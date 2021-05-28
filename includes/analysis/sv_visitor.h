@@ -7,6 +7,7 @@
 
 #include "mgp_sv/sv2017BaseListener.h"
 #include "mgp_sv/sv2017.h"
+#include "data_model/HDL_entity.h"
 
 #include <vector>
 #include <string>
@@ -14,13 +15,6 @@
 #include <unordered_map>
 
 using namespace mgp_sv;
-
-#define SV_FEATURE_MODULE 0
-#define SV_FEATURE_INTERFACE 1
-#define SV_FEATURE_PROGRAM 2
-#define SV_FEATURE_UDP 3
-
-enum sv_feature {module=SV_FEATURE_MODULE, interface=SV_FEATURE_INTERFACE,program=SV_FEATURE_PROGRAM,udp=SV_FEATURE_UDP};
 
 class sv_visitor : public sv2017BaseListener {
 

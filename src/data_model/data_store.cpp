@@ -2,7 +2,7 @@
 // Created by fils on 28/05/2021.
 //
 
-#include "data_store/data_store.h"
+#include "data_model/data_store.h"
 
 data_store::data_store() {
     store_path = std::string(std::getenv("HOME")) + "/.makefilegen_store";

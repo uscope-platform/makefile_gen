@@ -11,7 +11,7 @@
 #include <filesystem>
 #include <set>
 
-#include "data_store/data_store.h"
+#include "data_model/data_store.h"
 
 class Repository_walker {
 
