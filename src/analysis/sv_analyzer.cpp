@@ -6,7 +6,7 @@
 
 #include "analysis/sv_analyzer.h"
 
-sv_analyzer::sv_analyzer(const std::string& file_path) {
+sv_analyzer::sv_analyzer(const std::string& file_path) : sv_modules_explorer(file_path){
     path = file_path;
 
 }
@@ -46,12 +46,6 @@ void sv_analyzer::parse() {
     antlr4::tree::ParseTree *Tree = parser.source_text();
 
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&sv_modules_explorer, Tree);
-}
+    std::vector<HDL_entity> res = sv_modules_explorer.get_entities();
 
-std::unordered_map<std::string, sv_feature> sv_analyzer::get_declared_features() {
-    return sv_modules_explorer.get_declared_features();
-}
-
-std::unordered_map<std::string, sv_feature> sv_analyzer::get_instantiated_features() {
-    return sv_modules_explorer.get_instantiated_features();
 }

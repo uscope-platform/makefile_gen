@@ -9,6 +9,9 @@
 #include <sstream>
 #include <fstream>
 #include <regex>
+#include <vector>
+
+#include "data_model/HDL_entity.h"
 
 #include "mgp_sv/sv2017Lexer.h"
 #include "mgp_sv/sv2017.h"
@@ -21,8 +24,6 @@ public:
     void cleanup_content(const std::string& regex);
     void parse();
     std::string get_string();
-    std::unordered_map<std::string, sv_feature> get_declared_features();
-    std::unordered_map<std::string, sv_feature> get_instantiated_features();
 private:
     std::string path;
     std::string processed_content;

@@ -16,18 +16,28 @@
 
 using namespace mgp_sv;
 
+
+typedef std::pair<std::string, sv_feature> hdl_declaration_t;
+
+
 class sv_visitor : public sv2017BaseListener {
 
 public:
+    explicit sv_visitor(std::string p);
     void exitModule_header_common(sv2017::Module_header_commonContext *ctx) override;
     void exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) override;
     void exitInterface_header(sv2017::Interface_headerContext *ctx) override;
-    std::unordered_map<std::string,sv_feature> get_declared_features();
-    std::unordered_map<std::string,sv_feature> get_instantiated_features();
-
+    void exitModule_declaration(sv2017::Module_declarationContext *ctx) override;
+    void enterModule_declaration(sv2017::Module_declarationContext *ctx) override;
+    std::vector<HDL_entity> get_entities();
 private:
-    std::unordered_map<std::string,sv_feature> declared_features;
-    std::unordered_map<std::string,sv_feature> instantiated_features;
+    hdl_declaration_t declared_feature;
+    hdl_deps_t instantiated_features;
+    int nesting_level = 0;
+    std::stack<hdl_declaration_t> declarations_stack;
+    std::stack<hdl_deps_t> dependencies_stack;
+    std::string path;
+    std::vector<HDL_entity> entities;
 };
 
 
