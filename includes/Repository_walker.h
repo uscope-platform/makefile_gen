@@ -11,7 +11,7 @@
 #include <filesystem>
 #include <set>
 
-#include "json.hpp"
+#include "third_party/json.hpp"
 
 class Repository_walker {
 
