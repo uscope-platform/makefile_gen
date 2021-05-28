@@ -27,7 +27,7 @@ int main(int argc, char *argv[]){
 
     std::string input_file = "/home/fils/git/uscope_hdl/Components/signal_chain/multiphase_reference_generator/rtl/multiphase_reference_generator.sv";
 
-    frontend file_processor(input_file);
+    sv_analyzer file_processor(input_file);
     file_processor.cleanup_content("`(.*)");
     file_processor.parse();
 

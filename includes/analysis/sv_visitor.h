@@ -25,9 +25,9 @@ enum sv_feature {module=SV_FEATURE_MODULE, interface=SV_FEATURE_INTERFACE,progra
 class sv_visitor : public sv2017BaseListener {
 
 public:
-    void exitModule_header_common(sv2017::Module_header_commonContext *ctx);
-    void exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx);
-    void exitInterface_header(sv2017::Interface_headerContext *ctx);
+    void exitModule_header_common(sv2017::Module_header_commonContext *ctx) override;
+    void exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) override;
+    void exitInterface_header(sv2017::Interface_headerContext *ctx) override;
     std::unordered_map<std::string,sv_feature> get_declared_features();
     std::unordered_map<std::string,sv_feature> get_instantiated_features();
 

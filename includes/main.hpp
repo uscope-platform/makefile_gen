@@ -9,7 +9,7 @@
 
 #include "CLI11.h"
 #include "Repository_walker.h"
-#include "frontend.h"
+#include "analysis/sv_analyzer.h"
 
 
 

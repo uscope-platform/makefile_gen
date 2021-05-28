@@ -2,7 +2,7 @@
 // Created by fils on 27/05/2021.
 //
 
-#include "sv_visitor.h"
+#include "analysis/sv_visitor.h"
 
 void sv_visitor::exitModule_header_common(sv2017::Module_header_commonContext *ctx) {
     std::string module_name = ctx->identifier()->getText();

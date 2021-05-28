@@ -1,13 +1,13 @@
 set(MAKEFILE_GEN_SRCS /
         main.cpp /
-        sv_visitor.cpp /
-        frontend.cpp /
+        analysis/sv_visitor.cpp /
+        analysis/sv_analyzer.cpp /
         Repository_walker.cpp)
 
 set(MAKEFILE_GEN_INCL /
         ../includes/main.hpp /
-        ../includes/sv_visitor.h /
-        ../includes/frontend.h /
+        ../includes/analysis/sv_visitor.h /
+        ../includes/analysis/sv_analyzer.h /
         ../includes/CLI11.h /
         ../includes/json.hpp/
         ../includes/Repository_walker.h)

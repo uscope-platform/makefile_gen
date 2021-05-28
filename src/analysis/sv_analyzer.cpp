@@ -4,14 +4,14 @@
 
 
 
-#include "frontend.h"
+#include "analysis/sv_analyzer.h"
 
-frontend::frontend(const std::string& file_path) {
+sv_analyzer::sv_analyzer(const std::string& file_path) {
     path = file_path;
 
 }
 
-void frontend::cleanup_content(const std::string& regex) {
+void sv_analyzer::cleanup_content(const std::string& regex) {
     std::ifstream t(path);
     std::string raw_content;
 
@@ -27,11 +27,11 @@ void frontend::cleanup_content(const std::string& regex) {
 
 }
 
-std::string frontend::get_string() {
+std::string sv_analyzer::get_string() {
     return processed_content;
 }
 
-void frontend::parse() {
+void sv_analyzer::parse() {
 
     std::istringstream istream(processed_content);
 
@@ -48,10 +48,10 @@ void frontend::parse() {
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&sv_modules_explorer, Tree);
 }
 
-std::unordered_map<std::string, sv_feature> frontend::get_declared_features() {
+std::unordered_map<std::string, sv_feature> sv_analyzer::get_declared_features() {
     return sv_modules_explorer.get_declared_features();
 }
 
-std::unordered_map<std::string, sv_feature> frontend::get_instantiated_features() {
+std::unordered_map<std::string, sv_feature> sv_analyzer::get_instantiated_features() {
     return sv_modules_explorer.get_instantiated_features();
 }

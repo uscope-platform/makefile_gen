@@ -2,22 +2,22 @@
 // Created by fils on 27/05/2021.
 //
 
-#ifndef MAKEFILEGEN_V2_FRONTEND_H
-#define MAKEFILEGEN_V2_FRONTEND_H
+#ifndef MAKEFILEGEN_V2_SV_ANALYZER_H
+#define MAKEFILEGEN_V2_SV_ANALYZER_H
 
 #include <string>
 #include <sstream>
 #include <fstream>
 #include <regex>
 
-#include "../includes/mgp_sv/sv2017Lexer.h"
-#include "../includes/mgp_sv/sv2017.h"
-#include "sv_visitor.h"
+#include "mgp_sv/sv2017Lexer.h"
+#include "mgp_sv/sv2017.h"
+#include "analysis/sv_visitor.h"
 #include "antlr4-runtime.h"
 
-class frontend {
+class sv_analyzer {
 public:
-    frontend(const std::string& file_path);
+    explicit sv_analyzer(const std::string& file_path);
     void cleanup_content(const std::string& regex);
     void parse();
     std::string get_string();
@@ -31,4 +31,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_FRONTEND_H
+#endif //MAKEFILEGEN_V2_SV_ANALYZER_H
