@@ -3,8 +3,10 @@ set(MAKEFILE_GEN_SRCS /
         analysis/sv_visitor.cpp /
         analysis/sv_analyzer.cpp /
         Repository_walker.cpp /
-        data_model/data_store.cpp /
-        ../includes/data_model/HDL_entity.h)
+        data_model/settings_store.cpp /
+        data_model/HDL_entity.cpp /
+        data_model/data_store.cpp
+        )
 
 set(MAKEFILE_GEN_INCL /
         ../includes/main.hpp /
@@ -13,8 +15,10 @@ set(MAKEFILE_GEN_INCL /
         ../includes/third_party/CLI11.h /
         ../includes/third_party/json.hpp /
         ../includes/Repository_walker.h /
-        ../includes/data_model/data_store.h /
-        data_model/HDL_entity.cpp)
+        ../includes/data_model/settings_store.h /
+        ../includes/data_model/HDL_entity.h /
+        ../includes/data_model/data_store.h
+        )
 
 
 add_executable(makefile_gen ${MAKEFILE_GEN_SRCS} ${MAKEFILE_GEN_INCL})

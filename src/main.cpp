@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
 
     CLI11_PARSE(app, argc, argv);
 
-    std::shared_ptr<data_store>  store = std::make_shared<data_store>();
+    std::shared_ptr<settings_store>  store = std::make_shared<settings_store>();
 
     Repository_walker walker(store);
 

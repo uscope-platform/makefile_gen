@@ -9,7 +9,7 @@
 
 using json = nlohmann::json;
 
-Repository_walker::Repository_walker(std::shared_ptr<data_store> s) {
+Repository_walker::Repository_walker(std::shared_ptr<settings_store> s) {
     std::string config_file = "test.json";
     store = std::move(s);
     target_repository = store->get_setting("hdl_store");

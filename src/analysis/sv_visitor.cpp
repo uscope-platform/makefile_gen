@@ -19,7 +19,7 @@ void sv_visitor::enterModule_declaration(sv2017::Module_declarationContext *ctx)
 
 
 void sv_visitor::exitModule_declaration(sv2017::Module_declarationContext *ctx) {
-    HDL_entity entity(declared_feature.second, declared_feature.first, path, instantiated_features);
+    HDL_entity entity(declared_feature.second, declared_feature.first, path, instantiated_features, "verilog");
     entities.push_back(entity);
     if(nesting_level>1){
         declared_feature = declarations_stack.top();
