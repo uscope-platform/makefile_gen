@@ -5,23 +5,18 @@
 
 #include "Repository_walker.h"
 
+#include <utility>
+
 using json = nlohmann::json;
 
-Repository_walker::Repository_walker() {
+Repository_walker::Repository_walker(std::shared_ptr<data_store> s) {
     std::string config_file = "test.json";
-    json j;
-    if(std::filesystem::exists(config_file)){
-        std::ifstream i(config_file);
-        i >> j;
-        target_repository = j["hdl_repo"];
-    } else {
-        std::cout << "Please input the base path of the HDL repository" << std::endl;
-        std::string path_in;
-        std::cin >> path_in;
-        j["hdl_repo"] = path_in;
-        std::ofstream i(config_file);
-        i << j;
-        target_repository = path_in;
+    store = std::move(s);
+    target_repository = store->get_setting("hdl_store");
+    if(target_repository.empty()){
+        std::cout<< "Please enter the absolute path of the HDL repository"<<std::endl;
+        std::cin >> target_repository;
+        store->set_setting("hdl_store", target_repository);
     }
     analyze_dir();
 }

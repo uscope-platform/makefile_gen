@@ -11,12 +11,12 @@
 #include <filesystem>
 #include <set>
 
-#include "third_party/json.hpp"
+#include "data_store/data_store.h"
 
 class Repository_walker {
 
 public:
-    Repository_walker();
+    explicit Repository_walker(std::shared_ptr<data_store> s);
     void analyze_dir();
 private:
 
@@ -38,7 +38,7 @@ private:
     std::set<std::string> excluded_directories = {".git"};
     std::set<std::string> excluding_extensions = {".xpr"};
     std::string target_repository;
-
+    std::shared_ptr<data_store> store;
 };
 
 

@@ -9,6 +9,7 @@
 
 #include "third_party/CLI11.h"
 #include "Repository_walker.h"
+#include "data_store/data_store.h"
 #include "analysis/sv_analyzer.h"
 
 

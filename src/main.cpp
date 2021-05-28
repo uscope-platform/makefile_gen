@@ -23,7 +23,9 @@ int main(int argc, char *argv[]){
 
     CLI11_PARSE(app, argc, argv);
 
-    Repository_walker walker;
+    std::shared_ptr<data_store>  store = std::make_shared<data_store>();
+
+    Repository_walker walker(store);
 
     std::string input_file = "/home/fils/git/uscope_hdl/Components/signal_chain/multiphase_reference_generator/rtl/multiphase_reference_generator.sv";
 
