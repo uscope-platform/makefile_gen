@@ -7,7 +7,9 @@
 
 #include <string>
 
-#include "../includes/frontend.h"
+#include "CLI11.h"
+#include "Repository_walker.h"
+#include "frontend.h"
 
 
 

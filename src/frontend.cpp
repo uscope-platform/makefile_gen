@@ -4,7 +4,7 @@
 
 
 
-#include "../includes/frontend.h"
+#include "frontend.h"
 
 frontend::frontend(const std::string& file_path) {
     path = file_path;
