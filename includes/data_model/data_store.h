@@ -16,7 +16,8 @@ class data_store {
 public:
      data_store();
      HDL_entity get_entity(const std::string& name);
-     void store_entity(HDL_entity entity, const std::string& name);
+     void store_entity(HDL_entity entity);
+     void store_entity(const std::vector<HDL_entity>& vect);
      ~data_store();
 private:
 

@@ -20,8 +20,13 @@ HDL_entity data_store::get_entity(const std::string& name) {
     return entities_cache[name];
 }
 
-void data_store::store_entity(HDL_entity entity, const std::string& name) {
-    entities_cache[name] = std::move(entity);
+void data_store::store_entity(HDL_entity entity) {
+    entities_cache[entity.getName()] = std::move(entity);
+}
+void data_store::store_entity(const std::vector<HDL_entity>& vect) {
+    for(auto &item: vect){
+        entities_cache[item.getName()] = item;
+    }
 }
 
 data_store::~data_store() {

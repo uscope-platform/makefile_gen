@@ -13,6 +13,7 @@
 
 #include "data_model/settings_store.h"
 #include "data_model/data_store.h"
+#include "analysis/sv_analyzer.h"
 
 class Repository_walker {
 

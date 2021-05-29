@@ -119,7 +119,11 @@ bool Repository_walker::file_is_constraint(std::filesystem::path &file) {
 /// Analyze the target verilog-type file to extract declared and used instantiated design elements
 /// \param file Target file
 void Repository_walker::analyze_verilog(std::filesystem::path &file) {
-
+    sv_analyzer file_processor(file);
+    file_processor.cleanup_content("`(.*)");
+    file_processor.parse();
+    std::vector<HDL_entity> content = file_processor.get_entities();
+    d_store->store_entity(content);
 }
 
 /// Analyze the target vhdl-type file to extract declared and used instantiated design elements
