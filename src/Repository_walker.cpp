@@ -9,7 +9,7 @@
 
 using json = nlohmann::json;
 
-Repository_walker::Repository_walker(std::shared_ptr<settings_store> s, std::shared_ptr<data_store> d) {
+Repository_walker::Repository_walker(std::shared_ptr<settings_store> s, std::shared_ptr<data_store> d) : pool(max_threads){
     std::string config_file = "test.json";
     s_store = std::move(s);
     d_store = std::move(d);
@@ -43,6 +43,16 @@ void Repository_walker::analyze_dir() {
                 }
             }
         } else{
+            if(working_threads == max_threads){
+                pool.wait_for_tasks();
+                int i=0;
+                for(auto &f : analyzer_futures){
+                    auto result = f.get();
+                    d_store->store_entity(result);
+                    i++;
+                }
+                analyzer_futures.erase(analyzer_futures.begin(), analyzer_futures.end());
+            }
             analyze_file(path);
         }
     }
@@ -74,7 +84,8 @@ bool Repository_walker::contains_excluding_file(const std::filesystem::path &dir
 /// This method is a simple dispatcher that based on the file type calls the appropriate analysis method.
 void Repository_walker::analyze_file(std::filesystem::path &file) {
     if(file_is_verilog(file)){
-        analyze_verilog(file);
+        analyzer_futures.push_back(pool.submit(analyze_verilog, file));
+        working_threads++;
     } else if(file_is_script(file)){
         analyze_script(file);
     } else if(file_is_vhdl(file)){
@@ -116,14 +127,14 @@ bool Repository_walker::file_is_constraint(std::filesystem::path &file) {
     return extension == ".xdc";
 }
 
+
+
 /// Analyze the target verilog-type file to extract declared and used instantiated design elements
 /// \param file Target file
-void Repository_walker::analyze_verilog(std::filesystem::path &file) {
+std::vector<HDL_entity> analyze_verilog(const std::filesystem::path &file) {
     sv_analyzer file_processor(file);
     file_processor.cleanup_content("`(.*)");
-    file_processor.parse();
-    std::vector<HDL_entity> content = file_processor.get_entities();
-    d_store->store_entity(content);
+    return file_processor.analyze();
 }
 
 /// Analyze the target vhdl-type file to extract declared and used instantiated design elements

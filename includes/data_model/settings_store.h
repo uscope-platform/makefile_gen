@@ -10,10 +10,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-
-#include "third_party/json.hpp"
-
-using json = nlohmann::json;
+#include <map>
 
 class settings_store {
 public:

@@ -27,6 +27,5 @@ int main(int argc, char *argv[]){
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>();
     Repository_walker walker(s_store, d_store);
 
-
     return 0;
 }

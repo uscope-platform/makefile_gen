@@ -22,7 +22,7 @@ class sv_analyzer {
 public:
     explicit sv_analyzer(const std::string& file_path);
     void cleanup_content(const std::string& regex);
-    void parse();
+    std::vector<HDL_entity> analyze();
     std::vector<HDL_entity> get_entities();
     std::string get_string();
 private:

@@ -31,7 +31,7 @@ std::string sv_analyzer::get_string() {
     return processed_content;
 }
 
-void sv_analyzer::parse() {
+std::vector<HDL_entity> sv_analyzer::analyze() {
 
     std::istringstream istream(processed_content);
 
@@ -47,9 +47,5 @@ void sv_analyzer::parse() {
 
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&sv_modules_explorer, Tree);
 
-
-}
-
-std::vector<HDL_entity> sv_analyzer::get_entities() {
     return  sv_modules_explorer.get_entities();
 }
