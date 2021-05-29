@@ -6,12 +6,23 @@
 
 #include <utility>
 
+HDL_entity::HDL_entity() {
+    name = "";
+    path = "";
+    language = "";
+    type = null;
+}
+
 HDL_entity::HDL_entity(sv_feature t, std::string n, std::string p, hdl_deps_t deps, std::string lang) {
     type = t;
     name = std::move(n);
     path = std::move(p);
     dependencies = std::move(deps);
     language = std::move(lang);
+}
+
+const std::string &HDL_entity::getName() const {
+    return name;
 }
 
 HDL_entity::HDL_entity(const std::string& serialized_obj) {

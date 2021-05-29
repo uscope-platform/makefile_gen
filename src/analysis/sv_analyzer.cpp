@@ -46,6 +46,10 @@ void sv_analyzer::parse() {
     antlr4::tree::ParseTree *Tree = parser.source_text();
 
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&sv_modules_explorer, Tree);
-    std::vector<HDL_entity> res = sv_modules_explorer.get_entities();
 
+
+}
+
+std::vector<HDL_entity> sv_analyzer::get_entities() {
+    return  sv_modules_explorer.get_entities();
 }

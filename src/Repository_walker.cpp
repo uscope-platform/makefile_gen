@@ -9,14 +9,15 @@
 
 using json = nlohmann::json;
 
-Repository_walker::Repository_walker(std::shared_ptr<settings_store> s) {
+Repository_walker::Repository_walker(std::shared_ptr<settings_store> s, std::shared_ptr<data_store> d) {
     std::string config_file = "test.json";
-    store = std::move(s);
-    target_repository = store->get_setting("hdl_store");
+    s_store = std::move(s);
+    d_store = std::move(d);
+    target_repository = s_store->get_setting("hdl_store");
     if(target_repository.empty()){
         std::cout<< "Please enter the absolute path of the HDL repository"<<std::endl;
         std::cin >> target_repository;
-        store->set_setting("hdl_store", target_repository);
+        s_store->set_setting("hdl_store", target_repository);
     }
     analyze_dir();
 }

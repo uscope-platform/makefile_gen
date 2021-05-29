@@ -23,15 +23,20 @@ int main(int argc, char *argv[]){
 
     CLI11_PARSE(app, argc, argv);
 
-    std::shared_ptr<settings_store>  store = std::make_shared<settings_store>();
-
-    Repository_walker walker(store);
+    std::shared_ptr<settings_store>  s_store = std::make_shared<settings_store>();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>();
+    Repository_walker walker(s_store, d_store);
 
     std::string input_file = "/home/fils/git/uscope_hdl/Components/signal_chain/multiphase_reference_generator/rtl/multiphase_reference_generator.sv";
 
     sv_analyzer file_processor(input_file);
     file_processor.cleanup_content("`(.*)");
     file_processor.parse();
+    std::vector<HDL_entity> content = file_processor.get_entities();
+    for(auto &item : content){
+        d_store->store_entity(item, item.getName());
+    }
+
 
     return 0;
 }
