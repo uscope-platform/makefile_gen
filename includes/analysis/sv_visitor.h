@@ -7,7 +7,7 @@
 
 #include "mgp_sv/sv2017BaseListener.h"
 #include "mgp_sv/sv2017.h"
-#include "data_model/HDL_entity.h"
+#include "data_model/Resource.h"
 
 #include <vector>
 #include <string>
@@ -29,7 +29,7 @@ public:
     void exitInterface_header(sv2017::Interface_headerContext *ctx) override;
     void exitModule_declaration(sv2017::Module_declarationContext *ctx) override;
     void enterModule_declaration(sv2017::Module_declarationContext *ctx) override;
-    std::vector<HDL_entity> get_entities();
+    std::vector<Resource> get_entities();
 private:
     hdl_declaration_t declared_feature;
     hdl_deps_t instantiated_features;
@@ -37,7 +37,7 @@ private:
     std::stack<hdl_declaration_t> declarations_stack;
     std::stack<hdl_deps_t> dependencies_stack;
     std::string path;
-    std::vector<HDL_entity> entities;
+    std::vector<Resource> entities;
 };
 
 

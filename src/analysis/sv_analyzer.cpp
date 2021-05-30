@@ -31,7 +31,7 @@ std::string sv_analyzer::get_string() {
     return processed_content;
 }
 
-std::vector<HDL_entity> sv_analyzer::analyze() {
+std::vector<Resource> sv_analyzer::analyze() {
 
     std::istringstream istream(processed_content);
 
@@ -42,7 +42,7 @@ std::vector<HDL_entity> sv_analyzer::analyze() {
 
     tok_stream.fill();
     mgp_sv::sv2017 parser(&tok_stream);
-
+    parser.getInterpreter<antlr4::atn::ParserATNSimulator>()->setPredictionMode(antlr4::atn::PredictionMode::SLL);
     antlr4::tree::ParseTree *Tree = parser.source_text();
 
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&sv_modules_explorer, Tree);

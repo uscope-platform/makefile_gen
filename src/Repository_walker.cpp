@@ -7,7 +7,7 @@
 
 #include <utility>
 
-using json = nlohmann::json;
+
 
 Repository_walker::Repository_walker(std::shared_ptr<settings_store> s, std::shared_ptr<data_store> d) : pool(max_threads){
     std::string config_file = "test.json";
@@ -34,6 +34,7 @@ void Repository_walker::analyze_dir() {
         ++p_iter ) {
 
         auto path = p_iter->path();
+        std::string path_dbg = p_iter->path();
         if(std::filesystem::is_directory(path)){
             if(is_excluded_directory(path)){
                 p_iter.disable_recursion_pending();
@@ -43,7 +44,7 @@ void Repository_walker::analyze_dir() {
                 }
             }
         } else{
-            if(working_threads == max_threads){
+            if(working_threads == 2*max_threads){
                 pool.wait_for_tasks();
                 int i=0;
                 for(auto &f : analyzer_futures){
@@ -52,6 +53,7 @@ void Repository_walker::analyze_dir() {
                     i++;
                 }
                 analyzer_futures.erase(analyzer_futures.begin(), analyzer_futures.end());
+                working_threads =0;
             }
             analyze_file(path);
         }
@@ -131,7 +133,7 @@ bool Repository_walker::file_is_constraint(std::filesystem::path &file) {
 
 /// Analyze the target verilog-type file to extract declared and used instantiated design elements
 /// \param file Target file
-std::vector<HDL_entity> analyze_verilog(const std::filesystem::path &file) {
+std::vector<Resource> analyze_verilog(const std::filesystem::path &file) {
     sv_analyzer file_processor(file);
     file_processor.cleanup_content("`(.*)");
     return file_processor.analyze();
