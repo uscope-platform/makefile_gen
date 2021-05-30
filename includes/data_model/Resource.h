@@ -49,6 +49,8 @@ auto resource_to_integer(resource_type_t const value)
 
 typedef std::unordered_map<std::string,sv_feature> hdl_deps_t;
 
+typedef std::pair<std::string, sv_feature> hdl_declaration_t;
+
 class Resource {
 public:
     Resource();

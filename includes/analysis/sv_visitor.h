@@ -17,7 +17,7 @@
 using namespace mgp_sv;
 
 
-typedef std::pair<std::string, sv_feature> hdl_declaration_t;
+
 
 
 class sv_visitor : public sv2017BaseListener {

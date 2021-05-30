@@ -5,8 +5,9 @@ set(MAKEFILE_GEN_SRCS /
         Repository_walker.cpp /
         data_model/settings_store.cpp /
         data_model/Resource.cpp /
-        data_model/data_store.cpp
-        )
+        data_model/data_store.cpp /
+        analysis/vhdl_analyzer.cpp /
+        analysis/vhdl_visitor.cpp )
 
 set(MAKEFILE_GEN_INCL /
         ../includes/main.hpp /
@@ -16,8 +17,10 @@ set(MAKEFILE_GEN_INCL /
         ../includes/Repository_walker.h /
         ../includes/data_model/settings_store.h /
         ../includes/data_model/Resource.h /
-        ../includes/data_model/data_store.h
-        ../includes/third_party/thread_pool.hpp)
+        ../includes/data_model/data_store.h /
+        ../includes/third_party/thread_pool.hpp/
+        ../includes/analysis/vhdl_analyzer.h /
+        ../includes/analysis/vhdl_visitor.h)
 
 
 add_executable(makefile_gen ${MAKEFILE_GEN_SRCS} ${MAKEFILE_GEN_INCL})

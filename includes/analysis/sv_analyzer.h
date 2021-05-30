@@ -23,12 +23,11 @@ public:
     explicit sv_analyzer(const std::string& file_path);
     void cleanup_content(const std::string& regex);
     std::vector<Resource> analyze();
-    std::string get_string();
+
 private:
     std::string path;
     std::string processed_content;
     sv_visitor sv_modules_explorer;
-
 };
 
 

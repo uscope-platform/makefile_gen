@@ -13,6 +13,12 @@ Resource::Resource() {
     resource_type = null_resource;
 }
 
+///  Resource object creator
+/// \param t HDL entity feature
+/// \param n Name of the feature
+/// \param p Path of the file
+/// \param deps Dependencies of the file
+/// \param r_type type of resource
 Resource::Resource(sv_feature t, std::string n, std::string p, hdl_deps_t deps, resource_type_t r_type) {
     hdl_type = t;
     name = std::move(n);
@@ -20,7 +26,6 @@ Resource::Resource(sv_feature t, std::string n, std::string p, hdl_deps_t deps, 
     dependencies = std::move(deps);
     resource_type = r_type;
 }
-
 
 Resource::Resource(const std::string& serialized_obj) {
     std::istringstream ss(serialized_obj);

@@ -8,7 +8,6 @@
 
 sv_analyzer::sv_analyzer(const std::string& file_path) : sv_modules_explorer(file_path){
     path = file_path;
-
 }
 
 void sv_analyzer::cleanup_content(const std::string& regex) {
@@ -25,10 +24,6 @@ void sv_analyzer::cleanup_content(const std::string& regex) {
     std::regex e (regex);
     processed_content = std::regex_replace (raw_content,e,"");
 
-}
-
-std::string sv_analyzer::get_string() {
-    return processed_content;
 }
 
 std::vector<Resource> sv_analyzer::analyze() {
