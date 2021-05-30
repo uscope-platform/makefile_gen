@@ -18,7 +18,9 @@ class vhdl_visitor : public mgp_vh::vhdlParserBaseListener {
 
 public:
     explicit vhdl_visitor(std::string p);
-
+    void enterEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) override;
+    void exitEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) override;
+    void exitComponent_instantiation_statement(mgp_vh::vhdlParser::Component_instantiation_statementContext *ctx) override;
     std::vector<Resource> get_entities();
 private:
     hdl_declaration_t declared_feature;

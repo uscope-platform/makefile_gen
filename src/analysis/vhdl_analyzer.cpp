@@ -33,11 +33,24 @@ std::vector<Resource> vhdl_analyzer::analyze() {
     antlr4::CommonTokenStream tok_stream(&lexer);
 
     tok_stream.fill();
-    mgp_vh::vhdlParser parser(&tok_stream);
-    parser.getInterpreter<antlr4::atn::ParserATNSimulator>()->setPredictionMode(antlr4::atn::PredictionMode::SLL);
-    antlr4::tree::ParseTree *Tree = parser.design_file();
 
+    VhParserErrorListener error_listener;
+    error_listener.file_path = path;
+    mgp_vh::vhdlParser parser(&tok_stream);
+    parser.removeErrorListeners();
+    parser.addErrorListener(&error_listener);
+
+    antlr4::tree::ParseTree *Tree = parser.design_file();
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&vhdl_modules_explorer, Tree);
 
+
+
+
     return  vhdl_modules_explorer.get_entities();
+}
+
+void VhParserErrorListener::syntaxError(antlr4::Recognizer *recognizer, antlr4::Token *offendingSymbol, size_t line,
+                                      size_t charPositionInLine, const std::string &msg, std::exception_ptr e) {
+    std::cerr << "Error in file: "<< this->file_path << " At line: " << line << " Column: "<< charPositionInLine << std::endl;
+    std::cerr << "\t" << msg<< std::endl;
 }

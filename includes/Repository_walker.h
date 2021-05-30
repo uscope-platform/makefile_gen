@@ -15,9 +15,11 @@
 #include "data_model/settings_store.h"
 #include "data_model/data_store.h"
 #include "analysis/sv_analyzer.h"
+#include "analysis/vhdl_analyzer.h"
 #include "third_party/thread_pool.hpp"
 
 static std::vector<Resource> analyze_verilog(const std::filesystem::path &file);
+static std::vector<Resource> analyze_vhdl(const std::filesystem::path &file);
 
 const unsigned int max_threads = std::thread::hardware_concurrency()-1;
 
@@ -33,7 +35,7 @@ private:
     void analyze_file(std::filesystem::path& dir);
     // File analysis functions
 
-    void analyze_vhdl(std::filesystem::path &file);
+
     void analyze_script(std::filesystem::path &file);
     void analyze_constraint(std::filesystem::path &file);
     // File type discrimination methods

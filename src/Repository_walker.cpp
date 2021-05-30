@@ -91,7 +91,8 @@ void Repository_walker::analyze_file(std::filesystem::path &file) {
     } else if(file_is_script(file)){
         analyze_script(file);
     } else if(file_is_vhdl(file)){
-        analyze_vhdl(file);
+        analyzer_futures.push_back(pool.submit(analyze_vhdl, file));
+        working_threads++;
     } else if(file_is_constraint(file)){
         analyze_constraint(file);
     }
@@ -141,8 +142,10 @@ std::vector<Resource> analyze_verilog(const std::filesystem::path &file) {
 
 /// Analyze the target vhdl-type file to extract declared and used instantiated design elements
 /// \param file Target file
-void Repository_walker::analyze_vhdl(std::filesystem::path &file) {
-
+std::vector<Resource> analyze_vhdl(const std::filesystem::path &file) {
+    vhdl_analyzer file_processor(file);
+    file_processor.cleanup_content("");
+    return file_processor.analyze();
 }
 
 /// Analyze the target Script extracting the necessary metadata

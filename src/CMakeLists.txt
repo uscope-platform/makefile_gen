@@ -26,4 +26,5 @@ set(MAKEFILE_GEN_INCL /
 add_executable(makefile_gen ${MAKEFILE_GEN_SRCS} ${MAKEFILE_GEN_INCL})
 
 target_link_libraries(makefile_gen mgp_sv_lib)
+target_link_libraries(makefile_gen mgp_vh_lib)
 target_link_libraries(makefile_gen pthread)

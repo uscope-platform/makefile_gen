@@ -119,16 +119,9 @@ name_literal:
        | CHARACTER_LITERAL
 
 ;
-name:
-    name_literal
-      | name (
-            name_slice_part // name_index was removed as it is same as call
-            | name_attribute_part
-            | association_list // call args
-            | DOT suffix
-        )
-      | external_name
-;
+name: name_literal | name (name_slice_part | name_attribute_part | association_list | DOT suffix ) | external_name;
+
+
 name_slice_part:
     LPAREN explicit_range RPAREN
 ;

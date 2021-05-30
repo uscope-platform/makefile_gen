@@ -36,11 +36,26 @@ std::vector<Resource> sv_analyzer::analyze() {
     antlr4::CommonTokenStream tok_stream(&lexer);
 
     tok_stream.fill();
-    mgp_sv::sv2017 parser(&tok_stream);
-    parser.getInterpreter<antlr4::atn::ParserATNSimulator>()->setPredictionMode(antlr4::atn::PredictionMode::SLL);
-    antlr4::tree::ParseTree *Tree = parser.source_text();
 
+    SvParserErrorListener error_listener;
+    error_listener.file_path = path;
+
+    mgp_sv::sv2017 parser(&tok_stream);
+
+    parser.removeErrorListeners();
+    parser.addErrorListener(&error_listener);
+
+    //parser.getInterpreter<antlr4::atn::ParserATNSimulator>()->setPredictionMode(antlr4::atn::PredictionMode::SLL);
+    antlr4::tree::ParseTree *Tree = parser.source_text();
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&sv_modules_explorer, Tree);
 
+
+
     return  sv_modules_explorer.get_entities();
+}
+
+void SvParserErrorListener::syntaxError(antlr4::Recognizer *recognizer, antlr4::Token *offendingSymbol, size_t line,
+                                        size_t charPositionInLine, const std::string &msg, std::exception_ptr e) {
+    std::cerr << "Error in file: "<< this->file_path<< std::endl;
+    std::cerr << "\t" << msg<< std::endl;
 }
