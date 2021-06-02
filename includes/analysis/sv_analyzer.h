@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "data_model/HDL_Resource.h"
+#include "data_model/Resource_base.h"
 
 #include "mgp_sv/sv2017Lexer.h"
 #include "mgp_sv/sv2017.h"
@@ -22,7 +23,7 @@ class sv_analyzer {
 public:
     explicit sv_analyzer(const std::string& file_path);
     void cleanup_content(const std::string& regex);
-    std::vector<HDL_Resource> analyze();
+    std::vector<std::shared_ptr<Resource_base>> analyze();
 
 private:
     std::string path;

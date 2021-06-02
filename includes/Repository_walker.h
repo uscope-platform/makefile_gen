@@ -18,8 +18,8 @@
 #include "analysis/vhdl_analyzer.h"
 #include "third_party/thread_pool.hpp"
 
-static std::vector<HDL_Resource> analyze_verilog(const std::filesystem::path &file);
-static std::vector<HDL_Resource> analyze_vhdl(const std::filesystem::path &file);
+static std::vector<std::shared_ptr<Resource_base>> analyze_verilog(const std::filesystem::path &file);
+static std::vector<std::shared_ptr<Resource_base>> analyze_vhdl(const std::filesystem::path &file);
 
 const unsigned int max_threads = std::thread::hardware_concurrency()-1;
 
@@ -47,11 +47,12 @@ private:
     // TODO: Make excluded directories dynamic with a mechanism similar to .gitignore
     std::set<std::string> excluded_directories = {".git"};
     std::set<std::string> excluding_extensions = {".xpr"};
+
     std::string target_repository;
     std::shared_ptr<settings_store> s_store;
     std::shared_ptr<data_store> d_store;
 
-    std::vector<std::future<std::vector<HDL_Resource>>> analyzer_futures;
+    std::vector<std::future<std::vector<std::shared_ptr<Resource_base>>>> analyzer_futures;
 
     thread_pool pool;
     int working_threads = 0;

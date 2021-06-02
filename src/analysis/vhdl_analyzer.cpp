@@ -23,7 +23,7 @@ void vhdl_analyzer::cleanup_content(const std::string &regex) {
 
 }
 
-std::vector<HDL_Resource> vhdl_analyzer::analyze() {
+std::vector<std::shared_ptr<Resource_base>> vhdl_analyzer::analyze() {
 
     std::istringstream istream(processed_content);
 
@@ -42,9 +42,6 @@ std::vector<HDL_Resource> vhdl_analyzer::analyze() {
 
     antlr4::tree::ParseTree *Tree = parser.design_file();
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&vhdl_modules_explorer, Tree);
-
-
-
 
     return  vhdl_modules_explorer.get_entities();
 }

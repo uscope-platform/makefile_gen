@@ -8,12 +8,14 @@
 #include <string>
 #include <vector>
 
+#include "Resource_base.h"
+
 #define SCRIPT_TCL 0
 #define SCRIPT_PYTHON 1
 
 enum script_type_t {tcl_script=SCRIPT_TCL, python_script=SCRIPT_PYTHON};
 
-class Script {
+class Script : Resource_base {
 public:
     Script(std::string n, const std::string& t, std::vector<std::string> args);
     std::string get_name();

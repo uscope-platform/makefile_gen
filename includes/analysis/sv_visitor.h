@@ -31,7 +31,7 @@ public:
     void exitInterface_header(sv2017::Interface_headerContext *ctx) override;
 
 
-    std::vector<HDL_Resource> get_entities();
+    std::vector<std::shared_ptr<Resource_base>> get_entities();
 private:
     hdl_declaration_t declared_feature;
     hdl_deps_t instantiated_features;
@@ -39,7 +39,7 @@ private:
     std::stack<hdl_declaration_t> declarations_stack;
     std::stack<hdl_deps_t> dependencies_stack;
     std::string path;
-    std::vector<HDL_Resource> entities;
+    std::vector<std::shared_ptr<Resource_base>> entities;
 };
 
 

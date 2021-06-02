@@ -20,7 +20,7 @@ class vhdl_analyzer {
 public:
     explicit vhdl_analyzer(const std::string& file_path);
     void cleanup_content(const std::string& regex);
-    std::vector<HDL_Resource> analyze();
+    std::vector<std::shared_ptr<Resource_base>> analyze();
 
 private:
     std::string path;

@@ -10,7 +10,7 @@ vhdl_visitor::vhdl_visitor(std::string p) {
     path = std::move(p);
 }
 
-std::vector<HDL_Resource> vhdl_visitor::get_entities() {
+std::vector<std::shared_ptr<Resource_base>> vhdl_visitor::get_entities() {
     return entities;
 }
 
@@ -23,8 +23,8 @@ void vhdl_visitor::enterEntity_declaration(mgp_vh::vhdlParser::Entity_declaratio
 }
 
 void vhdl_visitor::exitEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) {
-    HDL_Resource entity(declared_feature.second, declared_feature.first, path, instantiated_features, vhdl_entity);
-    entities.push_back(entity);
+    std::shared_ptr<Resource_base> e = std::make_shared<HDL_Resource>(declared_feature.second, declared_feature.first, path, instantiated_features, vhdl_entity);
+    entities.push_back(e);
     if(nesting_level>1){
         declared_feature = declarations_stack.top();
         declarations_stack.pop();
@@ -36,7 +36,7 @@ void vhdl_visitor::exitEntity_declaration(mgp_vh::vhdlParser::Entity_declaration
 
 void vhdl_visitor::exitComponent_instantiation_statement(mgp_vh::vhdlParser::Component_instantiation_statementContext *ctx) {
     std::string module_name;
-    if(ctx->instantiated_unit()->name()->suffix() != NULL){
+    if(ctx->instantiated_unit()->name()->suffix() != nullptr){
         module_name = ctx->instantiated_unit()->name()->suffix()->getText();
     } else{
         module_name = ctx->instantiated_unit()->name()->name_literal()->identifier()->getText();

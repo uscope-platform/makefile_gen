@@ -19,8 +19,8 @@ void sv_visitor::enterModule_declaration(sv2017::Module_declarationContext *ctx)
 
 
 void sv_visitor::exitModule_declaration(sv2017::Module_declarationContext *ctx) {
-    HDL_Resource entity(declared_feature.second, declared_feature.first, path, instantiated_features, verilog_entity);
-    entities.push_back(entity);
+    std::shared_ptr<Resource_base> e = std::make_shared<HDL_Resource>(declared_feature.second, declared_feature.first, path, instantiated_features, verilog_entity);
+    entities.push_back(e);
     if(nesting_level>1){
         declared_feature = declarations_stack.top();
         declarations_stack.pop();
@@ -45,6 +45,6 @@ void sv_visitor::exitInterface_header(sv2017::Interface_headerContext *ctx) {
     instantiated_features[interface_name] = interface;
 }
 
-std::vector<HDL_Resource> sv_visitor::get_entities() {
+std::vector<std::shared_ptr<Resource_base>> sv_visitor::get_entities() {
     return entities;
 }
