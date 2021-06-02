@@ -27,5 +27,12 @@ int main(int argc, char *argv[]){
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>();
     Repository_walker walker(s_store, d_store);
 
+    if(target.empty()) target = std::filesystem::current_path().string() + "/Depfile";
+
+    Depfile dep(target);
+    std::string synth_top_level = dep.get_synth_tl();
+    std::string sim_top_level = dep.get_sim_tl();
+    std::vector<std::string> synth_add = dep.get_additional_synth_modules();
+    std::vector<std::string> sim_add = dep.get_additional_sim_modules();
     return 0;
 }
