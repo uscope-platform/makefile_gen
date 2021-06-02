@@ -34,5 +34,6 @@ int main(int argc, char *argv[]){
     std::string sim_top_level = dep.get_sim_tl();
     std::vector<std::string> synth_add = dep.get_additional_synth_modules();
     std::vector<std::string> sim_add = dep.get_additional_sim_modules();
+    std::vector<Script> scripts = dep.get_scripts();
     return 0;
 }

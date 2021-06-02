@@ -2,7 +2,7 @@
 // Created by fils on 02/06/2021.
 //
 
-#include "Depfile.h"
+#include "data_model/Depfile.h"
 
 Depfile::Depfile(const std::string& filename) {
 // read a JSON file
@@ -27,5 +27,17 @@ std::vector<std::string> Depfile::get_additional_sim_modules() {
 }
 
 std::vector<std::string> Depfile::get_excluded_modules() {
-    return content["sym_modules"];
+    return content["excluded_modules"];
+}
+
+std::vector<std::string> Depfile::get_constraints() {
+    return content["constraints"];
+}
+
+std::vector<Script> Depfile::get_scripts() {
+    std::vector<Script> retval;
+    for(auto item : content["scripts"]){
+        retval.emplace_back(item["name"], item["type"], item["arguments"]);
+    }
+    return retval;
 }

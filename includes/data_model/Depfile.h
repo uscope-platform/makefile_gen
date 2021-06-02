@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 
+#include "data_model/Script.h"
 #include "third_party/json.hpp"
 
 using json = nlohmann::json;
@@ -21,7 +22,8 @@ public:
     std::vector<std::string> get_additional_synth_modules();
     std::vector<std::string> get_additional_sim_modules();
     std::vector<std::string> get_excluded_modules();
-
+    std::vector<std::string> get_constraints();
+    std::vector<Script> get_scripts();
 private:
     json content;
 };

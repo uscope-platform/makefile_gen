@@ -8,7 +8,8 @@ set(MAKEFILE_GEN_SRCS /
         data_model/data_store.cpp /
         analysis/vhdl_analyzer.cpp /
         analysis/vhdl_visitor.cpp /
-        Depfile.cpp )
+        data_model/Depfile.cpp /
+        data_model/Script.cpp)
 
 set(MAKEFILE_GEN_INCL /
         ../includes/main.hpp /
@@ -22,7 +23,8 @@ set(MAKEFILE_GEN_INCL /
         ../includes/third_party/thread_pool.hpp/
         ../includes/analysis/vhdl_analyzer.h /
         ../includes/analysis/vhdl_visitor.h /
-        ../includes/Depfile.h)
+        ../includes/data_model/Depfile.h /
+        ../includes/data_model/Script.h)
 
 
 add_executable(makefile_gen ${MAKEFILE_GEN_SRCS} ${MAKEFILE_GEN_INCL})
