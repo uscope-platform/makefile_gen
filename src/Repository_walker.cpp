@@ -134,7 +134,7 @@ bool Repository_walker::file_is_constraint(std::filesystem::path &file) {
 
 /// Analyze the target verilog-type file to extract declared and used instantiated design elements
 /// \param file Target file
-std::vector<Resource> analyze_verilog(const std::filesystem::path &file) {
+std::vector<HDL_Resource> analyze_verilog(const std::filesystem::path &file) {
     sv_analyzer file_processor(file);
     file_processor.cleanup_content("`(.*)");
     return file_processor.analyze();
@@ -142,7 +142,7 @@ std::vector<Resource> analyze_verilog(const std::filesystem::path &file) {
 
 /// Analyze the target vhdl-type file to extract declared and used instantiated design elements
 /// \param file Target file
-std::vector<Resource> analyze_vhdl(const std::filesystem::path &file) {
+std::vector<HDL_Resource> analyze_vhdl(const std::filesystem::path &file) {
     vhdl_analyzer file_processor(file);
     file_processor.cleanup_content("");
     return file_processor.analyze();

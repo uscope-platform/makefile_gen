@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 #include <stack>
-#include "data_model/Resource.h"
+#include "data_model/HDL_Resource.h"
 
 #include "mgp_vh/vhdlParserBaseListener.h"
 #include "mgp_vh/vhdlParser.h"
@@ -21,7 +21,7 @@ public:
     void enterEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) override;
     void exitEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) override;
     void exitComponent_instantiation_statement(mgp_vh::vhdlParser::Component_instantiation_statementContext *ctx) override;
-    std::vector<Resource> get_entities();
+    std::vector<HDL_Resource> get_entities();
 private:
     hdl_declaration_t declared_feature;
     hdl_deps_t instantiated_features;
@@ -29,7 +29,7 @@ private:
     std::stack<hdl_declaration_t> declarations_stack;
     std::stack<hdl_deps_t> dependencies_stack;
     std::string path;
-    std::vector<Resource> entities;
+    std::vector<HDL_Resource> entities;
 
 };
 

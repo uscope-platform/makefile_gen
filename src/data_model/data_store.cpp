@@ -16,14 +16,14 @@ data_store::data_store() {
     }
 }
 
-Resource data_store::get_entity(const std::string& name) {
+HDL_Resource data_store::get_entity(const std::string& name) {
     return entities_cache[name];
 }
 
-void data_store::store_entity(Resource entity) {
+void data_store::store_entity(HDL_Resource entity) {
     entities_cache[entity.getName()] = std::move(entity);
 }
-void data_store::store_entity(const std::vector<Resource>& vect) {
+void data_store::store_entity(const std::vector<HDL_Resource>& vect) {
     for(auto &item: vect){
         entities_cache[item.getName()] = item;
     }
@@ -37,7 +37,7 @@ void data_store::load_entities_cache() {
     std::ifstream setting_stream(entities_file);
     std::string line;
     while (std::getline(setting_stream, line)){
-        Resource tmp(line);
+        HDL_Resource tmp(line);
         entities_cache[tmp.getName()]  = tmp;
     }
 }

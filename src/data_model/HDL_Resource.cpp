@@ -2,11 +2,11 @@
 // Created by fils on 28/05/2021.
 //
 
-#include <data_model/Resource.h>
+#include <data_model/HDL_Resource.h>
 
 #include <utility>
 
-Resource::Resource() {
+HDL_Resource::HDL_Resource() {
     name = "";
     path = "";
     hdl_type = null_feature;
@@ -19,7 +19,7 @@ Resource::Resource() {
 /// \param p Path of the file
 /// \param deps Dependencies of the file
 /// \param r_type type of resource
-Resource::Resource(sv_feature t, std::string n, std::string p, hdl_deps_t deps, resource_type_t r_type) {
+HDL_Resource::HDL_Resource(sv_feature t, std::string n, std::string p, hdl_deps_t deps, resource_type_t r_type) {
     hdl_type = t;
     name = std::move(n);
     path = std::move(p);
@@ -27,7 +27,7 @@ Resource::Resource(sv_feature t, std::string n, std::string p, hdl_deps_t deps, 
     resource_type = r_type;
 }
 
-Resource::Resource(const std::string& serialized_obj) {
+HDL_Resource::HDL_Resource(const std::string& serialized_obj) {
     std::istringstream ss(serialized_obj);
     std::vector<std::string> tokens;
     std::string tmp;
@@ -44,11 +44,11 @@ Resource::Resource(const std::string& serialized_obj) {
     }
 }
 
-const std::string &Resource::getName() const {
+const std::string &HDL_Resource::getName() const {
     return name;
 }
 
-Resource::operator std::string() {
+HDL_Resource::operator std::string() {
     std::ostringstream tmp;
     tmp << name << "," << std::to_string(feature_to_integer(hdl_type)) << "," << std::to_string(resource_to_integer(resource_type)) << "," << path;
     std::string part_1 = tmp.str();

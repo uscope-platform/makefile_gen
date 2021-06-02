@@ -4,7 +4,7 @@ set(MAKEFILE_GEN_SRCS /
         analysis/sv_analyzer.cpp /
         Repository_walker.cpp /
         data_model/settings_store.cpp /
-        data_model/Resource.cpp /
+        data_model/HDL_Resource.cpp /
         data_model/data_store.cpp /
         analysis/vhdl_analyzer.cpp /
         analysis/vhdl_visitor.cpp /
@@ -18,7 +18,7 @@ set(MAKEFILE_GEN_INCL /
         ../includes/third_party/CLI11.h /
         ../includes/Repository_walker.h /
         ../includes/data_model/settings_store.h /
-        ../includes/data_model/Resource.h /
+        ../includes/data_model/HDL_Resource.h /
         ../includes/data_model/data_store.h /
         ../includes/third_party/thread_pool.hpp/
         ../includes/analysis/vhdl_analyzer.h /

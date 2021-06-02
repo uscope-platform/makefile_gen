@@ -26,7 +26,7 @@ void sv_analyzer::cleanup_content(const std::string& regex) {
 
 }
 
-std::vector<Resource> sv_analyzer::analyze() {
+std::vector<HDL_Resource> sv_analyzer::analyze() {
 
     std::istringstream istream(processed_content);
 

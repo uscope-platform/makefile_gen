@@ -2,8 +2,8 @@
 // Created by fils on 28/05/2021.
 //
 
-#ifndef MAKEFILEGEN_V2_RESOURCE_H
-#define MAKEFILEGEN_V2_RESOURCE_H
+#ifndef MAKEFILEGEN_V2_HDL_RESOURCE_H
+#define MAKEFILEGEN_V2_HDL_RESOURCE_H
 
 #include <utility>
 #include <sstream>
@@ -51,11 +51,11 @@ typedef std::unordered_map<std::string,sv_feature> hdl_deps_t;
 
 typedef std::pair<std::string, sv_feature> hdl_declaration_t;
 
-class Resource {
+class HDL_Resource {
 public:
-    Resource();
-    Resource(sv_feature type, std::string n, std::string p, hdl_deps_t deps, resource_type_t r_type);
-    explicit Resource(const std::string& serialized_obj);
+    HDL_Resource();
+    HDL_Resource(sv_feature type, std::string n, std::string p, hdl_deps_t deps, resource_type_t r_type);
+    explicit HDL_Resource(const std::string& serialized_obj);
     operator std::string();
 
     const std::string &getName() const;
@@ -70,4 +70,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_RESOURCE_H
+#endif //MAKEFILEGEN_V2_HDL_RESOURCE_H
