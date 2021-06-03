@@ -30,6 +30,13 @@ void sv_visitor::exitModule_declaration(sv2017::Module_declarationContext *ctx) 
     }
 }
 
+void sv_visitor::exitInterface_declaration(sv2017::Interface_declarationContext *ctx) {
+    std::string interface_name = ctx->interface_header()->identifier()->getText();
+    hdl_deps_t dummy;
+    std::shared_ptr<HDL_Resource> e = std::make_shared<HDL_Resource>(interface, interface_name, path, dummy, verilog_entity);
+    entities.push_back(e);
+}
+
 void sv_visitor::exitModule_header_common(sv2017::Module_header_commonContext *ctx) {
     std::string module_name = ctx->identifier()->getText();
     declared_feature = std::make_pair(module_name, module);

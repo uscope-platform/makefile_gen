@@ -26,6 +26,7 @@ public:
     explicit sv_visitor(std::string p);
     void enterModule_declaration(sv2017::Module_declarationContext *ctx) override;
     void exitModule_declaration(sv2017::Module_declarationContext *ctx) override;
+    void exitInterface_declaration(sv2017::Interface_declarationContext *ctx) override;
     void exitModule_header_common(sv2017::Module_header_commonContext *ctx) override;
     void exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) override;
     void exitInterface_header(sv2017::Interface_headerContext *ctx) override;

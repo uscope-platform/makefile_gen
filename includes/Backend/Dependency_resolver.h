@@ -20,7 +20,7 @@ public:
 
 private:
     hdl_deps_t dependencies;
-    void get_dependencies(const std::string& module);
+    void get_dependencies(const std::string& module_name);
 
     std::vector<std::string> excluded_modules;
     std::shared_ptr<data_store> d_store;

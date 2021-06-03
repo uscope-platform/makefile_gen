@@ -63,3 +63,7 @@ HDL_Resource::operator std::string() {
 hdl_deps_t HDL_Resource::get_dependencies() {
     return dependencies;
 }
+
+bool HDL_Resource::is_interface() {
+    return hdl_type == interface;
+}
