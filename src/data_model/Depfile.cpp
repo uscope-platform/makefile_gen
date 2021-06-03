@@ -30,14 +30,22 @@ std::vector<std::string> Depfile::get_excluded_modules() {
     return content["excluded_modules"];
 }
 
-std::vector<std::string> Depfile::get_constraints() {
-    return content["constraints"];
+std::vector<Constraints> Depfile::get_constraints() {
+    std::vector<Constraints> retval;
+    for(const auto& item : content["constraints"]){
+        Constraints constr(item);
+        retval.push_back(constr);
+    }
+    return retval;
+
 }
 
 std::vector<Script> Depfile::get_scripts() {
     std::vector<Script> retval;
     for(auto item : content["scripts"]){
-        retval.emplace_back(item["name"], item["type"], item["arguments"]);
+        Script scr(item["name"], item["type"]);
+        scr.set_arguments( item["arguments"]);
+        retval.push_back(scr);
     }
     return retval;
 }

@@ -11,8 +11,11 @@
 #include <filesystem>
 #include <set>
 #include <future>
+#include <regex>
 
 #include "data_model/settings_store.h"
+#include "data_model/Script.h"
+#include "data_model/Constraints.h"
 #include "data_model/data_store.h"
 #include "analysis/sv_analyzer.h"
 #include "analysis/vhdl_analyzer.h"
@@ -20,6 +23,8 @@
 
 static std::vector<std::shared_ptr<Resource_base>> analyze_verilog(const std::filesystem::path &file);
 static std::vector<std::shared_ptr<Resource_base>> analyze_vhdl(const std::filesystem::path &file);
+static std::vector<std::shared_ptr<Resource_base>> analyze_script(const std::filesystem::path &file);
+static std::vector<std::shared_ptr<Resource_base>> analyze_constraint(const std::filesystem::path &file);
 
 const unsigned int max_threads = std::thread::hardware_concurrency()-1;
 
@@ -36,8 +41,6 @@ private:
     // File analysis functions
 
 
-    void analyze_script(std::filesystem::path &file);
-    void analyze_constraint(std::filesystem::path &file);
     // File type discrimination methods
     // TODO: use these to make file associations dynamic a la vscode
     static bool file_is_verilog(std::filesystem::path &file);
@@ -52,7 +55,9 @@ private:
     std::shared_ptr<settings_store> s_store;
     std::shared_ptr<data_store> d_store;
 
-    std::vector<std::future<std::vector<std::shared_ptr<Resource_base>>>> analyzer_futures;
+    std::vector<std::future<std::vector<std::shared_ptr<Resource_base>>>> hdl_futures;
+    std::vector<std::future<std::vector<std::shared_ptr<Resource_base>>>> scripts_futures;
+    std::vector<std::future<std::vector<std::shared_ptr<Resource_base>>>> constraints_futures;
 
     thread_pool pool;
     int working_threads = 0;

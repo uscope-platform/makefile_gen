@@ -11,20 +11,33 @@
 #include <fstream>
 
 #include "HDL_Resource.h"
+#include "Script.h"
+#include "Constraints.h"
 
 class data_store {
 public:
      data_store();
      std::shared_ptr<Resource_base> get_HDL_resource(const std::string& name);
-     void store_entity(const std::shared_ptr<Resource_base>& entity);
-     void store_entity(const std::vector<std::shared_ptr<Resource_base>> & vect);
-     ~data_store();
+     void store_hdl_entity(const std::shared_ptr<Resource_base>& entity);
+     void store_hdl_entity(const std::vector<std::shared_ptr<Resource_base>> & vect);
+
+    std::shared_ptr<Script> get_script(const std::string& name);
+    void store_script(const std::shared_ptr<Resource_base>& entity);
+    void store_script(const std::vector<std::shared_ptr<Resource_base>> & vect);
+
+    std::shared_ptr<Constraints> get_constraint(const std::string& name);
+    void store_constraint(const std::shared_ptr<Resource_base>& entity);
+    void store_constraint(const std::vector<std::shared_ptr<Resource_base>> & vect);
+
+    ~data_store();
 private:
 
     void load_entities_cache();
     void store_entities_cache();
 
     std::unordered_map<std::string, std::shared_ptr<HDL_Resource>> hdl_resources_cache;
+    std::unordered_map<std::string, std::shared_ptr<Script>> scripts_cache;
+    std::unordered_map<std::string, std::shared_ptr<Constraints>> constraints_cache;
     std::string  store_path;
     std::string entities_file;
 };

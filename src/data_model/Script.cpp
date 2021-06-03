@@ -6,11 +6,11 @@
 
 #include <utility>
 
-Script::Script(std::string n, const std::string& t, std::vector<std::string> args) {
+Script::Script(std::string n, const std::string& t) {
     name = std::move(n);
-    arguments = std::move(args);
     if(t=="tcl") type = tcl_script;
-    else if (t=="python") type = python_script;
+    else if (t=="python" || t == "py") type = python_script;
+    else type = uninit_script;
 }
 
 std::string Script::get_name() {
@@ -23,4 +23,12 @@ script_type_t Script::get_type() {
 
 std::vector<std::string> Script::get_arguments() {
     return arguments;
+}
+
+void Script::set_arguments(std::vector<std::string> args) {
+    arguments = std::move(args);
+}
+
+void Script::set_path(std::string p) {
+    path = std::move(p);
 }

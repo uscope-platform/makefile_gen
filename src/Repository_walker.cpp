@@ -46,13 +46,21 @@ void Repository_walker::analyze_dir() {
         } else{
             if(working_threads == 2*max_threads){
                 pool.wait_for_tasks();
-                int i=0;
-                for(auto &f : analyzer_futures){
+                for(auto &f : hdl_futures){
                     auto result = f.get();
-                    d_store->store_entity(result);
-                    i++;
+                    d_store->store_hdl_entity(result);
                 }
-                analyzer_futures.erase(analyzer_futures.begin(), analyzer_futures.end());
+                for(auto &f : scripts_futures){
+                    auto result = f.get();
+                    d_store->store_script(result);
+                }
+                for(auto &f : constraints_futures){
+                    auto result = f.get();
+                    d_store->store_constraint(result);
+                }
+                hdl_futures.erase(hdl_futures.begin(), hdl_futures.end());
+                scripts_futures.erase(scripts_futures.begin(), scripts_futures.end());
+                constraints_futures.erase(constraints_futures.begin(), constraints_futures.end());
                 working_threads =0;
             }
             analyze_file(path);
@@ -86,15 +94,17 @@ bool Repository_walker::contains_excluding_file(const std::filesystem::path &dir
 /// This method is a simple dispatcher that based on the file type calls the appropriate analysis method.
 void Repository_walker::analyze_file(std::filesystem::path &file) {
     if(file_is_verilog(file)){
-        analyzer_futures.push_back(pool.submit(analyze_verilog, file));
+        hdl_futures.push_back(pool.submit(analyze_verilog, file));
         working_threads++;
     } else if(file_is_script(file)){
-        analyze_script(file);
+        scripts_futures.push_back(pool.submit(analyze_script, file));
+        working_threads++;
     } else if(file_is_vhdl(file)){
-        analyzer_futures.push_back(pool.submit(analyze_vhdl, file));
+        hdl_futures.push_back(pool.submit(analyze_vhdl, file));
         working_threads++;
     } else if(file_is_constraint(file)){
-        analyze_constraint(file);
+        constraints_futures.push_back(pool.submit(analyze_constraint, file));
+        working_threads++;
     }
 }
 
@@ -150,14 +160,22 @@ std::vector<std::shared_ptr<Resource_base>> analyze_vhdl(const std::filesystem::
 
 /// Analyze the target Script extracting the necessary metadata
 /// \param file Target file
-void Repository_walker::analyze_script(std::filesystem::path &file) {
-
+std::vector<std::shared_ptr<Resource_base>> analyze_script(const std::filesystem::path &file) {
+    std::string ext = file.extension();
+    ext = std::regex_replace(ext, std::regex("\\."), "");
+    std::shared_ptr<Script> scr = std::make_shared<Script>(file.stem(), ext);
+    scr->set_path(file);
+    std::vector<std::shared_ptr<Resource_base>> retval = {scr};
+    return retval;
 }
 
 /// Analyze the target constraint file extracting the necessary metadata
 /// \param file Target file
-void Repository_walker::analyze_constraint(std::filesystem::path &file) {
-
+std::vector<std::shared_ptr<Resource_base>> analyze_constraint(const std::filesystem::path &file) {
+    std::shared_ptr<Constraints> constr = std::make_shared<Constraints>(file.stem());
+    constr->set_path(file);
+    std::vector<std::shared_ptr<Resource_base>> retval = {constr};
+    return retval;
 }
 
 

@@ -10,7 +10,8 @@ set(MAKEFILE_GEN_SRCS /
         analysis/vhdl_visitor.cpp /
         data_model/Depfile.cpp /
         data_model/Script.cpp /
-        data_model/Resource_base.cpp )
+        data_model/Resource_base.cpp /
+        data_model/Constraints.cpp)
 
 set(MAKEFILE_GEN_INCL /
         ../includes/main.hpp /
@@ -26,7 +27,8 @@ set(MAKEFILE_GEN_INCL /
         ../includes/analysis/vhdl_visitor.h /
         ../includes/data_model/Depfile.h /
         ../includes/data_model/Script.h /
-        ../includes/data_model/Resource_base.h)
+        ../includes/data_model/Resource_base.h /
+        ../includes/data_model/Constraints.h)
 
 
 add_executable(makefile_gen ${MAKEFILE_GEN_SRCS} ${MAKEFILE_GEN_INCL})
