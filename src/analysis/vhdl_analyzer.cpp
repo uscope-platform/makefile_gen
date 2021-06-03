@@ -23,7 +23,7 @@ void vhdl_analyzer::cleanup_content(const std::string &regex) {
 
 }
 
-std::vector<std::shared_ptr<Resource_base>> vhdl_analyzer::analyze() {
+std::vector<std::shared_ptr<HDL_Resource>> vhdl_analyzer::analyze() {
 
     std::istringstream istream(processed_content);
 

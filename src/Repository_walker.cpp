@@ -144,7 +144,7 @@ bool Repository_walker::file_is_constraint(std::filesystem::path &file) {
 
 /// Analyze the target verilog-type file to extract declared and used instantiated design elements
 /// \param file Target file
-std::vector<std::shared_ptr<Resource_base>> analyze_verilog(const std::filesystem::path &file) {
+std::vector<std::shared_ptr<HDL_Resource>> analyze_verilog(const std::filesystem::path &file) {
     sv_analyzer file_processor(file);
     file_processor.cleanup_content("`(.*)");
     return file_processor.analyze();
@@ -152,7 +152,7 @@ std::vector<std::shared_ptr<Resource_base>> analyze_verilog(const std::filesyste
 
 /// Analyze the target vhdl-type file to extract declared and used instantiated design elements
 /// \param file Target file
-std::vector<std::shared_ptr<Resource_base>> analyze_vhdl(const std::filesystem::path &file) {
+std::vector<std::shared_ptr<HDL_Resource>> analyze_vhdl(const std::filesystem::path &file) {
     vhdl_analyzer file_processor(file);
     file_processor.cleanup_content("");
     return file_processor.analyze();
@@ -160,22 +160,20 @@ std::vector<std::shared_ptr<Resource_base>> analyze_vhdl(const std::filesystem::
 
 /// Analyze the target Script extracting the necessary metadata
 /// \param file Target file
-std::vector<std::shared_ptr<Resource_base>> analyze_script(const std::filesystem::path &file) {
+std::vector<std::shared_ptr<Script>> analyze_script(const std::filesystem::path &file) {
     std::string ext = file.extension();
     ext = std::regex_replace(ext, std::regex("\\."), "");
     std::shared_ptr<Script> scr = std::make_shared<Script>(file.stem(), ext);
     scr->set_path(file);
-    std::vector<std::shared_ptr<Resource_base>> retval = {scr};
-    return retval;
+    return {scr};
 }
 
 /// Analyze the target constraint file extracting the necessary metadata
 /// \param file Target file
-std::vector<std::shared_ptr<Resource_base>> analyze_constraint(const std::filesystem::path &file) {
+std::vector<std::shared_ptr<Constraints>> analyze_constraint(const std::filesystem::path &file) {
     std::shared_ptr<Constraints> constr = std::make_shared<Constraints>(file.stem());
     constr->set_path(file);
-    std::vector<std::shared_ptr<Resource_base>> retval = {constr};
-    return retval;
+    return {constr};
 }
 
 

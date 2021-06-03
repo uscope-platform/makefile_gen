@@ -23,7 +23,7 @@ class sv_analyzer {
 public:
     explicit sv_analyzer(const std::string& file_path);
     void cleanup_content(const std::string& regex);
-    std::vector<std::shared_ptr<Resource_base>> analyze();
+    std::vector<std::shared_ptr<HDL_Resource>> analyze();
 
 private:
     std::string path;

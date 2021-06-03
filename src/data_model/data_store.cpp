@@ -20,11 +20,10 @@ std::shared_ptr<Resource_base> data_store::get_HDL_resource(const std::string& n
     return hdl_resources_cache[name];
 }
 
-void data_store::store_hdl_entity(const std::shared_ptr<Resource_base>& entity) {
-    std::shared_ptr<HDL_Resource> inner_entity = std::static_pointer_cast<HDL_Resource>(entity);
-    hdl_resources_cache[inner_entity->getName()] = inner_entity;
+void data_store::store_hdl_entity(const std::shared_ptr<HDL_Resource>& entity) {
+    hdl_resources_cache[entity->getName()] = entity;
 }
-void data_store::store_hdl_entity(const std::vector<std::shared_ptr<Resource_base>>& vect) {
+void data_store::store_hdl_entity(const std::vector<std::shared_ptr<HDL_Resource>>& vect) {
     for(auto &item: vect){
         store_hdl_entity(item);
     }
@@ -34,12 +33,11 @@ std::shared_ptr<Script> data_store::get_script(const std::string &name) {
     return scripts_cache[name];
 }
 
-void data_store::store_script(const std::shared_ptr<Resource_base> &entity) {
-    std::shared_ptr<Script> inner_entity = std::static_pointer_cast<Script>(entity);
-    scripts_cache[inner_entity->get_name()] = inner_entity;
+void data_store::store_script(const std::shared_ptr<Script> &entity) {
+    scripts_cache[entity->get_name()] = entity;
 }
 
-void data_store::store_script(const std::vector<std::shared_ptr<Resource_base>> &vect) {
+void data_store::store_script(const std::vector<std::shared_ptr<Script>> &vect) {
     for(auto &item: vect){
         store_script(item);
     }
@@ -49,12 +47,11 @@ std::shared_ptr<Constraints> data_store::get_constraint(const std::string &name)
     return constraints_cache[name];
 }
 
-void data_store::store_constraint(const std::shared_ptr<Resource_base> &entity) {
-    std::shared_ptr<Constraints> inner_entity = std::static_pointer_cast<Constraints>(entity);
-    constraints_cache[inner_entity->get_name()] = inner_entity;
+void data_store::store_constraint(const std::shared_ptr<Constraints> &entity) {
+    constraints_cache[entity->get_name()] = entity;
 }
 
-void data_store::store_constraint(const std::vector<std::shared_ptr<Resource_base>> &vect) {
+void data_store::store_constraint(const std::vector<std::shared_ptr<Constraints>> &vect) {
     for(auto &item: vect){
         store_constraint(item);
     }
