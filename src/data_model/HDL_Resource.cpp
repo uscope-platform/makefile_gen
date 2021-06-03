@@ -59,3 +59,7 @@ HDL_Resource::operator std::string() {
     std::string part_2 = tmp.str();
     return part_1 + part_2;
 }
+
+hdl_deps_t HDL_Resource::get_dependencies() {
+    return dependencies;
+}

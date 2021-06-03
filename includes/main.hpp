@@ -14,7 +14,7 @@
 #include "data_model/settings_store.h"
 #include "analysis/sv_analyzer.h"
 #include "data_model/Depfile.h"
-
+#include "Backend/Dependency_resolver.h"
 
 
 

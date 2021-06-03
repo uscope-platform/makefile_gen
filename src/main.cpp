@@ -35,5 +35,9 @@ int main(int argc, char *argv[]){
     std::vector<std::string> synth_add = dep.get_additional_synth_modules();
     std::vector<std::string> sim_add = dep.get_additional_sim_modules();
     std::vector<Script> scripts = dep.get_scripts();
+
+    Dependency_resolver resolver(synth_top_level, d_store);
+    resolver.set_excluded_modules(dep.get_excluded_modules());
+    std::vector<std::string> synth_deps = resolver.get_dependencies();
     return 0;
 }

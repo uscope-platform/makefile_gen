@@ -16,7 +16,7 @@ data_store::data_store() {
     }
 }
 
-std::shared_ptr<Resource_base> data_store::get_HDL_resource(const std::string& name) {
+std::shared_ptr<HDL_Resource> data_store::get_HDL_resource(const std::string& name) {
     return hdl_resources_cache[name];
 }
 

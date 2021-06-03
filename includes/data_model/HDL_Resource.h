@@ -58,6 +58,7 @@ public:
     HDL_Resource();
     HDL_Resource(sv_feature type, std::string n, std::string p, hdl_deps_t deps, resource_type_t r_type);
     explicit HDL_Resource(const std::string& serialized_obj);
+    hdl_deps_t get_dependencies();
     operator std::string();
 
     const std::string &getName() const;

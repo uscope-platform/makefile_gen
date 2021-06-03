@@ -17,7 +17,7 @@
 class data_store {
 public:
      data_store();
-     std::shared_ptr<Resource_base> get_HDL_resource(const std::string& name);
+     std::shared_ptr<HDL_Resource> get_HDL_resource(const std::string& name);
      void store_hdl_entity(const std::shared_ptr<HDL_Resource>& entity);
      void store_hdl_entity(const std::vector<std::shared_ptr<HDL_Resource>> & vect);
 
