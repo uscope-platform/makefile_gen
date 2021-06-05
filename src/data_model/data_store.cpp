@@ -73,10 +73,16 @@ void data_store::load_entities_cache() {
 }
 
 void data_store::store_entities_cache() {
+
     std::filesystem::remove(entities_file);
     std::ofstream entities_stream(entities_file);
     for (auto  [key, val] : hdl_resources_cache){
+        if(this->is_primitive(key) || val == nullptr) continue;
         std::string serialized_entity = *val;
         entities_stream << serialized_entity << std::endl;
     }
+}
+
+bool data_store::is_primitive(const std::string &name) {
+    return xilinx_primitives.find(name) != xilinx_primitives.end();
 }

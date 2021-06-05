@@ -15,19 +15,26 @@ void sv_visitor::enterModule_declaration(sv2017::Module_declarationContext *ctx)
     nesting_level++;
     declarations_stack.push(declared_feature);
     dependencies_stack.push(instantiated_features);
+    instantiated_features.clear();
 }
 
 
 void sv_visitor::exitModule_declaration(sv2017::Module_declarationContext *ctx) {
-    std::shared_ptr<HDL_Resource> e = std::make_shared<HDL_Resource>(declared_feature.second, declared_feature.first, path, instantiated_features, verilog_entity);
-    entities.push_back(e);
-    if(nesting_level>1){
-        declared_feature = declarations_stack.top();
-        declarations_stack.pop();
-        instantiated_features = dependencies_stack.top();
-        dependencies_stack.pop();
+
+        std::shared_ptr<HDL_Resource> e = std::make_shared<HDL_Resource>(declared_feature.second, declared_feature.first, path, instantiated_features, verilog_entity);
+        entities.push_back(e);
+        if(!declarations_stack.empty()) {
+            declared_feature = declarations_stack.top();
+            declarations_stack.pop();
+        }
+        if(!dependencies_stack.empty()){
+            instantiated_features = dependencies_stack.top();
+            dependencies_stack.pop();
+        } else{
+            instantiated_features.clear();
+        }
+
         nesting_level--;
-    }
 }
 
 void sv_visitor::exitInterface_declaration(sv2017::Interface_declarationContext *ctx) {

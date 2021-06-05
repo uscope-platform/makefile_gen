@@ -15,16 +15,23 @@ std::vector<std::string> Dependency_resolver::get_dependencies() {
 }
 
 void Dependency_resolver::get_dependencies(const std::string& module_name) {
+    // Excluded modules and primitives are not defined and thus get a reference to a null pointer, we must exit early from the function to avoid dereferencing it
     bool is_excluded = std::find(excluded_modules.begin(), excluded_modules.end(), module_name) != excluded_modules.end();
-    auto module = d_store->get_HDL_resource(module_name);
+    bool is_primitive = d_store->is_primitive(module_name);
+    if(is_excluded || is_primitive) return;
 
-    if(!(is_excluded || module->is_interface())) {
-        auto deps = module->get_dependencies();
-        dependencies.insert(deps.begin(), deps.end());
-        for(auto &item : deps){
-            get_dependencies(item.first);
-        }
+    //  interfaces never have dependencies so we can exit
+    bool is_interface = d_store->get_HDL_resource(module_name)->is_interface();
+    if(is_interface) return;
+
+    hdl_deps_t deps =  d_store->get_HDL_resource(module_name)->get_dependencies();
+
+    for(auto &item : deps){
+        auto res = d_store->get_HDL_resource(item.first);
+        dependencies.push_back(res);
+        get_dependencies(item.first);
     }
+
 
 }
 

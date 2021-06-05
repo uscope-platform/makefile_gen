@@ -19,7 +19,7 @@ public:
     void set_excluded_modules(std::vector<std::string> exclusion_list);
 
 private:
-    hdl_deps_t dependencies;
+    std::vector<std::shared_ptr<HDL_Resource>> dependencies;
     void get_dependencies(const std::string& module_name);
 
     std::vector<std::string> excluded_modules;
