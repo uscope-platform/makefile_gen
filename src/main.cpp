@@ -38,7 +38,7 @@ int main(int argc, char *argv[]){
 
     Dependency_resolver resolver(synth_top_level, d_store);
     resolver.set_excluded_modules(dep.get_excluded_modules());
-    std::vector<std::string> synth_deps = resolver.get_dependencies();
+    std::set<std::string> synth_deps = resolver.get_dependencies();
 
     return 0;
 }

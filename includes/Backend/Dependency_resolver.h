@@ -15,12 +15,12 @@
 class Dependency_resolver {
 public:
     Dependency_resolver(std::string tl, std::shared_ptr<data_store> store);
-    std::vector<std::string> get_dependencies();
+    std::set<std::string> get_dependencies();
     void set_excluded_modules(std::vector<std::string> exclusion_list);
 
 private:
     std::vector<std::shared_ptr<HDL_Resource>> dependencies;
-    void get_dependencies(const std::string& module_name);
+    void resolve_dependencies(const std::string& module_name);
 
     std::vector<std::string> excluded_modules;
     std::shared_ptr<data_store> d_store;

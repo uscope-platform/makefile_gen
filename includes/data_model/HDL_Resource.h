@@ -60,6 +60,7 @@ public:
     explicit HDL_Resource(const std::string& serialized_obj);
     hdl_deps_t get_dependencies();
     const std::string &getName() const;
+    std::string get_path();
     bool is_interface();
 
 

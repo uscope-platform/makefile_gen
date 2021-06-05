@@ -9,12 +9,16 @@ Dependency_resolver::Dependency_resolver(std::string tl, std::shared_ptr<data_st
     d_store = std::move(store);
 }
 
-std::vector<std::string> Dependency_resolver::get_dependencies() {
-    get_dependencies(top_level);
-    return std::vector<std::string>();
+std::set<std::string> Dependency_resolver::get_dependencies() {
+    resolve_dependencies(top_level);
+    std::set<std::string> ret_val;
+    for(const auto& item: dependencies){
+        ret_val.insert(item->get_path());
+    }
+    return ret_val;
 }
 
-void Dependency_resolver::get_dependencies(const std::string& module_name) {
+void Dependency_resolver::resolve_dependencies(const std::string& module_name) {
     // Excluded modules and primitives are not defined and thus get a reference to a null pointer, we must exit early from the function to avoid dereferencing it
     bool is_excluded = std::find(excluded_modules.begin(), excluded_modules.end(), module_name) != excluded_modules.end();
     bool is_primitive = d_store->is_primitive(module_name);
@@ -28,8 +32,8 @@ void Dependency_resolver::get_dependencies(const std::string& module_name) {
 
     for(auto &item : deps){
         auto res = d_store->get_HDL_resource(item.first);
-        dependencies.push_back(res);
-        get_dependencies(item.first);
+        if(res != nullptr) dependencies.push_back(res);
+        resolve_dependencies(item.first);
     }
 
 
