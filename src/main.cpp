@@ -40,5 +40,11 @@ int main(int argc, char *argv[]){
     resolver.set_excluded_modules(dep.get_excluded_modules());
     std::set<std::string> synth_deps = resolver.get_dependencies();
 
+    xilinx_project_generator generator;
+    generator.set_project_name(dep.get_project_name());
+    //enerator.set_synth_sources(synth_deps);
+    std::ofstream makefile("test_makefile.tcl");
+    generator.write_makefile(makefile);
+
     return 0;
 }

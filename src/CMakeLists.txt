@@ -12,7 +12,8 @@ set(MAKEFILE_GEN_SRCS /
         data_model/Script.cpp /
         data_model/Resource_base.cpp /
         data_model/Constraints.cpp /
-        Backend/Dependency_resolver.cpp)
+        Backend/Dependency_resolver.cpp /
+        Backend/xilinx_project_generator.cpp)
 
 set(MAKEFILE_GEN_INCL /
         ../includes/main.hpp /
@@ -30,7 +31,8 @@ set(MAKEFILE_GEN_INCL /
         ../includes/data_model/Script.h /
         ../includes/data_model/Resource_base.h /
         ../includes/data_model/Constraints.h /
-        ../includes/Backend/Dependency_resolver.h)
+        ../includes/Backend/Dependency_resolver.h /
+        ../includes/Backend/xilinx_project_generator.h)
 
 
 add_executable(makefile_gen ${MAKEFILE_GEN_SRCS} ${MAKEFILE_GEN_INCL})

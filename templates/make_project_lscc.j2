@@ -1,0 +1,28 @@
+set project_name "{{name}}_lscc"
+set origin_dir "."
+
+
+file delete -force $project_name
+file mkdir $project_name
+cd $project_name
+
+{# DEFINE SIM AND SYNTH SOURCES #}
+{{base_dir}}
+
+set synth_sources [list {% for source in synth_sources %}{{source}} {% endfor %}]
+
+set sim_sources [list {% for source in sim_sources %}{{source}} {% endfor %}]
+
+
+prj_create -name $project_name -impl "build" -dev iCE40UP5K-SG48I -performance "High-Performance_1.2V" -synthesis "LSE"
+
+prj_set_strategy_value -strategy Strategy1 {syn_vlog_input=System Verilog}
+prj_set_strategy_value -strategy Strategy1 syn_frequency=80
+
+foreach i $synth_sources {
+    prj_add_source -include {$include_dirs} $i
+}
+
+prj_save
+
+prj_close

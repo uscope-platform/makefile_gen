@@ -15,6 +15,7 @@
 #include "analysis/sv_analyzer.h"
 #include "data_model/Depfile.h"
 #include "Backend/Dependency_resolver.h"
+#include "Backend/xilinx_project_generator.h"
 
 
 

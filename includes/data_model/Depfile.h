@@ -21,6 +21,7 @@ public:
     explicit Depfile(const std::string& filename);
     std::string get_synth_tl();
     std::string get_sim_tl();
+    std::string get_project_name();
     std::vector<std::string> get_additional_synth_modules();
     std::vector<std::string> get_additional_sim_modules();
     std::vector<std::string> get_excluded_modules();

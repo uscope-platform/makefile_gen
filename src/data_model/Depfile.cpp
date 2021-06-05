@@ -49,3 +49,7 @@ std::vector<Script> Depfile::get_scripts() {
     }
     return retval;
 }
+
+std::string Depfile::get_project_name() {
+    return content["general"]["project_name"];
+}
