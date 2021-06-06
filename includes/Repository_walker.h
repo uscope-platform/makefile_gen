@@ -12,6 +12,7 @@
 #include <set>
 #include <future>
 #include <regex>
+#include <utility>
 
 #include "data_model/settings_store.h"
 #include "data_model/Script.h"
@@ -37,9 +38,9 @@ private:
 
     bool is_excluded_directory(const std::filesystem::path& dir);
     bool contains_excluding_file(const std::filesystem::path& dir);
+    void read_ignore_file(const std::filesystem::path& file);
     void analyze_file(std::filesystem::path& dir);
-    // File analysis functions
-
+    void collect_analysis_results();
 
     // File type discrimination methods
     // TODO: use these to make file associations dynamic a la vscode
@@ -48,8 +49,10 @@ private:
     static bool file_is_script(std::filesystem::path &file);
     static bool file_is_constraint(std::filesystem::path &file);
     // TODO: Make excluded directories dynamic with a mechanism similar to .gitignore
+
     std::set<std::string> excluded_directories = {".git"};
     std::set<std::string> excluding_extensions = {".xpr"};
+    std::string ignore_file_name = ".mkignore";
 
     std::string target_repository;
     std::shared_ptr<settings_store> s_store;

@@ -6,10 +6,6 @@
 
 xilinx_project_generator::xilinx_project_generator() {
     tpl = env.parse_template(template_file);
-    data["base_dir"] = "";
-    data["commons_dir"] = "";
-    data["synth_tl"] = "test";
-    data["tb_tl"] = "test";
 }
 
 
@@ -32,7 +28,7 @@ void xilinx_project_generator::set_sim_sources(const std::set<std::string>& path
     std::vector<std::string> raw_sim_sources = this->process_sources_set(paths);
     std::vector<std::string> diff;
 
-    std::set_difference(synth_sources.begin(), synth_sources.end(), raw_sim_sources.begin(), raw_sim_sources.end(),
+    std::set_difference(raw_sim_sources.begin(), raw_sim_sources.end(), synth_sources.begin(), synth_sources.end(),
                         std::inserter(diff, diff.begin()));
 
     data["sim_sources"] = diff;
@@ -51,7 +47,7 @@ void xilinx_project_generator::set_synth_tl(const std::string& tl) {
 }
 
 void xilinx_project_generator::set_sim_tl(const std::string &tl) {
-    data["sim_tl"] = tl;
+    data["tb_tl"] = tl;
 }
 
 void xilinx_project_generator::set_directories(const std::string &base, const std::string &commons) {

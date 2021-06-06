@@ -5,7 +5,7 @@
 
 #include "Repository_walker.h"
 
-#include <utility>
+
 
 
 
@@ -44,28 +44,35 @@ void Repository_walker::analyze_dir() {
             }
         } else{
             if(working_threads == 2*max_threads){
-                pool.wait_for_tasks();
-                for(auto &f : hdl_futures){
-                    auto result = f.get();
-                    d_store->store_hdl_entity(result);
-                }
-                for(auto &f : scripts_futures){
-                    auto result = f.get();
-                    d_store->store_script(result);
-                }
-                for(auto &f : constraints_futures){
-                    auto result = f.get();
-                    d_store->store_constraint(result);
-                }
-                hdl_futures.erase(hdl_futures.begin(), hdl_futures.end());
-                scripts_futures.erase(scripts_futures.begin(), scripts_futures.end());
-                constraints_futures.erase(constraints_futures.begin(), constraints_futures.end());
-                working_threads =0;
+               this->collect_analysis_results();
             }
             analyze_file(path);
         }
     }
+
+    this->collect_analysis_results();
 }
+
+void Repository_walker::collect_analysis_results() {
+    pool.wait_for_tasks();
+    for(auto &f : hdl_futures){
+        auto result = f.get();
+        d_store->store_hdl_entity(result);
+    }
+    for(auto &f : scripts_futures){
+        auto result = f.get();
+        d_store->store_script(result);
+    }
+    for(auto &f : constraints_futures){
+        auto result = f.get();
+        d_store->store_constraint(result);
+    }
+    hdl_futures.erase(hdl_futures.begin(), hdl_futures.end());
+    scripts_futures.erase(scripts_futures.begin(), scripts_futures.end());
+    constraints_futures.erase(constraints_futures.begin(), constraints_futures.end());
+    working_threads =0;
+}
+
 
 /// Check if the target directory needs to be skipped on the base of its name
 /// \param dir Target directory
@@ -78,13 +85,27 @@ bool Repository_walker::is_excluded_directory(const std::filesystem::path& dir) 
 /// \param dir Target directory
 /// \return true if the directory needs to be skipped
 bool Repository_walker::contains_excluding_file(const std::filesystem::path &dir) {
-    bool is_excluded = false;
     for(auto& p: std::filesystem::directory_iterator(dir)){
         if(!std::filesystem::is_directory(p.path())){
-            is_excluded = excluding_extensions.find(p.path().extension()) != excluding_extensions.end();
+            bool is_excluded = excluding_extensions.find(p.path().extension()) != excluding_extensions.end();
+            if(p.path().filename() == ignore_file_name){
+                this->read_ignore_file(p.path());
+            }
+            if(is_excluded) return true;
         }
     }
-    return is_excluded;
+    return false;
+}
+
+void Repository_walker::read_ignore_file(const std::filesystem::path &file) {
+    std::ifstream content(file);
+    std::string ignore_line;
+    std::string ignore_path;
+    while (std::getline(content, ignore_line)){
+        ignore_path = file.parent_path().string() + "/" + ignore_line;
+        if(std::filesystem::is_directory(ignore_path)) excluded_directories.insert(ignore_path);
+    }
+
 }
 
 /// File analysis Dispatcher
@@ -138,8 +159,6 @@ bool Repository_walker::file_is_constraint(std::filesystem::path &file) {
     std::string extension = file.extension();
     return extension == ".xdc";
 }
-
-
 
 /// Analyze the target verilog-type file to extract declared and used instantiated design elements
 /// \param file Target file

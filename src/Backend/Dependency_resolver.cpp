@@ -33,7 +33,8 @@ void Dependency_resolver::resolve_dependencies(const std::string& module_name) {
 
     for(auto &item : deps){
         auto res = d_store->get_HDL_resource(item.first);
-        if(res != nullptr) dependencies.push_back(res);
+        bool dep_excluded = std::find(excluded_modules.begin(), excluded_modules.end(), item.first) != excluded_modules.end();
+        if(res != nullptr && !dep_excluded) dependencies.push_back(res);
         resolve_dependencies(item.first);
     }
 
