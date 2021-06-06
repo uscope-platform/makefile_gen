@@ -28,7 +28,14 @@ void xilinx_project_generator::set_synth_sources(const std::set<std::string>& pa
 }
 
 void xilinx_project_generator::set_sim_sources(const std::set<std::string>& paths) {
-    data["sim_sources"] = this->process_sources_set(paths);
+    std::vector<std::string> synth_sources = data["synth_sources"];
+    std::vector<std::string> raw_sim_sources = this->process_sources_set(paths);
+    std::vector<std::string> diff;
+
+    std::set_difference(synth_sources.begin(), synth_sources.end(), raw_sim_sources.begin(), raw_sim_sources.end(),
+                        std::inserter(diff, diff.begin()));
+
+    data["sim_sources"] = diff;
 }
 
 void xilinx_project_generator::set_constraint_sources(const std::set<std::string>& paths) {

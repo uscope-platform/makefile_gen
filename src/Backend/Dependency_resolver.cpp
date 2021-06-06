@@ -11,6 +11,7 @@ Dependency_resolver::Dependency_resolver(std::string tl, std::shared_ptr<data_st
 
 std::set<std::string> Dependency_resolver::get_dependencies() {
     resolve_dependencies(top_level);
+    dependencies.push_back(d_store->get_HDL_resource(top_level));
     std::set<std::string> ret_val;
     for(const auto& item: dependencies){
         ret_val.insert(item->get_path());

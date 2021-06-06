@@ -39,7 +39,7 @@ int main(int argc, char *argv[]){
     synth_resolver.set_excluded_modules(dep.get_excluded_modules());
 
     // Get resolve simulation dependencies
-    Dependency_resolver sim_resolver(dep.get_synth_tl(), d_store);
+    Dependency_resolver sim_resolver(dep.get_sim_tl(), d_store);
     sim_resolver.set_excluded_modules(dep.get_excluded_modules());
 
     Auxiliary_resolver aux_resolver(d_store);
