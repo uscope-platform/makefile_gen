@@ -30,19 +30,30 @@ int main(int argc, char *argv[]){
     if(target.empty()) target = std::filesystem::current_path().string() + "/Depfile";
 
     Depfile dep(target);
-    std::string synth_top_level = dep.get_synth_tl();
-    std::string sim_top_level = dep.get_sim_tl();
+
     std::vector<std::string> synth_add = dep.get_additional_synth_modules();
     std::vector<std::string> sim_add = dep.get_additional_sim_modules();
-    std::vector<Script> scripts = dep.get_scripts();
 
-    Dependency_resolver resolver(synth_top_level, d_store);
-    resolver.set_excluded_modules(dep.get_excluded_modules());
-    std::set<std::string> synth_deps = resolver.get_dependencies();
+    // Get resolve synthesis dependencies
+    Dependency_resolver synth_resolver(dep.get_synth_tl(), d_store);
+    synth_resolver.set_excluded_modules(dep.get_excluded_modules());
+
+    // Get resolve simulation dependencies
+    Dependency_resolver sim_resolver(dep.get_synth_tl(), d_store);
+    sim_resolver.set_excluded_modules(dep.get_excluded_modules());
+
+    Auxiliary_resolver aux_resolver(d_store);
+
 
     xilinx_project_generator generator;
     generator.set_project_name(dep.get_project_name());
-    //enerator.set_synth_sources(synth_deps);
+    generator.set_directories(s_store->get_setting("hdl_store"), s_store->get_setting("hdl_store")+ "Components/Commons");
+    generator.set_synth_sources(synth_resolver.get_dependencies());
+    generator.set_sim_sources(sim_resolver.get_dependencies());
+    generator.set_script_sources(aux_resolver.get_tcl_scripts(dep.get_scripts()));
+    generator.set_constraint_sources(aux_resolver.get_constraints(dep.get_constraints()));
+    generator.set_sim_tl(dep.get_sim_tl());
+    generator.set_synth_tl(dep.get_synth_tl());
     std::ofstream makefile("test_makefile.tcl");
     generator.write_makefile(makefile);
 

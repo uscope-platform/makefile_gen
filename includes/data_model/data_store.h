@@ -22,11 +22,11 @@ public:
      void store_hdl_entity(const std::shared_ptr<HDL_Resource>& entity);
      void store_hdl_entity(const std::vector<std::shared_ptr<HDL_Resource>> & vect);
 
-    std::shared_ptr<Script> get_script(const std::string& name);
+    std::shared_ptr<Script> get_script(std::string& name);
     void store_script(const std::shared_ptr<Script>& entity);
     void store_script(const std::vector<std::shared_ptr<Script>> & vect);
 
-    std::shared_ptr<Constraints> get_constraint(const std::string& name);
+    std::shared_ptr<Constraints> get_constraint(std::string& name);
     void store_constraint(const std::shared_ptr<Constraints>& entity);
     void store_constraint(const std::vector<std::shared_ptr<Constraints>> & vect);
 
@@ -63,6 +63,8 @@ private:
             "SRL16E", "SRLC32E", "STARTUPE2", "USR_ACCESSE2", "XADC"
     };
 };
+
+
 
 
 

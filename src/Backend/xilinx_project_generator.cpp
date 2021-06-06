@@ -8,13 +8,10 @@ xilinx_project_generator::xilinx_project_generator() {
     tpl = env.parse_template(template_file);
     data["base_dir"] = "";
     data["commons_dir"] = "";
-    data["sim_sources"] = {"test", "test2"};
-    data["synth_sources"] = {"test", "test2"};
-    data["constraints_sources"] =  {"test", "test2"};
-    data["scripts"] = {"test", "test2"};
     data["synth_tl"] = "test";
     data["tb_tl"] = "test";
 }
+
 
 
 void xilinx_project_generator::write_makefile(std::ofstream &output) {
@@ -27,13 +24,41 @@ void xilinx_project_generator::set_project_name(const std::string& name) {
 }
 
 void xilinx_project_generator::set_synth_sources(const std::set<std::string>& paths) {
-    data["synth_sources"] = paths;
+    data["synth_sources"] = this->process_sources_set(paths);
 }
 
 void xilinx_project_generator::set_sim_sources(const std::set<std::string>& paths) {
-    data["sim_sources"] = paths;
+    data["sim_sources"] = this->process_sources_set(paths);
 }
 
 void xilinx_project_generator::set_constraint_sources(const std::set<std::string>& paths) {
     data["constraints_sources"] = paths;
+}
+
+void xilinx_project_generator::set_script_sources(const std::set<std::string>& paths) {
+    data["scripts"] = paths;
+}
+
+void xilinx_project_generator::set_synth_tl(const std::string& tl) {
+    data["synth_tl"] = tl;
+}
+
+void xilinx_project_generator::set_sim_tl(const std::string &tl) {
+    data["sim_tl"] = tl;
+}
+
+void xilinx_project_generator::set_directories(const std::string &base, const std::string &commons) {
+    base_dir = base;
+    commons_dir = commons;
+    data["base_dir"] = "set base_dir " + base;
+    data["commons_dir"] = "set commons_dir " + commons;
+}
+
+std::vector<std::string> xilinx_project_generator::process_sources_set(const std::set<std::string>& paths) {
+    std::vector<std::string> srcs;
+    srcs.reserve(paths.size());
+    for(const auto& source :paths){
+        srcs.push_back(std::regex_replace(source, std::regex(base_dir), "$base_dir"));
+    }
+    return srcs;
 }

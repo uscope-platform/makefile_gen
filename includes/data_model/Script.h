@@ -23,6 +23,7 @@ public:
     script_type_t get_type();
     void set_arguments(std::vector<std::string> args);
     void set_path(std::string p);
+    std::string get_path();
     std::vector<std::string> get_arguments();
 private:
     std::string name;

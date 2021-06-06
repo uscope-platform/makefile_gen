@@ -16,6 +16,7 @@
 #include "data_model/Depfile.h"
 #include "Backend/Dependency_resolver.h"
 #include "Backend/xilinx_project_generator.h"
+#include "Backend/Auxiliary_resolver.h"
 
 
 

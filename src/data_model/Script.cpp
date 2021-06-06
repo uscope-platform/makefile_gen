@@ -32,3 +32,7 @@ void Script::set_arguments(std::vector<std::string> args) {
 void Script::set_path(std::string p) {
     path = std::move(p);
 }
+
+std::string Script::get_path() {
+    return path;
+}

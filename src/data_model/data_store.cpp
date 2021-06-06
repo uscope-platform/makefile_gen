@@ -29,7 +29,7 @@ void data_store::store_hdl_entity(const std::vector<std::shared_ptr<HDL_Resource
     }
 }
 
-std::shared_ptr<Script> data_store::get_script(const std::string &name) {
+std::shared_ptr<Script> data_store::get_script(std::string &name) {
     return scripts_cache[name];
 }
 
@@ -43,7 +43,7 @@ void data_store::store_script(const std::vector<std::shared_ptr<Script>> &vect) 
     }
 }
 
-std::shared_ptr<Constraints> data_store::get_constraint(const std::string &name) {
+std::shared_ptr<Constraints> data_store::get_constraint(std::string &name) {
     return constraints_cache[name];
 }
 
@@ -56,8 +56,6 @@ void data_store::store_constraint(const std::vector<std::shared_ptr<Constraints>
         store_constraint(item);
     }
 }
-
-
 
 data_store::~data_store() {
     store_entities_cache();
