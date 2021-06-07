@@ -23,7 +23,7 @@ public:
     xilinx_project_generator();
     void write_makefile(std::ofstream &output);
     void set_project_name(const std::string& name);
-    void set_directories(const std::string& base,const std::string& commons);
+    void set_directories(const std::string& base,const std::vector<std::string>& commons);
     void set_synth_sources(const std::set<std::string>& paths);
     void set_sim_sources(const std::set<std::string>& paths);
     void set_synth_tl(const std::string& tl);
@@ -36,7 +36,6 @@ private:
     inja::Environment env;
     inja::Template tpl;
     std::string base_dir;
-    std::string commons_dir;
     std::string template_file = "/home/fils/git/makefilegen_v2/templates/make_project_xlnx.j2";
     json data;
 };

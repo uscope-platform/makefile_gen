@@ -26,6 +26,7 @@ public:
     std::vector<std::string> get_additional_sim_modules();
     std::vector<std::string> get_excluded_modules();
     std::vector<Constraints> get_constraints();
+    std::vector<std::string> get_include_directories();
     std::vector<Script> get_scripts();
 private:
     json content;

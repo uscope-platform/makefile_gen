@@ -53,3 +53,7 @@ std::vector<Script> Depfile::get_scripts() {
 std::string Depfile::get_project_name() {
     return content["general"]["project_name"];
 }
+
+std::vector<std::string> Depfile::get_include_directories() {
+    return content["general"]["include_paths"];
+}

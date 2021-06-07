@@ -50,11 +50,17 @@ void xilinx_project_generator::set_sim_tl(const std::string &tl) {
     data["tb_tl"] = tl;
 }
 
-void xilinx_project_generator::set_directories(const std::string &base, const std::string &commons) {
+void xilinx_project_generator::set_directories(const std::string &base, const std::vector<std::string> &commons) {
     base_dir = base;
-    commons_dir = commons;
+    std::vector<std::string> include_dirs;
+    include_dirs.reserve(commons.size());
+    
+    for(const auto& item:commons){
+        include_dirs.push_back(base + "/"+item);
+    }
+
     data["base_dir"] = "set base_dir " + base;
-    data["commons_dir"] = "set commons_dir " + commons;
+    data["commons_dir"] = include_dirs;
 }
 
 std::vector<std::string> xilinx_project_generator::process_sources_set(const std::set<std::string>& paths) {
