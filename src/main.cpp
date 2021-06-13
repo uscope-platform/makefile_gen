@@ -48,6 +48,7 @@ int main(int argc, char *argv[]){
     xilinx_project_generator generator;
     generator.set_project_name(dep.get_project_name());
 
+
     generator.set_directories(s_store->get_setting("hdl_store"), dep.get_include_directories());
     generator.set_synth_sources(synth_resolver.get_dependencies());
     generator.set_sim_sources(sim_resolver.get_dependencies());
@@ -57,6 +58,6 @@ int main(int argc, char *argv[]){
     generator.set_synth_tl(dep.get_synth_tl());
     std::ofstream makefile("test_makefile.tcl");
     generator.write_makefile(makefile);
-
+    
     return 0;
 }

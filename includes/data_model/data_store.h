@@ -37,11 +37,19 @@ private:
     void load_entities_cache();
     void store_entities_cache();
 
+    void load_scripts_cache();
+    void store_scripts_cache();
+
+    void load_constraints_cache();
+    void store_constraints_cache();
+
     std::unordered_map<std::string, std::shared_ptr<HDL_Resource>> hdl_resources_cache;
     std::unordered_map<std::string, std::shared_ptr<Script>> scripts_cache;
     std::unordered_map<std::string, std::shared_ptr<Constraints>> constraints_cache;
     std::string  store_path;
     std::string entities_file;
+    std::string scripts_file;
+    std::string constraints_file;
 
     std::set<std::string> xilinx_primitives = {
             "xpm_cdc_array_single", "xpm_cdc_async_rst", "xpm_cdc_gray", "xpm_cdc_handshake", "xpm_cdc_pulse", "xpm_cdc_single",

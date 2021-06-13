@@ -10,10 +10,19 @@ data_store::data_store() {
     std::filesystem::create_directory(store_path);
 
     entities_file = store_path + "/entities";
+    scripts_file = store_path + "/scripts";
+    constraints_file = store_path + "/constraints";
 
     if(std::filesystem::exists(entities_file)){
         load_entities_cache();
     }
+    if(std::filesystem::exists(scripts_file)){
+        load_scripts_cache();
+    }
+    if(std::filesystem::exists(constraints_file)){
+        load_constraints_cache();
+    }
+    int i = 0;
 }
 
 std::shared_ptr<HDL_Resource> data_store::get_HDL_resource(const std::string& name) {
@@ -57,21 +66,26 @@ void data_store::store_constraint(const std::vector<std::shared_ptr<Constraints>
     }
 }
 
+bool data_store::is_primitive(const std::string &name) {
+    return xilinx_primitives.find(name) != xilinx_primitives.end();
+}
+
 data_store::~data_store() {
     store_entities_cache();
+    store_scripts_cache();
+    store_constraints_cache();
 }
 
 void data_store::load_entities_cache() {
-    std::ifstream setting_stream(entities_file);
+    std::ifstream entities(entities_file);
     std::string line;
-    while (std::getline(setting_stream, line)){
+    while (std::getline(entities, line)){
         std::shared_ptr<HDL_Resource> tmp = std::make_shared<HDL_Resource>(line);
         hdl_resources_cache[tmp->getName()]  = tmp;
     }
 }
 
 void data_store::store_entities_cache() {
-
     std::filesystem::remove(entities_file);
     std::ofstream entities_stream(entities_file);
     for (auto  [key, val] : hdl_resources_cache){
@@ -81,6 +95,41 @@ void data_store::store_entities_cache() {
     }
 }
 
-bool data_store::is_primitive(const std::string &name) {
-    return xilinx_primitives.find(name) != xilinx_primitives.end();
+
+void data_store::load_scripts_cache() {
+    std::ifstream scripts_stream(scripts_file);
+    std::string line;
+    while (std::getline(scripts_stream, line)){
+        std::shared_ptr<Script> tmp = std::make_shared<Script>(line);
+        scripts_cache[tmp->get_name()]  = tmp;
+    }
+}
+
+void data_store::store_scripts_cache() {
+    std::filesystem::remove(scripts_file);
+    std::ofstream entities_stream(scripts_file);
+    for (auto  [key, val] : scripts_cache){
+        if(this->is_primitive(key) || val == nullptr) continue;
+        std::string serialized_entity = *val;
+        entities_stream << serialized_entity << std::endl;
+    }
+}
+
+void data_store::load_constraints_cache() {
+    std::ifstream stream(constraints_file);
+    std::string line;
+    while (std::getline(stream, line)){
+        std::shared_ptr<Constraints> tmp = std::make_shared<Constraints>(line, true);
+        constraints_cache[tmp->get_name()] = tmp;
+    }
+}
+
+void data_store::store_constraints_cache() {
+    std::filesystem::remove(constraints_file);
+    std::ofstream entities_stream(constraints_file);
+    for (auto  [key, val] : constraints_cache){
+        if(this->is_primitive(key) || val == nullptr) continue;
+        std::string serialized_entity = *val;
+        entities_stream << serialized_entity << std::endl;
+    }
 }

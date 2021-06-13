@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include "Resource_base.h"
 
@@ -16,15 +17,27 @@
 
 enum script_type_t {tcl_script=SCRIPT_TCL, python_script=SCRIPT_PYTHON, uninit_script=SCRIPT_UNINITIALIZED};
 
+///  Templated function used to convert a resource_type_t enum instance to the underlying integer for string conversion
+/// \return integer feature code
+template <typename script_type_t>
+auto script_to_integer(script_type_t const value)
+-> typename std::underlying_type<script_type_t>::type
+{
+    return static_cast<typename std::underlying_type<script_type_t>::type>(value);
+}
+
 class Script : public Resource_base {
 public:
     Script(std::string n, const std::string& t);
+    explicit Script(const std::string& serialized_script);
     std::string get_name();
     script_type_t get_type();
     void set_arguments(std::vector<std::string> args);
     void set_path(std::string p);
     std::string get_path();
     std::vector<std::string> get_arguments();
+
+    operator std::string();
 private:
     std::string name;
     std::string path;

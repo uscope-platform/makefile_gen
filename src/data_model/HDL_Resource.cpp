@@ -34,10 +34,10 @@ HDL_Resource::HDL_Resource(const std::string& serialized_obj) {
     while(std::getline(ss, tmp, ',')) {
         tokens.push_back(tmp);
     }
-    name = tokens[0];
+    name = std::string(tokens[0]);
     hdl_type = sv_feature(std::stoi(tokens[1]));
     resource_type = resource_type_t(std::stoi(tokens[2]));
-    path = tokens[3];
+    path = std::string(tokens[3]);
     tokens.erase(tokens.begin(), tokens.begin()+4);
     for(int i= 0; i<tokens.size(); i=i+2){
         dependencies[tokens[i]] = sv_feature(std::stoi(tokens[i+1]));

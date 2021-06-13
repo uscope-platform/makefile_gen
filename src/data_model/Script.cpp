@@ -13,6 +13,25 @@ Script::Script(std::string n, const std::string& t) {
     else type = uninit_script;
 }
 
+Script::Script(const std::string& serialized_script) {
+    std::istringstream stream(serialized_script);
+    std::vector<std::string> tokens;
+    std::string tmp;
+    tokens.reserve(3);
+    while(std::getline(stream, tmp, ',')) {
+        tokens.push_back(tmp);
+    }
+    name = std::string(tokens[0]);
+    path = std::string(tokens[1]);
+    type = script_type_t(std::stoi(tokens[2]));
+    tokens.erase(tokens.begin(), tokens.begin()+3);
+    for(auto & token : tokens){
+        arguments.push_back(token);
+    }
+
+}
+
+
 std::string Script::get_name() {
     return name;
 }
@@ -35,4 +54,14 @@ void Script::set_path(std::string p) {
 
 std::string Script::get_path() {
     return path;
+}
+
+Script::operator std::string() {
+    std::ostringstream ret_val;
+    ret_val << name << "," << path << "," << type << ",";
+
+    for(const auto& item:arguments){
+        ret_val << item << ",";
+    }
+    return ret_val.str();
 }
