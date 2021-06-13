@@ -58,6 +58,6 @@ int main(int argc, char *argv[]){
     generator.set_synth_tl(dep.get_synth_tl());
     std::ofstream makefile("test_makefile.tcl");
     generator.write_makefile(makefile);
-    
+
     return 0;
 }

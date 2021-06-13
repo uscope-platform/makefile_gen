@@ -34,6 +34,7 @@ public:
     ~data_store();
 private:
 
+    void clean_up_caches();
     void load_entities_cache();
     void store_entities_cache();
 

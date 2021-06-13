@@ -22,7 +22,7 @@ data_store::data_store() {
     if(std::filesystem::exists(constraints_file)){
         load_constraints_cache();
     }
-    int i = 0;
+    clean_up_caches();
 }
 
 std::shared_ptr<HDL_Resource> data_store::get_HDL_resource(const std::string& name) {
@@ -74,6 +74,7 @@ data_store::~data_store() {
     store_entities_cache();
     store_scripts_cache();
     store_constraints_cache();
+
 }
 
 void data_store::load_entities_cache() {
@@ -132,4 +133,39 @@ void data_store::store_constraints_cache() {
         std::string serialized_entity = *val;
         entities_stream << serialized_entity << std::endl;
     }
+}
+
+void data_store::clean_up_caches() {
+    std::vector<std::string> evicted_items;
+    for (auto  [key, val] : hdl_resources_cache){
+        if(val== nullptr) continue;
+        if(!std::filesystem::exists(val->get_path())){
+            evicted_items.push_back(key);
+        }
+    }
+    for (const auto &item : evicted_items){
+        hdl_resources_cache.erase(item);
+    }
+    evicted_items.clear();
+
+    for (auto  [key, val] : scripts_cache){
+        if(!std::filesystem::exists(val->get_path())){
+            evicted_items.push_back(key);
+        }
+    }
+    for (const auto &item : evicted_items){
+        scripts_cache.erase(item);
+    }
+    evicted_items.clear();
+
+
+    for (auto  [key, val] : constraints_cache){
+        if(!std::filesystem::exists(val->get_path())){
+            evicted_items.push_back(key);
+        }
+    }
+    for (const auto &item : evicted_items){
+        constraints_cache.erase(item);
+    }
+    evicted_items.clear();
 }
