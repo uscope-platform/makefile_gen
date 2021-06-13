@@ -3,13 +3,11 @@
 //
 
 
-#include "Repository_walker.h"
+#include "frontend/Repository_walker.h"
 
 
-
-
-
-Repository_walker::Repository_walker(std::shared_ptr<settings_store> s, std::shared_ptr<data_store> d) : pool(max_threads){
+Repository_walker::Repository_walker(std::shared_ptr<settings_store> s, std::shared_ptr<data_store> d) : pool(max_threads),
+                                                                                                         cache_mgr(s){
     s_store = std::move(s);
     d_store = std::move(d);
     target_repository = s_store->get_setting("hdl_store");
@@ -113,19 +111,28 @@ void Repository_walker::read_ignore_file(const std::filesystem::path &file) {
 ///
 /// This method is a simple dispatcher that based on the file type calls the appropriate analysis method.
 void Repository_walker::analyze_file(std::filesystem::path &file) {
-    if(file_is_verilog(file)){
-        hdl_futures.push_back(pool.submit(analyze_verilog, file));
-        working_threads++;
-    } else if(file_is_script(file)){
-        scripts_futures.push_back(pool.submit(analyze_script, file));
-        working_threads++;
-    } else if(file_is_vhdl(file)){
-        hdl_futures.push_back(pool.submit(analyze_vhdl, file));
-        working_threads++;
-    } else if(file_is_constraint(file)){
-        constraints_futures.push_back(pool.submit(analyze_constraint, file));
-        working_threads++;
+    if(!(file_is_verilog(file) || file_is_vhdl(file) || file_is_constraint(file)|| file_is_script(file))) return;
+
+    bool updated_file = true;
+
+    if(cache_mgr.is_cached(file)) updated_file = cache_mgr.is_changed(file);
+    if(updated_file) {
+        cache_mgr.add_file(file);
+        if(file_is_verilog(file)){
+            hdl_futures.push_back(pool.submit(analyze_verilog, file));
+            working_threads++;
+        } else if(file_is_script(file)){
+            scripts_futures.push_back(pool.submit(analyze_script, file));
+            working_threads++;
+        } else if(file_is_vhdl(file)){
+            hdl_futures.push_back(pool.submit(analyze_vhdl, file));
+            working_threads++;
+        } else if(file_is_constraint(file)){
+            constraints_futures.push_back(pool.submit(analyze_constraint, file));
+            working_threads++;
+        }
     }
+
 }
 
 /// Check if the target file appertains to the verilog language family

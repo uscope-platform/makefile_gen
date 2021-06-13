@@ -54,7 +54,7 @@ void xilinx_project_generator::set_directories(const std::string &base, const st
     base_dir = base;
     std::vector<std::string> include_dirs;
     include_dirs.reserve(commons.size());
-    
+
     for(const auto& item:commons){
         include_dirs.push_back(base + "/"+item);
     }

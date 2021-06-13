@@ -14,6 +14,7 @@
 #include <regex>
 #include <utility>
 
+#include <frontend/cache_manager.h>
 #include "data_model/settings_store.h"
 #include "data_model/Script.h"
 #include "data_model/Constraints.h"
@@ -21,6 +22,7 @@
 #include "analysis/sv_analyzer.h"
 #include "analysis/vhdl_analyzer.h"
 #include "third_party/thread_pool.hpp"
+
 
 static std::vector<std::shared_ptr<HDL_Resource>> analyze_verilog(const std::filesystem::path &file);
 static std::vector<std::shared_ptr<HDL_Resource>> analyze_vhdl(const std::filesystem::path &file);
@@ -64,6 +66,7 @@ private:
 
     thread_pool pool;
     int working_threads = 0;
+    cache_manager cache_mgr;
 
 };
 
