@@ -7,7 +7,7 @@
 
 
 Repository_walker::Repository_walker(std::shared_ptr<settings_store> s, std::shared_ptr<data_store> d) : pool(max_threads),
-                                                                                                         cache_mgr(s){
+                                                                                                         cache_mgr(s, d){
     s_store = std::move(s);
     d_store = std::move(d);
     target_repository = s_store->get_setting("hdl_store");

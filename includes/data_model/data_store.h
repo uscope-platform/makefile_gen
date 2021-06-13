@@ -30,6 +30,7 @@ public:
     void store_constraint(const std::shared_ptr<Constraints>& entity);
     void store_constraint(const std::vector<std::shared_ptr<Constraints>> & vect);
 
+    void remove_stale_info(const std::filesystem::path& p);
     bool is_primitive(const std::string &name);
     ~data_store();
 private:

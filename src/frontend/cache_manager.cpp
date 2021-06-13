@@ -4,18 +4,23 @@
 
 #include "frontend/cache_manager.h"
 
-cache_manager::cache_manager(std::shared_ptr<settings_store> settings) {
-    store = std::move(settings);
+cache_manager::cache_manager(std::shared_ptr<settings_store> settings, std::shared_ptr<data_store> data) {
+    s_store = std::move(settings);
+    d_store = std::move(data);
     load_cache_backend();
 }
 
 void cache_manager::add_file(std::filesystem::path &file) {
+    d_store->remove_stale_info(file);
     cache[file.string()] = hash_file(file);
 }
 
 bool cache_manager::is_changed(std::filesystem::path &file) {
+    bool ret_val;
     std::string current_digest = hash_file(file);
-    return current_digest != cache[file.string()];
+    ret_val = current_digest != cache[file.string()];
+
+    return ret_val;
 }
 
 std::string cache_manager::hash_file(std::filesystem::path &file) {
@@ -48,7 +53,7 @@ bool cache_manager::is_cached(std::filesystem::path &file) {
 }
 
 void cache_manager::load_cache_backend() {
-    std::istringstream cache_stream(store->get_setting("cache_dump"));
+    std::istringstream cache_stream(s_store->get_setting("cache_dump"));
 
     std::string cache_line;
     while (std::getline(cache_stream, cache_line,';')){
@@ -67,7 +72,7 @@ void cache_manager::store_cache_backend() {
     for(const auto& item: cache){
         cache_str << item.first << ">" << item.second << ";";
     }
-    store->set_setting("cache_dump", cache_str.str());
+    s_store->set_setting("cache_dump", cache_str.str());
 }
 
 cache_manager::~cache_manager() {

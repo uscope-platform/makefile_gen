@@ -32,6 +32,7 @@ std::shared_ptr<HDL_Resource> data_store::get_HDL_resource(const std::string& na
 void data_store::store_hdl_entity(const std::shared_ptr<HDL_Resource>& entity) {
     hdl_resources_cache[entity->getName()] = entity;
 }
+
 void data_store::store_hdl_entity(const std::vector<std::shared_ptr<HDL_Resource>>& vect) {
     for(auto &item: vect){
         store_hdl_entity(item);
@@ -167,5 +168,40 @@ void data_store::clean_up_caches() {
     for (const auto &item : evicted_items){
         constraints_cache.erase(item);
     }
-    evicted_items.clear();
 }
+
+void data_store::remove_stale_info(const std::filesystem::path& p) {
+    std::vector<std::string> evicted_items;
+
+    for (auto  [key, val] : hdl_resources_cache){
+        if(val== nullptr) continue;
+        if(val->get_path()==p.string()){
+            evicted_items.push_back(key);
+        }
+    }
+    for (const auto &item : evicted_items){
+        hdl_resources_cache.erase(item);
+    }
+    evicted_items.clear();
+
+    for (auto  [key, val] : scripts_cache){
+        if(val->get_path()==p.string()){
+            evicted_items.push_back(key);
+        }
+    }
+    for (const auto &item : evicted_items){
+        scripts_cache.erase(item);
+    }
+    evicted_items.clear();
+
+    for (auto  [key, val] : constraints_cache){
+        if(val->get_path()==p.string()){
+            evicted_items.push_back(key);
+        }
+    }
+    for (const auto &item : evicted_items){
+        constraints_cache.erase(item);
+    }
+
+}
+
