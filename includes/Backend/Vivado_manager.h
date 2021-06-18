@@ -14,6 +14,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <filesystem>
+#include <spawn.h>
+#include <utility>
 
 #include "data_model/settings_store.h"
 
@@ -24,6 +26,8 @@ public:
 
 private:
     static std::vector<const char *> str_vect_to_char_p(const std::vector<std::string>& vect);
+    static void spawn_process(const std::vector<std::string>&arg_v, bool daemonize, bool block);
+
     bool delete_makefile;
     std::string project_name;
     std::shared_ptr<settings_store> s_store;
