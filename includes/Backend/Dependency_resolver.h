@@ -17,8 +17,9 @@ public:
     Dependency_resolver(std::string tl, std::shared_ptr<data_store> store);
     std::set<std::string> get_dependencies();
     void set_excluded_modules(std::vector<std::string> exclusion_list);
+    void add_explicit_dependencies(const std::vector<std::string>& dep_list);
 
-
+private:
     std::vector<std::shared_ptr<HDL_Resource>> dependencies;
     void resolve_dependencies(const std::string& module_name);
 

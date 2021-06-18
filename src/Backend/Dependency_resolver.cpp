@@ -9,6 +9,7 @@ Dependency_resolver::Dependency_resolver(std::string tl, std::shared_ptr<data_st
     d_store = std::move(store);
 }
 
+
 std::set<std::string> Dependency_resolver::get_dependencies() {
     resolve_dependencies(top_level);
     dependencies.push_back(d_store->get_HDL_resource(top_level));
@@ -43,4 +44,11 @@ void Dependency_resolver::resolve_dependencies(const std::string& module_name) {
 
 void Dependency_resolver::set_excluded_modules(std::vector<std::string> exclusion_list) {
     excluded_modules = std::move(exclusion_list);
+}
+
+void Dependency_resolver::add_explicit_dependencies(const std::vector<std::string>& dep_list) {
+    for(const auto& item: dep_list){
+        dependencies.push_back(d_store->get_HDL_resource(item));
+        resolve_dependencies(item);
+    }
 }
