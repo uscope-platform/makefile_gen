@@ -15,7 +15,8 @@ set(MAKEFILE_GEN_SRCS /
         Backend/Dependency_resolver.cpp /
         Backend/xilinx_project_generator.cpp /
         Backend/Auxiliary_resolver.cpp /
-        frontend/cache_manager.cpp )
+        frontend/cache_manager.cpp /
+        Backend/Vivado_manager.cpp )
 
 set(MAKEFILE_GEN_INCL /
         ../includes/main.hpp /
@@ -36,7 +37,8 @@ set(MAKEFILE_GEN_INCL /
         ../includes/Backend/Dependency_resolver.h /
         ../includes/Backend/xilinx_project_generator.h /
         ../includes/Backend/Auxiliary_resolver.h /
-        ../includes/frontend/cache_manager.h)
+        ../includes/frontend/cache_manager.h /
+        ../includes/Backend/Vivado_manager.h)
 
 
 add_executable(makefile_gen ${MAKEFILE_GEN_SRCS} ${MAKEFILE_GEN_INCL})

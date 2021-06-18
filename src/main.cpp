@@ -18,7 +18,7 @@ int main(int argc, char *argv[]){
     bool synth_design;
     app.add_flag("--S", synth_design,"synthetize design");
     bool keep_makefile;
-    app.add_flag("--d", keep_makefile, "if set to true does not remove the makefile after use");
+    app.add_flag("--k", keep_makefile, "if set to true does not remove the makefile after use");
     bool reindex;
     app.add_flag("--re-map", "reindex HDL repository");
 
@@ -62,6 +62,8 @@ int main(int argc, char *argv[]){
     std::ofstream makefile("makefile.tcl");
     generator.write_makefile(makefile);
 
+    Vivado_manager manager(s_store, !keep_makefile, dep.get_project_name());
+    manager.create_project("makefile.tcl", true);
 
     return 0;
 }
