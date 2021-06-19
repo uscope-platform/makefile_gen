@@ -16,7 +16,8 @@ set(MAKEFILE_GEN_SRCS /
         Backend/xilinx_project_generator.cpp /
         Backend/Auxiliary_resolver.cpp /
         frontend/cache_manager.cpp /
-        Backend/Vivado_manager.cpp )
+        Backend/Vivado_manager.cpp /
+        Backend/lattice_project_generator.cpp)
 
 set(MAKEFILE_GEN_INCL /
         ../includes/main.hpp /
@@ -31,7 +32,6 @@ set(MAKEFILE_GEN_INCL /
         ../includes/analysis/vhdl_analyzer.h /
         ../includes/analysis/vhdl_visitor.h /
         ../includes/data_model/Depfile.h /
-
         ../includes/data_model/Script.h /
         ../includes/data_model/Resource_base.h /
         ../includes/data_model/Constraints.h /
@@ -39,7 +39,8 @@ set(MAKEFILE_GEN_INCL /
         ../includes/Backend/xilinx_project_generator.h /
         ../includes/Backend/Auxiliary_resolver.h /
         ../includes/frontend/cache_manager.h /
-        ../includes/Backend/Vivado_manager.h)
+        ../includes/Backend/Vivado_manager.h /
+        ../includes/Backend/lattice_project_generator.h)
 
 set(TEMPLATE_FILES /
         ../templates/make_project_xlnx.j2 /

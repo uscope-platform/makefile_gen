@@ -18,6 +18,7 @@
 #include "Backend/xilinx_project_generator.h"
 #include "Backend/Auxiliary_resolver.h"
 #include "Backend/Vivado_manager.h"
+#include "Backend/lattice_project_generator.h"
 
 
 #endif //MAKEFILEGEN_V2_MAIN_HPP
