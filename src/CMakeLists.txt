@@ -31,6 +31,7 @@ set(MAKEFILE_GEN_INCL /
         ../includes/analysis/vhdl_analyzer.h /
         ../includes/analysis/vhdl_visitor.h /
         ../includes/data_model/Depfile.h /
+
         ../includes/data_model/Script.h /
         ../includes/data_model/Resource_base.h /
         ../includes/data_model/Constraints.h /
@@ -40,10 +41,42 @@ set(MAKEFILE_GEN_INCL /
         ../includes/frontend/cache_manager.h /
         ../includes/Backend/Vivado_manager.h)
 
+set(TEMPLATE_FILES /
+        ../templates/make_project_xlnx.j2 /
+        ../templates/make_project_lscc.j2 /
+        ../templates/make_bitstream_xlnx.j2)
+
 
 add_executable(makefile_gen ${MAKEFILE_GEN_SRCS} ${MAKEFILE_GEN_INCL})
 
-target_link_libraries(makefile_gen mgp_sv_lib)
-target_link_libraries(makefile_gen mgp_vh_lib)
-target_link_libraries(makefile_gen pthread)
-target_link_libraries(makefile_gen crypto)
+target_link_libraries(makefile_gen PRIVATE mgp_sv_lib)
+target_link_libraries(makefile_gen PRIVATE mgp_vh_lib)
+
+target_link_libraries(makefile_gen PRIVATE Threads::Threads)
+target_link_libraries(makefile_gen PRIVATE OpenSSL::SSL)
+
+set_property(TARGET makefile_gen PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
+
+install(TARGETS makefile_gen DESTINATION /usr/local/bin)
+install(DIRECTORY ../templates/ DESTINATION /usr/local/etc/makefile_gen)
+
+
+SET(CPACK_PACKAGE_DESCRIPTION "makefile_gen FPGA tool")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Simple build system and project generator for FPGA")
+SET(CPACK_PACKAGE_VENDOR "filippo savi")
+SET(CPACK_PACKAGE_CONTACT "filippo.savi@unimore.it")
+SET(CPACK_PACKAGE_VERSION_MAJOR "1")
+SET(CPACK_PACKAGE_VERSION_MINOR "0")
+SET(CPACK_PACKAGE_VERSION_PATCH "0")
+SET(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${MAJOR_VERSION}.${MINOR_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}")
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${MAJOR_VERSION}.${MINOR_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}")
+
+
+#dependencies for this service menu
+SET(CPACK_DEBIAN_PACKAGE_DEPENDS " libssl-dev , libantlr4-runtime-dev ")
+
+SET(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+
+
+set(CPACK_PACKAGE_EXECUTABLES makefile_gen)
+INCLUDE(CPack)

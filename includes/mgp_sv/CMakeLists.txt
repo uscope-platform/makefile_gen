@@ -15,6 +15,9 @@ set(MGP_SV_PARSER_LIB_INCL /
         sv2017Visitor.h )
 
 add_library(mgp_sv_lib STATIC ${MGP_SV_PARSER_LIB_SRCS} ${MGP_SV_PARSER_LIB_INCL})
+
+set_property(TARGET mgp_sv_lib PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
+
 target_link_libraries(mgp_sv_lib antlr4-runtime)
 set_property(TARGET mgp_sv_lib PROPERTY POSITION_INDEPENDENT_CODE 1)
 
