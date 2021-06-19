@@ -19,8 +19,7 @@ int main(int argc, char *argv[]){
     app.add_flag("--S", synth_design,"synthetize design");
     bool keep_makefile;
     app.add_flag("--k", keep_makefile, "if set to true does not remove the makefile after use");
-    bool reindex;
-    app.add_flag("--re-map", "reindex HDL repository");
+
 
     CLI11_PARSE(app, argc, argv);
 
@@ -48,22 +47,24 @@ int main(int argc, char *argv[]){
     Auxiliary_resolver aux_resolver(d_store);
 
     //Generate makefile
-    xilinx_project_generator generator;
-    generator.set_project_name(dep.get_project_name());
+    if(generate_xilinx){
+        xilinx_project_generator generator;
+        generator.set_project_name(dep.get_project_name());
 
 
-    generator.set_directories(s_store->get_setting("hdl_store"), dep.get_include_directories());
-    generator.set_synth_sources(synth_resolver.get_dependencies());
-    generator.set_sim_sources(sim_resolver.get_dependencies());
-    generator.set_script_sources(aux_resolver.get_tcl_scripts(dep.get_scripts()));
-    generator.set_constraint_sources(aux_resolver.get_constraints(dep.get_constraints()));
-    generator.set_sim_tl(dep.get_sim_tl());
-    generator.set_synth_tl(dep.get_synth_tl());
-    std::ofstream makefile("makefile.tcl");
-    generator.write_makefile(makefile);
+        generator.set_directories(s_store->get_setting("hdl_store"), dep.get_include_directories());
+        generator.set_synth_sources(synth_resolver.get_dependencies());
+        generator.set_sim_sources(sim_resolver.get_dependencies());
+        generator.set_script_sources(aux_resolver.get_tcl_scripts(dep.get_scripts()));
+        generator.set_constraint_sources(aux_resolver.get_constraints(dep.get_constraints()));
+        generator.set_sim_tl(dep.get_sim_tl());
+        generator.set_synth_tl(dep.get_synth_tl());
+        std::ofstream makefile("makefile.tcl");
+        generator.write_makefile(makefile);
 
-    Vivado_manager manager(s_store, !keep_makefile, dep.get_project_name());
-    manager.create_project("makefile.tcl", true);
+        Vivado_manager manager(s_store, !keep_makefile, dep.get_project_name());
+        manager.create_project("makefile.tcl", true);
+    }
 
     return 0;
 }
