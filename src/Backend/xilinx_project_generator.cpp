@@ -5,6 +5,8 @@
 #include "Backend/xilinx_project_generator.h"
 
 xilinx_project_generator::xilinx_project_generator() {
+    std::string templates_dir = TEMPLATES_FOLDER;
+    template_file = templates_dir + "/make_project_xlnx.j2";
     tpl = env.parse_template(template_file);
 }
 

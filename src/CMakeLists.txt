@@ -49,21 +49,32 @@ set(TEMPLATE_FILES /
 
 add_executable(makefile_gen ${MAKEFILE_GEN_SRCS} ${MAKEFILE_GEN_INCL})
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DTEMPLATES_FOLDER="${CMAKE_SOURCE_DIR}/templates")
+else()
+    add_definitions(-DTEMPLATES_FOLDER="/usr/local/etc/makefile_gen")
+    set_property(TARGET makefile_gen PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
+endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+
 target_link_libraries(makefile_gen PRIVATE mgp_sv_lib)
 target_link_libraries(makefile_gen PRIVATE mgp_vh_lib)
 
 target_link_libraries(makefile_gen PRIVATE Threads::Threads)
 target_link_libraries(makefile_gen PRIVATE OpenSSL::SSL)
 
-set_property(TARGET makefile_gen PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
+
+
+
+## INSTALLATION SECTION
 
 install(TARGETS makefile_gen DESTINATION /usr/local/bin)
 install(DIRECTORY ../templates/ DESTINATION /usr/local/etc/makefile_gen)
 
+## PACKAGING SECTION
+
 SET(MAJOR_VERSION "1")
 SET(MINOR_VERSION "0")
 SET(PATCH_VERSION "0")
-
 
 SET(CPACK_PACKAGE_DESCRIPTION "makefile_gen FPGA tool")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Simple build system and project generator for FPGA")

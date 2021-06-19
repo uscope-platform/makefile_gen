@@ -36,7 +36,7 @@ private:
     inja::Environment env;
     inja::Template tpl;
     std::string base_dir;
-    std::string template_file = "/home/fils/git/makefilegen_v2/templates/make_project_xlnx.j2";
+    std::string template_file;
     json data;
 };
 
