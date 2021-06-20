@@ -71,3 +71,18 @@ bool HDL_Resource::is_interface() {
 std::string HDL_Resource::get_path() {
     return path;
 }
+
+bool operator==(const HDL_Resource &lhs, const HDL_Resource &rhs) {
+    std::string name;
+    std::string path;
+    resource_type_t resource_type;
+    sv_feature hdl_type;
+    hdl_deps_t dependencies;
+
+    bool factor_1 = lhs.name == rhs.name;
+    bool factor_2 = lhs.path == rhs.path;
+    bool factor_3 = lhs.resource_type == rhs.resource_type;
+    bool factor_4 = lhs.hdl_type == rhs.hdl_type;
+    bool factor_5 = lhs.dependencies == rhs.dependencies;
+    return factor_1 && factor_2 && factor_3 && factor_4 && factor_5;
+}

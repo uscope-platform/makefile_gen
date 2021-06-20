@@ -10,7 +10,6 @@
 #include <sstream>
 #include <utility>
 
-#include "Resource_base.h"
 
 #define SCRIPT_TCL 0
 #define SCRIPT_PYTHON 1
@@ -27,7 +26,7 @@ auto script_to_integer(script_type_t const value)
     return static_cast<typename std::underlying_type<script_type_t>::type>(value);
 }
 
-class Script : public Resource_base {
+class Script {
 public:
     Script(std::string n, const std::string& t);
     explicit Script(const std::string& serialized_script);

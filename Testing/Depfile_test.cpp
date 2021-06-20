@@ -5,9 +5,10 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "../includes/data_model/Depfile.h"
 #include "../includes/data_model/Constraints.h"
 #include "../includes/data_model/Script.h"
+#include "../includes/data_model/Depfile.h"
+
 
 class DepfileTest : public ::testing::Test {
 protected:

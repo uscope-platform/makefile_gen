@@ -1,11 +1,15 @@
 set(MAKEFILEGEN_TESTS /
-        Depfile_test.cpp
-        test_main.cpp)
+        test_main.cpp /
+        Depfile_test.cpp /
+        Script_test.cpp /
+        Constraints_test.cpp /
+        hdl_resource_testing.cpp )
 
 set(TESTED_SOURCES /
-        ../src/data_model/Depfile.cpp ../includes/data_model/Depfile.h#
-        ../src/data_model/Constraints.cpp ../includes/data_model/Constraints.h
-        ../src/data_model/Script.cpp ../includes/data_model/Script.h
+        ../src/data_model/Depfile.cpp ../includes/data_model/Depfile.h   /
+        ../src/data_model/Constraints.cpp ../includes/data_model/Constraints.h /
+        ../src/data_model/Script.cpp ../includes/data_model/Script.h /
+        ../src/data_model/HDL_Resource.cpp ../includes/data_model/HDL_Resource.h
         )
 
 add_executable(tests ${MAKEFILEGEN_TESTS} ${TESTED_SOURCES})

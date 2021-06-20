@@ -11,7 +11,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Resource_base.h"
 
 #define SV_FEATURE_MODULE 0
 #define SV_FEATURE_INTERFACE 1
@@ -53,7 +52,7 @@ typedef std::unordered_map<std::string,sv_feature> hdl_deps_t;
 
 typedef std::pair<std::string, sv_feature> hdl_declaration_t;
 
-class HDL_Resource :public Resource_base{
+class HDL_Resource {
 public:
     HDL_Resource();
     HDL_Resource(sv_feature type, std::string n, std::string p, hdl_deps_t deps, resource_type_t r_type);
@@ -63,10 +62,8 @@ public:
     std::string get_path();
     bool is_interface();
 
-
-
     operator std::string();
-
+    friend bool operator==(const HDL_Resource&lhs, const HDL_Resource&rhs);
 private:
     std::string name;
     std::string path;

@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "data_model/HDL_Resource.h"
-#include "data_model/Resource_base.h"
 
 #include "mgp_sv/sv2017Lexer.h"
 #include "mgp_sv/sv2017.h"

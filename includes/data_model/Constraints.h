@@ -10,9 +10,8 @@
 #include <utility>
 #include <sstream>
 
-#include "Resource_base.h"
 
-class Constraints :public Resource_base {
+class Constraints {
 public:
     explicit Constraints(std::string n);
     Constraints(const std::string& serialized_constraints, bool serialized);

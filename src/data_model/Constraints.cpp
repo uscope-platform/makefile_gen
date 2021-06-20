@@ -11,6 +11,7 @@
 Constraints::Constraints(std::string n) {
     name = std::move(n);
 }
+
 Constraints::Constraints(const std::string &serialized_constraints, bool serialized) {
     std::istringstream stream(serialized_constraints);
     std::vector<std::string> tokens;
