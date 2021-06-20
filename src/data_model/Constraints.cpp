@@ -41,3 +41,7 @@ Constraints::operator std::string() {
     ret_val << name << "," << path;
     return ret_val.str();
 }
+
+bool operator==(const Constraints &lhs, const Constraints &rhs) {
+    return lhs.name == rhs.name && lhs.path == rhs.path;
+}

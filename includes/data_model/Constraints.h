@@ -22,6 +22,8 @@ public:
     std::string get_path();
 
     operator std::string();
+    friend bool operator==(const Constraints&lhs, const Constraints&rhs);
+
 private:
     std::string name;
     std::string path;

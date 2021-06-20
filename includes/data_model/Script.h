@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <utility>
 
 #include "Resource_base.h"
 
@@ -38,6 +39,7 @@ public:
     std::vector<std::string> get_arguments();
 
     operator std::string();
+    friend bool operator==(const Script&lhs, const Script&rhs);
 private:
     std::string name;
     std::string path;

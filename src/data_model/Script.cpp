@@ -4,7 +4,7 @@
 
 #include "data_model/Script.h"
 
-#include <utility>
+
 
 Script::Script(std::string n, const std::string& t) {
     name = std::move(n);
@@ -64,4 +64,14 @@ Script::operator std::string() {
         ret_val << item << ",";
     }
     return ret_val.str();
+}
+
+bool operator==(const Script &lhs, const Script &rhs) {
+
+    bool cond_1 = lhs.name == rhs.name;
+    bool cond_2 = lhs.path == rhs.path;
+    bool cond_3 = lhs.type == rhs.type;
+    bool cond_4 = lhs.arguments == rhs.arguments;
+
+    return cond_1 && cond_2 && cond_3 && cond_4;
 }
