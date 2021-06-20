@@ -63,7 +63,7 @@ int main(int argc, char *argv[]){
         generator.write_makefile(makefile);
 
         Vivado_manager manager(s_store, !keep_makefile, dep.get_project_name());
-        manager.create_project("makefile.tcl", true);
+        manager.create_project("makefile.tcl",  true);
     }
 
     if(generate_lattice){
@@ -80,6 +80,9 @@ int main(int argc, char *argv[]){
         generator.set_synth_tl(dep.get_synth_tl());
         std::ofstream makefile("makefile.tcl");
         generator.write_makefile(makefile);
+
+        Radiant_manager manager(s_store, !keep_makefile, dep.get_project_name());
+        manager.create_project("makefile.tcl",  true);
     }
 
     return 0;

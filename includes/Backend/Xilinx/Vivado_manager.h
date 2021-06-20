@@ -18,19 +18,13 @@
 #include <utility>
 
 #include "data_model/settings_store.h"
+#include "../Toolchain_manager.h"
 
-class Vivado_manager {
+class Vivado_manager :public Toolchain_manager {
 public:
     Vivado_manager(std::shared_ptr<settings_store> s, bool del_mkfile, std::string name);
-    void create_project(const std::string& makefile, bool start_gui);
+    void create_project(const std::string& makefile, bool start_gui) override;
 
-private:
-    static std::vector<const char *> str_vect_to_char_p(const std::vector<std::string>& vect);
-    static void spawn_process(const std::vector<std::string>&arg_v, bool daemonize, bool block);
-
-    bool delete_makefile;
-    std::string project_name;
-    std::shared_ptr<settings_store> s_store;
     std::string vivado_path;
 };
 

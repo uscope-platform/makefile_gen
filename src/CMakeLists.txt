@@ -16,7 +16,9 @@ set(MAKEFILE_GEN_SRCS /
         Backend/Xilinx/Vivado_manager.cpp /
         Backend/Auxiliary_resolver.cpp /
         frontend/cache_manager.cpp /
-        Backend/project_generator_base.cpp )
+        Backend/project_generator_base.cpp /
+        Backend/Lattice/Radiant_manager.cpp /
+        Backend/Toolchain_manager.cpp )
 
 set(MAKEFILE_GEN_INCL /
         ../includes/main.hpp /
@@ -40,7 +42,9 @@ set(MAKEFILE_GEN_INCL /
         ../includes/Backend/Auxiliary_resolver.h /
         ../includes/frontend/cache_manager.h /      
         ../includes/Backend/Lattice/lattice_project_generator.h /
-        ../includes/Backend/project_generator_base.h)
+        ../includes/Backend/project_generator_base.h /
+        ../includes/Backend/Lattice/Radiant_manager.h /
+        ../includes/Backend/Toolchain_manager.h)
 
 set(TEMPLATE_FILES /
         ../templates/make_project_xlnx.j2 /

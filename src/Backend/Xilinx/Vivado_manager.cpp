@@ -5,13 +5,9 @@
 
 #include "Backend/Xilinx/Vivado_manager.h"
 
+#include <utility>
 
-
-
-Vivado_manager::Vivado_manager(std::shared_ptr<settings_store> s, bool del_mkfile, std::string name) {
-    delete_makefile = del_mkfile;
-    project_name = std::move(name);
-    s_store = std::move(s);
+Vivado_manager::Vivado_manager(std::shared_ptr<settings_store> s, bool del_mkfile, std::string name) : Toolchain_manager(std::move(s), del_mkfile, std::move(name)){
     vivado_path = "";
     vivado_path = s_store->get_setting("vivado_path");
     if(vivado_path.empty()){
@@ -48,26 +44,3 @@ void Vivado_manager::create_project(const std::string& makefile, bool start_gui)
         spawn_process(arg_v, true, false);
     }
 }
-
-std::vector<const char *> Vivado_manager::str_vect_to_char_p(const std::vector<std::string>& vect) {
-    std::vector<const char *> args;
-    args.reserve(vect.size() + 1);
-    for( const auto& sp: vect) {
-        args.push_back(sp.c_str());
-    }
-    args.push_back(nullptr);  // needed to terminate the args list
-
-    return args;
-}
-
-void Vivado_manager::spawn_process(const std::vector<std::string>&arg_v, bool daemonize, bool block) {
-    int pid = fork();
-    if(pid== 0){
-        std::vector<const char *> args = str_vect_to_char_p(arg_v);
-        if(daemonize) setsid();
-        execvp(args[0], const_cast<char *const *>(args.data()));
-
-    }
-    if(block) wait(nullptr);
-}
-
