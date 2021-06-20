@@ -1,26 +1,26 @@
 //
-// Created by fils on 19/06/2021.
+// Created by fils on 20/06/2021.
 //
 
-#ifndef MAKEFILEGEN_V2_LATTICE_PROJECT_GENERATOR_H
-#define MAKEFILEGEN_V2_LATTICE_PROJECT_GENERATOR_H
+#ifndef MAKEFILEGEN_V2_PROJECT_GENERATOR_BASE_H
+#define MAKEFILEGEN_V2_PROJECT_GENERATOR_BASE_H
 
-#include <ios>
+
+#include <string>
+#include <vector>
 #include <set>
-#include <iostream>
-#include <fstream>
+#include <utility>
 #include <regex>
-
-#include "data_model/Depfile.h"
 
 #include "third_party/inja.hpp"
 #include "third_party/json.hpp"
 
 using json = nlohmann::json;
 
-class lattice_project_generator {
+
+class project_generator_base {
 public:
-    lattice_project_generator();
+    explicit project_generator_base(const std::string& template_f);
     void write_makefile(std::ofstream &output);
     void set_project_name(const std::string& name);
     void set_directories(const std::string& base,const std::vector<std::string>& commons);
@@ -31,8 +31,9 @@ public:
     void set_constraint_sources(const std::set<std::string>& paths);
     void set_script_sources(const std::set<std::string>& paths);
 
-private:
+protected:
     std::vector<std::string> process_sources_set(const std::set<std::string>& paths);
+private:
     inja::Environment env;
     inja::Template tpl;
     std::string base_dir;
@@ -40,4 +41,5 @@ private:
     json data;
 };
 
-#endif //MAKEFILEGEN_V2_LATTICE_PROJECT_GENERATOR_H
+
+#endif //MAKEFILEGEN_V2_PROJECT_GENERATOR_BASE_H

@@ -1,26 +1,25 @@
 //
-// Created by fils on 19/06/2021.
+// Created by fils on 20/06/2021.
 //
 
-#include "../includes/Backend/lattice_project_generator.h"
+#include "../includes/Backend/project_generator_base.h"
 
-
-lattice_project_generator::lattice_project_generator() {
+project_generator_base::project_generator_base(const std::string& template_f) {
     std::string templates_dir = TEMPLATES_FOLDER;
-    template_file = templates_dir + "/make_project_lscc.j2";
+    template_file = templates_dir + "/" + template_f;
     tpl = env.parse_template(template_file);
 }
 
-void lattice_project_generator::set_project_name(const std::string &name) {
-    data["name"] = name;
-}
-
-void lattice_project_generator::write_makefile(std::ofstream &output) {
+void project_generator_base::write_makefile(std::ofstream &output) {
     std::string result = env.render(tpl, data);
     output<<result;
 }
 
-void lattice_project_generator::set_directories(const std::string &base, const std::vector<std::string> &commons) {
+void project_generator_base::set_project_name(const std::string &name) {
+    data["name"] = name;
+}
+
+void project_generator_base::set_directories(const std::string &base, const std::vector<std::string> &commons) {
     base_dir = base;
     std::vector<std::string> include_dirs;
     include_dirs.reserve(commons.size());
@@ -33,11 +32,11 @@ void lattice_project_generator::set_directories(const std::string &base, const s
     data["commons_dir"] = include_dirs;
 }
 
-void lattice_project_generator::set_synth_sources(const std::set<std::string> &paths) {
+void project_generator_base::set_synth_sources(const std::set<std::string> &paths) {
     data["synth_sources"] = this->process_sources_set(paths);
 }
 
-void lattice_project_generator::set_sim_sources(const std::set<std::string> &paths) {
+void project_generator_base::set_sim_sources(const std::set<std::string> &paths) {
     std::vector<std::string> synth_sources = data["synth_sources"];
     std::vector<std::string> raw_sim_sources = this->process_sources_set(paths);
     std::vector<std::string> diff;
@@ -48,27 +47,27 @@ void lattice_project_generator::set_sim_sources(const std::set<std::string> &pat
     data["sim_sources"] = diff;
 }
 
-void lattice_project_generator::set_synth_tl(const std::string &tl) {
+void project_generator_base::set_synth_tl(const std::string &tl) {
     data["synth_tl"] = tl;
 }
 
-void lattice_project_generator::set_sim_tl(const std::string &tl) {
+void project_generator_base::set_sim_tl(const std::string &tl) {
     data["tb_tl"] = tl;
 }
 
-std::vector<std::string> lattice_project_generator::process_sources_set(const std::set<std::string> &paths) {
+void project_generator_base::set_constraint_sources(const std::set<std::string> &paths) {
+    data["constraints_sources"] = paths;
+}
+
+void project_generator_base::set_script_sources(const std::set<std::string> &paths) {
+    data["scripts"] = paths;
+}
+
+std::vector<std::string> project_generator_base::process_sources_set(const std::set<std::string> &paths) {
     std::vector<std::string> srcs;
     srcs.reserve(paths.size());
     for(const auto& source :paths){
         srcs.push_back(std::regex_replace(source, std::regex(base_dir), "$base_dir"));
     }
     return srcs;
-}
-
-void lattice_project_generator::set_constraint_sources(const std::set<std::string> &paths) {
-    data["constraints_sources"] = paths;
-}
-
-void lattice_project_generator::set_script_sources(const std::set<std::string> &paths) {
-    data["scripts"] = paths;
 }

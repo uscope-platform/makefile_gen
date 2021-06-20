@@ -15,7 +15,7 @@ std::string Depfile::get_synth_tl() {
 }
 
 std::string Depfile::get_sim_tl() {
-    return content["general"]["sym_tl"];
+    return content["general"]["sim_tl"];
 }
 
 std::vector<std::string> Depfile::get_additional_synth_modules() {
@@ -23,7 +23,7 @@ std::vector<std::string> Depfile::get_additional_synth_modules() {
 }
 
 std::vector<std::string> Depfile::get_additional_sim_modules() {
-    return content["general"]["sym_modules"];
+    return content["general"]["sim_modules"];
 }
 
 std::vector<std::string> Depfile::get_excluded_modules() {

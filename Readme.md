@@ -23,6 +23,10 @@ The following toolchains are supported:
 - Xilinx Vivado
 - Lattice Radiant
 
+### Limitations
+
+- Include directories need to be set up manually in Lattice Radiant as the feature is not exposed through tcl scripting
+
 ## Supported platform
 
 - Linux (developed and tested on debian based distro)
