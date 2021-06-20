@@ -19,12 +19,25 @@ int main(int argc, char *argv[]){
     app.add_flag("--S", synth_design,"synthetize design");
     bool keep_makefile = false;
     app.add_flag("--k", keep_makefile, "if set to true does not remove the makefile after use");
-
+    std::string get_setting;
+    app.add_option("--get_setting", get_setting, "Print the value of a cached user setting");
+    std::string set_setting;
+    app.add_option("--set_setting", set_setting, "Modify the value of a cached user setting");
 
     CLI11_PARSE(app, argc, argv);
 
     // Setup caches
     std::shared_ptr<settings_store>  s_store = std::make_shared<settings_store>();
+    if(!get_setting.empty()){
+        std::cout << s_store->get_setting(get_setting)<<std::endl;
+    }
+    if(!set_setting.empty()){
+        std::string line;
+        std::istringstream ss(set_setting);
+        std::vector<std::string> setting;
+        while(std::getline(ss,line,'=')) setting.push_back(line);
+        s_store->set_setting(setting[0], setting[1]);
+    }
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>();
 
     // analyze repository content and update cache
@@ -51,7 +64,6 @@ int main(int argc, char *argv[]){
         xilinx_project_generator generator;
         generator.set_project_name(dep.get_project_name());
 
-
         generator.set_directories(s_store->get_setting("hdl_store"), dep.get_include_directories());
         generator.set_synth_sources(synth_resolver.get_dependencies());
         generator.set_sim_sources(sim_resolver.get_dependencies());
@@ -69,7 +81,6 @@ int main(int argc, char *argv[]){
     if(generate_lattice){
         lattice_project_generator generator;
         generator.set_project_name(dep.get_project_name());
-
 
         generator.set_directories(s_store->get_setting("hdl_store"), dep.get_include_directories());
         generator.set_synth_sources(synth_resolver.get_dependencies());
