@@ -205,3 +205,15 @@ void data_store::remove_stale_info(const std::filesystem::path& p) {
 
 }
 
+void data_store::evict_hdl_entity(const std::string &name) {
+    hdl_resources_cache.erase(name);
+}
+
+void data_store::evict_script(const std::string &name) {
+    scripts_cache.erase(name);
+}
+
+void data_store::evict_constraint(const std::string &name) {
+    constraints_cache.erase(name);
+}
+

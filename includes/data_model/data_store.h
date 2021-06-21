@@ -17,18 +17,21 @@
 
 class data_store {
 public:
-     data_store();
-     std::shared_ptr<HDL_Resource> get_HDL_resource(const std::string& name);
-     void store_hdl_entity(const std::shared_ptr<HDL_Resource>& entity);
-     void store_hdl_entity(const std::vector<std::shared_ptr<HDL_Resource>> & vect);
+    data_store();
+    std::shared_ptr<HDL_Resource> get_HDL_resource(const std::string& name);
+    void store_hdl_entity(const std::shared_ptr<HDL_Resource>& entity);
+    void store_hdl_entity(const std::vector<std::shared_ptr<HDL_Resource>> & vect);
+    void evict_hdl_entity(const std::string& name);
 
     std::shared_ptr<Script> get_script(std::string& name);
     void store_script(const std::shared_ptr<Script>& entity);
     void store_script(const std::vector<std::shared_ptr<Script>> & vect);
+    void evict_script(const std::string& name);
 
     std::shared_ptr<Constraints> get_constraint(std::string& name);
     void store_constraint(const std::shared_ptr<Constraints>& entity);
     void store_constraint(const std::vector<std::shared_ptr<Constraints>> & vect);
+    void evict_constraint(const std::string& name);
 
     void remove_stale_info(const std::filesystem::path& p);
     bool is_primitive(const std::string &name);
