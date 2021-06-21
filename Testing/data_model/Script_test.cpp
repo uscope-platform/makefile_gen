@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "../includes/data_model/Script.h"
+#include "data_model/Script.h"
 
 
 

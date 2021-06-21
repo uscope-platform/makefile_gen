@@ -18,6 +18,7 @@ public:
 
     std::string get_setting(const std::string& setting);
     void set_setting(const std::string& name, const std::string& value);
+    void remove_setting(const std::string& setting);
     ~settings_store();
 private:
 

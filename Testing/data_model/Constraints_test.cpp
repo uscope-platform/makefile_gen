@@ -5,7 +5,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../includes/data_model/Constraints.h"
+#include "data_model/Constraints.h"
 
 
 

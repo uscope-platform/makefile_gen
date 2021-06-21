@@ -5,7 +5,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../includes/data_model/HDL_Resource.h"
+#include "data_model/HDL_Resource.h"
 
 
 TEST( HDL_resource_test , deserialization) {

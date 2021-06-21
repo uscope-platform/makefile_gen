@@ -49,4 +49,8 @@ settings_store::~settings_store() {
     store_settings_backend();
 }
 
+void settings_store::remove_setting(const std::string &setting) {
+    settings_backend.erase(setting);
+}
+
 
