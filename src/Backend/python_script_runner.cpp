@@ -15,6 +15,9 @@ void python_script_runner::run_python_scripts(std::set<std::shared_ptr<Script>> 
         if(!args.empty()) {
             std::string target = base_path + "/" + args[0];
             arg_v.emplace_back(target);
+            for(int i = 1; i<args.size(); ++i) {
+                arg_v.push_back(args[i]);
+            }
             spawn_process(arg_v, false, true);
             if(item->get_product_include()){
                 std::string tmp_type = item->get_product_type();
