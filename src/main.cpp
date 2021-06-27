@@ -59,6 +59,11 @@ int main(int argc, char *argv[]){
     // Resolve auxiliary files (scripts and constraints)
     Auxiliary_resolver aux_resolver(d_store);
 
+    python_script_runner py_runner;
+    py_runner.run_python_scripts(aux_resolver.get_python_objects(dep.get_scripts()));
+
+    walker.analyze_dir();
+
     //Generate makefile
     if(generate_xilinx){
         xilinx_project_generator generator;
@@ -67,7 +72,7 @@ int main(int argc, char *argv[]){
         generator.set_directories(s_store->get_setting("hdl_store"), dep.get_include_directories());
         generator.set_synth_sources(synth_resolver.get_dependencies());
         generator.set_sim_sources(sim_resolver.get_dependencies());
-        generator.set_script_sources(aux_resolver.get_tcl_scripts(dep.get_scripts()));
+        generator.set_script_sources(aux_resolver.get_tcl_script_paths(dep.get_scripts()));
         generator.set_constraint_sources(aux_resolver.get_constraints(dep.get_constraints()));
         generator.set_sim_tl(dep.get_sim_tl());
         generator.set_synth_tl(dep.get_synth_tl());
@@ -85,7 +90,7 @@ int main(int argc, char *argv[]){
         generator.set_directories(s_store->get_setting("hdl_store"), dep.get_include_directories());
         generator.set_synth_sources(synth_resolver.get_dependencies());
         generator.set_sim_sources(sim_resolver.get_dependencies());
-        generator.set_script_sources(aux_resolver.get_tcl_scripts(dep.get_scripts()));
+        generator.set_script_sources(aux_resolver.get_tcl_script_paths(dep.get_scripts()));
         generator.set_constraint_sources(aux_resolver.get_constraints(dep.get_constraints()));
         generator.set_sim_tl(dep.get_sim_tl());
         generator.set_synth_tl(dep.get_synth_tl());

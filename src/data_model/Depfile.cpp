@@ -45,6 +45,10 @@ std::vector<Script> Depfile::get_scripts() {
     for(auto item : content["scripts"]){
         Script scr(item["name"], item["type"]);
         scr.set_arguments( item["arguments"]);
+
+        if(item.contains("include_product")) {
+            scr.set_include_products(item["include_product"]);
+        }
         retval.push_back(scr);
     }
     return retval;

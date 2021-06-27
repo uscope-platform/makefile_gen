@@ -22,6 +22,7 @@
 
 class Toolchain_manager {
 public:
+    Toolchain_manager() = default;
     Toolchain_manager(std::shared_ptr<settings_store> s, bool del_mkfile, std::string name);
     virtual void create_project(const std::string& makefile, bool start_gui) {};
 

@@ -75,3 +75,11 @@ bool operator==(const Script &lhs, const Script &rhs) {
 
     return cond_1 && cond_2 && cond_3 && cond_4;
 }
+
+void Script::set_include_products(bool gen) {
+    include_products = gen;
+}
+
+bool Script::get_include_products() const {
+    return include_products;
+}

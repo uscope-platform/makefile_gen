@@ -17,7 +17,8 @@ set(MAKEFILE_GEN_SRCS /
         frontend/cache_manager.cpp /
         Backend/project_generator_base.cpp /
         Backend/Lattice/Radiant_manager.cpp /
-        Backend/Toolchain_manager.cpp )
+        Backend/Toolchain_manager.cpp /
+        Backend/python_script_runner.cpp)
 
 set(MAKEFILE_GEN_INCL /
         ../includes/main.hpp /
@@ -42,7 +43,8 @@ set(MAKEFILE_GEN_INCL /
         ../includes/Backend/Lattice/lattice_project_generator.h /
         ../includes/Backend/project_generator_base.h /
         ../includes/Backend/Lattice/Radiant_manager.h /
-        ../includes/Backend/Toolchain_manager.h)
+        ../includes/Backend/Toolchain_manager.h /
+        ../includes/Backend/python_script_runner.h)
 
 set(TEMPLATE_FILES /
         ../templates/make_project_xlnx.j2 /
