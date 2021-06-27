@@ -61,6 +61,14 @@ int main(int argc, char *argv[]){
 
     python_script_runner py_runner;
     py_runner.run_python_scripts(aux_resolver.get_python_objects(dep.get_scripts()));
+    std::set<std::string> script_deps = aux_resolver.get_tcl_script_paths(dep.get_scripts());
+
+    std::set<std::string> additional_script_deps = py_runner.get_script_dependencies();
+    script_deps.insert(additional_script_deps.begin(), additional_script_deps.end());
+
+    //TODO: do something with this
+    std::set<std::string> hdl_deps = py_runner.get_hdl_dependencies();
+    std::set<std::string> constr_deps = py_runner.get_constraints_dependencies();
 
     walker.analyze_dir();
 
@@ -72,7 +80,7 @@ int main(int argc, char *argv[]){
         generator.set_directories(s_store->get_setting("hdl_store"), dep.get_include_directories());
         generator.set_synth_sources(synth_resolver.get_dependencies());
         generator.set_sim_sources(sim_resolver.get_dependencies());
-        generator.set_script_sources(aux_resolver.get_tcl_script_paths(dep.get_scripts()));
+        generator.set_script_sources(script_deps);
         generator.set_constraint_sources(aux_resolver.get_constraints(dep.get_constraints()));
         generator.set_sim_tl(dep.get_sim_tl());
         generator.set_synth_tl(dep.get_synth_tl());

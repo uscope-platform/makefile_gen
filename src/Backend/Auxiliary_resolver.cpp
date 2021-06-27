@@ -49,6 +49,7 @@ std::set<std::shared_ptr<Script>> Auxiliary_resolver::get_script_objects_by_type
         std::shared_ptr<Script> test = d_store->get_script(script_name);
         if(scr->get_type() == type){
             scr->set_arguments(item.get_arguments());
+            scr->set_product(item.get_product_include(), item.get_product_type());
             ret_val.insert(scr);
         }
     }

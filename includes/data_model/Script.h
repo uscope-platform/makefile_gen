@@ -32,8 +32,9 @@ public:
     explicit Script(const std::string& serialized_script);
     std::string get_name();
     script_type_t get_type();
-    void set_include_products(bool gen);
-    bool get_include_products() const;
+    void set_product(bool gen, std::string t);
+    [[nodiscard]] bool get_product_include() const;
+    [[nodiscard]] std::string get_product_type() const;
     void set_arguments(std::vector<std::string> args);
     void set_path(std::string p);
     std::string get_path();
@@ -45,7 +46,8 @@ private:
     std::string name;
     std::string path;
     script_type_t type;
-    bool include_products;
+    std::string product_type;
+    bool product_include;
     std::vector<std::string> arguments;
 };
 

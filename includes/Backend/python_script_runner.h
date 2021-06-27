@@ -16,9 +16,13 @@
 class python_script_runner :private Toolchain_manager{
 public:
     void run_python_scripts(std::set<std::shared_ptr<Script>> scripts);
-    std::vector<std::string> get_additional_dependencies();
+    std::set<std::string>  get_script_dependencies();
+    std::set<std::string>  get_hdl_dependencies();
+    std::set<std::string>  get_constraints_dependencies();
 private:
-    std::vector<std::string> additional_dependencies;
+    std::set<std::string> script_dependencies;
+    std::set<std::string> hdl_dependencies;
+    std::set<std::string> constraints_depdendencies;
 };
 
 

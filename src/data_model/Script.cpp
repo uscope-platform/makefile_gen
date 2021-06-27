@@ -4,6 +4,8 @@
 
 #include "data_model/Script.h"
 
+#include <utility>
+
 
 
 Script::Script(std::string n, const std::string& t) {
@@ -76,10 +78,15 @@ bool operator==(const Script &lhs, const Script &rhs) {
     return cond_1 && cond_2 && cond_3 && cond_4;
 }
 
-void Script::set_include_products(bool gen) {
-    include_products = gen;
+void Script::set_product(bool gen, std::string t) {
+    product_include = gen;
+    product_type = std::move(t);
 }
 
-bool Script::get_include_products() const {
-    return include_products;
+bool Script::get_product_include() const {
+    return product_include;
+}
+
+std::string Script::get_product_type() const {
+    return product_type;
 }

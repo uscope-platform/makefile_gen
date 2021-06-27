@@ -13,12 +13,33 @@ void python_script_runner::run_python_scripts(std::set<std::shared_ptr<Script>> 
         arg_v.emplace_back("python3");
         arg_v.emplace_back(p);
         if(!args.empty()) {
-            arg_v.emplace_back(base_path + "/" + args[0]);
+            std::string target = base_path + "/" + args[0];
+            arg_v.emplace_back(target);
             spawn_process(arg_v, false, true);
+            if(item->get_product_include()){
+                std::string tmp_type = item->get_product_type();
+                if(tmp_type == "tcl"){
+                    script_dependencies.insert(target);
+                } else if(tmp_type == "hdl"){
+                    hdl_dependencies.insert(target);
+                } else if(tmp_type == "xdc"){
+                    constraints_depdendencies.insert(target);
+                }
+            }
+
         }
+
     }
 }
 
-std::vector<std::string> python_script_runner::get_additional_dependencies() {
-    return additional_dependencies;
+std::set<std::string> python_script_runner::get_script_dependencies() {
+    return script_dependencies;
+}
+
+std::set<std::string> python_script_runner::get_hdl_dependencies() {
+    return hdl_dependencies;
+}
+
+std::set<std::string> python_script_runner::get_constraints_dependencies() {
+    return constraints_depdendencies;
 }
