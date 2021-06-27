@@ -47,15 +47,6 @@ int main(int argc, char *argv[]){
     if(target.empty()) target = std::filesystem::current_path().string() + "/Depfile";
     Depfile dep(target);
 
-    // Resolve top level files dependencies
-    Dependency_resolver synth_resolver(dep.get_synth_tl(), d_store);
-    synth_resolver.set_excluded_modules(dep.get_excluded_modules());
-    synth_resolver.add_explicit_dependencies(dep.get_additional_synth_modules());
-
-    Dependency_resolver sim_resolver(dep.get_sim_tl(), d_store);
-    sim_resolver.set_excluded_modules(dep.get_excluded_modules());
-    sim_resolver.add_explicit_dependencies(dep.get_additional_sim_modules());
-
     // Resolve auxiliary files (scripts and constraints)
     Auxiliary_resolver aux_resolver(d_store);
 
@@ -66,11 +57,20 @@ int main(int argc, char *argv[]){
     std::set<std::string> additional_script_deps = py_runner.get_script_dependencies();
     script_deps.insert(additional_script_deps.begin(), additional_script_deps.end());
 
-    //TODO: do something with this
-    std::set<std::string> hdl_deps = py_runner.get_hdl_dependencies();
-    std::set<std::string> constr_deps = py_runner.get_constraints_dependencies();
+    std::set<std::string> additional_constr_deps = py_runner.get_constraints_dependencies();
+    std::set<std::string> constr_deps = aux_resolver.get_constraints(dep.get_constraints());
+    constr_deps.insert(additional_constr_deps.begin(), additional_constr_deps.end());
 
     walker.analyze_dir();
+
+    // Resolve top level files dependencies
+    Dependency_resolver synth_resolver(dep.get_synth_tl(), d_store);
+    synth_resolver.set_excluded_modules(dep.get_excluded_modules());
+    synth_resolver.add_explicit_dependencies(dep.get_additional_synth_modules());
+
+    Dependency_resolver sim_resolver(dep.get_sim_tl(), d_store);
+    sim_resolver.set_excluded_modules(dep.get_excluded_modules());
+    sim_resolver.add_explicit_dependencies(dep.get_additional_sim_modules());
 
     //Generate makefile
     if(generate_xilinx){
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]){
         generator.set_synth_sources(synth_resolver.get_dependencies());
         generator.set_sim_sources(sim_resolver.get_dependencies());
         generator.set_script_sources(script_deps);
-        generator.set_constraint_sources(aux_resolver.get_constraints(dep.get_constraints()));
+        generator.set_constraint_sources(constr_deps);
         generator.set_sim_tl(dep.get_sim_tl());
         generator.set_synth_tl(dep.get_synth_tl());
         std::ofstream makefile("makefile.tcl");
