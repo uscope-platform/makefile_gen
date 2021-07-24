@@ -9,6 +9,7 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
+#include <iostream>
 
 #include "data_model/data_store.h"
 

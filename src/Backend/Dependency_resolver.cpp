@@ -27,7 +27,12 @@ void Dependency_resolver::resolve_dependencies(const std::string& module_name) {
     if(is_excluded || is_primitive) return;
 
     //  interfaces never have dependencies so we can exit
-    bool is_interface = d_store->get_HDL_resource(module_name)->is_interface();
+    std::shared_ptr<HDL_Resource> resource = d_store->get_HDL_resource(module_name);
+    if(!resource){
+        std::cerr << "ERROR: module or interface " << module_name << " not found"<<std::endl;
+        exit(1);
+    }
+    bool is_interface = resource->is_interface();
     if(is_interface) return;
 
     hdl_deps_t deps =  d_store->get_HDL_resource(module_name)->get_dependencies();
