@@ -13,6 +13,12 @@ find_package(Threads REQUIRED)
 include_directories(/usr/include/antlr4-runtime)
 include_directories(includes)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DTEMPLATES_FOLDER="${CMAKE_SOURCE_DIR}/templates")
+else()
+    add_definitions(-DTEMPLATES_FOLDER="/usr/local/etc/makefile_gen")
+endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+
 add_subdirectory(includes)
 add_subdirectory(src)
 add_subdirectory(Testing)

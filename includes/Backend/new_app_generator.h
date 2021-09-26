@@ -13,26 +13,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_MAIN_HPP
-#define MAKEFILEGEN_V2_MAIN_HPP
+#ifndef MAKEFILEGEN_V2_NEW_APP_GENERATOR_H
+#define MAKEFILEGEN_V2_NEW_APP_GENERATOR_H
 
 #include <string>
+#include <filesystem>
+#include "third_party/inja.hpp"
+#include "third_party/json.hpp"
+
+class new_app_generator {
+public:
+    new_app_generator(std::string &app_name, std::string &app_language);
+private:
+    void write_depfile();
+    void write_synth_hdl();
+    void write_sim_hdl();
+    void write_constraints();
+    std::string name;
+    std::string lang;
+
+    inja::Environment env;
+    std::string base_dir;
+    nlohmann::json data;
+};
 
 
-#include "third_party/CLI11.h"
-
-#include "frontend/Repository_walker.h"
-#include "data_model/data_store.h"
-#include "data_model/settings_store.h"
-#include "analysis/sv_analyzer.h"
-#include "data_model/Depfile.h"
-#include "Backend/Dependency_resolver.h"
-#include "Backend/Xilinx/xilinx_project_generator.h"
-#include "Backend/python_script_runner.h"
-#include "Backend/Auxiliary_resolver.h"
-#include "Backend/Xilinx/Vivado_manager.h"
-#include "Backend/Lattice/lattice_project_generator.h"
-#include "Backend/Lattice/Radiant_manager.h"
-#include "Backend/new_app_generator.h"
-
-#endif //MAKEFILEGEN_V2_MAIN_HPP
+#endif //MAKEFILEGEN_V2_NEW_APP_GENERATOR_H

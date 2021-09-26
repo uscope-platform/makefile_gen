@@ -34,6 +34,10 @@ int main(int argc, char *argv[]){
     app.add_option("--get_setting", get_setting, "Print the value of a cached user setting");
     std::string set_setting;
     app.add_option("--set_setting", set_setting, "Modify the value of a cached user setting");
+    std::string new_app_name;
+    app.add_option("--new_app", new_app_name, "Setup a new blank application");
+    std::string new_app_lang;
+    app.add_option("--lang", new_app_lang, "Specify the language for the new app");
 
     CLI11_PARSE(app, argc, argv);
 
@@ -49,6 +53,23 @@ int main(int argc, char *argv[]){
         while(std::getline(ss,line,'=')) setting.push_back(line);
         s_store->set_setting(setting[0], setting[1]);
     }
+
+    if(!new_app_name.empty()){
+        std::string lang = "sv";
+        if(!new_app_lang.empty()){
+            if(new_app_lang == "vlog")
+                lang = "v";
+            else if(new_app_lang == "sv"|| new_app_lang == "vhdl")
+                lang = new_app_lang;
+            else{
+                std::cout<< "ERROR: Unknown language option: " + new_app_lang << std::endl;
+                exit(1);
+            }
+        }
+        new_app_generator gen(new_app_name, lang);
+    }
+
+
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>();
 
     // analyze repository content and update cache

@@ -13,6 +13,7 @@ set(MAKEFILE_GEN_SRCS /
         data_model/Constraints.cpp /
         Backend/Dependency_resolver.cpp /
         Backend/Xilinx/Vivado_manager.cpp /
+        Backend/new_app_generator.cpp /
         Backend/Auxiliary_resolver.cpp /
         frontend/cache_manager.cpp /
         Backend/project_generator_base.cpp /
@@ -20,46 +21,17 @@ set(MAKEFILE_GEN_SRCS /
         Backend/Toolchain_manager.cpp /
         Backend/python_script_runner.cpp)
 
-set(MAKEFILE_GEN_INCL /
-        ../includes/main.hpp /
-        ../includes/analysis/sv_visitor.h /
-        ../includes/analysis/sv_analyzer.h /
-        ../includes/third_party/CLI11.h /
-        ../includes/frontend/Repository_walker.h /
-        ../includes/data_model/settings_store.h /
-        ../includes/data_model/HDL_Resource.h /
-        ../includes/data_model/data_store.h /
-        ../includes/third_party/thread_pool.hpp/
-        ../includes/analysis/vhdl_analyzer.h /
-        ../includes/analysis/vhdl_visitor.h /
-        ../includes/data_model/Depfile.h /
-        ../includes/data_model/Script.h /
-        ../includes/data_model/Constraints.h /
-        ../includes/Backend/Dependency_resolver.h /
-        ../includes/Backend/Xilinx/xilinx_project_generator.h /
-        ../includes/Backend/Xilinx/Vivado_manager.h /
-        ../includes/Backend/Auxiliary_resolver.h /
-        ../includes/frontend/cache_manager.h /      
-        ../includes/Backend/Lattice/lattice_project_generator.h /
-        ../includes/Backend/project_generator_base.h /
-        ../includes/Backend/Lattice/Radiant_manager.h /
-        ../includes/Backend/Toolchain_manager.h /
-        ../includes/Backend/python_script_runner.h)
-
 set(TEMPLATE_FILES /
         ../templates/make_project_xlnx.j2 /
         ../templates/make_project_lscc.j2 /
         ../templates/make_bitstream_xlnx.j2)
 
 
-add_executable(makefile_gen ${MAKEFILE_GEN_SRCS} ${MAKEFILE_GEN_INCL})
+add_executable(makefile_gen ${MAKEFILE_GEN_SRCS})
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_definitions(-DTEMPLATES_FOLDER="${CMAKE_SOURCE_DIR}/templates")
-else()
-    add_definitions(-DTEMPLATES_FOLDER="/usr/local/etc/makefile_gen")
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set_property(TARGET makefile_gen PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
-endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+endif(CMAKE_BUILD_TYPE STREQUAL "Release")
 
 target_link_libraries(makefile_gen PRIVATE mgp_sv_lib)
 target_link_libraries(makefile_gen PRIVATE mgp_vh_lib)
