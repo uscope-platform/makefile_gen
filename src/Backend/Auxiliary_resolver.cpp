@@ -34,6 +34,9 @@ std::set<std::string> Auxiliary_resolver::get_constraints(const std::vector<Cons
     for(auto item : names){
         std::string constraint_name = std::regex_replace(item.get_name(), std::regex("\\.xdc"), "");
         std::shared_ptr<Constraints> cnstr = d_store->get_constraint(constraint_name);
+        if(cnstr == nullptr){
+            throw std::runtime_error("ERROR: constraint file " + constraint_name+ " not found!");
+        }
         ret_val.insert(cnstr->get_path());
     }
     return ret_val;
