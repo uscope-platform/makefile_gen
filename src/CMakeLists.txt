@@ -6,6 +6,7 @@ set(MAKEFILE_GEN_SRCS /
         data_model/settings_store.cpp /
         data_model/HDL_Resource.cpp /
         data_model/data_store.cpp /
+        data_model/DataFile.cpp
         analysis/vhdl_analyzer.cpp /
         analysis/vhdl_visitor.cpp /
         data_model/Depfile.cpp /

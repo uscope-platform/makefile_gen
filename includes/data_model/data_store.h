@@ -25,6 +25,7 @@
 #include "HDL_Resource.h"
 #include "Script.h"
 #include "Constraints.h"
+#include "DataFile.h"
 
 class data_store {
 public:
@@ -38,6 +39,11 @@ public:
     void store_script(const std::shared_ptr<Script>& entity);
     void store_script(const std::vector<std::shared_ptr<Script>> & vect);
     void evict_script(const std::string& name);
+
+    std::shared_ptr<DataFile> get_data_file(const std::string& name);
+    void store_data_file(const std::shared_ptr<DataFile>& entity);
+    void store_data_file(const std::vector<std::shared_ptr<DataFile>> & vect);
+    void evict_data_file(const std::string& name);
 
     std::shared_ptr<Constraints> get_constraint(std::string& name);
     void store_constraint(const std::shared_ptr<Constraints>& entity);
@@ -59,13 +65,19 @@ private:
     void load_constraints_cache();
     void store_constraints_cache();
 
+    void load_data_file_cache();
+    void store_data_file_cache();
+
     std::unordered_map<std::string, std::shared_ptr<HDL_Resource>> hdl_resources_cache;
     std::unordered_map<std::string, std::shared_ptr<Script>> scripts_cache;
     std::unordered_map<std::string, std::shared_ptr<Constraints>> constraints_cache;
+    std::unordered_map<std::string, std::shared_ptr<DataFile>> data_cache;
+
     std::string  store_path;
     std::string entities_file;
     std::string scripts_file;
     std::string constraints_file;
+    std::string data_file;
 
     std::set<std::string> xilinx_primitives = {
             "xpm_cdc_array_single", "xpm_cdc_async_rst", "xpm_cdc_gray", "xpm_cdc_handshake", "xpm_cdc_pulse", "xpm_cdc_single",

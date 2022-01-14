@@ -30,6 +30,7 @@
 #include "data_model/Script.h"
 #include "data_model/Constraints.h"
 #include "data_model/data_store.h"
+#include "data_model/DataFile.h"
 #include "analysis/sv_analyzer.h"
 #include "analysis/vhdl_analyzer.h"
 #include "third_party/thread_pool.hpp"
@@ -38,6 +39,7 @@
 static std::vector<std::shared_ptr<HDL_Resource>> analyze_verilog(const std::filesystem::path &file);
 static std::vector<std::shared_ptr<HDL_Resource>> analyze_vhdl(const std::filesystem::path &file);
 static std::vector<std::shared_ptr<Script>> analyze_script(const std::filesystem::path &file);
+static std::vector<std::shared_ptr<DataFile>> analyze_data(const std::filesystem::path &file);
 static std::vector<std::shared_ptr<Constraints>> analyze_constraint(const std::filesystem::path &file);
 
 const unsigned int max_threads = std::thread::hardware_concurrency()-1;
@@ -61,6 +63,7 @@ private:
     static bool file_is_vhdl(std::filesystem::path &file);
     static bool file_is_script(std::filesystem::path &file);
     static bool file_is_constraint(std::filesystem::path &file);
+    static bool file_is_data(std::filesystem::path &file);
     // TODO: Make excluded directories dynamic with a mechanism similar to .gitignore
 
     std::set<std::string> excluded_directories = {".git"};
@@ -74,6 +77,7 @@ private:
     std::vector<std::future<std::vector<std::shared_ptr<HDL_Resource>>>> hdl_futures;
     std::vector<std::future<std::vector<std::shared_ptr<Script>>>> scripts_futures;
     std::vector<std::future<std::vector<std::shared_ptr<Constraints>>>> constraints_futures;
+    std::vector<std::future<std::vector<std::shared_ptr<DataFile>>>> data_futures;
 
     thread_pool pool;
     int working_threads = 0;

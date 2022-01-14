@@ -76,9 +76,15 @@ void Repository_walker::collect_analysis_results() {
         auto result = f.get();
         d_store->store_constraint(result);
     }
+    for(auto  &f: data_futures){
+        auto result = f.get();
+        d_store->store_data_file(result);
+    }
     hdl_futures.erase(hdl_futures.begin(), hdl_futures.end());
     scripts_futures.erase(scripts_futures.begin(), scripts_futures.end());
     constraints_futures.erase(constraints_futures.begin(), constraints_futures.end());
+    data_futures.erase(data_futures.begin(), data_futures.end());
+
     working_threads =0;
 }
 
@@ -122,7 +128,7 @@ void Repository_walker::read_ignore_file(const std::filesystem::path &file) {
 ///
 /// This method is a simple dispatcher that based on the file type calls the appropriate analysis method.
 void Repository_walker::analyze_file(std::filesystem::path &file) {
-    if(!(file_is_verilog(file) || file_is_vhdl(file) || file_is_constraint(file)|| file_is_script(file))) return;
+    if(!(file_is_verilog(file) || file_is_vhdl(file) || file_is_constraint(file)|| file_is_script(file) || file_is_data(file))) return;
 
     bool updated_file = true;
 
@@ -140,6 +146,9 @@ void Repository_walker::analyze_file(std::filesystem::path &file) {
             working_threads++;
         } else if(file_is_constraint(file)){
             constraints_futures.push_back(pool.submit(analyze_constraint, file));
+            working_threads++;
+        } else if(file_is_data(file)){
+            data_futures.push_back(pool.submit(analyze_data, file));
             working_threads++;
         }
     }
@@ -178,6 +187,12 @@ bool Repository_walker::file_is_constraint(std::filesystem::path &file) {
     return extension == ".xdc";
 }
 
+bool Repository_walker::file_is_data(std::filesystem::path &file) {
+    std::string extension = file.extension();
+    return extension == ".dat" || extension == ".mem";
+}
+
+
 /// Analyze the target verilog-type file to extract declared and used instantiated design elements
 /// \param file Target file
 std::vector<std::shared_ptr<HDL_Resource>> analyze_verilog(const std::filesystem::path &file) {
@@ -192,6 +207,14 @@ std::vector<std::shared_ptr<HDL_Resource>> analyze_vhdl(const std::filesystem::p
     vhdl_analyzer file_processor(file);
     file_processor.cleanup_content("");
     return file_processor.analyze();
+}
+
+
+/// Analyze the target Script extracting the necessary metadata
+/// \param file Target file
+std::vector<std::shared_ptr<DataFile>> analyze_data(const std::filesystem::path &file) {
+    std::shared_ptr<DataFile> data = std::make_shared<DataFile>(file.stem(), file.string());
+    return {data};
 }
 
 /// Analyze the target Script extracting the necessary metadata

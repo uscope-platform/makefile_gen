@@ -6,10 +6,12 @@ set(MAKEFILEGEN_TESTS
         data_model/hdl_resource_testing.cpp
         data_model/settings_store_test.cpp
         data_model/data_store_test.cpp
+        data_model/DataFile_test.cpp
         Backend/Application_management_test.cpp)
 
 set(TESTED_SOURCES
         ../src/data_model/Depfile.cpp
+        ../src/data_model/DataFile.cpp
         ../src/data_model/Constraints.cpp
         ../src/data_model/Script.cpp
         ../src/data_model/HDL_Resource.cpp

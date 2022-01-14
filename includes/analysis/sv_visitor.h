@@ -20,10 +20,12 @@
 #include "mgp_sv/sv2017.h"
 #include "data_model/HDL_Resource.h"
 
+#include <regex>
 #include <vector>
 #include <string>
 #include <iostream>
 #include <unordered_map>
+#include <filesystem>
 
 using namespace mgp_sv;
 
@@ -41,7 +43,7 @@ public:
     void exitModule_header_common(sv2017::Module_header_commonContext *ctx) override;
     void exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) override;
     void exitInterface_header(sv2017::Interface_headerContext *ctx) override;
-
+    void exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) override;
 
     std::vector<std::shared_ptr<HDL_Resource>> get_entities();
 private:

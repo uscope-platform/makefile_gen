@@ -51,6 +51,22 @@ TEST( data_store_test , evict_script) {
 }
 
 
+TEST( data_store_test , evict_data_file) {
+
+    auto *store_1 = new data_store();
+    DataFile test_df("test","/data/file/path");
+
+    std::shared_ptr<DataFile> test_df_ptr = std::make_shared<DataFile>(test_df);
+    store_1->store_data_file(test_df_ptr);
+    store_1->evict_data_file(test_df_ptr->get_name());
+    std::string n = "test";
+    std::shared_ptr<DataFile> test_item = store_1->get_data_file(n);
+
+    ASSERT_EQ(test_item, nullptr);
+
+}
+
+
 TEST( data_store_test , evict_hdl_entity) {
 
     auto *store_1 = new data_store();
@@ -87,6 +103,25 @@ TEST( data_store_test , ser_des_constraints) {
 
 }
 
+
+TEST( data_store_test , ser_des_data_File) {
+
+    auto *store_1 = new data_store();
+    // The path is chosen to always exist as otherwise the Cache entry is removed  by the cache clearing
+    // routine invoked by the constructor
+    DataFile test_df("test","/bin/sh");
+
+    std::shared_ptr<DataFile> test_df_ptr = std::make_shared<DataFile>(test_df);
+    store_1->store_data_file(test_df_ptr);
+    delete store_1;
+    auto *store_2 = new data_store();
+    std::string name = "test";
+    std::shared_ptr<DataFile> result = store_2->get_data_file(name);
+    ASSERT_EQ(*result, *test_df_ptr);
+    store_2->evict_script(test_df_ptr->get_name());
+    delete store_2;
+
+}
 
 TEST( data_store_test , ser_des_script) {
 
@@ -147,6 +182,29 @@ TEST( data_store_test , store_script_vect) {
     ASSERT_EQ(test_vect, res_vect);
 }
 
+
+TEST( data_store_test , store_data_file_vect) {
+
+    auto *store = new data_store();
+    std::shared_ptr<DataFile> test_df_1 = std::make_shared<DataFile>("test_1","/path/1");
+    std::shared_ptr<DataFile> test_df_2 = std::make_shared<DataFile>("test_2","/path/2");
+    std::vector<std::shared_ptr<DataFile>> test_vect = {test_df_1,test_df_2};
+    store->store_data_file(test_vect);
+    std::string name = "test_1";
+    std::shared_ptr<DataFile> test_res_1 = store->get_data_file(name);
+    name = "test_2";
+    std::shared_ptr<DataFile> test_res_2 = store->get_data_file(name);
+    std::vector<std::shared_ptr<DataFile>> res_vect = {test_res_1, test_res_2};
+
+    store->evict_script("test_1");
+    store->evict_script("test_2");
+
+    ASSERT_EQ(test_vect, res_vect);
+}
+
+
+
+
 TEST( data_store_test , store_hdl_vect) {
 
     auto *store = new data_store();
@@ -203,6 +261,21 @@ TEST( data_store_test , constr_clean_up) {
 
 }
 
+
+TEST( data_store_test , data_file_clean_up) {
+
+    auto *store_1 = new data_store();
+    std::shared_ptr<DataFile> test_df_ptr = std::make_shared<DataFile>("test","/data/file/path");
+    store_1->store_data_file(test_df_ptr);
+    delete store_1;
+    auto *store_2 = new data_store();
+    std::string name = "test";
+    std::shared_ptr<Script> result = store_2->get_script(name);
+    ASSERT_EQ(result, nullptr);
+    store_2->evict_script(test_df_ptr->get_name());
+    delete store_2;
+
+}
 
 TEST( data_store_test , script_clean_up) {
 

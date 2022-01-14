@@ -23,6 +23,7 @@ data_store::data_store() {
     entities_file = store_path + "/entities";
     scripts_file = store_path + "/scripts";
     constraints_file = store_path + "/constraints";
+    data_file = store_path + "/data_files";
 
     if(std::filesystem::exists(entities_file)){
         load_entities_cache();
@@ -32,6 +33,9 @@ data_store::data_store() {
     }
     if(std::filesystem::exists(constraints_file)){
         load_constraints_cache();
+    }
+    if(std::filesystem::exists(data_file)){
+        load_data_file_cache();
     }
     clean_up_caches();
 }
@@ -86,7 +90,7 @@ data_store::~data_store() {
     store_entities_cache();
     store_scripts_cache();
     store_constraints_cache();
-
+    store_data_file_cache();
 }
 
 void data_store::load_entities_cache() {
@@ -120,11 +124,11 @@ void data_store::load_scripts_cache() {
 
 void data_store::store_scripts_cache() {
     std::filesystem::remove(scripts_file);
-    std::ofstream entities_stream(scripts_file);
+    std::ofstream itemss_stream(scripts_file);
     for (auto  [key, val] : scripts_cache){
-        if(this->is_primitive(key) || val == nullptr) continue;
-        std::string serialized_entity = *val;
-        entities_stream << serialized_entity << std::endl;
+        if(val == nullptr) continue;
+        std::string serialized_item = *val;
+        itemss_stream << serialized_item << std::endl;
     }
 }
 
@@ -139,11 +143,11 @@ void data_store::load_constraints_cache() {
 
 void data_store::store_constraints_cache() {
     std::filesystem::remove(constraints_file);
-    std::ofstream entities_stream(constraints_file);
+    std::ofstream items_stream(constraints_file);
     for (auto  [key, val] : constraints_cache){
-        if(this->is_primitive(key) || val == nullptr) continue;
-        std::string serialized_entity = *val;
-        entities_stream << serialized_entity << std::endl;
+        if(val == nullptr) continue;
+        std::string serialized_item = *val;
+        items_stream << serialized_item << std::endl;
     }
 }
 
@@ -213,6 +217,16 @@ void data_store::remove_stale_info(const std::filesystem::path& p) {
     for (const auto &item : evicted_items){
         constraints_cache.erase(item);
     }
+    evicted_items.clear();
+
+    for (auto  [key, val] : data_cache){
+        if(val->get_path()==p.string()){
+            evicted_items.push_back(key);
+        }
+    }
+    for (const auto &item : evicted_items){
+        data_cache.erase(item);
+    }
 
 }
 
@@ -228,3 +242,39 @@ void data_store::evict_constraint(const std::string &name) {
     constraints_cache.erase(name);
 }
 
+std::shared_ptr<DataFile> data_store::get_data_file(const std::string &name) {
+    return data_cache[name];
+}
+
+void data_store::store_data_file(const std::shared_ptr<DataFile> &entity) {
+    data_cache[entity->get_name()] = entity;
+}
+
+void data_store::store_data_file(const std::vector<std::shared_ptr<DataFile>> &vect) {
+    for(auto &item: vect){
+        store_data_file(item);
+    }
+}
+
+void data_store::evict_data_file(const std::string &name) {
+    data_cache.erase(name);
+}
+
+void data_store::load_data_file_cache() {
+    std::ifstream data_files_stream(data_file);
+    std::string line;
+    while (std::getline(data_files_stream, line)){
+        std::shared_ptr<DataFile> tmp = std::make_shared<DataFile>(line);
+        data_cache[tmp->get_name()] = tmp;
+    }
+}
+
+void data_store::store_data_file_cache() {
+    std::filesystem::remove(data_file);
+    std::ofstream items_stream(data_file);
+    for (auto  [key, val] : data_cache){
+        if(val == nullptr) continue;
+        std::string serialized_item = *val;
+        items_stream << serialized_item << std::endl;
+    }
+}

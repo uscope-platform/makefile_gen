@@ -73,3 +73,16 @@ void sv_visitor::exitInterface_header(sv2017::Interface_headerContext *ctx) {
 std::vector<std::shared_ptr<HDL_Resource>> sv_visitor::get_entities() {
     return entities;
 }
+
+void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
+    std::string call_name = ctx->any_system_tf_identifier()->getText();
+    if(call_name=="$readmemh" || call_name=="$readmemb"){
+        std::string data_file = ctx->list_of_arguments()->expression()[0]->getText();
+        data_file = std::regex_replace(data_file, std::regex("\\\""), "");
+        std::filesystem::path p = data_file;
+        if(p.extension().string() == ".dat"|| p.extension().string() == ".mem"){
+            instantiated_features[p.stem()] = memory_init;
+        }
+
+    }
+}

@@ -23,9 +23,12 @@ Dependency_resolver::Dependency_resolver(std::string tl, std::shared_ptr<data_st
 
 std::set<std::string> Dependency_resolver::get_dependencies() {
     resolve_dependencies(top_level);
-    dependencies.push_back(d_store->get_HDL_resource(top_level));
+    hdl_dependencies.push_back(d_store->get_HDL_resource(top_level));
     std::set<std::string> ret_val;
-    for(const auto& item: dependencies){
+    for(const auto& item: hdl_dependencies){
+        ret_val.insert(item->get_path());
+    }
+    for(const auto& item: mem_init_dependencies){
         ret_val.insert(item->get_path());
     }
     return ret_val;
@@ -51,8 +54,20 @@ void Dependency_resolver::resolve_dependencies(const std::string& module_name) {
     for(auto &item : deps){
         auto res = d_store->get_HDL_resource(item.first);
         bool dep_excluded = std::find(excluded_modules.begin(), excluded_modules.end(), item.first) != excluded_modules.end();
-        if(res != nullptr && !dep_excluded) dependencies.push_back(res);
-        resolve_dependencies(item.first);
+        if(res != nullptr && !dep_excluded) hdl_dependencies.push_back(res);
+        if(item.second != memory_init){
+            resolve_dependencies(item.first);
+        } else {
+            std::shared_ptr<DataFile> dep = d_store->get_data_file(item.first);
+            if(dep == nullptr){
+                std::cerr << "ERROR: memory initialization file " << item.first << " not found"<<std::endl;
+                exit(1);
+            } else{
+                mem_init_dependencies.push_back(dep);
+            }
+
+        }
+
     }
 
 
@@ -64,7 +79,7 @@ void Dependency_resolver::set_excluded_modules(std::vector<std::string> exclusio
 
 void Dependency_resolver::add_explicit_dependencies(const std::vector<std::string>& dep_list) {
     for(const auto& item: dep_list){
-        dependencies.push_back(d_store->get_HDL_resource(item));
+        hdl_dependencies.push_back(d_store->get_HDL_resource(item));
         resolve_dependencies(item);
     }
 }
