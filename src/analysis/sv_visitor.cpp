@@ -86,3 +86,17 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
 
     }
 }
+
+void sv_visitor::exitPackage_declaration(sv2017::Package_declarationContext *ctx) {
+    std::string package_name = ctx->identifier()[0]->getText();
+    std::shared_ptr<HDL_Resource> e = std::make_shared<HDL_Resource>(package, package_name, path, instantiated_features, verilog_entity);
+    entities.push_back(e);
+}
+
+void sv_visitor::exitPackage_or_class_scoped_path(sv2017::Package_or_class_scoped_pathContext *ctx) {
+    if(!ctx->DOUBLE_COLON().empty()){
+        std::string package_name = ctx->package_or_class_scoped_path_item()[0]->identifier()->getText();
+        instantiated_features[package_name] = package;
+    }
+
+}

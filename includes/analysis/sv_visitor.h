@@ -44,6 +44,8 @@ public:
     void exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) override;
     void exitInterface_header(sv2017::Interface_headerContext *ctx) override;
     void exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) override;
+    void exitPackage_declaration(sv2017::Package_declarationContext *ctx) override;
+    void exitPackage_or_class_scoped_path(sv2017::Package_or_class_scoped_pathContext *ctx) override;
 
     std::vector<std::shared_ptr<HDL_Resource>> get_entities();
 private:
