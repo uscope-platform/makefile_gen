@@ -19,6 +19,7 @@
 
 sv_visitor::sv_visitor(std::string p) {
     path = std::move(p);
+    file_declare_package = false;
 }
 
 
@@ -90,6 +91,7 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
 void sv_visitor::exitPackage_declaration(sv2017::Package_declarationContext *ctx) {
     std::string package_name = ctx->identifier()[0]->getText();
     std::shared_ptr<HDL_Resource> e = std::make_shared<HDL_Resource>(package, package_name, path, instantiated_features, verilog_entity);
+    file_declare_package = true;
     entities.push_back(e);
 }
 
@@ -100,3 +102,12 @@ void sv_visitor::exitPackage_or_class_scoped_path(sv2017::Package_or_class_scope
     }
 
 }
+
+void sv_visitor::exitPackage_item(sv2017::Package_itemContext *ctx) {
+    if(ctx->parameter_declaration() != nullptr){
+        std::string param_name = ctx->parameter_declaration()->list_of_param_assignments()[0].param_assignment()[0]->identifier()->getText();
+        int i = 0;
+    }
+
+}
+

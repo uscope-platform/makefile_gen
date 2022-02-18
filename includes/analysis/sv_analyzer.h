@@ -24,6 +24,11 @@
 
 #include "data_model/HDL_Resource.h"
 
+#include "data_model/bus_structure/bus_registers.h"
+#include "data_model/bus_structure/bus_crossbar.h"
+#include "data_model/bus_structure/bus_module.h"
+
+
 #include "mgp_sv/sv2017Lexer.h"
 #include "mgp_sv/sv2017.h"
 #include "analysis/sv_visitor.h"
@@ -36,9 +41,36 @@ public:
     std::vector<std::shared_ptr<HDL_Resource>> analyze();
 
 private:
+
+    void analyze_package_docstings();
+    void analyze_register(const std::string& docstring, const std::string& parameter);
+    void analyze_module(const std::string& docstring, const std::string& parameter);
+    void analyze_crossbar(const std::string& docstring, const std::string& parameter, bool is_root);
+
+    void construct_bus_hierarchy(std::shared_ptr<bus_crossbar> dict);
+
+    std::unordered_map<std::string, std::shared_ptr<bus_registers>> registers_dict;
+    std::unordered_map<std::string, std::shared_ptr<bus_module>> modules_dict;
+    std::unordered_map<std::string, std::shared_ptr<bus_crossbar>> crossbar_dict;
+
+    std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
     std::string path;
     std::string processed_content;
     sv_visitor sv_modules_explorer;
+
+    static std::string ltrim(const std::string &s) {
+        size_t start = s.find_first_not_of(" \n\r\t\f\v");
+        return (start == std::string::npos) ? "" : s.substr(start);
+    }
+
+    static std::string rtrim(const std::string &s) {
+        size_t end = s.find_last_not_of(" \n\r\t\f\v");
+        return (end == std::string::npos) ? "" : s.substr(0, end + 1);
+    }
+
+    static std::string trim(const std::string &s) {
+        return rtrim(ltrim(s));
+    }
 };
 
 

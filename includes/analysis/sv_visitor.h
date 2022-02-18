@@ -46,7 +46,8 @@ public:
     void exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) override;
     void exitPackage_declaration(sv2017::Package_declarationContext *ctx) override;
     void exitPackage_or_class_scoped_path(sv2017::Package_or_class_scoped_pathContext *ctx) override;
-
+    void exitPackage_item(sv2017::Package_itemContext *ctx) override;
+    const bool is_package_declared() {return file_declare_package;};
     std::vector<std::shared_ptr<HDL_Resource>> get_entities();
 private:
     hdl_declaration_t declared_feature;
@@ -56,6 +57,8 @@ private:
     std::stack<hdl_deps_t> dependencies_stack;
     std::string path;
     std::vector<std::shared_ptr<HDL_Resource>> entities;
+
+    bool file_declare_package;
 };
 
 

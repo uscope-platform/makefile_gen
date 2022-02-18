@@ -61,9 +61,111 @@ std::vector<std::shared_ptr<HDL_Resource>> sv_analyzer::analyze() {
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&sv_modules_explorer, Tree);
 
 
-
+    if(sv_modules_explorer.is_package_declared()){
+        analyze_package_docstings();
+    }
     return  sv_modules_explorer.get_entities();
 }
+
+void sv_analyzer::analyze_package_docstings() {
+    std::regex docstring_ex(R"(/\*[^*]*\*+(?:[^/*][^*]*\*+)*/)");
+    std::regex type_ex(R"((?: )*type: (.*))");
+    std::regex parameter_ex(R"((?: )*parameter: (.*))");
+
+    for(std::sregex_iterator i = std::sregex_iterator(processed_content.begin(), processed_content.end(), docstring_ex);
+        i != std::sregex_iterator();
+        ++i ) {
+        std::smatch m = *i;
+        std::string docstring =  trim(m.str().substr(3,m.str().length()-6));
+        regex_search(docstring, m, type_ex);
+        std::string t = m[1];
+        regex_search(docstring, m, parameter_ex);
+        std::string param = m[1];
+        if(t=="crossbar"){
+            analyze_crossbar(docstring, param, false);
+        } else if(t=="module"){
+            analyze_module(docstring, param);
+        } else if(t=="register"){
+            analyze_register(docstring, param);
+        } else if(t=="bus_root"){
+            analyze_crossbar(docstring, param, true);
+        }
+    }
+    for(auto &item:bus_roots){
+        construct_bus_hierarchy(item);
+    }
+    if(!bus_roots.empty()){
+        std::string test = bus_component::component_to_string(bus_roots[0]);
+        std::cerr << test;
+        int i = 0;
+    }
+
+}
+
+void sv_analyzer::construct_bus_hierarchy(std::shared_ptr<bus_crossbar> dict) {
+    std::vector<std::string> childs = dict->get_raw_children_list();
+    if(childs.empty()) {
+        return;
+    }
+    for(auto &item:childs){
+        if(modules_dict.count(item)!= 0 ){
+            dict->add_child(modules_dict[item]);
+            modules_dict.erase(item);
+        } else if(registers_dict.count(item) != 0){
+            dict->add_child(registers_dict[item]);
+            registers_dict.erase(item);
+        } else if(crossbar_dict.count(item) != 0){
+            construct_bus_hierarchy(crossbar_dict[item]);
+            dict->add_child(crossbar_dict[item]);
+            crossbar_dict.erase(item);
+        }
+    }
+
+}
+
+void sv_analyzer::analyze_register(const std::string& docstring, const std::string& parameter) {
+    std::regex target_ex(R"((?: )*target: (.*))");
+    std::smatch m;
+    regex_search(docstring, m, target_ex);
+    std::string target_module = m[1];
+    std::shared_ptr<bus_registers> reg = std::make_shared<bus_registers>(target_module, parameter);
+    registers_dict[target_module] = reg;
+}
+
+void sv_analyzer::analyze_module(const std::string& docstring, const std::string& parameter) {
+    std::regex target_ex(R"((?: )*target: (.*) (.*))");
+    std::smatch m;
+    regex_search(docstring, m, target_ex);
+    std::string target_module = m[1];
+    std::string target_instance = m[2];
+    std::shared_ptr<bus_module> mod = std::make_shared<bus_module>(target_instance, target_module, parameter);
+    modules_dict[parameter] = mod;
+}
+
+void sv_analyzer::analyze_crossbar(const std::string& docstring, const std::string& parameter, bool is_root) {
+
+    std::regex children_list_ex(R"((?: )*children: (.*))");
+    std::regex child_ex(R"(([a-zA-Z0-9$_]+))");
+    std::smatch m;
+    regex_search(docstring, m, children_list_ex);
+    std::vector<std::string> children_vect;
+
+    std::istringstream iss(m[1]);
+    std::string item;
+    while (std::getline(iss, item, ' ')) {
+        children_vect.push_back(item);
+    }
+
+    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>(children_vect, parameter);
+    if(is_root){
+        bus_roots.push_back(xbar);
+    } else {
+        crossbar_dict[parameter] = xbar;
+    }
+
+}
+
+
 
 void SvParserErrorListener::syntaxError(antlr4::Recognizer *recognizer, antlr4::Token *offendingSymbol, size_t line,
                                         size_t charPositionInLine, const std::string &msg, std::exception_ptr e) {
