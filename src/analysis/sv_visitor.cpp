@@ -15,7 +15,7 @@
 
 #include "analysis/sv_visitor.h"
 
-#include <utility>
+
 
 sv_visitor::sv_visitor(std::string p) {
     path = std::move(p);
@@ -88,10 +88,16 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
     }
 }
 
+void sv_visitor::enterPackage_declaration(sv2017::Package_declarationContext *ctx) {
+    file_declare_package = true;
+}
+
 void sv_visitor::exitPackage_declaration(sv2017::Package_declarationContext *ctx) {
     std::string package_name = ctx->identifier()[0]->getText();
+    calculate_package_parameters();
     std::shared_ptr<HDL_Resource> e = std::make_shared<HDL_Resource>(package, package_name, path, instantiated_features, verilog_entity);
-    file_declare_package = true;
+    e->set_parameters(package_parameters);
+    package_parameters.clear();
     entities.push_back(e);
 }
 
@@ -103,11 +109,160 @@ void sv_visitor::exitPackage_or_class_scoped_path(sv2017::Package_or_class_scope
 
 }
 
-void sv_visitor::exitPackage_item(sv2017::Package_itemContext *ctx) {
-    if(ctx->parameter_declaration() != nullptr){
-        std::string param_name = ctx->parameter_declaration()->list_of_param_assignments()[0].param_assignment()[0]->identifier()->getText();
-        int i = 0;
+void sv_visitor::enterParameter_declaration(sv2017::Parameter_declarationContext *ctx) {
+    std::string dbg = ctx->getText();
+    current_parameter = ctx->list_of_param_assignments()[0].param_assignment()[0]->identifier()->getText();
+}
+
+void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext *ctx) {
+    if(file_declare_package){
+        if(string_components.size() == 1){
+            try {
+                uint32_t addr = std::stoul(string_components.front());
+                numeric_parameters[current_parameter] = addr;
+            } catch (std::invalid_argument const& ex){
+                if(numeric_parameters.count(string_components.front())>0){
+                    numeric_parameters[current_parameter] = numeric_parameters[string_components.front()];
+                } else{
+                    parameter par(current_parameter, string_components);
+                    package_parameters.push_back(par);
+                }
+            }
+        } else{
+            parameter par(current_parameter, string_components);
+            package_parameters.push_back(par);
+        }
+        string_components.clear();
     }
 
 }
 
+void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
+    if(file_declare_package){
+        if(ctx->expression().size()>1){
+            if(ctx->operator_plus_minus()== nullptr && ctx->operator_mul_div_mod()== nullptr){
+                std::cerr<< "Warning: unsupported operation detected in parameter assignment expression" << std::endl;
+            }
+        }
+    }
+
+}
+
+void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
+    if(file_declare_package){
+        uint32_t numeric_val = parse_number(ctx->getText());
+        string_components.push_back(std::to_string(numeric_val));
+    }
+}
+
+void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
+    if(file_declare_package){
+        std::string dbg = ctx->getText();
+        string_components.push_back(ctx->getText());
+    }
+}
+
+void sv_visitor::exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx) {
+    if(file_declare_package){
+        string_components.push_back(ctx->getText());
+    }
+}
+
+void sv_visitor::exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *ctx) {
+    if(file_declare_package){
+        string_components.push_back(ctx->getText());
+    }
+}
+
+uint32_t sv_visitor::parse_number(const std::string& s) {
+    std::regex hex_number(R"(\d*'h([0-9a-fA-F]*))");
+    std::regex dec_number(R"(^(?:\d*'d)?([0-9]*)$)");
+    std::regex oct_number(R"(^\d*'o([0-7]*)$)");
+    std::regex bin_number(R"(\d*'b([0-1]*))");
+
+    std::smatch sm;
+    if(std::regex_match(s,sm, hex_number)){
+        return std::stoul(sm[1],nullptr, 16);
+    } else if(std::regex_match(s,sm, dec_number)){
+        return std::stoul(sm[1],nullptr, 10);
+    } else if(std::regex_match(s,sm, oct_number)){
+        return std::stoul(sm[1],nullptr, 8);
+    } else if(std::regex_match(s,sm, bin_number)){
+        return std::stoul(sm[1],nullptr, 2);
+    }
+    return 0;
+}
+
+
+void sv_visitor::calculate_package_parameters() {
+    std::vector<parameter> remaining_parameters;
+
+    while(!package_parameters.empty()){
+        remaining_parameters.clear();
+        //update parameters with calculated values
+        for(auto &np:numeric_parameters){
+            for(auto &item:package_parameters){
+                item.update_expression(np.first, np.second);
+            }
+        }
+
+        // Calculate available expressions
+        for(auto &item:package_parameters){
+            try{
+                std::string param_name = item.get_name();
+                uint32_t res = calculate_expression(item.get_expression());
+                numeric_parameters[param_name] = res;
+            } catch(std::invalid_argument &ex){
+                remaining_parameters.push_back(item);
+            }
+        }
+
+        package_parameters = remaining_parameters;
+    }
+
+}
+
+uint32_t sv_visitor::calculate_expression(std::vector<std::string> exp) {
+
+    for (int i = 0; i< exp.size(); i++) {
+        if(exp[i] == "*"){
+            uint32_t op_a = std::stoul(exp[i-1]);
+            uint32_t op_b = std::stoul(exp[i+1]);
+            exp[i-1] = std::to_string(op_a*op_b);
+            exp.erase(exp.begin()+i);
+            exp.erase(exp.begin()+i);
+            --i;
+        } else if(exp[i] == "/"){
+            uint32_t op_a = std::stoul(exp[i-1]);
+            uint32_t op_b = std::stoul(exp[i+1]);
+            exp[i-1] = std::to_string(op_a/op_b);
+            exp.erase(exp.begin()+i);
+            exp.erase(exp.begin()+i);
+        } else if(exp[i]=="%"){
+            uint32_t op_a = std::stoul(exp[i-1]);
+            uint32_t op_b = std::stoul(exp[i+1]);
+            exp[i-1] = std::to_string(op_a%op_b);
+            exp.erase(exp.begin()+i);
+            exp.erase(exp.begin()+i);
+        }
+    }
+
+
+    for (int i = 0; i< exp.size(); i++) {
+        if(exp[i] == "+"){
+            uint32_t op_a = std::stoul(exp[i-1]);
+            uint32_t op_b = std::stoul(exp[i+1]);
+            exp[i-1] = std::to_string(op_a+op_b);
+            exp.erase(exp.begin()+i);
+            exp.erase(exp.begin()+i);
+            --i;
+        } else if(exp[i] == "-"){
+            uint32_t op_a = std::stoul(exp[i-1]);
+            uint32_t op_b = std::stoul(exp[i+1]);
+            exp[i-1] = std::to_string(op_a-op_b);
+            exp.erase(exp.begin()+i);
+            exp.erase(exp.begin()+i);
+        }
+    }
+    return std::stoul(exp[0]);
+}
