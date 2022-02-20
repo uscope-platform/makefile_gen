@@ -94,10 +94,9 @@ void sv_visitor::enterPackage_declaration(sv2017::Package_declarationContext *ct
 
 void sv_visitor::exitPackage_declaration(sv2017::Package_declarationContext *ctx) {
     std::string package_name = ctx->identifier()[0]->getText();
-    calculate_package_parameters();
+    calculate_parameters();
     std::shared_ptr<HDL_Resource> e = std::make_shared<HDL_Resource>(package, package_name, path, instantiated_features, verilog_entity);
-    e->set_parameters(package_parameters);
-    package_parameters.clear();
+    e->set_parameters(numeric_parameters);
     entities.push_back(e);
 }
 
@@ -124,12 +123,12 @@ void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext 
                 if(numeric_parameters.count(string_components.front())>0){
                     numeric_parameters[current_parameter] = numeric_parameters[string_components.front()];
                 } else{
-                    parameter par(current_parameter, string_components);
+                    expression par(current_parameter, string_components);
                     package_parameters.push_back(par);
                 }
             }
         } else{
-            parameter par(current_parameter, string_components);
+            expression par(current_parameter, string_components);
             package_parameters.push_back(par);
         }
         string_components.clear();
@@ -194,8 +193,8 @@ uint32_t sv_visitor::parse_number(const std::string& s) {
 }
 
 
-void sv_visitor::calculate_package_parameters() {
-    std::vector<parameter> remaining_parameters;
+void sv_visitor::calculate_parameters() {
+    std::vector<expression> remaining_parameters;
 
     while(!package_parameters.empty()){
         remaining_parameters.clear();

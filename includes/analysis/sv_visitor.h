@@ -20,7 +20,7 @@
 #include "mgp_sv/sv2017.h"
 
 #include "data_model/HDL_Resource.h"
-#include "data_model/parameter.h"
+#include "data_model/expression.h"
 
 #include <regex>
 #include <utility>
@@ -60,9 +60,10 @@ public:
 
     static uint32_t parse_number(const std::string& s);
 
-    void calculate_package_parameters();
+    void calculate_parameters();
     static uint32_t calculate_expression(std::vector<std::string> exp);
     std::vector<std::shared_ptr<HDL_Resource>> get_entities();
+
 private:
     hdl_declaration_t declared_feature;
     hdl_deps_t instantiated_features;
@@ -74,7 +75,7 @@ private:
 
     std::string current_parameter;
     uint32_t current_address;
-    std::vector<parameter> package_parameters;
+    std::vector<expression> package_parameters;
     bool file_declare_package;
     std::vector<std::string> current_operands;
     std::vector<std::string> current_operators;

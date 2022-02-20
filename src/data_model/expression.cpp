@@ -13,30 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "data_model/parameter.h"
+#include "data_model/expression.h"
 
-#include <utility>
 
-parameter::parameter(std::string n, uint32_t a) {
+expression::expression(std::string n, uint32_t a) {
     name = std::move(n);
-    address = a;
-    determined = true;
 }
 
-parameter::parameter(std::string n, std::vector<std::string> e) {
+expression::expression(std::string n, std::vector<std::string> e) {
     name = std::move(n);
-    address = 0;
-    determined = false;
     expression_components = std::move(e);
 }
 
-
-void parameter::set_address(uint32_t a) {
-    address = a;
-    determined = true;
-}
-
-void parameter::update_expression(const std::string& n, uint32_t value) {
+void expression::update_expression(const std::string& n, uint32_t value) {
     for (auto & expression_component : expression_components) {
         if(expression_component == n){
             expression_component = std::to_string(value);

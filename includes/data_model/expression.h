@@ -13,30 +13,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_PARAMETER_H
-#define MAKEFILEGEN_V2_PARAMETER_H
+#ifndef MAKEFILEGEN_V2_EXPRESSION_H
+#define MAKEFILEGEN_V2_EXPRESSION_H
 
 
 #include <string>
 #include <vector>
 #include <stack>
+#include <utility>
 
-class parameter {
+class expression {
 public:
-    parameter(std::string n, uint32_t a);
-    parameter(std::string n, std::vector<std::string> e);
-    [[nodiscard]] bool is_determined() const {return determined;};
+    expression(std::string n, uint32_t a);
+    expression(std::string n, std::vector<std::string> e);
     std::string get_name() {return name;};
-    [[nodiscard]] uint32_t get_address() const {return address;};
     [[nodiscard]] std::vector<std::string> get_expression() const {return expression_components;};
-    void set_address(uint32_t a);
     void update_expression(const std::string& n, uint32_t value);
 private:
     std::string name;
-    uint32_t address;
-    bool determined;
     std::vector<std::string> expression_components;
 };
 
 
-#endif //MAKEFILEGEN_V2_PARAMETER_H
+#endif //MAKEFILEGEN_V2_EXPRESSION_H

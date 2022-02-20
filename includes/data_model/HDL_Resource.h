@@ -22,7 +22,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "data_model/parameter.h"
+#include "data_model/expression.h"
 
 #define SV_FEATURE_MODULE 0
 #define SV_FEATURE_INTERFACE 1
@@ -76,8 +76,8 @@ public:
     std::string get_path();
     bool is_interface();
 
-    void set_parameters(std::vector<parameter> p) {parameters = std::move(p);}
-    std::vector<parameter> get_parameters() {return parameters;};
+    void set_parameters(std::unordered_map<std::string, uint32_t> p) { parameters = std::move(p);}
+    std::unordered_map<std::string, uint32_t> get_parameters() {return parameters;};
     operator std::string();
     friend bool operator==(const HDL_Resource&lhs, const HDL_Resource&rhs);
 private:
@@ -85,7 +85,7 @@ private:
     std::string path;
     resource_type_t resource_type;
     sv_feature hdl_type;
-    std::vector<parameter> parameters;
+    std::unordered_map<std::string, uint32_t> parameters;
 
     hdl_deps_t dependencies;
 };

@@ -1,31 +1,32 @@
-set(MAKEFILE_GEN_SRCS /
-        main.cpp /
-        analysis/sv_visitor.cpp /
-        analysis/sv_analyzer.cpp /
-        frontend/Repository_walker.cpp /
-        data_model/settings_store.cpp /
-        data_model/HDL_Resource.cpp /
-        data_model/data_store.cpp /
-        data_model/DataFile.cpp /
-        data_model/bus_structure/bus_component.cpp /
-        data_model/bus_structure/bus_registers.cpp /
-        data_model/bus_structure/bus_module.cpp /
-        data_model/bus_structure/bus_crossbar.cpp /
-        data_model/parameter.cpp /
-        analysis/vhdl_analyzer.cpp /
-        analysis/vhdl_visitor.cpp /
-        data_model/Depfile.cpp /
-        data_model/Script.cpp /
-        data_model/Constraints.cpp /
-        Backend/Dependency_resolver.cpp /
-        Backend/Xilinx/Vivado_manager.cpp /
-        Backend/new_app_generator.cpp /
-        Backend/Auxiliary_resolver.cpp /
-        frontend/cache_manager.cpp /
-        Backend/project_generator_base.cpp /
-        Backend/Lattice/Radiant_manager.cpp /
-        Backend/Toolchain_manager.cpp /
-        Backend/python_script_runner.cpp)
+set(MAKEFILE_GEN_SRCS_I /
+        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/sv_visitor.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/sv_analyzer.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/Repository_walker.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/settings_store.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL_Resource.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/data_store.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/DataFile.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_structure/bus_component.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_structure/bus_registers.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_structure/bus_module.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_structure/bus_crossbar.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/expression.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/vhdl_analyzer.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/vhdl_visitor.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Depfile.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Script.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Constraints.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Dependency_resolver.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Xilinx/Vivado_manager.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/new_app_generator.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Auxiliary_resolver.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/cache_manager.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/project_generator_base.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Lattice/Radiant_manager.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Toolchain_manager.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/python_script_runner.cpp)
+
+set(MAKEFILE_GEN_SRCS ${MAKEFILE_GEN_SRCS_I}  PARENT_SCOPE)
 
 set(TEMPLATE_FILES /
         ../templates/make_project_xlnx.j2 /
@@ -33,7 +34,7 @@ set(TEMPLATE_FILES /
         ../templates/make_bitstream_xlnx.j2)
 
 
-add_executable(makefile_gen ${MAKEFILE_GEN_SRCS})
+add_executable(makefile_gen ${MAKEFILE_GEN_SRCS_I} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set_property(TARGET makefile_gen PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
