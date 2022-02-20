@@ -7,6 +7,7 @@ set(MAKEFILEGEN_TESTS
         data_model/settings_store_test.cpp
         data_model/data_store_test.cpp
         data_model/DataFile_test.cpp
+        data_model/bus_structure_test.cpp
         analysis/analysis.cpp
         Backend/Application_management_test.cpp)
 
@@ -27,6 +28,7 @@ make_directory(${CHECK_FILES_DIR})
 configure_file(files/Depfile ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file(check_files/Depfile_gs ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/test_package.sv ${CHECK_FILES_DIR} COPYONLY)
+configure_file(check_files/test_sv_module.sv ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/top_synth_sv.sv ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/top_tb_sv.sv ${CHECK_FILES_DIR} COPYONLY)
 

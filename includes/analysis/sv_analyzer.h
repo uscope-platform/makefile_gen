@@ -42,10 +42,10 @@ public:
 
 private:
 
-    void analyze_package_docstings();
-    void analyze_register(const std::string& docstring, const std::string& parameter);
-    void analyze_module(const std::string& docstring, const std::string& parameter);
-    void analyze_crossbar(const std::string& docstring, const std::string& parameter, bool is_root);
+    void analyze_package_docstings(std::unordered_map<std::string, uint32_t> parameters);
+    void analyze_register(const std::string& docstring, const std::string& parameter_name, uint32_t address);
+    void analyze_module(const std::string& docstring, const std::string& parameter_name, uint32_t address);
+    void analyze_crossbar(const std::string& docstring, const std::string& parameter_name, uint32_t address, bool is_root);
 
     void construct_bus_hierarchy(std::shared_ptr<bus_crossbar> dict);
 

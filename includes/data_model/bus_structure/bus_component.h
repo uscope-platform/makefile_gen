@@ -32,11 +32,13 @@ class bus_component {
 public:
     bus_component(std::string n, component_type t);
     virtual std::string to_string(std::string prefix) {return "";};
+    [[nodiscard]] uint32_t get_base_address() const {return base_address;};
+    void  set_base_address(uint32_t ba) { base_address = ba;};
     static std::string component_to_string(const std::shared_ptr<bus_component>& p) { return component_to_string(p, "");};
     static std::string component_to_string(const std::shared_ptr<bus_component>& p, const std::string& prefix);
 protected:
     std::string parameter_name;
-    unsigned int base_address;
+    uint32_t base_address;
     component_type type;
 
 

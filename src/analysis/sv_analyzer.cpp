@@ -62,12 +62,19 @@ std::vector<std::shared_ptr<HDL_Resource>> sv_analyzer::analyze() {
 
 
     if(sv_modules_explorer.is_package_declared()){
-        analyze_package_docstings();
+        std::vector<std::shared_ptr<HDL_Resource>> entities = sv_modules_explorer.get_entities();
+        std::shared_ptr<HDL_Resource> declared_package;
+        for(auto &e:entities){
+            if(e->get_type() == package){
+                declared_package = e;
+            }
+        }
+        analyze_package_docstings(declared_package->get_parameters());
     }
     return  sv_modules_explorer.get_entities();
 }
 
-void sv_analyzer::analyze_package_docstings() {
+void sv_analyzer::analyze_package_docstings(std::unordered_map<std::string, uint32_t> parameters) {
     std::regex docstring_ex(R"(/\*[^*]*\*+(?:[^/*][^*]*\*+)*/)");
     std::regex type_ex(R"((?: )*type: (.*))");
     std::regex parameter_ex(R"((?: )*parameter: (.*))");
@@ -80,26 +87,20 @@ void sv_analyzer::analyze_package_docstings() {
         regex_search(docstring, m, type_ex);
         std::string t = m[1];
         regex_search(docstring, m, parameter_ex);
-        std::string param = m[1];
+        std::string param_name = m[1];
         if(t=="crossbar"){
-            analyze_crossbar(docstring, param, false);
+            analyze_crossbar(docstring, param_name,parameters[param_name], false);
         } else if(t=="module"){
-            analyze_module(docstring, param);
+            analyze_module(docstring, param_name,parameters[param_name]);
         } else if(t=="register"){
-            analyze_register(docstring, param);
+            analyze_register(docstring, param_name,parameters[param_name]);
         } else if(t=="bus_root"){
-            analyze_crossbar(docstring, param, true);
+            analyze_crossbar(docstring, param_name,parameters[param_name], true);
         }
     }
     for(auto &item:bus_roots){
         construct_bus_hierarchy(item);
     }
-    if(!bus_roots.empty()){
-        std::string test = bus_component::component_to_string(bus_roots[0]);
-        std::cerr << test;
-        int i = 0;
-    }
-
 }
 
 void sv_analyzer::construct_bus_hierarchy(std::shared_ptr<bus_crossbar> dict) {
@@ -123,26 +124,28 @@ void sv_analyzer::construct_bus_hierarchy(std::shared_ptr<bus_crossbar> dict) {
 
 }
 
-void sv_analyzer::analyze_register(const std::string& docstring, const std::string& parameter) {
+void sv_analyzer::analyze_register(const std::string& docstring, const std::string& parameter_name, uint32_t address) {
     std::regex target_ex(R"((?: )*target: (.*))");
     std::smatch m;
     regex_search(docstring, m, target_ex);
     std::string target_module = m[1];
-    std::shared_ptr<bus_registers> reg = std::make_shared<bus_registers>(target_module, parameter);
+    std::shared_ptr<bus_registers> reg = std::make_shared<bus_registers>(target_module, parameter_name);
+    reg->set_base_address(address);
     registers_dict[target_module] = reg;
 }
 
-void sv_analyzer::analyze_module(const std::string& docstring, const std::string& parameter) {
+void sv_analyzer::analyze_module(const std::string& docstring, const std::string& parameter_name, uint32_t address) {
     std::regex target_ex(R"((?: )*target: (.*) (.*))");
     std::smatch m;
     regex_search(docstring, m, target_ex);
     std::string target_module = m[1];
     std::string target_instance = m[2];
-    std::shared_ptr<bus_module> mod = std::make_shared<bus_module>(target_instance, target_module, parameter);
-    modules_dict[parameter] = mod;
+    std::shared_ptr<bus_module> mod = std::make_shared<bus_module>(target_instance, target_module, parameter_name);
+    mod->set_base_address(address);
+    modules_dict[parameter_name] = mod;
 }
 
-void sv_analyzer::analyze_crossbar(const std::string& docstring, const std::string& parameter, bool is_root) {
+void sv_analyzer::analyze_crossbar(const std::string& docstring, const std::string& parameter_name, uint32_t address, bool is_root) {
 
     std::regex children_list_ex(R"((?: )*children: (.*))");
     std::regex child_ex(R"(([a-zA-Z0-9$_]+))");
@@ -156,11 +159,12 @@ void sv_analyzer::analyze_crossbar(const std::string& docstring, const std::stri
         children_vect.push_back(item);
     }
 
-    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>(children_vect, parameter);
+    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>(children_vect, parameter_name);
+    xbar->set_base_address(address);
     if(is_root){
         bus_roots.push_back(xbar);
     } else {
-        crossbar_dict[parameter] = xbar;
+        crossbar_dict[parameter_name] = xbar;
     }
 
 }

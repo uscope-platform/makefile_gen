@@ -23,6 +23,6 @@ bus_registers::bus_registers(std::string n, std::string p) : bus_component(std::
 }
 
 std::string bus_registers::to_string(std::string prefix) {
-    return prefix + name + " [registers]";
+    return prefix + name + " [registers] -- " + parameter_name + " -- " + std::to_string(base_address);
 }
 

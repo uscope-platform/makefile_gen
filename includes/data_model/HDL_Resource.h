@@ -74,6 +74,7 @@ public:
     hdl_deps_t get_dependencies();
     const std::string &getName() const;
     std::string get_path();
+    sv_feature get_type() {return hdl_type;};
     bool is_interface();
 
     void set_parameters(std::unordered_map<std::string, uint32_t> p) { parameters = std::move(p);}

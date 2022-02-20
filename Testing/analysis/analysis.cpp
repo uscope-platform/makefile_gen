@@ -19,7 +19,7 @@
 
 #include "analysis/sv_analyzer.h"
 
-TEST( sv_analysis_test , package) {
+TEST( analysis_test , package) {
 
     sv_analyzer analyzer("check_files/test_package.sv");
     analyzer.cleanup_content("`(.*)");
@@ -35,3 +35,16 @@ TEST( sv_analysis_test , package) {
 
     ASSERT_EQ(check_map, parameters);
 }
+
+TEST( analysis_test , sv_module) {
+
+    sv_analyzer analyzer("check_files/test_sv_module.sv");
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    hdl_deps_t check_dep;
+    check_dep["SyndromeCalculator"] = module;
+    std::shared_ptr<HDL_Resource> check_res = std::make_shared<HDL_Resource>(module, "Decoder", "check_files/test_sv_module.sv", check_dep, verilog_entity);
+    ASSERT_EQ(*resource, *check_res);
+
+}
+

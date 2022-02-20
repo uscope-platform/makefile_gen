@@ -84,16 +84,13 @@ std::string HDL_Resource::get_path() {
 }
 
 bool operator==(const HDL_Resource &lhs, const HDL_Resource &rhs) {
-    std::string name;
-    std::string path;
-    resource_type_t resource_type;
-    sv_feature hdl_type;
-    hdl_deps_t dependencies;
+    bool ret = true;
 
-    bool factor_1 = lhs.name == rhs.name;
-    bool factor_2 = lhs.path == rhs.path;
-    bool factor_3 = lhs.resource_type == rhs.resource_type;
-    bool factor_4 = lhs.hdl_type == rhs.hdl_type;
-    bool factor_5 = lhs.dependencies == rhs.dependencies;
-    return factor_1 && factor_2 && factor_3 && factor_4 && factor_5;
+    ret &= lhs.name == rhs.name;
+    ret &= lhs.path == rhs.path;
+    ret &= lhs.resource_type == rhs.resource_type;
+    ret &= lhs.hdl_type == rhs.hdl_type;
+    ret &= lhs.dependencies == rhs.dependencies;
+    ret &= lhs.parameters == rhs.parameters;
+    return ret;
 }
