@@ -14,6 +14,8 @@
 // limitations under the License.
 
 
+`define MKF_GEN_ANALYZE_BUS
+
 package test_package;
 
     /**

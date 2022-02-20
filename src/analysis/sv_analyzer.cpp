@@ -33,7 +33,9 @@ void sv_analyzer::cleanup_content(const std::string& regex) {
                        std::istreambuf_iterator<char>());
 
     std::regex e (regex);
-    processed_content = std::regex_replace (raw_content,e,"");
+    search_bus_defining_package(raw_content);
+    sv_modules_explorer.set_contains_bus_defining_package(is_bus_defining_package);
+    processed_content = std::regex_replace(raw_content,e,"");
 
 }
 
@@ -61,7 +63,7 @@ std::vector<std::shared_ptr<HDL_Resource>> sv_analyzer::analyze() {
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&sv_modules_explorer, Tree);
 
 
-    if(sv_modules_explorer.is_package_declared()){
+    if(is_bus_defining_package){
         std::vector<std::shared_ptr<HDL_Resource>> entities = sv_modules_explorer.get_entities();
         std::shared_ptr<HDL_Resource> declared_package;
         for(auto &e:entities){
@@ -169,6 +171,11 @@ void sv_analyzer::analyze_crossbar(const std::string& docstring, const std::stri
 
 }
 
+void sv_analyzer::search_bus_defining_package(std::string &content) {
+    std::regex definition(R"(`define MKF_GEN_ANALYZE_BUS)");
+
+    is_bus_defining_package = std::regex_search(content,definition);
+}
 
 
 void SvParserErrorListener::syntaxError(antlr4::Recognizer *recognizer, antlr4::Token *offendingSymbol, size_t line,

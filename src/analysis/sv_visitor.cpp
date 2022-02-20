@@ -19,7 +19,6 @@
 
 sv_visitor::sv_visitor(std::string p) {
     path = std::move(p);
-    file_declare_package = false;
 }
 
 
@@ -87,10 +86,6 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
     }
 }
 
-void sv_visitor::enterPackage_declaration(sv2017::Package_declarationContext *ctx) {
-    file_declare_package = true;
-}
-
 void sv_visitor::exitPackage_declaration(sv2017::Package_declarationContext *ctx) {
     std::string package_name = ctx->identifier()[0]->getText();
     calculate_parameters();
@@ -113,7 +108,7 @@ void sv_visitor::enterParameter_declaration(sv2017::Parameter_declarationContext
 }
 
 void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext *ctx) {
-    if(file_declare_package){
+    if(file_contains_bus_defining_package){
         if(string_components.size() == 1){
             try {
                 uint32_t addr = std::stoul(string_components.front());
@@ -136,7 +131,7 @@ void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext 
 }
 
 void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
-    if(file_declare_package){
+    if(file_contains_bus_defining_package){
         if(ctx->expression().size()>1){
             if(ctx->operator_plus_minus()== nullptr && ctx->operator_mul_div_mod()== nullptr){
                 std::cerr<< "Warning: unsupported operation detected in parameter assignment expression" << std::endl;
@@ -147,27 +142,27 @@ void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
 }
 
 void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
-    if(file_declare_package){
+    if(file_contains_bus_defining_package){
         uint32_t numeric_val = parse_number(ctx->getText());
         string_components.push_back(std::to_string(numeric_val));
     }
 }
 
 void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
-    if(file_declare_package){
+    if(file_contains_bus_defining_package){
         std::string dbg = ctx->getText();
         string_components.push_back(ctx->getText());
     }
 }
 
 void sv_visitor::exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx) {
-    if(file_declare_package){
+    if(file_contains_bus_defining_package){
         string_components.push_back(ctx->getText());
     }
 }
 
 void sv_visitor::exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *ctx) {
-    if(file_declare_package){
+    if(file_contains_bus_defining_package){
         string_components.push_back(ctx->getText());
     }
 }

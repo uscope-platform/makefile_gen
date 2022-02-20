@@ -36,6 +36,8 @@ class sv_visitor : public sv2017BaseListener {
 
 public:
     explicit sv_visitor(std::string p);
+    void set_contains_bus_defining_package(bool b) { file_contains_bus_defining_package = b;};
+
     void enterModule_declaration(sv2017::Module_declarationContext *ctx) override;
     void exitModule_declaration(sv2017::Module_declarationContext *ctx) override;
     void exitInterface_declaration(sv2017::Interface_declarationContext *ctx) override;
@@ -44,7 +46,6 @@ public:
     void exitInterface_header(sv2017::Interface_headerContext *ctx) override;
     void exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) override;
     void exitPackage_declaration(sv2017::Package_declarationContext *ctx) override;
-    void enterPackage_declaration(sv2017::Package_declarationContext *ctx) override;
     void exitPackage_or_class_scoped_path(sv2017::Package_or_class_scoped_pathContext *ctx) override;
     void enterParameter_declaration(sv2017::Parameter_declarationContext *ctx) override;
     void exitParameter_declaration(sv2017::Parameter_declarationContext *ctx) override;
@@ -52,8 +53,6 @@ public:
     void exitExpression(sv2017::ExpressionContext *ctx) override;
     void exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *ctx) override;
     void exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx) override;
-
-    const bool is_package_declared() {return file_declare_package;};
 
     void exitPrimaryLit(sv2017::PrimaryLitContext *ctx) override;
     void exitPrimaryPath(sv2017::PrimaryPathContext *ctx) override;
@@ -76,7 +75,7 @@ private:
     std::string current_parameter;
     uint32_t current_address;
     std::vector<expression> package_parameters;
-    bool file_declare_package;
+    bool file_contains_bus_defining_package;
     std::vector<std::string> current_operands;
     std::vector<std::string> current_operators;
 

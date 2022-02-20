@@ -41,7 +41,7 @@ public:
     std::vector<std::shared_ptr<HDL_Resource>> analyze();
 
 private:
-
+    void search_bus_defining_package(std::string &content);
     void analyze_package_docstings(std::unordered_map<std::string, uint32_t> parameters);
     void analyze_register(const std::string& docstring, const std::string& parameter_name, uint32_t address);
     void analyze_module(const std::string& docstring, const std::string& parameter_name, uint32_t address);
@@ -57,6 +57,7 @@ private:
     std::string path;
     std::string processed_content;
     sv_visitor sv_modules_explorer;
+    bool is_bus_defining_package;
 
     static std::string ltrim(const std::string &s) {
         size_t start = s.find_first_not_of(" \n\r\t\f\v");
