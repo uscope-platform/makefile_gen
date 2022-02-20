@@ -29,6 +29,7 @@ configure_file(files/Depfile ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file(check_files/Depfile_gs ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/test_package.sv ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/test_sv_module.sv ${CHECK_FILES_DIR} COPYONLY)
+configure_file(check_files/test_vhdl_module.vhd ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/top_synth_sv.sv ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/top_tb_sv.sv ${CHECK_FILES_DIR} COPYONLY)
 

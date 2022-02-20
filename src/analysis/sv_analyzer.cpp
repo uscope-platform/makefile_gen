@@ -92,7 +92,7 @@ void sv_analyzer::analyze_package_docstings(std::unordered_map<std::string, uint
             analyze_crossbar(docstring, param_name,parameters[param_name], false);
         } else if(t=="module"){
             analyze_module(docstring, param_name,parameters[param_name]);
-        } else if(t=="register"){
+        } else if(t=="registers"){
             analyze_register(docstring, param_name,parameters[param_name]);
         } else if(t=="bus_root"){
             analyze_crossbar(docstring, param_name,parameters[param_name], true);

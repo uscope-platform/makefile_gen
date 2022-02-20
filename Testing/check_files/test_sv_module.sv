@@ -8,8 +8,12 @@ module Decoder (
     axi_stream.master data_out
 );
 
+   reg [31:0] memory [5:0];
+   initial memory = $readmemh("mem/init/file.dat");
 
-    SyndromeCalculator SC (
+    SyndromeCalculator #(
+        .TEST_PARAM(test_package::param)
+    ) SC (
         .clock(clock),
         .reset(reset),
         .data_in(data_in),
@@ -17,3 +21,10 @@ module Decoder (
     );
 
 endmodule
+
+
+interface test_if;
+
+    logic signal_1;
+    logic signal_2;
+endinterface

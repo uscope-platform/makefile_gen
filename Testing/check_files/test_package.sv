@@ -44,5 +44,18 @@ package test_package;
     **/
     parameter scope_mux = gpio;
 
+    /**
+        parameter: modulo_parameter
+        type: registers
+        target: SicDriveMasterScope
+    **/
+    parameter modulo_parameter = 3 % 2;
+
+    /**
+        parameter: subtraction_parameter
+        type: registers
+        target: SicDriveMasterScope
+    **/
+    parameter subtraction_parameter = 'o4 - 'b10;
 
 endpackage

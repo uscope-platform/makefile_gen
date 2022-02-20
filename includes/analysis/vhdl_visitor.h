@@ -31,6 +31,7 @@ public:
     explicit vhdl_visitor(std::string p);
     void enterEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) override;
     void exitEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) override;
+    void exitArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) override;
     void exitComponent_instantiation_statement(mgp_vh::vhdlParser::Component_instantiation_statementContext *ctx) override;
     std::vector<std::shared_ptr<HDL_Resource>> get_entities();
 private:

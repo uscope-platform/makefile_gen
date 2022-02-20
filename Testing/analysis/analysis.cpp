@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 
 #include "analysis/sv_analyzer.h"
+#include "analysis/vhdl_analyzer.h"
 
 TEST( analysis_test , package) {
 
@@ -32,7 +33,8 @@ TEST( analysis_test , package) {
     check_map["timebase"] = 0x43c00000;
     check_map["gpio"] = 0x43c01001;
     check_map["scope_mux"] = 0x43c01001;
-
+    check_map["modulo_parameter"] = 1;
+    check_map["subtraction_parameter"] = 2;
     ASSERT_EQ(check_map, parameters);
 }
 
@@ -43,8 +45,24 @@ TEST( analysis_test , sv_module) {
     auto resource = analyzer.analyze()[0];
     hdl_deps_t check_dep;
     check_dep["SyndromeCalculator"] = module;
+    check_dep["test_package"] = package;
+    check_dep["file"] = memory_init;
     std::shared_ptr<HDL_Resource> check_res = std::make_shared<HDL_Resource>(module, "Decoder", "check_files/test_sv_module.sv", check_dep, verilog_entity);
     ASSERT_EQ(*resource, *check_res);
+    resource = analyzer.analyze()[1];
+    hdl_deps_t dummy;
+    check_res = std::make_shared<HDL_Resource>(interface, "test_if", "check_files/test_sv_module.sv", dummy, verilog_entity);
+    ASSERT_EQ(*resource, *check_res);
+}
 
+TEST( analysis_test , vhdl_module) {
+
+    vhdl_analyzer analyzer("check_files/test_vhdl_module.vhd");
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    hdl_deps_t check_dep;
+    check_dep["ANDGATE"] = module;
+    std::shared_ptr<HDL_Resource> check_res = std::make_shared<HDL_Resource>(null_feature, "half_adder", "check_files/test_vhdl_module.vhd", check_dep, vhdl_entity);
+    ASSERT_EQ(*resource, *check_res);
 }
 

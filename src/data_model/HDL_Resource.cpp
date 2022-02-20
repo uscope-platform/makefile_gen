@@ -94,3 +94,7 @@ bool operator==(const HDL_Resource &lhs, const HDL_Resource &rhs) {
     ret &= lhs.parameters == rhs.parameters;
     return ret;
 }
+
+void HDL_Resource::add_dependencies(hdl_deps_t deps) {
+    dependencies.insert( deps.begin(), deps.end());
+}

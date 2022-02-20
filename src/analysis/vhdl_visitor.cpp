@@ -33,6 +33,16 @@ void vhdl_visitor::enterEntity_declaration(mgp_vh::vhdlParser::Entity_declaratio
     declared_feature = std::make_pair(module_name, null_feature);
 }
 
+void vhdl_visitor::exitArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) {
+    std::string name = ctx->name()->getText();
+    for(auto &item:entities){
+        if(item->getName() == name){
+            item->add_dependencies(instantiated_features);
+        }
+    }
+}
+
+
 void vhdl_visitor::exitEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) {
     std::shared_ptr<HDL_Resource> e = std::make_shared<HDL_Resource>(declared_feature.second, declared_feature.first, path, instantiated_features, vhdl_entity);
     entities.push_back(e);
@@ -55,3 +65,4 @@ void vhdl_visitor::exitComponent_instantiation_statement(mgp_vh::vhdlParser::Com
 
     instantiated_features[module_name] = module;
 }
+

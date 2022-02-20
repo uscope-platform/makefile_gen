@@ -84,7 +84,6 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
         if(p.extension().string() == ".dat"|| p.extension().string() == ".mem"){
             instantiated_features[p.stem()] = memory_init;
         }
-
     }
 }
 
