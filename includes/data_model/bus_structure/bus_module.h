@@ -20,15 +20,23 @@
 #include "data_model/bus_structure/bus_component.h"
 
 #include <memory>
+#include <sstream>
+#include <vector>
 #include <string>
 
 class bus_module : public bus_component{
     public:
     bus_module(std::string n, std::string t, std::string p);
+    explicit bus_module(const std::string& serialized_obj);
+    std::string get_name() {return name;};
+    std::string get_module_type() {return instance_type;};
     std::string to_string(std::string prefix) override;
+
+    operator std::string();
+    friend bool operator==(const bus_module&lhs, const bus_module&rhs);
 private:
     std::string name;
-    std::string type;
+    std::string instance_type;
 };
 
 

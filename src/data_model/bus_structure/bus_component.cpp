@@ -43,3 +43,31 @@ std::string bus_component::component_to_string(const std::shared_ptr<bus_compone
     }
     return ret;
 }
+
+
+
+bool operator==(const bus_component &lhs, const bus_component &rhs) {
+    bool res = true;
+
+    res &= lhs.type == rhs.type;
+    res &= lhs.base_address == rhs.base_address;
+    res &= lhs.parameter_name == rhs.parameter_name;
+    return res;
+}
+
+std::shared_ptr<bus_component> bus_component::string_to_component(std::string s) {
+
+    char component_type = s[0];
+
+    switch (component_type) {
+        case '0':
+            return std::make_shared<bus_crossbar>(s.substr(1, s.size()));
+        case '1':
+            return std::make_shared<bus_registers>(s.substr(1, s.size()));
+        case '2':
+            return std::make_shared<bus_module>(s.substr(1, s.size()));
+        default:
+            throw std::invalid_argument("Invalid bus component type");
+    }
+
+}

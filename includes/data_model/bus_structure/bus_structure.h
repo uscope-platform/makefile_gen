@@ -13,28 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-#ifndef MAKEFILEGEN_V2_BUS_REGISTERS_H
-#define MAKEFILEGEN_V2_BUS_REGISTERS_H
+#ifndef MAKEFILEGEN_V2_BUS_STRUCTURE_H
+#define MAKEFILEGEN_V2_BUS_STRUCTURE_H
 
 #include "data_model/bus_structure/bus_component.h"
+#include "data_model/bus_structure/bus_registers.h"
+#include "data_model/bus_structure/bus_module.h"
+#include "data_model/bus_structure/bus_crossbar.h"
 
-#include <string>
-#include <sstream>
-#include <vector>
-#include <utility>
-
-class bus_registers : public bus_component{
-public:
-    bus_registers(std::string n, std::string p);
-    explicit bus_registers(const std::string& serialized_obj);
-    operator std::string();
-    std::string to_string(std::string prefix) override;
-    std::string get_name() {return name;};
-    friend bool operator==(const bus_registers&lhs, const bus_registers&rhs);
-private:
-    std::string name;
-};
-
-
-#endif //MAKEFILEGEN_V2_BUS_REGISTERS_H
+#endif //MAKEFILEGEN_V2_BUS_STRUCTURE_H

@@ -21,8 +21,10 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <memory>
 
-#include "data_model/expression.h"
+
+#include "data_model/bus_structure/bus_structure.h"
 
 #define SV_FEATURE_MODULE 0
 #define SV_FEATURE_INTERFACE 1
@@ -70,9 +72,13 @@ class HDL_Resource {
 public:
     HDL_Resource();
     HDL_Resource(sv_feature type, std::string n, std::string p, hdl_deps_t deps, resource_type_t r_type);
+    void deserialize_bus_vector(const std::string& ser);
+    static std::vector<std::string> tokenize(const std::string& str, char token);
     explicit HDL_Resource(const std::string& serialized_obj);
     hdl_deps_t get_dependencies();
     void add_dependencies(hdl_deps_t deps);
+    void add_bus_roots(std::vector<std::shared_ptr<bus_crossbar>> bc) { bus_roots = std::move(bc);};
+    std::vector<std::shared_ptr<bus_crossbar>> get_bus_roots() {return bus_roots;};
     const std::string &getName() const;
     std::string get_path();
     sv_feature get_type() {return hdl_type;};
@@ -87,9 +93,11 @@ private:
     std::string path;
     resource_type_t resource_type;
     sv_feature hdl_type;
-    std::unordered_map<std::string, uint32_t> parameters;
-
     hdl_deps_t dependencies;
+
+    //SV PACKAGE SPECIFIC PARAMETERS
+    std::unordered_map<std::string, uint32_t> parameters;
+    std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
 };
 
 
