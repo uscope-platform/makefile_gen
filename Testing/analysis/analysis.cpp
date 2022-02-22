@@ -26,6 +26,7 @@ TEST( analysis_test , package) {
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
     ASSERT_EQ(resource->getName(), "test_package");
+
     std::unordered_map<std::string, uint32_t> parameters = resource->get_parameters();
 
     std::unordered_map<std::string, uint32_t> check_map;
@@ -36,6 +37,15 @@ TEST( analysis_test , package) {
     check_map["modulo_parameter"] = 1;
     check_map["subtraction_parameter"] = 2;
     ASSERT_EQ(check_map, parameters);
+
+    std::shared_ptr<HDL_Resource> check_res = std::make_shared<HDL_Resource>(package, "test_package", "check_files/test_package.sv", hdl_deps_t(), verilog_entity);
+    check_res->set_parameters(check_map);
+
+    std::string temp = *resource->get_bus_roots()[0];
+    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>("1136656384,bus_base,0,01136656384,timebase,0,/2general_ctrls,gpio,gpio,1136660481,2");
+    std::vector<std::shared_ptr<bus_crossbar>> bus_roots({xbar});
+    check_res->add_bus_roots(bus_roots);
+    ASSERT_EQ(*resource, *check_res);
 }
 
 TEST( analysis_test , sv_module) {

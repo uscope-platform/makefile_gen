@@ -21,12 +21,19 @@ Depfile::Depfile(const std::string& filename) {
     dfstream >> content;
 }
 
+Depfile::Depfile(const Depfile &file) {
+    content = file.get_content();
+}
 std::string Depfile::get_synth_tl() {
     return content["general"]["synth_tl"];
 }
 
 std::string Depfile::get_sim_tl() {
     return content["general"]["sim_tl"];
+}
+
+std::string Depfile::get_bus_defining_package() {
+    return content["general"]["bus_defining_package"];
 }
 
 std::vector<std::string> Depfile::get_additional_synth_modules() {

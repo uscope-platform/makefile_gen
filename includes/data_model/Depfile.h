@@ -30,8 +30,11 @@ using json = nlohmann::json;
 class Depfile {
 public:
     explicit Depfile(const std::string& filename);
+    Depfile ( const Depfile & file);
     std::string get_synth_tl();
+    [[nodiscard]] json get_content() const {return content;};
     std::string get_sim_tl();
+    std::string get_bus_defining_package();
     std::string get_project_name();
     std::vector<std::string> get_additional_synth_modules();
     std::vector<std::string> get_additional_sim_modules();

@@ -69,6 +69,12 @@ TEST_F( DepfileTest , Depfile_sim_top) {
 
 }
 
+TEST_F( DepfileTest , Depfile_bus_defining_package) {
+    SetUp("Depfile");
+    ASSERT_EQ(file->get_bus_defining_package(), "package_name");
+
+}
+
 
 
 TEST_F( DepfileTest , Depfile_excluded_modules) {

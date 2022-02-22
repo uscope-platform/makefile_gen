@@ -24,6 +24,8 @@ int main(int argc, char *argv[]){
     app.add_option("-D,--depfile", target, "Target Depfile")->check(CLI::ExistingFile);
     bool generate_xilinx = false;
     app.add_flag("--X",generate_xilinx,"Generate Xilinx Makefile");
+    bool generate_app_definition = false;
+    app.add_flag("--A",generate_app_definition,"Generate application definition file");
     bool generate_lattice = false;
     app.add_flag("--L",generate_lattice,"Generate Lattice Makefile");
     bool synth_design = false;
@@ -139,6 +141,11 @@ int main(int argc, char *argv[]){
 
         Radiant_manager manager(s_store, !keep_makefile, dep.get_project_name());
         manager.create_project("makefile.tcl",  true);
+    }
+
+    if(generate_app_definition){
+        application_definition_generator app_def_gen(dep, d_store);
+        app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
     }
 
     return 0;

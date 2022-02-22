@@ -9,7 +9,8 @@ set(MAKEFILEGEN_TESTS
         data_model/DataFile_test.cpp
         data_model/bus_structure_test.cpp
         analysis/analysis.cpp
-        Backend/Application_management_test.cpp)
+        Backend/Application_management_test.cpp
+        Backend/Application_definition_generator.cpp)
 
 
 add_executable(tests ${MAKEFILEGEN_TESTS} ${MAKEFILE_GEN_SRCS})

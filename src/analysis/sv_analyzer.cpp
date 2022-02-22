@@ -72,6 +72,7 @@ std::vector<std::shared_ptr<HDL_Resource>> sv_analyzer::analyze() {
             }
         }
         analyze_package_docstings(declared_package->get_parameters());
+        declared_package->add_bus_roots(bus_roots);
     }
     return  sv_modules_explorer.get_entities();
 }

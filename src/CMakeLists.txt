@@ -17,6 +17,7 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Script.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Constraints.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Dependency_resolver.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/application_definition_generator.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Xilinx/Vivado_manager.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/new_app_generator.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Auxiliary_resolver.cpp /
