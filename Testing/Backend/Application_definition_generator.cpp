@@ -59,7 +59,7 @@ TEST( app_def_generation , generate_app_def) {
     std::vector<nlohmann::json> check_peripherals;
 
     nlohmann::json p1;
-    p1["base_address"] = "12";
+    p1["base_address"] = "0xc";
     p1["name"] = "register_instance";
     p1["peripheral_id"] = "register_instance";
     p1["proxied"] = false;
@@ -70,7 +70,7 @@ TEST( app_def_generation , generate_app_def) {
     check_peripherals.push_back(p1);
 
     nlohmann::json p2;
-    p2["base_address"] = "13";
+    p2["base_address"] = "0xd";
     p2["name"] = "module_instance";
     p2["peripheral_id"] = "module_instance";
     p2["proxied"] = false;

@@ -6,6 +6,8 @@
  **/
 lexer grammar sv2017Lexer;
 
+channels { DOCUMENTATION_CHANNEL}
+
 KW_DOLAR_ERROR: '$error';
 KW_DOLAR_FATAL: '$fatal';
 KW_DOLAR_FULLSKEW: '$fullskew';
@@ -397,7 +399,13 @@ ONE_LINE_COMMENT:
     '//' .*? ( '\r' )? ( EOF
                          | '\n'
                        ) -> channel(HIDDEN);
+
+
+DOCUMENTATION_COMMENT: '/**' .*? '**/' -> channel(DOCUMENTATION_CHANNEL);
+
 BLOCK_COMMENT: '/*' .*? '*/' -> channel(HIDDEN);
+
+
 WHITE_SPACE: [ \t\n\r\f] + -> channel(HIDDEN);
 fragment EDGE_DESCRIPTOR:
     Z_OR_X ZERO_OR_ONE
@@ -488,6 +496,7 @@ fragment ANY_ASCII_CHARACTERS:
  ;
 fragment ANY_PRINTABLE_ASCII_CHARACTER_EXCEPT_WHITE_SPACE: '\u0021'..'\u007E';
 
+
 mode TABLE_MODE;
     TABLE_MODE_KW_ENDTABLE: KW_ENDTABLE -> popMode,type(KW_ENDTABLE);
     LEVEL_SYMBOL:
@@ -506,3 +515,4 @@ mode TABLE_MODE;
     TABLE_MODE_RPAREN: ')' -> type(RPAREN);
     TABLE_MODE_SEMI: ';' -> type(SEMI);
     TABLE_MODE_WHITE_SPACE: [ \t\n\r] + -> channel(HIDDEN),type(WHITE_SPACE);
+

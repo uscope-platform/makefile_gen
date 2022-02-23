@@ -22,12 +22,12 @@
 #include <regex>
 #include <vector>
 
+#include "third_party/json.hpp"
 #include "data_model/HDL_Resource.h"
-
 #include "data_model/bus_structure/bus_registers.h"
 #include "data_model/bus_structure/bus_crossbar.h"
 #include "data_model/bus_structure/bus_module.h"
-
+#include "analysis/documentation_analyzer.h"
 
 #include "mgp_sv/sv2017Lexer.h"
 #include "mgp_sv/sv2017.h"
@@ -41,37 +41,19 @@ public:
     std::vector<std::shared_ptr<HDL_Resource>> analyze();
 
 private:
+
+    void process_hdl();
     void search_bus_defining_package(std::string &content);
-    void analyze_package_docstings(std::unordered_map<std::string, uint32_t> parameters);
-    void analyze_register(const std::string& docstring, const std::string& parameter_name, uint32_t address);
-    void analyze_module(const std::string& docstring, const std::string& parameter_name, uint32_t address);
-    void analyze_crossbar(const std::string& docstring, const std::string& parameter_name, uint32_t address, bool is_root);
 
-    void construct_bus_hierarchy(std::shared_ptr<bus_crossbar> dict);
 
-    std::unordered_map<std::string, std::shared_ptr<bus_registers>> registers_dict;
-    std::unordered_map<std::string, std::shared_ptr<bus_module>> modules_dict;
-    std::unordered_map<std::string, std::shared_ptr<bus_crossbar>> crossbar_dict;
+    std::unordered_map<std::string, uint32_t> parameters;
 
-    std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
     std::string path;
     std::string processed_content;
     sv_visitor sv_modules_explorer;
     bool is_bus_defining_package;
+    std::shared_ptr<HDL_Resource> package_ptr;
 
-    static std::string ltrim(const std::string &s) {
-        size_t start = s.find_first_not_of(" \n\r\t\f\v");
-        return (start == std::string::npos) ? "" : s.substr(start);
-    }
-
-    static std::string rtrim(const std::string &s) {
-        size_t end = s.find_last_not_of(" \n\r\t\f\v");
-        return (end == std::string::npos) ? "" : s.substr(0, end + 1);
-    }
-
-    static std::string trim(const std::string &s) {
-        return rtrim(ltrim(s));
-    }
 };
 
 

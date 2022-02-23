@@ -27,7 +27,7 @@
 
 class application_definition_generator {
 public:
-    explicit application_definition_generator(const Depfile& file, std::shared_ptr<data_store> store);
+    application_definition_generator(const Depfile& file, std::shared_ptr<bus_crossbar> xbar);
     void write_definition_file(const std::string &path);
 private:
     void construct_application();

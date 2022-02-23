@@ -144,7 +144,8 @@ int main(int argc, char *argv[]){
     }
 
     if(generate_app_definition){
-        application_definition_generator app_def_gen(dep, d_store);
+        std::shared_ptr<bus_crossbar> xbar = std::static_pointer_cast<bus_crossbar>(d_store->get_HDL_resource(dep.get_bus_defining_package())->get_bus_roots()[0]);
+        application_definition_generator app_def_gen(dep, xbar);
         app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
     }
 

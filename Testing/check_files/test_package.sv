@@ -19,44 +19,73 @@
 package test_package;
 
     /**
-        parameter: bus_base
-        type: bus_root
-        children: timebase gpio fcore uscope sensor speed rtcu delay_emulator
+        {
+            "name": "bus_base",
+            "type": "package_parameter",
+            "class": "bus_root",
+            "children": [
+                "timebase", "gpio", "fcore",
+                "uscope", "sensor", "speed",
+                "rtcu", "delay_emulator"
+            ]
+        }
     **/
     parameter bus_base = 32'h43c00000;
 
     /**
-        parameter: timebase
-        type: crossbar
-        children: current_timebase angle_timebase speed_timebase
+        {
+            "name": "timebase",
+            "type": "package_parameter",
+            "class": "crossbar",
+            "children": [
+                "current_timebase",
+                "angle_timebase",
+                "speed_timebase"
+            ]
+        }
     **/
     parameter timebase = bus_base;
 
     /**
-        parameter: gpio
-        type: module
-        target: gpio general_ctrls
+        {
+            "name": "gpio",
+            "type": "package_parameter",
+            "class": "module",
+            "target": {
+                    "module_type": "gpio",
+                    "instance_name": "general_ctrls"
+                }
+        }
     **/
     parameter gpio = timebase + 32'h1000 * 2 / 2 + 1;
 
     /**
-        parameter: scope_mux
-        type: registers
-        target: SicDriveMasterScope
+        {
+            "name": "scope_mux",
+            "type": "package_parameter",
+            "class": "registers",
+            "target": "SicDriveMasterScope"
+        }
     **/
     parameter scope_mux = gpio;
 
     /**
-        parameter: modulo_parameter
-        type: registers
-        target: SicDriveMasterScope
+        {
+            "name": "modulo_parameter",
+            "type": "package_parameter",
+            "class": "registers",
+            "target": "SicDriveMasterScope"
+        }
     **/
     parameter modulo_parameter = 3 % 2;
 
     /**
-        parameter: subtraction_parameter
-        type: registers
-        target: SicDriveMasterScope
+        {
+            "name": "subtraction_parameter",
+            "type": "package_parameter",
+            "class": "registers",
+            "target": "SicDriveMasterScope"
+        }
     **/
     parameter subtraction_parameter = 'o4 - 'b10;
 

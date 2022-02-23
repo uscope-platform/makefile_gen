@@ -15,17 +15,16 @@
 
 #include "Backend/application_definition_generator.h"
 
-application_definition_generator::application_definition_generator(const Depfile& file, std::shared_ptr<data_store> store) : dep(file){
-    d_store = std::move(store);
+#include <utility>
 
-    bus_root = std::static_pointer_cast<bus_crossbar>(d_store->get_HDL_resource(dep.get_bus_defining_package())->get_bus_roots()[0]);
 
+application_definition_generator::application_definition_generator(const Depfile &file,
+                                                                   std::shared_ptr<bus_crossbar> xbar) : dep(file){
+    bus_root = std::move(xbar);
     walk_bus_structure(bus_root);
 
     construct_application();
-
 }
-
 
 void application_definition_generator::walk_bus_structure(const std::shared_ptr<bus_crossbar>& node) {
 
@@ -92,5 +91,6 @@ std::string application_definition_generator::uint_to_hex(uint32_t i) {
     out << std::hex << i;
     return out.str();
 }
+
 
 

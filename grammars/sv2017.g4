@@ -13,6 +13,7 @@ options { tokenVocab=sv2017Lexer; }
 
 /**********************************************************************************************************************/
 /* The start rule */
+
 source_text: ( timeunits_declaration )? ( description )* EOF;
 description:
    module_declaration
