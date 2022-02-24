@@ -24,15 +24,18 @@
 
 class DataFile {
 public:
-
+    DataFile() = default;
     DataFile(std::string n, std::string p);
-    explicit DataFile(const std::string&  ser);
 
     std::string get_name();
     void set_path(std::string p);
     std::string get_path();
 
-    operator std::string();
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(name, path);
+    }
+
     friend bool operator==(const DataFile&lhs, const DataFile&rhs);
 private:
     std::string name;

@@ -17,7 +17,7 @@
 #ifndef MAKEFILEGEN_V2_BUS_REGISTERS_H
 #define MAKEFILEGEN_V2_BUS_REGISTERS_H
 
-#include "data_model/bus_structure/bus_component.h"
+#include "bus_component.h"
 
 #include <string>
 #include <sstream>
@@ -26,15 +26,30 @@
 
 class bus_registers : public bus_component{
 public:
+    bus_registers() = default;
     bus_registers(std::string n, std::string p);
-    explicit bus_registers(const std::string& serialized_obj);
-    operator std::string();
-    std::string to_string(std::string prefix) override;
+
+
+    [[nodiscard]] uint32_t get_base_address() const {return base_address;};
+    void  set_base_address(uint32_t ba) { base_address = ba;};
+
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(name, parameter_name, base_address);
+    }
+
+    std::string pretty_print(std::string prefix);
     std::string get_name() {return name;};
     friend bool operator==(const bus_registers&lhs, const bus_registers&rhs);
 private:
     std::string name;
+    std::string parameter_name;
+    uint32_t base_address;
 };
 
+#include "third_party/cereal/types/polymorphic.hpp"
+#include "third_party/cereal/archives/binary.hpp"
 
+CEREAL_REGISTER_TYPE(bus_registers);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(bus_component, bus_registers)
 #endif //MAKEFILEGEN_V2_BUS_REGISTERS_H

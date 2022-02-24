@@ -17,18 +17,6 @@
 
 
 
-DataFile::DataFile(const std::string& ser) {
-    std::istringstream stream(ser);
-    std::vector<std::string> tokens;
-    std::string tmp;
-    tokens.reserve(2);
-    while(std::getline(stream, tmp, ',')) {
-        tokens.push_back(tmp);
-    }
-    name = std::string(tokens[0]);
-    path = std::string(tokens[1]);
-}
-
 DataFile::DataFile(std::string n, std::string p ) {
     name = std::move(n);
     path = std::move(p);
@@ -46,12 +34,6 @@ std::string DataFile::get_name() {
     return name;
 }
 
-DataFile::operator std::string() {
-    std::ostringstream ret_val;
-    ret_val << name << "," << path;
-
-    return ret_val.str();
-}
 
 bool operator==(const DataFile &lhs, const DataFile &rhs) {
     bool ret_val = true;

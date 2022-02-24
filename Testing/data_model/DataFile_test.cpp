@@ -27,16 +27,3 @@ TEST( DataFile_test , path) {
     DataFile test_class("test", "path");
     ASSERT_EQ(test_class.get_path(), "path");
 }
-
-TEST( DataFile_test, deserialization) {
-    DataFile test_class("test,/data/path");
-    DataFile checker("test", "/data/path");
-
-    ASSERT_EQ(test_class, checker);
-}
-
-TEST( DataFile_test , serialization) {
-    DataFile test_class("test", "/data/path");
-    std::string result = test_class;
-    ASSERT_EQ(result, "test,/data/path");
-}

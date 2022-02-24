@@ -16,7 +16,6 @@
 #include <gtest/gtest.h>
 
 #include "../includes/data_model/data_store.h"
-#include "../includes/data_model/Constraints.h"
 
 
 TEST( data_store_test , evict_constr) {
@@ -84,83 +83,28 @@ TEST( data_store_test , evict_hdl_entity) {
 }
 
 
-TEST( data_store_test , ser_des_constraints) {
-
-    auto *store_1 = new data_store();
-    Constraints test_constr("test");
-    // The path is chosen to always exist as otherwise the Cache entry is removed  by the cache clearing
-    // routine invoked by the constructor
-    test_constr.set_path("/bin/sh");
-    std::shared_ptr<Constraints> test_constr_ptr = std::make_shared<Constraints>(test_constr);
-    store_1->store_constraint(test_constr_ptr);
-    delete store_1;
-    auto *store_2 = new data_store();
-    std::string name = "test";
-    std::shared_ptr<Constraints> result = store_2->get_constraint(name);
-    ASSERT_EQ(*result, *test_constr_ptr);
-    store_2->evict_constraint(test_constr_ptr->get_name());
-    delete store_2;
-
-}
-
 
 TEST( data_store_test , ser_des_data_File) {
 
-    auto *store_1 = new data_store();
-    // The path is chosen to always exist as otherwise the Cache entry is removed  by the cache clearing
-    // routine invoked by the constructor
-    DataFile test_df("test","/bin/sh");
 
-    std::shared_ptr<DataFile> test_df_ptr = std::make_shared<DataFile>(test_df);
-    store_1->store_data_file(test_df_ptr);
-    delete store_1;
-    auto *store_2 = new data_store();
-    std::string name = "test";
-    std::shared_ptr<DataFile> result = store_2->get_data_file(name);
-    ASSERT_EQ(*result, *test_df_ptr);
-    store_2->evict_script(test_df_ptr->get_name());
-    delete store_2;
+    DataFile data_out("test", "/test/path");
 
-}
+    std::stringstream os;
+    {
+        cereal::BinaryOutputArchive archive_out(os);
+        archive_out(data_out);
+    }
 
-TEST( data_store_test , ser_des_script) {
-
-    auto *store_1 = new data_store();
-    Script test_scr("test","py");
-    // The path is chosen to always exist as otherwise the Cache entry is removed  by the cache clearing
-    // routine invoked by the constructor
-    test_scr.set_path("/bin/sh");
-    std::shared_ptr<Script> test_scr_ptr = std::make_shared<Script>(test_scr);
-    store_1->store_script(test_scr_ptr);
-    delete store_1;
-    auto *store_2 = new data_store();
-    std::string name = "test";
-    std::shared_ptr<Script> result = store_2->get_script(name);
-    ASSERT_EQ(*result, *test_scr_ptr);
-    store_2->evict_script(test_scr_ptr->get_name());
-    delete store_2;
+    std::string json_str = os.str();
+    std::stringstream is(json_str);
+    DataFile data_in;
+    cereal::BinaryInputArchive archive_in(is);
+    archive_in(data_in);
+    ASSERT_EQ(data_out, data_in);
 
 }
 
-TEST( data_store_test , ser_des_hdl_resource) {
 
-    auto *store_1 = new data_store();
-    hdl_deps_t deps;
-    // The path is chosen as to always exist as otherwise the Cache entry is removed  by the cache clearing
-    // routine invoked by the constructor
-    HDL_Resource test_entity(module, "test", "/bin/sh", deps, verilog_entity);
-
-    std::shared_ptr<HDL_Resource> test_res_ptr = std::make_shared<HDL_Resource>(test_entity);
-    store_1->store_hdl_entity(test_res_ptr);
-    delete store_1;
-    auto *store_2 = new data_store();
-    std::string name = "test";
-    std::shared_ptr<HDL_Resource> result = store_2->get_HDL_resource(name);
-    ASSERT_EQ(*result, *test_res_ptr);
-    store_2->evict_script(test_res_ptr->getName());
-    delete store_2;
-
-}
 
 
 TEST( data_store_test , store_script_vect) {
@@ -174,12 +118,14 @@ TEST( data_store_test , store_script_vect) {
     std::shared_ptr<Script> test_res_1 = store->get_script(name);
     name = "test_2";
     std::shared_ptr<Script> test_res_2 = store->get_script(name);
+
     std::vector<std::shared_ptr<Script>> res_vect = {test_res_1, test_res_2};
 
     store->evict_script("test_1");
     store->evict_script("test_2");
 
-    ASSERT_EQ(test_vect, res_vect);
+    ASSERT_EQ(*test_vect[0], *res_vect[0]);
+    ASSERT_EQ(*test_vect[1], *res_vect[1]);
 }
 
 
@@ -199,7 +145,8 @@ TEST( data_store_test , store_data_file_vect) {
     store->evict_script("test_1");
     store->evict_script("test_2");
 
-    ASSERT_EQ(test_vect, res_vect);
+    ASSERT_EQ(*test_vect[0], *res_vect[0]);
+    ASSERT_EQ(*test_vect[1], *res_vect[1]);
 }
 
 
@@ -221,7 +168,9 @@ TEST( data_store_test , store_hdl_vect) {
 
     store->evict_hdl_entity("test_1");
     store->evict_hdl_entity("test_2");
-    ASSERT_EQ(test_vect, res_vect);
+
+    ASSERT_EQ(*test_vect[0], *res_vect[0]);
+    ASSERT_EQ(*test_vect[1], *res_vect[1]);
 }
 
 TEST( data_store_test , store_const_vect) {
@@ -240,7 +189,9 @@ TEST( data_store_test , store_const_vect) {
 
     store->evict_constraint("test_1");
     store->evict_constraint("test_2");
-    ASSERT_EQ(test_vect, res_vect);
+
+    ASSERT_EQ(*test_vect[0], *res_vect[0]);
+    ASSERT_EQ(*test_vect[1], *res_vect[1]);
 }
 
 

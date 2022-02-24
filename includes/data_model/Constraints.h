@@ -21,18 +21,24 @@
 #include <utility>
 #include <sstream>
 
+#include "third_party/cereal/types/string.hpp"
 
 class Constraints {
 public:
+    Constraints() = default;
+    Constraints(const Constraints &C);
     explicit Constraints(std::string n);
-    Constraints(const std::string& serialized_constraints, bool serialized);
 
     std::string get_name();
     void set_path(std::string p);
     std::string get_path();
 
-    operator std::string();
     friend bool operator==(const Constraints&lhs, const Constraints&rhs);
+
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(name, path);
+    }
 
 private:
     std::string name;

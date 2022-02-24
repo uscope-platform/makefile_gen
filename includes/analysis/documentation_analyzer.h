@@ -21,7 +21,7 @@
 #include <antlr4-runtime.h>
 #include <regex>
 
-#include "data_model/bus_structure/bus_structure.h"
+#include "data_model/documentation/bus_structure/bus_structure.h"
 #include "mgp_sv/sv2017Lexer.h"
 #include "mgp_sv/sv2017.h"
 

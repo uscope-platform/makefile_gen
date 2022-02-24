@@ -17,7 +17,8 @@
 #ifndef MAKEFILEGEN_V2_BUS_MODULE_H
 #define MAKEFILEGEN_V2_BUS_MODULE_H
 
-#include "data_model/bus_structure/bus_component.h"
+#include "bus_component.h"
+
 
 #include <memory>
 #include <sstream>
@@ -26,18 +27,31 @@
 
 class bus_module : public bus_component{
     public:
+    bus_module() = default;
     bus_module(std::string n, std::string t, std::string p);
-    explicit bus_module(const std::string& serialized_obj);
     std::string get_name() {return name;};
     std::string get_module_type() {return instance_type;};
-    std::string to_string(std::string prefix) override;
+    std::string pretty_print(std::string prefix);
 
-    operator std::string();
+    [[nodiscard]] uint32_t get_base_address() const {return base_address;};
+    void  set_base_address(uint32_t ba) { base_address = ba;};
+
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(name, parameter_name, base_address, instance_type);
+    }
+
     friend bool operator==(const bus_module&lhs, const bus_module&rhs);
 private:
     std::string name;
+    uint32_t base_address;
+    std::string parameter_name;
     std::string instance_type;
 };
 
+#include "third_party/cereal/types/polymorphic.hpp"
+#include "third_party/cereal/archives/binary.hpp"
 
+CEREAL_REGISTER_TYPE(bus_module);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(bus_component, bus_module)
 #endif //MAKEFILEGEN_V2_BUS_MODULE_H

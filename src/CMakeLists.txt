@@ -10,13 +10,15 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/bus_structure/bus_registers.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/bus_structure/bus_module.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/bus_structure/bus_crossbar.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/module_documentation.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/register_documentation.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Depfile.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Script.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Constraints.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/expression.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/analysis/vhdl_analyzer.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/analysis/documentation_analyzer.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/analysis/vhdl_visitor.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Depfile.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Script.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Constraints.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Dependency_resolver.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/application_definition_generator.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Xilinx/Vivado_manager.cpp /

@@ -18,9 +18,9 @@
 
 #include "data_model/Depfile.h"
 #include "Backend/application_definition_generator.h"
-#include "data_model/bus_structure/bus_registers.h"
-#include "data_model/bus_structure/bus_module.h"
-#include "data_model/bus_structure/bus_crossbar.h"
+#include "data_model/documentation/bus_structure/bus_registers.h"
+#include "data_model/documentation/bus_structure/bus_module.h"
+#include "data_model/documentation/bus_structure/bus_crossbar.h"
 
 TEST( app_def_generation , generate_app_def) {
     Depfile file("check_files/Depfile_gs");

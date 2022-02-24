@@ -23,8 +23,13 @@
 #include <vector>
 #include <memory>
 
+#include "data_model/documentation/module_documentation.h"
+#include "data_model/documentation/bus_structure/bus_structure.h"
 
-#include "data_model/bus_structure/bus_structure.h"
+#include "third_party/cereal/archives/binary.hpp"
+#include "third_party/cereal/types/unordered_map.hpp"
+#include "third_party/cereal/types/vector.hpp"
+#include "third_party/cereal/types/memory.hpp"
 
 #define SV_FEATURE_MODULE 0
 #define SV_FEATURE_INTERFACE 1
@@ -70,11 +75,11 @@ typedef std::pair<std::string, sv_feature> hdl_declaration_t;
 
 class HDL_Resource {
 public:
-    HDL_Resource();
+    HDL_Resource( const HDL_Resource &c );
+    HDL_Resource() = default;
     HDL_Resource(sv_feature type, std::string n, std::string p, hdl_deps_t deps, resource_type_t r_type);
     void deserialize_bus_vector(const std::string& ser);
     static std::vector<std::string> tokenize(const std::string& str, char token);
-    explicit HDL_Resource(const std::string& serialized_obj);
     hdl_deps_t get_dependencies();
     void add_dependencies(hdl_deps_t deps);
     void add_bus_roots(std::vector<std::shared_ptr<bus_crossbar>> bc) { bus_roots = std::move(bc);};
@@ -86,7 +91,15 @@ public:
 
     void set_parameters(std::unordered_map<std::string, uint32_t> p) { parameters = std::move(p);}
     std::unordered_map<std::string, uint32_t> get_parameters() {return parameters;};
-    operator std::string();
+
+    void set_documentation(module_documentation &d) {doc= d;};
+    module_documentation get_documentation() { return doc;};
+
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(name, path, resource_type, hdl_type, dependencies, parameters, bus_roots, doc);
+    }
+
     friend bool operator==(const HDL_Resource&lhs, const HDL_Resource&rhs);
 private:
     std::string name;
@@ -98,7 +111,12 @@ private:
     //SV PACKAGE SPECIFIC PARAMETERS
     std::unordered_map<std::string, uint32_t> parameters;
     std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
+
+    // DOCUMENTATION
+    module_documentation doc;
 };
+
+
 
 
 #endif //MAKEFILEGEN_V2_HDL_RESOURCE_H

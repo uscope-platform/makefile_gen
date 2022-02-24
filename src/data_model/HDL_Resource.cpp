@@ -13,16 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <data_model/HDL_Resource.h>
+#include "data_model/HDL_Resource.h"
 
-#include <utility>
 
-HDL_Resource::HDL_Resource() {
-    name = "";
-    path = "";
-    hdl_type = null_feature;
-    resource_type = null_resource;
-}
 
 ///  Resource object creator
 /// \param t HDL entity feature
@@ -38,42 +31,16 @@ HDL_Resource::HDL_Resource(sv_feature t, std::string n, std::string p, hdl_deps_
     resource_type = r_type;
 }
 
-HDL_Resource::HDL_Resource(const std::string& serialized_obj) {
-    std::vector<std::string> tokens = tokenize(serialized_obj, ',');
-    name = std::string(tokens[0]);
-    hdl_type = sv_feature(std::stoi(tokens[1]));
-    resource_type = resource_type_t(std::stoi(tokens[2]));
-    path = std::string(tokens[3]);
-    int dep_array_size = std::stoi(tokens[4]);
-    for(int i= 5; i<5+dep_array_size*2; i=i+2){
-        dependencies[tokens[i]] = sv_feature(std::stoi(tokens[i+1]));
-    }
-    int param_array_size = std::stoi(tokens[5+dep_array_size*2]);
-    for(int i= 6+dep_array_size*2; i<6+dep_array_size*2+param_array_size*2; i=i+2){
-        parameters[tokens[i]] = std::stoi(tokens[i+1]);
-    }
-    std::string bus_root_string;
+HDL_Resource::HDL_Resource(const HDL_Resource &c) {
+    name = c.name;
+    path = c.path;
+    resource_type = c.resource_type;
+    hdl_type = c.hdl_type;
+    dependencies = c.dependencies;
 
-    int bus_token_start = 6+dep_array_size*2+param_array_size*2;
-
-    for(int i=bus_token_start; i<tokens.size(); ++i){
-        bus_root_string += tokens[i];
-        if(i != tokens.size()-1)
-            bus_root_string += ",";
-    }
-
-    if(!bus_root_string.empty()){
-        deserialize_bus_vector(bus_root_string);
-    }
-
-}
-
-void HDL_Resource::deserialize_bus_vector(const std::string& ser) {
-
-    std::vector<std::string> bus_vect = tokenize(ser, '-');
-    for(auto &item:bus_vect){
-        bus_roots.push_back(std::make_shared<bus_crossbar>(item));
-    }
+    parameters = c.parameters;
+    bus_roots = c.bus_roots;
+    doc = c.doc;
 }
 
 std::vector<std::string> HDL_Resource::tokenize(const std::string& str, char token) {
@@ -91,34 +58,6 @@ const std::string &HDL_Resource::getName() const {
     return name;
 }
 
-HDL_Resource::operator std::string() {
-    std::ostringstream tmp;
-    tmp << name << "," << std::to_string(feature_to_integer(hdl_type)) << "," << std::to_string(resource_to_integer(resource_type)) << "," << path;
-
-    tmp << "," << std::to_string(dependencies.size());
-
-    for (auto const& [key, val] : dependencies){
-        tmp << ',' << key << ',' << std::to_string(feature_to_integer(val));
-    }
-
-    tmp << "," << std::to_string(parameters.size());
-
-    for (auto const& [key, val] : parameters){
-        tmp << ',' << key << ',' << std::to_string(val);
-    }
-    if(!bus_roots.empty()){
-        tmp << ",";
-        // THE CROSSBAR SERIALIZATION ALREADY USES COMMA AND SLASH AS SEPARATORS, THUS HERE A DASH IS USED
-        for(int i = 0; i < bus_roots.size(); ++i){
-            std::string serialized_bus = *bus_roots[i];
-            tmp << serialized_bus;
-            if(i != bus_roots.size() - 1) tmp << "-";
-        }
-
-    }
-
-    return tmp.str();
-}
 
 hdl_deps_t HDL_Resource::get_dependencies() {
     return dependencies;
@@ -165,3 +104,4 @@ bool operator==(const HDL_Resource &lhs, const HDL_Resource &rhs) {
 void HDL_Resource::add_dependencies(hdl_deps_t deps) {
     dependencies.insert( deps.begin(), deps.end());
 }
+

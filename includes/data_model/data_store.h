@@ -27,6 +27,19 @@
 #include "Constraints.h"
 #include "DataFile.h"
 
+struct cache_t{
+    std::unordered_map<std::string, HDL_Resource> hdl;
+    std::unordered_map<std::string, Script> scripts;
+    std::unordered_map<std::string, Constraints> constraints;
+    std::unordered_map<std::string, DataFile> data;
+
+    template <class Archive>
+    void serialize( Archive & ar )
+    {
+        ar( hdl, scripts, constraints, data);
+    }
+};
+
 class data_store {
 public:
     data_store();
@@ -56,28 +69,13 @@ public:
 private:
 
     void clean_up_caches();
-    void load_entities_cache();
-    void store_entities_cache();
+    void load_cache();
+    void store_cache();
 
-    void load_scripts_cache();
-    void store_scripts_cache();
+    struct cache_t cache;
 
-    void load_constraints_cache();
-    void store_constraints_cache();
-
-    void load_data_file_cache();
-    void store_data_file_cache();
-
-    std::unordered_map<std::string, std::shared_ptr<HDL_Resource>> hdl_resources_cache;
-    std::unordered_map<std::string, std::shared_ptr<Script>> scripts_cache;
-    std::unordered_map<std::string, std::shared_ptr<Constraints>> constraints_cache;
-    std::unordered_map<std::string, std::shared_ptr<DataFile>> data_cache;
-
-    std::string  store_path;
-    std::string entities_file;
-    std::string scripts_file;
-    std::string constraints_file;
-    std::string data_file;
+    std::string store_path;
+    std::string unified_cache;
 
     std::set<std::string> xilinx_primitives = {
             "xpm_cdc_array_single", "xpm_cdc_async_rst", "xpm_cdc_gray", "xpm_cdc_handshake", "xpm_cdc_pulse", "xpm_cdc_single",

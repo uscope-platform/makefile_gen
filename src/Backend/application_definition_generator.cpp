@@ -29,11 +29,13 @@ application_definition_generator::application_definition_generator(const Depfile
 void application_definition_generator::walk_bus_structure(const std::shared_ptr<bus_crossbar>& node) {
 
     for(auto &item: node->get_children()){
-        if(item->get_type() == bus_crossbar_t){
+        auto&  ptr = *item;
+        std::string ret;
+        if (typeid(ptr) == typeid(bus_crossbar)) {
             walk_bus_structure(std::static_pointer_cast<bus_crossbar>(item));
-        } else if(item->get_type()==bus_register_t){
+        } else if(typeid(ptr) == typeid(bus_registers)) {
             peripherals.push_back(generate_peripheral(std::static_pointer_cast<bus_registers>(item)));
-        } else if(item->get_type()==bus_module_t){
+        } else if(typeid(ptr) == typeid(bus_module)) {
             peripherals.push_back(generate_peripheral(std::static_pointer_cast<bus_module>(item)));
         }
     }

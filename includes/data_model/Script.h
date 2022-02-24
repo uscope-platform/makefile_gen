@@ -20,7 +20,8 @@
 #include <vector>
 #include <sstream>
 #include <utility>
-
+#include "third_party/cereal/types/vector.hpp"
+#include "third_party/cereal/types/string.hpp"
 
 #define SCRIPT_TCL 0
 #define SCRIPT_PYTHON 1
@@ -39,8 +40,9 @@ auto script_to_integer(script_type_t const value)
 
 class Script {
 public:
+    Script() = default;
+    Script(const Script &S);
     Script(std::string n, const std::string& t);
-    explicit Script(const std::string& serialized_script);
     std::string get_name();
     script_type_t get_type();
     void set_product(bool gen, std::string t);
@@ -51,7 +53,12 @@ public:
     std::string get_path();
     std::vector<std::string> get_arguments();
 
-    operator std::string();
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(name, path, type, product_type, product_include,arguments);
+    }
+
+
     friend bool operator==(const Script&lhs, const Script&rhs);
 private:
     std::string name;

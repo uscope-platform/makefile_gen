@@ -22,7 +22,7 @@
 
 #include "third_party/json.hpp"
 #include "data_model/Depfile.h"
-#include "data_model/bus_structure/bus_structure.h"
+#include "data_model/documentation/bus_structure/bus_structure.h"
 #include "data_model/data_store.h"
 
 class application_definition_generator {

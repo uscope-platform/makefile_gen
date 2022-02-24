@@ -14,60 +14,55 @@
 // limitations under the License.
 
 
-#include "data_model/bus_structure/bus_component.h"
+#include "data_model/documentation/bus_structure/bus_component.h"
 
-#include "data_model/bus_structure/bus_crossbar.h"
-#include "data_model/bus_structure/bus_module.h"
-#include "data_model/bus_structure/bus_registers.h"
+#include "data_model/documentation/bus_structure/bus_crossbar.h"
+#include "data_model/documentation/bus_structure/bus_module.h"
+#include "data_model/documentation/bus_structure/bus_registers.h"
 
-bus_component::bus_component(std::string n, component_type t) {
-    type = t;
-    base_address = 0;
-    parameter_name = std::move(n);
-}
 
-std::string bus_component::component_to_string(const std::shared_ptr<bus_component>& p, const std::string& prefix) {
+std::string bus_component::pretty_print(const std::shared_ptr<bus_component>& p, const std::string& prefix) {
+    auto&  ptr = *p;
     std::string ret;
-    switch (p->type) {
-        case bus_crossbar_t:
-            ret = std::static_pointer_cast<bus_crossbar>(p)->to_string(prefix);
-            break;
-        case bus_register_t:
-            ret = std::static_pointer_cast<bus_registers>(p)->to_string(prefix);
-            break;
-        case bus_module_t:
-            ret = std::static_pointer_cast<bus_module>(p)->to_string(prefix);
-            break;
-        default:
-            break;
+    if (typeid(ptr) == typeid(bus_crossbar)) {
+        ret = std::static_pointer_cast<bus_crossbar>(p)->pretty_print(prefix);
+    } else if(typeid(ptr) == typeid(bus_registers)) {
+        ret = std::static_pointer_cast<bus_registers>(p)->pretty_print(prefix);
+    } else if(typeid(ptr) == typeid(bus_module)) {
+        ret = std::static_pointer_cast<bus_module>(p)->pretty_print(prefix);
     }
     return ret;
 }
 
 
+bool bus_component::compare(std::shared_ptr<bus_component> &lhs, std::shared_ptr<bus_component> &rhs) {
+    bool ret = true;
+    auto&  ptr_l = *lhs;
+    auto&  ptr_r = *rhs;
 
-bool operator==(const bus_component &lhs, const bus_component &rhs) {
-    bool res = true;
-
-    res &= lhs.type == rhs.type;
-    res &= lhs.base_address == rhs.base_address;
-    res &= lhs.parameter_name == rhs.parameter_name;
-    return res;
+    ret &= typeid(ptr_l) == typeid(ptr_r);
+    if (typeid(lhs) == typeid(bus_crossbar)) {
+        ret &= *std::static_pointer_cast<bus_crossbar>(lhs) == *std::static_pointer_cast<bus_crossbar>(rhs);
+    } else if(typeid(lhs) == typeid(bus_registers)) {
+        ret &= *std::static_pointer_cast<bus_registers>(lhs) == *std::static_pointer_cast<bus_registers>(rhs);
+    } else if(typeid(lhs) == typeid(bus_module)) {
+        ret &= *std::static_pointer_cast<bus_module>(lhs) == *std::static_pointer_cast<bus_module>(rhs);
+    }
+    return ret;
 }
 
-std::shared_ptr<bus_component> bus_component::string_to_component(std::string s) {
+bool bus_component::compare(const std::shared_ptr<bus_component> &lhs, const std::shared_ptr<bus_component> &rhs) {
+    bool ret = true;
+    auto&  ptr_l = *lhs;
+    auto&  ptr_r = *rhs;
 
-    char component_type = s[0];
-
-    switch (component_type) {
-        case '0':
-            return std::make_shared<bus_crossbar>(s.substr(1, s.size()));
-        case '1':
-            return std::make_shared<bus_registers>(s.substr(1, s.size()));
-        case '2':
-            return std::make_shared<bus_module>(s.substr(1, s.size()));
-        default:
-            throw std::invalid_argument("Invalid bus component type");
+    ret &= typeid(ptr_l) == typeid(ptr_r);
+    if (typeid(lhs) == typeid(bus_crossbar)) {
+        ret &= *std::static_pointer_cast<bus_crossbar>(lhs) == *std::static_pointer_cast<bus_crossbar>(rhs);
+    } else if(typeid(lhs) == typeid(bus_registers)) {
+        ret &= *std::static_pointer_cast<bus_registers>(lhs) == *std::static_pointer_cast<bus_registers>(rhs);
+    } else if(typeid(lhs) == typeid(bus_module)) {
+        ret &= *std::static_pointer_cast<bus_module>(lhs) == *std::static_pointer_cast<bus_module>(rhs);
     }
-
+    return ret;
 }

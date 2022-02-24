@@ -18,7 +18,7 @@
 
 #include "data_model/Constraints.h"
 
-
+#include "third_party/cereal/archives/binary.hpp"
 
 TEST( Constraints_test , get_name) {
     Constraints cnstr("test");
@@ -31,16 +31,22 @@ TEST( Constraints_test , path) {
     ASSERT_EQ(cnstr.get_path(), "test_path");
 }
 
-TEST( Constraints_test , serialization) {
-    Constraints cnstr("test");
-    cnstr.set_path("test_path");
-    std::string result = cnstr;
-    ASSERT_EQ(result, "test,test_path");
-}
 
-TEST( Constraints_test , deserialization) {
-    Constraints cnstr("test,test_path", true);
-    Constraints result("test");
-    result.set_path("test_path");
-    ASSERT_EQ(cnstr, result);
+
+TEST( Constraints_test , ser_des_constraints) {
+    Constraints constr_out("test");
+    constr_out.set_path("/test/path");
+
+    std::stringstream os;
+    {
+        cereal::BinaryOutputArchive archive_out(os);
+        archive_out(constr_out);
+    }
+
+    std::string json_str = os.str();
+    std::stringstream is(json_str);
+    Constraints constr_in;
+    cereal::BinaryInputArchive archive_in(is);
+    archive_in(constr_in);
+    ASSERT_EQ(constr_out, constr_in);
 }

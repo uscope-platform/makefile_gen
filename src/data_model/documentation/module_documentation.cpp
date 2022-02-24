@@ -13,12 +13,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_BUS_STRUCTURE_H
-#define MAKEFILEGEN_V2_BUS_STRUCTURE_H
 
-#include "data_model/bus_structure/bus_component.h"
-#include "data_model/bus_structure/bus_registers.h"
-#include "data_model/bus_structure/bus_module.h"
-#include "data_model/bus_structure/bus_crossbar.h"
+#include "data_model/documentation/module_documentation.h"
 
-#endif //MAKEFILEGEN_V2_BUS_STRUCTURE_H
+
+void module_documentation::add_register(register_documentation reg) {
+    registers.push_back(reg);
+}
+
+
+bool operator==(const module_documentation &lhs, const module_documentation &rhs) {
+    bool ret = true;
+
+    ret &= lhs.name == rhs.name;
+    ret &= lhs.registers.size() == rhs.registers.size();
+
+    if(ret){
+        for(int i = 0; i<lhs.registers.size(); i++){
+            ret &= lhs.registers[i] == rhs.registers[i];
+        }
+    }
+
+    return ret;
+}

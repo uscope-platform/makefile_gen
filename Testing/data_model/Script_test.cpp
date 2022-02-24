@@ -18,7 +18,7 @@
 #include <gmock/gmock.h>
 
 #include "data_model/Script.h"
-
+#include "third_party/cereal/archives/binary.hpp"
 
 
 TEST( Script_test , get_name) {
@@ -32,25 +32,30 @@ TEST( Script_test , path) {
     ASSERT_EQ(cnstr.get_path(), "test_path");
 }
 
-TEST( Script_test , deserialization) {
-    Script test_script("FPalu,/home/fils/git/uscope_hdl/Components/system/fcore/FPalu.tcl,0,");
-    Script checker("FPalu", "tcl");
-    checker.set_path("/home/fils/git/uscope_hdl/Components/system/fcore/FPalu.tcl");
 
-    ASSERT_EQ(test_script, checker);
+TEST( Script_test , ser_des_script) {
+
+    Script scr_out("test", "tcl");
+    scr_out.set_path("/test/path");
+
+    std::stringstream os;
+    {
+        cereal::BinaryOutputArchive archive_out(os);
+        archive_out(scr_out);
+    }
+
+    std::string json_str = os.str();
+    std::stringstream is(json_str);
+    Script scr_in;
+    cereal::BinaryInputArchive archive_in(is);
+    archive_in(scr_in);
+    ASSERT_EQ(scr_out, scr_in);
+
 }
-
-TEST( Script_test , serialization) {
-    Script test_script("FPalu", "tcl");
-    test_script.set_path("/home/fils/git/uscope_hdl/Components/system/fcore/FPalu.tcl");
-    test_script.set_arguments({"test_arg_1","test_arg_2"});
-    std::string result = test_script;
-    ASSERT_EQ(result, "FPalu,/home/fils/git/uscope_hdl/Components/system/fcore/FPalu.tcl,0,test_arg_1,test_arg_2,");
-}
-
 
 TEST( Script_test , arguments) {
-    Script test_script("FPalu,/home/fils/git/uscope_hdl/Components/system/fcore/FPalu.tcl,0,test_arg_1,test_arg_2,");
+    Script test_script("test", "tcl");
+    test_script.set_arguments({"test_arg_1", "test_arg_2"});
     std::vector<std::string> args = test_script.get_arguments();
     std::vector<std::string> results = {"test_arg_1", "test_arg_2"};
 
@@ -59,7 +64,7 @@ TEST( Script_test , arguments) {
 
 
 TEST( Script_test , get_type) {
-    Script test_script("FPalu,/home/fils/git/uscope_hdl/Components/system/fcore/FPalu.tcl,0,test_arg_1,test_arg_2,");
+    Script test_script("test", "tcl");
     script_type_t type = test_script.get_type();
 
     ASSERT_EQ(type, tcl_script);

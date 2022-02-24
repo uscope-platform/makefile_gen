@@ -24,9 +24,9 @@
 
 #include "third_party/json.hpp"
 #include "data_model/HDL_Resource.h"
-#include "data_model/bus_structure/bus_registers.h"
-#include "data_model/bus_structure/bus_crossbar.h"
-#include "data_model/bus_structure/bus_module.h"
+#include "data_model/documentation/bus_structure/bus_registers.h"
+#include "data_model/documentation/bus_structure/bus_crossbar.h"
+#include "data_model/documentation/bus_structure/bus_module.h"
 #include "analysis/documentation_analyzer.h"
 
 #include "mgp_sv/sv2017Lexer.h"

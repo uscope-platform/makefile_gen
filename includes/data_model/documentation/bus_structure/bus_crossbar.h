@@ -17,9 +17,13 @@
 #ifndef MAKEFILEGEN_V2_BUS_CROSSBAR_H
 #define MAKEFILEGEN_V2_BUS_CROSSBAR_H
 
-#include "data_model/bus_structure/bus_component.h"
-#include "data_model/bus_structure/bus_module.h"
-#include "data_model/bus_structure/bus_registers.h"
+#include "bus_component.h"
+#include "bus_module.h"
+#include "bus_registers.h"
+
+#include "third_party/cereal/types/vector.hpp"
+#include "third_party/cereal/types/memory.hpp"
+
 
 #include <string>
 #include <sstream>
@@ -29,21 +33,35 @@
 
 class bus_crossbar : public bus_component{
 public:
+    bus_crossbar() = default;
     bus_crossbar(std::vector<std::string> c, std::string p);
-    explicit bus_crossbar(const std::string& serialized_obj);
     void add_child(const std::shared_ptr<bus_component>& c);
+
+    [[nodiscard]] uint32_t get_base_address() const {return base_address;};
+    void  set_base_address(uint32_t ba) { base_address = ba;};
 
     std::vector<std::shared_ptr<bus_component>> get_children() {return children;};
     std::vector<std::string> get_raw_children_list() {return raw_children_list;};
-    std::string to_string(std::string prefix) override;
+    std::string pretty_print(std::string prefix);
 
-    operator std::string();
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(base_address, parameter_name, raw_children_list, children);
+    }
+
+
     friend bool operator==(const bus_crossbar&lhs, const bus_crossbar&rhs);
 private:
     std::vector<std::shared_ptr<bus_component>> children;
+    uint32_t base_address;
+    std::string parameter_name;
     std::vector<std::string> raw_children_list;
 
 };
 
+#include "third_party/cereal/types/polymorphic.hpp"
+#include "third_party/cereal/archives/binary.hpp"
 
+CEREAL_REGISTER_TYPE(bus_crossbar);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(bus_component, bus_crossbar)
 #endif //MAKEFILEGEN_V2_BUS_CROSSBAR_H

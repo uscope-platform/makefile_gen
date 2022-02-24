@@ -1134,7 +1134,7 @@ template <typename T, enable_if_t<std::is_enum<T>::value, detail::enabler> = det
 std::string value_string(const T &value) {
     return std::to_string(static_cast<typename std::underlying_type<T>::type>(value));
 }
-/// for other types just use the regular to_string function
+/// for other types just use the regular pretty_print function
 template <typename T,
           enable_if_t<!std::is_enum<T>::value && !std::is_arithmetic<T>::value, detail::enabler> = detail::dummy>
 auto value_string(const T &value) -> decltype(to_string(value)) {

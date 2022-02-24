@@ -11588,12 +11588,12 @@ class json_pointer
 
     @invariant For each JSON pointer `ptr`, it holds:
     @code {.cpp}
-    ptr == json_pointer(ptr.to_string());
+    ptr == json_pointer(ptr.pretty_print());
     @endcode
 
     @return a string representation of the JSON pointer
 
-    @liveexample{The example shows the result of `to_string`.,json_pointer__to_string}
+    @liveexample{The example shows the result of `pretty_print`.,json_pointer__to_string}
 
     @since version 2.0.0
     */
@@ -11607,7 +11607,7 @@ class json_pointer
         });
     }
 
-    /// @copydoc to_string()
+    /// @copydoc pretty_print()
     operator std::string() const
     {
         return to_string();
@@ -25160,9 +25160,9 @@ class basic_json
 };
 
 /*!
-@brief user-defined to_string function for JSON values
+@brief user-defined pretty_print function for JSON values
 
-This function implements a user-defined to_string  for JSON objects.
+This function implements a user-defined pretty_print  for JSON objects.
 
 @param[in] j  a JSON object
 @return a std::string object

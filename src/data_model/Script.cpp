@@ -18,6 +18,14 @@
 #include <utility>
 
 
+Script::Script(const Script &S) {
+    name = S.name;
+    type = S.type;
+    path = S.path;
+    arguments = S.arguments;
+    product_type = S.product_type;
+    product_include = S.product_include;
+}
 
 Script::Script(std::string n, const std::string& t) {
     name = std::move(n);
@@ -25,25 +33,6 @@ Script::Script(std::string n, const std::string& t) {
     else if (t=="python" || t == "py") type = python_script;
     else type = uninit_script;
 }
-
-Script::Script(const std::string& serialized_script) {
-    std::istringstream stream(serialized_script);
-    std::vector<std::string> tokens;
-    std::string tmp;
-    tokens.reserve(3);
-    while(std::getline(stream, tmp, ',')) {
-        tokens.push_back(tmp);
-    }
-    name = std::string(tokens[0]);
-    path = std::string(tokens[1]);
-    type = script_type_t(std::stoi(tokens[2]));
-    tokens.erase(tokens.begin(), tokens.begin()+3);
-    for(auto & token : tokens){
-        arguments.push_back(token);
-    }
-
-}
-
 
 std::string Script::get_name() {
     return name;
@@ -69,16 +58,6 @@ std::string Script::get_path() {
     return path;
 }
 
-Script::operator std::string() {
-    std::ostringstream ret_val;
-    ret_val << name << "," << path << "," << type << ",";
-
-    for(const auto& item:arguments){
-        ret_val << item << ",";
-    }
-    return ret_val.str();
-}
-
 bool operator==(const Script &lhs, const Script &rhs) {
 
     bool cond_1 = lhs.name == rhs.name;
@@ -101,3 +80,5 @@ bool Script::get_product_include() const {
 std::string Script::get_product_type() const {
     return product_type;
 }
+
+

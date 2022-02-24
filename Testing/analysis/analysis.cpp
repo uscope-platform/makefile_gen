@@ -41,8 +41,18 @@ TEST( analysis_test , package) {
     std::shared_ptr<HDL_Resource> check_res = std::make_shared<HDL_Resource>(package, "test_package", "check_files/test_package.sv", hdl_deps_t(), verilog_entity);
     check_res->set_parameters(check_map);
 
-    std::string temp = *resource->get_bus_roots()[0];
-    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>("1136656384,bus_base,0,01136656384,timebase,0,/2general_ctrls,gpio,gpio,1136660481,2");
+
+    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>(std::vector<std::string>(), "bus_base");
+    xbar->set_base_address(0x43c00000);
+
+    std::shared_ptr<bus_module> mod = std::make_shared<bus_module>("general_ctrls", "gpio", "gpio");
+    mod->set_base_address(1136660481);
+    xbar->add_child(mod);
+
+    std::shared_ptr<bus_crossbar> xbar2 = std::make_shared<bus_crossbar>(std::vector<std::string>(), "timebase");
+    xbar2->set_base_address(1136656384);
+    xbar->add_child(xbar2);
+
     std::vector<std::shared_ptr<bus_crossbar>> bus_roots({xbar});
     check_res->add_bus_roots(bus_roots);
     ASSERT_EQ(*resource, *check_res);
