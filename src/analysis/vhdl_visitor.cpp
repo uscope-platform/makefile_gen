@@ -21,7 +21,7 @@ vhdl_visitor::vhdl_visitor(std::string p) {
     path = std::move(p);
 }
 
-std::vector<std::shared_ptr<HDL_Resource>> vhdl_visitor::get_entities() {
+std::vector<HDL_Resource> vhdl_visitor::get_entities() {
     return entities;
 }
 
@@ -36,15 +36,15 @@ void vhdl_visitor::enterEntity_declaration(mgp_vh::vhdlParser::Entity_declaratio
 void vhdl_visitor::exitArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) {
     std::string name = ctx->name()->getText();
     for(auto &item:entities){
-        if(item->getName() == name){
-            item->add_dependencies(instantiated_features);
+        if(item.getName() == name){
+            item.add_dependencies(instantiated_features);
         }
     }
 }
 
 
 void vhdl_visitor::exitEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) {
-    std::shared_ptr<HDL_Resource> e = std::make_shared<HDL_Resource>(declared_feature.second, declared_feature.first, path, instantiated_features, vhdl_entity);
+    HDL_Resource e(declared_feature.second, declared_feature.first, path, instantiated_features, vhdl_entity);
     entities.push_back(e);
     if(nesting_level>1){
         declared_feature = declarations_stack.top();

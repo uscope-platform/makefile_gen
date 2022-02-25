@@ -21,7 +21,12 @@
         {
             "name":"test_script.py",
             "type": "py",
-            "arguments":[]
+            "arguments":["B"]
+        },
+        {
+            "name":"test_script.py",
+            "type": "py",
+            "arguments":["A"]
         }
     ],
     "excluded_modules":[

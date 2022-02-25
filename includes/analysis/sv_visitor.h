@@ -61,7 +61,7 @@ public:
 
     void calculate_parameters();
     static uint32_t calculate_expression(std::vector<std::string> exp);
-    std::vector<std::shared_ptr<HDL_Resource>> get_entities();
+    std::vector<HDL_Resource> get_entities();
 
 private:
     hdl_declaration_t declared_feature;
@@ -70,7 +70,7 @@ private:
     std::stack<hdl_declaration_t> declarations_stack;
     std::stack<hdl_deps_t> dependencies_stack;
     std::string path;
-    std::vector<std::shared_ptr<HDL_Resource>> entities;
+    std::vector<HDL_Resource> entities;
 
     std::string current_parameter;
     uint32_t current_address;

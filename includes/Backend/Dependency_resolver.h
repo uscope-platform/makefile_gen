@@ -32,8 +32,8 @@ public:
     void add_explicit_dependencies(const std::vector<std::string>& dep_list);
 
 private:
-    std::vector<std::shared_ptr<HDL_Resource>> hdl_dependencies;
-    std::vector<std::shared_ptr<DataFile>> mem_init_dependencies;
+    std::vector<HDL_Resource> hdl_dependencies;
+    std::vector<DataFile> mem_init_dependencies;
     void resolve_dependencies(const std::string& module_name);
 
     std::vector<std::string> excluded_modules;

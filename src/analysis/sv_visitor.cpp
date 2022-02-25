@@ -32,7 +32,7 @@ void sv_visitor::enterModule_declaration(sv2017::Module_declarationContext *ctx)
 
 void sv_visitor::exitModule_declaration(sv2017::Module_declarationContext *ctx) {
 
-        std::shared_ptr<HDL_Resource> e = std::make_shared<HDL_Resource>(declared_feature.second, declared_feature.first, path, instantiated_features, verilog_entity);
+        HDL_Resource e(declared_feature.second, declared_feature.first, path, instantiated_features, verilog_entity);
         entities.push_back(e);
         if(!declarations_stack.empty()) {
             declared_feature = declarations_stack.top();
@@ -51,7 +51,7 @@ void sv_visitor::exitModule_declaration(sv2017::Module_declarationContext *ctx) 
 void sv_visitor::exitInterface_declaration(sv2017::Interface_declarationContext *ctx) {
     std::string interface_name = ctx->interface_header()->identifier()->getText();
     hdl_deps_t dummy;
-    std::shared_ptr<HDL_Resource> e = std::make_shared<HDL_Resource>(interface, interface_name, path, dummy, verilog_entity);
+    HDL_Resource e (interface, interface_name, path, dummy, verilog_entity);
     entities.push_back(e);
 }
 
@@ -70,7 +70,7 @@ void sv_visitor::exitInterface_header(sv2017::Interface_headerContext *ctx) {
     instantiated_features[interface_name] = interface;
 }
 
-std::vector<std::shared_ptr<HDL_Resource>> sv_visitor::get_entities() {
+std::vector<HDL_Resource> sv_visitor::get_entities() {
     return entities;
 }
 
@@ -89,8 +89,8 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
 void sv_visitor::exitPackage_declaration(sv2017::Package_declarationContext *ctx) {
     std::string package_name = ctx->identifier()[0]->getText();
     calculate_parameters();
-    std::shared_ptr<HDL_Resource> e = std::make_shared<HDL_Resource>(package, package_name, path, instantiated_features, verilog_entity);
-    e->set_parameters(numeric_parameters);
+    HDL_Resource e(package, package_name, path, instantiated_features, verilog_entity);
+    e.set_parameters(numeric_parameters);
     entities.push_back(e);
 }
 

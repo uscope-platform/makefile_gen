@@ -25,9 +25,9 @@ TEST( analysis_test , package) {
     sv_analyzer analyzer("check_files/test_package.sv");
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
-    ASSERT_EQ(resource->getName(), "test_package");
+    ASSERT_EQ(resource.getName(), "test_package");
 
-    std::unordered_map<std::string, uint32_t> parameters = resource->get_parameters();
+    std::unordered_map<std::string, uint32_t> parameters = resource.get_parameters();
 
     std::unordered_map<std::string, uint32_t> check_map;
     check_map["bus_base"] = 0x43c00000;
@@ -38,8 +38,8 @@ TEST( analysis_test , package) {
     check_map["subtraction_parameter"] = 2;
     ASSERT_EQ(check_map, parameters);
 
-    std::shared_ptr<HDL_Resource> check_res = std::make_shared<HDL_Resource>(package, "test_package", "check_files/test_package.sv", hdl_deps_t(), verilog_entity);
-    check_res->set_parameters(check_map);
+    HDL_Resource check_res(package, "test_package", "check_files/test_package.sv", hdl_deps_t(), verilog_entity);
+    check_res.set_parameters(check_map);
 
 
     std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>(std::vector<std::string>(), "bus_base");
@@ -54,8 +54,8 @@ TEST( analysis_test , package) {
     xbar->add_child(xbar2);
 
     std::vector<std::shared_ptr<bus_crossbar>> bus_roots({xbar});
-    check_res->add_bus_roots(bus_roots);
-    ASSERT_EQ(*resource, *check_res);
+    check_res.add_bus_roots(bus_roots);
+    ASSERT_EQ(resource, check_res);
 }
 
 TEST( analysis_test , sv_module) {
@@ -67,12 +67,12 @@ TEST( analysis_test , sv_module) {
     check_dep["SyndromeCalculator"] = module;
     check_dep["test_package"] = package;
     check_dep["file"] = memory_init;
-    std::shared_ptr<HDL_Resource> check_res = std::make_shared<HDL_Resource>(module, "Decoder", "check_files/test_sv_module.sv", check_dep, verilog_entity);
-    ASSERT_EQ(*resource, *check_res);
+    HDL_Resource check_res(module, "Decoder", "check_files/test_sv_module.sv", check_dep, verilog_entity);
+    ASSERT_EQ(resource, check_res);
     resource = analyzer.analyze()[1];
     hdl_deps_t dummy;
-    check_res = std::make_shared<HDL_Resource>(interface, "test_if", "check_files/test_sv_module.sv", dummy, verilog_entity);
-    ASSERT_EQ(*resource, *check_res);
+    check_res = HDL_Resource(interface, "test_if", "check_files/test_sv_module.sv", dummy, verilog_entity);
+    ASSERT_EQ(resource, check_res);
 }
 
 TEST( analysis_test , vhdl_module) {
@@ -82,7 +82,7 @@ TEST( analysis_test , vhdl_module) {
     auto resource = analyzer.analyze()[0];
     hdl_deps_t check_dep;
     check_dep["ANDGATE"] = module;
-    std::shared_ptr<HDL_Resource> check_res = std::make_shared<HDL_Resource>(null_feature, "half_adder", "check_files/test_vhdl_module.vhd", check_dep, vhdl_entity);
-    ASSERT_EQ(*resource, *check_res);
+    HDL_Resource check_res (null_feature, "half_adder", "check_files/test_vhdl_module.vhd", check_dep, vhdl_entity);
+    ASSERT_EQ(resource, check_res);
 }
 

@@ -58,7 +58,6 @@ public:
         ar(name, path, type, product_type, product_include,arguments);
     }
 
-
     friend bool operator==(const Script&lhs, const Script&rhs);
 private:
     std::string name;

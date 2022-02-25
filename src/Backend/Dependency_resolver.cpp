@@ -25,11 +25,11 @@ std::set<std::string> Dependency_resolver::get_dependencies() {
     resolve_dependencies(top_level);
     hdl_dependencies.push_back(d_store->get_HDL_resource(top_level));
     std::set<std::string> ret_val;
-    for(const auto& item: hdl_dependencies){
-        ret_val.insert(item->get_path());
+    for(auto& item: hdl_dependencies){
+        ret_val.insert(item.get_path());
     }
-    for(const auto& item: mem_init_dependencies){
-        ret_val.insert(item->get_path());
+    for(auto& item: mem_init_dependencies){
+        ret_val.insert(item.get_path());
     }
     return ret_val;
 }
@@ -41,25 +41,25 @@ void Dependency_resolver::resolve_dependencies(const std::string& module_name) {
     if(is_excluded || is_primitive) return;
 
     //  interfaces never have dependencies so we can exit
-    std::shared_ptr<HDL_Resource> resource = d_store->get_HDL_resource(module_name);
-    if(!resource){
+    HDL_Resource resource = d_store->get_HDL_resource(module_name);
+    if(resource == HDL_Resource()){
         std::cerr << "ERROR: module or interface " << module_name << " not found"<<std::endl;
         exit(1);
     }
-    bool is_interface = resource->is_interface();
+    bool is_interface = resource.is_interface();
     if(is_interface) return;
 
-    hdl_deps_t deps =  d_store->get_HDL_resource(module_name)->get_dependencies();
+    hdl_deps_t deps =  d_store->get_HDL_resource(module_name).get_dependencies();
 
     for(auto &item : deps){
         auto res = d_store->get_HDL_resource(item.first);
         bool dep_excluded = std::find(excluded_modules.begin(), excluded_modules.end(), item.first) != excluded_modules.end();
-        if(res != nullptr && !dep_excluded) hdl_dependencies.push_back(res);
+        if(res != HDL_Resource() && !dep_excluded) hdl_dependencies.push_back(res);
         if(item.second != memory_init){
             resolve_dependencies(item.first);
         } else {
-            std::shared_ptr<DataFile> dep = d_store->get_data_file(item.first);
-            if(dep == nullptr){
+            DataFile dep = d_store->get_data_file(item.first);
+            if(dep == DataFile()){
                 std::cerr << "ERROR: memory initialization file " << item.first << " not found"<<std::endl;
                 exit(1);
             } else{

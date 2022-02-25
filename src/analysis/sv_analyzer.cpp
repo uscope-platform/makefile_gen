@@ -39,14 +39,23 @@ void sv_analyzer::cleanup_content(const std::string& regex) {
 
 }
 
-std::vector<std::shared_ptr<HDL_Resource>> sv_analyzer::analyze() {
+std::vector<HDL_Resource> sv_analyzer::analyze() {
     process_hdl();
 
-    documentation_analyzer doc(processed_content, parameters);
+    auto entities = sv_modules_explorer.get_entities();
+
+
     if(is_bus_defining_package){
-        package_ptr->add_bus_roots(doc.get_bus_roots());
+        for(auto &e:entities){
+            if(e.get_type() == package){
+                parameters = e.get_parameters();
+                documentation_analyzer doc(processed_content, parameters);
+                e.add_bus_roots(doc.get_bus_roots());
+            }
+        }
     }
-    return  sv_modules_explorer.get_entities();
+
+    return  entities;
 }
 
 
@@ -72,17 +81,6 @@ void sv_analyzer::process_hdl() {
     //parser.getInterpreter<antlr4::atn::ParserATNSimulator>()->setPredictionMode(antlr4::atn::PredictionMode::SLL);
     antlr4::tree::ParseTree *Tree = parser.source_text();
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&sv_modules_explorer, Tree);
-
-
-    if(is_bus_defining_package){
-        std::vector<std::shared_ptr<HDL_Resource>> entities = sv_modules_explorer.get_entities();
-        for(auto &e:entities){
-            if(e->get_type() == package){
-                package_ptr = e;
-            }
-        }
-        parameters = package_ptr->get_parameters();
-    }
 
 }
 

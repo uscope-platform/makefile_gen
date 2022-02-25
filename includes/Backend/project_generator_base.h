@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_set>
 #include <set>
 #include <utility>
 #include <regex>
@@ -39,8 +40,8 @@ public:
     void set_sim_sources(const std::set<std::string>& paths);
     void set_synth_tl(const std::string& tl);
     void set_sim_tl(const std::string& tl);
-    void set_constraint_sources(const std::set<std::string>& paths);
-    void set_script_sources(const std::set<std::string>& paths);
+    void set_constraint_sources(const std::unordered_set<std::string>& paths);
+    void set_script_sources(const std::unordered_set<std::string>& paths);
 
 protected:
     std::vector<std::string> process_sources_set(const std::set<std::string>& paths);

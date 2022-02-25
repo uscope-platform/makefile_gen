@@ -32,6 +32,7 @@ Script::Script(std::string n, const std::string& t) {
     if(t=="tcl") type = tcl_script;
     else if (t=="python" || t == "py") type = python_script;
     else type = uninit_script;
+    product_include = false;
 }
 
 std::string Script::get_name() {
@@ -60,12 +61,15 @@ std::string Script::get_path() {
 
 bool operator==(const Script &lhs, const Script &rhs) {
 
-    bool cond_1 = lhs.name == rhs.name;
-    bool cond_2 = lhs.path == rhs.path;
-    bool cond_3 = lhs.type == rhs.type;
-    bool cond_4 = lhs.arguments == rhs.arguments;
+    bool ret = true;
+    ret &= lhs.name == rhs.name;
+    ret &= lhs.path == rhs.path;
+    ret &= lhs.type == rhs.type;
+    ret &= lhs.arguments == rhs.arguments;
+    ret &= lhs.product_type == rhs.product_type;
+    ret &= lhs.product_include == rhs.product_include;
 
-    return cond_1 && cond_2 && cond_3 && cond_4;
+    return ret;
 }
 
 void Script::set_product(bool gen, std::string t) {
@@ -80,5 +84,6 @@ bool Script::get_product_include() const {
 std::string Script::get_product_type() const {
     return product_type;
 }
+
 
 

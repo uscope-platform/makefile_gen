@@ -28,58 +28,61 @@ data_store::data_store() {
     clean_up_caches();
 }
 
-std::shared_ptr<HDL_Resource> data_store::get_HDL_resource(const std::string& name) {
-    if(cache.hdl.count(name) == 0) return nullptr;
-    return std::make_shared<HDL_Resource>(cache.hdl[name]);
+HDL_Resource data_store::get_HDL_resource(const std::string& name) {
+    return cache.hdl[name];
 }
 
-void data_store::store_hdl_entity(const std::shared_ptr<HDL_Resource>& entity) {
-    cache.hdl[entity->getName()] = *entity;
+void data_store::store_hdl_entity(const HDL_Resource& entity) {
+    cache.hdl[entity.getName()] = entity;
 }
 
-void data_store::store_hdl_entity(const std::vector<std::shared_ptr<HDL_Resource>>& vect) {
+void data_store::store_hdl_entity(const std::vector<HDL_Resource>& vect) {
     for(auto &item: vect){
         store_hdl_entity(item);
     }
 }
 
-std::shared_ptr<Script> data_store::get_script(std::string &name) {
-    if(cache.scripts.count(name) == 0) return nullptr;
-    return std::make_shared<Script>( cache.scripts[name]);
-
+Script data_store::get_script(std::string &name) {
+    return cache.scripts[name];
 }
 
-void data_store::store_script(const std::shared_ptr<Script> &entity) {
-    cache.scripts[entity->get_name()] = *entity;
+void data_store::store_script(Script entity) {
+    cache.scripts[entity.get_name()] = entity;
 }
 
-void data_store::store_script(const std::vector<std::shared_ptr<Script>> &vect) {
+void data_store::store_script(const std::vector<Script> &vect) {
     for(auto &item: vect){
         store_script(item);
     }
 }
 
-std::shared_ptr<Constraints> data_store::get_constraint(std::string &name) {
-    if(cache.constraints.count(name) == 0) return nullptr;
-    return std::make_shared<Constraints>(cache.constraints[name]);
+Constraints data_store::get_constraint(std::string &name) {
+
+    return cache.constraints[name];
 }
 
-void data_store::store_constraint(const std::shared_ptr<Constraints> &entity) {
-    cache.constraints[entity->get_name()] = *entity;
+void data_store::store_constraint(Constraints entity) {
+    cache.constraints[entity.get_name()] = entity;
 }
 
-void data_store::store_constraint(const std::vector<std::shared_ptr<Constraints>> &vect) {
+void data_store::store_constraint(const std::vector<Constraints> &vect) {
     for(auto &item: vect){
         store_constraint(item);
     }
 }
-std::shared_ptr<DataFile> data_store::get_data_file(const std::string &name) {
-    if(cache.data.count(name) == 0) return nullptr;
-    return std::make_shared<DataFile>( cache.data[name]);
+
+DataFile data_store::get_data_file(const std::string &name) {
+    return cache.data[name];
 }
 
-void data_store::store_data_file(const std::shared_ptr<DataFile> &entity) {
-    cache.data[entity->get_name()] = *entity;
+void data_store::store_data_file(DataFile entity) {
+    cache.data[entity.get_name()] = entity;
+}
+
+void data_store::store_data_file(const std::vector<DataFile> &vect) {
+    for(auto &item: vect){
+        store_data_file(item);
+    }
 }
 
 
@@ -200,12 +203,6 @@ void data_store::evict_constraint(const std::string &name) {
     cache.constraints.erase(name);
 }
 
-
-void data_store::store_data_file(const std::vector<std::shared_ptr<DataFile>> &vect) {
-    for(auto &item: vect){
-        store_data_file(item);
-    }
-}
 
 void data_store::evict_data_file(const std::string &name) {
     cache.data.erase(name);

@@ -66,11 +66,11 @@ void project_generator_base::set_sim_tl(const std::string &tl) {
     data["tb_tl"] = tl;
 }
 
-void project_generator_base::set_constraint_sources(const std::set<std::string> &paths) {
+void project_generator_base::set_constraint_sources(const std::unordered_set<std::string> &paths) {
     data["constraints_sources"] = paths;
 }
 
-void project_generator_base::set_script_sources(const std::set<std::string> &paths) {
+void project_generator_base::set_script_sources(const std::unordered_set<std::string> &paths) {
     data["scripts"] = paths;
 }
 

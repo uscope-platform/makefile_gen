@@ -107,5 +107,8 @@ TEST_F( DepfileTest , Depfile_scripts) {
     std::vector<Script> correct_answer;
     correct_answer.emplace_back("test_script.tcl", "tcl");
     correct_answer.emplace_back("test_script.py", "py");
+    correct_answer.emplace_back("test_script.py", "py");
+    correct_answer[1].set_arguments({"B"});
+    correct_answer[2].set_arguments({"A"});
     ASSERT_THAT(file->get_scripts(), testing::ContainerEq(correct_answer));
 }
