@@ -18,7 +18,7 @@
 
 #include "data_model/documentation/module_documentation.h"
 #include "data_model/documentation/register_documentation.h"
-
+#include "data_model/documentation/field_documentation.h"
 
 TEST( register_tests , serdes) {
 
@@ -58,12 +58,20 @@ TEST( register_tests , comparison_fail) {
 TEST( module_tests , serdes) {
 
     register_documentation reg_doc1("register_name", 0x14, "register description", true, true);
+    field_documentation fd1("field_name", "field description", 28, 7);
+    reg_doc1.add_field(fd1);
     register_documentation reg_doc2("register_name", 0x15, "register description", true, true);
+    field_documentation fd2("field_name", "field description", 28, 7);
+    reg_doc2.add_field(fd2);
+
+    std::vector<std::string> children = {"reg", "mod"};
+    bus_crossbar xbar_out(children,"crossbar_address_param");
+
     module_documentation mod_doc_out;
     mod_doc_out.set_name("test_module");
     mod_doc_out.add_register(reg_doc1);
     mod_doc_out.add_register(reg_doc2);
-
+    mod_doc_out.add_internal_bus(xbar_out);
     std::stringstream os;
     {
         cereal::BinaryOutputArchive archive_out(os);
@@ -83,29 +91,100 @@ TEST( module_tests , serdes) {
 TEST( module_tests , comparison_succeed) {
 
     register_documentation reg_doc1("register_name", 0x14, "register description", true, true);
+    field_documentation fd1("field_name", "field description", 28, 7);
+    reg_doc1.add_field(fd1);
     register_documentation reg_doc2("register_name", 0x15, "register description", true, true);
+    field_documentation fd2("field_name", "field description", 28, 7);
+    reg_doc2.add_field(fd2);
+
     module_documentation mod_doc;
     mod_doc.set_name("test_module");
     mod_doc.add_register(reg_doc1);
     mod_doc.add_register(reg_doc2);
 
-    ASSERT_EQ(mod_doc, mod_doc);
+    std::vector<std::string> children = {"reg", "mod"};
+    bus_crossbar xbar_out(children,"crossbar_address_param");
+    mod_doc.add_internal_bus(xbar_out);
+
+    module_documentation mod_doc_2;
+    mod_doc_2.set_name("test_module");
+    mod_doc_2.add_register(reg_doc1);
+    mod_doc_2.add_register(reg_doc2);
+
+    std::vector<std::string> children2 = {"reg", "mod"};
+    bus_crossbar xbar_out2(children2,"crossbar_address_param");
+    mod_doc_2.add_internal_bus(xbar_out2);
+
+
+    ASSERT_EQ(mod_doc, mod_doc_2);
 }
 
 
 TEST( module_tests , comparison_fail) {
 
     register_documentation reg_doc1("register_name", 0x14, "register description", true, true);
+    field_documentation fd1("field_name", "field description", 28, 7);
+    reg_doc1.add_field(fd1);
     register_documentation reg_doc2("register_name", 0x15, "register description", true, true);
+    field_documentation fd2("field_name", "field description", 28, 7);
+    reg_doc2.add_field(fd2);
     module_documentation mod_doc;
     mod_doc.set_name("test_module");
     mod_doc.add_register(reg_doc1);
     mod_doc.add_register(reg_doc2);
 
+    std::vector<std::string> children = {"reg", "mod"};
+    bus_crossbar xbar_out(children,"crossbar_address_param");
+    mod_doc.add_internal_bus(xbar_out);
+
+
     module_documentation mod_doc_2;
     mod_doc_2.set_name("test_module");
     mod_doc_2.add_register(reg_doc1);
     mod_doc_2.add_register(reg_doc1);
+    mod_doc_2.add_internal_bus(xbar_out);
 
     ASSERT_NE(mod_doc, mod_doc_2);
+}
+
+
+
+
+TEST( field_tests , serdes) {
+
+    field_documentation fd_out("field_name", "field description", 28, 7);
+
+    std::stringstream os;
+    {
+        cereal::BinaryOutputArchive archive_out(os);
+        archive_out(fd_out);
+    }
+
+    std::string json_str = os.str();
+
+    std::stringstream is(json_str);
+
+    field_documentation fd_in;
+    cereal::BinaryInputArchive archive_in(is);
+    archive_in(fd_in);
+    ASSERT_EQ(fd_out, fd_in);
+}
+
+TEST( field_tests , comparison_succeed) {
+
+    field_documentation fd_out1("field_name", "field description", 28, 7);
+    field_documentation fd_out2("field_name", "field description", 28, 7);
+
+    ASSERT_EQ(fd_out1, fd_out2);
+}
+
+
+TEST( field_tests , comparison_fail) {
+
+
+    field_documentation fd_out1("field_name", "field description", 28, 7);
+    field_documentation fd_out2("field_name", "field description", 24, 7);
+
+
+    ASSERT_NE(fd_out1, fd_out2);
 }

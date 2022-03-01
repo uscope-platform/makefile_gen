@@ -35,6 +35,10 @@ class bus_crossbar : public bus_component{
 public:
     bus_crossbar() = default;
     bus_crossbar(std::vector<std::string> c, std::string p);
+
+    void set_parameter(std::string p) {parameter_name = std::move(p);};
+    std::string get_parameter() {return parameter_name;};
+
     void add_child(const std::shared_ptr<bus_component>& c);
 
     [[nodiscard]] uint32_t get_base_address() const {return base_address;};

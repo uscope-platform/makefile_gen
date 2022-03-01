@@ -15,21 +15,24 @@
 
 #include "analysis/documentation_analyzer.h"
 
+#include <utility>
 
 
+documentation_analyzer::documentation_analyzer(std::istream &s) {
+    parse_documentation(s);
+}
 
-documentation_analyzer::documentation_analyzer(std::string &s, std::unordered_map<std::string, uint32_t> parameters) {
+documentation_analyzer::documentation_analyzer(std::string &s) {
 
-    parameters_dict = std::move(parameters);
     std::istringstream istream(s);
+    parse_documentation(istream);
 
+}
 
-    antlr4::ANTLRInputStream antlr_istream(istream);
+void documentation_analyzer::parse_documentation(std::istream &stream) {
+    antlr4::ANTLRInputStream antlr_istream(stream);
     mgp_sv::sv2017Lexer lexer(&antlr_istream);
     antlr4::CommonTokenStream documentation_stream(&lexer,mgp_sv::sv2017Lexer::DOCUMENTATION_CHANNEL);
-
-    std::vector<std::string> raw_documentation_comments;
-
 
     while(true){
         size_t current_tok = documentation_stream.LA(1);
@@ -37,6 +40,12 @@ documentation_analyzer::documentation_analyzer(std::string &s, std::unordered_ma
         raw_documentation_comments.push_back(documentation_stream.LT(1)->getText());
         documentation_stream.consume();
     }
+}
+
+
+void documentation_analyzer::process_documentation(std::unordered_map<std::string, uint32_t> parameters) {
+    parameters_dict = std::move(parameters);
+    std::vector<nlohmann::json> documentation_comments;
 
     for(auto &str:raw_documentation_comments){
         std::regex comment_boundaries(R"((\/\*\*|\*\*\/))");
@@ -45,15 +54,14 @@ documentation_analyzer::documentation_analyzer(std::string &s, std::unordered_ma
         nlohmann::json obj;
         std::istringstream ss(content);
         ss >> obj;
+        documentation_comments.push_back(obj);
+    }
+
+    for(auto &obj:documentation_comments){
         analyze_documentation_object(obj);
     }
 
-    for(auto &item:bus_roots){
-        construct_bus_hierarchy(item);
-    }
-
 }
-
 
 
 std::vector<std::shared_ptr<bus_crossbar>> documentation_analyzer::get_bus_roots() {
@@ -61,71 +69,113 @@ std::vector<std::shared_ptr<bus_crossbar>> documentation_analyzer::get_bus_roots
 }
 
 void documentation_analyzer::analyze_documentation_object(nlohmann::json &obj) {
-    if(obj["type"] == "package_parameter") {
-        if(obj["class"] == "module"){
-            analyze_module(obj);
-        } else if(obj["class"] == "registers") {
-            analyze_register(obj);
-        } else if( obj["class"] == "crossbar") {
-            analyze_crossbar(obj, false);
-        } else if( obj["class"] == "bus_root"){
-            analyze_crossbar(obj, true);
-        }
-    } else if(obj["type"] == "peripheral") {
-
+    std::string type = obj["type"];
+    if(type == "bus_hierarchy") {
+        analyze_bus_hierarchy(obj);
+    } else if(type == "peripheral") {
+        analyze_peripheral(obj);
     }
 }
 
-void documentation_analyzer::analyze_register(nlohmann::json &obj) {
+void documentation_analyzer::analyze_bus_hierarchy(nlohmann::json &obj) {
+    bus_crossbar root;
+    root.set_parameter(obj["name"]);
+
+    std::vector<nlohmann::json> children = obj["children"];
+
+    for (auto &item:children) {
+        std::string type = item["type"];
+        if(type == "module"){
+            root.add_child(analyze_module(item));
+        } else if(type == "registers") {
+            root.add_child(analyze_register(item));
+        } else if(type == "crossbar") {
+            root.add_child(analyze_crossbar(item));
+        }
+    }
+    root.set_base_address(parameters_dict[obj["name"]]);
+    bus_roots.push_back(std::make_shared<bus_crossbar>(root));
+}
+
+
+std::shared_ptr<bus_registers> documentation_analyzer::analyze_register(nlohmann::json &obj) {
 
     std::string target_module = obj["target"];
     std::string parameter_name =  obj["name"];
     std::shared_ptr<bus_registers> reg = std::make_shared<bus_registers>(target_module, parameter_name);
     reg->set_base_address(parameters_dict[parameter_name]);
-    registers_dict[target_module] = reg;
+    return reg;
 }
 
-void documentation_analyzer::analyze_module(nlohmann::json &obj) {
+std::shared_ptr<bus_module> documentation_analyzer::analyze_module(nlohmann::json &obj) {
 
-    std::string target_module = obj["target"]["module_type"];
-    std::string target_instance = obj["target"]["instance_name"];
+    std::string target_module = obj["target"]["type"];
+    std::string target_instance = obj["target"]["name"];
     std::string parameter_name =  obj["name"];
     std::shared_ptr<bus_module> mod = std::make_shared<bus_module>(target_instance, target_module, parameter_name);
     mod->set_base_address(parameters_dict[parameter_name]);
-    modules_dict[parameter_name] = mod;
+    return mod;
 }
 
-void documentation_analyzer::analyze_crossbar(nlohmann::json &obj, bool is_root) {
+std::shared_ptr<bus_crossbar> documentation_analyzer::analyze_crossbar(nlohmann::json &obj) {
 
     std::string parameter_name = obj["name"];
-    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>(obj["children"], parameter_name);
 
-    xbar->set_base_address(parameters_dict[parameter_name]);
+    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>();
+    xbar->set_parameter(parameter_name);
 
-    if(is_root){
-        bus_roots.push_back(xbar);
-    } else {
-        crossbar_dict[parameter_name] = xbar;
-    }
-
-}
-
-void documentation_analyzer::construct_bus_hierarchy(const std::shared_ptr<bus_crossbar>& dict) {
-    std::vector<std::string> childs = dict->get_raw_children_list();
-    if(childs.empty()) {
-        return;
-    }
-    for(auto &item:childs){
-        if(modules_dict.count(item)!= 0 ){
-            dict->add_child(modules_dict[item]);
-            modules_dict.erase(item);
-        } else if(registers_dict.count(item) != 0){
-            dict->add_child(registers_dict[item]);
-            registers_dict.erase(item);
-        } else if(crossbar_dict.count(item) != 0){
-            construct_bus_hierarchy(crossbar_dict[item]);
-            dict->add_child(crossbar_dict[item]);
-            crossbar_dict.erase(item);
+    std::vector<nlohmann::json> children = obj["children"];
+    for (auto &item:children) {
+        std::string type = item["type"];
+        if(type == "module"){
+            xbar->add_child(analyze_module(item));
+        } else if(type == "registers") {
+            xbar->add_child(analyze_register(item));
+        } else if(type == "crossbar") {
+            xbar->add_child(analyze_crossbar(item));
         }
     }
+
+    xbar->set_base_address(parameters_dict[parameter_name]);
+    return xbar;
 }
+
+void documentation_analyzer::analyze_peripheral(nlohmann::json &obj) {
+    module_documentation mod_doc;
+    std::string str_n = obj["name"];
+    mod_doc.set_name(str_n);
+    for(auto &item : obj["registers"]){
+        std::string off =item["offset"];
+        uint32_t offset = std::stoul(off, nullptr, 0);
+        std::string dir = item["direction"];
+        bool read_allowed = dir.find('R') != std::string::npos;
+        bool write_allowed = dir.find('W') != std::string::npos;
+        register_documentation reg_doc(item["name"], offset, item["description"], read_allowed, write_allowed);
+
+        if(item.contains("fields")){
+            for(auto &f_obj:item["fields"]){
+                auto field_doc = analyze_register_field(f_obj);
+                reg_doc.add_field(field_doc);
+            }
+        }
+        mod_doc.add_register(reg_doc);
+    }
+    modules_doc[str_n] = mod_doc;
+}
+
+std::unordered_map<std::string, module_documentation> documentation_analyzer::get_modules_documentation() {
+    return modules_doc;
+}
+
+field_documentation documentation_analyzer::analyze_register_field(nlohmann::json &obj) {
+    std::string name = obj["name"];
+    std::string desc = obj["description"];
+    uint8_t start_pos = obj["start_position"];
+    uint8_t length = obj["length"];
+    field_documentation doc(name, desc, start_pos, length);
+    return doc;
+}
+
+
+
+

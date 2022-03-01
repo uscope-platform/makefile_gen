@@ -20,26 +20,32 @@
 #include <vector>
 #include <memory>
 #include <sstream>
+#include <utility>
 
 #include "third_party/cereal/types/vector.hpp"
 #include "data_model/documentation/register_documentation.h"
-
+#include "data_model/documentation/bus_structure/bus_crossbar.h"
 
 class module_documentation {
 public:
     module_documentation() = default;
-    void add_register(register_documentation reg);
+    void add_register(const register_documentation& reg);
+    void add_internal_bus(bus_crossbar b);
+    bus_crossbar get_internal_bus() {return internal_bus;};
     void set_name(const std::string &n) {name = n;};
+    std::vector<register_documentation> get_registers() {return  registers;};
 
     template<class Archive>
     void serialize(Archive & archive) {
-        archive(name, registers);
+        archive(name, registers, internal_bus);
     }
 
     friend bool operator==(const module_documentation&lhs, const module_documentation&rhs);
 private:
     std::string name;
     std::vector<register_documentation> registers;
+    bus_crossbar internal_bus;
+
 };
 
 

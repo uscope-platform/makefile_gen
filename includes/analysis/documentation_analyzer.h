@@ -22,6 +22,8 @@
 #include <regex>
 
 #include "data_model/documentation/bus_structure/bus_structure.h"
+#include "data_model/documentation/module_documentation.h"
+#include "data_model/documentation/register_documentation.h"
 #include "mgp_sv/sv2017Lexer.h"
 #include "mgp_sv/sv2017.h"
 
@@ -29,25 +31,29 @@
 
 class documentation_analyzer {
 public:
-    explicit documentation_analyzer(std::string &s, std::unordered_map<std::string, uint32_t> parameters);
+    explicit documentation_analyzer(std::string &s);
+    explicit documentation_analyzer(std::istream &stream);
+    void parse_documentation(std::istream &stream);
+    void process_documentation(std::unordered_map<std::string, uint32_t> parameters);
     std::vector<std::shared_ptr<bus_crossbar>> get_bus_roots();
+    std::unordered_map<std::string, module_documentation> get_modules_documentation();
 private:
     void analyze_documentation_object(nlohmann::json &obj);
-    void construct_bus_hierarchy(const std::shared_ptr<bus_crossbar>& dict);
-    void analyze_register(nlohmann::json &obj);
-    void analyze_module(nlohmann::json &obj);
-    void analyze_crossbar(nlohmann::json &obj, bool is_root);
+    void analyze_bus_hierarchy(nlohmann::json &obj);
+    // BUS STRUCTURE DOCUMENTATION
+    std::shared_ptr<bus_registers> analyze_register(nlohmann::json &obj);
+    std::shared_ptr<bus_module> analyze_module(nlohmann::json &obj);
+    field_documentation analyze_register_field(nlohmann::json &obj);
+    std::shared_ptr<bus_crossbar> analyze_crossbar(nlohmann::json &obj);
+    // PERIPHERAL DOCUMENTATION
+    void analyze_peripheral(nlohmann::json &obj);
 
     std::unordered_map<std::string, uint32_t> parameters_dict;
 
-    std::vector<nlohmann::json> documentation_comments;
-
-    std::unordered_map<std::string, std::shared_ptr<bus_registers>> registers_dict;
-    std::unordered_map<std::string, std::shared_ptr<bus_module>> modules_dict;
-    std::unordered_map<std::string, std::shared_ptr<bus_crossbar>> crossbar_dict;
+    std::vector<std::string> raw_documentation_comments;
 
     std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
-
+    std::unordered_map<std::string, module_documentation> modules_doc;
 };
 
 

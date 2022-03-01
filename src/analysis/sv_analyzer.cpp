@@ -44,15 +44,32 @@ std::vector<HDL_Resource> sv_analyzer::analyze() {
 
     auto entities = sv_modules_explorer.get_entities();
 
+    documentation_analyzer doc(processed_content);
 
     if(is_bus_defining_package){
         for(auto &e:entities){
             if(e.get_type() == package){
                 parameters = e.get_parameters();
-                documentation_analyzer doc(processed_content, parameters);
+            }
+        }
+    }
+
+    doc.process_documentation(parameters);
+
+    // THIS SECOND LOOP CAN NOT BE AVOIDED AS PARAMETERS NEED TO BE EXTRACTED BEFORE DOCUMENTATION GETS PROCESSED
+    // WHILE BUS ROOTS CAN ONLY BE ADDED TO THE ENTITY ONCE THE DOCUMENTATION HAS BEEN ANALYSED
+    if(is_bus_defining_package){
+        for(auto &e:entities){
+            if(e.get_type() == package){
                 e.add_bus_roots(doc.get_bus_roots());
             }
         }
+    }
+
+
+    auto modules_doc = doc.get_modules_documentation();
+    for(auto &e:entities){
+        e.set_documentation(modules_doc[e.getName()]);
     }
 
     return  entities;

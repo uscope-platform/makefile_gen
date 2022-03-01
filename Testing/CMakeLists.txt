@@ -9,6 +9,7 @@ set(MAKEFILEGEN_TESTS
         data_model/DataFile_test.cpp
         data_model/bus_structure_test.cpp
         data_model/module_register_documentation.cpp
+        analysis/documentation_analyzer.cpp
         analysis/analysis.cpp
         Backend/Application_management_test.cpp
         Backend/Application_definition_generator.cpp)
@@ -34,5 +35,9 @@ configure_file(check_files/test_sv_module.sv ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/test_vhdl_module.vhd ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/top_synth_sv.sv ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/top_tb_sv.sv ${CHECK_FILES_DIR} COPYONLY)
+
+set(CHECK_FILES_DIR ${CMAKE_CURRENT_BINARY_DIR}/check_files/documentation_analyzer)
+make_directory(${CHECK_FILES_DIR})
+configure_file(check_files/documentation_analyzer/test_bus_hierarchy.sv ${CHECK_FILES_DIR} COPYONLY)
 
 

@@ -57,11 +57,11 @@ bool bus_component::compare(const std::shared_ptr<bus_component> &lhs, const std
     auto&  ptr_r = *rhs;
 
     ret &= typeid(ptr_l) == typeid(ptr_r);
-    if (typeid(lhs) == typeid(bus_crossbar)) {
+    if (typeid(ptr_l) == typeid(bus_crossbar)) {
         ret &= *std::static_pointer_cast<bus_crossbar>(lhs) == *std::static_pointer_cast<bus_crossbar>(rhs);
-    } else if(typeid(lhs) == typeid(bus_registers)) {
+    } else if(typeid(ptr_l) == typeid(bus_registers)) {
         ret &= *std::static_pointer_cast<bus_registers>(lhs) == *std::static_pointer_cast<bus_registers>(rhs);
-    } else if(typeid(lhs) == typeid(bus_module)) {
+    } else if(typeid(ptr_l) == typeid(bus_module)) {
         ret &= *std::static_pointer_cast<bus_module>(lhs) == *std::static_pointer_cast<bus_module>(rhs);
     }
     return ret;

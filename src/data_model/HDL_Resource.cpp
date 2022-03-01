@@ -43,15 +43,6 @@ HDL_Resource::HDL_Resource(const HDL_Resource &c) {
     doc = c.doc;
 }
 
-std::vector<std::string> HDL_Resource::tokenize(const std::string& str, char token) {
-    std::istringstream ss(str);
-    std::vector<std::string> tokens;
-    std::string tmp;
-    while(std::getline(ss, tmp, token)) {
-        tokens.push_back(tmp);
-    }
-    return  tokens;
-}
 
 
 const std::string &HDL_Resource::getName() const {

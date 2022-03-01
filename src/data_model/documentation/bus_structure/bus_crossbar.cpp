@@ -48,7 +48,7 @@ bool operator==(const bus_crossbar &lhs, const bus_crossbar &rhs) {
 
     if(ret){
         for(int i = 0; i< lhs.children.size(); ++i){
-            bus_component::compare(lhs.children[i], rhs.children[i]);
+            ret &= bus_component::compare(lhs.children[i], rhs.children[i]);
         }
     }
     // THE RAW CHILDREN LIST IS NOT INCLUDED AS IT IS A VERY TEMPORARY HACK

@@ -78,8 +78,6 @@ public:
     HDL_Resource( const HDL_Resource &c );
     HDL_Resource() = default;
     HDL_Resource(sv_feature type, std::string n, std::string p, hdl_deps_t deps, resource_type_t r_type);
-    void deserialize_bus_vector(const std::string& ser);
-    static std::vector<std::string> tokenize(const std::string& str, char token);
     hdl_deps_t get_dependencies();
     void add_dependencies(hdl_deps_t deps);
     void add_bus_roots(std::vector<std::shared_ptr<bus_crossbar>> bc) { bus_roots = std::move(bc);};

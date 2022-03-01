@@ -14,27 +14,17 @@
 // limitations under the License.
 
 
-`define MKF_GEN_ANALYZE_BUS
-
 package test_package;
 
 
     parameter bus_base = 32'h43c00000;
 
-    parameter timebase = bus_base;
+    parameter timebase = 351;
 
-    parameter gpio = timebase + 32'h1000 * 2 / 2 + 1;
+    parameter gpio =  32'h1000;
 
-    parameter scope_mux = gpio;
-
-    parameter modulo_parameter = 3 % 2;
-
-    parameter subtraction_parameter = 'o4 - 'b10;
-
-endpackage
-
-
- /**
+    parameter delay_emulator = 168;
+    /**
     {
         "name": "bus_base",
         "type": "bus_hierarchy",
@@ -43,31 +33,22 @@ endpackage
                 "name": "timebase",
                 "type": "crossbar",
                 "children": [
+                     {
+                        "name": "gpio",
+                        "type": "module",
+                        "target": {
+                                "type": "gpio",
+                                "name": "general_ctrls"
+                            }
+                    },
                     {
-                        "name": "scope_mux",
+                        "name": "delay_emulator",
                         "type": "registers",
-                        "target": "SicDriveMasterScope"
+                        "target": "delay_emulator"
                     }
                 ]
-            },
-            {
-                "name": "gpio",
-                "type": "module",
-                "target": {
-                        "type": "gpio",
-                        "name": "general_ctrls"
-                    }
-            },
-            {
-                "name": "modulo_parameter",
-                "type": "registers",
-                "target": "SicDriveMasterScope"
-            },
-            {
-                "name": "subtraction_parameter",
-                "type": "registers",
-                "target": "SicDriveMasterScope"
             }
         ]
     }
-**/
+    **/
+endpackage

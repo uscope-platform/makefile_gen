@@ -41,19 +41,33 @@ TEST( analysis_test , package) {
     HDL_Resource check_res(package, "test_package", "check_files/test_package.sv", hdl_deps_t(), verilog_entity);
     check_res.set_parameters(check_map);
 
+    std::shared_ptr<bus_crossbar> root = std::make_shared<bus_crossbar>();
+    root->set_parameter("bus_base");
+    root->set_base_address(0x43c00000);
 
-    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>(std::vector<std::string>(), "bus_base");
-    xbar->set_base_address(0x43c00000);
+    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>();
+    xbar->set_parameter("timebase");
+    xbar->set_base_address(1136656384);
+    root->add_child(xbar);
+
+    std::shared_ptr<bus_registers> reg = std::make_shared<bus_registers>("SicDriveMasterScope", "scope_mux");
+    reg->set_base_address(0x43c01001);
+    xbar->add_child(reg);
 
     std::shared_ptr<bus_module> mod = std::make_shared<bus_module>("general_ctrls", "gpio", "gpio");
-    mod->set_base_address(1136660481);
-    xbar->add_child(mod);
+    mod->set_base_address(0x43c01001);
+    root->add_child(mod);
 
-    std::shared_ptr<bus_crossbar> xbar2 = std::make_shared<bus_crossbar>(std::vector<std::string>(), "timebase");
-    xbar2->set_base_address(1136656384);
-    xbar->add_child(xbar2);
+    reg = std::make_shared<bus_registers>("SicDriveMasterScope", "modulo_parameter");
+    reg->set_base_address(1);
+    root->add_child(reg);
 
-    std::vector<std::shared_ptr<bus_crossbar>> bus_roots({xbar});
+    reg = std::make_shared<bus_registers>("SicDriveMasterScope", "subtraction_parameter");
+    reg->set_base_address(2);
+    root->add_child(reg);
+
+
+    std::vector<std::shared_ptr<bus_crossbar>> bus_roots({root});
     check_res.add_bus_roots(bus_roots);
     ASSERT_EQ(resource, check_res);
 }

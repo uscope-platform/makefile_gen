@@ -13,31 +13,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "data_model/documentation/field_documentation.h"
 
-#include "data_model/documentation/module_documentation.h"
+#include <utility>
 
+field_documentation::field_documentation() {
+    name = "";
+    description = "";
+    start_position = 0;
+    length = 0;
 
-void module_documentation::add_register(const register_documentation& reg) {
-    registers.push_back(reg);
 }
 
-void module_documentation::add_internal_bus(bus_crossbar b) {
-    internal_bus = std::move(b);
+field_documentation::field_documentation(std::string n, std::string desc, uint8_t start, uint8_t len) {
+    name = std::move(n);
+    description = std::move(desc);
+    start_position = start;
+    length = len;
 }
 
-
-bool operator==(const module_documentation &lhs, const module_documentation &rhs) {
+bool operator==(const field_documentation &lhs, const field_documentation &rhs) {
     bool ret = true;
 
     ret &= lhs.name == rhs.name;
-    ret &= lhs.registers.size() == rhs.registers.size();
-    ret &= lhs.internal_bus == rhs.internal_bus;
-
-    if(ret){
-        for(int i = 0; i<lhs.registers.size(); i++){
-            ret &= lhs.registers[i] == rhs.registers[i];
-        }
-    }
+    ret &= lhs.description == rhs.description;
+    ret &= lhs.start_position == rhs.start_position;
+    ret &= lhs.length == rhs.length;
 
     return ret;
 }
+

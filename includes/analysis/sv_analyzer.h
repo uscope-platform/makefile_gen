@@ -52,7 +52,6 @@ private:
     std::string processed_content;
     sv_visitor sv_modules_explorer;
     bool is_bus_defining_package;
-    HDL_Resource package_ptr;
 
 };
 

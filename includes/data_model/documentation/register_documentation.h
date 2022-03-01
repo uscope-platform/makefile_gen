@@ -18,17 +18,27 @@
 
 #include <string>
 #include "third_party/cereal/types/string.hpp"
+#include "third_party/cereal/types/vector.hpp"
+
+#include "data_model/documentation/field_documentation.h"
 
 class register_documentation {
 public:
     register_documentation() = default;
     register_documentation(const std::string& n, uint32_t off, const std::string& desc, bool read, bool write);
 
+    std::string get_name() {return name;};
+    uint32_t get_offset() {return offset;};
+    std::string get_description() {return description;};
+    bool get_read_allowed() {return read_allowed;};
+    bool get_write_allowed() {return write_allowed;};
+
+    void add_field(field_documentation &doc);
     friend bool operator==(const register_documentation&lhs, const register_documentation&rhs);
 
     template<class Archive>
     void serialize(Archive & archive) {
-        archive(name, offset, description, read_allowed, write_allowed);
+        archive(name, offset, description, read_allowed, write_allowed, fields);
     }
 
 private:
@@ -37,6 +47,7 @@ private:
     std::string description;
     bool read_allowed;
     bool write_allowed;
+    std::vector<field_documentation> fields;
 };
 
 

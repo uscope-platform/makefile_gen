@@ -31,5 +31,18 @@ bool operator==(const register_documentation &lhs, const register_documentation 
     ret &= lhs.description == rhs.description;
     ret &= lhs.read_allowed == rhs.read_allowed;
     ret &= lhs.write_allowed == rhs.write_allowed;
+
+    ret &= lhs.fields.size() == rhs.fields.size();
+
+    if(ret){
+        for(int i = 0; i<lhs.fields.size(); i++){
+            ret &= lhs.fields[i] == rhs.fields[i];
+        }
+    }
+
     return ret;
+}
+
+void register_documentation::add_field(field_documentation &doc) {
+     fields.push_back(doc);
 }
