@@ -18,26 +18,62 @@
 
 #include "data_model/Depfile.h"
 #include "Backend/application_definition_generator.h"
-#include "data_model/documentation/bus_structure/bus_registers.h"
 #include "data_model/documentation/bus_structure/bus_module.h"
 #include "data_model/documentation/bus_structure/bus_crossbar.h"
 
-TEST( app_def_generation , generate_app_def) {
+
+
+
+class app_def_generation : public ::testing::Test {
+protected:
+    void SetUp() {
+        d_store = std::make_shared<data_store>();
+
+        HDL_Resource mod_res(module, "module_type", "test/path.sv", hdl_deps_t(), verilog_entity);
+
+        bus_submodule sc;
+        sc.set_name("SC");
+        sc.set_module_type("SyndromeCalculator");
+        sc.set_offset(0);
+
+        bus_submodule tm2;
+        tm2.set_name("Decoder");
+        tm2.set_module_type("Decoder");
+        tm2.set_offset(10);
+
+        mod_res.set_submodules({sc, tm2});
+
+        d_store->store_hdl_entity(mod_res);
+
+        HDL_Resource mod_res_2(module, "register_type", "test/path.sv", hdl_deps_t(), verilog_entity);
+        d_store->store_hdl_entity(mod_res_2);
+    }
+
+    virtual void TearDown() {
+        d_store->evict_hdl_entity("module_type");
+        d_store->evict_hdl_entity("register_type");
+    }
+    std::shared_ptr<data_store> d_store;
+};
+
+TEST_F( app_def_generation , generate_app_def) {
+
     Depfile file("check_files/Depfile_gs");
 
 
-    std::shared_ptr<bus_registers> reg = std::make_shared<bus_registers>("register_instance", "register_address_param");
+    std::shared_ptr<bus_module> reg = std::make_shared<bus_module>("register_instance",  "register_type");
     reg->set_base_address(12);
 
-    std::shared_ptr<bus_module> mod = std::make_shared<bus_module>("module_instance", "module_type", "module_address_param");
+    std::shared_ptr<bus_module> mod = std::make_shared<bus_module>("module_instance", "module_type");
     mod->set_base_address(13);
 
-    std::vector<std::string> children = {"reg", "mod"};
-    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>(children,"crossbar_address_param");
+    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>("crossbar_address_param");
     xbar->add_child(reg);
     xbar->add_child(mod);
     xbar->set_base_address(14);
-    application_definition_generator gen(file, xbar);
+
+
+    application_definition_generator gen(file, xbar, d_store);
     gen.write_definition_file("test.json");
 
     nlohmann::json result;
@@ -64,7 +100,7 @@ TEST( app_def_generation , generate_app_def) {
     p1["peripheral_id"] = "register_instance";
     p1["proxied"] = false;
     p1["proxy_address"] = "0";
-    p1["spec_id"] = "register_instance";
+    p1["spec_id"] = "register_type";
     p1["type"] = "Registers";
     p1["user_accessible"] = false;
     check_peripherals.push_back(p1);
@@ -80,10 +116,32 @@ TEST( app_def_generation , generate_app_def) {
     p2["user_accessible"] = false;
     check_peripherals.push_back(p2);
 
+
+    nlohmann::json p3;
+    p3["base_address"] = "0xd";
+    p3["name"] = "module_instance.SC";
+    p3["peripheral_id"] = "module_instance.SC";
+    p3["proxied"] = false;
+    p3["proxy_address"] = "0";
+    p3["spec_id"] = "SyndromeCalculator";
+    p3["type"] = "Registers";
+    p3["user_accessible"] = false;
+    check_peripherals.push_back(p3);
+
+    nlohmann::json p4;
+    p4["base_address"] = "0x17";
+    p4["name"] = "module_instance.Decoder";
+    p4["peripheral_id"] = "module_instance.Decoder";
+    p4["proxied"] = false;
+    p4["proxy_address"] = "0";
+    p4["spec_id"] = "Decoder";
+    p4["type"] = "Registers";
+    p4["user_accessible"] = false;
+    check_peripherals.push_back(p4);
+
     ref_app["peripherals"] = check_peripherals;
 
     std::filesystem::remove("test.json");
 
     ASSERT_EQ(ref_app, result);
 }
-

@@ -80,12 +80,17 @@ public:
     HDL_Resource(sv_feature type, std::string n, std::string p, hdl_deps_t deps, resource_type_t r_type);
     hdl_deps_t get_dependencies();
     void add_dependencies(hdl_deps_t deps);
+    void add_bus_roots(const std::shared_ptr<bus_crossbar>& bc) { bus_roots.push_back(bc);};
     void add_bus_roots(std::vector<std::shared_ptr<bus_crossbar>> bc) { bus_roots = std::move(bc);};
     std::vector<std::shared_ptr<bus_crossbar>> get_bus_roots() {return bus_roots;};
     const std::string &getName() const;
     std::string get_path();
     sv_feature get_type() {return hdl_type;};
     bool is_interface();
+
+    void add_submodule(const bus_submodule &s) {bus_submodules.push_back(s);};
+    void set_submodules(std::vector<bus_submodule> v) {bus_submodules = std::move(v);};
+    std::vector<bus_submodule> get_submodules() {return bus_submodules;};
 
     void set_parameters(std::unordered_map<std::string, uint32_t> p) { parameters = std::move(p);}
     std::unordered_map<std::string, uint32_t> get_parameters() {return parameters;};
@@ -105,10 +110,11 @@ private:
     resource_type_t resource_type;
     sv_feature hdl_type;
     hdl_deps_t dependencies;
+    std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
 
     //SV PACKAGE SPECIFIC PARAMETERS
     std::unordered_map<std::string, uint32_t> parameters;
-    std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
+    std::vector<bus_submodule> bus_submodules;
 
     // DOCUMENTATION
     module_documentation doc;

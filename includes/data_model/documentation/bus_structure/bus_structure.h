@@ -17,8 +17,8 @@
 #define MAKEFILEGEN_V2_BUS_STRUCTURE_H
 
 #include "bus_component.h"
-#include "bus_registers.h"
 #include "bus_module.h"
 #include "bus_crossbar.h"
+#include "bus_submodule.h"
 
 #endif //MAKEFILEGEN_V2_BUS_STRUCTURE_H

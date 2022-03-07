@@ -41,8 +41,8 @@ HDL_Resource::HDL_Resource(const HDL_Resource &c) {
     parameters = c.parameters;
     bus_roots = c.bus_roots;
     doc = c.doc;
+    bus_submodules = c.bus_submodules;
 }
-
 
 
 const std::string &HDL_Resource::getName() const {

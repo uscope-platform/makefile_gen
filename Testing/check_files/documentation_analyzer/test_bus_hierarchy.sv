@@ -28,6 +28,7 @@ package test_package;
     {
         "name": "bus_base",
         "type": "bus_hierarchy",
+        "target": "test_package",
         "children": [
             {
                 "name": "timebase",
@@ -40,11 +41,6 @@ package test_package;
                                 "type": "gpio",
                                 "name": "general_ctrls"
                             }
-                    },
-                    {
-                        "name": "delay_emulator",
-                        "type": "registers",
-                        "target": "delay_emulator"
                     }
                 ]
             }

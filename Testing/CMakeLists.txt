@@ -39,5 +39,4 @@ configure_file(check_files/top_tb_sv.sv ${CHECK_FILES_DIR} COPYONLY)
 set(CHECK_FILES_DIR ${CMAKE_CURRENT_BINARY_DIR}/check_files/documentation_analyzer)
 make_directory(${CHECK_FILES_DIR})
 configure_file(check_files/documentation_analyzer/test_bus_hierarchy.sv ${CHECK_FILES_DIR} COPYONLY)
-
-
+configure_file(check_files/documentation_analyzer/test_module_hierarchy.sv ${CHECK_FILES_DIR} COPYONLY)

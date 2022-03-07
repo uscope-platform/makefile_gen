@@ -36,13 +36,15 @@ public:
     void parse_documentation(std::istream &stream);
     void process_documentation(std::unordered_map<std::string, uint32_t> parameters);
     std::vector<std::shared_ptr<bus_crossbar>> get_bus_roots();
+    std::unordered_map<std::string, std::vector<bus_submodule>> get_bus_submodules();
     std::unordered_map<std::string, module_documentation> get_modules_documentation();
 private:
     void analyze_documentation_object(nlohmann::json &obj);
     void analyze_bus_hierarchy(nlohmann::json &obj);
+    void analyze_module_hierarchy(nlohmann::json &obj);
     // BUS STRUCTURE DOCUMENTATION
-    std::shared_ptr<bus_registers> analyze_register(nlohmann::json &obj);
     std::shared_ptr<bus_module> analyze_module(nlohmann::json &obj);
+    bus_submodule analyze_submodule(nlohmann::json &obj);
     field_documentation analyze_register_field(nlohmann::json &obj);
     std::shared_ptr<bus_crossbar> analyze_crossbar(nlohmann::json &obj);
     // PERIPHERAL DOCUMENTATION
@@ -53,6 +55,7 @@ private:
     std::vector<std::string> raw_documentation_comments;
 
     std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
+    std::unordered_map<std::string, std::vector<bus_submodule>> bus_submodules;
     std::unordered_map<std::string, module_documentation> modules_doc;
 };
 

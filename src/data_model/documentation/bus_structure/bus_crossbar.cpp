@@ -17,8 +17,7 @@
 #include "data_model/documentation/bus_structure/bus_crossbar.h"
 
 
-bus_crossbar::bus_crossbar(std::vector<std::string> c, std::string p){
-     raw_children_list = std::move(c);
+bus_crossbar::bus_crossbar(std::string p) {
      parameter_name = std::move(p);
      base_address = 0;
 }
@@ -27,23 +26,13 @@ void bus_crossbar::add_child(const std::shared_ptr<bus_component>& c) {
     children.push_back(c);
 }
 
-std::string bus_crossbar::pretty_print(std::string prefix) {
-    std::string ret;
-    ret += prefix +  "CROSSBAR -- " + parameter_name + " -- " + std::to_string(base_address)  + "\n";
-    for(auto &child:children){
-        ret += bus_component::pretty_print(child, prefix + "  ");
-        if(&child != &children.back()) ret += "\n";
-    }
-    return ret;
-}
-
 
 bool operator==(const bus_crossbar &lhs, const bus_crossbar &rhs) {
     bool ret = true;
 
     ret &= lhs.base_address == rhs.base_address;
     ret &= lhs.parameter_name == rhs.parameter_name;
-
+    ret &= lhs.target == rhs.target;
     ret &= lhs.children.size() == rhs.children.size();
 
     if(ret){

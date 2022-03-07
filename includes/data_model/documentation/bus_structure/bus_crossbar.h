@@ -19,7 +19,6 @@
 
 #include "bus_component.h"
 #include "bus_module.h"
-#include "bus_registers.h"
 
 #include "third_party/cereal/types/vector.hpp"
 #include "third_party/cereal/types/memory.hpp"
@@ -34,8 +33,9 @@
 class bus_crossbar : public bus_component{
 public:
     bus_crossbar() = default;
-    bus_crossbar(std::vector<std::string> c, std::string p);
-
+    bus_crossbar(std::string p);
+    void set_target(const std::string &t) {target = t;};
+    std::string get_target() {return target;};
     void set_parameter(std::string p) {parameter_name = std::move(p);};
     std::string get_parameter() {return parameter_name;};
 
@@ -45,12 +45,10 @@ public:
     void  set_base_address(uint32_t ba) { base_address = ba;};
 
     std::vector<std::shared_ptr<bus_component>> get_children() {return children;};
-    std::vector<std::string> get_raw_children_list() {return raw_children_list;};
-    std::string pretty_print(std::string prefix);
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(base_address, parameter_name, raw_children_list, children);
+        ar(base_address, parameter_name, children);
     }
 
 
@@ -59,7 +57,7 @@ private:
     std::vector<std::shared_ptr<bus_component>> children;
     uint32_t base_address;
     std::string parameter_name;
-    std::vector<std::string> raw_children_list;
+    std::string target;
 
 };
 

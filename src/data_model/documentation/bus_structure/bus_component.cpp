@@ -18,21 +18,7 @@
 
 #include "data_model/documentation/bus_structure/bus_crossbar.h"
 #include "data_model/documentation/bus_structure/bus_module.h"
-#include "data_model/documentation/bus_structure/bus_registers.h"
-
-
-std::string bus_component::pretty_print(const std::shared_ptr<bus_component>& p, const std::string& prefix) {
-    auto&  ptr = *p;
-    std::string ret;
-    if (typeid(ptr) == typeid(bus_crossbar)) {
-        ret = std::static_pointer_cast<bus_crossbar>(p)->pretty_print(prefix);
-    } else if(typeid(ptr) == typeid(bus_registers)) {
-        ret = std::static_pointer_cast<bus_registers>(p)->pretty_print(prefix);
-    } else if(typeid(ptr) == typeid(bus_module)) {
-        ret = std::static_pointer_cast<bus_module>(p)->pretty_print(prefix);
-    }
-    return ret;
-}
+#include "data_model/documentation/bus_structure/bus_submodule.h"
 
 
 bool bus_component::compare(std::shared_ptr<bus_component> &lhs, std::shared_ptr<bus_component> &rhs) {
@@ -43,10 +29,10 @@ bool bus_component::compare(std::shared_ptr<bus_component> &lhs, std::shared_ptr
     ret &= typeid(ptr_l) == typeid(ptr_r);
     if (typeid(lhs) == typeid(bus_crossbar)) {
         ret &= *std::static_pointer_cast<bus_crossbar>(lhs) == *std::static_pointer_cast<bus_crossbar>(rhs);
-    } else if(typeid(lhs) == typeid(bus_registers)) {
-        ret &= *std::static_pointer_cast<bus_registers>(lhs) == *std::static_pointer_cast<bus_registers>(rhs);
     } else if(typeid(lhs) == typeid(bus_module)) {
         ret &= *std::static_pointer_cast<bus_module>(lhs) == *std::static_pointer_cast<bus_module>(rhs);
+    } else if(typeid(lhs) == typeid(bus_submodule)){
+        ret &= *std::static_pointer_cast<bus_submodule>(lhs) == *std::static_pointer_cast<bus_submodule>(rhs);
     }
     return ret;
 }
@@ -59,10 +45,10 @@ bool bus_component::compare(const std::shared_ptr<bus_component> &lhs, const std
     ret &= typeid(ptr_l) == typeid(ptr_r);
     if (typeid(ptr_l) == typeid(bus_crossbar)) {
         ret &= *std::static_pointer_cast<bus_crossbar>(lhs) == *std::static_pointer_cast<bus_crossbar>(rhs);
-    } else if(typeid(ptr_l) == typeid(bus_registers)) {
-        ret &= *std::static_pointer_cast<bus_registers>(lhs) == *std::static_pointer_cast<bus_registers>(rhs);
     } else if(typeid(ptr_l) == typeid(bus_module)) {
         ret &= *std::static_pointer_cast<bus_module>(lhs) == *std::static_pointer_cast<bus_module>(rhs);
+    } else if(typeid(lhs) == typeid(bus_submodule)){
+        ret &= *std::static_pointer_cast<bus_submodule>(lhs) == *std::static_pointer_cast<bus_submodule>(rhs);
     }
     return ret;
 }

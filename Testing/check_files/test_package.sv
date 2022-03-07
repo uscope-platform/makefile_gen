@@ -38,6 +38,7 @@ endpackage
     {
         "name": "bus_base",
         "type": "bus_hierarchy",
+        "target": "test_package",
         "children": [
             {
                 "name": "timebase",
@@ -45,8 +46,11 @@ endpackage
                 "children": [
                     {
                         "name": "scope_mux",
-                        "type": "registers",
-                        "target": "SicDriveMasterScope"
+                        "type": "module",
+                        "target": {
+                                "type": "SicDriveMasterScope",
+                                "name": "SicDriveMasterScope"
+                            }
                     }
                 ]
             },
@@ -60,13 +64,21 @@ endpackage
             },
             {
                 "name": "modulo_parameter",
-                "type": "registers",
-                "target": "SicDriveMasterScope"
+                "type": "module",
+                "target":
+                    {
+                        "type": "SicDriveMasterScope",
+                        "name": "SicDriveMasterScope"
+                    }
             },
             {
                 "name": "subtraction_parameter",
-                "type": "registers",
-                "target": "SicDriveMasterScope"
+                "type": "module",
+                "target":
+                    {
+                        "type": "SicDriveMasterScope",
+                        "name": "SicDriveMasterScope"
+                    }
             }
         ]
     }

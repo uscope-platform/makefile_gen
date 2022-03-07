@@ -13,28 +13,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-#include "data_model/documentation/bus_structure/bus_registers.h"
-
+#include "data_model/documentation/bus_structure/bus_submodule.h"
 
 
-bus_registers::bus_registers(std::string n, std::string p){
-    name = std::move(n);
-    parameter_name = std::move(p);
-    base_address = 0;
+
+bool operator==(const bus_submodule &lhs, const bus_submodule &rhs) {
+    bool ret = true;
+
+    ret &= lhs.name == rhs.name;
+    ret &= lhs.instance_type == rhs.instance_type;
+    ret &= lhs.offset == rhs.offset;
+
+    ret &= lhs.children.size() == rhs.children.size();
+
+    if(ret){
+        for(int i = 0; i< lhs.children.size(); ++i){
+            ret &= lhs.children[i] == rhs.children[i];
+        }
+    }
+
+    return ret;
 }
 
-
-std::string bus_registers::pretty_print(std::string prefix) {
-    return prefix + name + " [registers] -- " + parameter_name + " -- " + std::to_string(base_address);
+void bus_submodule::set_module_type(const std::string t) {
+    instance_type = t;
 }
-
-
-bool operator==(const bus_registers &lhs, const bus_registers &rhs) {
-    bool res = true;
-    res &= lhs.name == rhs.name;
-    res &= lhs.base_address == rhs.base_address;
-    res &= lhs.parameter_name == rhs.parameter_name;
-    return res;
-}
-

@@ -43,28 +43,30 @@ TEST( analysis_test , package) {
 
     std::shared_ptr<bus_crossbar> root = std::make_shared<bus_crossbar>();
     root->set_parameter("bus_base");
+    root->set_target("test_package");
     root->set_base_address(0x43c00000);
 
     std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>();
     xbar->set_parameter("timebase");
     xbar->set_base_address(1136656384);
+    std::shared_ptr<bus_module> mod = std::make_shared<bus_module>("SicDriveMasterScope","SicDriveMasterScope");
+    mod->set_base_address(0x43c01001);
+    xbar->add_child(mod);
     root->add_child(xbar);
 
-    std::shared_ptr<bus_registers> reg = std::make_shared<bus_registers>("SicDriveMasterScope", "scope_mux");
-    reg->set_base_address(0x43c01001);
-    xbar->add_child(reg);
 
-    std::shared_ptr<bus_module> mod = std::make_shared<bus_module>("general_ctrls", "gpio", "gpio");
-    mod->set_base_address(0x43c01001);
-    root->add_child(mod);
 
-    reg = std::make_shared<bus_registers>("SicDriveMasterScope", "modulo_parameter");
-    reg->set_base_address(1);
-    root->add_child(reg);
+    std::shared_ptr<bus_module> mod2 = std::make_shared<bus_module>("general_ctrls", "gpio");
+    mod2->set_base_address(0x43c01001);
+    root->add_child(mod2);
 
-    reg = std::make_shared<bus_registers>("SicDriveMasterScope", "subtraction_parameter");
-    reg->set_base_address(2);
-    root->add_child(reg);
+    std::shared_ptr<bus_module> mod3 = std::make_shared<bus_module>("SicDriveMasterScope","SicDriveMasterScope");
+    mod3->set_base_address(1);
+    root->add_child(mod3);
+
+    std::shared_ptr<bus_module> mod4 = std::make_shared<bus_module>("SicDriveMasterScope","SicDriveMasterScope");
+    mod4->set_base_address(2);
+    root->add_child(mod4);
 
 
     std::vector<std::shared_ptr<bus_crossbar>> bus_roots({root});

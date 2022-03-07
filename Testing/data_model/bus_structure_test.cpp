@@ -20,50 +20,9 @@
 
 #include "data_model/documentation/bus_structure/bus_crossbar.h"
 #include "data_model/documentation/bus_structure/bus_module.h"
-#include "data_model/documentation/bus_structure/bus_registers.h"
-
-TEST( bus_structure, bus_structure_printing) {
-
-    std::shared_ptr<bus_registers> reg = std::make_shared<bus_registers>("register_instance", "register_address_param");
-    reg->set_base_address(12);
-
-    std::shared_ptr<bus_module> mod = std::make_shared<bus_module>("module_instance", "module_type", "module_address_param");
-    mod->set_base_address(13);
-
-    std::vector<std::string> children = {"reg", "mod"};
-    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>(children,"crossbar_address_param");
-    xbar->add_child(reg);
-    xbar->add_child(mod);
-    xbar->set_base_address(14);
-    std::string test_string = "CROSSBAR -- crossbar_address_param -- 14\n  register_instance [registers] -- register_address_param -- 12\n  module_instance [module_type] -- module_address_param -- 13";
-    std::string structure_string = xbar->pretty_print("");
-    ASSERT_EQ(test_string, structure_string);
-}
-
-TEST( bus_structure, register_serdes) {
-
-    bus_registers reg_out("register_instance", "register_address_param");
-    reg_out.set_base_address(12);
-
-    std::stringstream os;
-    {
-        cereal::BinaryOutputArchive archive_out(os);
-        archive_out(reg_out);
-    }
-
-    std::string json_str = os.str();
-
-    std::stringstream is(json_str);
-
-    bus_registers reg_in;
-    cereal::BinaryInputArchive archive_in(is);
-    archive_in(reg_in);
-
-    ASSERT_EQ(reg_out, reg_in);
-}
 
 TEST( bus_structure, module_serdes) {
-    bus_module mod_out("module_instance", "module_type", "module_address_param");
+    bus_module mod_out("module_instance", "module_type");
     mod_out.set_base_address(13);
 
     std::stringstream os;
@@ -85,15 +44,13 @@ TEST( bus_structure, module_serdes) {
 
 TEST( bus_structure , crossbar_serdes) {
 
-    std::shared_ptr<bus_registers> reg = std::make_shared<bus_registers>("register_instance", "register_address_param");
-    reg->set_base_address(12);
 
-    std::shared_ptr<bus_module> mod = std::make_shared<bus_module>("module_instance", "module_type", "module_address_param");
+
+    std::shared_ptr<bus_module> mod = std::make_shared<bus_module>("module_instance", "module_type");
     mod->set_base_address(13);
 
-    std::vector<std::string> children = {"reg", "mod"};
-    bus_crossbar xbar_out(children,"crossbar_address_param");
-    xbar_out.add_child(reg);
+    std::vector<std::string> children = {"mod"};
+    bus_crossbar xbar_out("crossbar_address_param");
     xbar_out.add_child(mod);
     xbar_out.set_base_address(14);
 

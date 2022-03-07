@@ -19,10 +19,10 @@
 
 
 application_definition_generator::application_definition_generator(const Depfile &file,
-                                                                   std::shared_ptr<bus_crossbar> xbar) : dep(file){
+                                                                   std::shared_ptr<bus_crossbar> xbar, std::shared_ptr<data_store> &d) : dep(file){
     bus_root = std::move(xbar);
+    d_store = d;
     walk_bus_structure(bus_root);
-
     construct_application();
 }
 
@@ -33,12 +33,39 @@ void application_definition_generator::walk_bus_structure(const std::shared_ptr<
         std::string ret;
         if (typeid(ptr) == typeid(bus_crossbar)) {
             walk_bus_structure(std::static_pointer_cast<bus_crossbar>(item));
-        } else if(typeid(ptr) == typeid(bus_registers)) {
-            peripherals.push_back(generate_peripheral(std::static_pointer_cast<bus_registers>(item)));
         } else if(typeid(ptr) == typeid(bus_module)) {
-            peripherals.push_back(generate_peripheral(std::static_pointer_cast<bus_module>(item)));
+            auto module = std::static_pointer_cast<bus_module>(item);
+            peripherals.push_back(generate_peripheral(module));
+
+            auto test = d_store->get_HDL_resource(module->get_module_type());
+            auto submodules = d_store->get_HDL_resource(module->get_module_type()).get_submodules();
+
+            auto submodules_def = generate_submodules(submodules, module->get_name(),
+                                                    module->get_base_address());
+            if(!submodules_def.empty()){
+                peripherals.insert(peripherals.end(), submodules_def.begin(), submodules_def.end());
+            }
+
         }
     }
+}
+
+std::vector<nlohmann::json>
+application_definition_generator::generate_submodules(std::vector<bus_submodule> &sm, const std::string &spec_prefix,
+                                                      uint32_t base_address) {
+    std::vector<nlohmann::json> ret;
+
+    for (auto &item:sm) {
+        auto def = generate_peripheral(item, spec_prefix, base_address);
+        ret.push_back(def);
+        auto children = item.get_children();
+        auto child_defs = generate_submodules(children, spec_prefix + "." + item.get_name(), base_address + item.get_offset());
+        if(!child_defs.empty()){
+            ret.insert(ret.end(), child_defs.begin(), child_defs.end());
+        }
+    }
+
+    return ret;
 }
 
 nlohmann::json application_definition_generator::generate_peripheral(std::shared_ptr<bus_module> m) {
@@ -54,18 +81,19 @@ nlohmann::json application_definition_generator::generate_peripheral(std::shared
     return periph;
 }
 
-nlohmann::json application_definition_generator::generate_peripheral(std::shared_ptr<bus_registers> r) {
+nlohmann::json application_definition_generator::generate_peripheral(bus_submodule m, const std::string& spec_prefix, uint32_t base_address) {
     nlohmann::json periph;
-    periph["name"] = r->get_name();
-    periph["peripheral_id"] = r->get_name();
-    periph["spec_id"] = r->get_name();
-    periph["base_address"] =  "0x" + uint_to_hex(r->get_base_address());
+    periph["name"] = spec_prefix + "." + m.get_name();
+    periph["peripheral_id"] = spec_prefix + "." + m.get_name();
+    periph["spec_id"] =  m.get_module_type();
+    periph["base_address"] = "0x" + uint_to_hex(base_address + m.get_offset());
     periph["proxied"] = false;
     periph["proxy_address"] = std::to_string(0);
     periph["type"] = "Registers";
     periph["user_accessible"] = false;
     return periph;
 }
+
 
 void application_definition_generator::write_definition_file(const std::string &path) {
     std::string str = application.dump();
@@ -93,6 +121,5 @@ std::string application_definition_generator::uint_to_hex(uint32_t i) {
     out << std::hex << i;
     return out.str();
 }
-
 
 

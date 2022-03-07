@@ -12,43 +12,48 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#ifndef MAKEFILEGEN_V2_BUS_SUBMODULE_H
+#define MAKEFILEGEN_V2_BUS_SUBMODULE_H
 
 
-#ifndef MAKEFILEGEN_V2_BUS_MODULE_H
-#define MAKEFILEGEN_V2_BUS_MODULE_H
+#include <utility>
 
-#include "bus_component.h"
+#include "data_model/documentation/bus_structure/bus_component.h"
 
-
-#include <memory>
-#include <sstream>
-#include <vector>
-#include <string>
-
-class bus_module : public bus_component{
-    public:
-    bus_module() = default;
-    bus_module(std::string n, std::string t);
+class bus_submodule : public bus_component{
+public:
+    bus_submodule() = default;
     std::string get_name() {return name;};
+    void set_name(std::string n) {name = std::move(n);};
+
     std::string get_module_type() {return instance_type;};
-    [[nodiscard]] uint32_t get_base_address() const {return base_address;};
-    void  set_base_address(uint32_t ba) { base_address = ba;};
+    void set_module_type(const std::string t);
+
+    void add_child(const bus_submodule& sub){children.push_back(sub);};
+    std::vector<bus_submodule> get_children() {return children;};
+
+    [[nodiscard]] uint32_t get_offset() const {return offset;};
+    void  set_offset(uint32_t o) { offset = o;};
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, base_address, instance_type);
+        ar(name, offset, instance_type);
     }
 
-    friend bool operator==(const bus_module&lhs, const bus_module&rhs);
+    friend bool operator==(const bus_submodule&lhs, const bus_submodule&rhs);
 private:
     std::string name;
-    uint32_t base_address;
     std::string instance_type;
+    std::vector<bus_submodule> children;
+    uint32_t offset;
+
 };
 
 #include "third_party/cereal/types/polymorphic.hpp"
 #include "third_party/cereal/archives/binary.hpp"
 
-CEREAL_REGISTER_TYPE(bus_module);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(bus_component, bus_module)
-#endif //MAKEFILEGEN_V2_BUS_MODULE_H
+CEREAL_REGISTER_TYPE(bus_submodule);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(bus_component, bus_submodule)
+
+
+#endif //MAKEFILEGEN_V2_BUS_SUBMODULE_H

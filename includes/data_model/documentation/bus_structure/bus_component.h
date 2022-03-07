@@ -28,7 +28,6 @@
 class bus_component {
 public:
     bus_component() = default;
-    static std::string pretty_print(const std::shared_ptr<bus_component>& p, const std::string& prefix);
     virtual ~bus_component() = default; // virtual destructor to make class polymorphic
     static bool compare(std::shared_ptr<bus_component> &lhs, std::shared_ptr<bus_component> &rhs);
     static bool compare(const std::shared_ptr<bus_component> &lhs, const std::shared_ptr<bus_component> &rhs);
