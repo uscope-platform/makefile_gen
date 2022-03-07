@@ -65,13 +65,11 @@ TEST( module_tests , serdes) {
     reg_doc2.add_field(fd2);
 
     std::vector<std::string> children = {"reg", "mod"};
-    bus_crossbar xbar_out("crossbar_address_param");
 
     module_documentation mod_doc_out;
     mod_doc_out.set_name("test_module");
     mod_doc_out.add_register(reg_doc1);
     mod_doc_out.add_register(reg_doc2);
-    mod_doc_out.add_internal_bus(xbar_out);
     std::stringstream os;
     {
         cereal::BinaryOutputArchive archive_out(os);
@@ -103,17 +101,12 @@ TEST( module_tests , comparison_succeed) {
     mod_doc.add_register(reg_doc2);
 
     std::vector<std::string> children = {"reg", "mod"};
-    bus_crossbar xbar_out("crossbar_address_param");
-    mod_doc.add_internal_bus(xbar_out);
-
     module_documentation mod_doc_2;
     mod_doc_2.set_name("test_module");
     mod_doc_2.add_register(reg_doc1);
     mod_doc_2.add_register(reg_doc2);
 
     std::vector<std::string> children2 = {"reg", "mod"};
-    bus_crossbar xbar_out2("crossbar_address_param");
-    mod_doc_2.add_internal_bus(xbar_out2);
 
 
     ASSERT_EQ(mod_doc, mod_doc_2);
@@ -134,15 +127,12 @@ TEST( module_tests , comparison_fail) {
     mod_doc.add_register(reg_doc2);
 
     std::vector<std::string> children = {"reg", "mod"};
-    bus_crossbar xbar_out("crossbar_address_param");
-    mod_doc.add_internal_bus(xbar_out);
 
 
     module_documentation mod_doc_2;
     mod_doc_2.set_name("test_module");
     mod_doc_2.add_register(reg_doc1);
     mod_doc_2.add_register(reg_doc1);
-    mod_doc_2.add_internal_bus(xbar_out);
 
     ASSERT_NE(mod_doc, mod_doc_2);
 }

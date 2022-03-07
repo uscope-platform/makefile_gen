@@ -21,9 +21,6 @@ void module_documentation::add_register(const register_documentation& reg) {
     registers.push_back(reg);
 }
 
-void module_documentation::add_internal_bus(bus_crossbar b) {
-    internal_bus = std::move(b);
-}
 
 
 bool operator==(const module_documentation &lhs, const module_documentation &rhs) {
@@ -31,7 +28,6 @@ bool operator==(const module_documentation &lhs, const module_documentation &rhs
 
     ret &= lhs.name == rhs.name;
     ret &= lhs.registers.size() == rhs.registers.size();
-    ret &= lhs.internal_bus == rhs.internal_bus;
 
     if(ret){
         for(int i = 0; i<lhs.registers.size(); i++){

@@ -30,21 +30,18 @@ class module_documentation {
 public:
     module_documentation() = default;
     void add_register(const register_documentation& reg);
-    void add_internal_bus(bus_crossbar b);
-    bus_crossbar get_internal_bus() {return internal_bus;};
     void set_name(const std::string &n) {name = n;};
     std::vector<register_documentation> get_registers() {return  registers;};
 
     template<class Archive>
     void serialize(Archive & archive) {
-        archive(name, registers, internal_bus);
+        archive(name, registers);
     }
 
     friend bool operator==(const module_documentation&lhs, const module_documentation&rhs);
 private:
     std::string name;
     std::vector<register_documentation> registers;
-    bus_crossbar internal_bus;
 
 };
 
