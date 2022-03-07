@@ -35,17 +35,18 @@ void application_definition_generator::walk_bus_structure(const std::shared_ptr<
             walk_bus_structure(std::static_pointer_cast<bus_crossbar>(item));
         } else if(typeid(ptr) == typeid(bus_module)) {
             auto module = std::static_pointer_cast<bus_module>(item);
-            peripherals.push_back(generate_peripheral(module));
+            auto entity = d_store->get_HDL_resource(module->get_module_type());
+            auto submodules = entity.get_submodules();
 
-            auto test = d_store->get_HDL_resource(module->get_module_type());
-            auto submodules = d_store->get_HDL_resource(module->get_module_type()).get_submodules();
-
-            auto submodules_def = generate_submodules(submodules, module->get_name(),
-                                                    module->get_base_address());
-            if(!submodules_def.empty()){
-                peripherals.insert(peripherals.end(), submodules_def.begin(), submodules_def.end());
+            if(submodules.empty()){
+                peripherals.push_back(generate_peripheral(module));
+            } else{
+                auto submodules_def = generate_submodules(submodules, module->get_name(),
+                                                          module->get_base_address());
+                if(!submodules_def.empty()){
+                    peripherals.insert(peripherals.end(), submodules_def.begin(), submodules_def.end());
+                }
             }
-
         }
     }
 }

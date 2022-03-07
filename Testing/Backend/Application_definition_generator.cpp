@@ -105,18 +105,6 @@ TEST_F( app_def_generation , generate_app_def) {
     p1["user_accessible"] = false;
     check_peripherals.push_back(p1);
 
-    nlohmann::json p2;
-    p2["base_address"] = "0xd";
-    p2["name"] = "module_instance";
-    p2["peripheral_id"] = "module_instance";
-    p2["proxied"] = false;
-    p2["proxy_address"] = "0";
-    p2["spec_id"] = "module_type";
-    p2["type"] = "Registers";
-    p2["user_accessible"] = false;
-    check_peripherals.push_back(p2);
-
-
     nlohmann::json p3;
     p3["base_address"] = "0xd";
     p3["name"] = "module_instance.SC";
