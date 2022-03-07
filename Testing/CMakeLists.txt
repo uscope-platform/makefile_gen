@@ -12,7 +12,8 @@ set(MAKEFILEGEN_TESTS
         analysis/documentation_analyzer.cpp
         analysis/analysis.cpp
         Backend/Application_management_test.cpp
-        Backend/Application_definition_generator.cpp)
+        Backend/Application_definition_generator.cpp
+        Backend/Peripheral_definition_generator.cpp)
 
 
 add_executable(tests ${MAKEFILEGEN_TESTS} ${MAKEFILE_GEN_SRCS})
@@ -40,3 +41,4 @@ set(CHECK_FILES_DIR ${CMAKE_CURRENT_BINARY_DIR}/check_files/documentation_analyz
 make_directory(${CHECK_FILES_DIR})
 configure_file(check_files/documentation_analyzer/test_bus_hierarchy.sv ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/documentation_analyzer/test_module_hierarchy.sv ${CHECK_FILES_DIR} COPYONLY)
+configure_file(check_files/documentation_analyzer/test_peripheral_definition.sv ${CHECK_FILES_DIR} COPYONLY)

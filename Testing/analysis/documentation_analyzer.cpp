@@ -87,3 +87,32 @@ TEST( documentation_analyzer , module_bus_hierarchy) {
 
     ASSERT_EQ(check_map, results);
 }
+
+
+TEST( documentation_analyzer , peripheral) {
+
+    std::ifstream is("check_files/documentation_analyzer/test_peripheral_definition.sv");
+
+    std::unordered_map<std::string, uint32_t> params;
+
+    documentation_analyzer doc(is);
+    doc.process_documentation(params);
+    std::unordered_map<std::string, module_documentation> results = doc.get_modules_documentation();
+
+    module_documentation check_doc;
+    check_doc.set_name("Decoder");
+    register_documentation reg_1("simple_register_r", 0, "Single word read only register", true, false);
+    register_documentation reg_2("simple_register_w", 0x4, "Single word write only register", false, true);
+    register_documentation reg_3("field_registers", 0x20, "register with multiple fields", true, true);
+    field_documentation field_1("field_1", "First field",0,8);
+    field_documentation field_2("field_2", "Second Field",8,8);
+    reg_3.add_field(field_1);
+    reg_3.add_field(field_2);
+    check_doc.add_register(reg_1);
+    check_doc.add_register(reg_2);
+    check_doc.add_register(reg_3);
+    std::unordered_map<std::string, module_documentation> check_map;
+    check_map["Decoder"] = check_doc;
+
+    ASSERT_EQ(check_map, results);
+}
