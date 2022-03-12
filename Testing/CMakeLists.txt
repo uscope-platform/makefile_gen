@@ -14,6 +14,7 @@ set(MAKEFILEGEN_TESTS
         Backend/Application_management_test.cpp
         Backend/Application_definition_generator.cpp
         Backend/Peripheral_definition_generator.cpp
+        frontend/cache_manager.cpp)
 
 
 add_executable(tests ${MAKEFILEGEN_TESTS} ${MAKEFILE_GEN_SRCS})

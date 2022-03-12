@@ -35,28 +35,46 @@ bool cache_manager::is_changed(std::filesystem::path &file) {
 }
 
 std::string cache_manager::hash_file(std::filesystem::path &file) {
-    unsigned int size;
-    std::vector<std::string> file_chunks;
 
-    std::ifstream infile(file);
 
-    std::vector<char> buffer (SHA256_DIGEST_LENGTH,0);
-
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256_CTX sha256;
-    SHA256_Init(&sha256);
-
-    while(!infile.eof()) {
-        infile.read(buffer.data(), buffer.size());
-        std::string chunk(buffer.begin(), buffer.end());
-        SHA256_Update(&sha256, chunk.c_str(), chunk.size());
+    std::ifstream in(file);
+    std::string file_content;
+    if (in)
+    {
+        in.seekg(0, std::ios::end);
+        file_content.resize(in.tellg());
+        in.seekg(0, std::ios::beg);
+        in.read(&file_content[0], file_content.size());
+        in.close();
     }
-    SHA256_Final(hash, &sha256);
-    char * raw_str = OPENSSL_buf2hexstr(hash, SHA256_DIGEST_LENGTH);
-    std::string hash_digest(raw_str);
-    OPENSSL_free(raw_str);
 
-    return hash_digest;
+
+    EVP_MD_CTX* context = EVP_MD_CTX_new();
+
+    if(context != nullptr){
+        if(EVP_DigestInit_ex(context, EVP_sha256(), nullptr)) {
+            if(EVP_DigestUpdate(context, file_content.c_str(), file_content.length())) {
+                unsigned char hash[EVP_MAX_MD_SIZE];
+                unsigned int lengthOfHash = 0;
+
+                if(EVP_DigestFinal_ex(context, hash, &lengthOfHash)) {
+                    std::stringstream ss;
+                    for(unsigned int i = 0; i < lengthOfHash; ++i) {
+                        ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+                        if(i<lengthOfHash-1){
+                            ss<<":";
+                        }
+                    }
+                    EVP_MD_CTX_free(context);
+                    return ss.str();
+                }
+            }
+        }
+    }
+
+
+    // If I get here there must have been some error with the hash calculation, throw an exception
+    throw std::runtime_error("ERROR: could not calculate file hash");
 }
 
 bool cache_manager::is_cached(std::filesystem::path &file) {
@@ -64,6 +82,7 @@ bool cache_manager::is_cached(std::filesystem::path &file) {
 }
 
 void cache_manager::load_cache_backend() {
+    std::string test = s_store->get_setting("cache_dump");
     std::istringstream cache_stream(s_store->get_setting("cache_dump"));
 
     std::string cache_line;

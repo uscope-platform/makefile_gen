@@ -17,13 +17,13 @@
 #define MAKEFILEGEN_V2_CACHE_MANAGER_H
 
 #include <filesystem>
+#include <gtest/gtest.h>
 #include <unordered_map>
 #include <utility>
 #include <fstream>
 #include <vector>
 
-#include <openssl/sha.h>
-#include <openssl/crypto.h>
+#include <openssl/evp.h>
 
 #include "data_model/settings_store.h"
 #include "data_model/data_store.h"
@@ -35,7 +35,11 @@ public:
     bool is_changed(std::filesystem::path &file);
     bool is_cached(std::filesystem::path &file);
     ~cache_manager();
+protected:
+    std::string get_cache_line(const std::string& s) {return cache[s];};
 private:
+    FRIEND_TEST(cache_manager_Test , file_hashing);
+    FRIEND_TEST(cache_manager_Test , cache_loading);
     static std::string hash_file(std::filesystem::path &file);
     void load_cache_backend();
     void store_cache_backend();
