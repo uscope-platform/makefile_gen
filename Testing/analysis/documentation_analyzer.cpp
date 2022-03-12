@@ -111,6 +111,7 @@ TEST( documentation_analyzer , peripheral) {
     check_doc.add_register(reg_1);
     check_doc.add_register(reg_2);
     check_doc.add_register(reg_3);
+
     std::unordered_map<std::string, module_documentation> check_map;
     check_map["Decoder"] = check_doc;
 

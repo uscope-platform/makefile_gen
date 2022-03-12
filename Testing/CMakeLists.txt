@@ -13,7 +13,7 @@ set(MAKEFILEGEN_TESTS
         analysis/analysis.cpp
         Backend/Application_management_test.cpp
         Backend/Application_definition_generator.cpp
-        Backend/Peripheral_definition_generator.cpp)
+        Backend/Peripheral_definition_generator.cpp
 
 
 add_executable(tests ${MAKEFILEGEN_TESTS} ${MAKEFILE_GEN_SRCS})

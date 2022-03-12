@@ -30,6 +30,7 @@ public:
     void walk_bus_structure(const std::shared_ptr<bus_crossbar>& node);
     nlohmann::json generate_peripheral(std::shared_ptr<bus_module>& node);
     static nlohmann::json generate_register(register_documentation &doc);
+    std::vector<nlohmann::json> get_peripheral_definitions() {return peripheral_defs;};
 private:
     std::shared_ptr<bus_crossbar> bus_root;
     std::string ver;

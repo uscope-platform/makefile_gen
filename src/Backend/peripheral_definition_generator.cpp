@@ -42,13 +42,15 @@ nlohmann::json peripheral_definition_generator::generate_peripheral(std::shared_
 
     periph["name"] = node->get_module_type();
     periph["version"] = ver;
-    ret[node->get_module_type()] = periph;
+
 
     std::vector<nlohmann::json> regs;
     auto def = d_store->get_HDL_resource(node->get_module_type());
     for(auto &item:def.get_documentation().get_registers()){
         regs.push_back(generate_register(item));
     }
+    periph["registers"] = regs;
+    ret[node->get_module_type()] = periph;
     return ret;
 }
 
@@ -61,11 +63,12 @@ nlohmann::json peripheral_definition_generator::generate_register(register_docum
     ret["ID"] = doc.get_name();
     ret["register_name"] = doc.get_name();
     ret["description"] = doc.get_description();
+    std::string dir;
     if(doc.get_read_allowed())
-        ret["direction"] += "R";
+        dir += "R";
     if(doc.get_write_allowed())
-        ret["direction"] += "W";
-
+        dir += "W";
+    ret["direction"] = dir;
     std::ostringstream off;
     off<< "0x" << std::hex << doc.get_offset();
     ret["offset"] = off.str();
