@@ -33,7 +33,7 @@ using json = nlohmann::json;
 class project_generator_base {
 public:
     explicit project_generator_base(const std::string& template_f);
-    void write_makefile(std::ofstream &output);
+    void write_makefile(std::ostream &output);
     void set_project_name(const std::string& name);
     void set_directories(const std::string& base,const std::vector<std::string>& commons);
     void set_synth_sources(const std::set<std::string>& paths);

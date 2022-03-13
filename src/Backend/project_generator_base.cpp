@@ -21,7 +21,7 @@ project_generator_base::project_generator_base(const std::string& template_f) {
     tpl = env.parse_template(template_file);
 }
 
-void project_generator_base::write_makefile(std::ofstream &output) {
+void project_generator_base::write_makefile(std::ostream &output) {
     std::string result = env.render(tpl, data);
     output<<result;
 }
