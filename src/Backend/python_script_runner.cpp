@@ -26,10 +26,13 @@ void python_script_runner::run_python_scripts(std::vector<Script> scripts) {
         if(!args.empty()) {
             std::string target = base_path + "/" + args[0];
             arg_v.emplace_back(target);
-            for(int i = 1; i<args.size(); ++i) {
+            for (int i = 1; i < args.size(); ++i) {
                 arg_v.push_back(args[i]);
             }
-            spawn_process(arg_v, false, true);
+        }
+        spawn_process(arg_v, false, true);
+        if(!args.empty()) {
+            std::string target = base_path + "/" + args[0];
             if(item.get_product_include()){
                 std::string tmp_type = item.get_product_type();
                 if(tmp_type == "tcl"){
@@ -40,7 +43,6 @@ void python_script_runner::run_python_scripts(std::vector<Script> scripts) {
                     constraints_depdendencies.insert(target);
                 }
             }
-
         }
 
     }

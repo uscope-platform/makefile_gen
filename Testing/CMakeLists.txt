@@ -15,7 +15,7 @@ set(MAKEFILEGEN_TESTS
         Backend/Application_definition_generator.cpp
         Backend/Peripheral_definition_generator.cpp
         Backend/toolchain_manager.cpp
-        frontend/cache_manager.cpp frontend/repository_walker.cpp)
+        frontend/cache_manager.cpp frontend/repository_walker.cpp Backend/python_script_runner.cpp)
 
 
 add_executable(tests ${MAKEFILEGEN_TESTS} ${MAKEFILE_GEN_SRCS})
@@ -38,6 +38,7 @@ configure_file(check_files/test_sv_module.sv ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/test_vhdl_module.vhd ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/top_synth_sv.sv ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/top_tb_sv.sv ${CHECK_FILES_DIR} COPYONLY)
+configure_file(check_files/python_test.py ${CHECK_FILES_DIR} COPYONLY)
 
 set(CHECK_FILES_DIR ${CMAKE_CURRENT_BINARY_DIR}/check_files/documentation_analyzer)
 make_directory(${CHECK_FILES_DIR})
@@ -59,3 +60,4 @@ configure_file(check_files/repository_walker/ignored_dir/test_sv_module2.sv ${RE
 make_directory(${REPO_WALKER_TEST_DIR}/ignored_dir_2)
 configure_file(check_files/repository_walker/ignored_dir_2/test_sv_module2.sv ${REPO_WALKER_TEST_DIR}/ignored_dir_2 COPYONLY)
 configure_file(check_files/repository_walker/ignored_dir_2/example_proj.xpr ${REPO_WALKER_TEST_DIR}/ignored_dir_2 COPYONLY)
+
