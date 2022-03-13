@@ -28,6 +28,7 @@
 #include <filesystem>
 #include <spawn.h>
 #include <utility>
+#include <gtest/gtest.h>
 
 #include "../data_model/settings_store.h"
 
@@ -38,6 +39,8 @@ public:
     virtual void create_project(const std::string& makefile, bool start_gui) {};
 
 protected:
+    FRIEND_TEST(Toolchain_manager, str_vect_to_char_p);
+    FRIEND_TEST(Toolchain_manager, spawn_process);
     static std::vector<const char *> str_vect_to_char_p(const std::vector<std::string>& vect);
     static void spawn_process(const std::vector<std::string>&arg_v, bool daemonize, bool block);
 

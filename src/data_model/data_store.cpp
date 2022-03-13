@@ -16,13 +16,14 @@
 #include "data_model/data_store.h"
 
 
-data_store::data_store() {
+data_store::data_store(bool e) {
+    ephemeral = e;
     store_path = std::string(std::getenv("HOME")) + "/.makefilegen_store";
     std::filesystem::create_directory(store_path);
 
     unified_cache = store_path + "/unified_cache";
 
-    if(std::filesystem::exists(unified_cache)){
+    if(std::filesystem::exists(unified_cache) & !ephemeral){
         load_cache();
     }
     clean_up_caches();
@@ -91,7 +92,9 @@ bool data_store::is_primitive(const std::string &name) {
 }
 
 data_store::~data_store() {
-    store_cache();
+    if(!ephemeral){
+        store_cache();
+    }
 }
 
 

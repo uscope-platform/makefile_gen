@@ -24,8 +24,9 @@
 #include <future>
 #include <regex>
 #include <utility>
+#include <gtest/gtest.h>
 
-#include <frontend/cache_manager.h>
+#include "frontend/cache_manager.h"
 #include "data_model/settings_store.h"
 #include "data_model/Script.h"
 #include "data_model/Constraints.h"
@@ -47,10 +48,11 @@ const unsigned int max_threads = std::thread::hardware_concurrency()-1;
 class Repository_walker {
 
 public:
-    explicit Repository_walker(std::shared_ptr<settings_store> s, std::shared_ptr<data_store> d);
+    Repository_walker(const std::shared_ptr<settings_store>& s, const std::shared_ptr<data_store>& d);
+    Repository_walker(const std::shared_ptr<settings_store>& s, const std::shared_ptr<data_store>& d, std::set<std::string> ex);
     void analyze_dir();
 private:
-
+    void construct_walker(std::shared_ptr<settings_store> s, std::shared_ptr<data_store> d, std::set<std::string> ex);
     bool is_excluded_directory(const std::filesystem::path& dir);
     bool contains_excluding_file(const std::filesystem::path& dir);
     void read_ignore_file(const std::filesystem::path& file);
@@ -59,14 +61,16 @@ private:
 
     // File type discrimination methods
     // TODO: use these to make file associations dynamic a la vscode
-    static bool file_is_verilog(std::filesystem::path &file);
-    static bool file_is_vhdl(std::filesystem::path &file);
-    static bool file_is_script(std::filesystem::path &file);
-    static bool file_is_constraint(std::filesystem::path &file);
-    static bool file_is_data(std::filesystem::path &file);
+    static bool file_is_verilog(const std::filesystem::path &file);
+    static bool file_is_vhdl(const std::filesystem::path &file);
+    static bool file_is_script(const std::filesystem::path &file);
+    static bool file_is_constraint(const std::filesystem::path &file);
+    static bool file_is_data(const std::filesystem::path &file);
     // TODO: Make excluded directories dynamic with a mechanism similar to .gitignore
 
-    std::set<std::string> excluded_directories = {".git"};
+    FRIEND_TEST(repository_walker , file_type_handling);
+
+    std::set<std::string> excluded_directories;
     std::set<std::string> excluding_extensions = {".xpr"};
     std::string ignore_file_name = ".mkignore";
 

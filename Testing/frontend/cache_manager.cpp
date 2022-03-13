@@ -27,9 +27,7 @@ std::string exec(const char* cmd) {
     std::array<char, 128> buffer;
     std::string result;
     std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
-    if (!pipe) {
-        throw std::runtime_error("popen() failed!");
-    }
+
     while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
         result += buffer.data();
     }
@@ -40,7 +38,7 @@ std::string exec(const char* cmd) {
 class cache_manager_Test : public ::testing::Test {
 protected:
     void SetUp() {
-        d_store = std::make_shared<data_store>();
+        d_store = std::make_shared<data_store>(true);
 
 
         module_documentation doc;
@@ -61,7 +59,7 @@ protected:
         mod_entity.set_documentation(doc);
         d_store->store_hdl_entity(mod_entity);
 
-        s_store = std::make_shared<settings_store>();
+        s_store = std::make_shared<settings_store>(true);
         s_store->set_setting("cache_dump", "");
 
         std::filesystem::copy("check_files/test_package.sv", "check_files/test_package.sv.test");

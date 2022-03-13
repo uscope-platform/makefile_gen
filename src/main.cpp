@@ -44,7 +44,7 @@ int main(int argc, char *argv[]){
     CLI11_PARSE(app, argc, argv);
 
     // Setup caches
-    std::shared_ptr<settings_store>  s_store = std::make_shared<settings_store>();
+    std::shared_ptr<settings_store>  s_store = std::make_shared<settings_store>(false);
     if(!get_setting.empty()){
         std::cout << s_store->get_setting(get_setting)<<std::endl;
     }
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]){
     }
 
 
-    std::shared_ptr<data_store> d_store = std::make_shared<data_store>();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(false);
 
     // analyze repository content and update cache
     Repository_walker walker(s_store, d_store);

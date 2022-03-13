@@ -27,6 +27,7 @@
 #include <filesystem>
 #include <spawn.h>
 #include <utility>
+#include <gtest/gtest.h>
 
 #include "data_model/settings_store.h"
 #include "../Toolchain_manager.h"
@@ -35,6 +36,11 @@ class Vivado_manager :public Toolchain_manager {
 public:
     Vivado_manager(std::shared_ptr<settings_store> s, bool del_mkfile, std::string name);
     void create_project(const std::string& makefile, bool start_gui) override;
+
+protected:
+
+    FRIEND_TEST(Toolchain_manager, vivado_manager);
+    std::vector<std::string> prepare_call(const std::string& makefile);
 
     std::string vivado_path;
 };

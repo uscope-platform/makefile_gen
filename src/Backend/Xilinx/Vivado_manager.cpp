@@ -29,6 +29,26 @@ Vivado_manager::Vivado_manager(std::shared_ptr<settings_store> s, bool del_mkfil
 }
 
 void Vivado_manager::create_project(const std::string& makefile, bool start_gui) {
+
+    spawn_process(prepare_call(makefile), false, true);
+
+    if(delete_makefile){
+        std::filesystem::remove(makefile);
+    }
+
+    if(start_gui){
+
+        std::vector<std::string> arg_v;
+        arg_v.emplace_back(vivado_path + "/bin/vivado");
+        arg_v.emplace_back("-nolog");
+        arg_v.emplace_back("-nojournal");
+        arg_v.push_back(project_name + "/" + project_name+".xpr");
+
+        spawn_process(arg_v, true, false);
+    }
+}
+
+std::vector<std::string> Vivado_manager::prepare_call(const std::string &makefile) {
     std::vector<std::string> arg_v;
     arg_v.emplace_back(vivado_path + "/bin/vivado");
     arg_v.emplace_back("-mode");
@@ -37,21 +57,5 @@ void Vivado_manager::create_project(const std::string& makefile, bool start_gui)
     arg_v.emplace_back("-nojournal");
     arg_v.emplace_back("-source");
     arg_v.push_back(makefile);
-
-    spawn_process(arg_v, false, true);
-
-    if(delete_makefile){
-        std::filesystem::remove(makefile);
-    }
-
-    if(start_gui){
-
-        arg_v.clear();
-        arg_v.emplace_back(vivado_path + "/bin/vivado");
-        arg_v.emplace_back("-nolog");
-        arg_v.emplace_back("-nojournal");
-        arg_v.push_back(project_name + "/" + project_name+".xpr");
-
-        spawn_process(arg_v, true, false);
-    }
+    return arg_v;
 }

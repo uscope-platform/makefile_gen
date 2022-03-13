@@ -14,13 +14,13 @@
 // limitations under the License.
 #include "data_model/settings_store.h"
 
-settings_store::settings_store() {
+settings_store::settings_store(bool e) {
     store_path = std::string(std::getenv("HOME")) + "/.makefilegen_store";
     std::filesystem::create_directory(store_path);
-
+    ephemeral = e;
     settings_file = store_path + "/settings";
 
-    if(std::filesystem::exists(settings_file)){
+    if(std::filesystem::exists(settings_file) && !ephemeral){
         load_settings_backend();
     }
 }
@@ -56,11 +56,15 @@ void settings_store::store_settings_backend() {
 }
 
 settings_store::~settings_store() {
-    store_settings_backend();
+    if(!ephemeral){
+        store_settings_backend();
+    }
+
 }
 
 void settings_store::remove_setting(const std::string &setting) {
     settings_backend.erase(setting);
 }
+
 
 

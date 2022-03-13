@@ -25,7 +25,7 @@
 
 class settings_store {
 public:
-    settings_store();
+    settings_store(bool e);
 
     std::string get_setting(const std::string& setting);
     void set_setting(const std::string& name, const std::string& value);
@@ -37,6 +37,7 @@ private:
     void store_settings_backend();
     std::map<std::string, std::string> settings_backend;
 
+    bool ephemeral;
     std::string store_path;
     std::string settings_file;
 };

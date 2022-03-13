@@ -16,11 +16,24 @@
 
 #include "frontend/Repository_walker.h"
 
+#include <utility>
 
-Repository_walker::Repository_walker(std::shared_ptr<settings_store> s, std::shared_ptr<data_store> d) : pool(max_threads),
+
+Repository_walker::Repository_walker(const std::shared_ptr<settings_store>& s, const std::shared_ptr<data_store>& d) : pool(max_threads),
                                                                                                          cache_mgr(s, d){
+    construct_walker(s, d, {".git"});
+}
+
+Repository_walker::Repository_walker(const std::shared_ptr<settings_store>& s, const std::shared_ptr<data_store>& d,
+                                     std::set<std::string> ex) : pool(max_threads), cache_mgr(s, d) {
+    construct_walker(s, d, std::move(ex));
+}
+
+void Repository_walker::construct_walker(std::shared_ptr<settings_store> s, std::shared_ptr<data_store> d,
+                                         std::set<std::string> ex) {
     s_store = std::move(s);
     d_store = std::move(d);
+    excluded_directories = std::move(ex);
     target_repository = s_store->get_setting("hdl_store");
     if(target_repository.empty()){
         std::cout<< "Please enter the absolute path of the HDL repository"<<std::endl;
@@ -29,6 +42,9 @@ Repository_walker::Repository_walker(std::shared_ptr<settings_store> s, std::sha
     }
     analyze_dir();
 }
+
+
+
 
 /// This method analyses the Repository_walker target directory, mapping out useful things (like module dependencies, script location, etc.)
 ///
@@ -158,15 +174,15 @@ void Repository_walker::analyze_file(std::filesystem::path &file) {
 /// Check if the target file appertains to the verilog language family
 /// \param file Target file
 /// \return True if the file is verilog
-bool Repository_walker::file_is_verilog(std::filesystem::path &file) {
+bool Repository_walker::file_is_verilog(const std::filesystem::path &file) {
     std::string extension = file.extension();
-    return extension == ".svh" || extension == ".sv" || extension == ".v" || extension == ".v";
+    return extension == ".svh" || extension == ".sv" || extension == ".vh" || extension == ".v";
 }
 
 /// Check if the target file appertains to the vhdl language family
 /// \param file Target file
 /// \return
-bool Repository_walker::file_is_vhdl(std::filesystem::path &file) {
+bool Repository_walker::file_is_vhdl(const std::filesystem::path &file) {
     std::string extension = file.extension();
     return extension == ".vhd";
 }
@@ -174,7 +190,7 @@ bool Repository_walker::file_is_vhdl(std::filesystem::path &file) {
 /// Check if the target file is a recognized script (TCL and python)
 /// \param file Target file
 /// \return true if the file is a recognized script
-bool Repository_walker::file_is_script(std::filesystem::path &file) {
+bool Repository_walker::file_is_script(const std::filesystem::path &file) {
     std::string extension = file.extension();
     return extension == ".tcl" || extension == ".py";
 }
@@ -182,12 +198,12 @@ bool Repository_walker::file_is_script(std::filesystem::path &file) {
 /// Check if the target is a constrain file
 /// \param file Target file
 /// \return true if the file is a constrain file
-bool Repository_walker::file_is_constraint(std::filesystem::path &file) {
+bool Repository_walker::file_is_constraint(const std::filesystem::path &file) {
     std::string extension = file.extension();
     return extension == ".xdc";
 }
 
-bool Repository_walker::file_is_data(std::filesystem::path &file) {
+bool Repository_walker::file_is_data(const std::filesystem::path &file) {
     std::string extension = file.extension();
     return extension == ".dat" || extension == ".mem";
 }

@@ -14,7 +14,8 @@ set(MAKEFILEGEN_TESTS
         Backend/Application_management_test.cpp
         Backend/Application_definition_generator.cpp
         Backend/Peripheral_definition_generator.cpp
-        frontend/cache_manager.cpp)
+        Backend/toolchain_manager.cpp
+        frontend/cache_manager.cpp frontend/repository_walker.cpp)
 
 
 add_executable(tests ${MAKEFILEGEN_TESTS} ${MAKEFILE_GEN_SRCS})
@@ -43,3 +44,18 @@ make_directory(${CHECK_FILES_DIR})
 configure_file(check_files/documentation_analyzer/test_bus_hierarchy.sv ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/documentation_analyzer/test_module_hierarchy.sv ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/documentation_analyzer/test_peripheral_definition.sv ${CHECK_FILES_DIR} COPYONLY)
+
+
+set(REPO_WALKER_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR}/repository_walker)
+make_directory(${REPO_WALKER_TEST_DIR})
+configure_file(check_files/repository_walker/test_sv_module.sv ${REPO_WALKER_TEST_DIR} COPYONLY)
+configure_file(check_files/repository_walker/test_vhdl_module.vhd ${REPO_WALKER_TEST_DIR} COPYONLY)
+configure_file(check_files/repository_walker/data.dat ${REPO_WALKER_TEST_DIR} COPYONLY)
+configure_file(check_files/repository_walker/script_1.tcl ${REPO_WALKER_TEST_DIR} COPYONLY)
+configure_file(check_files/repository_walker/script_2.py ${REPO_WALKER_TEST_DIR} COPYONLY)
+configure_file(check_files/repository_walker/constraints.xdc ${REPO_WALKER_TEST_DIR} COPYONLY)
+make_directory(${REPO_WALKER_TEST_DIR}/ignored_dir)
+configure_file(check_files/repository_walker/ignored_dir/test_sv_module2.sv ${REPO_WALKER_TEST_DIR}/ignored_dir COPYONLY)
+make_directory(${REPO_WALKER_TEST_DIR}/ignored_dir_2)
+configure_file(check_files/repository_walker/ignored_dir_2/test_sv_module2.sv ${REPO_WALKER_TEST_DIR}/ignored_dir_2 COPYONLY)
+configure_file(check_files/repository_walker/ignored_dir_2/example_proj.xpr ${REPO_WALKER_TEST_DIR}/ignored_dir_2 COPYONLY)
