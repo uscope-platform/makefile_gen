@@ -15,7 +15,7 @@ set(MAKEFILEGEN_TESTS
         Backend/Application_definition_generator.cpp
         Backend/Peripheral_definition_generator.cpp
         Backend/toolchain_manager.cpp
-        frontend/cache_manager.cpp frontend/repository_walker.cpp Backend/python_script_runner.cpp)
+        frontend/cache_manager.cpp frontend/repository_walker.cpp Backend/python_script_runner.cpp Backend/auxiliary_resolver.cpp)
 
 
 add_executable(tests ${MAKEFILEGEN_TESTS} ${MAKEFILE_GEN_SRCS})
