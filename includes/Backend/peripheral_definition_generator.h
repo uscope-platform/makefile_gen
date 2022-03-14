@@ -30,12 +30,14 @@ public:
     void walk_bus_structure(const std::shared_ptr<bus_crossbar>& node);
     nlohmann::json generate_peripheral(std::shared_ptr<bus_module>& node);
     static nlohmann::json generate_register(register_documentation &doc);
+    static nlohmann::json generate_field(field_documentation &doc);
     std::vector<nlohmann::json> get_peripheral_definitions() {return peripheral_defs;};
+    void write_definition_file(const std::string &path);
 private:
     std::shared_ptr<bus_crossbar> bus_root;
     std::string ver;
     std::shared_ptr<data_store> d_store;
-    std::vector<nlohmann::json> peripheral_defs;
+    nlohmann::json peripheral_defs;
 };
 
 

@@ -22,6 +22,11 @@ class field_documentation {
 public:
     field_documentation();
     field_documentation(std::string n, std::string desc, uint8_t start, uint8_t len);
+
+    std::string get_name() {return name;};
+    std::string get_description() {return description;};
+    uint8_t get_starting_position() const {return start_position;};
+    uint8_t get_length() const {return length;};
     template<class Archive>
     void serialize( Archive & ar ) {
         ar(name, description, start_position, length);

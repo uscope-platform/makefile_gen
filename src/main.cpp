@@ -26,6 +26,8 @@ int main(int argc, char *argv[]){
     app.add_flag("--X",generate_xilinx,"Generate Xilinx Makefile");
     bool generate_app_definition = false;
     app.add_flag("--A",generate_app_definition,"Generate application definition file");
+    bool generate_periph_definition = false;
+    app.add_flag("--P",generate_periph_definition,"Generate Peripherals definition file");
     bool generate_lattice = false;
     app.add_flag("--L",generate_lattice,"Generate Lattice Makefile");
     bool synth_design = false;
@@ -147,6 +149,12 @@ int main(int argc, char *argv[]){
         std::shared_ptr<bus_crossbar> xbar = std::static_pointer_cast<bus_crossbar>(d_store->get_HDL_resource(dep.get_bus_defining_package()).get_bus_roots()[0]);
         application_definition_generator app_def_gen(dep, xbar, d_store);
         app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
+    }
+
+    if(generate_periph_definition){
+        std::shared_ptr<bus_crossbar> xbar = std::static_pointer_cast<bus_crossbar>(d_store->get_HDL_resource(dep.get_bus_defining_package()).get_bus_roots()[0]);
+        peripheral_definition_generator periph_def_gen(dep, xbar, d_store);
+        periph_def_gen.write_definition_file(dep.get_project_name() + "_periph_def.json");
     }
 
     return 0;

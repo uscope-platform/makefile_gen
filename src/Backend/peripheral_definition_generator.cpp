@@ -73,5 +73,26 @@ nlohmann::json peripheral_definition_generator::generate_register(register_docum
     off<< "0x" << std::hex << doc.get_offset();
     ret["offset"] = off.str();
     ret["register_format"] = "single";
+    std::vector<nlohmann::json> fields = {};
+    for(auto &item:doc.get_fields()){
+        fields.push_back(generate_field(item));
+    }
+    ret["fields"] = fields;
     return ret;
+}
+
+nlohmann::json peripheral_definition_generator::generate_field(field_documentation &doc) {
+    nlohmann::json ret;
+    ret["name"] = doc.get_name();
+    ret["description"] = doc.get_description();
+    ret["offset"] = doc.get_starting_position();
+    ret["length"] = doc.get_length();
+    return ret;
+}
+
+void peripheral_definition_generator::write_definition_file(const std::string &path) {
+    std::string str = peripheral_defs.dump();
+    std::ofstream ss(path);
+    ss<<str;
+    ss.close();
 }

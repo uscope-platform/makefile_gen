@@ -35,4 +35,6 @@
 #include "Backend/Lattice/Radiant_manager.h"
 #include "Backend/new_app_generator.h"
 #include "Backend/application_definition_generator.h"
+#include "Backend/peripheral_definition_generator.h"
+
 #endif //MAKEFILEGEN_V2_MAIN_HPP

@@ -82,6 +82,7 @@ TEST_F( periph_def_generation , generate_periph_def) {
     reg_1["direction"] = "R";
     reg_1["offset"] = "0x0";
     reg_1["register_format"] = "single";
+    reg_1["fields"] = std::vector<nlohmann::json>();
     check_vect.push_back(reg_1);
 
     nlohmann::json reg_2;
@@ -91,7 +92,9 @@ TEST_F( periph_def_generation , generate_periph_def) {
     reg_2["direction"] = "W";
     reg_2["offset"] = "0x4";
     reg_2["register_format"] = "single";
+    reg_2["fields"] = std::vector<nlohmann::json>();
     check_vect.push_back(reg_2);
+
 
     nlohmann::json reg_3;
     reg_3["ID"] = "field_registers";
@@ -100,6 +103,22 @@ TEST_F( periph_def_generation , generate_periph_def) {
     reg_3["direction"] = "RW";
     reg_3["offset"] = "0x20";
     reg_3["register_format"] = "single";
+    reg_3["fields"] = std::vector<nlohmann::json>();
+
+    nlohmann::json field1;
+    field1["name"] = "field_1";
+    field1["description"] = "First field";
+    field1["offset"] = 0;
+    field1["length"] = 8;
+    reg_3["fields"].push_back(field1);
+
+    nlohmann::json field2;
+    field2["name"] = "field_2";
+    field2["description"] = "Second Field";
+    field2["offset"] = 8;
+    field2["length"] = 8;
+    reg_3["fields"].push_back(field2);
+
     check_vect.push_back(reg_3);
     check["test_module"]["registers"] = check_vect;
 

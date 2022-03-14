@@ -34,6 +34,7 @@ public:
     bool get_write_allowed() {return write_allowed;};
 
     void add_field(field_documentation &doc);
+    std::vector<field_documentation> get_fields() {return fields;};
     friend bool operator==(const register_documentation&lhs, const register_documentation&rhs);
 
     template<class Archive>
