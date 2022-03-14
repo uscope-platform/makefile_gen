@@ -42,9 +42,22 @@ protected:
         doc.add_register(reg_3);
 
 
+        module_documentation submod_doc;
+        submod_doc.set_name("test_submodule");
+        HDL_Resource submod_entity(module, "test_submodule", "test/path2.sv", hdl_deps_t(), verilog_entity);
+        submod_entity.set_documentation(submod_doc);
+
+        bus_submodule submod;
+        submod.set_name("test_submod");
+        submod.set_module_type("test_submodule");
+
         HDL_Resource mod_entity(module, "test_module", "test/path.sv", hdl_deps_t(), verilog_entity);
         mod_entity.set_documentation(doc);
+        mod_entity.set_submodules({submod});
         d_store->store_hdl_entity(mod_entity);
+
+
+        d_store->store_hdl_entity(submod_entity);
     }
 
     virtual void TearDown() {
@@ -122,5 +135,9 @@ TEST_F( periph_def_generation , generate_periph_def) {
     check_vect.push_back(reg_3);
     check["test_module"]["registers"] = check_vect;
 
-    ASSERT_EQ(std::vector<nlohmann::json>({check}), result);
+    check["test_submodule"] = nlohmann::json();
+    check["test_submodule"]["name"] = "test_submodule";
+    check["test_submodule"]["version"] = "1.0";
+    check["test_submodule"]["registers"] = std::vector<nlohmann::json>();
+    ASSERT_EQ(check, result);
 }

@@ -28,15 +28,17 @@ public:
     peripheral_definition_generator(const Depfile &file,
                                     std::shared_ptr<bus_crossbar> xbar, std::shared_ptr<data_store> &d);
     void walk_bus_structure(const std::shared_ptr<bus_crossbar>& node);
-    nlohmann::json generate_peripheral(std::shared_ptr<bus_module>& node);
+    void generate_peripheral(HDL_Resource &res);
     static nlohmann::json generate_register(register_documentation &doc);
     static nlohmann::json generate_field(field_documentation &doc);
-    std::vector<nlohmann::json> get_peripheral_definitions() {return peripheral_defs;};
+    nlohmann::json get_peripheral_definitions() {return peripheral_defs;};
     void write_definition_file(const std::string &path);
 private:
     std::shared_ptr<bus_crossbar> bus_root;
     std::string ver;
     std::shared_ptr<data_store> d_store;
+    std::vector<HDL_Resource> submodules_to_generate;
+
     nlohmann::json peripheral_defs;
 };
 

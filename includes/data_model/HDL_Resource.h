@@ -100,7 +100,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, path, resource_type, hdl_type, dependencies, parameters, bus_roots, doc);
+        ar(name, path, resource_type, hdl_type, dependencies, parameters, bus_roots, bus_submodules, doc);
     }
 
     friend bool operator==(const HDL_Resource&lhs, const HDL_Resource&rhs);

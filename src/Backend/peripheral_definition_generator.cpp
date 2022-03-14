@@ -31,27 +31,46 @@ void peripheral_definition_generator::walk_bus_structure(const std::shared_ptr<b
             walk_bus_structure(std::static_pointer_cast<bus_crossbar>(item));
         } else if(typeid(ptr) == typeid(bus_module)) {
             auto mod = std::static_pointer_cast<bus_module>(item);
-            peripheral_defs.push_back(generate_peripheral(mod));
+            HDL_Resource res = d_store->get_HDL_resource(mod->get_module_type());
+            generate_peripheral(res);
+        }
+    }
+
+    while(!submodules_to_generate.empty()){
+        auto working_set = submodules_to_generate;
+        submodules_to_generate.clear();
+        for(auto &item:working_set){
+           generate_peripheral(item);
         }
     }
 }
 
-nlohmann::json peripheral_definition_generator::generate_peripheral(std::shared_ptr<bus_module> &node) {
-    nlohmann::json ret;
-    nlohmann::json periph;
+void peripheral_definition_generator::generate_peripheral(HDL_Resource &res) {
 
-    periph["name"] = node->get_module_type();
-    periph["version"] = ver;
+    nlohmann::json specs;
+
+    if(peripheral_defs.contains(res.getName())) return;
+
+    specs["name"] = res.getName();
+    specs["version"] = ver;
 
 
     std::vector<nlohmann::json> regs;
-    auto def = d_store->get_HDL_resource(node->get_module_type());
-    for(auto &item:def.get_documentation().get_registers()){
+
+    for(auto &item:res.get_documentation().get_registers()){
         regs.push_back(generate_register(item));
     }
-    periph["registers"] = regs;
-    ret[node->get_module_type()] = periph;
-    return ret;
+
+    specs["registers"] = regs;
+    peripheral_defs[res.getName()] = specs;
+
+
+    for(auto &item:res.get_submodules()){
+        std::string item_test = item.get_module_type();
+        auto resource = d_store->get_HDL_resource(item.get_module_type());
+        submodules_to_generate.push_back(resource);
+    }
+
 }
 
 

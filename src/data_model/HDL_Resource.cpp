@@ -71,6 +71,7 @@ bool operator==(const HDL_Resource &lhs, const HDL_Resource &rhs) {
     ret &= lhs.hdl_type == rhs.hdl_type;
     ret &= lhs.dependencies == rhs.dependencies;
     ret &= lhs.parameters == rhs.parameters;
+    ret &= lhs.bus_submodules == rhs.bus_submodules;
 
     if(lhs.bus_roots.size() != rhs.bus_roots.size()){
         return false;

@@ -33,6 +33,10 @@ TEST( HDL_resource_test , ser_des_hdl_resource) {
 
     hdl_deps_t deps;
     HDL_Resource hdl_out(module, "test", "/bin/sh", deps, verilog_entity);
+    bus_submodule bsm;
+    bsm.set_name("test");
+    bsm.set_offset(21);
+    hdl_out.set_submodules({bsm});
 
     std::stringstream os;
     {
