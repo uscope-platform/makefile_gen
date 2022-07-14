@@ -21,6 +21,10 @@
 Vivado_manager::Vivado_manager(std::shared_ptr<settings_store> s, bool del_mkfile, std::string name) : Toolchain_manager(std::move(s), del_mkfile, std::move(name)){
     vivado_path = "";
     vivado_path = s_store->get_setting("vivado_path");
+    if(!std::filesystem::exists(vivado_path)){
+        std::cout << "WARNING: Current Vivado installation not found:"<<std::endl<< vivado_path << std::endl;
+        vivado_path = "";
+    }
     if(vivado_path.empty()){
         std::cout<< "Enter the full path of the Vivado installation"<<std::endl;
         std::cin >> vivado_path;
