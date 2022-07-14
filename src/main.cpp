@@ -71,6 +71,7 @@ int main(int argc, char *argv[]){
             }
         }
         new_app_generator gen(new_app_name, lang);
+        return 0;
     }
 
 
