@@ -77,8 +77,6 @@ nlohmann::json application_definition_generator::generate_peripheral(std::shared
     periph["base_address"] = "0x" + uint_to_hex(m->get_base_address());
     periph["proxied"] = false;
     periph["proxy_address"] = std::to_string(0);
-    periph["type"] = "Registers";
-    periph["user_accessible"] = false;
     return periph;
 }
 
@@ -90,8 +88,6 @@ nlohmann::json application_definition_generator::generate_peripheral(bus_submodu
     periph["base_address"] = "0x" + uint_to_hex(base_address + m.get_offset());
     periph["proxied"] = false;
     periph["proxy_address"] = std::to_string(0);
-    periph["type"] = "Registers";
-    periph["user_accessible"] = false;
     return periph;
 }
 

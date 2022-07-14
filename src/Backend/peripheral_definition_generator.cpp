@@ -51,7 +51,7 @@ void peripheral_definition_generator::generate_peripheral(HDL_Resource &res) {
 
     if(peripheral_defs.contains(res.getName())) return;
 
-    specs["name"] = res.getName();
+    specs["peripheral_name"] = res.getName();
     specs["version"] = ver;
 
 
@@ -91,7 +91,6 @@ nlohmann::json peripheral_definition_generator::generate_register(register_docum
     std::ostringstream off;
     off<< "0x" << std::hex << doc.get_offset();
     ret["offset"] = off.str();
-    ret["register_format"] = "single";
     std::vector<nlohmann::json> fields = {};
     for(auto &item:doc.get_fields()){
         fields.push_back(generate_field(item));
