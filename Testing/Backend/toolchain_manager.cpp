@@ -33,9 +33,9 @@ TEST(Toolchain_manager, str_vect_to_char_p){
 
 TEST(Toolchain_manager, vivado_manager){
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true);
-    s_store->set_setting("vivado_path", "true");
+    s_store->set_setting("vivado_path", "/etc/passwd"); //USE A PATH THAT GUARANTEED TO EXIST
     Vivado_manager v(s_store, true, "test");
     std::vector<std::string> result = v.prepare_call("test_project");
-    std::vector<std::string> check = {"true/bin/vivado", "-mode", "batch", "-nolog", "-nojournal", "-source", "test_project" };
+    std::vector<std::string> check = {"/etc/passwd/bin/vivado", "-mode", "batch", "-nolog", "-nojournal", "-source", "test_project" };
     ASSERT_EQ(result, check);
 }

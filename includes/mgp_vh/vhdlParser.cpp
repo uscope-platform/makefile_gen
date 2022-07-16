@@ -1,17 +1,5 @@
-// Copyright 2021 University of Nottingham Ningbo China
-// Author: Filippo Savi <filssavi@gmail.com>
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+
+// Generated from /home/fils/git/makefilegen_v2/grammars/vhdlParser.g4 by ANTLR 4.9.2
 
 
 #include "vhdlParserListener.h"
@@ -26518,7 +26506,7 @@ vhdlParser::Initializer::Initializer() {
     }
 	}
 
-  static uint16_t serializedATNSegment0[] = {
+  static const uint16_t serializedATNSegment0[] = {
     0x3, 0x608b, 0xa72a, 0x8133, 0xb9ed, 0x417c, 0x3be7, 0x7786, 0x5964, 
        0x3, 0xa6, 0xa67, 0x4, 0x2, 0x9, 0x2, 0x4, 0x3, 0x9, 0x3, 0x4, 0x4, 
        0x9, 0x4, 0x4, 0x5, 0x9, 0x5, 0x4, 0x6, 0x9, 0x6, 0x4, 0x7, 0x9, 
@@ -28370,7 +28358,7 @@ vhdlParser::Initializer::Initializer() {
        0x44, 0x2, 0x2, 0x9d6, 0x9d8, 0x5, 0x1e8, 0xf5, 0x2, 0x9d7, 0x9d6, 
        0x3, 
   };
-  static uint16_t serializedATNSegment1[] = {
+  static const uint16_t serializedATNSegment1[] = {
     0x2, 0x2, 0x2, 0x9d7, 0x9d8, 0x3, 0x2, 0x2, 0x2, 0x9d8, 0x9d9, 0x3, 
        0x2, 0x2, 0x2, 0x9d9, 0x9da, 0x7, 0x7f, 0x2, 0x2, 0x9da, 0x1e1, 0x3, 
        0x2, 0x2, 0x2, 0x9db, 0x9df, 0x7, 0x6a, 0x2, 0x2, 0x9dc, 0x9dd, 0x5, 

@@ -101,8 +101,6 @@ TEST_F( app_def_generation , generate_app_def) {
     p1["proxied"] = false;
     p1["proxy_address"] = "0";
     p1["spec_id"] = "register_type";
-    p1["type"] = "Registers";
-    p1["user_accessible"] = false;
     check_peripherals.push_back(p1);
 
     nlohmann::json p3;
@@ -112,8 +110,6 @@ TEST_F( app_def_generation , generate_app_def) {
     p3["proxied"] = false;
     p3["proxy_address"] = "0";
     p3["spec_id"] = "SyndromeCalculator";
-    p3["type"] = "Registers";
-    p3["user_accessible"] = false;
     check_peripherals.push_back(p3);
 
     nlohmann::json p4;
@@ -123,8 +119,6 @@ TEST_F( app_def_generation , generate_app_def) {
     p4["proxied"] = false;
     p4["proxy_address"] = "0";
     p4["spec_id"] = "Decoder";
-    p4["type"] = "Registers";
-    p4["user_accessible"] = false;
     check_peripherals.push_back(p4);
 
     ref_app["peripherals"] = check_peripherals;

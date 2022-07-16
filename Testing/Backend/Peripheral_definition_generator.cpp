@@ -83,7 +83,7 @@ TEST_F( periph_def_generation , generate_periph_def) {
 
     nlohmann::json check;
     check["test_module"] = nlohmann::json();
-    check["test_module"]["name"] = "test_module";
+    check["test_module"]["peripheral_name"] = "test_module";
     check["test_module"]["version"] = "1.0";
 
     std::vector<nlohmann::json> check_vect;
@@ -94,7 +94,6 @@ TEST_F( periph_def_generation , generate_periph_def) {
     reg_1["description"] = "Single word read only register";
     reg_1["direction"] = "R";
     reg_1["offset"] = "0x0";
-    reg_1["register_format"] = "single";
     reg_1["fields"] = std::vector<nlohmann::json>();
     check_vect.push_back(reg_1);
 
@@ -104,7 +103,6 @@ TEST_F( periph_def_generation , generate_periph_def) {
     reg_2["description"] = "Single word write only register";
     reg_2["direction"] = "W";
     reg_2["offset"] = "0x4";
-    reg_2["register_format"] = "single";
     reg_2["fields"] = std::vector<nlohmann::json>();
     check_vect.push_back(reg_2);
 
@@ -115,7 +113,6 @@ TEST_F( periph_def_generation , generate_periph_def) {
     reg_3["description"] = "register with multiple fields";
     reg_3["direction"] = "RW";
     reg_3["offset"] = "0x20";
-    reg_3["register_format"] = "single";
     reg_3["fields"] = std::vector<nlohmann::json>();
 
     nlohmann::json field1;
@@ -136,7 +133,7 @@ TEST_F( periph_def_generation , generate_periph_def) {
     check["test_module"]["registers"] = check_vect;
 
     check["test_submodule"] = nlohmann::json();
-    check["test_submodule"]["name"] = "test_submodule";
+    check["test_submodule"]["peripheral_name"] = "test_submodule";
     check["test_submodule"]["version"] = "1.0";
     check["test_submodule"]["registers"] = std::vector<nlohmann::json>();
     ASSERT_EQ(check, result);

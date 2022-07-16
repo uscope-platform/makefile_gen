@@ -82,7 +82,8 @@ TEST_F(cache_manager_Test , file_hashing) {
     std::string cl = cm.get_cache_line("check_files/test_package.sv");
 
     std::string check_hash = exec("openssl dgst -sha256 -c check_files/test_package.sv");
-    check_hash = check_hash.substr(37, check_hash.length()-38);
+    unsigned int pos = check_hash.find(' ');
+    check_hash = check_hash.substr(pos+1, check_hash.size()-(pos+2));
 
     ASSERT_EQ(cl, check_hash);
 }

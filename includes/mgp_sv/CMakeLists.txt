@@ -18,8 +18,6 @@ add_library(mgp_sv_lib STATIC ${MGP_SV_PARSER_LIB_SRCS} ${MGP_SV_PARSER_LIB_INCL
 
 set_property(TARGET mgp_sv_lib PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
 
-target_link_libraries(mgp_sv_lib antlr4-runtime)
+target_link_libraries(mgp_sv_lib ${CMAKE_BINARY_DIR}/antlr_runtime/dist/usr/local/lib/libantlr4-runtime.a)
 set_property(TARGET mgp_sv_lib PROPERTY POSITION_INDEPENDENT_CODE 1)
-
-
 

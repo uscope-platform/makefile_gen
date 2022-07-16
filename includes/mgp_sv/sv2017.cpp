@@ -1,5 +1,5 @@
 
-// Generated from /home/fils/git/makefilegen_v2/grammars/sv2017.g4 by ANTLR 4.9.2
+// Generated from /home/fils/git/makefilegen_v2/grammars/sv2017.g4 by ANTLR 4.9.3
 
 
 #include "sv2017Listener.h"
@@ -37056,7 +37056,7 @@ sv2017::Inc_or_dec_expressionContext* sv2017::inc_or_dec_expression() {
     switch (_input->LA(1)) {
       case sv2017::INCR:
       case sv2017::DECR: {
-        _localctx = dynamic_cast<Inc_or_dec_expressionContext *>(_tracker.createInstance<sv2017::Inc_or_dec_expressionPreContext>(_localctx));
+        _localctx = _tracker.createInstance<sv2017::Inc_or_dec_expressionPreContext>(_localctx);
         enterOuterAlt(_localctx, 1);
         setState(4063);
         inc_or_dec_operator();
@@ -37097,7 +37097,7 @@ sv2017::Inc_or_dec_expressionContext* sv2017::inc_or_dec_expression() {
       case sv2017::SIMPLE_IDENTIFIER:
       case sv2017::LBRACE:
       case sv2017::APOSTROPHE_LBRACE: {
-        _localctx = dynamic_cast<Inc_or_dec_expressionContext *>(_tracker.createInstance<sv2017::Inc_or_dec_expressionPostContext>(_localctx));
+        _localctx = _tracker.createInstance<sv2017::Inc_or_dec_expressionPostContext>(_localctx);
         enterOuterAlt(_localctx, 2);
         setState(4072);
         variable_lvalue();
@@ -68426,35 +68426,35 @@ sv2017::Module_itemContext* sv2017::module_item() {
 
 bool sv2017::sempred(RuleContext *context, size_t ruleIndex, size_t predicateIndex) {
   switch (ruleIndex) {
-    case 56: return udp_declarationSempred(dynamic_cast<Udp_declarationContext *>(context), predicateIndex);
-    case 74: return interface_declarationSempred(dynamic_cast<Interface_declarationContext *>(context), predicateIndex);
-    case 106: return action_blockSempred(dynamic_cast<Action_blockContext *>(context), predicateIndex);
-    case 107: return seq_blockSempred(dynamic_cast<Seq_blockContext *>(context), predicateIndex);
-    case 108: return par_blockSempred(dynamic_cast<Par_blockContext *>(context), predicateIndex);
-    case 117: return conditional_statementSempred(dynamic_cast<Conditional_statementContext *>(context), predicateIndex);
-    case 154: return rs_if_elseSempred(dynamic_cast<Rs_if_elseContext *>(context), predicateIndex);
-    case 190: return property_exprSempred(dynamic_cast<Property_exprContext *>(context), predicateIndex);
-    case 209: return sequence_exprSempred(dynamic_cast<Sequence_exprContext *>(context), predicateIndex);
-    case 214: return clocking_declarationSempred(dynamic_cast<Clocking_declarationContext *>(context), predicateIndex);
-    case 224: return covergroup_declarationSempred(dynamic_cast<Covergroup_declarationContext *>(context), predicateIndex);
-    case 231: return select_expressionSempred(dynamic_cast<Select_expressionContext *>(context), predicateIndex);
-    case 248: return block_event_expressionSempred(dynamic_cast<Block_event_expressionContext *>(context), predicateIndex);
-    case 284: return primarySempred(dynamic_cast<PrimaryContext *>(context), predicateIndex);
-    case 287: return expressionSempred(dynamic_cast<ExpressionContext *>(context), predicateIndex);
-    case 314: return constraint_expressionSempred(dynamic_cast<Constraint_expressionContext *>(context), predicateIndex);
-    case 319: return module_declarationSempred(dynamic_cast<Module_declarationContext *>(context), predicateIndex);
-    case 420: return function_declarationSempred(dynamic_cast<Function_declarationContext *>(context), predicateIndex);
-    case 427: return task_declarationSempred(dynamic_cast<Task_declarationContext *>(context), predicateIndex);
-    case 434: return checker_declarationSempred(dynamic_cast<Checker_declarationContext *>(context), predicateIndex);
-    case 435: return class_declarationSempred(dynamic_cast<Class_declarationContext *>(context), predicateIndex);
-    case 438: return interface_class_declarationSempred(dynamic_cast<Interface_class_declarationContext *>(context), predicateIndex);
-    case 441: return package_declarationSempred(dynamic_cast<Package_declarationContext *>(context), predicateIndex);
-    case 443: return program_declarationSempred(dynamic_cast<Program_declarationContext *>(context), predicateIndex);
-    case 449: return sequence_declarationSempred(dynamic_cast<Sequence_declarationContext *>(context), predicateIndex);
-    case 452: return property_declarationSempred(dynamic_cast<Property_declarationContext *>(context), predicateIndex);
-    case 491: return config_declarationSempred(dynamic_cast<Config_declarationContext *>(context), predicateIndex);
-    case 507: return if_generate_constructSempred(dynamic_cast<If_generate_constructContext *>(context), predicateIndex);
-    case 510: return generate_begin_end_blockSempred(dynamic_cast<Generate_begin_end_blockContext *>(context), predicateIndex);
+    case 56: return udp_declarationSempred(antlrcpp::downCast<Udp_declarationContext *>(context), predicateIndex);
+    case 74: return interface_declarationSempred(antlrcpp::downCast<Interface_declarationContext *>(context), predicateIndex);
+    case 106: return action_blockSempred(antlrcpp::downCast<Action_blockContext *>(context), predicateIndex);
+    case 107: return seq_blockSempred(antlrcpp::downCast<Seq_blockContext *>(context), predicateIndex);
+    case 108: return par_blockSempred(antlrcpp::downCast<Par_blockContext *>(context), predicateIndex);
+    case 117: return conditional_statementSempred(antlrcpp::downCast<Conditional_statementContext *>(context), predicateIndex);
+    case 154: return rs_if_elseSempred(antlrcpp::downCast<Rs_if_elseContext *>(context), predicateIndex);
+    case 190: return property_exprSempred(antlrcpp::downCast<Property_exprContext *>(context), predicateIndex);
+    case 209: return sequence_exprSempred(antlrcpp::downCast<Sequence_exprContext *>(context), predicateIndex);
+    case 214: return clocking_declarationSempred(antlrcpp::downCast<Clocking_declarationContext *>(context), predicateIndex);
+    case 224: return covergroup_declarationSempred(antlrcpp::downCast<Covergroup_declarationContext *>(context), predicateIndex);
+    case 231: return select_expressionSempred(antlrcpp::downCast<Select_expressionContext *>(context), predicateIndex);
+    case 248: return block_event_expressionSempred(antlrcpp::downCast<Block_event_expressionContext *>(context), predicateIndex);
+    case 284: return primarySempred(antlrcpp::downCast<PrimaryContext *>(context), predicateIndex);
+    case 287: return expressionSempred(antlrcpp::downCast<ExpressionContext *>(context), predicateIndex);
+    case 314: return constraint_expressionSempred(antlrcpp::downCast<Constraint_expressionContext *>(context), predicateIndex);
+    case 319: return module_declarationSempred(antlrcpp::downCast<Module_declarationContext *>(context), predicateIndex);
+    case 420: return function_declarationSempred(antlrcpp::downCast<Function_declarationContext *>(context), predicateIndex);
+    case 427: return task_declarationSempred(antlrcpp::downCast<Task_declarationContext *>(context), predicateIndex);
+    case 434: return checker_declarationSempred(antlrcpp::downCast<Checker_declarationContext *>(context), predicateIndex);
+    case 435: return class_declarationSempred(antlrcpp::downCast<Class_declarationContext *>(context), predicateIndex);
+    case 438: return interface_class_declarationSempred(antlrcpp::downCast<Interface_class_declarationContext *>(context), predicateIndex);
+    case 441: return package_declarationSempred(antlrcpp::downCast<Package_declarationContext *>(context), predicateIndex);
+    case 443: return program_declarationSempred(antlrcpp::downCast<Program_declarationContext *>(context), predicateIndex);
+    case 449: return sequence_declarationSempred(antlrcpp::downCast<Sequence_declarationContext *>(context), predicateIndex);
+    case 452: return property_declarationSempred(antlrcpp::downCast<Property_declarationContext *>(context), predicateIndex);
+    case 491: return config_declarationSempred(antlrcpp::downCast<Config_declarationContext *>(context), predicateIndex);
+    case 507: return if_generate_constructSempred(antlrcpp::downCast<If_generate_constructContext *>(context), predicateIndex);
+    case 510: return generate_begin_end_blockSempred(antlrcpp::downCast<Generate_begin_end_blockContext *>(context), predicateIndex);
 
   default:
     break;
@@ -69062,7 +69062,8 @@ std::vector<std::string> sv2017::_symbolicNames = {
   "INCR", "DECR", "DIST_WEIGHT_ASSIGN", "OVERLAPPING_IMPL", "NONOVERLAPPING_IMPL", 
   "IMPLIES", "IMPLIES_P", "IMPLIES_N", "PATH_FULL", "HASH_MINUS_HASH", "HASH_EQ_HASH", 
   "AT", "DOUBLE_AT", "HASH", "DOUBLE_HASH", "TRIPLE_AND", "ONE_LINE_COMMENT", 
-  "BLOCK_COMMENT", "WHITE_SPACE", "LEVEL_SYMBOL", "EDGE_SYMBOL"
+  "DOCUMENTATION_COMMENT", "BLOCK_COMMENT", "WHITE_SPACE", "LEVEL_SYMBOL", 
+  "EDGE_SYMBOL"
 };
 
 dfa::Vocabulary sv2017::_vocabulary(_literalNames, _symbolicNames);
@@ -69085,7 +69086,7 @@ sv2017::Initializer::Initializer() {
 
   static const uint16_t serializedATNSegment0[] = {
     0x3, 0x608b, 0xa72a, 0x8133, 0xb9ed, 0x417c, 0x3be7, 0x7786, 0x5964, 
-       0x3, 0x174, 0x1bd9, 0x4, 0x2, 0x9, 0x2, 0x4, 0x3, 0x9, 0x3, 0x4, 
+       0x3, 0x175, 0x1bd9, 0x4, 0x2, 0x9, 0x2, 0x4, 0x3, 0x9, 0x3, 0x4, 
        0x4, 0x9, 0x4, 0x4, 0x5, 0x9, 0x5, 0x4, 0x6, 0x9, 0x6, 0x4, 0x7, 
        0x9, 0x7, 0x4, 0x8, 0x9, 0x8, 0x4, 0x9, 0x9, 0x9, 0x4, 0xa, 0x9, 
        0xa, 0x4, 0xb, 0x9, 0xb, 0x4, 0xc, 0x9, 0xc, 0x4, 0xd, 0x9, 0xd, 
@@ -70514,7 +70515,7 @@ sv2017::Initializer::Initializer() {
        0x5f, 0x77, 0x77, 0x4, 0x2, 0x12f, 0x12f, 0x15a, 0x15b, 0x3, 0x2, 
        0x153, 0x154, 0x3, 0x2, 0x12a, 0x12d, 0x3, 0x2, 0x143, 0x146, 0x3, 
        0x2, 0x13c, 0x141, 0x3, 0x2, 0x134, 0x136, 0x3, 0x2, 0x15d, 0x15e, 
-       0x4, 0x2, 0x154, 0x154, 0x173, 0x173, 0x3, 0x2, 0x2d, 0x2f, 0x4, 
+       0x4, 0x2, 0x154, 0x154, 0x174, 0x174, 0x3, 0x2, 0x2d, 0x2f, 0x4, 
        0x2, 0xc0, 0xc0, 0x10c, 0x10c, 0x4, 0x2, 0x1e, 0x1e, 0x20, 0x20, 
        0x4, 0x2, 0xdc, 0xdc, 0x109, 0x109, 0x4, 0x2, 0x163, 0x164, 0x169, 
        0x16a, 0x4, 0x2, 0x5d, 0x5d, 0xc8, 0xc8, 0x5, 0x2, 0x17, 0x17, 0xbe, 
@@ -70988,7 +70989,7 @@ sv2017::Initializer::Initializer() {
        0x2, 0x55a, 0x55b, 0x3, 0x2, 0x2, 0x2, 0x55b, 0x55c, 0x3, 0x2, 0x2, 
        0x2, 0x55c, 0x55d, 0x7, 0x59, 0x2, 0x2, 0x55d, 0x81, 0x3, 0x2, 0x2, 
        0x2, 0x55e, 0x55f, 0x5, 0x8c, 0x47, 0x2, 0x55f, 0x560, 0x7, 0x13a, 
-       0x2, 0x2, 0x560, 0x561, 0x7, 0x173, 0x2, 0x2, 0x561, 0x562, 0x7, 
+       0x2, 0x2, 0x560, 0x561, 0x7, 0x174, 0x2, 0x2, 0x561, 0x562, 0x7, 
        0x121, 0x2, 0x2, 0x562, 0x83, 0x3, 0x2, 0x2, 0x2, 0x563, 0x565, 0x5, 
        0x86, 0x44, 0x2, 0x564, 0x563, 0x3, 0x2, 0x2, 0x2, 0x564, 0x565, 
        0x3, 0x2, 0x2, 0x2, 0x565, 0x566, 0x3, 0x2, 0x2, 0x2, 0x566, 0x568, 
@@ -71005,22 +71006,22 @@ sv2017::Initializer::Initializer() {
        0x2, 0x579, 0x57a, 0x7, 0x121, 0x2, 0x2, 0x57a, 0x89, 0x3, 0x2, 0x2, 
        0x2, 0x57b, 0x57e, 0x5, 0x8c, 0x47, 0x2, 0x57c, 0x57e, 0x5, 0x8e, 
        0x48, 0x2, 0x57d, 0x57b, 0x3, 0x2, 0x2, 0x2, 0x57d, 0x57c, 0x3, 0x2, 
-       0x2, 0x2, 0x57e, 0x8b, 0x3, 0x2, 0x2, 0x2, 0x57f, 0x581, 0x7, 0x173, 
+       0x2, 0x2, 0x57e, 0x8b, 0x3, 0x2, 0x2, 0x2, 0x57f, 0x581, 0x7, 0x174, 
        0x2, 0x2, 0x580, 0x57f, 0x3, 0x2, 0x2, 0x2, 0x581, 0x582, 0x3, 0x2, 
        0x2, 0x2, 0x582, 0x580, 0x3, 0x2, 0x2, 0x2, 0x582, 0x583, 0x3, 0x2, 
-       0x2, 0x2, 0x583, 0x8d, 0x3, 0x2, 0x2, 0x2, 0x584, 0x586, 0x7, 0x173, 
+       0x2, 0x2, 0x583, 0x8d, 0x3, 0x2, 0x2, 0x2, 0x584, 0x586, 0x7, 0x174, 
        0x2, 0x2, 0x585, 0x584, 0x3, 0x2, 0x2, 0x2, 0x586, 0x589, 0x3, 0x2, 
        0x2, 0x2, 0x587, 0x585, 0x3, 0x2, 0x2, 0x2, 0x587, 0x588, 0x3, 0x2, 
        0x2, 0x2, 0x588, 0x58a, 0x3, 0x2, 0x2, 0x2, 0x589, 0x587, 0x3, 0x2, 
        0x2, 0x2, 0x58a, 0x58e, 0x5, 0x90, 0x49, 0x2, 0x58b, 0x58d, 0x7, 
-       0x173, 0x2, 0x2, 0x58c, 0x58b, 0x3, 0x2, 0x2, 0x2, 0x58d, 0x590, 
+       0x174, 0x2, 0x2, 0x58c, 0x58b, 0x3, 0x2, 0x2, 0x2, 0x58d, 0x590, 
        0x3, 0x2, 0x2, 0x2, 0x58e, 0x58c, 0x3, 0x2, 0x2, 0x2, 0x58e, 0x58f, 
        0x3, 0x2, 0x2, 0x2, 0x58f, 0x8f, 0x3, 0x2, 0x2, 0x2, 0x590, 0x58e, 
        0x3, 0x2, 0x2, 0x2, 0x591, 0x592, 0x7, 0x122, 0x2, 0x2, 0x592, 0x593, 
-       0x7, 0x173, 0x2, 0x2, 0x593, 0x594, 0x7, 0x173, 0x2, 0x2, 0x594, 
-       0x597, 0x7, 0x123, 0x2, 0x2, 0x595, 0x597, 0x7, 0x174, 0x2, 0x2, 
+       0x7, 0x174, 0x2, 0x2, 0x593, 0x594, 0x7, 0x174, 0x2, 0x2, 0x594, 
+       0x597, 0x7, 0x123, 0x2, 0x2, 0x595, 0x597, 0x7, 0x175, 0x2, 0x2, 
        0x596, 0x591, 0x3, 0x2, 0x2, 0x2, 0x596, 0x595, 0x3, 0x2, 0x2, 0x2, 
-       0x597, 0x91, 0x3, 0x2, 0x2, 0x2, 0x598, 0x599, 0x7, 0x173, 0x2, 0x2, 
+       0x597, 0x91, 0x3, 0x2, 0x2, 0x2, 0x598, 0x599, 0x7, 0x174, 0x2, 0x2, 
        0x599, 0x93, 0x3, 0x2, 0x2, 0x2, 0x59a, 0x59b, 0x9, 0x2c, 0x2, 0x2, 
        0x59b, 0x95, 0x3, 0x2, 0x2, 0x2, 0x59c, 0x59d, 0x7, 0x61, 0x2, 0x2, 
        0x59d, 0x5bf, 0x5, 0x98, 0x4d, 0x2, 0x59e, 0x5ae, 0x5, 0x98, 0x4d, 

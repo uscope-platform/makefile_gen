@@ -10,7 +10,7 @@ find_package(OpenSSL REQUIRED)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-include_directories(/usr/include/antlr4-runtime)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/antlr_runtime/dist/usr/local/include/antlr4-runtime)
 include_directories(includes)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -19,8 +19,22 @@ else()
     add_definitions(-DTEMPLATES_FOLDER="/usr/local/etc/makefile_gen")
 endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
+
+set(ANTLR_VERSION 4.9.3)
+
+
 add_subdirectory(includes)
 add_subdirectory(src)
 add_subdirectory(Testing)
+add_subdirectory(grammars)
 
+ExternalProject_Add(antlr_runtime
+        GIT_REPOSITORY https://github.com/antlr/antlr4.git
+        GIT_TAG ${ANTLR_VERSION}
+        CONFIGURE_COMMAND cmake ${CMAKE_BINARY_DIR}/antlr_runtime-prefix/src/antlr_runtime/runtime/Cpp
+        BUILD_COMMAND "make"
+        INSTALL_COMMAND DESTDIR=${CMAKE_BINARY_DIR}/antlr_runtime/dist make install
+        )
 
+add_custom_target(parsers)
+add_dependencies(parsers vh_parser_gen sv_parser_gen antlr_runtime)

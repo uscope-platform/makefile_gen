@@ -52,9 +52,6 @@ target_link_libraries(makefile_gen PRIVATE mgp_vh_lib)
 target_link_libraries(makefile_gen PRIVATE Threads::Threads)
 target_link_libraries(makefile_gen PRIVATE OpenSSL::SSL)
 
-
-
-
 ## INSTALLATION SECTION
 
 install(TARGETS makefile_gen DESTINATION /usr/local/bin)
