@@ -82,6 +82,10 @@ int main(int argc, char *argv[]){
 
     // Parse depfile
     if(target.empty()) target = std::filesystem::current_path().string() + "/Depfile";
+    if(!std::filesystem::exists(target)){
+        std::cout << "ERROR: Depfile " + target + " does not exist" << std::endl;
+        exit(1);
+    }
     Depfile dep(target);
 
     // Resolve auxiliary files (scripts and constraints)
