@@ -122,7 +122,6 @@ All other libraries are statically linked during compilation to ease deployment.
 When building from source the following additional dependencies are necessary
 
 - Cmake
-- Antlr C++ runtime (version 4.9.2)
 - OpenSSL 
 
 To build from source the following command can be used:
