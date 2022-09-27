@@ -77,8 +77,14 @@ void project_generator_base::set_script_sources(const std::unordered_set<std::st
 std::vector<std::string> project_generator_base::process_sources_set(const std::set<std::string> &paths) {
     std::vector<std::string> srcs;
     srcs.reserve(paths.size());
+
     for(const auto& source :paths){
-        srcs.push_back(std::regex_replace(source, std::regex(base_dir), "$base_dir"));
+        std::string replaced = base_dir;
+        if(replaced.ends_with("/")){
+            replaced.pop_back();
+        }
+        srcs.push_back(std::regex_replace(source, std::regex(replaced), "${base_dir}"));
+
     }
     return srcs;
 }

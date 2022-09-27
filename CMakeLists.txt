@@ -32,7 +32,6 @@ ExternalProject_Add(antlr_runtime
         GIT_REPOSITORY https://github.com/antlr/antlr4.git
         GIT_TAG ${ANTLR_VERSION}
         CONFIGURE_COMMAND cmake ${CMAKE_BINARY_DIR}/antlr_runtime-prefix/src/antlr_runtime/runtime/Cpp
-        BUILD_COMMAND "make"
         INSTALL_COMMAND DESTDIR=${CMAKE_BINARY_DIR}/antlr_runtime/dist make install
         )
 
