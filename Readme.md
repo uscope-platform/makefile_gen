@@ -122,7 +122,13 @@ All other libraries are statically linked during compilation to ease deployment.
 When building from source the following additional dependencies are necessary
 
 - Cmake
-- OpenSSL 
+- OpenSSL
+- Gtest library
+
+To install on Ubuntu (22.04) use
+```shell
+sudo apt install libssl-dev libgtest-dev build-essential
+```
 
 To build from source the following command can be used:
 
