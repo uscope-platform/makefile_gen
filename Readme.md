@@ -127,7 +127,7 @@ When building from source the following additional dependencies are necessary
 
 To install on Ubuntu (22.04) use
 ```shell
-sudo apt install libssl-dev libgtest-dev build-essential pkg-config uuid-dev libgmock-dev
+sudo apt install libssl-dev libgtest-dev build-essential pkg-config uuid-dev libgmock-dev python3-jinja2
 ```
 
 To build from source the following command can be used:
