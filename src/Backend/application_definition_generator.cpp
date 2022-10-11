@@ -110,6 +110,7 @@ void application_definition_generator::construct_application() {
     application["n_enables"] = 0;
     application["parameters"] = std::vector<nlohmann::json>();
     application["peripherals"] = peripherals;
+    application["soft_cores"] = std::vector<nlohmann::json>();
     application["timebase_address"] = "";
 }
 
