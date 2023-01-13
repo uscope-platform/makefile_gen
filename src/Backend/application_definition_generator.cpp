@@ -135,12 +135,7 @@ void application_definition_generator::add_cores(std::vector<processor_instance>
             io_array.push_back(io);
         }
         c["io"] = io_array;
-        for(auto p:peripherals){
-            std::string t = p.dump();
-            if(p["name"] == core.get_target()){
-                c["address"] = p["base_address"];
-            }
-        }
+        c["address"] = core.get_address();
         cores.push_back(c);
     }
 }

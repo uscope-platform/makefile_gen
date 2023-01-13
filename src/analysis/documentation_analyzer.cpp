@@ -97,6 +97,9 @@ void documentation_analyzer::analyze_processor_instance(nlohmann::json &obj) {
         i.add_io(tmp_io);
     }
     std::string t = obj["parent"];
+
+    std::string s_addr = obj["address"];
+    i.set_address(s_addr);
     processors.insert({t,i});
 }
 

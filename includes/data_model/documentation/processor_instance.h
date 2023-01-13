@@ -56,9 +56,12 @@ public:
     void add_io(const io &i);
     void set_target(std::string t) {target = std::move(t);}
 
+    void set_address(std::string a) {address = a;};
+    std::string get_address() {return address;};
+
     template<class Archive>
     void serialize(Archive & archive) {
-        archive(name, dma_io, target);
+        archive(name, dma_io, target, address);
     }
 
     std::string get_name() {return name;};
@@ -69,6 +72,7 @@ public:
 private:
     std::vector<io> dma_io;
     std::string target;
+    std::string address;
     std::string name;
 };
 

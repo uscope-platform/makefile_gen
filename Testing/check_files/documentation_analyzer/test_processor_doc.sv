@@ -31,6 +31,7 @@ endmodule
             "name": "current_controller",
             "type": "processor_instance",
             "target": "processor",
+            "address": "0x83c00000",
             "parent": "SicDriveMasterCurrentControl",
             "dma_io": [
                 {
