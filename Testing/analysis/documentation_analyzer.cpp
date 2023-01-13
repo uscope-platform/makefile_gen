@@ -117,3 +117,40 @@ TEST( documentation_analyzer , peripheral) {
 
     ASSERT_EQ(check_map, results);
 }
+
+
+TEST( documentation_analyzer , processor_doc) {
+
+    std::ifstream is("check_files/documentation_analyzer/test_processor_doc.sv");
+
+    std::unordered_map<std::string, uint32_t> params;
+
+    documentation_analyzer doc(is);
+    doc.process_documentation(params);
+    std::unordered_map<std::string, processor_instance> results = doc.get_processors_documentation();
+
+    processor_instance check_doc;
+    check_doc.set_name("current_controller");
+    check_doc.set_target("processor");
+
+    io a;
+    a.name = "Current";
+    a.type = input;
+    a.address = 1;
+    check_doc.add_io(a);
+
+    a.name = "Speed";
+    a.type = input;
+    a.address = 2;
+    check_doc.add_io(a);
+
+    a.name = "duty";
+    a.type = output;
+    a.address = 15;
+    check_doc.add_io(a);
+
+    std::unordered_map<std::string, processor_instance> check_map;
+    check_map["SicDriveMasterCurrentControl"] = check_doc;
+
+    ASSERT_EQ(check_map, results);
+}

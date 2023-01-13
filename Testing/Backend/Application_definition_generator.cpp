@@ -122,6 +122,7 @@ TEST_F( app_def_generation , generate_app_def) {
     check_peripherals.push_back(p4);
 
     ref_app["peripherals"] = check_peripherals;
+    ref_app["soft_cores"] = std::vector<nlohmann::json>();
 
     std::filesystem::remove("test.json");
 

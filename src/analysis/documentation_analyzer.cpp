@@ -59,7 +59,6 @@ void documentation_analyzer::process_documentation(std::unordered_map<std::strin
     for(auto &obj:documentation_comments){
         analyze_documentation_object(obj);
     }
-
 }
 
 
@@ -75,8 +74,33 @@ void documentation_analyzer::analyze_documentation_object(nlohmann::json &obj) {
         analyze_module_hierarchy(obj);
     } else if(type == "peripheral") {
         analyze_peripheral(obj);
+    } else if(type == "processor_instance"){
+        analyze_processor_instance(obj);
     }
 }
+
+void documentation_analyzer::analyze_processor_instance(nlohmann::json &obj) {
+    processor_instance i(obj["name"]);
+    i.set_target(obj["target"]);
+    for(auto &item:obj["dma_io"]){
+        io tmp_io;
+        tmp_io.name = item["name"];
+        std::string s_addr = item["address"];
+        tmp_io.address = std::stoul(s_addr);
+        if(item["type"]=="input"){
+            tmp_io.type = input;
+        } else if(item["type"]=="output"){
+            tmp_io.type = output;
+        } else if(item["type"]=="memory"){
+            tmp_io.type = memory;
+        }
+        i.add_io(tmp_io);
+    }
+    std::string t = obj["parent"];
+    processors.insert({t,i});
+}
+
+
 
 void documentation_analyzer::analyze_bus_hierarchy(nlohmann::json &obj) {
     bus_crossbar root;
@@ -199,6 +223,6 @@ std::unordered_map<std::string, std::vector<bus_submodule>> documentation_analyz
     return bus_submodules;
 }
 
-
-
-
+std::unordered_map<std::string, processor_instance> documentation_analyzer::get_processors_documentation() {
+    return processors;
+}

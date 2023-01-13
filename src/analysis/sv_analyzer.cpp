@@ -74,10 +74,14 @@ std::vector<HDL_Resource> sv_analyzer::analyze() {
         }
     };
 
-    auto modules_doc = doc.get_modules_documentation();
-    for(auto &e:entities){
-        e.set_documentation(modules_doc[e.getName()]);
-    }
+    auto procs = doc.get_processors_documentation();
+    for(auto &item: procs){
+        for(auto &e:entities){
+            if(e.getName() == item.first){
+                e.add_processor_doc(item.second);
+            }
+        }
+    };
 
     return  entities;
 }

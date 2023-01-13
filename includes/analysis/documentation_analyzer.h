@@ -24,6 +24,7 @@
 #include "data_model/documentation/bus_structure/bus_structure.h"
 #include "data_model/documentation/module_documentation.h"
 #include "data_model/documentation/register_documentation.h"
+#include "data_model//documentation/processor_instance.h"
 #include "mgp_sv/sv2017Lexer.h"
 #include "mgp_sv/sv2017.h"
 
@@ -38,6 +39,7 @@ public:
     std::vector<std::shared_ptr<bus_crossbar>> get_bus_roots();
     std::unordered_map<std::string, std::vector<bus_submodule>> get_bus_submodules();
     std::unordered_map<std::string, module_documentation> get_modules_documentation();
+    std::unordered_map<std::string, processor_instance> get_processors_documentation();
 private:
     void analyze_documentation_object(nlohmann::json &obj);
     void analyze_bus_hierarchy(nlohmann::json &obj);
@@ -49,6 +51,8 @@ private:
     std::shared_ptr<bus_crossbar> analyze_crossbar(nlohmann::json &obj);
     // PERIPHERAL DOCUMENTATION
     void analyze_peripheral(nlohmann::json &obj);
+    // PROCESSORS DOCUMENTATION
+    void analyze_processor_instance(nlohmann::json &obj);
 
     std::unordered_map<std::string, uint32_t> parameters_dict;
 
@@ -57,6 +61,7 @@ private:
     std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
     std::unordered_map<std::string, std::vector<bus_submodule>> bus_submodules;
     std::unordered_map<std::string, module_documentation> modules_doc;
+    std::unordered_map<std::string, processor_instance> processors;
 };
 
 

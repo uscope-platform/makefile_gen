@@ -15,8 +15,6 @@
 
 #include "data_model/HDL_Resource.h"
 
-
-
 ///  Resource object creator
 /// \param t HDL entity feature
 /// \param n Name of the feature
@@ -42,6 +40,7 @@ HDL_Resource::HDL_Resource(const HDL_Resource &c) {
     bus_roots = c.bus_roots;
     doc = c.doc;
     bus_submodules = c.bus_submodules;
+    processor_docs = c.processor_docs;
 }
 
 
@@ -72,6 +71,7 @@ bool operator==(const HDL_Resource &lhs, const HDL_Resource &rhs) {
     ret &= lhs.dependencies == rhs.dependencies;
     ret &= lhs.parameters == rhs.parameters;
     ret &= lhs.bus_submodules == rhs.bus_submodules;
+    ret &= lhs.processor_docs == rhs.processor_docs;
 
     if(lhs.bus_roots.size() != rhs.bus_roots.size()){
         return false;

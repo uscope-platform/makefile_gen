@@ -23,7 +23,6 @@ application_definition_generator::application_definition_generator(const Depfile
     bus_root = std::move(xbar);
     d_store = d;
     walk_bus_structure(bus_root);
-    construct_application();
 }
 
 void application_definition_generator::walk_bus_structure(const std::shared_ptr<bus_crossbar>& node) {
@@ -110,14 +109,40 @@ void application_definition_generator::construct_application() {
     application["n_enables"] = 0;
     application["parameters"] = std::vector<nlohmann::json>();
     application["peripherals"] = peripherals;
-    application["soft_cores"] = std::vector<nlohmann::json>();
+    application["soft_cores"] = cores;
     application["timebase_address"] = "";
 }
+
+
 
 std::string application_definition_generator::uint_to_hex(uint32_t i) {
     std::ostringstream out;
     out << std::hex << i;
     return out.str();
+}
+
+void application_definition_generator::add_cores(std::vector<processor_instance> cs) {
+    for(auto &core:cs){
+        nlohmann::json c;
+        c["id"] = core.get_name();
+        c["default_program"] = "";
+        std::vector<nlohmann::json> io_array;
+        for(auto &i:core.get_dma_io()){
+            nlohmann::json io;
+            io["name"] = i.name;
+            io["address"] = i.address;
+            io["type"] = i.get_type();
+            io_array.push_back(io);
+        }
+        c["io"] = io_array;
+        for(auto p:peripherals){
+            std::string t = p.dump();
+            if(p["name"] == core.get_target()){
+                c["address"] = p["base_address"];
+            }
+        }
+        cores.push_back(c);
+    }
 }
 
 

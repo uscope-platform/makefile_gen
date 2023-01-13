@@ -25,23 +25,26 @@
 #include "third_party/cereal/types/vector.hpp"
 #include "data_model/documentation/register_documentation.h"
 #include "data_model/documentation/bus_structure/bus_crossbar.h"
+#include "data_model/documentation/processor_instance.h"
 
 class module_documentation {
 public:
     module_documentation() = default;
     void add_register(const register_documentation& reg);
+    void set_processor_io(std::vector<io> i) {processor_io = i;};
     void set_name(const std::string &n) {name = n;};
     std::vector<register_documentation> get_registers() {return  registers;};
 
     template<class Archive>
     void serialize(Archive & archive) {
-        archive(name, registers);
+        archive(name, registers, processor_io);
     }
 
     friend bool operator==(const module_documentation&lhs, const module_documentation&rhs);
 private:
     std::string name;
     std::vector<register_documentation> registers;
+    std::vector<io> processor_io;
 
 };
 

@@ -22,8 +22,6 @@ Dependency_resolver::Dependency_resolver(std::string tl, std::shared_ptr<data_st
 
 
 std::set<std::string> Dependency_resolver::get_dependencies() {
-    resolve_dependencies(top_level);
-    hdl_dependencies.push_back(d_store->get_HDL_resource(top_level));
     std::set<std::string> ret_val;
     for(auto& item: hdl_dependencies){
         ret_val.insert(item.get_path());
@@ -32,6 +30,11 @@ std::set<std::string> Dependency_resolver::get_dependencies() {
         ret_val.insert(item.get_path());
     }
     return ret_val;
+}
+
+void Dependency_resolver::resolve_dependencies() {
+    resolve_dependencies(top_level);
+    hdl_dependencies.push_back(d_store->get_HDL_resource(top_level));
 }
 
 void Dependency_resolver::resolve_dependencies(const std::string& module_name) {
@@ -46,10 +49,16 @@ void Dependency_resolver::resolve_dependencies(const std::string& module_name) {
         std::cerr << "ERROR: module or interface " << module_name << " not found"<<std::endl;
         exit(1);
     }
+
     bool is_interface = resource.is_interface();
     if(is_interface) return;
 
-    hdl_deps_t deps =  d_store->get_HDL_resource(module_name).get_dependencies();
+    if(resource.has_processors()){
+        auto proc = resource.get_processor_doc();
+        detected_processors.insert(detected_processors.end(), proc.begin(), proc.end());
+    }
+
+    hdl_deps_t deps =  resource.get_dependencies();
 
     for(auto &item : deps){
         auto res = d_store->get_HDL_resource(item.first);
@@ -83,3 +92,4 @@ void Dependency_resolver::add_explicit_dependencies(const std::vector<std::strin
         resolve_dependencies(item);
     }
 }
+

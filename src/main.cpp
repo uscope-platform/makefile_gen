@@ -108,10 +108,12 @@ int main(int argc, char *argv[]){
     Dependency_resolver synth_resolver(dep.get_synth_tl(), d_store);
     synth_resolver.set_excluded_modules(dep.get_excluded_modules());
     synth_resolver.add_explicit_dependencies(dep.get_additional_synth_modules());
+    synth_resolver.resolve_dependencies();
 
     Dependency_resolver sim_resolver(dep.get_sim_tl(), d_store);
     sim_resolver.set_excluded_modules(dep.get_excluded_modules());
     sim_resolver.add_explicit_dependencies(dep.get_additional_sim_modules());
+    sim_resolver.resolve_dependencies();
 
     //Generate makefile
     if(generate_xilinx){
@@ -153,6 +155,9 @@ int main(int argc, char *argv[]){
     if(generate_app_definition){
         std::shared_ptr<bus_crossbar> xbar = std::static_pointer_cast<bus_crossbar>(d_store->get_HDL_resource(dep.get_bus_defining_package()).get_bus_roots()[0]);
         application_definition_generator app_def_gen(dep, xbar, d_store);
+        auto cores = synth_resolver.get_processors();
+        app_def_gen.add_cores(cores);
+        app_def_gen.construct_application();
         app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
     }
 

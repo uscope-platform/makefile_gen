@@ -92,6 +92,10 @@ public:
     void set_submodules(std::vector<bus_submodule> v) {bus_submodules = std::move(v);};
     std::vector<bus_submodule> get_submodules() {return bus_submodules;};
 
+    void add_processor_doc(processor_instance &p) {processor_docs.push_back(p);};
+    std::vector<processor_instance> get_processor_doc() {return processor_docs;};
+    bool has_processors() {return !processor_docs.empty();};
+
     void set_parameters(std::unordered_map<std::string, uint32_t> p) { parameters = std::move(p);}
     std::unordered_map<std::string, uint32_t> get_parameters() {return parameters;};
 
@@ -100,7 +104,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, path, resource_type, hdl_type, dependencies, parameters, bus_roots, bus_submodules, doc);
+        ar(name, path, resource_type, hdl_type, dependencies, parameters, bus_roots, bus_submodules, doc, processor_docs);
     }
 
     friend bool operator==(const HDL_Resource&lhs, const HDL_Resource&rhs);
@@ -115,6 +119,7 @@ private:
     //SV PACKAGE SPECIFIC PARAMETERS
     std::unordered_map<std::string, uint32_t> parameters;
     std::vector<bus_submodule> bus_submodules;
+    std::vector<processor_instance> processor_docs;
 
     // DOCUMENTATION
     module_documentation doc;

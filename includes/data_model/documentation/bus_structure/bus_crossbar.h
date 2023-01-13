@@ -19,6 +19,7 @@
 
 #include "bus_component.h"
 #include "bus_module.h"
+#include "data_model/documentation/processor_instance.h"
 
 #include "third_party/cereal/types/vector.hpp"
 #include "third_party/cereal/types/memory.hpp"
