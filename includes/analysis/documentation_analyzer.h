@@ -35,6 +35,7 @@ public:
     explicit documentation_analyzer(std::string &s);
     explicit documentation_analyzer(std::istream &stream);
     void parse_documentation(std::istream &stream);
+    void set_source_path(std::string &f_path) {path = f_path;};
     void process_documentation(std::unordered_map<std::string, uint32_t> parameters);
     std::vector<std::shared_ptr<bus_crossbar>> get_bus_roots();
     std::unordered_map<std::string, std::vector<bus_submodule>> get_bus_submodules();
@@ -62,6 +63,7 @@ private:
     std::unordered_map<std::string, std::vector<bus_submodule>> bus_submodules;
     std::unordered_map<std::string, module_documentation> modules_doc;
     std::unordered_map<std::string, processor_instance> processors;
+    std::string path;
 };
 
 

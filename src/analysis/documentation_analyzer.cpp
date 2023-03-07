@@ -52,7 +52,13 @@ void documentation_analyzer::process_documentation(std::unordered_map<std::strin
 
         nlohmann::json obj;
         std::istringstream ss(content);
-        ss >> obj;
+        try {
+            ss >> obj;
+        } catch (nlohmann::json::parse_error& e) {
+            std::cout<<"ERROR: A malformed json string was found while parsing documentation comments in file: " << path<<std::endl;
+            exit(2);
+        }
+
         documentation_comments.push_back(obj);
     }
 
