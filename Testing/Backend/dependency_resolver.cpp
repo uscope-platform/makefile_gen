@@ -45,6 +45,7 @@ TEST_F(dep_resolver , dependency_resolver) {
     Dependency_resolver res("test_module", d_store);
     res.set_excluded_modules({"excluded_module"});
     res.add_explicit_dependencies({"expl_dep"});
+    res.resolve_dependencies();
     std::set<std::string> result = res.get_dependencies();
     std::set<std::string> check = {"test/mod.sv", "test/dep.sv", "test/mem_init.mem", "test/explicit/dep.sv"};
     ASSERT_EQ(result, check);

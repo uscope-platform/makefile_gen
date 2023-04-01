@@ -74,6 +74,7 @@ TEST_F( app_def_generation , generate_app_def) {
 
 
     application_definition_generator gen(file, xbar, d_store);
+    gen.construct_application();
     gen.write_definition_file("test.json");
 
     nlohmann::json result;
