@@ -83,7 +83,16 @@ TEST( analysis_test , sv_module) {
     check_dep["SyndromeCalculator"] = module;
     check_dep["test_package"] = package;
     check_dep["file"] = memory_init;
+
+    std::unordered_map<std::string, port_direction_t> test_ports;
+
+    test_ports["clock"] = input_port;
+    test_ports["reset"] = input_port;
+    test_ports["data_in"] = modport;
+    test_ports["data_out"] = modport;
+
     HDL_Resource check_res(module, "Decoder", "check_files/test_sv_module.sv", check_dep, verilog_entity);
+    check_res.set_ports(test_ports);
     ASSERT_EQ(resource, check_res);
     resource = analyzer.analyze()[1];
     hdl_deps_t dummy;

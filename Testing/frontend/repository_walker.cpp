@@ -70,7 +70,18 @@ TEST_F(repository_walker , directory_analysis) {
     constraints_check["constraints"] = c;
     ASSERT_EQ(constraints_results, constraints_check);
 
+
+    std::unordered_map<std::string, port_direction_t> test_ports;
+
+    test_ports["clock"] = input_port;
+    test_ports["reset"] = input_port;
+    test_ports["data_in"] = modport;
+    test_ports["data_out"] = modport;
+
+
     HDL_Resource sv_res(module, "Decoder", "repository_walker/test_sv_module.sv", hdl_deps_t(), verilog_entity);
+    sv_res.set_ports(test_ports);
+
     HDL_Resource vh_res(null_feature, "half_adder", "repository_walker/test_vhdl_module.vhd", hdl_deps_t(), vhdl_entity);
     std::unordered_map<std::string,HDL_Resource> hdl_check;
     hdl_check["Decoder"] = sv_res;

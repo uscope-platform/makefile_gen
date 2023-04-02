@@ -41,6 +41,7 @@ HDL_Resource::HDL_Resource(const HDL_Resource &c) {
     doc = c.doc;
     bus_submodules = c.bus_submodules;
     processor_docs = c.processor_docs;
+    ports = c.ports;
 }
 
 
@@ -72,6 +73,7 @@ bool operator==(const HDL_Resource &lhs, const HDL_Resource &rhs) {
     ret &= lhs.parameters == rhs.parameters;
     ret &= lhs.bus_submodules == rhs.bus_submodules;
     ret &= lhs.processor_docs == rhs.processor_docs;
+    ret &= lhs.ports == rhs.ports;
 
     if(lhs.bus_roots.size() != rhs.bus_roots.size()){
         return false;

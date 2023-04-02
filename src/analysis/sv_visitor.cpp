@@ -26,26 +26,39 @@ void sv_visitor::enterModule_declaration(sv2017::Module_declarationContext *ctx)
     nesting_level++;
     declarations_stack.push(declared_feature);
     dependencies_stack.push(instantiated_features);
+    declaration_type_stack.push(current_declaration_type);
     instantiated_features.clear();
+    current_declaration_type = "module";
 }
 
 
 void sv_visitor::exitModule_declaration(sv2017::Module_declarationContext *ctx) {
 
         HDL_Resource e(declared_feature.second, declared_feature.first, path, instantiated_features, verilog_entity);
+        e.set_ports(port_map);
+        port_map.clear();
         entities.push_back(e);
         if(!declarations_stack.empty()) {
             declared_feature = declarations_stack.top();
             declarations_stack.pop();
         }
+
         if(!dependencies_stack.empty()){
             instantiated_features = dependencies_stack.top();
             dependencies_stack.pop();
         } else{
             instantiated_features.clear();
         }
-
+        if(!declaration_type_stack.empty()){
+            current_declaration_type = declaration_type_stack.top();
+            declaration_type_stack.pop();
+        }
         nesting_level--;
+}
+
+void sv_visitor::enterInterface_declaration(sv2017::Interface_declarationContext *ctx) {
+    declaration_type_stack.push(current_declaration_type);
+    current_declaration_type = "interface";
 }
 
 void sv_visitor::exitInterface_declaration(sv2017::Interface_declarationContext *ctx) {
@@ -53,6 +66,10 @@ void sv_visitor::exitInterface_declaration(sv2017::Interface_declarationContext 
     hdl_deps_t dummy;
     HDL_Resource e (interface, interface_name, path, dummy, verilog_entity);
     entities.push_back(e);
+    if(!declaration_type_stack.empty()){
+        current_declaration_type = declaration_type_stack.top();
+        declaration_type_stack.pop();
+    }
 }
 
 void sv_visitor::exitModule_header_common(sv2017::Module_header_commonContext *ctx) {
@@ -258,4 +275,22 @@ uint32_t sv_visitor::calculate_expression(std::vector<std::string> exp) {
         }
     }
     return std::stoul(exp[0]);
+}
+
+void sv_visitor::exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext *ctx) {
+    if(current_declaration_type == "module"){
+        std::string port_name = ctx->port_identifier()->getText();
+        if(ctx->DOT()){
+            port_map[port_name] = modport;
+        } else{
+            std::string dir = ctx->port_direction()->getText();
+            if(dir=="input")
+                port_map[port_name] = input_port;
+            else if(dir=="output")
+                port_map[port_name] = output_port;
+            else if(dir=="inout")
+                port_map[port_name] = inout_port;
+
+        }
+    }
 }

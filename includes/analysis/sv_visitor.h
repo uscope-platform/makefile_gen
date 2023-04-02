@@ -40,6 +40,7 @@ public:
 
     void enterModule_declaration(sv2017::Module_declarationContext *ctx) override;
     void exitModule_declaration(sv2017::Module_declarationContext *ctx) override;
+    void enterInterface_declaration(sv2017::Interface_declarationContext *ctx) override;
     void exitInterface_declaration(sv2017::Interface_declarationContext *ctx) override;
     void exitModule_header_common(sv2017::Module_header_commonContext *ctx) override;
     void exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) override;
@@ -49,6 +50,7 @@ public:
     void exitPackage_or_class_scoped_path(sv2017::Package_or_class_scoped_pathContext *ctx) override;
     void enterParameter_declaration(sv2017::Parameter_declarationContext *ctx) override;
     void exitParameter_declaration(sv2017::Parameter_declarationContext *ctx) override;
+    void exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext *ctx) override;
 
     void exitExpression(sv2017::ExpressionContext *ctx) override;
     void exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *ctx) override;
@@ -69,17 +71,20 @@ private:
     int nesting_level = 0;
     std::stack<hdl_declaration_t> declarations_stack;
     std::stack<hdl_deps_t> dependencies_stack;
+    std::stack<std::string> declaration_type_stack;
     std::string path;
     std::vector<HDL_Resource> entities;
+    std::unordered_map<std::string, port_direction_t> port_map;
 
     std::string current_parameter;
-    uint32_t current_address;
     std::vector<expression> package_parameters;
     bool file_contains_bus_defining_package;
     std::vector<std::string> current_operands;
     std::vector<std::string> current_operators;
+    std::string current_declaration_type;
 
     std::vector<std::string> string_components;
+
 
 
     std::unordered_map<std::string, uint32_t> numeric_parameters;
