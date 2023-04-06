@@ -43,14 +43,6 @@ enum sv_feature {module=SV_FEATURE_MODULE, interface=SV_FEATURE_INTERFACE,progra
         udp=SV_FEATURE_UDP, null_feature=SV_FEATURE_NULL, memory_init=SV_MEMORY_INIT_FILE, package=SV_FEATURE_PACKAGE};
 
 
-#define RES_VERILOG_ENTITY 0
-#define RES_VHDL_ENTITY 1
-#define RES_SCRIPT 2
-#define RES_CONSTRAINT 3
-#define RES_NULL 4
-enum resource_type_t {verilog_entity=RES_VERILOG_ENTITY, vhdl_entity=RES_VHDL_ENTITY,
-        script=RES_SCRIPT, constraint=RES_CONSTRAINT, null_resource=RES_NULL};
-
 enum port_direction_t {
     input_port = 0,
     output_port = 1,
@@ -58,26 +50,33 @@ enum port_direction_t {
     modport = 3
 };
 
-typedef std::unordered_map<std::string,sv_feature> hdl_deps_t;
+typedef std::unordered_map<std::string, sv_feature> hdl_deps_t;
 
 typedef std::pair<std::string, sv_feature> hdl_declaration_t;
 
     class HDL_Resource {
     public:
         HDL_Resource( const HDL_Resource &c );
-        HDL_Resource() = default;
-        HDL_Resource(sv_feature type, std::string n, std::string p, hdl_deps_t deps, resource_type_t r_type);
-        hdl_deps_t get_dependencies();
+        HDL_Resource();
+        HDL_Resource(sv_feature type, std::string n, std::string p, hdl_deps_t deps);
+        hdl_deps_t get_dependencies() {return dependencies;};
+
         void add_dependencies(hdl_deps_t deps);
         void add_bus_roots(const std::shared_ptr<bus_crossbar>& bc) { bus_roots.push_back(bc);};
         void add_bus_roots(std::vector<std::shared_ptr<bus_crossbar>> bc) { bus_roots = std::move(bc);};
         std::vector<std::shared_ptr<bus_crossbar>> get_bus_roots() {return bus_roots;};
-        const std::string &getName() const;
-        std::string get_path();
+
+        void set_name(const std::string &n) {name  = n;};
+        const std::string &getName() const {return name;};
+
+        void set_path(const std::string &p) {path  = p;};
+        std::string get_path() {return path;};
+        void set_type(const sv_feature t) {hdl_type  = t;};
         sv_feature get_type() {return hdl_type;};
         bool is_interface();
 
-        void set_ports(std::unordered_map<std::string, port_direction_t> m) {ports = m;}
+        void set_ports(std::unordered_map<std::string, port_direction_t> m) {ports = std::move(m);};
+        void add_ports(const std::string &p_n, port_direction_t dir) {ports[p_n] = dir;};
 
         void add_submodule(const bus_submodule &s) {bus_submodules.push_back(s);};
         void set_submodules(std::vector<bus_submodule> v) {bus_submodules = std::move(v);};
@@ -87,6 +86,7 @@ typedef std::pair<std::string, sv_feature> hdl_declaration_t;
         std::vector<processor_instance> get_processor_doc() {return processor_docs;};
         bool has_processors() {return !processor_docs.empty();};
 
+        void add_parameter(std::string name, uint32_t val) {parameters[name] = val;};
         void set_parameters(std::unordered_map<std::string, uint32_t> p) { parameters = std::move(p);}
         std::unordered_map<std::string, uint32_t> get_parameters() {return parameters;};
 
@@ -95,19 +95,21 @@ typedef std::pair<std::string, sv_feature> hdl_declaration_t;
 
         template<class Archive>
         void serialize( Archive & ar ) {
-            ar(name, path, resource_type, hdl_type, dependencies, parameters, ports, bus_roots, bus_submodules, doc, processor_docs);
+            ar(name, path, hdl_type, dependencies, parameters, ports, bus_roots, bus_submodules, doc, processor_docs);
         }
+
+        bool is_empty();
 
         friend bool operator==(const HDL_Resource&lhs, const HDL_Resource&rhs);
     private:
         std::string name;
         std::string path;
-        resource_type_t resource_type;
         sv_feature hdl_type;
         hdl_deps_t dependencies;
         std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
         std::unordered_map<std::string, port_direction_t> ports;
 
+        std::vector<HDL_Resource> deps_vector;
         //SV PACKAGE SPECIFIC PARAMETERS
         std::unordered_map<std::string, uint32_t> parameters;
         std::vector<bus_submodule> bus_submodules;

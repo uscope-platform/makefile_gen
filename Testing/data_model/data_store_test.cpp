@@ -67,7 +67,7 @@ TEST( data_store_test , evict_hdl_entity) {
 
     auto *store_1 = new data_store(true);
     hdl_deps_t deps;
-    HDL_Resource test_entity(module, "test", "/test/path", deps, verilog_entity);
+    HDL_Resource test_entity(module, "test", "/test/path", deps);
 
     store_1->store_hdl_entity(test_entity);
     store_1->evict_hdl_entity(test_entity.getName());
@@ -152,8 +152,8 @@ TEST( data_store_test , store_hdl_vect) {
 
     auto *store = new data_store(true);
     hdl_deps_t deps;
-    HDL_Resource test_res_1(module, "test_1", "/bin/sh", deps, verilog_entity);
-    HDL_Resource test_res_2(module, "test_2", "/bin/sh", deps, verilog_entity);
+    HDL_Resource test_res_1(module, "test_1", "/bin/sh", deps);
+    HDL_Resource test_res_2(module, "test_2", "/bin/sh", deps);
     std::vector<HDL_Resource> test_vect = {test_res_1,test_res_2};
     store->store_hdl_entity(test_vect);
     std::string name = "test_1";
@@ -244,7 +244,7 @@ TEST( data_store_test , resource_clean_up) {
     auto *store_1 = new data_store(true);
     hdl_deps_t deps;
 
-    HDL_Resource test_entity(module, "test", "/test", deps, verilog_entity);
+    HDL_Resource test_entity(module, "test", "/test", deps);
 
     store_1->store_hdl_entity(test_entity);
     delete store_1;

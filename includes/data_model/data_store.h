@@ -22,7 +22,7 @@
 #include <set>
 #include <fstream>
 
-#include "HDL_Resource.h"
+#include "data_model/HDL/HDL_Resource.h"
 #include "Script.h"
 #include "Constraints.h"
 #include "DataFile.h"

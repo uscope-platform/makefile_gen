@@ -20,7 +20,7 @@
 #include <vector>
 #include <fstream>
 
-#include "data_model/HDL_Resource.h"
+#include "data_model/HDL/HDL_Resource.h"
 #include "vhdl_visitor.h"
 #include "antlr4-runtime.h"
 #include "mgp_vh/vhdlLexer.h"

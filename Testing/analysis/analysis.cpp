@@ -38,7 +38,7 @@ TEST( analysis_test , package) {
     check_map["subtraction_parameter"] = 2;
     ASSERT_EQ(check_map, parameters);
 
-    HDL_Resource check_res(package, "test_package", "check_files/test_package.sv", hdl_deps_t(), verilog_entity);
+    HDL_Resource check_res(package, "test_package", "check_files/test_package.sv", hdl_deps_t());
     check_res.set_parameters(check_map);
 
     std::shared_ptr<bus_crossbar> root = std::make_shared<bus_crossbar>();
@@ -91,12 +91,12 @@ TEST( analysis_test , sv_module) {
     test_ports["data_in"] = modport;
     test_ports["data_out"] = modport;
 
-    HDL_Resource check_res(module, "Decoder", "check_files/test_sv_module.sv", check_dep, verilog_entity);
+    HDL_Resource check_res(module, "Decoder", "check_files/test_sv_module.sv", check_dep);
     check_res.set_ports(test_ports);
     ASSERT_EQ(resource, check_res);
     resource = analyzer.analyze()[1];
     hdl_deps_t dummy;
-    check_res = HDL_Resource(interface, "test_if", "check_files/test_sv_module.sv", dummy, verilog_entity);
+    check_res = HDL_Resource(interface, "test_if", "check_files/test_sv_module.sv", dummy);
     ASSERT_EQ(resource, check_res);
 }
 
@@ -107,7 +107,7 @@ TEST( analysis_test , vhdl_module) {
     auto resource = analyzer.analyze()[0];
     hdl_deps_t check_dep;
     check_dep["ANDGATE"] = module;
-    HDL_Resource check_res (null_feature, "half_adder", "check_files/test_vhdl_module.vhd", check_dep, vhdl_entity);
+    HDL_Resource check_res (null_feature, "half_adder", "check_files/test_vhdl_module.vhd", check_dep);
     ASSERT_EQ(resource, check_res);
 }
 

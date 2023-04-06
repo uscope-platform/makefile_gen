@@ -29,7 +29,7 @@ protected:
     void SetUp() {
         d_store = std::make_shared<data_store>(true);
 
-        HDL_Resource mod_res(module, "module_type", "test/path.sv", hdl_deps_t(), verilog_entity);
+        HDL_Resource mod_res(module, "module_type", "test/path.sv", hdl_deps_t());
 
         bus_submodule sc;
         sc.set_name("SC");
@@ -45,7 +45,7 @@ protected:
 
         d_store->store_hdl_entity(mod_res);
 
-        HDL_Resource mod_res_2(module, "register_type", "test/path.sv", hdl_deps_t(), verilog_entity);
+        HDL_Resource mod_res_2(module, "register_type", "test/path.sv", hdl_deps_t());
         d_store->store_hdl_entity(mod_res_2);
     }
 

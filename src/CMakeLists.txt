@@ -3,7 +3,7 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/analysis/sv_analyzer.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/Repository_walker.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/settings_store.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL_Resource.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_Resource.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/data_store.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/DataFile.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/bus_structure/bus_component.cpp /
@@ -31,7 +31,13 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/project_generator_base.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Lattice/Radiant_manager.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Toolchain_manager.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/python_script_runner.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/python_script_runner.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL_instance.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_modules_factory.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_interfaces_factory.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_packages_factory.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/resource_factory_base.cpp
+        )
 
 set(MAKEFILE_GEN_SRCS ${MAKEFILE_GEN_SRCS_I}  PARENT_SCOPE)
 

@@ -44,7 +44,7 @@ void vhdl_visitor::exitArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyCo
 
 
 void vhdl_visitor::exitEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) {
-    HDL_Resource e(declared_feature.second, declared_feature.first, path, instantiated_features, vhdl_entity);
+    HDL_Resource e(declared_feature.second, declared_feature.first, path, instantiated_features);
     entities.push_back(e);
     if(nesting_level>1){
         declared_feature = declarations_stack.top();

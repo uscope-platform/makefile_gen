@@ -23,68 +23,42 @@ sv_visitor::sv_visitor(std::string p) {
 
 
 void sv_visitor::enterModule_declaration(sv2017::Module_declarationContext *ctx) {
-    nesting_level++;
-    declarations_stack.push(declared_feature);
-    dependencies_stack.push(instantiated_features);
-    declaration_type_stack.push(current_declaration_type);
-    instantiated_features.clear();
     current_declaration_type = "module";
+    resources_factory.new_module(path);
 }
 
 
 void sv_visitor::exitModule_declaration(sv2017::Module_declarationContext *ctx) {
-
-        HDL_Resource e(declared_feature.second, declared_feature.first, path, instantiated_features, verilog_entity);
-        e.set_ports(port_map);
-        port_map.clear();
-        entities.push_back(e);
-        if(!declarations_stack.empty()) {
-            declared_feature = declarations_stack.top();
-            declarations_stack.pop();
-        }
-
-        if(!dependencies_stack.empty()){
-            instantiated_features = dependencies_stack.top();
-            dependencies_stack.pop();
-        } else{
-            instantiated_features.clear();
-        }
-        if(!declaration_type_stack.empty()){
-            current_declaration_type = declaration_type_stack.top();
-            declaration_type_stack.pop();
-        }
-        nesting_level--;
+    entities.push_back(resources_factory.get_module());
 }
 
 void sv_visitor::enterInterface_declaration(sv2017::Interface_declarationContext *ctx) {
-    declaration_type_stack.push(current_declaration_type);
     current_declaration_type = "interface";
+    interfaces_factory.new_interface(path);
 }
 
 void sv_visitor::exitInterface_declaration(sv2017::Interface_declarationContext *ctx) {
     std::string interface_name = ctx->interface_header()->identifier()->getText();
-    hdl_deps_t dummy;
-    HDL_Resource e (interface, interface_name, path, dummy, verilog_entity);
-    entities.push_back(e);
-    if(!declaration_type_stack.empty()){
-        current_declaration_type = declaration_type_stack.top();
-        declaration_type_stack.pop();
-    }
+    interfaces_factory.set_interface_name(interface_name);
+    entities.push_back(interfaces_factory.get_interface());
 }
 
 void sv_visitor::exitModule_header_common(sv2017::Module_header_commonContext *ctx) {
     std::string module_name = ctx->identifier()->getText();
-    declared_feature = std::make_pair(module_name, module);
+    resources_factory.set_module_name(module_name);
 }
 
 void sv_visitor::exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) {
     std::string module_name = ctx->identifier()->getText();
-    instantiated_features[module_name] = module;
+    std::string instance_name = ctx->hierarchical_instance(0)->name_of_instance()->identifier()->getText();
+
+    HDL_instance inst(instance_name, module_name, module);
+    resources_factory.add_instance(inst);
 }
 
 void sv_visitor::exitInterface_header(sv2017::Interface_headerContext *ctx) {
     std::string interface_name = ctx->identifier()->getText();
-    instantiated_features[interface_name] = interface;
+    resources_factory.add_interface_dep(interface_name);
 }
 
 std::vector<HDL_Resource> sv_visitor::get_entities() {
@@ -98,23 +72,25 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
         data_file = std::regex_replace(data_file, std::regex("\\\""), "");
         std::filesystem::path p = data_file;
         if(p.extension().string() == ".dat"|| p.extension().string() == ".mem"){
-            instantiated_features[p.stem()] = memory_init;
+            resources_factory.add_mem_file_dep(p.stem());
         }
     }
 }
 
+void sv_visitor::enterPackage_declaration(sv2017::Package_declarationContext *ctx) {
+    packages_factory.new_package(path);
+}
+
 void sv_visitor::exitPackage_declaration(sv2017::Package_declarationContext *ctx) {
     std::string package_name = ctx->identifier()[0]->getText();
-    calculate_parameters();
-    HDL_Resource e(package, package_name, path, instantiated_features, verilog_entity);
-    e.set_parameters(numeric_parameters);
-    entities.push_back(e);
+    packages_factory.set_package_name(package_name);
+    entities.push_back(packages_factory.get_package());
 }
 
 void sv_visitor::exitPackage_or_class_scoped_path(sv2017::Package_or_class_scoped_pathContext *ctx) {
     if(!ctx->DOUBLE_COLON().empty()){
         std::string package_name = ctx->package_or_class_scoped_path_item()[0]->identifier()->getText();
-        instantiated_features[package_name] = package;
+        resources_factory.add_package_dep(package_name);
     }
 
 }
@@ -129,18 +105,18 @@ void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext 
         if(string_components.size() == 1){
             try {
                 uint32_t addr = std::stoul(string_components.front());
-                numeric_parameters[current_parameter] = addr;
+                packages_factory.add_numeric_parameter(current_parameter, addr);
             } catch (std::invalid_argument const& ex){
-                if(numeric_parameters.count(string_components.front())>0){
-                    numeric_parameters[current_parameter] = numeric_parameters[string_components.front()];
+                if(packages_factory.numeric_parameter_exists(string_components.front())){
+                    packages_factory.add_numeric_parameter(current_parameter, packages_factory.get_numeric_parameter(string_components.front()));
                 } else{
                     expression par(current_parameter, string_components);
-                    package_parameters.push_back(par);
+                    packages_factory.add_unresolved_parameter(par);
                 }
             }
         } else{
             expression par(current_parameter, string_components);
-            package_parameters.push_back(par);
+            packages_factory.add_unresolved_parameter(par);
         }
         string_components.clear();
     }
@@ -203,94 +179,23 @@ uint32_t sv_visitor::parse_number(const std::string& s) {
     return 0;
 }
 
-
-void sv_visitor::calculate_parameters() {
-    std::vector<expression> remaining_parameters;
-
-    while(!package_parameters.empty()){
-        remaining_parameters.clear();
-        //update parameters with calculated values
-        for(auto &np:numeric_parameters){
-            for(auto &item:package_parameters){
-                item.update_expression(np.first, np.second);
-            }
-        }
-
-        // Calculate available expressions
-        for(auto &item:package_parameters){
-            try{
-                std::string param_name = item.get_name();
-                uint32_t res = calculate_expression(item.get_expression());
-                numeric_parameters[param_name] = res;
-            } catch(std::invalid_argument &ex){
-                remaining_parameters.push_back(item);
-            }
-        }
-
-        package_parameters = remaining_parameters;
-    }
-
-}
-
-uint32_t sv_visitor::calculate_expression(std::vector<std::string> exp) {
-
-    for (int i = 0; i< exp.size(); i++) {
-        if(exp[i] == "*"){
-            uint32_t op_a = std::stoul(exp[i-1]);
-            uint32_t op_b = std::stoul(exp[i+1]);
-            exp[i-1] = std::to_string(op_a*op_b);
-            exp.erase(exp.begin()+i);
-            exp.erase(exp.begin()+i);
-            --i;
-        } else if(exp[i] == "/"){
-            uint32_t op_a = std::stoul(exp[i-1]);
-            uint32_t op_b = std::stoul(exp[i+1]);
-            exp[i-1] = std::to_string(op_a/op_b);
-            exp.erase(exp.begin()+i);
-            exp.erase(exp.begin()+i);
-        } else if(exp[i]=="%"){
-            uint32_t op_a = std::stoul(exp[i-1]);
-            uint32_t op_b = std::stoul(exp[i+1]);
-            exp[i-1] = std::to_string(op_a%op_b);
-            exp.erase(exp.begin()+i);
-            exp.erase(exp.begin()+i);
-        }
-    }
-
-
-    for (int i = 0; i< exp.size(); i++) {
-        if(exp[i] == "+"){
-            uint32_t op_a = std::stoul(exp[i-1]);
-            uint32_t op_b = std::stoul(exp[i+1]);
-            exp[i-1] = std::to_string(op_a+op_b);
-            exp.erase(exp.begin()+i);
-            exp.erase(exp.begin()+i);
-            --i;
-        } else if(exp[i] == "-"){
-            uint32_t op_a = std::stoul(exp[i-1]);
-            uint32_t op_b = std::stoul(exp[i+1]);
-            exp[i-1] = std::to_string(op_a-op_b);
-            exp.erase(exp.begin()+i);
-            exp.erase(exp.begin()+i);
-        }
-    }
-    return std::stoul(exp[0]);
-}
-
 void sv_visitor::exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext *ctx) {
     if(current_declaration_type == "module"){
         std::string port_name = ctx->port_identifier()->getText();
+        port_direction_t dir;
         if(ctx->DOT()){
-            port_map[port_name] = modport;
+            dir = modport;
         } else{
-            std::string dir = ctx->port_direction()->getText();
-            if(dir=="input")
-                port_map[port_name] = input_port;
-            else if(dir=="output")
-                port_map[port_name] = output_port;
-            else if(dir=="inout")
-                port_map[port_name] = inout_port;
+            std::string dir_s = ctx->port_direction()->getText();
+            if(dir_s=="input")
+                dir = input_port;
+            else if(dir_s=="output")
+                dir = output_port;
+            else if(dir_s=="inout")
+                dir = inout_port;
 
         }
+        resources_factory.add_port(port_name, dir);
     }
 }
+

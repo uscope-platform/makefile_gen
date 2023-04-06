@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 #include <stack>
-#include "data_model/HDL_Resource.h"
+#include "data_model/HDL/HDL_Resource.h"
 
 #include "mgp_vh/vhdlParserBaseListener.h"
 #include "mgp_vh/vhdlParser.h"

@@ -19,7 +19,12 @@
 #include "mgp_sv/sv2017BaseListener.h"
 #include "mgp_sv/sv2017.h"
 
-#include "data_model/HDL_Resource.h"
+#include "data_model/HDL/HDL_Resource.h"
+#include "data_model/HDL/HDL_modules_factory.hpp"
+#include "data_model/HDL/HDL_interfaces_factory.hpp"
+#include "data_model/HDL/HDL_packages_factory.hpp"
+
+#include "data_model/HDL_instance.hpp"
 #include "data_model/expression.h"
 
 #include <regex>
@@ -46,6 +51,7 @@ public:
     void exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) override;
     void exitInterface_header(sv2017::Interface_headerContext *ctx) override;
     void exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) override;
+    void enterPackage_declaration(sv2017::Package_declarationContext *ctx) override;
     void exitPackage_declaration(sv2017::Package_declarationContext *ctx) override;
     void exitPackage_or_class_scoped_path(sv2017::Package_or_class_scoped_pathContext *ctx) override;
     void enterParameter_declaration(sv2017::Parameter_declarationContext *ctx) override;
@@ -61,23 +67,15 @@ public:
 
     static uint32_t parse_number(const std::string& s);
 
-    void calculate_parameters();
-    static uint32_t calculate_expression(std::vector<std::string> exp);
+
     std::vector<HDL_Resource> get_entities();
 
 private:
-    hdl_declaration_t declared_feature;
-    hdl_deps_t instantiated_features;
-    int nesting_level = 0;
-    std::stack<hdl_declaration_t> declarations_stack;
-    std::stack<hdl_deps_t> dependencies_stack;
-    std::stack<std::string> declaration_type_stack;
+
     std::string path;
     std::vector<HDL_Resource> entities;
-    std::unordered_map<std::string, port_direction_t> port_map;
 
     std::string current_parameter;
-    std::vector<expression> package_parameters;
     bool file_contains_bus_defining_package;
     std::vector<std::string> current_operands;
     std::vector<std::string> current_operators;
@@ -85,9 +83,9 @@ private:
 
     std::vector<std::string> string_components;
 
-
-
-    std::unordered_map<std::string, uint32_t> numeric_parameters;
+    HDL_modules_factory resources_factory;
+    HDL_interfaces_factory interfaces_factory;
+    HDL_packages_factory packages_factory;
 };
 
 

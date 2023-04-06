@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "third_party/json.hpp"
-#include "data_model/HDL_Resource.h"
+#include "data_model/HDL/HDL_Resource.h"
 #include "data_model/documentation/bus_structure/bus_crossbar.h"
 #include "data_model/documentation/bus_structure/bus_module.h"
 #include "analysis/documentation_analyzer.h"

@@ -26,13 +26,13 @@ protected:
         deps["test_dep"] = module;
         deps["test_mem_init"] = memory_init;
         deps["excluded_module"] = module;
-        HDL_Resource mod_entity(module, "test_module", "test/mod.sv", deps, verilog_entity);
+        HDL_Resource mod_entity(module, "test_module", "test/mod.sv", deps);
         d_store->store_hdl_entity(mod_entity);
         DataFile D("test_mem_init", "test/mem_init.mem");
         d_store->store_data_file(D);
-        HDL_Resource expl_dep(module, "expl_dep", "test/explicit/dep.sv", hdl_deps_t(), verilog_entity);
+        HDL_Resource expl_dep(module, "expl_dep", "test/explicit/dep.sv", hdl_deps_t());
         d_store->store_hdl_entity(expl_dep);
-        HDL_Resource dep_entity(module, "test_dep", "test/dep.sv", hdl_deps_t(), verilog_entity);
+        HDL_Resource dep_entity(module, "test_dep", "test/dep.sv", hdl_deps_t());
         d_store->store_hdl_entity(dep_entity);
     }
 
