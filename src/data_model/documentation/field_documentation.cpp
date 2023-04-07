@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "data_model/documentation/field_documentation.h"
+#include "data_model/documentation/field_documentation.hpp"
 
 #include <utility>
 

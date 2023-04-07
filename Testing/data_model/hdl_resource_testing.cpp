@@ -16,7 +16,7 @@
 
 #include <gtest/gtest.h>
 
-#include "data_model/HDL/HDL_Resource.h"
+#include "data_model/HDL/HDL_Resource.hpp"
 
 
 

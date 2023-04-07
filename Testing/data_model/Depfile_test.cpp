@@ -16,9 +16,9 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "data_model/Constraints.h"
-#include "data_model/Script.h"
-#include "data_model/Depfile.h"
+#include "data_model/Constraints.hpp"
+#include "data_model/Script.hpp"
+#include "data_model/Depfile.hpp"
 
 
 class DepfileTest : public ::testing::Test {

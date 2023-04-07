@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "data_model/HDL/HDL_Resource.h"
+#include "data_model/HDL/HDL_Resource.hpp"
 
 
 HDL_Resource::HDL_Resource() {

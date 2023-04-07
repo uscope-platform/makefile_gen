@@ -16,7 +16,7 @@
 
 #include <gtest/gtest.h>
 
-#include "data_model/Constraints.h"
+#include "data_model/Constraints.hpp"
 
 #include "third_party/cereal/archives/binary.hpp"
 

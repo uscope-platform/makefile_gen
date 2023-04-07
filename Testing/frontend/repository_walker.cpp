@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "frontend/Repository_walker.h"
+#include "frontend/Repository_walker.hpp"
 #include <gtest/gtest.h>
 
 

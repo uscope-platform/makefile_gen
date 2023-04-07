@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "data_model/documentation/processor_instance.h"
+#include "data_model/documentation/processor_instance.hpp"
 
 
 processor_instance::processor_instance(const std::string &n) {

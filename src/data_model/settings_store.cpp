@@ -12,7 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "data_model/settings_store.h"
+#include "data_model/settings_store.hpp"
 
 settings_store::settings_store(bool e) {
     store_path = std::string(std::getenv("HOME")) + "/.makefilegen_store";

@@ -17,9 +17,9 @@
 #define MAKEFILEGEN_V2_HDL_PACKAGES_FACTORY_HPP
 
 
-#include "data_model/HDL/HDL_Resource.h"
+#include "data_model/HDL/HDL_Resource.hpp"
 #include "data_model/HDL/resource_factory_base.hpp"
-#include "data_model/expression.h"
+#include "data_model/expression.hpp"
 
 
 class HDL_packages_factory : protected resources_factory_base<HDL_Resource>{

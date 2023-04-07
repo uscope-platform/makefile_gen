@@ -14,7 +14,7 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
-#include "Backend/Dependency_resolver.h"
+#include "Backend/Dependency_resolver.hpp"
 
 
 

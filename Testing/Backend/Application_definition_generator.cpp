@@ -16,10 +16,10 @@
 #include <gtest/gtest.h>
 #include <filesystem>
 
-#include "data_model/Depfile.h"
-#include "Backend/application_definition_generator.h"
-#include "data_model/documentation/bus_structure/bus_module.h"
-#include "data_model/documentation/bus_structure/bus_crossbar.h"
+#include "data_model/Depfile.hpp"
+#include "Backend/uplatform/application_definition_generator.hpp"
+#include "data_model/documentation/bus_structure/bus_module.hpp"
+#include "data_model/documentation/bus_structure/bus_crossbar.hpp"
 
 
 

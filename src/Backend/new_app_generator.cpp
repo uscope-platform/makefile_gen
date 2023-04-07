@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "Backend/new_app_generator.h"
+#include "Backend/new_app_generator.hpp"
 
 new_app_generator::new_app_generator(std::string &app_name, std::string &app_language) {
     name = app_name;

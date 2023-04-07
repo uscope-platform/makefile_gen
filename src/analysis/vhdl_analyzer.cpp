@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "analysis/vhdl_analyzer.h"
+#include "analysis/vhdl_analyzer.hpp"
 
 vhdl_analyzer::vhdl_analyzer(const std::string &file_path): vhdl_modules_explorer(file_path) {
     path = file_path;

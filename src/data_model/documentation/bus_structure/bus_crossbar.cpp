@@ -14,7 +14,7 @@
 // limitations under the License.
 
 
-#include "data_model/documentation/bus_structure/bus_crossbar.h"
+#include "data_model/documentation/bus_structure/bus_crossbar.hpp"
 
 
 bus_crossbar::bus_crossbar(std::string p) {

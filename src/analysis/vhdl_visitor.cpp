@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "analysis/vhdl_visitor.h"
+#include "analysis/vhdl_visitor.hpp"
 
 #include <utility>
 

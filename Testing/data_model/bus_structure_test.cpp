@@ -18,8 +18,8 @@
 #include "third_party/cereal/archives/binary.hpp"
 #include "third_party/cereal/types/polymorphic.hpp"
 
-#include "data_model/documentation/bus_structure/bus_crossbar.h"
-#include "data_model/documentation/bus_structure/bus_module.h"
+#include "data_model/documentation/bus_structure/bus_crossbar.hpp"
+#include "data_model/documentation/bus_structure/bus_module.hpp"
 
 TEST( bus_structure, module_serdes) {
     bus_module mod_out("module_instance", "module_type");

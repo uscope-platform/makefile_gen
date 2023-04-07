@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "Backend/Dependency_resolver.h"
+#include "Backend/Dependency_resolver.hpp"
 
 Dependency_resolver::Dependency_resolver(std::string tl, std::shared_ptr<data_store> store) {
     top_level = std::move(tl);

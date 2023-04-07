@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "data_model/DataFile.h"
+#include "data_model/DataFile.hpp"
 
 
 TEST( DataFile_test , get_name) {

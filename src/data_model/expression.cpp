@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "data_model/expression.h"
+#include "data_model/expression.hpp"
 
 
 expression::expression(std::string n, uint32_t a) {

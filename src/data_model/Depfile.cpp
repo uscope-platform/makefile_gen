@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "data_model/Depfile.h"
+#include "data_model/Depfile.hpp"
 
 Depfile::Depfile(const std::string& filename) {
 // read a JSON file

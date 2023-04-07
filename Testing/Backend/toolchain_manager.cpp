@@ -15,8 +15,8 @@
 
 #include <gtest/gtest.h>
 
-#include "Backend/Toolchain_manager.h"
-#include "Backend/Xilinx/Vivado_manager.h"
+#include "Backend/Toolchain_manager.hpp"
+#include "Backend/Xilinx/Vivado_manager.hpp"
 
 TEST(Toolchain_manager, str_vect_to_char_p){
 

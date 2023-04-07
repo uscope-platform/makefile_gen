@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "../includes/Backend/project_generator_base.h"
+#include "../includes/Backend/project_generator_base.hpp"
 
 project_generator_base::project_generator_base(const std::string& template_f) {
     std::string templates_dir = TEMPLATES_FOLDER;

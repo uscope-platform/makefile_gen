@@ -16,9 +16,9 @@
 #include <gtest/gtest.h>
 #include "third_party/cereal/archives/binary.hpp"
 
-#include "data_model/documentation/module_documentation.h"
-#include "data_model/documentation/register_documentation.h"
-#include "data_model/documentation/field_documentation.h"
+#include "data_model/documentation/module_documentation.hpp"
+#include "data_model/documentation/register_documentation.hpp"
+#include "data_model/documentation/field_documentation.hpp"
 
 TEST( register_tests , serdes) {
 

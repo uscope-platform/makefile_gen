@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "Backend/Toolchain_manager.h"
+#include "Backend/Toolchain_manager.hpp"
 
 Toolchain_manager::Toolchain_manager(std::shared_ptr <settings_store> s, bool del_mkfile, std::string name) {
     delete_makefile = del_mkfile;

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "data_model/documentation/bus_structure/bus_submodule.h"
+#include "data_model/documentation/bus_structure/bus_submodule.hpp"
 
 
 

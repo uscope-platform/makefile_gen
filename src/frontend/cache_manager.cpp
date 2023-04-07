@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "frontend/cache_manager.h"
+#include "frontend/cache_manager.hpp"
 
 cache_manager::cache_manager(std::shared_ptr<settings_store> settings, std::shared_ptr<data_store> data) {
     s_store = std::move(settings);

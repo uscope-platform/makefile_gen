@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../includes/Backend/new_app_generator.h"
+#include "../includes/Backend/new_app_generator.hpp"
 
 #ifndef TEMPLATES_FOLDER
     #define TEMPLATES_FOLDER "../templates"

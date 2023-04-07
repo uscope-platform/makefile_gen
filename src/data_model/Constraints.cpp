@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "data_model/Constraints.h"
+#include "data_model/Constraints.hpp"
 
 #include <utility>
 

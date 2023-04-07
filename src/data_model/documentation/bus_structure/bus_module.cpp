@@ -14,7 +14,7 @@
 // limitations under the License.
 
 
-#include "data_model/documentation/bus_structure/bus_module.h"
+#include "data_model/documentation/bus_structure/bus_module.hpp"
 
 #include <utility>
 

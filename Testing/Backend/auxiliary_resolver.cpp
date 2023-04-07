@@ -15,8 +15,8 @@
 
 #include <gtest/gtest.h>
 
-#include "data_model/data_store.h"
-#include "Backend/Auxiliary_resolver.h"
+#include "data_model/data_store.hpp"
+#include "Backend/Auxiliary_resolver.hpp"
 
 class aux_resolver : public ::testing::Test {
 protected:

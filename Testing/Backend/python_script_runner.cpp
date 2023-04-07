@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include <filesystem>
 
-#include "Backend/python_script_runner.h"
+#include "Backend/python_script_runner.hpp"
 
 TEST(python_script_runner, run_script){
 

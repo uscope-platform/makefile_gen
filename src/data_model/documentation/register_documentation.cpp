@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "data_model/documentation/register_documentation.h"
+#include "data_model/documentation/register_documentation.hpp"
 
 register_documentation::register_documentation(const std::string& n, uint32_t off, const std::string& desc, bool read, bool write) {
     name = n;

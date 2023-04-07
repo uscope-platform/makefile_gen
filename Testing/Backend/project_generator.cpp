@@ -14,7 +14,7 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
-#include "Backend/Xilinx/xilinx_project_generator.h"
+#include "Backend/Xilinx/xilinx_project_generator.hpp"
 
 
 TEST(xilinx_project_gen, gen){

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "data_model/data_store.h"
+#include "data_model/data_store.hpp"
 
 
 data_store::data_store(bool e) {

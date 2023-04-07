@@ -14,7 +14,7 @@
 // limitations under the License.
 
 
-#include "data_model/documentation/module_documentation.h"
+#include "data_model/documentation/module_documentation.hpp"
 
 
 void module_documentation::add_register(const register_documentation& reg) {

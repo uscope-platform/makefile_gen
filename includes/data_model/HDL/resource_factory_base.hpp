@@ -18,7 +18,7 @@
 
 #include <string>
 #include <stack>
-#include "HDL_Resource.h"
+#include "HDL_Resource.hpp"
 
 template <class T>
 class resources_factory_base {

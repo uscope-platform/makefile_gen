@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "data_model/Script.h"
+#include "data_model/Script.hpp"
 #include "third_party/cereal/archives/binary.hpp"
 
 

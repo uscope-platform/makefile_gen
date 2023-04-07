@@ -16,10 +16,10 @@
 
 #include <gtest/gtest.h>
 
-#include "data_model/Depfile.h"
-#include "data_model/HDL/HDL_Resource.h"
-#include "data_model/data_store.h"
-#include "Backend/peripheral_definition_generator.h"
+#include "data_model/Depfile.hpp"
+#include "data_model/HDL/HDL_Resource.hpp"
+#include "data_model/data_store.hpp"
+#include "Backend/uplatform/peripheral_definition_generator.hpp"
 
 
 class periph_def_generation : public ::testing::Test {

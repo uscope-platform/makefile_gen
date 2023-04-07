@@ -14,7 +14,7 @@
 // limitations under the License.
 
 
-#include "frontend/Repository_walker.h"
+#include "frontend/Repository_walker.hpp"
 
 #include <utility>
 

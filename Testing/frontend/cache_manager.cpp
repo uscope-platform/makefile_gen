@@ -16,9 +16,9 @@
 #include <gtest/gtest.h>
 #include <filesystem>
 
-#include "data_model/settings_store.h"
-#include "data_model/data_store.h"
-#include "frontend/cache_manager.h"
+#include "data_model/settings_store.hpp"
+#include "data_model/data_store.hpp"
+#include "frontend/cache_manager.hpp"
 
 
 

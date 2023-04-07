@@ -15,7 +15,7 @@
 
 
 
-#include "analysis/sv_analyzer.h"
+#include "analysis/sv_analyzer.hpp"
 
 sv_analyzer::sv_analyzer(const std::string& file_path) : sv_modules_explorer(file_path){
     path = file_path;

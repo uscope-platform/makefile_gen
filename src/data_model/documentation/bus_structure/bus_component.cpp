@@ -14,11 +14,11 @@
 // limitations under the License.
 
 
-#include "data_model/documentation/bus_structure/bus_component.h"
+#include "data_model/documentation/bus_structure/bus_component.hpp"
 
-#include "data_model/documentation/bus_structure/bus_crossbar.h"
-#include "data_model/documentation/bus_structure/bus_module.h"
-#include "data_model/documentation/bus_structure/bus_submodule.h"
+#include "data_model/documentation/bus_structure/bus_crossbar.hpp"
+#include "data_model/documentation/bus_structure/bus_module.hpp"
+#include "data_model/documentation/bus_structure/bus_submodule.hpp"
 
 
 bool bus_component::compare(std::shared_ptr<bus_component> &lhs, std::shared_ptr<bus_component> &rhs) {

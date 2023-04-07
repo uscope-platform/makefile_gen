@@ -17,8 +17,8 @@
 
 #include <gtest/gtest.h>
 
-#include "analysis/sv_analyzer.h"
-#include "analysis/vhdl_analyzer.h"
+#include "analysis/sv_analyzer.hpp"
+#include "analysis/vhdl_analyzer.hpp"
 
 TEST( analysis_test , package) {
 
