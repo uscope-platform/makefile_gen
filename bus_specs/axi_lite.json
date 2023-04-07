@@ -1,0 +1,34 @@
+{
+
+  "name": "axi_lite",
+  "modports":{
+    "in": "slave",
+    "out": "master"
+  },
+  "default_specs":{
+    "in_port":"axi_in",
+    "out_port":"axi_out"
+  },
+  "components": {
+    "axil_crossbar_interface":{
+      "class":"interconnect",
+      "type":"n2m",
+      "n_sources":"NM",
+      "n_sinks":"NS",
+      "in_port":"slaves",
+      "out_port":"masters"
+    },
+    "axil_external_registers_cu": {
+      "class":"sink",
+      "type":"cu"
+    },
+    "axil_simple_register_cu":{
+      "class": "sink",
+      "type": "cu"
+    },
+    "axis_to_axil": {
+      "class":"source",
+      "type":"bridge"
+    }
+  }
+}

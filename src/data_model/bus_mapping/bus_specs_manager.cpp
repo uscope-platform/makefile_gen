@@ -15,6 +15,32 @@
 
 #include "data_model/bus_mapping/bus_specs_manager.hpp"
 
-bus_specs_manager::bus_specs_manager() {
-    std::string templates_dir = TEMPLATES_FOLDER;
+bus_mapping::bus_specs_manager::bus_specs_manager(const bus_mapping::bus_specs_manager &b) {
+    bus_specs = b.bus_specs;
+    port_dir_specs = b.port_dir_specs;
+}
+
+bus_mapping::bus_specs_manager::bus_specs_manager() {
+    std::string specs_dir = SPECS_FOLDER;
+
+    for(auto &item:std::filesystem::directory_iterator(specs_dir)){
+        std::ifstream ifs(item.path());
+        nlohmann::json bus_spec_obj = nlohmann::json::parse(ifs);
+        std::string name = bus_spec_obj["name"];
+
+        std::vector<bus_mapping::bus_component> components;
+        for(auto &comp: bus_spec_obj["components"].items()){
+            bus_mapping::bus_component new_comp(comp.key(), comp.value());
+            new_comp.set_defaults(bus_spec_obj["default_specs"]);
+            components.push_back(new_comp);
+        }
+        std::unordered_map<std::string, if_port_dir> dir_map = {{bus_spec_obj["modports"]["in"], if_port_input}, {bus_spec_obj["modports"]["out"], if_port_output}};
+        port_dir_specs[name] = dir_map;
+        bus_specs[name] = components;
+    }
+
+}
+
+bus_mapping::bus_specs_manager::~bus_specs_manager() {
+    int i = 0;
 }

@@ -19,6 +19,7 @@
 #include "data_model/documentation/bus_structure/bus_crossbar.hpp"
 #include "data_model/documentation/bus_structure/bus_module.hpp"
 #include "data_model/documentation/bus_structure/bus_submodule.hpp"
+#include "data_model/bus_mapping/bus_component.hpp"
 
 
 bool bus_component::compare(std::shared_ptr<bus_component> &lhs, std::shared_ptr<bus_component> &rhs) {

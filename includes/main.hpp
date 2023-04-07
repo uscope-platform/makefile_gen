@@ -36,5 +36,6 @@
 #include "Backend/new_app_generator.hpp"
 #include "Backend/uplatform/application_definition_generator.hpp"
 #include "Backend/uplatform/peripheral_definition_generator.hpp"
+#include "data_model/bus_mapping/bus_mapper.hpp"
 
 #endif //MAKEFILEGEN_V2_MAIN_HPP

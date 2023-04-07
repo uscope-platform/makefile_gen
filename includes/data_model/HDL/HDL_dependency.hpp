@@ -34,11 +34,13 @@ public:
     HDL_dependency( const HDL_dependency &c );
 
     void add_parameter(const std::string& parameter_name, std::string value);
+    std::unordered_map<std::string, std::string> get_parameters() { return parameters_map;};
+
     void add_port_connection(const std::string& port_name, std::string value);
+    std::unordered_map<std::string, std::string> get_ports() { return ports_map;};
 
     std::string get_name() const {return name;};
     void set_name(const std::string &n) {name = n;};
-
 
     std::string get_type() const {return type;};
     void set_type(const std::string &t) {type = t;};

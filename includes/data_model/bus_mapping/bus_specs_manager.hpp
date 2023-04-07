@@ -18,13 +18,33 @@
 
 #include <unordered_map>
 #include <string>
+#include <vector>
+#include <filesystem>
+#include <fstream>
+#include <set>
 
-class bus_specs_manager {
-public:
-    bus_specs_manager();
-private:
+#include "data_model/bus_mapping/bus_component.hpp"
 
-};
+ typedef enum {
+    if_port_input = 0,
+    if_port_output = 1
+} if_port_dir;
+
+namespace bus_mapping{
+    class bus_specs_manager {
+    public:
+        bus_specs_manager();
+        bus_specs_manager(const bus_specs_manager &b);
+        std::vector<bus_component> get_bus_specs(const std::string &s){return bus_specs[s];};
+        bool is_known_bus(const std::string &s) {return bus_specs.contains(s);};
+        std::unordered_map<std::string, if_port_dir> get_port_dir_specs(const std::string &s){return port_dir_specs[s];};
+        ~bus_specs_manager();
+    private:
+        std::unordered_map<std::string, std::vector<bus_component>> bus_specs;
+        std::unordered_map<std::string, std::unordered_map<std::string, if_port_dir>> port_dir_specs;
+    };
+}
+
 
 
 #endif //MAKEFILEGEN_V2_BUS_SPECS_MANAGER_HPP

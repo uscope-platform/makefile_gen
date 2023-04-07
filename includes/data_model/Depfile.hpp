@@ -36,6 +36,7 @@ public:
     std::string get_sim_tl();
     std::string get_bus_defining_package();
     std::string get_project_name();
+    json get_bus_section();
     std::vector<std::string> get_additional_synth_modules();
     std::vector<std::string> get_additional_sim_modules();
     std::vector<std::string> get_excluded_modules();
