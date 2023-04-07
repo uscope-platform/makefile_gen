@@ -15,18 +15,25 @@
 
 #include "frontend/cache_manager.hpp"
 
-cache_manager::cache_manager(std::shared_ptr<settings_store> settings, std::shared_ptr<data_store> data) {
+cache_manager::cache_manager(std::shared_ptr<settings_store> settings, std::shared_ptr<data_store> data, bool no_cache) {
     s_store = std::move(settings);
     d_store = std::move(data);
-    load_cache_backend();
+    no_cache = ephimeral;
+    if(!ephimeral){
+        load_cache_backend();
+    }
+
+
 }
 
 void cache_manager::add_file(std::filesystem::path &file) {
+    if(ephimeral) return;
     d_store->remove_stale_info(file);
     cache[file.string()] = hash_file(file);
 }
 
 bool cache_manager::is_changed(std::filesystem::path &file) {
+    if(ephimeral) return true;
     bool ret_val;
     std::string current_digest = hash_file(file);
     ret_val = current_digest != cache[file.string()];
@@ -78,6 +85,7 @@ std::string cache_manager::hash_file(std::filesystem::path &file) {
 }
 
 bool cache_manager::is_cached(std::filesystem::path &file) {
+    if(ephimeral) return false;
     return cache.count(file.string())>0;
 }
 
@@ -106,5 +114,8 @@ void cache_manager::store_cache_backend() {
 }
 
 cache_manager::~cache_manager() {
-    store_cache_backend();
+    if(!ephimeral){
+        store_cache_backend();
+    }
+
 }

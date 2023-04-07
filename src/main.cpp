@@ -42,6 +42,8 @@ int main(int argc, char *argv[]){
     app.add_option("--new_app", new_app_name, "Setup a new blank application");
     std::string new_app_lang;
     app.add_option("--lang", new_app_lang, "Specify the language for the new app");
+    bool no_cache = false;
+    app.add_flag("--no-cache", no_cache, "Run the program without touching the repository cache");
 
     CLI11_PARSE(app, argc, argv);
 
@@ -50,6 +52,7 @@ int main(int argc, char *argv[]){
     if(!get_setting.empty()){
         std::cout << s_store->get_setting(get_setting)<<std::endl;
     }
+
     if(!set_setting.empty()){
         std::string line;
         std::istringstream ss(set_setting);
@@ -75,10 +78,10 @@ int main(int argc, char *argv[]){
     }
 
 
-    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(false);
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(no_cache);
 
     // analyze repository content and update cache
-    Repository_walker walker(s_store, d_store);
+    Repository_walker walker(s_store, d_store, no_cache);
 
     // Parse depfile
     if(target.empty()) target = std::filesystem::current_path().string() + "/Depfile";

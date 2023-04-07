@@ -19,13 +19,13 @@
 #include <utility>
 
 
-Repository_walker::Repository_walker(const std::shared_ptr<settings_store>& s, const std::shared_ptr<data_store>& d) : pool(max_threads),
-                                                                                                         cache_mgr(s, d){
+Repository_walker::Repository_walker(const std::shared_ptr<settings_store>& s, const std::shared_ptr<data_store>& d, bool ephimeral) : pool(max_threads),
+                                                                                                         cache_mgr(s, d, ephimeral){
     construct_walker(s, d, {".git"});
 }
 
-Repository_walker::Repository_walker(const std::shared_ptr<settings_store>& s, const std::shared_ptr<data_store>& d,
-                                     std::set<std::string> ex) : pool(max_threads), cache_mgr(s, d) {
+Repository_walker::Repository_walker(const std::shared_ptr<settings_store>& s, const std::shared_ptr<data_store>& d, bool ephimeral,
+                                     std::set<std::string> ex) : pool(max_threads), cache_mgr(s, d, ephimeral) {
     construct_walker(s, d, std::move(ex));
 }
 

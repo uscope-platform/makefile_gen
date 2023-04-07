@@ -48,8 +48,8 @@ const unsigned int max_threads = std::thread::hardware_concurrency()-1;
 class Repository_walker {
 
 public:
-    Repository_walker(const std::shared_ptr<settings_store>& s, const std::shared_ptr<data_store>& d);
-    Repository_walker(const std::shared_ptr<settings_store>& s, const std::shared_ptr<data_store>& d, std::set<std::string> ex);
+    Repository_walker(const std::shared_ptr<settings_store>& s, const std::shared_ptr<data_store>& d, bool ephimeral);
+    Repository_walker(const std::shared_ptr<settings_store>& s, const std::shared_ptr<data_store>& d, bool ephimeral, std::set<std::string> ex);
     void analyze_dir();
 private:
     void construct_walker(std::shared_ptr<settings_store> s, std::shared_ptr<data_store> d, std::set<std::string> ex);

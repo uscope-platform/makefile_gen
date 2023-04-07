@@ -30,7 +30,7 @@
 
 class cache_manager {
 public:
-    explicit cache_manager(std::shared_ptr<settings_store> settings, std::shared_ptr<data_store> data);
+    explicit cache_manager(std::shared_ptr<settings_store> settings, std::shared_ptr<data_store> data, bool no_cache);
     void add_file(std::filesystem::path &file);
     bool is_changed(std::filesystem::path &file);
     bool is_cached(std::filesystem::path &file);
@@ -47,6 +47,7 @@ private:
     std::shared_ptr<settings_store> s_store;
     std::shared_ptr<data_store> d_store;
     std::unordered_map<std::string, std::string> cache;
+    bool ephimeral;
 };
 
 

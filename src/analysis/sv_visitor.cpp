@@ -193,8 +193,12 @@ void sv_visitor::exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext 
     if(current_declaration_type == "module"){
         std::string port_name = ctx->port_identifier()->getText();
         port_direction_t dir;
-        if(ctx->DOT()){
-            dir = modport;
+        if(ctx->port_direction() == nullptr){
+            if(ctx->DOT()){
+                dir = modport;
+            } else{
+                dir = raw_port;
+            }
         } else{
             std::string dir_s = ctx->port_direction()->getText();
             if(dir_s=="input")
@@ -203,7 +207,6 @@ void sv_visitor::exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext 
                 dir = output_port;
             else if(dir_s=="inout")
                 dir = inout_port;
-
         }
         modules_factory.add_port(port_name, dir);
     }
@@ -211,7 +214,10 @@ void sv_visitor::exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext 
 
 void sv_visitor::exitNamed_port_connection(sv2017::Named_port_connectionContext *ctx) {
     auto port_name = ctx->identifier()->getText();
-    auto connecting_item = ctx->expression()->getText();
+    std::string connecting_item;
+    if(ctx->expression() != nullptr){
+       connecting_item = ctx->expression()->getText();
+    }
     if(deps_factory.is_valid_dependency()){
         deps_factory.add_port(port_name, connecting_item);
     }
