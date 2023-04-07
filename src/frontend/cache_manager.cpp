@@ -18,7 +18,7 @@
 cache_manager::cache_manager(std::shared_ptr<settings_store> settings, std::shared_ptr<data_store> data, bool no_cache) {
     s_store = std::move(settings);
     d_store = std::move(data);
-    no_cache = ephimeral;
+    ephimeral = no_cache;
     if(!ephimeral){
         load_cache_backend();
     }

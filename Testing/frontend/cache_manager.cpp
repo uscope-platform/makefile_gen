@@ -76,7 +76,7 @@ protected:
 
 
 TEST_F(cache_manager_Test , file_hashing) {
-    cache_manager cm(s_store, d_store);
+    cache_manager cm(s_store, d_store, false);
     std::filesystem::path p("check_files/test_package.sv");
     cm.add_file(p);
     std::string cl = cm.get_cache_line("check_files/test_package.sv");
@@ -89,7 +89,7 @@ TEST_F(cache_manager_Test , file_hashing) {
 }
 
 TEST_F(cache_manager_Test , file_is_cached) {
-    cache_manager cm(s_store, d_store);
+    cache_manager cm(s_store, d_store, false);
     std::filesystem::path p("check_files/test_package.sv");
     cm.add_file(p);
 
@@ -103,7 +103,7 @@ TEST_F(cache_manager_Test , file_is_cached) {
 }
 
 TEST_F(cache_manager_Test , file_is_changed) {
-    cache_manager cm(s_store, d_store);
+    cache_manager cm(s_store, d_store, false);
 
 
     std::filesystem::path p("check_files/test_package.sv.test");
@@ -129,12 +129,12 @@ TEST_F(cache_manager_Test , cache_loading) {
     std::filesystem::path p(filename);
     std::string original_hash, loaded_hash;
     {
-        cache_manager cm(s_store, d_store);
+        cache_manager cm(s_store, d_store, false);
         cm.add_file(p);
         original_hash = cm.get_cache_line(filename);
     }
     {
-        cache_manager cm(s_store, d_store);
+        cache_manager cm(s_store, d_store, false);
         loaded_hash = cm.get_cache_line(filename);
     }
     ASSERT_EQ(original_hash, loaded_hash);

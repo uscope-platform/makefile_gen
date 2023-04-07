@@ -15,8 +15,10 @@ include_directories(includes)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DTEMPLATES_FOLDER="${CMAKE_SOURCE_DIR}/templates")
+    add_definitions(-DSPECS_FOLDER="${CMAKE_SOURCE_DIR}/bus_specs")
 else()
-    add_definitions(-DTEMPLATES_FOLDER="/usr/local/etc/makefile_gen")
+    add_definitions(-DTEMPLATES_FOLDER="/usr/local/etc/makefile_gen/templates")
+    add_definitions(-DSPECS_FOLDER="/usr/local/etc/makefile_gen/specs")
 endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 

@@ -37,7 +37,8 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_modules_factory.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_interfaces_factory.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_packages_factory.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/resource_factory_base.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/resource_factory_base.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_mapping/bus_specs_manager.cpp
         )
 
 set(MAKEFILE_GEN_SRCS ${MAKEFILE_GEN_SRCS_I}  PARENT_SCOPE)
@@ -63,7 +64,8 @@ target_link_libraries(makefile_gen PRIVATE OpenSSL::SSL)
 ## INSTALLATION SECTION
 
 install(TARGETS makefile_gen DESTINATION /usr/local/bin)
-install(DIRECTORY ../templates/ DESTINATION /usr/local/etc/makefile_gen)
+install(DIRECTORY ../templates/ DESTINATION /usr/local/etc/makefile_gen/templates)
+install(DIRECTORY ../bus_specs/ DESTINATION /usr/local/etc/makefile_gen/specs)
 
 ## PACKAGING SECTION
 
