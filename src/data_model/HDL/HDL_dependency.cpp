@@ -16,6 +16,14 @@
 #include "data_model/HDL/HDL_dependency.hpp"
 
 
+HDL_dependency::HDL_dependency(const HDL_dependency &c) {
+    parameters_map = c.parameters_map;
+    ports_map = c.ports_map;
+    dep_class = c.dep_class;
+    type = c.type;
+    name = c.name;
+}
+
 
 HDL_dependency::HDL_dependency(std::string dep_name, std::string dep_type, dependency_class d_c) {
     dep_class = d_c;

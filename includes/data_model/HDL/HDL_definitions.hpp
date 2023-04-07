@@ -17,8 +17,6 @@
 #ifndef MAKEFILEGEN_V2_HDL_DEFINITIONS_HPP
 #define MAKEFILEGEN_V2_HDL_DEFINITIONS_HPP
 
-
-
 enum dependency_class {
     module=0,
     interface=1,
@@ -35,7 +33,5 @@ enum port_direction_t {
     inout_port = 2,
     modport = 3
 };
-
-
 
 #endif //MAKEFILEGEN_V2_HDL_DEFINITIONS_HPP

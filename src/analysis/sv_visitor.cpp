@@ -46,13 +46,18 @@ void sv_visitor::exitModule_header_common(sv2017::Module_header_commonContext *c
     modules_factory.set_module_name(module_name);
 }
 
-void sv_visitor::exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) {
+void sv_visitor::enterModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) {
     std::string module_name = ctx->identifier()->getText();
     std::string instance_name = ctx->hierarchical_instance(0)->name_of_instance()->identifier()->getText();
 
-    HDL_dependency dep(instance_name, module_name, module);
-    modules_factory.add_instance(dep);
+    deps_factory.new_dependency(instance_name, module_name, module);
 }
+
+
+void sv_visitor::exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) {
+    modules_factory.add_instance(deps_factory.get_dependency());
+}
+
 
 void sv_visitor::exitInterface_header(sv2017::Interface_headerContext *ctx) {
     std::string interface_name = ctx->identifier()->getText();
@@ -203,4 +208,21 @@ void sv_visitor::exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext 
         modules_factory.add_port(port_name, dir);
     }
 }
+
+void sv_visitor::exitNamed_port_connection(sv2017::Named_port_connectionContext *ctx) {
+    auto port_name = ctx->identifier()->getText();
+    auto connecting_item = ctx->expression()->getText();
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.add_port(port_name, connecting_item);
+    }
+}
+
+void sv_visitor::exitNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) {
+    auto param_name = ctx->identifier()->getText();
+    auto param_value = ctx->param_expression()->getText();
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.add_parameter(param_name, param_value);
+    }
+}
+
 

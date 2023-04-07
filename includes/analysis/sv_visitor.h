@@ -23,6 +23,7 @@
 #include "data_model/HDL/HDL_modules_factory.hpp"
 #include "data_model/HDL/HDL_interfaces_factory.hpp"
 #include "data_model/HDL/HDL_packages_factory.hpp"
+#include "data_model/HDL/HDL_dependencies_factory.hpp"
 
 #include "data_model/HDL/HDL_dependency.hpp"
 #include "data_model/expression.h"
@@ -48,6 +49,7 @@ public:
     void enterInterface_declaration(sv2017::Interface_declarationContext *ctx) override;
     void exitInterface_declaration(sv2017::Interface_declarationContext *ctx) override;
     void exitModule_header_common(sv2017::Module_header_commonContext *ctx) override;
+    void enterModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) override;
     void exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) override;
     void exitInterface_header(sv2017::Interface_headerContext *ctx) override;
     void exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) override;
@@ -65,6 +67,9 @@ public:
     void exitPrimaryLit(sv2017::PrimaryLitContext *ctx) override;
     void exitPrimaryPath(sv2017::PrimaryPathContext *ctx) override;
 
+
+    void exitNamed_port_connection(sv2017::Named_port_connectionContext *ctx) override;
+    void exitNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) override;
     static uint32_t parse_number(const std::string& s);
 
 
@@ -86,6 +91,7 @@ private:
     HDL_modules_factory modules_factory;
     HDL_interfaces_factory interfaces_factory;
     HDL_packages_factory packages_factory;
+    HDL_dependencies_factory deps_factory;
 };
 
 

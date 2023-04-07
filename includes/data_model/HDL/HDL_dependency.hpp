@@ -31,13 +31,20 @@ class HDL_dependency {
 public:
     HDL_dependency(std::string dep_name, std::string dep_type, dependency_class d_c);
     HDL_dependency() = default;
+    HDL_dependency( const HDL_dependency &c );
 
     void add_parameter(const std::string& parameter_name, std::string value);
     void add_port_connection(const std::string& port_name, std::string value);
 
-    std::string get_name() const {return name;} ;
+    std::string get_name() const {return name;};
+    void set_name(const std::string &n) {name = n;};
+
+
     std::string get_type() const {return type;};
+    void set_type(const std::string &t) {type = t;};
+
     dependency_class get_dependency_class() const {return dep_class;};
+    void set_dependency_class(dependency_class dc){dep_class = dc;};
 
     template<class Archive>
     void serialize( Archive & ar ) {

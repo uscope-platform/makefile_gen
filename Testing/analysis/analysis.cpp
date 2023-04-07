@@ -81,6 +81,12 @@ TEST( analysis_test , sv_module) {
     auto resource = analyzer.analyze()[0];
 
     HDL_dependency d3("SC", "SyndromeCalculator", module);
+    d3.add_port_connection("clock", "clock");
+    d3.add_port_connection("reset", "reset");
+    d3.add_port_connection("data_in", "data_in");
+    d3.add_port_connection("syndrome", "data_out");
+    d3.add_parameter("TEST_PARAM", "test_package::param");
+
     HDL_dependency d2("param", "test_package", package);
     HDL_dependency d1("__init_file__", "file", memory_init);
     std::vector<HDL_dependency> deps = {d1, d2, d3};
