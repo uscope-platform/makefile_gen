@@ -22,24 +22,23 @@ HDL_Resource::HDL_Resource() {
     path = "";
 }
 
+
 ///  Resource object creator
 /// \param t HDL entity feature
 /// \param n Name of the feature
 /// \param p Path of the file
-/// \param deps Dependencies of the file
 /// \param r_type type of resource
-HDL_Resource::HDL_Resource(sv_feature t, std::string n, std::string p, hdl_deps_t deps) {
+HDL_Resource::HDL_Resource(dependency_class t, std::string n, std::string p) {
     hdl_type = t;
     name = std::move(n);
     path = std::move(p);
-    dependencies = std::move(deps);
 }
 
 HDL_Resource::HDL_Resource(const HDL_Resource &c) {
     name = c.name;
     path = c.path;
     hdl_type = c.hdl_type;
-    dependencies = c.dependencies;
+    dependencies_vect = c.dependencies_vect;
 
     parameters = c.parameters;
     bus_roots = c.bus_roots;
@@ -53,13 +52,47 @@ bool HDL_Resource::is_interface() {
     return hdl_type == interface;
 }
 
+
+
+bool HDL_Resource::is_empty() {
+    bool ret = true;
+
+    ret &= name.empty();
+    ret &= path.empty();
+    ret &= hdl_type == module;
+    ret &= parameters.empty();
+    ret &= bus_submodules.empty();
+    ret &= processor_docs.empty();
+    ret &= dependencies_vect.empty();
+    ret &= ports.empty();
+
+    ret &= bus_roots.empty();
+
+    return ret;
+}
+
+std::vector<HDL_dependency> HDL_Resource::get_dependencies() {
+
+    return dependencies_vect;
+}
+
+void HDL_Resource::add_dependency(const HDL_dependency &dep) {
+    dependencies_vect.push_back(dep);
+}
+
+void HDL_Resource::add_dependencies(std::vector<HDL_dependency> deps) {
+    dependencies_vect.insert(dependencies_vect.begin(), deps.begin(), deps.end());
+}
+
+
+
 bool operator==(const HDL_Resource &lhs, const HDL_Resource &rhs) {
     bool ret = true;
 
     ret &= lhs.name == rhs.name;
     ret &= lhs.path == rhs.path;
     ret &= lhs.hdl_type == rhs.hdl_type;
-    ret &= lhs.dependencies == rhs.dependencies;
+    ret &= lhs.dependencies_vect == rhs.dependencies_vect;
     ret &= lhs.parameters == rhs.parameters;
     ret &= lhs.bus_submodules == rhs.bus_submodules;
     ret &= lhs.processor_docs == rhs.processor_docs;
@@ -83,26 +116,7 @@ bool operator==(const HDL_Resource &lhs, const HDL_Resource &rhs) {
     return ret;
 }
 
-void HDL_Resource::add_dependencies(hdl_deps_t deps) {
-    dependencies.insert( deps.begin(), deps.end());
+bool operator<(const HDL_Resource &lhs, const HDL_Resource &rhs) {
+    return lhs.name<rhs.name;
 }
-
-
-bool HDL_Resource::is_empty() {
-    bool ret = true;
-
-    ret &= name.empty();
-    ret &= path.empty();
-    ret &= hdl_type == module;
-    ret &= dependencies.empty();
-    ret &= parameters.empty();
-    ret &= bus_submodules.empty();
-    ret &= processor_docs.empty();
-    ret &= ports.empty();
-
-    ret &= bus_roots.empty();
-
-    return ret;
-}
-
 

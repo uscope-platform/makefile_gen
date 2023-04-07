@@ -44,14 +44,14 @@ protected:
 
         module_documentation submod_doc;
         submod_doc.set_name("test_submodule");
-        HDL_Resource submod_entity(module, "test_submodule", "test/path2.sv", hdl_deps_t());
+        HDL_Resource submod_entity(module, "test_submodule", "test/path2.sv");
         submod_entity.set_documentation(submod_doc);
 
         bus_submodule submod;
         submod.set_name("test_submod");
         submod.set_module_type("test_submodule");
 
-        HDL_Resource mod_entity(module, "test_module", "test/path.sv", hdl_deps_t());
+        HDL_Resource mod_entity(module, "test_module", "test/path.sv");
         mod_entity.set_documentation(doc);
         mod_entity.set_submodules({submod});
         d_store->store_hdl_entity(mod_entity);

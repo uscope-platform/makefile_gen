@@ -55,7 +55,7 @@ protected:
         doc.add_register(reg_3);
 
 
-        HDL_Resource mod_entity(module, "test_module", "test/path.sv", hdl_deps_t());
+        HDL_Resource mod_entity(module, "test_module", "test/path.sv");
         mod_entity.set_documentation(doc);
         d_store->store_hdl_entity(mod_entity);
 

@@ -21,28 +21,21 @@ void HDL_modules_factory::new_module(std::string &p) {
     current_resource.set_type(module);
 }
 
-void HDL_modules_factory::add_instance(const HDL_instance &i) {
-    hdl_deps_t deps;
-    deps[i.get_type()] = i.get_feature();
-    current_resource.add_dependencies(deps);
+void HDL_modules_factory::add_instance(const HDL_dependency &i) {
+
+    current_resource.add_dependency(i);
 }
 
-void HDL_modules_factory::add_interface_dep(const std::string &intf) {
-    hdl_deps_t deps;
-    deps[intf] = interface;
-    current_resource.add_dependencies(deps);
+void HDL_modules_factory::add_interface_dep(const HDL_dependency &i) {
+    current_resource.add_dependency(i);
 }
 
-void HDL_modules_factory::add_mem_file_dep(const std::string &memf) {
-    hdl_deps_t deps;
-    deps[memf] = memory_init;
-    current_resource.add_dependencies(deps);
+void HDL_modules_factory::add_mem_file_dep(const HDL_dependency &i) {
+    current_resource.add_dependency(i);
 }
 
-void HDL_modules_factory::add_package_dep(const std::string &pack) {
-    hdl_deps_t deps;
-    deps[pack] = package;
-    current_resource.add_dependencies(deps);
+void HDL_modules_factory::add_package_dep(const HDL_dependency &i) {
+    current_resource.add_dependency(i);
 }
 
 void HDL_modules_factory::add_port(const std::string &p_n, port_direction_t dir) {

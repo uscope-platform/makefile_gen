@@ -17,8 +17,8 @@
 
 template<class T>
 void resources_factory_base<T>::new_resource(std::string &p) {
+    valid_resource = true;
     push_resource();
-
     current_resource = T();
     current_resource.set_path(p);
 }
@@ -28,6 +28,9 @@ void resources_factory_base<T>::pop_resource() {
     if(!resource_stack.empty()){
         current_resource = resource_stack.top();
         resource_stack.pop();
+    } else {
+        valid_resource = false;
+        current_resource = T();
     }
 }
 

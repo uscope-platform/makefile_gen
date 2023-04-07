@@ -31,11 +31,12 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/project_generator_base.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Lattice/Radiant_manager.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Toolchain_manager.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/python_script_runner.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL_instance.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_modules_factory.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_interfaces_factory.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_packages_factory.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/python_script_runner.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_dependency.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_instances_factory.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_modules_factory.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_interfaces_factory.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_packages_factory.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/resource_factory_base.cpp
         )
 

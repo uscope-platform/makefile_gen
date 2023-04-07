@@ -20,7 +20,6 @@ Dependency_resolver::Dependency_resolver(std::string tl, std::shared_ptr<data_st
     d_store = std::move(store);
 }
 
-
 std::set<std::string> Dependency_resolver::get_dependencies() {
     std::set<std::string> ret_val;
     for(auto& item: hdl_dependencies){
@@ -58,18 +57,18 @@ void Dependency_resolver::resolve_dependencies(const std::string& module_name) {
         detected_processors.insert(detected_processors.end(), proc.begin(), proc.end());
     }
 
-    hdl_deps_t deps =  resource.get_dependencies();
+    std::vector<HDL_dependency> deps =  resource.get_dependencies();
 
     for(auto &item : deps){
-        auto res = d_store->get_HDL_resource(item.first);
-        bool dep_excluded = std::find(excluded_modules.begin(), excluded_modules.end(), item.first) != excluded_modules.end();
+        auto res = d_store->get_HDL_resource(item.get_type());
+        bool dep_excluded = std::find(excluded_modules.begin(), excluded_modules.end(), item.get_type()) != excluded_modules.end();
         if(res != HDL_Resource() && !dep_excluded) hdl_dependencies.push_back(res);
-        if(item.second != memory_init){
-            resolve_dependencies(item.first);
+        if(item.get_dependency_class() != memory_init){
+            resolve_dependencies(item.get_type());
         } else {
-            DataFile dep = d_store->get_data_file(item.first);
+            DataFile dep = d_store->get_data_file(item.get_type());
             if(dep == DataFile()){
-                std::cerr << "ERROR: memory initialization file " << item.first << " not found"<<std::endl;
+                std::cerr << "ERROR: memory initialization file " << item.get_type() << " not found"<<std::endl;
                 exit(1);
             } else{
                 mem_init_dependencies.push_back(dep);

@@ -13,43 +13,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_HDL_INSTANCE_HPP
-#define MAKEFILEGEN_V2_HDL_INSTANCE_HPP
+#ifndef MAKEFILEGEN_V2_HDL_DEPENDENCY_HPP
+#define MAKEFILEGEN_V2_HDL_DEPENDENCY_HPP
 
 #include <unordered_map>
 #include <string>
+#include <utility>
 
-#include "data_model/HDL/HDL_Resource.h"
+#include "data_model/HDL/HDL_definitions.hpp"
 
 #include "third_party/cereal/archives/binary.hpp"
 #include "third_party/cereal/types/unordered_map.hpp"
 #include "third_party/cereal/types/vector.hpp"
 #include "third_party/cereal/types/memory.hpp"
 
-class HDL_instance {
+class HDL_dependency {
 public:
-    HDL_instance(std::string n, std::string t, sv_feature f);
+    HDL_dependency(std::string dep_name, std::string dep_type, dependency_class d_c);
+    HDL_dependency() = default;
 
     void add_parameter(const std::string& parameter_name, std::string value);
     void add_port_connection(const std::string& port_name, std::string value);
 
     std::string get_name() const {return name;} ;
     std::string get_type() const {return type;};
-    sv_feature get_feature() const {return feature;};
+    dependency_class get_dependency_class() const {return dep_class;};
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name,type, feature, ports_map, parameters_map);
+        ar(name,type, dep_class, ports_map, parameters_map);
     }
 
-    friend bool operator==(const HDL_instance&lhs, const HDL_instance&rhs);
+    friend bool operator==(const HDL_dependency&lhs, const HDL_dependency&rhs);
 private:
     std::unordered_map<std::string, std::string> parameters_map;
     std::unordered_map<std::string, std::string> ports_map;
-    sv_feature feature;
+    dependency_class dep_class;
     std::string type;
     std::string name;
 };
 
 
-#endif //MAKEFILEGEN_V2_HDL_INSTANCE_HPP
+#endif //MAKEFILEGEN_V2_HDL_DEPENDENCY_HPP

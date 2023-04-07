@@ -26,43 +26,40 @@ std::vector<HDL_Resource> vhdl_visitor::get_entities() {
 }
 
 void vhdl_visitor::enterEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) {
-    nesting_level++;
-    declarations_stack.push(declared_feature);
-    dependencies_stack.push(instantiated_features);
     std::string module_name = ctx->identifier()[0]->getText();
-    declared_feature = std::make_pair(module_name, null_feature);
+    modules_factory.new_module(path);
+    modules_factory.set_module_name(module_name);
 }
 
 void vhdl_visitor::exitArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) {
     std::string name = ctx->name()->getText();
     for(auto &item:entities){
         if(item.getName() == name){
-            item.add_dependencies(instantiated_features);
+            item.add_dependencies(dependency_map[item.getName()]);
         }
     }
 }
 
 
 void vhdl_visitor::exitEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) {
-    HDL_Resource e(declared_feature.second, declared_feature.first, path, instantiated_features);
-    entities.push_back(e);
-    if(nesting_level>1){
-        declared_feature = declarations_stack.top();
-        declarations_stack.pop();
-        instantiated_features = dependencies_stack.top();
-        dependencies_stack.pop();
-        nesting_level--;
+    entities.push_back(modules_factory.get_module());
+}
+
+void vhdl_visitor::exitConcurrent_statement(mgp_vh::vhdlParser::Concurrent_statementContext *ctx) {
+    if(ctx->component_instantiation_statement()!= nullptr){
+        auto instantiation = ctx->component_instantiation_statement();
+        std::string module_name;
+        if(instantiation->instantiated_unit()->name()->suffix() != nullptr){
+            module_name = instantiation->instantiated_unit()->name()->suffix()->getText();
+        } else{
+            module_name = instantiation->instantiated_unit()->name()->name_literal()->identifier()->getText();
+        }
+        HDL_dependency dep(ctx->label()->getText(), module_name, module);
+        dependency_map[current_architecture].push_back(dep);
     }
 }
 
-void vhdl_visitor::exitComponent_instantiation_statement(mgp_vh::vhdlParser::Component_instantiation_statementContext *ctx) {
-    std::string module_name;
-    if(ctx->instantiated_unit()->name()->suffix() != nullptr){
-        module_name = ctx->instantiated_unit()->name()->suffix()->getText();
-    } else{
-        module_name = ctx->instantiated_unit()->name()->name_literal()->identifier()->getText();
-    }
-
-    instantiated_features[module_name] = module;
+void vhdl_visitor::enterArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) {
+    current_architecture = ctx->name()->getText();
 }
 

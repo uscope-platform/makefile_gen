@@ -66,8 +66,7 @@ TEST( data_store_test , evict_data_file) {
 TEST( data_store_test , evict_hdl_entity) {
 
     auto *store_1 = new data_store(true);
-    hdl_deps_t deps;
-    HDL_Resource test_entity(module, "test", "/test/path", deps);
+    HDL_Resource test_entity(module, "test", "/test/path");
 
     store_1->store_hdl_entity(test_entity);
     store_1->evict_hdl_entity(test_entity.getName());
@@ -151,9 +150,8 @@ TEST( data_store_test , store_data_file_vect) {
 TEST( data_store_test , store_hdl_vect) {
 
     auto *store = new data_store(true);
-    hdl_deps_t deps;
-    HDL_Resource test_res_1(module, "test_1", "/bin/sh", deps);
-    HDL_Resource test_res_2(module, "test_2", "/bin/sh", deps);
+    HDL_Resource test_res_1(module, "test_1", "/bin/sh");
+    HDL_Resource test_res_2(module, "test_2", "/bin/sh");
     std::vector<HDL_Resource> test_vect = {test_res_1,test_res_2};
     store->store_hdl_entity(test_vect);
     std::string name = "test_1";
@@ -172,7 +170,6 @@ TEST( data_store_test , store_hdl_vect) {
 TEST( data_store_test , store_const_vect) {
 
     auto *store = new data_store(true);
-    hdl_deps_t deps;
     Constraints test_const_1( "test_1");
     Constraints test_const_2("test_2");
     std::vector<Constraints> test_vect = {test_const_1,test_const_2};
@@ -242,9 +239,8 @@ TEST( data_store_test , script_clean_up) {
 TEST( data_store_test , resource_clean_up) {
 
     auto *store_1 = new data_store(true);
-    hdl_deps_t deps;
 
-    HDL_Resource test_entity(module, "test", "/test", deps);
+    HDL_Resource test_entity(module, "test", "/test");
 
     store_1->store_hdl_entity(test_entity);
     delete store_1;

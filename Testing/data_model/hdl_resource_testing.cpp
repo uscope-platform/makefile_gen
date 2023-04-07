@@ -31,8 +31,7 @@ TEST( HDL_resource_test , is_interface) {
 TEST( HDL_resource_test , ser_des_hdl_resource) {
 
 
-    hdl_deps_t deps;
-    HDL_Resource hdl_out(module, "test", "/bin/sh", deps);
+    HDL_Resource hdl_out(module, "test", "/bin/sh");
     bus_submodule bsm;
     bsm.set_name("test");
     bsm.set_offset(21);
@@ -76,25 +75,27 @@ TEST( HDL_resource_test , ser_des_hdl_resource) {
 }
 
 TEST( HDL_resource_test , get_path) {
-    hdl_deps_t  dependencies;
-    HDL_Resource res(module, "test_module","/test_path/test.sv", dependencies);
+
+    HDL_Resource res(module, "test_module","/test_path/test.sv");
 
     ASSERT_EQ(res.get_path(), "/test_path/test.sv");
 }
 
 TEST( HDL_resource_test , get_dependencies) {
-    hdl_deps_t  dependencies;
-    dependencies["test_module_1"] = module;
-    dependencies["test_module_2"] = module;
-    HDL_Resource test_item(module, "test","/test/test.sv", dependencies);
+    HDL_Resource test_item;
+    HDL_dependency d("inst", "test_module_1", module);
+    test_item.add_dependency(d);
+    HDL_dependency d2("inst", "test_module_2", module);
+    test_item.add_dependency(d2);
 
-    ASSERT_EQ(test_item.get_dependencies(), dependencies);
+    std::vector<HDL_dependency> check = {d, d2};
+
+    ASSERT_EQ(test_item.get_dependencies(), check);
 }
 
 TEST( HDL_resource_test , get_name) {
-    hdl_deps_t  dependencies;
 
-    HDL_Resource test_item(module, "test","/test/test.sv", dependencies);
+    HDL_Resource test_item(module, "test","/test/test.sv");
 
     ASSERT_EQ(test_item.getName(), "test");
 }

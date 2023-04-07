@@ -13,29 +13,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_RESOURCES_FACTORY_BASE_HPP
-#define MAKEFILEGEN_V2_RESOURCES_FACTORY_BASE_HPP
-
-#include <string>
-#include <stack>
-#include "HDL_Resource.h"
-
-template <class T>
-class resources_factory_base {
-
-protected:
-    void new_resource(std::string &p);
-    T get_resource();
-    void set_name(const std::string &n);
-
-    T current_resource;
-    void push_resource();
-    void pop_resource();
-    std::stack<T> resource_stack;
-
-    bool valid_resource;
-};
-
-
-
-#endif //MAKEFILEGEN_V2_RESOURCES_FACTORY_BASE_HPP
+#include "data_model/HDL/HDL_instances_factory.hpp"

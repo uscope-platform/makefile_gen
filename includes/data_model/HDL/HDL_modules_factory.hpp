@@ -19,7 +19,7 @@
 #include "data_model/HDL/HDL_Resource.h"
 #include "data_model/HDL/resource_factory_base.hpp"
 
-#include "data_model/HDL_instance.hpp"
+#include "data_model/HDL/HDL_dependency.hpp"
 
 class HDL_modules_factory : protected resources_factory_base<HDL_Resource> {
 
@@ -28,13 +28,14 @@ public:
     HDL_Resource get_module();
     void set_module_name(const std::string &n) { set_name(n);};
 
-    void add_instance(const HDL_instance &i);
-    void add_interface_dep(const std::string &intf);
-    void add_mem_file_dep(const std::string &memf);
-    void add_package_dep(const std::string &pack);
+    void add_instance(const HDL_dependency &i);
+    void add_interface_dep(const HDL_dependency &i);
+    void add_mem_file_dep(const HDL_dependency &i);
+    void add_package_dep(const HDL_dependency &i);
 
     void add_port(const std::string &p_n, port_direction_t dir);
 
+    bool is_current_valid() {return valid_resource;};
 };
 
 

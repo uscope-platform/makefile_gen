@@ -23,6 +23,7 @@
 #include <vector>
 #include <memory>
 
+#include "data_model/HDL/HDL_dependency.hpp"
 #include "data_model/documentation/module_documentation.h"
 #include "data_model/documentation/bus_structure/bus_structure.h"
 
@@ -31,37 +32,19 @@
 #include "third_party/cereal/types/vector.hpp"
 #include "third_party/cereal/types/memory.hpp"
 
-#define SV_FEATURE_MODULE 0
-#define SV_FEATURE_INTERFACE 1
-#define SV_FEATURE_PROGRAM 2
-#define SV_FEATURE_UDP 3
-#define SV_FEATURE_NULL 4
-#define SV_FEATURE_PACKAGE 6
-#define SV_MEMORY_INIT_FILE 5
+#include "data_model/HDL/HDL_definitions.hpp"
 
-enum sv_feature {module=SV_FEATURE_MODULE, interface=SV_FEATURE_INTERFACE,program=SV_FEATURE_PROGRAM,
-        udp=SV_FEATURE_UDP, null_feature=SV_FEATURE_NULL, memory_init=SV_MEMORY_INIT_FILE, package=SV_FEATURE_PACKAGE};
-
-
-enum port_direction_t {
-    input_port = 0,
-    output_port = 1,
-    inout_port = 2,
-    modport = 3
-};
-
-typedef std::unordered_map<std::string, sv_feature> hdl_deps_t;
-
-typedef std::pair<std::string, sv_feature> hdl_declaration_t;
-
-    class HDL_Resource {
+class HDL_Resource {
     public:
         HDL_Resource( const HDL_Resource &c );
         HDL_Resource();
-        HDL_Resource(sv_feature type, std::string n, std::string p, hdl_deps_t deps);
-        hdl_deps_t get_dependencies() {return dependencies;};
+        HDL_Resource(dependency_class type, std::string n, std::string p);
 
-        void add_dependencies(hdl_deps_t deps);
+        std::vector<HDL_dependency> get_dependencies();
+
+        void add_dependencies(std::vector<HDL_dependency> deps);
+        void add_dependency(const HDL_dependency &dep);
+
         void add_bus_roots(const std::shared_ptr<bus_crossbar>& bc) { bus_roots.push_back(bc);};
         void add_bus_roots(std::vector<std::shared_ptr<bus_crossbar>> bc) { bus_roots = std::move(bc);};
         std::vector<std::shared_ptr<bus_crossbar>> get_bus_roots() {return bus_roots;};
@@ -71,8 +54,8 @@ typedef std::pair<std::string, sv_feature> hdl_declaration_t;
 
         void set_path(const std::string &p) {path  = p;};
         std::string get_path() {return path;};
-        void set_type(const sv_feature t) {hdl_type  = t;};
-        sv_feature get_type() {return hdl_type;};
+        void set_type(const dependency_class t) { hdl_type  = t;};
+        dependency_class get_type() {return hdl_type;};
         bool is_interface();
 
         void set_ports(std::unordered_map<std::string, port_direction_t> m) {ports = std::move(m);};
@@ -95,21 +78,20 @@ typedef std::pair<std::string, sv_feature> hdl_declaration_t;
 
         template<class Archive>
         void serialize( Archive & ar ) {
-            ar(name, path, hdl_type, dependencies, parameters, ports, bus_roots, bus_submodules, doc, processor_docs);
+            ar(name, path, hdl_type,dependencies_vect, parameters, ports, bus_roots, bus_submodules, doc, processor_docs);
         }
 
         bool is_empty();
-
+        friend bool operator <(const HDL_Resource& lhs, const HDL_Resource& rhs);
         friend bool operator==(const HDL_Resource&lhs, const HDL_Resource&rhs);
     private:
         std::string name;
         std::string path;
-        sv_feature hdl_type;
-        hdl_deps_t dependencies;
+        dependency_class hdl_type;
+        std::vector<HDL_dependency> dependencies_vect;
         std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
         std::unordered_map<std::string, port_direction_t> ports;
 
-        std::vector<HDL_Resource> deps_vector;
         //SV PACKAGE SPECIFIC PARAMETERS
         std::unordered_map<std::string, uint32_t> parameters;
         std::vector<bus_submodule> bus_submodules;

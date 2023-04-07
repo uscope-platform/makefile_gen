@@ -24,7 +24,7 @@
 #include "data_model/HDL/HDL_interfaces_factory.hpp"
 #include "data_model/HDL/HDL_packages_factory.hpp"
 
-#include "data_model/HDL_instance.hpp"
+#include "data_model/HDL/HDL_dependency.hpp"
 #include "data_model/expression.h"
 
 #include <regex>
@@ -83,7 +83,7 @@ private:
 
     std::vector<std::string> string_components;
 
-    HDL_modules_factory resources_factory;
+    HDL_modules_factory modules_factory;
     HDL_interfaces_factory interfaces_factory;
     HDL_packages_factory packages_factory;
 };

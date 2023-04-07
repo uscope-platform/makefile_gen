@@ -13,30 +13,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "data_model/HDL_instance.hpp"
+#include "data_model/HDL/HDL_dependency.hpp"
 
-#include <utility>
 
-HDL_instance::HDL_instance(std::string s, std::string t, sv_feature f) {
-    feature = f;
-    name = std::move(s);
-    type = std::move(t);
+
+HDL_dependency::HDL_dependency(std::string dep_name, std::string dep_type, dependency_class d_c) {
+    dep_class = d_c;
+    name = std::move(dep_name);
+    type = std::move(dep_type);
 }
 
-void HDL_instance::add_parameter(const std::string& parameter_name, std::string value) {
+void HDL_dependency::add_parameter(const std::string& parameter_name, std::string value) {
     parameters_map[parameter_name] = std::move(value);
 }
 
-void HDL_instance::add_port_connection(const std::string& port_name, std::string value) {
+void HDL_dependency::add_port_connection(const std::string& port_name, std::string value) {
     ports_map[port_name] = std::move(value);
 }
 
-bool operator==(const HDL_instance &lhs, const HDL_instance &rhs) {
+bool operator==(const HDL_dependency &lhs, const HDL_dependency &rhs) {
     bool ret = true;
 
     ret &= lhs.name == rhs.name;
     ret &= lhs.type == rhs.type;
-    ret &= lhs.feature == rhs.feature;
+    ret &= lhs.dep_class == rhs.dep_class;
     ret &= lhs.ports_map == rhs.ports_map;
     ret &= lhs.parameters_map == rhs.parameters_map;
 

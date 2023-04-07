@@ -38,7 +38,7 @@ TEST( analysis_test , package) {
     check_map["subtraction_parameter"] = 2;
     ASSERT_EQ(check_map, parameters);
 
-    HDL_Resource check_res(package, "test_package", "check_files/test_package.sv", hdl_deps_t());
+    HDL_Resource check_res(package, "test_package", "check_files/test_package.sv");
     check_res.set_parameters(check_map);
 
     std::shared_ptr<bus_crossbar> root = std::make_shared<bus_crossbar>();
@@ -79,10 +79,12 @@ TEST( analysis_test , sv_module) {
     sv_analyzer analyzer("check_files/test_sv_module.sv");
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
-    hdl_deps_t check_dep;
-    check_dep["SyndromeCalculator"] = module;
-    check_dep["test_package"] = package;
-    check_dep["file"] = memory_init;
+
+    HDL_dependency d3("SC", "SyndromeCalculator", module);
+    HDL_dependency d2("param", "test_package", package);
+    HDL_dependency d1("__init_file__", "file", memory_init);
+    std::vector<HDL_dependency> deps = {d1, d2, d3};
+
 
     std::unordered_map<std::string, port_direction_t> test_ports;
 
@@ -91,12 +93,12 @@ TEST( analysis_test , sv_module) {
     test_ports["data_in"] = modport;
     test_ports["data_out"] = modport;
 
-    HDL_Resource check_res(module, "Decoder", "check_files/test_sv_module.sv", check_dep);
+    HDL_Resource check_res(module, "Decoder", "check_files/test_sv_module.sv");
+    check_res.add_dependencies(deps);
     check_res.set_ports(test_ports);
     ASSERT_EQ(resource, check_res);
     resource = analyzer.analyze()[1];
-    hdl_deps_t dummy;
-    check_res = HDL_Resource(interface, "test_if", "check_files/test_sv_module.sv", dummy);
+    check_res = HDL_Resource(interface, "test_if", "check_files/test_sv_module.sv");
     ASSERT_EQ(resource, check_res);
 }
 
@@ -105,9 +107,9 @@ TEST( analysis_test , vhdl_module) {
     vhdl_analyzer analyzer("check_files/test_vhdl_module.vhd");
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
-    hdl_deps_t check_dep;
-    check_dep["ANDGATE"] = module;
-    HDL_Resource check_res (null_feature, "half_adder", "check_files/test_vhdl_module.vhd", check_dep);
+    HDL_dependency dep("and_component", "ANDGATE", module);
+    HDL_Resource check_res (module, "half_adder", "check_files/test_vhdl_module.vhd");
+    check_res.add_dependency(dep);
     ASSERT_EQ(resource, check_res);
 }
 

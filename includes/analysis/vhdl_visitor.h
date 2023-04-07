@@ -20,6 +20,8 @@
 #include <vector>
 #include <stack>
 #include "data_model/HDL/HDL_Resource.h"
+#include "data_model/HDL/HDL_dependency.hpp"
+#include "data_model/HDL/HDL_modules_factory.hpp"
 
 #include "mgp_vh/vhdlParserBaseListener.h"
 #include "mgp_vh/vhdlParser.h"
@@ -31,18 +33,17 @@ public:
     explicit vhdl_visitor(std::string p);
     void enterEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) override;
     void exitEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) override;
+    void enterArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) override;
     void exitArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) override;
-    void exitComponent_instantiation_statement(mgp_vh::vhdlParser::Component_instantiation_statementContext *ctx) override;
+    void exitConcurrent_statement(mgp_vh::vhdlParser::Concurrent_statementContext *ctx) override;
     std::vector<HDL_Resource> get_entities();
 private:
-    hdl_declaration_t declared_feature;
-    hdl_deps_t instantiated_features;
-    int nesting_level = 0;
-    std::stack<hdl_declaration_t> declarations_stack;
-    std::stack<hdl_deps_t> dependencies_stack;
     std::string path;
     std::vector<HDL_Resource>  entities;
+    std::unordered_map<std::string, std::vector<HDL_dependency>> dependency_map;
+    std::string current_architecture;
 
+    HDL_modules_factory modules_factory;
 };
 
 

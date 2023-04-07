@@ -15,8 +15,6 @@
 
 #include "analysis/sv_visitor.h"
 
-
-
 sv_visitor::sv_visitor(std::string p) {
     path = std::move(p);
 }
@@ -24,12 +22,12 @@ sv_visitor::sv_visitor(std::string p) {
 
 void sv_visitor::enterModule_declaration(sv2017::Module_declarationContext *ctx) {
     current_declaration_type = "module";
-    resources_factory.new_module(path);
+    modules_factory.new_module(path);
 }
 
 
 void sv_visitor::exitModule_declaration(sv2017::Module_declarationContext *ctx) {
-    entities.push_back(resources_factory.get_module());
+    entities.push_back(modules_factory.get_module());
 }
 
 void sv_visitor::enterInterface_declaration(sv2017::Interface_declarationContext *ctx) {
@@ -45,20 +43,24 @@ void sv_visitor::exitInterface_declaration(sv2017::Interface_declarationContext 
 
 void sv_visitor::exitModule_header_common(sv2017::Module_header_commonContext *ctx) {
     std::string module_name = ctx->identifier()->getText();
-    resources_factory.set_module_name(module_name);
+    modules_factory.set_module_name(module_name);
 }
 
 void sv_visitor::exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) {
     std::string module_name = ctx->identifier()->getText();
     std::string instance_name = ctx->hierarchical_instance(0)->name_of_instance()->identifier()->getText();
 
-    HDL_instance inst(instance_name, module_name, module);
-    resources_factory.add_instance(inst);
+    HDL_dependency dep(instance_name, module_name, module);
+    modules_factory.add_instance(dep);
 }
 
 void sv_visitor::exitInterface_header(sv2017::Interface_headerContext *ctx) {
     std::string interface_name = ctx->identifier()->getText();
-    resources_factory.add_interface_dep(interface_name);
+    if(modules_factory.is_current_valid()){
+        HDL_dependency dep("__scoped_declaration__", interface_name, interface);
+        modules_factory.add_interface_dep(dep);
+    }
+
 }
 
 std::vector<HDL_Resource> sv_visitor::get_entities() {
@@ -72,7 +74,8 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
         data_file = std::regex_replace(data_file, std::regex("\\\""), "");
         std::filesystem::path p = data_file;
         if(p.extension().string() == ".dat"|| p.extension().string() == ".mem"){
-            resources_factory.add_mem_file_dep(p.stem());
+            HDL_dependency dep("__init_file__", p.stem(), memory_init);
+            modules_factory.add_mem_file_dep(dep);
         }
     }
 }
@@ -90,7 +93,9 @@ void sv_visitor::exitPackage_declaration(sv2017::Package_declarationContext *ctx
 void sv_visitor::exitPackage_or_class_scoped_path(sv2017::Package_or_class_scoped_pathContext *ctx) {
     if(!ctx->DOUBLE_COLON().empty()){
         std::string package_name = ctx->package_or_class_scoped_path_item()[0]->identifier()->getText();
-        resources_factory.add_package_dep(package_name);
+        std::string package_item = ctx->package_or_class_scoped_path_item()[1]->identifier()->getText();
+        HDL_dependency dep(package_item, package_name, package);
+        modules_factory.add_package_dep(dep);
     }
 
 }
@@ -195,7 +200,7 @@ void sv_visitor::exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext 
                 dir = inout_port;
 
         }
-        resources_factory.add_port(port_name, dir);
+        modules_factory.add_port(port_name, dir);
     }
 }
 

@@ -22,17 +22,19 @@ class dep_resolver : public ::testing::Test {
 protected:
     void SetUp() {
         d_store = std::make_shared<data_store>(true);
-        hdl_deps_t deps;
-        deps["test_dep"] = module;
-        deps["test_mem_init"] = memory_init;
-        deps["excluded_module"] = module;
-        HDL_Resource mod_entity(module, "test_module", "test/mod.sv", deps);
+        HDL_dependency d1("inst", "test_dep", module);
+        HDL_dependency d2("mem_init", "test_mem_init", memory_init);
+        HDL_dependency d3("exm", "excluded_module", module);
+        std::vector<HDL_dependency> deps = {d1, d2, d3};
+        HDL_Resource mod_entity(module, "test_module", "test/mod.sv");
+        mod_entity.add_dependencies(deps);
         d_store->store_hdl_entity(mod_entity);
+
         DataFile D("test_mem_init", "test/mem_init.mem");
         d_store->store_data_file(D);
-        HDL_Resource expl_dep(module, "expl_dep", "test/explicit/dep.sv", hdl_deps_t());
+        HDL_Resource expl_dep(module, "expl_dep", "test/explicit/dep.sv");
         d_store->store_hdl_entity(expl_dep);
-        HDL_Resource dep_entity(module, "test_dep", "test/dep.sv", hdl_deps_t());
+        HDL_Resource dep_entity(module, "test_dep", "test/dep.sv");
         d_store->store_hdl_entity(dep_entity);
     }
 

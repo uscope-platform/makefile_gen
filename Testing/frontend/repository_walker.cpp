@@ -79,10 +79,10 @@ TEST_F(repository_walker , directory_analysis) {
     test_ports["data_out"] = modport;
 
 
-    HDL_Resource sv_res(module, "Decoder", "repository_walker/test_sv_module.sv", hdl_deps_t());
+    HDL_Resource sv_res(module, "Decoder", "repository_walker/test_sv_module.sv");
     sv_res.set_ports(test_ports);
 
-    HDL_Resource vh_res(null_feature, "half_adder", "repository_walker/test_vhdl_module.vhd", hdl_deps_t());
+    HDL_Resource vh_res(module, "half_adder", "repository_walker/test_vhdl_module.vhd");
     std::unordered_map<std::string,HDL_Resource> hdl_check;
     hdl_check["Decoder"] = sv_res;
     hdl_check["half_adder"] = vh_res;
