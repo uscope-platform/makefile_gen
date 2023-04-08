@@ -196,6 +196,9 @@ void sv_visitor::exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext 
         if(ctx->port_direction() == nullptr){
             if(ctx->DOT()){
                 dir = modport;
+                std::string if_type = ctx->identifier(0)->getText();
+                std::string modport_type = ctx->identifier(1)->getText();
+                modules_factory.add_if_port_specs(port_name, if_type, modport_type);
             } else{
                 dir = raw_port;
             }

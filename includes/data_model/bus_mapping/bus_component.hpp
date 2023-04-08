@@ -13,33 +13,32 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_BUS_COMPONENT_HPP
-#define MAKEFILEGEN_V2_BUS_COMPONENT_HPP
+#ifndef MAKEFILEGEN_V2_MAPPER_BUS_COMPONENT_HPP
+#define MAKEFILEGEN_V2_MAPPER_BUS_COMPONENT_HPP
 
 #include <string>
 #include <unordered_map>
 #include <third_party/json.hpp>
 #include <iostream>
 
-namespace bus_mapping{
 
-    typedef enum{
-        source = 0,
-        sink = 1,
-        interconnect = 2
-    }bus_component_class;
+typedef enum{
+    source = 0,
+    sink = 1,
+    interconnect = 2
+}bus_component_class;
 
-    class bus_component {
-    public:
-        explicit bus_component(const std::string &name, nlohmann::json &comp_spec);
-        void set_defaults(nlohmann::json &spec);
-        friend bool operator==(const bus_component &lhs, const bus_component&rhs);
-    private:
-        bus_component_class component_class;
-        std::unordered_map<std::string, std::string> component_specs;
-        std::string name;
-    };
-}
+class mapper_bus_component {
+public:
+    mapper_bus_component(const mapper_bus_component &bc);
+    explicit mapper_bus_component(const std::string &name, nlohmann::json &comp_spec);
+    void set_defaults(nlohmann::json &spec);
+    friend bool operator==(const mapper_bus_component &lhs, const mapper_bus_component&rhs);
+private:
+    bus_component_class component_class;
+    std::unordered_map<std::string, std::string> component_specs;
+    std::string name;
+};
 
 
-#endif //MAKEFILEGEN_V2_BUS_COMPONENT_HPP
+#endif //MAKEFILEGEN_V2_MAPPER_BUS_COMPONENT_HPP

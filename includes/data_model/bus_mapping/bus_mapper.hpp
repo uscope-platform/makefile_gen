@@ -22,19 +22,30 @@
 
 #include "third_party/json.hpp"
 
-namespace bus_mapping {
-    class bus_mapper {
-    public:
-        bus_mapper(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d);
 
-        void map_bus(const nlohmann::json &bus, const std::string &bus_selector, const std::string &top_level);
+typedef struct {
+    std::string port_name;
+    HDL_Resource module_spec;
+    HDL_dependency instance;
+}bus_map_node;
 
-    private:
-        std::vector<std::pair<std::string, HDL_Resource>> map_network(HDL_Resource &res, const std::string &network_name);
-        std::shared_ptr<settings_store> s_store;
-        std::shared_ptr<data_store> d_store;
-        bus_mapping::bus_specs_manager specs_manager;
-    };
-}
+class bus_mapper {
+public:
+    bus_mapper(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d);
+
+    void map_bus(const nlohmann::json &bus, const std::string &bus_selector, const std::string &top_level);
+
+private:
+    std::vector<bus_map_node> map_network(HDL_Resource &res, const std::string &network_name);
+    std::vector<bus_map_node> exclude_sources(std::vector<bus_map_node> network);
+    std::shared_ptr<settings_store> s_store;
+    std::shared_ptr<data_store> d_store;
+    std::string bus_type;
+
+    bus_specs_manager specs_manager;
+
+    std::vector<bus_map_node> leaf_nodes;
+    std::vector<bus_map_node> interconnects;
+};
 
 #endif //MAKEFILEGEN_V2_BUS_MAPPER_HPP

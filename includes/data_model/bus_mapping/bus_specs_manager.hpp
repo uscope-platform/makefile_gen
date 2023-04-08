@@ -30,20 +30,19 @@
     if_port_output = 1
 } if_port_dir;
 
-namespace bus_mapping{
-    class bus_specs_manager {
-    public:
-        bus_specs_manager();
-        bus_specs_manager(const bus_specs_manager &b);
-        std::vector<bus_component> get_bus_specs(const std::string &s){return bus_specs[s];};
-        bool is_known_bus(const std::string &s) {return bus_specs.contains(s);};
-        std::unordered_map<std::string, if_port_dir> get_port_dir_specs(const std::string &s){return port_dir_specs[s];};
-        ~bus_specs_manager();
-    private:
-        std::unordered_map<std::string, std::vector<bus_component>> bus_specs;
-        std::unordered_map<std::string, std::unordered_map<std::string, if_port_dir>> port_dir_specs;
-    };
-}
+class bus_specs_manager {
+public:
+    bus_specs_manager();
+    bus_specs_manager(const bus_specs_manager &b);
+    std::vector<mapper_bus_component> get_bus_specs(const std::string &s){return bus_specs[s];};
+    bool is_known_bus(const std::string &s) {return bus_specs.contains(s);};
+    std::string get_port_dir_specs(const std::string &s, if_port_dir dir){return port_dir_specs[s][dir];};
+    bool is_sink(const std::string &s);
+    bool is_interconnect(const std::string &s);
+private:
+    std::unordered_map<std::string, std::vector<mapper_bus_component>> bus_specs;
+    std::unordered_map<std::string, std::unordered_map<if_port_dir, std::string>> port_dir_specs;
+};
 
 
 

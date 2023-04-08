@@ -25,6 +25,7 @@
 #include "third_party/cereal/archives/binary.hpp"
 #include "third_party/cereal/types/unordered_map.hpp"
 #include "third_party/cereal/types/vector.hpp"
+#include "third_party/cereal/types/array.hpp"
 #include "third_party/cereal/types/memory.hpp"
 
 class HDL_dependency {

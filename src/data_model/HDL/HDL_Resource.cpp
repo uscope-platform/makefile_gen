@@ -38,7 +38,7 @@ HDL_Resource::HDL_Resource(const HDL_Resource &c) {
     name = c.name;
     path = c.path;
     hdl_type = c.hdl_type;
-    dependencies_vect = c.dependencies_vect;
+    dependencies = c.dependencies;
 
     parameters = c.parameters;
     bus_roots = c.bus_roots;
@@ -46,6 +46,7 @@ HDL_Resource::HDL_Resource(const HDL_Resource &c) {
     bus_submodules = c.bus_submodules;
     processor_docs = c.processor_docs;
     ports = c.ports;
+    if_specs = c.if_specs;
 }
 
 bool HDL_Resource::is_interface() {
@@ -63,9 +64,9 @@ bool HDL_Resource::is_empty() {
     ret &= parameters.empty();
     ret &= bus_submodules.empty();
     ret &= processor_docs.empty();
-    ret &= dependencies_vect.empty();
+    ret &= dependencies.empty();
     ret &= ports.empty();
-
+    ret &= if_specs.empty();
     ret &= bus_roots.empty();
 
     return ret;
@@ -73,15 +74,15 @@ bool HDL_Resource::is_empty() {
 
 std::vector<HDL_dependency> HDL_Resource::get_dependencies() {
 
-    return dependencies_vect;
+    return dependencies;
 }
 
 void HDL_Resource::add_dependency(const HDL_dependency &dep) {
-    dependencies_vect.push_back(dep);
+    dependencies.push_back(dep);
 }
 
 void HDL_Resource::add_dependencies(std::vector<HDL_dependency> deps) {
-    dependencies_vect.insert(dependencies_vect.begin(), deps.begin(), deps.end());
+    dependencies.insert(dependencies.begin(), deps.begin(), deps.end());
 }
 
 
@@ -92,11 +93,12 @@ bool operator==(const HDL_Resource &lhs, const HDL_Resource &rhs) {
     ret &= lhs.name == rhs.name;
     ret &= lhs.path == rhs.path;
     ret &= lhs.hdl_type == rhs.hdl_type;
-    ret &= lhs.dependencies_vect == rhs.dependencies_vect;
+    ret &= lhs.dependencies == rhs.dependencies;
     ret &= lhs.parameters == rhs.parameters;
     ret &= lhs.bus_submodules == rhs.bus_submodules;
     ret &= lhs.processor_docs == rhs.processor_docs;
     ret &= lhs.ports == rhs.ports;
+    ret &= lhs.if_specs == rhs.if_specs;
 
     if(lhs.bus_roots.size() != rhs.bus_roots.size()){
         return false;
@@ -118,5 +120,13 @@ bool operator==(const HDL_Resource &lhs, const HDL_Resource &rhs) {
 
 bool operator<(const HDL_Resource &lhs, const HDL_Resource &rhs) {
     return lhs.name<rhs.name;
+}
+
+void HDL_Resource::add_if_port_specs(const std::string &p_n, const std::string &if_name, const std::string &modport) {
+    if_specs[p_n] = {if_name, modport};
+}
+
+std::pair<std::string, std::string> HDL_Resource::get_if_port_specs(const std::string &p_n) {
+    return std::make_pair(if_specs[p_n][0],if_specs[p_n][1]);
 }
 

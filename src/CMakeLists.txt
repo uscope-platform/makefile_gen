@@ -39,7 +39,7 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_packages_factory.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/resource_factory_base.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_mapping/bus_specs_manager.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_mapping/bus_component.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_mapping/mapper_bus_component.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_mapping/bus_mapper.cpp
         )
 

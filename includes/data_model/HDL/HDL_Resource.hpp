@@ -61,6 +61,9 @@ class HDL_Resource {
         void set_ports(std::unordered_map<std::string, port_direction_t> m) {ports = std::move(m);};
         void add_ports(const std::string &p_n, port_direction_t dir) {ports[p_n] = dir;};
 
+        void add_if_port_specs(const std::string &p_n, const std::string &if_name, const std::string &modport);
+        std::pair<std::string, std::string> get_if_port_specs(const std::string &p_n);
+
         void add_submodule(const bus_submodule &s) {bus_submodules.push_back(s);};
         void set_submodules(std::vector<bus_submodule> v) {bus_submodules = std::move(v);};
         std::vector<bus_submodule> get_submodules() {return bus_submodules;};
@@ -69,7 +72,7 @@ class HDL_Resource {
         std::vector<processor_instance> get_processor_doc() {return processor_docs;};
         bool has_processors() {return !processor_docs.empty();};
 
-        void add_parameter(std::string name, uint32_t val) {parameters[name] = val;};
+        void add_parameter(const std::string& param_name, uint32_t val) {parameters[param_name] = val;};
         void set_parameters(std::unordered_map<std::string, uint32_t> p) { parameters = std::move(p);}
         std::unordered_map<std::string, uint32_t> get_parameters() {return parameters;};
 
@@ -78,7 +81,7 @@ class HDL_Resource {
 
         template<class Archive>
         void serialize( Archive & ar ) {
-            ar(name, path, hdl_type,dependencies_vect, parameters, ports, bus_roots, bus_submodules, doc, processor_docs);
+            ar(name, path, hdl_type, dependencies, if_specs, parameters, ports, bus_roots, bus_submodules, doc, processor_docs);
         }
 
         bool is_empty();
@@ -88,9 +91,10 @@ class HDL_Resource {
         std::string name;
         std::string path;
         dependency_class hdl_type;
-        std::vector<HDL_dependency> dependencies_vect;
+        std::vector<HDL_dependency> dependencies;
         std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
         std::unordered_map<std::string, port_direction_t> ports;
+        std::unordered_map<std::string, std::array<std::string, 2>> if_specs;
 
         //SV PACKAGE SPECIFIC PARAMETERS
         std::unordered_map<std::string, uint32_t> parameters;

@@ -15,7 +15,15 @@
 
 #include "data_model/bus_mapping/bus_component.hpp"
 
-bus_mapping::bus_component::bus_component(const std::string &n, nlohmann::json &spec) {
+
+mapper_bus_component::mapper_bus_component(const mapper_bus_component &bc) {
+    name = bc.name;
+    component_class = bc.component_class;
+    component_specs = bc.component_specs;
+}
+
+
+mapper_bus_component::mapper_bus_component(const std::string &n, nlohmann::json &spec) {
     name = n;
     if(!spec.contains("class")){
         std::cerr << "ERROR: Could not find class when processing specs for bus component: "<< name<< std::endl;
@@ -40,7 +48,7 @@ bus_mapping::bus_component::bus_component(const std::string &n, nlohmann::json &
     }
 }
 
-bool bus_mapping::operator==(const bus_mapping::bus_component &lhs, const bus_mapping::bus_component &rhs) {
+bool operator==(const mapper_bus_component &lhs, const mapper_bus_component &rhs) {
     bool ret = true;
     ret &= lhs.name == rhs.name;
     ret &= lhs.component_class == rhs.component_class;
@@ -48,7 +56,7 @@ bool bus_mapping::operator==(const bus_mapping::bus_component &lhs, const bus_ma
     return ret;
 }
 
-void bus_mapping::bus_component::set_defaults(nlohmann::json &def_spec) {
+void mapper_bus_component::set_defaults(nlohmann::json &def_spec) {
 
     for(auto &spec:def_spec.items()){
         if(!component_specs.contains(spec.key())){
@@ -56,3 +64,4 @@ void bus_mapping::bus_component::set_defaults(nlohmann::json &def_spec) {
         }
     }
 }
+
