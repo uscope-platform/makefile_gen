@@ -46,6 +46,10 @@ private:
     bool port_contains_if(const std::string &port, const std::string &intf);
     bool is_array_parameter(const std::string &port);
 
+    std::vector<std::string> get_interconnect_addr_vect(bus_map_node &item, HDL_Resource &parent, std::vector<std::string> &intf);
+    std::uint32_t get_address(const std::string &str, HDL_Resource &parent);
+    static bool is_sv_constant(const std::string &s);
+    uint32_t parse_sv_constant(const std::string &s);
     std::vector<std::string> split_if_array(const std::string &array);
 
     std::shared_ptr<settings_store> s_store;

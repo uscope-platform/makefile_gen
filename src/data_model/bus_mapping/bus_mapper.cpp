@@ -84,22 +84,13 @@ void bus_mapper::process_interconnects(HDL_Resource &parent) {
         auto masters_str = item.instance.get_ports()[specs_manager.get_interconnect_source_port(bus_type, item.module_spec.getName())];//use spec manager instead of hardcoded name;
         auto masters_ifs = split_if_array(masters_str);
 
-        auto address_param = item.instance.get_parameters()["SLAVE_ADDR"];
-        std::vector<std::string> addresses_vect;
-        if(is_array_parameter(address_param)){
-            addresses_vect = split_if_array(address_param);
-        } else{
-            auto addresses_str = parent.get_string_parameter(address_param);
-            addresses_vect = split_if_array(addresses_str);
-        }
-
+        auto addresses_vect = get_interconnect_addr_vect(item, parent, masters_ifs);
 
         for(int i = 0; i<masters_ifs.size(); ++i){
             bus_map_node n = {masters_ifs[i], parent, HDL_dependency()};
             std::vector<bus_map_node> top = {n};
             auto addr_s = addresses_vect[i];
-            uint32_t address = bus_defining_package.get_numeric_parameters()[addr_s.substr(addr_s.find("::")+2, addr_s.size())];
-            map_network(top, address);
+            map_network(top, get_address(addresses_vect[i], parent));
         }
 
     }
@@ -146,6 +137,70 @@ std::vector<std::string> bus_mapper::split_if_array(const std::string &array) {
         retval.push_back(array);
     }
     return retval;
+}
+
+std::vector<std::string> bus_mapper::get_interconnect_addr_vect(bus_map_node &item, HDL_Resource &parent, std::vector<std::string> &intf) {
+
+
+    auto address_param = item.instance.get_parameters()["SLAVE_ADDR"];
+    std::vector<std::string> addresses_vect;
+    if(is_array_parameter(address_param)){
+        addresses_vect = split_if_array(address_param);
+    } else{
+        auto addresses_str = parent.get_string_parameter(address_param);
+        addresses_vect = split_if_array(addresses_str);
+    }
+
+    return addresses_vect;
+}
+
+std::uint32_t bus_mapper::get_address(const std::string &str, HDL_Resource &parent) {
+
+    auto param_name = str.substr(str.find("::")+2, str.size());
+    if(bus_defining_package.is_numeric_parameter(param_name)){
+        return  bus_defining_package.get_numeric_parameter(param_name);
+    } else if(parent.is_string_parameter(str)){
+        auto param_value = parent.get_string_parameter(str);
+        try{
+            if(is_sv_constant(param_value)) return parse_sv_constant(param_value);
+            else return std::stoul(param_value, nullptr, 0);
+
+        } catch (std::invalid_argument &ex){
+            return get_address(param_value, parent);
+        }
+    } else{
+        // try and parse the parameter value as an expression;
+        return 0;
+    }
+}
+
+uint32_t bus_mapper::parse_sv_constant(const std::string &s) {
+    std::regex r("^\\d*'(h|d|o|b)");
+    auto val = std::regex_replace(s, r, "");
+
+    std::smatch base_match;
+    if(std::regex_search(s, base_match, r)){
+        if(base_match[1].str() =="h"){
+            return std::stoul(val, nullptr, 16);
+        } else if(base_match[1].str() =="d") {
+            return std::stoul(val, nullptr, 10);
+        } else if(base_match[1].str() =="o") {
+            return std::stoul(val, nullptr, 8);
+        } else if(base_match[1].str() =="b") {
+            return std::stoul(val, nullptr, 2);
+        }
+    }
+    return 0;
+}
+
+bool bus_mapper::is_sv_constant(const std::string &s) {
+    std::regex r("^\\d*'(h|d|o|b)([0-9a-fA-F]+)");
+    std::smatch base_match;
+    if(std::regex_search(s, base_match, r)){
+        return true;
+    } else{
+        return false;
+    }
 }
 
 

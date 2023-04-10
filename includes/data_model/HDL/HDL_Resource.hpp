@@ -75,10 +75,13 @@ class HDL_Resource {
         void add_numeric_parameter(const std::string& param_name, uint32_t val) { numeric_parameters[param_name] = val;};
         void set_numeric_parameters(std::unordered_map<std::string, uint32_t> p) { numeric_parameters = std::move(p);}
         std::unordered_map<std::string, uint32_t> get_numeric_parameters() {return numeric_parameters;};
+        uint32_t get_numeric_parameter(const std::string &s){return numeric_parameters[s];};
+        bool is_numeric_parameter(const std::string &s){return numeric_parameters.contains(s);};
+
 
         void add_string_parameter(const std::string& param_name, const std::string& val) { string_parameter[param_name] = val;};
         std::string get_string_parameter(const std::string &name){return string_parameter[name];};
-
+        bool is_string_parameter(const std::string &name){return string_parameter.contains(name);};
         void set_documentation(module_documentation &d) {doc= d;};
         module_documentation get_documentation() { return doc;};
 
