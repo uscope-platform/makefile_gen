@@ -27,40 +27,102 @@ void bus_mapper::map_bus(const nlohmann::json &bus, const std::string &bus_selec
 
     auto tl = d_store->get_HDL_resource(top_level);
 
-    auto bus_network = map_network(tl, bus_if);
-    auto clean_network = exclude_sources(bus_network);
+    bus_map_node n = {bus_if, tl, HDL_dependency()};
+    std::vector<bus_map_node> top = {n};
 
+    map_network(top);
+    
+    int i = 0;
 }
 
-std::vector<bus_map_node> bus_mapper::map_network(HDL_Resource &res, const std::string &network_name) {
+
+void bus_mapper::map_network(std::vector<bus_map_node> &res_v) {
     std::vector<bus_map_node> bus_network;
-    for(auto &dep: res.get_dependencies()){
-        for(auto &port:dep.get_ports()){
-            if(port.second == network_name){
-                bus_network.emplace_back(port.first, d_store->get_HDL_resource(dep.get_type()), dep);
+    for(auto &res:res_v) {
+        for(auto &dep: res.module_spec.get_dependencies()){
+            std::vector<bus_map_node> sub_network;
+            for(auto &port:dep.get_ports()){
+                if(port_contains_if(port.second, res.port_name)){
+                    auto module_spec = d_store->get_HDL_resource(dep.get_type());
+                    if(specs_manager.get_port_dir_specs(bus_type, if_port_input) == module_spec.get_if_port_specs(port.first).second){
+                        bus_map_node cur_node(port.first, module_spec, dep);
+                        process_node_type(cur_node, res);
+                        sub_network.push_back(cur_node);
+                    } else{
+
+                    }
+                }
+            }
+            if(!sub_network.empty()){
+                process_interconnects(res.module_spec);
+                if(!sub_network.empty()){
+                    map_network(sub_network);
+                }
             }
         }
     }
-
-    return bus_network;
 }
 
-std::vector<bus_map_node>
-bus_mapper::exclude_sources(std::vector<bus_map_node> network) {
+bool bus_mapper::process_node_type(bus_map_node &node, bus_map_node &parent) {
+    if(specs_manager.is_sink(node.module_spec.getName())){
+        leaf_nodes.push_back(parent);
+        return false;
+    }else if(specs_manager.is_interconnect(node.module_spec.getName())){
+        interconnects.push_back(node);
+        return false;
+    }else {
+        return true;
+    }
+}
 
-    std::vector<bus_map_node> next_nodes;
+void bus_mapper::process_interconnects(HDL_Resource &parent) {
+    auto working_set = interconnects;
+    interconnects.clear();
 
-    for(auto &item:network) {
-        if(specs_manager.is_sink(item.module_spec.getName())){
-            leaf_nodes.push_back(item);
-        }
-        if(specs_manager.is_interconnect(item.module_spec.getName())){
-            interconnects.push_back(item);
-        }
+    for(auto &item:working_set) {
+        auto masters_str = item.instance.get_ports()[specs_manager.get_interconnect_source_port(bus_type, item.module_spec.getName())];//use spec manager instead of hardcoded name;
+        auto masters_ifs = split_if_array(masters_str);
+        for(auto &m:masters_ifs){
+            bus_map_node n = {m, parent, HDL_dependency()};
+            std::vector<bus_map_node> top = {n};
 
-        if (item.module_spec.get_if_port_specs(item.port_name).second == specs_manager.get_port_dir_specs(bus_type, if_port_input)) {
-            next_nodes.push_back(item);
+            map_network(top);
         }
     }
-    return next_nodes;
+
 }
+
+bool bus_mapper::port_contains_if(const std::string &port, const std::string &intf) {
+    const std::regex regex(R"(\{([^\}]+)\})");
+    std::smatch base_match;
+    if(std::regex_search(port, base_match, regex)){
+        std::stringstream ss(base_match[1].str());
+        std::string item;
+        while (std::getline(ss, item, ',')) {
+            if(item==intf) return true;
+        }
+    }else{
+        return  port==intf;
+    }
+    return false;
+}
+
+std::vector<std::string> bus_mapper::split_if_array(const std::string &array) {
+    std::vector<std::string> retval;
+    const std::regex regex(R"(\{([^\}]+)\})");
+    std::smatch base_match;
+    if(std::regex_search(array, base_match, regex)){
+        std::stringstream ss(base_match[1].str());
+        std::string item;
+
+        while (std::getline(ss, item, ',')) {
+           retval.push_back(item);
+        }
+    }else{
+        retval.push_back(array);
+    }
+    return retval;
+}
+
+
+

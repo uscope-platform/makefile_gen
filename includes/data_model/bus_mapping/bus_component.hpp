@@ -33,6 +33,9 @@ public:
     mapper_bus_component(const mapper_bus_component &bc);
     explicit mapper_bus_component(const std::string &name, nlohmann::json &comp_spec);
     void set_defaults(nlohmann::json &spec);
+    std::string get_name(){return name;};
+    bus_component_class  get_class() {return component_class;};
+    std::string get_spec(const std::string &spec_name){return component_specs[spec_name];};
     friend bool operator==(const mapper_bus_component &lhs, const mapper_bus_component&rhs);
 private:
     bus_component_class component_class;

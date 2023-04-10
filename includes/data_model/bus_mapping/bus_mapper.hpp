@@ -21,6 +21,7 @@
 #include "data_model/bus_mapping/bus_specs_manager.hpp"
 
 #include "third_party/json.hpp"
+#include <regex>
 
 
 typedef struct {
@@ -36,8 +37,15 @@ public:
     void map_bus(const nlohmann::json &bus, const std::string &bus_selector, const std::string &top_level);
 
 private:
-    std::vector<bus_map_node> map_network(HDL_Resource &res, const std::string &network_name);
-    std::vector<bus_map_node> exclude_sources(std::vector<bus_map_node> network);
+
+    void map_network(std::vector<bus_map_node> &res_v);
+    bool process_node_type(bus_map_node &node, bus_map_node &parent);
+    void process_interconnects(HDL_Resource &parent);
+
+    bool port_contains_if(const std::string &port, const std::string &intf);
+
+    std::vector<std::string> split_if_array(const std::string &array);
+
     std::shared_ptr<settings_store> s_store;
     std::shared_ptr<data_store> d_store;
     std::string bus_type;

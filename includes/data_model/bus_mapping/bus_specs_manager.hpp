@@ -22,6 +22,7 @@
 #include <filesystem>
 #include <fstream>
 #include <set>
+#include <unordered_set>
 
 #include "data_model/bus_mapping/bus_component.hpp"
 
@@ -35,13 +36,15 @@ public:
     bus_specs_manager();
     bus_specs_manager(const bus_specs_manager &b);
     std::vector<mapper_bus_component> get_bus_specs(const std::string &s){return bus_specs[s];};
-    bool is_known_bus(const std::string &s) {return bus_specs.contains(s);};
     std::string get_port_dir_specs(const std::string &s, if_port_dir dir){return port_dir_specs[s][dir];};
+    std::string get_interconnect_source_port(const std::string &bus_name, const std::string &module_n);
     bool is_sink(const std::string &s);
     bool is_interconnect(const std::string &s);
 private:
     std::unordered_map<std::string, std::vector<mapper_bus_component>> bus_specs;
     std::unordered_map<std::string, std::unordered_map<if_port_dir, std::string>> port_dir_specs;
+    std::unordered_set<std::string> interconnect_modules;
+    std::unordered_set<std::string> sink_modules;
 };
 
 

@@ -32,6 +32,11 @@ bus_specs_manager::bus_specs_manager() {
         for(auto &comp: bus_spec_obj["components"].items()){
             mapper_bus_component new_comp(comp.key(), comp.value());
             new_comp.set_defaults(bus_spec_obj["default_specs"]);
+            if(new_comp.get_class()==interconnect){
+                interconnect_modules.insert(new_comp.get_name());
+            } else if(new_comp.get_class()==sink){
+                sink_modules.insert(new_comp.get_name());
+            }
             components.push_back(new_comp);
         }
         std::unordered_map<if_port_dir, std::string> dir_map = {{if_port_input, bus_spec_obj["modports"]["in"]}, {if_port_output, bus_spec_obj["modports"]["out"]}};
@@ -42,9 +47,18 @@ bus_specs_manager::bus_specs_manager() {
 }
 
 bool bus_specs_manager::is_sink(const std::string &s) {
-    return false;
+    return sink_modules.contains(s);
 }
 
 bool bus_specs_manager::is_interconnect(const std::string &s) {
-    return false;
+    return interconnect_modules.contains(s);
+}
+
+std::string bus_specs_manager::get_interconnect_source_port(const std::string &bus_name, const std::string &module_n) {
+    for(auto &item:bus_specs[bus_name]){
+        if(item.get_name()==module_n){
+            return item.get_spec("out_port");
+        }
+    }
+    return "";
 }
