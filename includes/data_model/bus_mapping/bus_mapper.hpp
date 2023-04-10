@@ -28,6 +28,7 @@ typedef struct {
     std::string port_name;
     HDL_Resource module_spec;
     HDL_dependency instance;
+    uint32_t node_address;
 }bus_map_node;
 
 class bus_mapper {
@@ -38,11 +39,12 @@ public:
 
 private:
 
-    void map_network(std::vector<bus_map_node> &res_v);
-    bool process_node_type(bus_map_node &node, bus_map_node &parent);
+    void map_network(std::vector<bus_map_node> &res_v, uint32_t base_address);
+    bool process_node_type(bus_map_node &node, bus_map_node &parent, uint32_t base_address);
     void process_interconnects(HDL_Resource &parent);
 
     bool port_contains_if(const std::string &port, const std::string &intf);
+    bool is_array_parameter(const std::string &port);
 
     std::vector<std::string> split_if_array(const std::string &array);
 

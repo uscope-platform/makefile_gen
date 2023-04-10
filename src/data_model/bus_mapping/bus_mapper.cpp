@@ -31,12 +31,14 @@ void bus_mapper::map_bus(const nlohmann::json &bus, const std::string &bus_selec
     bus_map_node n = {bus_if, tl, HDL_dependency()};
     std::vector<bus_map_node> top = {n};
 
-    map_network(top);
-
+    map_network(top, bus_defining_package.get_bus_roots()[0]->get_base_address());
+    for(auto &item:leaf_nodes){
+        std::cout<<" -- module -- " << item.module_spec.getName() << " -- address -- " << item.node_address << std::endl;
+    }
 }
 
 
-void bus_mapper::map_network(std::vector<bus_map_node> &res_v) {
+void bus_mapper::map_network(std::vector<bus_map_node> &res_v, uint32_t base_address) {
     std::vector<bus_map_node> bus_network;
     for(auto &res:res_v) {
         for(auto &dep: res.module_spec.get_dependencies()){
@@ -46,25 +48,24 @@ void bus_mapper::map_network(std::vector<bus_map_node> &res_v) {
                     auto module_spec = d_store->get_HDL_resource(dep.get_type());
                     if(specs_manager.get_port_dir_specs(bus_type, if_port_input) == module_spec.get_if_port_specs(port.first).second){
                         bus_map_node cur_node(port.first, module_spec, dep);
-                        process_node_type(cur_node, res);
+                        process_node_type(cur_node, res, base_address);
                         sub_network.push_back(cur_node);
-                    } else{
-
                     }
                 }
             }
             if(!sub_network.empty()){
                 process_interconnects(res.module_spec);
                 if(!sub_network.empty()){
-                    map_network(sub_network);
+                    map_network(sub_network, base_address);
                 }
             }
         }
     }
 }
 
-bool bus_mapper::process_node_type(bus_map_node &node, bus_map_node &parent) {
+bool bus_mapper::process_node_type(bus_map_node &node, bus_map_node &parent, uint32_t base_address) {
     if(specs_manager.is_sink(node.module_spec.getName())){
+        parent.node_address = base_address;
         leaf_nodes.push_back(parent);
         return false;
     }else if(specs_manager.is_interconnect(node.module_spec.getName())){
@@ -82,14 +83,25 @@ void bus_mapper::process_interconnects(HDL_Resource &parent) {
     for(auto &item:working_set) {
         auto masters_str = item.instance.get_ports()[specs_manager.get_interconnect_source_port(bus_type, item.module_spec.getName())];//use spec manager instead of hardcoded name;
         auto masters_ifs = split_if_array(masters_str);
-        auto addresses_str = item.instance.get_parameters()["SLAVE_ADDR"];
-        auto address_param = parent.get_numeric_parameters()[addresses_str];
-        for(auto &m:masters_ifs){
-            bus_map_node n = {m, parent, HDL_dependency()};
-            std::vector<bus_map_node> top = {n};
 
-            map_network(top);
+        auto address_param = item.instance.get_parameters()["SLAVE_ADDR"];
+        std::vector<std::string> addresses_vect;
+        if(is_array_parameter(address_param)){
+            addresses_vect = split_if_array(address_param);
+        } else{
+            auto addresses_str = parent.get_string_parameter(address_param);
+            addresses_vect = split_if_array(addresses_str);
         }
+
+
+        for(int i = 0; i<masters_ifs.size(); ++i){
+            bus_map_node n = {masters_ifs[i], parent, HDL_dependency()};
+            std::vector<bus_map_node> top = {n};
+            auto addr_s = addresses_vect[i];
+            uint32_t address = bus_defining_package.get_numeric_parameters()[addr_s.substr(addr_s.find("::")+2, addr_s.size())];
+            map_network(top, address);
+        }
+
     }
 
 }
@@ -109,6 +121,16 @@ bool bus_mapper::port_contains_if(const std::string &port, const std::string &in
     return false;
 }
 
+bool bus_mapper::is_array_parameter(const std::string &port) {
+    const std::regex regex(R"(\{([^\}]+)\})");
+    std::smatch base_match;
+    if(std::regex_search(port, base_match, regex)){
+        return true;
+    } else{
+        return false;
+    }
+}
+
 std::vector<std::string> bus_mapper::split_if_array(const std::string &array) {
     std::vector<std::string> retval;
     const std::regex regex(R"(\{([^\}]+)\})");
@@ -125,6 +147,7 @@ std::vector<std::string> bus_mapper::split_if_array(const std::string &array) {
     }
     return retval;
 }
+
 
 
 
