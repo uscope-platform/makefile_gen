@@ -40,7 +40,8 @@ HDL_Resource::HDL_Resource(const HDL_Resource &c) {
     hdl_type = c.hdl_type;
     dependencies = c.dependencies;
 
-    parameters = c.parameters;
+    numeric_parameters = c.numeric_parameters;
+    string_parameter = c.string_parameter;
     bus_roots = c.bus_roots;
     doc = c.doc;
     bus_submodules = c.bus_submodules;
@@ -61,13 +62,14 @@ bool HDL_Resource::is_empty() {
     ret &= name.empty();
     ret &= path.empty();
     ret &= hdl_type == module;
-    ret &= parameters.empty();
+    ret &= numeric_parameters.empty();
     ret &= bus_submodules.empty();
     ret &= processor_docs.empty();
     ret &= dependencies.empty();
     ret &= ports.empty();
     ret &= if_specs.empty();
     ret &= bus_roots.empty();
+    ret &= string_parameter.empty();
 
     return ret;
 }
@@ -94,11 +96,12 @@ bool operator==(const HDL_Resource &lhs, const HDL_Resource &rhs) {
     ret &= lhs.path == rhs.path;
     ret &= lhs.hdl_type == rhs.hdl_type;
     ret &= lhs.dependencies == rhs.dependencies;
-    ret &= lhs.parameters == rhs.parameters;
+    ret &= lhs.numeric_parameters == rhs.numeric_parameters;
     ret &= lhs.bus_submodules == rhs.bus_submodules;
     ret &= lhs.processor_docs == rhs.processor_docs;
     ret &= lhs.ports == rhs.ports;
     ret &= lhs.if_specs == rhs.if_specs;
+    ret &= lhs.string_parameter == rhs.string_parameter;
 
     if(lhs.bus_roots.size() != rhs.bus_roots.size()){
         return false;

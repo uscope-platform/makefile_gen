@@ -23,7 +23,7 @@ void HDL_packages_factory::new_package(std::string &p) {
 
 HDL_Resource HDL_packages_factory::get_package() {
     calculate_unresolved_parameters();
-    current_resource.set_parameters(numeric_parameters);
+    current_resource.set_numeric_parameters(numeric_parameters);
     return resources_factory_base<HDL_Resource>::get_resource();
 }
 

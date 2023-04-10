@@ -156,7 +156,7 @@ int main(int argc, char *argv[]){
     }
 
     if(generate_app_definition || generate_periph_definition){
-        bus_mapper mapper(s_store, d_store);
+        bus_mapper mapper(s_store, d_store, d_store->get_HDL_resource(dep.get_bus_defining_package()));
         mapper.map_bus(dep.get_bus_section(), "control",dep.get_synth_tl());
     }
 

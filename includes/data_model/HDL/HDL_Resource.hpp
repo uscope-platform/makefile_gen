@@ -72,16 +72,19 @@ class HDL_Resource {
         std::vector<processor_instance> get_processor_doc() {return processor_docs;};
         bool has_processors() {return !processor_docs.empty();};
 
-        void add_parameter(const std::string& param_name, uint32_t val) {parameters[param_name] = val;};
-        void set_parameters(std::unordered_map<std::string, uint32_t> p) { parameters = std::move(p);}
-        std::unordered_map<std::string, uint32_t> get_parameters() {return parameters;};
+        void add_numeric_parameter(const std::string& param_name, uint32_t val) { numeric_parameters[param_name] = val;};
+        void set_numeric_parameters(std::unordered_map<std::string, uint32_t> p) { numeric_parameters = std::move(p);}
+        std::unordered_map<std::string, uint32_t> get_numeric_parameters() {return numeric_parameters;};
+
+        void add_string_parameter(const std::string& param_name, const std::string& val) { string_parameter[param_name] = val;};
+        std::string get_string_parameter(const std::string &name){return string_parameter[name];};
 
         void set_documentation(module_documentation &d) {doc= d;};
         module_documentation get_documentation() { return doc;};
 
         template<class Archive>
         void serialize( Archive & ar ) {
-            ar(name, path, hdl_type, dependencies, if_specs, parameters, ports, bus_roots, bus_submodules, doc, processor_docs);
+            ar(name, path, hdl_type, dependencies, if_specs, numeric_parameters, string_parameter, ports, bus_roots, bus_submodules, doc, processor_docs);
         }
 
         bool is_empty();
@@ -95,9 +98,10 @@ class HDL_Resource {
         std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
         std::unordered_map<std::string, port_direction_t> ports;
         std::unordered_map<std::string, std::array<std::string, 2>> if_specs;
+        std::unordered_map<std::string, std::string> string_parameter;
 
         //SV PACKAGE SPECIFIC PARAMETERS
-        std::unordered_map<std::string, uint32_t> parameters;
+        std::unordered_map<std::string, uint32_t> numeric_parameters;
         std::vector<bus_submodule> bus_submodules;
         std::vector<processor_instance> processor_docs;
 

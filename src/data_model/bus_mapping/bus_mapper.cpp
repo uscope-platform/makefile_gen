@@ -15,9 +15,10 @@
 
 #include "data_model/bus_mapping/bus_mapper.hpp"
 
-bus_mapper::bus_mapper(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d){
+bus_mapper::bus_mapper(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d, const HDL_Resource &bdp){
     d_store = d;
     s_store = s;
+    bus_defining_package = bdp;
 }
 
 void bus_mapper::map_bus(const nlohmann::json &bus, const std::string &bus_selector, const std::string &top_level) {
@@ -31,8 +32,7 @@ void bus_mapper::map_bus(const nlohmann::json &bus, const std::string &bus_selec
     std::vector<bus_map_node> top = {n};
 
     map_network(top);
-    
-    int i = 0;
+
 }
 
 
@@ -82,6 +82,8 @@ void bus_mapper::process_interconnects(HDL_Resource &parent) {
     for(auto &item:working_set) {
         auto masters_str = item.instance.get_ports()[specs_manager.get_interconnect_source_port(bus_type, item.module_spec.getName())];//use spec manager instead of hardcoded name;
         auto masters_ifs = split_if_array(masters_str);
+        auto addresses_str = item.instance.get_parameters()["SLAVE_ADDR"];
+        auto address_param = parent.get_numeric_parameters()[addresses_str];
         for(auto &m:masters_ifs){
             bus_map_node n = {m, parent, HDL_dependency()};
             std::vector<bus_map_node> top = {n};

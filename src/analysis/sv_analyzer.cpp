@@ -50,7 +50,7 @@ std::vector<HDL_Resource> sv_analyzer::analyze() {
     if(is_bus_defining_package){
         for(auto &e:entities){
             if(e.get_type() == package){
-                parameters = e.get_parameters();
+                parameters = e.get_numeric_parameters();
             }
         }
     }

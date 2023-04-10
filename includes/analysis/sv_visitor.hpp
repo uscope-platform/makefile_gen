@@ -58,6 +58,7 @@ public:
     void exitPackage_or_class_scoped_path(sv2017::Package_or_class_scoped_pathContext *ctx) override;
     void enterParameter_declaration(sv2017::Parameter_declarationContext *ctx) override;
     void exitParameter_declaration(sv2017::Parameter_declarationContext *ctx) override;
+    void exitParam_assignment(sv2017::Param_assignmentContext *ctx) override;
     void exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext *ctx) override;
 
     void exitExpression(sv2017::ExpressionContext *ctx) override;

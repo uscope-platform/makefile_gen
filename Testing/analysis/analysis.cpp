@@ -27,7 +27,7 @@ TEST( analysis_test , package) {
     auto resource = analyzer.analyze()[0];
     ASSERT_EQ(resource.getName(), "test_package");
 
-    std::unordered_map<std::string, uint32_t> parameters = resource.get_parameters();
+    std::unordered_map<std::string, uint32_t> parameters = resource.get_numeric_parameters();
 
     std::unordered_map<std::string, uint32_t> check_map;
     check_map["bus_base"] = 0x43c00000;
@@ -39,7 +39,7 @@ TEST( analysis_test , package) {
     ASSERT_EQ(check_map, parameters);
 
     HDL_Resource check_res(package, "test_package", "check_files/test_package.sv");
-    check_res.set_parameters(check_map);
+    check_res.set_numeric_parameters(check_map);
 
     std::shared_ptr<bus_crossbar> root = std::make_shared<bus_crossbar>();
     root->set_parameter("bus_base");
@@ -102,6 +102,13 @@ TEST( analysis_test , sv_module) {
     HDL_Resource check_res(module, "Decoder", "check_files/test_sv_module.sv");
     check_res.add_dependencies(deps);
     check_res.set_ports(test_ports);
+
+    check_res.add_if_port_specs("data_out", "axi_stream", "master");
+    check_res.add_if_port_specs("data_in", "axi_stream", "slave");
+
+    check_res.add_string_parameter("module_parameter_1", "56");
+    check_res.add_string_parameter("module_parameter_2", "74");
+
     ASSERT_EQ(resource, check_res);
     resource = analyzer.analyze()[1];
     check_res = HDL_Resource(interface, "test_if", "check_files/test_sv_module.sv");

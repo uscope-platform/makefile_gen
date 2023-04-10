@@ -33,6 +33,8 @@ public:
     void add_mem_file_dep(const HDL_dependency &i);
     void add_package_dep(const HDL_dependency &i);
 
+    void add_parameter(const std::string&p_n, const std::string &v);
+
     void add_port(const std::string &p_n, port_direction_t dir);
     void add_if_port_specs(const std::string &p_n,const std::string &if_name, const std::string &modport);
     bool is_current_valid() {return valid_resource;};

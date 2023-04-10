@@ -18,10 +18,10 @@
 #include "data_model/bus_mapping/bus_specs_manager.hpp"
 
 TEST( bus_specs_manager, parsing) {
-    bus_mapping::bus_specs_manager manager;
+    bus_specs_manager manager;
     auto res = manager.get_bus_specs("axi_lite");
 
-    std::vector<bus_mapping::bus_component> check_vect;
+    std::vector<mapper_bus_component> check_vect;
     auto spec = nlohmann::json::parse(R"({"class":"interconnect","type":"n2m","n_sources":"NM","n_sinks":"NS","in_port":"slaves","out_port":"masters"})");
     check_vect.emplace_back("axil_crossbar_interface", spec);
 

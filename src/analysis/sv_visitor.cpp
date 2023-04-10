@@ -130,7 +130,6 @@ void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext 
         }
         string_components.clear();
     }
-
 }
 
 void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
@@ -232,6 +231,12 @@ void sv_visitor::exitNamed_parameter_assignment(sv2017::Named_parameter_assignme
     if(deps_factory.is_valid_dependency()){
         deps_factory.add_parameter(param_name, param_value);
     }
+}
+
+void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
+    auto p_n = ctx->identifier()->getText();
+    auto val = ctx->constant_param_expression()->getText();
+    modules_factory.add_parameter(p_n, val);
 }
 
 

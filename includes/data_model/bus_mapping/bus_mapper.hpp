@@ -32,7 +32,7 @@ typedef struct {
 
 class bus_mapper {
 public:
-    bus_mapper(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d);
+    bus_mapper(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d, const HDL_Resource &bdp);
 
     void map_bus(const nlohmann::json &bus, const std::string &bus_selector, const std::string &top_level);
 
@@ -54,6 +54,7 @@ private:
 
     std::vector<bus_map_node> leaf_nodes;
     std::vector<bus_map_node> interconnects;
+    HDL_Resource bus_defining_package;
 };
 
 #endif //MAKEFILEGEN_V2_BUS_MAPPER_HPP

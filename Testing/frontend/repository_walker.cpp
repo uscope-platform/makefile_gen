@@ -82,6 +82,9 @@ TEST_F(repository_walker , directory_analysis) {
     HDL_Resource sv_res(module, "Decoder", "repository_walker/test_sv_module.sv");
     sv_res.set_ports(test_ports);
 
+    sv_res.add_if_port_specs("data_out", "axi_stream", "master");
+    sv_res.add_if_port_specs("data_in", "axi_stream", "slave");
+
     HDL_Resource vh_res(module, "half_adder", "repository_walker/test_vhdl_module.vhd");
     std::unordered_map<std::string,HDL_Resource> hdl_check;
     hdl_check["Decoder"] = sv_res;

@@ -8,8 +8,11 @@ module Decoder (
     axi_stream.master data_out
 );
 
-   reg [31:0] memory [5:0];
-   initial memory = $readmemh("mem/init/file.dat");
+    parameter module_parameter_1 = 56;
+    localparam module_parameter_2 = 74;
+
+    reg [31:0] memory [5:0];
+    initial memory = $readmemh("mem/init/file.dat");
 
     SyndromeCalculator #(
         .TEST_PARAM(test_package::param)
