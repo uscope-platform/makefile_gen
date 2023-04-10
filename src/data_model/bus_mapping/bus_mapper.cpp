@@ -169,6 +169,34 @@ std::uint32_t bus_mapper::get_address(const std::string &str, HDL_Resource &pare
             return get_address(param_value, parent);
         }
     } else{
+        std::regex expr(R"(([a-zA-Z0-9_']*)\s*(\+|\-)\s*([a-zA-Z0-9_']*))");
+        std::smatch base_match;
+        if(std::regex_search(str, base_match, expr)){
+            if(base_match.size()!= 4){
+                return 0;
+            }
+            auto op_a_str = base_match[1].str();
+            auto op_b_str = base_match[3].str();
+            uint32_t op_a, op_b;
+            if(is_sv_constant(op_a_str)){
+                op_a = parse_sv_constant(op_a_str);
+            } else{
+                op_a = get_address(op_a_str, parent);
+            }
+            if(is_sv_constant(op_b_str)){
+                op_b = parse_sv_constant(op_b_str);
+            } else{
+                op_b = get_address(op_b_str, parent);
+            }
+            auto optor = base_match[2].str();
+            if(optor == "+"){
+                return op_a + op_b;
+            }else if(optor == "-"){
+                return op_a - op_b;
+            } else{
+                return 0;
+            }
+        }
         // try and parse the parameter value as an expression;
         return 0;
     }
