@@ -20,12 +20,15 @@ address_resolver::address_resolver(const HDL_Resource &bdp) {
 }
 
 uint32_t address_resolver::get_address(const std::string &str, HDL_Resource &parent) {
+    return get_address(str,parent, 0);
+}
 
+uint32_t address_resolver::get_address(const std::string &str, HDL_Resource &parent, int stack_level) {
     auto param_name = str.substr(str.find("::")+2, str.size());
     if(bus_defining_package.is_numeric_parameter(param_name)){
         return  bus_defining_package.get_numeric_parameter(param_name);
-    } else if(parameters_stack.back().contains(str)){
-        return get_address(parameters_stack.back()[str], parent);
+    } else if((parameters_stack.end()- stack_level)->contains(str)){
+        return get_address((parameters_stack.end()- stack_level)->at(str), parent, stack_level+1);
     } else if(parent.is_string_parameter(str)){
         auto param_value = parent.get_string_parameter(str);
         try{
@@ -68,6 +71,7 @@ uint32_t address_resolver::get_address(const std::string &str, HDL_Resource &par
         return 0;
     }
 }
+
 
 bool address_resolver::is_sv_constant(const std::string &s) {
     std::regex r("^\\d*'(h|d|o|b)([0-9a-fA-F]+)");

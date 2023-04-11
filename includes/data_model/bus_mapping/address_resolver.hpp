@@ -28,6 +28,7 @@ public:
     void push_parameters_map(HDL_dependency &instance);
     void pop_parameters_map();
     uint32_t get_address(const std::string &str, HDL_Resource &parent);
+    uint32_t get_address(const std::string &str, HDL_Resource &parent, int stack_level);
     bool is_sv_constant(const std::string &s);
     uint32_t parse_sv_constant(const std::string &s);
 private:
