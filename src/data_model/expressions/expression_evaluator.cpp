@@ -15,6 +15,38 @@
 
 #include "data_model/expressions/expression_evaluator.hpp"
 
+
+
+std::unordered_map<std::string, uint32_t>
+expression_evaluator::calculate_expressions(std::vector<expression> exp_vect, std::unordered_map<std::string, uint32_t> params) {
+    std::vector<expression> working_set = std::move(exp_vect);
+    std::vector<expression> remaining_parameters;
+
+    while(!working_set.empty()){
+        remaining_parameters.clear();
+        //update parameters with calculated values
+        for(auto &np:params){
+            for(auto &item:working_set){
+                item.update_expression(np.first, np.second);
+            }
+        }
+
+        // Calculate available expressions
+        for(auto &item:working_set){
+            try{
+                std::string param_name = item.get_name();
+                uint32_t res = expression_evaluator::calculate_expression(item.get_expression());
+                params[param_name] = res;
+            } catch(std::invalid_argument &ex){
+                remaining_parameters.push_back(item);
+            }
+        }
+
+        working_set = remaining_parameters;
+    }
+    return params;
+}
+
 uint32_t expression_evaluator::calculate_expression(std::vector<std::string> exp) {
     for (int i = 0; i< exp.size(); i++) {
         if(exp[i] == "*"){
@@ -59,32 +91,28 @@ uint32_t expression_evaluator::calculate_expression(std::vector<std::string> exp
     return std::stoul(exp[0]);
 }
 
-std::unordered_map<std::string, uint32_t>
-expression_evaluator::calculate_expressions(std::vector<expression> exp_vect, std::unordered_map<std::string, uint32_t> params) {
-    std::vector<expression> working_set = std::move(exp_vect);
-    std::vector<expression> remaining_parameters;
-
-    while(!working_set.empty()){
-        remaining_parameters.clear();
-        //update parameters with calculated values
-        for(auto &np:params){
-            for(auto &item:working_set){
-                item.update_expression(np.first, np.second);
-            }
+std::vector<std::string> expression_evaluator::get_variable_names(expression exp) {
+    std::vector<std::string> ret_val;
+    for(auto &item:exp.get_expression()){
+        std::set<std::string> operators = {"+", "*", "-", "/", "%"};
+        if(operators.contains(item))
+            continue;
+        try{
+            std::stoul(item);
+        }catch(std::exception& e){
+            ret_val.push_back(item);
         }
-
-        // Calculate available expressions
-        for(auto &item:working_set){
-            try{
-                std::string param_name = item.get_name();
-                uint32_t res = expression_evaluator::calculate_expression(item.get_expression());
-                params[param_name] = res;
-            } catch(std::invalid_argument &ex){
-                remaining_parameters.push_back(item);
-            }
-        }
-
-        working_set = remaining_parameters;
     }
-    return params;
+    return ret_val;
+}
+
+uint32_t
+expression_evaluator::calculate_expression(expression exp, std::unordered_map<std::string, uint32_t> params) {
+
+    for(auto &np:params){
+        exp.update_expression(np.first, np.second);
+    }
+
+    return expression_evaluator::calculate_expression(exp.get_expression());
+
 }

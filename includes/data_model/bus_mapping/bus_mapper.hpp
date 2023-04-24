@@ -20,8 +20,9 @@
 #include "data_model/settings_store.hpp"
 #include "data_model/bus_mapping/bus_specs_manager.hpp"
 #include "data_model/bus_mapping/address_resolver.hpp"
-#include <nlohmann/json.hpp>
+#include "data_model/expressions/expression_evaluator.hpp"
 
+#include <nlohmann/json.hpp>
 #include <regex>
 
 
@@ -42,12 +43,14 @@ private:
 
     void map_network(bus_map_node &res_v, uint32_t base_address);
     bool process_node_type(bus_map_node &node, bus_map_node &parent, uint32_t base_address);
-    void process_interconnects(HDL_Resource &parent_res, const HDL_dependency &parent_dep);
+    void process_interconnects(HDL_Resource &parent_res, HDL_dependency &parent_dep);
 
     bool port_contains_if(const std::string &port, const std::string &intf);
     bool is_array_parameter(const std::string &port);
 
-    std::vector<std::string> get_interconnect_addr_vect(bus_map_node &item, HDL_Resource &parent, std::vector<std::string> &intf);
+    std::vector<uint32_t> get_parametrised_addrs(std::string name,const nlohmann::json &spec, uint32_t n_ifs, HDL_Resource &parent_res, HDL_dependency &parent_dep);
+
+    std::vector<std::string> get_interconnect_addr_vect(bus_map_node &item, HDL_Resource &parent);
 
     std::vector<std::string> split_if_array(const std::string &array);
 

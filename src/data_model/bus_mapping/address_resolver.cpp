@@ -1,4 +1,4 @@
-//  Copyright 2023 Filippo Savi
+ //  Copyright 2023 Filippo Savi
 //  Author: Filippo Savi <filssavi@gmail.com>
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,24 +19,31 @@ address_resolver::address_resolver(const HDL_Resource &bdp) {
     bus_defining_package = bdp;
 }
 
-uint32_t address_resolver::get_address(const std::string &str, HDL_Resource &parent) {
-    return get_address(str,parent, 0);
+uint32_t address_resolver::get_address(const std::string &str, HDL_Resource &parent_res, HDL_dependency &parent_dep) {
+    return get_address(str,parent_res, parent_dep, 0);
 }
 
-uint32_t address_resolver::get_address(const std::string &str, HDL_Resource &parent, int stack_level) {
+
+uint32_t address_resolver::get_address(const std::string &str, HDL_Resource &parent, HDL_dependency &parent_dep, int stack_level) {
     auto param_name = str.substr(str.find("::")+2, str.size());
     if(bus_defining_package.is_numeric_parameter(param_name)){
         return  bus_defining_package.get_numeric_parameter(param_name);
-    } else if((parameters_stack.end()- stack_level)->contains(str)){
-        return get_address((parameters_stack.end()- stack_level)->at(str), parent, stack_level+1);
+    }
+    if(parameters_stack[parameters_stack.size()-1- stack_level].contains(str)){
+        return get_address(parameters_stack[parameters_stack.size()-1- stack_level][str], parent, parent_dep,stack_level+1);
     } else if(parent.is_string_parameter(str)){
-        auto param_value = parent.get_string_parameter(str);
+        std::string param_value;
+        if(parent_dep.is_parameter_overridden(str)){
+            param_value = parent_dep.get_parameter_value(str);
+        } else {
+            param_value = parent.get_string_parameter(str);
+        }
         try{
             if(is_sv_constant(param_value)) return parse_sv_constant(param_value);
             else return std::stoul(param_value, nullptr, 0);
 
         } catch (std::invalid_argument &ex){
-            return get_address(param_value, parent);
+            return get_address(param_value, parent, parent_dep);
         }
     } else{
         std::regex expr(R"(([a-zA-Z0-9_']*)\s*(\+|\-)\s*([a-zA-Z0-9_']*))");
@@ -51,12 +58,12 @@ uint32_t address_resolver::get_address(const std::string &str, HDL_Resource &par
             if(is_sv_constant(op_a_str)){
                 op_a = parse_sv_constant(op_a_str);
             } else{
-                op_a = get_address(op_a_str, parent);
+                op_a = get_address(op_a_str, parent, parent_dep);
             }
             if(is_sv_constant(op_b_str)){
                 op_b = parse_sv_constant(op_b_str);
             } else{
-                op_b = get_address(op_b_str, parent);
+                op_b = get_address(op_b_str, parent, parent_dep);
             }
             auto optor = base_match[2].str();
             if(optor == "+"){
@@ -67,8 +74,12 @@ uint32_t address_resolver::get_address(const std::string &str, HDL_Resource &par
                 return 0;
             }
         }
-        // try and parse the parameter value as an expression;
-        return 0;
+        try{
+            return std::stoul(str, nullptr, 0);
+        } catch(...) {
+            return 0;
+        }
+
     }
 }
 

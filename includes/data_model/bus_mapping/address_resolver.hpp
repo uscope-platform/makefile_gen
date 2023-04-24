@@ -27,11 +27,12 @@ public:
     explicit address_resolver(const HDL_Resource &bdp);
     void push_parameters_map(HDL_dependency &instance);
     void pop_parameters_map();
-    uint32_t get_address(const std::string &str, HDL_Resource &parent);
-    uint32_t get_address(const std::string &str, HDL_Resource &parent, int stack_level);
+    uint32_t get_address(const std::string &str, HDL_Resource &parent_res, HDL_dependency &parent_dep);
+    uint32_t get_address(const std::string &str, HDL_Resource &parent_res, HDL_dependency &parent_dep, int stack_level);
     bool is_sv_constant(const std::string &s);
     uint32_t parse_sv_constant(const std::string &s);
 private:
+
     HDL_Resource bus_defining_package;
     std::vector<std::unordered_map<std::string, std::string>> parameters_stack;
 };

@@ -37,6 +37,8 @@ public:
 
     void add_parameter(const std::string& parameter_name, std::string value);
     std::unordered_map<std::string, std::string> get_parameters() { return parameters;};
+    std::string  get_parameter_value(const std::string& parameter_name) {return parameters[parameter_name];};
+    bool is_parameter_overridden(const std::string& parameter_name) {return parameters.contains(parameter_name);};
 
     void add_port_connection(const std::string& port_name, std::string value);
     std::unordered_map<std::string, std::string> get_ports() { return ports_map;};
@@ -51,6 +53,8 @@ public:
     void set_dependency_class(dependency_class dc){dep_class = dc;};
 
     void add_array_quantifier(const expression &exp);
+    bool is_module_array(){return quantifier!=expression();};
+    expression get_quantifier(){return quantifier;};
 
     template<class Archive>
     void serialize( Archive & ar ) {

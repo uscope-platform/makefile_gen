@@ -20,6 +20,7 @@
 #include <string>
 #include <unordered_map>
 #include <stdexcept>
+#include <set>
 
 #include "data_model/expressions/expression.hpp"
 
@@ -27,6 +28,8 @@ class expression_evaluator {
 public:
     static uint32_t calculate_expression(std::vector<std::string> exp);
     static std::unordered_map<std::string, uint32_t> calculate_expressions(std::vector<expression> exp_vect, std::unordered_map<std::string, uint32_t> params);
+    static uint32_t calculate_expression(expression exp, std::unordered_map<std::string, uint32_t> params);
+    static std::vector<std::string> get_variable_names(expression exp);
 };
 
 
