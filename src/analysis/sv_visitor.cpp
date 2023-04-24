@@ -144,27 +144,28 @@ void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
 }
 
 void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
-    if(file_contains_bus_defining_package){
+    if(file_contains_bus_defining_package || in_module_array_def){
         uint32_t numeric_val = parse_number(ctx->getText());
         string_components.push_back(std::to_string(numeric_val));
     }
+
 }
 
 void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
-    if(file_contains_bus_defining_package){
+    if(file_contains_bus_defining_package || in_module_array_def){
         std::string dbg = ctx->getText();
         string_components.push_back(ctx->getText());
     }
 }
 
 void sv_visitor::exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx) {
-    if(file_contains_bus_defining_package){
+    if(file_contains_bus_defining_package || in_module_array_def){
         string_components.push_back(ctx->getText());
     }
 }
 
 void sv_visitor::exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *ctx) {
-    if(file_contains_bus_defining_package){
+    if(file_contains_bus_defining_package || in_module_array_def){
         string_components.push_back(ctx->getText());
     }
 }
@@ -245,5 +246,27 @@ void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
 
     modules_factory.add_parameter(p_n, val);
 }
+
+void sv_visitor::enterName_of_instance(sv2017::Name_of_instanceContext *ctx) {
+    if(!ctx->unpacked_dimension().empty()){
+        in_module_array_def = true;
+    }
+}
+
+void sv_visitor::exitName_of_instance(sv2017::Name_of_instanceContext *ctx) {
+    if(in_module_array_def){
+        expression q(ctx->identifier()->getText(), string_components);
+        deps_factory.add_array_quantifier(q);
+        string_components.clear();
+    }
+    in_module_array_def = false;
+}
+
+
+void sv_visitor::exitUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) {
+
+}
+
+
 
 

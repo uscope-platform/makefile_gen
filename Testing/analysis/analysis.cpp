@@ -90,6 +90,8 @@ TEST( analysis_test , sv_module) {
     HDL_dependency d2("param", "test_package", package);
     HDL_dependency d1("__init_file__", "file", memory_init);
     HDL_dependency d0("if_array", "axi_lite", module);
+    expression exp("if_array", {"module_parameter_2","+","1"});
+    d0.add_array_quantifier(exp);
     std::vector<HDL_dependency> deps = {d0, d1, d2, d3};
 
 

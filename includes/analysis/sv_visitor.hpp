@@ -72,6 +72,11 @@ public:
 
     void exitNamed_port_connection(sv2017::Named_port_connectionContext *ctx) override;
     void exitNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) override;
+
+    void enterName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
+    void exitName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
+
+    void exitUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) override;
     static uint32_t parse_number(const std::string& s);
 
 
@@ -88,12 +93,16 @@ private:
     std::vector<std::string> current_operators;
     std::string current_declaration_type;
 
+    bool in_module_array_def = false;
+
     std::vector<std::string> string_components;
 
     HDL_modules_factory modules_factory;
     HDL_interfaces_factory interfaces_factory;
     HDL_packages_factory packages_factory;
     HDL_dependencies_factory deps_factory;
+
+
 };
 
 

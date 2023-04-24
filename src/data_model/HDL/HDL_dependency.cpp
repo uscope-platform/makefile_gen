@@ -22,6 +22,7 @@ HDL_dependency::HDL_dependency(const HDL_dependency &c) {
     dep_class = c.dep_class;
     type = c.type;
     name = c.name;
+    quantifier = c.quantifier;
 }
 
 
