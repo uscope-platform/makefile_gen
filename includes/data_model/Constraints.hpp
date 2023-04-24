@@ -21,7 +21,7 @@
 #include <utility>
 #include <sstream>
 
-#include "third_party/cereal/types/string.hpp"
+#include <cereal/types/string.hpp>
 
 class Constraints {
 public:

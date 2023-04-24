@@ -23,7 +23,7 @@
 #include "data_model/Script.hpp"
 #include "data_model/Constraints.hpp"
 
-#include "third_party/json.hpp"
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 

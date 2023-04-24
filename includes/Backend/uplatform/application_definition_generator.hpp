@@ -18,9 +18,8 @@
 
 #include <string>
 #include <utility>
+#include <nlohmann/json.hpp>
 
-
-#include "third_party/json.hpp"
 #include "data_model/Depfile.hpp"
 #include "data_model/documentation/bus_structure/bus_structure.hpp"
 #include "data_model/data_store.hpp"

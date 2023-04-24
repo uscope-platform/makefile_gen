@@ -21,8 +21,8 @@
 #include "bus_module.hpp"
 #include "data_model/documentation/processor_instance.hpp"
 
-#include "third_party/cereal/types/vector.hpp"
-#include "third_party/cereal/types/memory.hpp"
+#include <cereal/types/vector.hpp>
+#include <cereal/types/memory.hpp>
 
 
 #include <string>
@@ -62,8 +62,8 @@ private:
 
 };
 
-#include "third_party/cereal/types/polymorphic.hpp"
-#include "third_party/cereal/archives/binary.hpp"
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/archives/binary.hpp>
 
 CEREAL_REGISTER_TYPE(bus_crossbar);
 CEREAL_REGISTER_POLYMORPHIC_RELATION(bus_component, bus_crossbar)

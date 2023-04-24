@@ -5,13 +5,19 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(OPENSSL_USE_STATIC_LIBS TRUE)
-find_package(OpenSSL REQUIRED)
-
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
+set(ANTLR_VERSION 4.11.1)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/antlr_runtime/dist/usr/local/include/antlr4-runtime)
+find_package(OpenSSL REQUIRED)
+find_package(Threads REQUIRED)
+find_package(antlr4-runtime CONFIG REQUIRED)
+find_package(CLI11 REQUIRED)
+find_package(nlohmann_json REQUIRED)
+find_package(cereal)
+find_package(inja)
 include_directories(includes)
+
+include_directories(${inja_INCLUDE_DIRS})
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DTEMPLATES_FOLDER="${CMAKE_SOURCE_DIR}/templates")
@@ -20,10 +26,6 @@ else()
     add_definitions(-DTEMPLATES_FOLDER="/usr/local/etc/makefile_gen/templates")
     add_definitions(-DSPECS_FOLDER="/usr/local/etc/makefile_gen/specs")
 endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
-
-
-set(ANTLR_VERSION 4.9.3)
-
 
 add_subdirectory(includes)
 add_subdirectory(src)
@@ -38,4 +40,4 @@ ExternalProject_Add(antlr_runtime
         )
 
 add_custom_target(parsers)
-add_dependencies(parsers vh_parser_gen sv_parser_gen antlr_runtime)
+add_dependencies(parsers vh_parser_gen sv_parser_gen)

@@ -17,8 +17,8 @@
 #define MAKEFILEGEN_V2_REGISTER_DOCUMENTATION_HPP
 
 #include <string>
-#include "third_party/cereal/types/string.hpp"
-#include "third_party/cereal/types/vector.hpp"
+#include <cereal/types/vector.hpp>
+#include <cereal/types/string.hpp>
 
 #include "data_model/documentation/field_documentation.hpp"
 

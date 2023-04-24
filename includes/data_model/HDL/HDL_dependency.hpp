@@ -21,12 +21,13 @@
 #include <utility>
 
 #include "data_model/HDL/HDL_definitions.hpp"
+#include "data_model/expressions/expression.hpp"
 
-#include "third_party/cereal/archives/binary.hpp"
-#include "third_party/cereal/types/unordered_map.hpp"
-#include "third_party/cereal/types/vector.hpp"
-#include "third_party/cereal/types/array.hpp"
-#include "third_party/cereal/types/memory.hpp"
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/unordered_map.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/array.hpp>
+#include <cereal/types/memory.hpp>
 
 class HDL_dependency {
 public:

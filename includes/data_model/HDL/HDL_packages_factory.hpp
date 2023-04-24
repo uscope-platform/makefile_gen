@@ -19,8 +19,8 @@
 
 #include "data_model/HDL/HDL_Resource.hpp"
 #include "data_model/HDL/resource_factory_base.hpp"
-#include "data_model/expression.hpp"
-
+#include "data_model/expressions/expression.hpp"
+#include "data_model/expressions/expression_evaluator.hpp"
 
 class HDL_packages_factory : protected resources_factory_base<HDL_Resource>{
 
@@ -37,6 +37,7 @@ private:
     void calculate_unresolved_parameters();
     static uint32_t calculate_expression(std::vector<std::string> exp);
     std::vector<expression> unresolved_parameters;
+    
     std::unordered_map<std::string, uint32_t> numeric_parameters;
 
 };

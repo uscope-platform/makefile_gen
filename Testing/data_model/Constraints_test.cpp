@@ -15,10 +15,10 @@
 
 
 #include <gtest/gtest.h>
+#include <cereal/archives/binary.hpp>
 
 #include "data_model/Constraints.hpp"
 
-#include "third_party/cereal/archives/binary.hpp"
 
 TEST( Constraints_test , get_name) {
     Constraints cnstr("test");

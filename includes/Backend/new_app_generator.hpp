@@ -18,8 +18,8 @@
 
 #include <string>
 #include <filesystem>
-#include "third_party/inja.hpp"
-#include "third_party/json.hpp"
+#include <inja/inja.hpp>
+#include <nlohmann/json.hpp>
 
 class new_app_generator {
 public:

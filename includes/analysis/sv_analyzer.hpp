@@ -21,8 +21,8 @@
 #include <fstream>
 #include <regex>
 #include <vector>
+#include <nlohmann/json.hpp>
 
-#include "third_party/json.hpp"
 #include "data_model/HDL/HDL_Resource.hpp"
 #include "data_model/documentation/bus_structure/bus_crossbar.hpp"
 #include "data_model/documentation/bus_structure/bus_module.hpp"

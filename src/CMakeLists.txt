@@ -17,7 +17,8 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Depfile.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Script.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Constraints.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/expression.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/expressions/expression.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/expressions/expression_evaluator.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/analysis/vhdl_analyzer.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/analysis/documentation_analyzer.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/analysis/vhdl_visitor.cpp /
@@ -61,8 +62,7 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Release")
 target_link_libraries(makefile_gen PRIVATE mgp_sv_lib)
 target_link_libraries(makefile_gen PRIVATE mgp_vh_lib)
 
-target_link_libraries(makefile_gen PRIVATE Threads::Threads)
-target_link_libraries(makefile_gen PRIVATE OpenSSL::SSL)
+target_link_libraries(makefile_gen PRIVATE Threads::Threads cereal pantor::inja OpenSSL::SSL)
 
 ## INSTALLATION SECTION
 

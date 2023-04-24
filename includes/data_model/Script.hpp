@@ -20,8 +20,8 @@
 #include <vector>
 #include <sstream>
 #include <utility>
-#include "third_party/cereal/types/vector.hpp"
-#include "third_party/cereal/types/string.hpp"
+#include <cereal/types/vector.hpp>
+#include <cereal/types/string.hpp>
 
 #define SCRIPT_TCL 0
 #define SCRIPT_PYTHON 1

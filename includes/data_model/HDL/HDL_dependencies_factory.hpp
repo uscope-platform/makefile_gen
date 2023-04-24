@@ -17,6 +17,7 @@
 #define MAKEFILEGEN_V2_HDL_DEPENDENCIES_FACTORY_HPP
 
 #include "data_model/HDL/HDL_dependency.hpp"
+#include "data_model/expressions/expression.hpp"
 
 class HDL_dependencies_factory {
 public:

@@ -26,7 +26,7 @@
 #include "data_model/HDL/HDL_dependencies_factory.hpp"
 
 #include "data_model/HDL/HDL_dependency.hpp"
-#include "data_model/expression.hpp"
+#include "data_model/expressions/expression.hpp"
 
 #include <regex>
 #include <utility>
@@ -35,6 +35,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <filesystem>
+#include <nlohmann/json.hpp>
 
 using namespace mgp_sv;
 

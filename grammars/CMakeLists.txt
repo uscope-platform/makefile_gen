@@ -79,3 +79,7 @@ add_custom_command(
         COMMAND java -cp "${ANTLR_CLASSPATH}" org.antlr.v4.Tool -package mgp_vh ${ANTLR_OPTIONS} ${ANTLR_OUTPUT} ${PROJECT_SOURCE_DIR}/grammars/vhdlParser.g4
         COMMENT "generating sources for VHDL parser"
 )
+
+add_custom_target(vh_parser_gen DEPENDS  ${VHDL_PARSER_SRC})
+
+add_dependencies(vh_parser_gen antlr_jar)

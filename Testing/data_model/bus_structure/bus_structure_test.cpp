@@ -14,9 +14,8 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
-
-#include "third_party/cereal/archives/binary.hpp"
-#include "third_party/cereal/types/polymorphic.hpp"
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/polymorphic.hpp>
 
 #include "data_model/documentation/bus_structure/bus_crossbar.hpp"
 #include "data_model/documentation/bus_structure/bus_module.hpp"

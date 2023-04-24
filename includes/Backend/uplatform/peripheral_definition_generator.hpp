@@ -17,7 +17,7 @@
 #define MAKEFILEGEN_V2_PERIPHERAL_DEFINITION_GENERATOR_HPP
 
 #include <memory>
-#include "third_party/json.hpp"
+#include <nlohmann/json.hpp>
 
 #include "data_model/documentation/bus_structure/bus_structure.hpp"
 #include "data_model/data_store.hpp"

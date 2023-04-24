@@ -20,8 +20,8 @@
 #include "data_model/settings_store.hpp"
 #include "data_model/bus_mapping/bus_specs_manager.hpp"
 #include "data_model/bus_mapping/address_resolver.hpp"
+#include <nlohmann/json.hpp>
 
-#include "third_party/json.hpp"
 #include <regex>
 
 

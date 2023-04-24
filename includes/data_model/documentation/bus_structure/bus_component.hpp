@@ -21,8 +21,9 @@
 #include <utility>
 #include <memory>
 
-#include "third_party/cereal/types/polymorphic.hpp"
-#include "third_party/cereal/types/base_class.hpp"
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/types/base_class.hpp>
+
 
 
 class bus_component {

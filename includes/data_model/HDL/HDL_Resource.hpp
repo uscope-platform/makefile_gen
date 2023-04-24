@@ -27,10 +27,10 @@
 #include "data_model/documentation/module_documentation.hpp"
 #include "data_model/documentation/bus_structure/bus_structure.hpp"
 
-#include "third_party/cereal/archives/binary.hpp"
-#include "third_party/cereal/types/unordered_map.hpp"
-#include "third_party/cereal/types/vector.hpp"
-#include "third_party/cereal/types/memory.hpp"
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/unordered_map.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/memory.hpp>
 
 #include "data_model/HDL/HDL_definitions.hpp"
 

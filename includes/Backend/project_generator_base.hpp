@@ -23,9 +23,9 @@
 #include <set>
 #include <utility>
 #include <regex>
+#include <inja/inja.hpp>
+#include <nlohmann/json.hpp>
 
-#include "third_party/inja.hpp"
-#include "third_party/json.hpp"
 
 using json = nlohmann::json;
 

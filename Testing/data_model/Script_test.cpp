@@ -18,7 +18,7 @@
 #include <gmock/gmock.h>
 
 #include "data_model/Script.hpp"
-#include "third_party/cereal/archives/binary.hpp"
+#include <cereal/archives/binary.hpp>
 
 
 TEST( Script_test , get_name) {

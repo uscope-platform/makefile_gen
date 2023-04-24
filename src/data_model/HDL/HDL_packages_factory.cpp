@@ -32,74 +32,9 @@ void HDL_packages_factory::add_numeric_parameter(const std::string &name, uint32
 }
 
 void HDL_packages_factory::calculate_unresolved_parameters() {
-    std::vector<expression> remaining_parameters;
-
-    while(!unresolved_parameters.empty()){
-        remaining_parameters.clear();
-        //update parameters with calculated values
-        for(auto &np:numeric_parameters){
-            for(auto &item:unresolved_parameters){
-                item.update_expression(np.first, np.second);
-            }
-        }
-
-        // Calculate available expressions
-        for(auto &item:unresolved_parameters){
-            try{
-                std::string param_name = item.get_name();
-                uint32_t res = calculate_expression(item.get_expression());
-                numeric_parameters[param_name] = res;
-            } catch(std::invalid_argument &ex){
-                remaining_parameters.push_back(item);
-            }
-        }
-
-        unresolved_parameters = remaining_parameters;
-    }
+    numeric_parameters = expression_evaluator::calculate_expressions(unresolved_parameters, numeric_parameters);
 }
-uint32_t HDL_packages_factory::calculate_expression(std::vector<std::string> exp) {
-    for (int i = 0; i< exp.size(); i++) {
-        if(exp[i] == "*"){
-            uint32_t op_a = std::stoul(exp[i-1]);
-            uint32_t op_b = std::stoul(exp[i+1]);
-            exp[i-1] = std::to_string(op_a*op_b);
-            exp.erase(exp.begin()+i);
-            exp.erase(exp.begin()+i);
-            --i;
-        } else if(exp[i] == "/"){
-            uint32_t op_a = std::stoul(exp[i-1]);
-            uint32_t op_b = std::stoul(exp[i+1]);
-            exp[i-1] = std::to_string(op_a/op_b);
-            exp.erase(exp.begin()+i);
-            exp.erase(exp.begin()+i);
-        } else if(exp[i]=="%"){
-            uint32_t op_a = std::stoul(exp[i-1]);
-            uint32_t op_b = std::stoul(exp[i+1]);
-            exp[i-1] = std::to_string(op_a%op_b);
-            exp.erase(exp.begin()+i);
-            exp.erase(exp.begin()+i);
-        }
-    }
 
-
-    for (int i = 0; i< exp.size(); i++) {
-        if(exp[i] == "+"){
-            uint32_t op_a = std::stoul(exp[i-1]);
-            uint32_t op_b = std::stoul(exp[i+1]);
-            exp[i-1] = std::to_string(op_a+op_b);
-            exp.erase(exp.begin()+i);
-            exp.erase(exp.begin()+i);
-            --i;
-        } else if(exp[i] == "-"){
-            uint32_t op_a = std::stoul(exp[i-1]);
-            uint32_t op_b = std::stoul(exp[i+1]);
-            exp[i-1] = std::to_string(op_a-op_b);
-            exp.erase(exp.begin()+i);
-            exp.erase(exp.begin()+i);
-        }
-    }
-    return std::stoul(exp[0]);
-}
 
 void HDL_packages_factory::add_string_parameter(const std::string &s) {
 

@@ -20,6 +20,7 @@
 #include <utility>
 #include <antlr4-runtime.h>
 #include <regex>
+#include <nlohmann/json.hpp>
 
 #include "data_model/documentation/bus_structure/bus_structure.hpp"
 #include "data_model/documentation/module_documentation.hpp"
@@ -28,7 +29,7 @@
 #include "mgp_sv/sv2017Lexer.h"
 #include "mgp_sv/sv2017.h"
 
-#include "third_party/json.hpp"
+
 
 class documentation_analyzer {
 public:

@@ -21,7 +21,7 @@
 #include <utility>
 #include <vector>
 
-#include "third_party/cereal/types/vector.hpp"
+#include <cereal/types/vector.hpp>
 
 typedef enum {
   input=1,

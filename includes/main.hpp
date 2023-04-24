@@ -19,7 +19,7 @@
 #include <string>
 
 
-#include "third_party/CLI11.h"
+#include <CLI/CLI.hpp>
 
 #include "frontend/Repository_walker.hpp"
 #include "data_model/data_store.hpp"

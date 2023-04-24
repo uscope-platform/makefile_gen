@@ -14,7 +14,7 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
-#include "third_party/cereal/archives/binary.hpp"
+#include <cereal/archives/binary.hpp>
 
 #include "data_model/documentation/module_documentation.hpp"
 #include "data_model/documentation/register_documentation.hpp"

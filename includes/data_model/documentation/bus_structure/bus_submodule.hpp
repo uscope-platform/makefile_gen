@@ -49,8 +49,8 @@ private:
 
 };
 
-#include "third_party/cereal/types/polymorphic.hpp"
-#include "third_party/cereal/archives/binary.hpp"
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/archives/binary.hpp>
 
 CEREAL_REGISTER_TYPE(bus_submodule);
 CEREAL_REGISTER_POLYMORPHIC_RELATION(bus_component, bus_submodule)
