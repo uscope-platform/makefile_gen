@@ -30,14 +30,20 @@ data_store::data_store(bool e) {
 }
 
 HDL_Resource data_store::get_HDL_resource(const std::string& name) {
-    return cache.hdl[name];
+    if(cache.interfaces.contains(name)) return cache.interfaces[name];
+    else return cache.hdl[name];
 }
 
-void data_store::store_hdl_entity(const HDL_Resource& entity) {
-    cache.hdl[entity.getName()] = entity;
+void data_store::store_hdl_entity(HDL_Resource& entity) {
+    if(entity.get_type()==interface){
+        cache.hdl[entity.getName()] = entity;
+    } else {
+        cache.interfaces[entity.getName()] = entity;
+    }
+
 }
 
-void data_store::store_hdl_entity(const std::vector<HDL_Resource>& vect) {
+void data_store::store_hdl_entity(std::vector<HDL_Resource>& vect) {
     for(auto &item: vect){
         store_hdl_entity(item);
     }
@@ -129,6 +135,17 @@ void data_store::clean_up_caches() {
     }
     evicted_items.clear();
 
+    for (auto  [key, val] : cache.interfaces){
+        if(!std::filesystem::exists(val.get_path())){
+            evicted_items.push_back(key);
+        }
+    }
+    for (const auto &item : evicted_items){
+        cache.interfaces.erase(item);
+    }
+    evicted_items.clear();
+
+
     for (auto  [key, val] : cache.scripts){
         if(!std::filesystem::exists(val.get_path())){
             evicted_items.push_back(key);
@@ -163,6 +180,17 @@ void data_store::remove_stale_info(const std::filesystem::path& p) {
     }
     evicted_items.clear();
 
+    for (auto  [key, val] : cache.interfaces){
+        if(val.get_path()==p.string()){
+            evicted_items.push_back(key);
+        }
+    }
+    for (const auto &item : evicted_items){
+        cache.interfaces.erase(item);
+    }
+    evicted_items.clear();
+
+
     for (auto  [key, val] : cache.scripts){
         if(val.get_path()==p.string()){
             evicted_items.push_back(key);
@@ -195,7 +223,8 @@ void data_store::remove_stale_info(const std::filesystem::path& p) {
 }
 
 void data_store::evict_hdl_entity(const std::string &name) {
-    cache.hdl.erase(name);
+    if(cache.interfaces.contains(name)) cache.interfaces.erase(name);
+    else cache.hdl.erase(name);
 }
 
 void data_store::evict_script(const std::string &name) {
@@ -209,4 +238,13 @@ void data_store::evict_constraint(const std::string &name) {
 
 void data_store::evict_data_file(const std::string &name) {
     cache.data.erase(name);
+}
+
+std::unordered_map<std::string, HDL_Resource> data_store::get_hdl_cache() {
+    std::unordered_map<std::string, HDL_Resource> ret_val;
+
+    ret_val.insert(cache.hdl.begin(), cache.hdl.end());
+    ret_val.insert(cache.interfaces.begin(), cache.interfaces.end());
+
+    return ret_val;
 }

@@ -78,6 +78,20 @@ TEST( data_store_test , evict_hdl_entity) {
 }
 
 
+TEST( data_store_test , evict_interface_entity) {
+
+    auto *store_1 = new data_store(true);
+    HDL_Resource test_entity(interface, "test", "/test/path");
+
+    store_1->store_hdl_entity(test_entity);
+    store_1->evict_hdl_entity(test_entity.getName());
+    std::string n = "test";
+    HDL_Resource test_item = store_1->get_HDL_resource(n);
+
+    ASSERT_EQ(test_item, HDL_Resource());
+
+}
+
 
 TEST( data_store_test , ser_des_data_File) {
 
@@ -146,6 +160,27 @@ TEST( data_store_test , store_data_file_vect) {
 
 
 
+
+
+TEST( data_store_test , store_interface_vect) {
+
+    auto *store = new data_store(true);
+    HDL_Resource test_res_1(interface, "test_1", "/bin/sh");
+    HDL_Resource test_res_2(interface, "test_2", "/bin/sh");
+    std::vector<HDL_Resource> test_vect = {test_res_1,test_res_2};
+    store->store_hdl_entity(test_vect);
+    std::string name = "test_1";
+    HDL_Resource test_result_1 = store->get_HDL_resource(name);
+    name = "test_2";
+    HDL_Resource test_result_2 = store->get_HDL_resource(name);
+    std::vector<HDL_Resource> res_vect = {test_result_1, test_result_2};
+
+    store->evict_hdl_entity("test_1");
+    store->evict_hdl_entity("test_2");
+
+    ASSERT_EQ(test_vect[0], res_vect[0]);
+    ASSERT_EQ(test_vect[1], res_vect[1]);
+}
 
 TEST( data_store_test , store_hdl_vect) {
 

@@ -29,6 +29,7 @@
 
 struct cache_t{
     std::unordered_map<std::string, HDL_Resource> hdl;
+    std::unordered_map<std::string, HDL_Resource> interfaces;
     std::unordered_map<std::string, Script> scripts;
     std::unordered_map<std::string, Constraints> constraints;
     std::unordered_map<std::string, DataFile> data;
@@ -36,7 +37,7 @@ struct cache_t{
     template <class Archive>
     void serialize( Archive & ar )
     {
-        ar( hdl, scripts, constraints, data);
+        ar( hdl, scripts, constraints, interfaces, data);
     }
 };
 
@@ -44,8 +45,8 @@ class data_store {
 public:
     data_store(bool e);
     HDL_Resource get_HDL_resource(const std::string& name);
-    void store_hdl_entity(const HDL_Resource& entity);
-    void store_hdl_entity(const std::vector<HDL_Resource> & vect);
+    void store_hdl_entity(HDL_Resource& entity);
+    void store_hdl_entity(std::vector<HDL_Resource> & vect);
     void evict_hdl_entity(const std::string& name);
 
     Script get_script(std::string& name);
@@ -66,7 +67,7 @@ public:
     void remove_stale_info(const std::filesystem::path& p);
     bool is_primitive(const std::string &name);
 
-    std::unordered_map<std::string, HDL_Resource> get_hdl_cache() const {return cache.hdl;};
+    std::unordered_map<std::string, HDL_Resource> get_hdl_cache();
     std::unordered_map<std::string, Script> get_scripts_cache() const {return cache.scripts;};
     std::unordered_map<std::string, Constraints> get_constraints_cache() const {return cache.constraints;};
     std::unordered_map<std::string, DataFile> get_data_cache() const {return cache.data;};

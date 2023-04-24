@@ -35,7 +35,6 @@ public:
     bool numeric_parameter_exists(const std::string &name) {return numeric_parameters.count(name)>0;};
 private:
     void calculate_unresolved_parameters();
-    static uint32_t calculate_expression(std::vector<std::string> exp);
     std::vector<expression> unresolved_parameters;
     
     std::unordered_map<std::string, uint32_t> numeric_parameters;
