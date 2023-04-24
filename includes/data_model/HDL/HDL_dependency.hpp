@@ -36,7 +36,7 @@ public:
     HDL_dependency( const HDL_dependency &c );
 
     void add_parameter(const std::string& parameter_name, std::string value);
-    std::unordered_map<std::string, std::string> get_parameters() { return parameters_map;};
+    std::unordered_map<std::string, std::string> get_parameters() { return parameters;};
 
     void add_port_connection(const std::string& port_name, std::string value);
     std::unordered_map<std::string, std::string> get_ports() { return ports_map;};
@@ -50,18 +50,21 @@ public:
     dependency_class get_dependency_class() const {return dep_class;};
     void set_dependency_class(dependency_class dc){dep_class = dc;};
 
+    void add_array_quantifier(const expression &exp);
+
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name,type, dep_class, ports_map, parameters_map);
+        ar(name, type, dep_class, ports_map, parameters, quantifier);
     }
 
     friend bool operator==(const HDL_dependency&lhs, const HDL_dependency&rhs);
 private:
-    std::unordered_map<std::string, std::string> parameters_map;
+    std::unordered_map<std::string, std::string> parameters;
     std::unordered_map<std::string, std::string> ports_map;
     dependency_class dep_class;
     std::string type;
     std::string name;
+    expression quantifier;
 };
 
 

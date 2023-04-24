@@ -33,3 +33,7 @@ HDL_dependency HDL_dependencies_factory::get_dependency() {
     valid_dependency = false;
     return current_dependency;
 }
+
+void HDL_dependencies_factory::add_array_quantifier(const expression &exp) {
+    current_dependency.add_array_quantifier(exp);
+}

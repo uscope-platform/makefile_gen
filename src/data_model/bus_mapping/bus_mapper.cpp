@@ -17,7 +17,7 @@
 
 bus_mapper::bus_mapper(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d, const HDL_Resource &bdp) : resolver(bdp){
     d_store = d;
-    s_store = s;
+    s_store =  s;
     bus_defining_package = bdp;
 }
 
@@ -32,7 +32,7 @@ void bus_mapper::map_bus(const nlohmann::json &bus, const std::string &bus_selec
 
     map_network(top, bus_defining_package.get_bus_roots()[0]->get_base_address());
     for(auto &item:leaf_nodes){
-        std::cout<<" -- module -- " << item.module_spec.getName() << " -- address -- " <<std::hex << item.node_address << std::endl;
+        std::cout<<"Found " << item.module_spec.getName() << " at address " <<std::hex << item.node_address << std::endl;
     }
 }
 

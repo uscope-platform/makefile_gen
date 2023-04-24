@@ -24,6 +24,7 @@ public:
     void new_dependency(const std::string &n, const std::string &p, dependency_class dc);
     void add_parameter(const std::string &name, const std::string &value);
     void add_port(const std::string &name, const std::string &value);
+    void add_array_quantifier(const expression &exp);
     HDL_dependency get_dependency();
     bool is_valid_dependency(){return valid_dependency;};
 private:

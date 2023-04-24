@@ -17,7 +17,7 @@
 
 
 HDL_dependency::HDL_dependency(const HDL_dependency &c) {
-    parameters_map = c.parameters_map;
+    parameters = c.parameters;
     ports_map = c.ports_map;
     dep_class = c.dep_class;
     type = c.type;
@@ -32,7 +32,7 @@ HDL_dependency::HDL_dependency(std::string dep_name, std::string dep_type, depen
 }
 
 void HDL_dependency::add_parameter(const std::string& parameter_name, std::string value) {
-    parameters_map[parameter_name] = std::move(value);
+    parameters[parameter_name] = std::move(value);
 }
 
 void HDL_dependency::add_port_connection(const std::string& port_name, std::string value) {
@@ -46,7 +46,11 @@ bool operator==(const HDL_dependency &lhs, const HDL_dependency &rhs) {
     ret &= lhs.type == rhs.type;
     ret &= lhs.dep_class == rhs.dep_class;
     ret &= lhs.ports_map == rhs.ports_map;
-    ret &= lhs.parameters_map == rhs.parameters_map;
-
+    ret &= lhs.parameters == rhs.parameters;
+    ret &= lhs.quantifier == rhs.quantifier;
     return ret;
+}
+
+void HDL_dependency::add_array_quantifier(const expression &exp) {
+    quantifier = exp;
 }

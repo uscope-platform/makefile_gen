@@ -236,6 +236,13 @@ void sv_visitor::exitNamed_parameter_assignment(sv2017::Named_parameter_assignme
 void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
     auto p_n = ctx->identifier()->getText();
     auto val = ctx->constant_param_expression()->getText();
+    auto vz = val[0];
+    if ( val.front() == '"' ) {
+        val.erase( 0, 1 ); // erase the first character
+        val.erase( val.size() - 1 ); // erase the last character
+        val = std::regex_replace(val, std::regex("\\\\"), "");
+    }
+
     modules_factory.add_parameter(p_n, val);
 }
 

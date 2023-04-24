@@ -11,6 +11,8 @@ module Decoder (
     parameter module_parameter_1 = 56;
     localparam module_parameter_2 = 74;
 
+    axi_lite if_array[module_parameter_2+1]();
+
     reg [31:0] memory [5:0];
     initial memory = $readmemh("mem/init/file.dat");
 
