@@ -160,10 +160,10 @@ int main(int argc, char *argv[]){
         mapper.map_bus(dep.get_bus_section(), "control",dep.get_synth_tl());
         if(generate_app_definition){
             std::shared_ptr<bus_crossbar> xbar = std::static_pointer_cast<bus_crossbar>(d_store->get_HDL_resource(dep.get_bus_defining_package()).get_bus_roots()[0]);
-            application_definition_generator app_def_gen(dep, d_store, mapper.get_leaves());
+            application_definition_generator app_def_gen(mapper.get_leaves());
             auto cores = synth_resolver.get_processors();
             app_def_gen.add_cores(cores);
-            app_def_gen.construct_application();
+            app_def_gen.construct_application(dep.get_project_name());
             app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
         }
         if(generate_periph_definition){

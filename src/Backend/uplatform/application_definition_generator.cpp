@@ -17,15 +17,32 @@
 
 
 
-application_definition_generator::application_definition_generator(const Depfile &file,
-                                                                   std::shared_ptr<data_store> &d,
-                                                                   const std::vector<bus_map_node> &l) : dep(file){
+application_definition_generator::application_definition_generator(const std::vector<bus_map_node> &l) {
     leaves = l;
-    d_store = d;
+
+    std::unordered_map<std::string, uint32_t> app_instance_counters;
+    std::unordered_set<std::string> repeated_app_instances;
+    std::unordered_set<std::string> defined_app_instances;
+
+    for(auto &item:leaves){
+
+        if(defined_app_instances.contains(item.instance.get_name())){
+            app_instance_counters[item.instance.get_name()] = 1;
+        } else{
+            defined_app_instances.insert(item.instance.get_name());
+        }
+    }
+
     for(auto &item:leaves){
         nlohmann::json periph;
-        periph["name"] = item.instance.get_name();
-        periph["peripheral_id"] = item.instance.get_name();
+        std::string inst_name = item.instance.get_name();
+        if(app_instance_counters.contains(inst_name)){
+            auto inst_count = app_instance_counters[inst_name];
+            app_instance_counters[inst_name]++;
+            inst_name += "_" + std::to_string(inst_count);
+        }
+        periph["name"] =inst_name;
+        periph["peripheral_id"] = inst_name;
         periph["spec_id"] =item.instance.get_type();
         periph["base_address"] = "0x" + uint_to_hex(item.node_address);
         periph["proxied"] = false;
@@ -41,8 +58,8 @@ void application_definition_generator::write_definition_file(const std::string &
     ss.close();
 }
 
-void application_definition_generator::construct_application() {
-    application["application_name"] = dep.get_project_name();
+void application_definition_generator::construct_application(const std::string &name) {
+    application["application_name"] = name;
     application["bitstream"] = "";
     application["channels"] = std::vector<nlohmann::json>();
     application["channel_groups"] = std::vector<nlohmann::json>();

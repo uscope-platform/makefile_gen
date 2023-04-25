@@ -27,20 +27,15 @@
 
 class application_definition_generator {
 public:
-    application_definition_generator(const Depfile& file,
-                                     std::shared_ptr<data_store> &d,
-                                     const std::vector<bus_map_node> &l
-                                     );
+    application_definition_generator(const std::vector<bus_map_node> &l);
     void add_cores(std::vector<processor_instance> cs);
     void write_definition_file(const std::string &path);
-    void construct_application();
+    void construct_application(const std::string &name);
 private:
 
 
     static std::string uint_to_hex(uint32_t i);
-    Depfile dep;
 
-    std::shared_ptr<data_store> d_store;
     nlohmann::json application;
     std::vector<nlohmann::json> peripherals;
     std::vector<bus_map_node> leaves;

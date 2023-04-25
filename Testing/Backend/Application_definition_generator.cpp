@@ -81,8 +81,8 @@ TEST_F( app_def_generation , generate_app_def) {
     bmn.instance = d3;
     mapper.push_back(bmn);
 
-    application_definition_generator gen(file, d_store, mapper);
-    gen.construct_application();
+    application_definition_generator gen(mapper);
+    gen.construct_application(file.get_project_name());
     gen.write_definition_file("test.json");
 
     nlohmann::json result;
