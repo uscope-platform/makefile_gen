@@ -23,13 +23,18 @@
 #include <set>
 
 #include "data_model/expressions/expression.hpp"
+#include "data_model/HDL/HDL_Resource.hpp"
+#include "data_model/HDL/HDL_dependency.hpp"
+#include "data_model/bus_mapping/address_resolver.hpp"
 
 class expression_evaluator {
 public:
+
     static uint32_t calculate_expression(std::vector<std::string> exp);
     static std::unordered_map<std::string, uint32_t> calculate_expressions(std::vector<expression> exp_vect, std::unordered_map<std::string, uint32_t> params);
     static uint32_t calculate_expression(expression exp, std::unordered_map<std::string, uint32_t> params);
     static std::vector<std::string> get_variable_names(expression exp);
+    static uint32_t calculate_expression(const expression& exp, HDL_Resource &res, HDL_dependency &dep, address_resolver &resolver);
 };
 
 

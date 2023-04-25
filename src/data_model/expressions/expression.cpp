@@ -46,3 +46,19 @@ bool operator==(const expression &lhs, const expression &rhs) {
     return ret;
 }
 
+expression::expression(std::string text) {
+    name = "exp";
+    std::vector<std::string> tokens;
+    std::string purged_text = std::regex_replace (text,std::regex("\\s+"),"sub-$2");
+    std::regex re(R"(([a-z0-9A-Z$_]+)(\+|\-|\*|\/)([a-z0-9A-Z$_]+))");
+    std::smatch sm;
+    if(std::regex_match(purged_text, sm, re)){
+        expression_components.push_back(sm[1]);
+        expression_components.push_back(sm[2]);
+        expression_components.push_back(sm[3]);
+    } else{
+        expression_components.push_back(text);
+    }
+
+}
+

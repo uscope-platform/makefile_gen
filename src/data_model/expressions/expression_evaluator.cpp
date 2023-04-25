@@ -116,3 +116,13 @@ expression_evaluator::calculate_expression(expression exp, std::unordered_map<st
     return expression_evaluator::calculate_expression(exp.get_expression());
 
 }
+
+uint32_t expression_evaluator::calculate_expression(const expression& exp, HDL_Resource &res, HDL_dependency &dep,
+                                                    address_resolver &resolver) {
+
+    std::unordered_map<std::string, uint32_t> params;
+    for(auto &val: expression_evaluator::get_variable_names(exp)){
+        params[val] = resolver.get_address(val, res, dep, 0);
+    }
+    return expression_evaluator::calculate_expression(exp, params);
+}

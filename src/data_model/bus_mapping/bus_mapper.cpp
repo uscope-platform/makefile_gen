@@ -30,25 +30,38 @@ void bus_mapper::map_bus(const nlohmann::json &bus, const std::string &bus_selec
 
     bus_map_node top = {bus_if, tl, HDL_dependency()};
 
-    map_network(top, bus_defining_package.get_bus_roots()[0]->get_base_address());
+    map_network(top, bus_defining_package.get_bus_roots()[0]->get_base_address(), false);
     for(auto &item:leaf_nodes){
         std::cout<<"Found " << item.module_spec.getName() << " at address " <<std::hex << item.node_address << std::endl;
     }
 }
 
 
-void bus_mapper::map_network( bus_map_node &res, uint32_t base_address) {
+void bus_mapper::map_network( bus_map_node &res, uint32_t base_address, bool parametrised) {
     std::vector<bus_map_node> bus_network;
     resolver.push_parameters_map(res.instance);
     for(auto &dep: res.module_spec.get_dependencies()){
         std::vector<bus_map_node> sub_network;
-        for(auto &port:dep.get_ports()){
-            if(port_contains_if(port.second, res.port_name)){
-                auto module_spec = d_store->get_HDL_resource(dep.get_type());
-                if(specs_manager.get_port_dir_specs(bus_type, if_port_input) == module_spec.get_if_port_specs(port.first).second){
-                    bus_map_node cur_node(port.first, module_spec, dep);
-                    process_node_type(cur_node, res, base_address);
-                    sub_network.push_back(cur_node);
+        if(parametrised){
+            if(dep.get_type()==res.module_name){
+                for(auto &port:dep.get_ports()) {
+                    if(port.second.substr(0, port.second.find("[")) == res.port_name){
+                        auto module_spec = d_store->get_HDL_resource(dep.get_type());
+                        bus_map_node cur_node(port.first, module_spec, dep);
+                        process_node_type(cur_node, res, base_address);
+                        sub_network.push_back(cur_node);
+                    }
+                }
+            }
+        } else{
+            for(auto &port:dep.get_ports()){
+                if(port_contains_if(port.second, res.port_name)){
+                    auto module_spec = d_store->get_HDL_resource(dep.get_type());
+                    if(specs_manager.get_port_dir_specs(bus_type, if_port_input) == module_spec.get_if_port_specs(port.first).second){
+                        bus_map_node cur_node(port.first, module_spec, dep);
+                        process_node_type(cur_node, res, base_address);
+                        sub_network.push_back(cur_node);
+                    }
                 }
             }
         }
@@ -56,9 +69,8 @@ void bus_mapper::map_network( bus_map_node &res, uint32_t base_address) {
             process_interconnects(res.module_spec, res.instance);
             if(!sub_network.empty()){
                 for(auto &item:sub_network){
-                    map_network(item, base_address);
+                    map_network(item, base_address, false);
                 }
-
             }
         }
     }
@@ -96,19 +108,22 @@ void bus_mapper::process_interconnects(HDL_Resource &parent_res, HDL_dependency 
                 }
             }
             if(master_if_decl.is_module_array()){
-                std::unordered_map<std::string, uint32_t> expr_params;
-                for(auto &val: expression_evaluator::get_variable_names(master_if_decl.get_quantifier())){
-                    expr_params[val] = resolver.get_address(val, parent_res, parent_dep, 0);
-                }
-                auto n_ifs = expression_evaluator::calculate_expression(master_if_decl.get_quantifier(), expr_params);
-                auto addresses_vect = get_parametrised_addrs(parametrized_bus_instance,
-                                                             nlohmann::json::parse(parent_res.get_string_parameter("PRAGMA_MKFG_BUS_LAYOUT")),
-                                                             n_ifs, parent_res, parent_dep);
 
-                for(int i = 0; i<addresses_vect.size(); i++){
-                    bus_map_node node = {masters_str, parent_res, parent_dep};
-                    //TODO: adapt network mapper to work with interface array in port connections;
-                    map_network(node, addresses_vect[i]);
+                nlohmann::ordered_json bus_layout;
+                for(auto if_spec:nlohmann::ordered_json::parse(parent_res.get_string_parameter("PRAGMA_MKFG_BUS_LAYOUT"))) {
+                    if (if_spec["name"] == parametrized_bus_instance) {
+                        bus_layout = if_spec;
+                    }
+                }
+
+                auto n_ifs = expression_evaluator::calculate_expression(master_if_decl.get_quantifier(), parent_res, parent_dep, resolver);
+                auto addresses_vect = get_parametrised_addrs(bus_layout, n_ifs, parent_res, parent_dep);
+
+                auto map = decode_interconnect_map(bus_layout["map"], parent_res, parent_dep);
+
+                for(int i = 0; i<map.size(); i++){
+                    bus_map_node node = {masters_str, parent_res, parent_dep, 0, map[i]};
+                    map_network(node, addresses_vect[i], true);
                 }
             }
 
@@ -120,7 +135,7 @@ void bus_mapper::process_interconnects(HDL_Resource &parent_res, HDL_dependency 
 
             for(int i = 0; i<masters_ifs.size(); ++i){
                 bus_map_node node = {masters_ifs[i], parent_res, parent_dep};
-                map_network(node, resolver.get_address(addresses_vect[i], parent_res, parent_dep));
+                map_network(node, resolver.get_address(addresses_vect[i], parent_res, parent_dep), false);
             }
         }
     }
@@ -186,19 +201,28 @@ std::vector<std::string> bus_mapper::get_interconnect_addr_vect(bus_map_node &it
     return addresses_vect;
 }
 
-std::vector<uint32_t> bus_mapper::get_parametrised_addrs(std::string name, const nlohmann::json &spec,
+std::vector<uint32_t> bus_mapper::get_parametrised_addrs( const nlohmann::json &spec,
                                                          uint32_t n_ifs, HDL_Resource &parent_res,
                                                          HDL_dependency &parent_dep) {
     std::vector<uint32_t> ret_val;
 
-    for(auto if_spec:spec){
-        auto dbg = nlohmann::to_string(if_spec);
-        if(if_spec["name"]==name){
-            uint32_t base_addr = resolver.get_address(if_spec["base"], parent_res, parent_dep);
-            uint32_t offset = std::stoul((std::string )if_spec["offset"], nullptr, 0);
-            for(int i = 0; i<n_ifs; i++){
-                ret_val.push_back(base_addr+i*offset);
-            }
+    uint32_t base_addr = resolver.get_address(spec["base"], parent_res, parent_dep);
+    uint32_t offset = std::stoul((std::string )spec["offset"], nullptr, 0);
+    for(int i = 0; i<n_ifs; i++){
+        ret_val.push_back(base_addr+i*offset);
+    }
+    return ret_val;
+}
+
+std::unordered_map<uint32_t, std::string> bus_mapper::decode_interconnect_map(const nlohmann::ordered_json &map, HDL_Resource &parent_res, HDL_dependency &parent_dep) {
+    int current_if = 0;
+    std::unordered_map<uint32_t, std::string> ret_val;
+    for(auto &item:map){
+        expression e = expression(item["len"]);
+        auto quantifier = expression_evaluator::calculate_expression(e, parent_res, parent_dep, resolver);
+        for(int i = 0; i<quantifier; i++){
+           ret_val[current_if] = item["mod"];
+           current_if++;
         }
     }
     return ret_val;

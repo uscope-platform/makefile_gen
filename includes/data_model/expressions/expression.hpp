@@ -22,13 +22,14 @@
 #include <stack>
 #include <utility>
 #include <memory>
-
+#include <regex>
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/vector.hpp>
 
 class expression {
 public:
     expression()=default;
+    explicit expression(std::string text);
     expression( const expression &e );
     expression(std::string n, uint32_t a);
     expression(std::string n, std::vector<std::string> e);
