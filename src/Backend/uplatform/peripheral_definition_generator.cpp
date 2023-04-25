@@ -16,42 +16,29 @@
 #include "Backend/uplatform/peripheral_definition_generator.hpp"
 
 peripheral_definition_generator::peripheral_definition_generator(const Depfile &file,
-                                                                 std::shared_ptr<bus_crossbar> xbar, std::shared_ptr<data_store> &d) {
+                                                                 std::shared_ptr<bus_crossbar> xbar, std::shared_ptr<data_store> &d, const std::vector<bus_map_node> &l) {
     bus_root = std::move(xbar);
     ver = "1.0";
     d_store = d;
-    walk_bus_structure(bus_root);
-}
 
-void peripheral_definition_generator::walk_bus_structure(const std::shared_ptr<bus_crossbar> &node) {
-    for(auto &item: node->get_children()){
-        auto&  ptr = *item;
-        std::string ret;
-        if (typeid(ptr) == typeid(bus_crossbar)) {
-            walk_bus_structure(std::static_pointer_cast<bus_crossbar>(item));
-        } else if(typeid(ptr) == typeid(bus_module)) {
-            auto mod = std::static_pointer_cast<bus_module>(item);
-            HDL_Resource res = d_store->get_HDL_resource(mod->get_module_type());
-            generate_peripheral(res);
-        }
-    }
-
-    while(!submodules_to_generate.empty()){
-        auto working_set = submodules_to_generate;
-        submodules_to_generate.clear();
-        for(auto &item:working_set){
-           generate_peripheral(item);
-        }
+    std::set<std::string> processed_peripherals;
+    for(auto &item:l){
+        processed_peripherals.insert(item.module_spec.getName());
+        generate_peripheral(item.module_spec);
     }
 }
 
-void peripheral_definition_generator::generate_peripheral(HDL_Resource &res) {
+void peripheral_definition_generator::generate_peripheral(const HDL_Resource &res) {
 
     nlohmann::json specs;
 
     if(peripheral_defs.contains(res.getName())) return;
+    std::string periph_name = res.getName();
 
-    specs["peripheral_name"] = res.getName();
+    if(res.get_documentation().is_aliased()){
+        periph_name= res.get_documentation().get_alias();
+    }
+    specs["peripheral_name"] = periph_name;
     specs["version"] = ver;
 
 
@@ -62,7 +49,7 @@ void peripheral_definition_generator::generate_peripheral(HDL_Resource &res) {
     }
 
     specs["registers"] = regs;
-    peripheral_defs[res.getName()] = specs;
+    peripheral_defs[periph_name] = specs;
 
 
     for(auto &item:res.get_submodules()){

@@ -66,7 +66,7 @@ class HDL_Resource {
 
         void add_submodule(const bus_submodule &s) {bus_submodules.push_back(s);};
         void set_submodules(std::vector<bus_submodule> v) {bus_submodules = std::move(v);};
-        std::vector<bus_submodule> get_submodules() {return bus_submodules;};
+        std::vector<bus_submodule> get_submodules() const {return bus_submodules;};
 
         void add_processor_doc(processor_instance &p) {processor_docs.push_back(p);};
         std::vector<processor_instance> get_processor_doc() {return processor_docs;};
@@ -83,7 +83,7 @@ class HDL_Resource {
         std::string get_string_parameter(const std::string &name){return string_parameter[name];};
         bool is_string_parameter(const std::string &name){return string_parameter.contains(name);};
         void set_documentation(module_documentation &d) {doc= d;};
-        module_documentation get_documentation() { return doc;};
+        module_documentation get_documentation() const { return doc;};
 
         template<class Archive>
         void serialize( Archive & ar ) {

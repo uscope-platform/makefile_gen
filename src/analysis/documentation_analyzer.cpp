@@ -145,6 +145,9 @@ void documentation_analyzer::analyze_module_hierarchy(nlohmann::json &obj) {
 void documentation_analyzer::analyze_peripheral(nlohmann::json &obj) {
     module_documentation mod_doc;
     std::string str_n = obj["name"];
+    if(obj.contains("alias")){
+        mod_doc.set_alias(obj["alias"]);
+    }
     mod_doc.set_name(str_n);
     for(auto &item : obj["registers"]){
         std::string off =item["offset"];

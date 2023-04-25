@@ -17,6 +17,7 @@
 #define MAKEFILEGEN_V2_MODULE_DOCUMENTATION_HPP
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <memory>
 #include <sstream>
@@ -31,18 +32,22 @@ class module_documentation {
 public:
     module_documentation() = default;
     void add_register(const register_documentation& reg);
-    void set_processor_io(std::vector<io> i) {processor_io = i;};
+    void set_processor_io(std::vector<io> i) {processor_io = std::move(i);};
     void set_name(const std::string &n) {name = n;};
     std::vector<register_documentation> get_registers() {return  registers;};
+    void set_alias(const std::string &a){ alias = a;};
+    std::string get_alias(){return alias;};
+    bool is_aliased(){return alias!="";};
 
     template<class Archive>
     void serialize(Archive & archive) {
-        archive(name, registers, processor_io);
+        archive(name, registers, alias, processor_io);
     }
 
     friend bool operator==(const module_documentation&lhs, const module_documentation&rhs);
 private:
     std::string name;
+    std::string alias;
     std::vector<register_documentation> registers;
     std::vector<io> processor_io;
 
