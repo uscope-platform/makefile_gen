@@ -18,77 +18,21 @@
 
 
 application_definition_generator::application_definition_generator(const Depfile &file,
-                                                                   std::shared_ptr<bus_crossbar> xbar, std::shared_ptr<data_store> &d) : dep(file){
-    bus_root = std::move(xbar);
+                                                                   std::shared_ptr<data_store> &d,
+                                                                   const std::vector<bus_map_node> &l) : dep(file){
+    leaves = l;
     d_store = d;
-    walk_bus_structure(bus_root);
-}
-
-void application_definition_generator::walk_bus_structure(const std::shared_ptr<bus_crossbar>& node) {
-
-    for(auto &item: node->get_children()){
-        auto&  ptr = *item;
-        std::string ret;
-        if (typeid(ptr) == typeid(bus_crossbar)) {
-            walk_bus_structure(std::static_pointer_cast<bus_crossbar>(item));
-        } else if(typeid(ptr) == typeid(bus_module)) {
-            auto module = std::static_pointer_cast<bus_module>(item);
-            auto entity = d_store->get_HDL_resource(module->get_module_type());
-            auto submodules = entity.get_submodules();
-
-            if(submodules.empty()){
-                peripherals.push_back(generate_peripheral(module));
-            } else{
-                auto submodules_def = generate_submodules(submodules, module->get_name(),
-                                                          module->get_base_address());
-                if(!submodules_def.empty()){
-                    peripherals.insert(peripherals.end(), submodules_def.begin(), submodules_def.end());
-                }
-            }
-        }
+    for(auto &item:leaves){
+        nlohmann::json periph;
+        periph["name"] = item.instance.get_name();
+        periph["peripheral_id"] = item.instance.get_name();
+        periph["spec_id"] =item.instance.get_type();
+        periph["base_address"] = "0x" + uint_to_hex(item.node_address);
+        periph["proxied"] = false;
+        periph["proxy_address"] = std::to_string(0);
+        peripherals.push_back(periph);
     }
 }
-
-std::vector<nlohmann::json>
-application_definition_generator::generate_submodules(std::vector<bus_submodule> &sm, const std::string &spec_prefix,
-                                                      uint32_t base_address) {
-    std::vector<nlohmann::json> ret;
-
-    for (auto &item:sm) {
-        auto def = generate_peripheral(item, spec_prefix, base_address);
-        ret.push_back(def);
-        auto children = item.get_children();
-        auto child_defs = generate_submodules(children, spec_prefix + "." + item.get_name(), base_address + item.get_offset());
-        if(!child_defs.empty()){
-            ret.insert(ret.end(), child_defs.begin(), child_defs.end());
-        }
-    }
-
-    return ret;
-}
-
-nlohmann::json application_definition_generator::generate_peripheral(std::shared_ptr<bus_module> m) {
-    nlohmann::json periph;
-    periph["name"] = m->get_name();
-    periph["peripheral_id"] = m->get_name();
-    periph["spec_id"] = m->get_module_type();
-    periph["base_address"] = "0x" + uint_to_hex(m->get_base_address());
-    periph["proxied"] = false;
-    periph["proxy_address"] = std::to_string(0);
-    return periph;
-}
-
-nlohmann::json application_definition_generator::generate_peripheral(bus_submodule m, const std::string& spec_prefix, uint32_t base_address) {
-    nlohmann::json periph;
-    periph["name"] = spec_prefix + "." + m.get_name();
-    periph["peripheral_id"] = spec_prefix + "." + m.get_name();
-    periph["spec_id"] =  m.get_module_type();
-    periph["base_address"] = "0x" + uint_to_hex(base_address + m.get_offset());
-    periph["proxied"] = false;
-    periph["proxy_address"] = std::to_string(0);
-    return periph;
-}
-
 
 void application_definition_generator::write_definition_file(const std::string &path) {
     std::string str = application.dump();

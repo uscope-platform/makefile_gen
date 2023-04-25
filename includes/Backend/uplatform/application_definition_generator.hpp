@@ -23,26 +23,27 @@
 #include "data_model/Depfile.hpp"
 #include "data_model/documentation/bus_structure/bus_structure.hpp"
 #include "data_model/data_store.hpp"
+#include "data_model/bus_mapping/bus_mapper.hpp"
 
 class application_definition_generator {
 public:
-    application_definition_generator(const Depfile& file, std::shared_ptr<bus_crossbar> xbar, std::shared_ptr<data_store> &d);
+    application_definition_generator(const Depfile& file,
+                                     std::shared_ptr<data_store> &d,
+                                     const std::vector<bus_map_node> &l
+                                     );
     void add_cores(std::vector<processor_instance> cs);
     void write_definition_file(const std::string &path);
     void construct_application();
 private:
-    void walk_bus_structure(const std::shared_ptr<bus_crossbar>& node);
-    nlohmann::json generate_peripheral(std::shared_ptr<bus_module> m);
-    nlohmann::json generate_peripheral(bus_submodule m, const std::string& spec_prefix, uint32_t base_address);
-    std::vector<nlohmann::json> generate_submodules(std::vector<bus_submodule> &sm, const std::string& spec_prefix, uint32_t base_address);
+
 
     static std::string uint_to_hex(uint32_t i);
     Depfile dep;
 
     std::shared_ptr<data_store> d_store;
     nlohmann::json application;
-    std::shared_ptr<bus_crossbar> bus_root;
     std::vector<nlohmann::json> peripherals;
+    std::vector<bus_map_node> leaves;
 
     std::vector<processor_instance> cores_spec;
     std::vector<nlohmann::json> cores;

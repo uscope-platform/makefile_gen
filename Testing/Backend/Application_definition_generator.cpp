@@ -61,19 +61,27 @@ TEST_F( app_def_generation , generate_app_def) {
     Depfile file("check_files/Depfile_gs");
 
 
-    std::shared_ptr<bus_module> reg = std::make_shared<bus_module>("register_instance",  "register_type");
-    reg->set_base_address(12);
 
-    std::shared_ptr<bus_module> mod = std::make_shared<bus_module>("module_instance", "module_type");
-    mod->set_base_address(13);
+    std::vector<bus_map_node> mapper;
 
-    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>("crossbar_address_param");
-    xbar->add_child(reg);
-    xbar->add_child(mod);
-    xbar->set_base_address(14);
+    bus_map_node bmn;
 
+    HDL_dependency d1("register_instance", "register_type", module);
+    bmn.node_address = 12;
+    bmn.instance = d1;
+    mapper.push_back(bmn);
 
-    application_definition_generator gen(file, xbar, d_store);
+    HDL_dependency d2("SC", "SyndromeCalculator", module);
+    bmn.node_address = 13;
+    bmn.instance = d2;
+    mapper.push_back(bmn);
+
+    HDL_dependency d3("Decoder", "Decoder", module);
+    bmn.node_address = 23;
+    bmn.instance = d3;
+    mapper.push_back(bmn);
+
+    application_definition_generator gen(file, d_store, mapper);
     gen.construct_application();
     gen.write_definition_file("test.json");
 
@@ -106,8 +114,8 @@ TEST_F( app_def_generation , generate_app_def) {
 
     nlohmann::json p3;
     p3["base_address"] = "0xd";
-    p3["name"] = "module_instance.SC";
-    p3["peripheral_id"] = "module_instance.SC";
+    p3["name"] = "SC";
+    p3["peripheral_id"] = "SC";
     p3["proxied"] = false;
     p3["proxy_address"] = "0";
     p3["spec_id"] = "SyndromeCalculator";
@@ -115,8 +123,8 @@ TEST_F( app_def_generation , generate_app_def) {
 
     nlohmann::json p4;
     p4["base_address"] = "0x17";
-    p4["name"] = "module_instance.Decoder";
-    p4["peripheral_id"] = "module_instance.Decoder";
+    p4["name"] = "Decoder";
+    p4["peripheral_id"] = "Decoder";
     p4["proxied"] = false;
     p4["proxy_address"] = "0";
     p4["spec_id"] = "Decoder";

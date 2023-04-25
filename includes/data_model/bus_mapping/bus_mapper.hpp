@@ -39,7 +39,7 @@ public:
     bus_mapper(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d, const HDL_Resource &bdp);
 
     void map_bus(const nlohmann::json &bus, const std::string &bus_selector, const std::string &top_level);
-
+    std::vector<bus_map_node> get_leaves(){return leaf_nodes;};
 private:
 
     void map_network(bus_map_node &res_v, uint32_t base_address, bool parametrised);
