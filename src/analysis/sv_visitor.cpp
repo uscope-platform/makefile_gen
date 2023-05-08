@@ -263,10 +263,4 @@ void sv_visitor::exitName_of_instance(sv2017::Name_of_instanceContext *ctx) {
 }
 
 
-void sv_visitor::exitUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) {
-
-}
-
-
-
 

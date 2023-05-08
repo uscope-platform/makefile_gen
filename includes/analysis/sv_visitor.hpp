@@ -76,7 +76,6 @@ public:
     void enterName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
     void exitName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
 
-    void exitUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) override;
     static uint32_t parse_number(const std::string& s);
 
 

@@ -42,10 +42,10 @@ void bus_mapper::map_network( bus_map_node &res, uint32_t base_address, bool par
     resolver.push_parameters_map(res.instance);
     for(auto &dep: res.module_spec.get_dependencies()){
         std::vector<bus_map_node> sub_network;
-        if(parametrised){
-            if(dep.get_type()==res.module_name){
-                for(auto &port:dep.get_ports()) {
-                    if(port.second.substr(0, port.second.find("[")) == res.port_name){
+        if(parametrised) {
+            if (dep.get_type() == res.module_name) {
+                for (auto &port: dep.get_ports()) {
+                    if (port.second.substr(0, port.second.find("[")) == res.port_name) {
                         auto module_spec = d_store->get_HDL_resource(dep.get_type());
                         bus_map_node cur_node(port.first, module_spec, dep);
                         process_node_type(cur_node, res, base_address);
@@ -54,8 +54,20 @@ void bus_mapper::map_network( bus_map_node &res, uint32_t base_address, bool par
                 }
             }
         } else{
+            std::string if_name;
+            if(res.port_name.find('[')!=std::string::npos){
+                if_name = res.port_name.substr(0, res.port_name.find('['));
+            } else{
+                if_name = res.port_name;
+            }
             for(auto &port:dep.get_ports()){
-                if(port_contains_if(port.second, res.port_name)){
+                std::string port_name;
+                if(port.second.find('[')!=std::string::npos) {
+                    port_name = port.second.substr(0, port.second.find('['));
+                } else{
+                    port_name = port.second;
+                }
+                if(port_contains_if(port_name, if_name)){
                     auto module_spec = d_store->get_HDL_resource(dep.get_type());
                     if(specs_manager.get_port_dir_specs(bus_type, if_port_input) == module_spec.get_if_port_specs(port.first).second){
                         bus_map_node cur_node(port.first, module_spec, dep);
@@ -94,6 +106,9 @@ void bus_mapper::process_interconnects(HDL_Resource &parent_res, HDL_dependency 
     auto working_set = interconnects;
     interconnects.clear();
     std::string parametrized_bus_instance;
+    if(parent_res.is_string_parameter("PRAGMA_MKFG_DEBUG")){
+        int j = 0;
+    }
     if(parent_res.is_string_parameter("PRAGMA_MKFG_PARAMETRIZED_INTERCONNECT")){
         parametrized_bus_instance = parent_res.get_string_parameter("PRAGMA_MKFG_PARAMETRIZED_INTERCONNECT");
     }
@@ -128,7 +143,7 @@ void bus_mapper::process_interconnects(HDL_Resource &parent_res, HDL_dependency 
             }
 
         } else{
-            auto masters_str = item.instance.get_ports()[specs_manager.get_interconnect_source_port(bus_type, item.module_spec.getName())];//use spec manager instead of hardcoded name;
+            auto masters_str = item.instance.get_ports()[specs_manager.get_interconnect_source_port(bus_type, item.module_spec.getName())];
             auto masters_ifs = split_if_array(masters_str);
 
             auto addresses_vect = get_interconnect_addr_vect(item, parent_res);
