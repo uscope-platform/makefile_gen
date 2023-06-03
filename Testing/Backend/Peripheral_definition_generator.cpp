@@ -78,7 +78,11 @@ TEST_F( periph_def_generation , generate_periph_def) {
     xbar->set_base_address(14);
 
 
-    peripheral_definition_generator uut(file, xbar,d_store);
+    bus_map_node node;
+    node.module_spec = d_store->get_HDL_resource("test_module");
+
+    std::vector<bus_map_node> leaves = {node};
+    peripheral_definition_generator uut(file, xbar,d_store, leaves);
     auto result = uut.get_peripheral_definitions();
 
     nlohmann::json check;
@@ -132,9 +136,5 @@ TEST_F( periph_def_generation , generate_periph_def) {
     check_vect.push_back(reg_3);
     check["test_module"]["registers"] = check_vect;
 
-    check["test_submodule"] = nlohmann::json();
-    check["test_submodule"]["peripheral_name"] = "test_submodule";
-    check["test_submodule"]["version"] = "1.0";
-    check["test_submodule"]["registers"] = std::vector<nlohmann::json>();
     ASSERT_EQ(check, result);
 }
