@@ -13,9 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "analysis/vhdl_visitor.hpp"
+#include "frontend/analysis/vhdl_visitor.hpp"
 
-#include <utility>
+
 
 vhdl_visitor::vhdl_visitor(std::string p) {
     path = std::move(p);

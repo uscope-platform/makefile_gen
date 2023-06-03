@@ -17,6 +17,7 @@
 #define MAKEFILEGEN_V2_VHDL_VISITOR_HPP
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <stack>
 #include "data_model/HDL/HDL_Resource.hpp"

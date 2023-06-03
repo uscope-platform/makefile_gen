@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include <fstream>
 
-#include "analysis/documentation_analyzer.hpp"
+#include "frontend/analysis/documentation_analyzer.hpp"
 
 TEST( documentation_analyzer , package_bus_hierarchy) {
 

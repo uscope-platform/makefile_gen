@@ -26,11 +26,11 @@
 #include "data_model/HDL/HDL_Resource.hpp"
 #include "data_model/documentation/bus_structure/bus_crossbar.hpp"
 #include "data_model/documentation/bus_structure/bus_module.hpp"
-#include "analysis/documentation_analyzer.hpp"
+#include "frontend/analysis/documentation_analyzer.hpp"
 
 #include "mgp_sv/sv2017Lexer.h"
 #include "mgp_sv/sv2017.h"
-#include "analysis/sv_visitor.hpp"
+#include "frontend/analysis/sv_visitor.hpp"
 #include "antlr4-runtime.h"
 
 class sv_analyzer {

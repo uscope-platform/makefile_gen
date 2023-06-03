@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "analysis/sv_visitor.hpp"
+#include "frontend/analysis/sv_visitor.hpp"
 
 sv_visitor::sv_visitor(std::string p) {
     path = std::move(p);

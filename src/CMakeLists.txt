@@ -1,6 +1,6 @@
 set(MAKEFILE_GEN_SRCS_I /
-        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/sv_visitor.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/sv_analyzer.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/sv_visitor.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/sv_analyzer.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/Repository_walker.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/settings_store.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_Resource.cpp /
@@ -19,9 +19,9 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Constraints.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/expressions/expression.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/expressions/expression_evaluator.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/vhdl_analyzer.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/documentation_analyzer.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/vhdl_visitor.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/vhdl_analyzer.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/documentation_analyzer.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/vhdl_visitor.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Dependency_resolver.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/uplatform/application_definition_generator.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/uplatform/peripheral_definition_generator.cpp /
