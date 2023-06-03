@@ -82,7 +82,7 @@ TEST_F( periph_def_generation , generate_periph_def) {
     node.module_spec = d_store->get_HDL_resource("test_module");
 
     std::vector<bus_map_node> leaves = {node};
-    peripheral_definition_generator uut(file, xbar,d_store, leaves);
+    peripheral_definition_generator uut(d_store, leaves);
     auto result = uut.get_peripheral_definitions();
 
     nlohmann::json check;

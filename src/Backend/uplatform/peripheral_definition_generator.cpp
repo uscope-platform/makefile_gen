@@ -15,9 +15,8 @@
 
 #include "Backend/uplatform/peripheral_definition_generator.hpp"
 
-peripheral_definition_generator::peripheral_definition_generator(const Depfile &file,
-                                                                 std::shared_ptr<bus_crossbar> xbar, std::shared_ptr<data_store> &d, const std::vector<bus_map_node> &l) {
-    bus_root = std::move(xbar);
+peripheral_definition_generator::peripheral_definition_generator(std::shared_ptr<data_store> &d, const std::vector<bus_map_node> &l) {
+
     ver = "1.0";
     d_store = d;
 
