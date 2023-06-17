@@ -24,7 +24,7 @@
 #include "frontend/Repository_walker.hpp"
 #include "data_model/data_store.hpp"
 #include "data_model/settings_store.hpp"
-#include "analysis/sv_analyzer.hpp"
+#include "frontend/analysis/sv_analyzer.hpp"
 #include "data_model/Depfile.hpp"
 #include "Backend/Dependency_resolver.hpp"
 #include "Backend/Xilinx/xilinx_project_generator.hpp"

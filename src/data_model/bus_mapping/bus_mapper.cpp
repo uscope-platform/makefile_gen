@@ -110,7 +110,7 @@ void bus_mapper::process_interconnects(HDL_Resource &parent_res, HDL_dependency 
         int j = 0;
     }
     if(parent_res.is_string_parameter("PRAGMA_MKFG_PARAMETRIZED_INTERCONNECT")){
-        parametrized_bus_instance = parent_res.get_string_parameter("PRAGMA_MKFG_PARAMETRIZED_INTERCONNECT");
+        parametrized_bus_instance = parent_res.get_parameter("PRAGMA_MKFG_PARAMETRIZED_INTERCONNECT");
     }
     for(auto &item:working_set) {
         if(item.instance.get_name()==parametrized_bus_instance){
@@ -125,7 +125,7 @@ void bus_mapper::process_interconnects(HDL_Resource &parent_res, HDL_dependency 
             if(master_if_decl.is_module_array()){
 
                 nlohmann::ordered_json bus_layout;
-                for(auto if_spec:nlohmann::ordered_json::parse(parent_res.get_string_parameter("PRAGMA_MKFG_BUS_LAYOUT"))) {
+                for(auto if_spec:nlohmann::ordered_json::parse(parent_res.get_parameter("PRAGMA_MKFG_BUS_LAYOUT"))) {
                     if (if_spec["name"] == parametrized_bus_instance) {
                         bus_layout = if_spec;
                     }
@@ -209,7 +209,7 @@ std::vector<std::string> bus_mapper::get_interconnect_addr_vect(bus_map_node &it
     if(is_array_parameter(address_param)){
         addresses_vect = split_if_array(address_param);
     } else{
-        auto addresses_str = parent.get_string_parameter(address_param);
+        auto addresses_str = parent.get_parameter(address_param);
         addresses_vect = split_if_array(addresses_str);
     }
 

@@ -27,19 +27,38 @@ TEST( analysis_test , package) {
     auto resource = analyzer.analyze()[0];
     ASSERT_EQ(resource.getName(), "test_package");
 
-    std::unordered_map<std::string, uint32_t> parameters = resource.get_numeric_parameters();
+    std::unordered_map<std::string, HDL_parameter> parameters = resource.get_parameters();
 
-    std::unordered_map<std::string, uint32_t> check_map;
-    check_map["bus_base"] = 0x43c00000;
-    check_map["timebase"] = 0x43c00000;
-    check_map["gpio"] = 0x43c01001;
-    check_map["scope_mux"] = 0x43c01001;
-    check_map["modulo_parameter"] = 1;
-    check_map["subtraction_parameter"] = 2;
+    std::unordered_map<std::string, HDL_parameter> check_map;
+    HDL_parameter p;
+    p.set_name("bus_base");
+    p.set_value(0x43c00000);
+    check_map[p.get_name()] = p;
+
+    p.set_name("timebase");
+    p.set_value(0x43c00000);
+    check_map[p.get_name()] = p;
+
+    p.set_name("gpio");
+    p.set_value(0x43c01001);
+    check_map[p.get_name()] = p;
+
+    p.set_name("scope_mux");
+    p.set_value(0x43c01001);
+    check_map[p.get_name()] = p;
+
+    p.set_name("modulo_parameter");
+    p.set_value(1);
+    check_map[p.get_name()] = p;
+
+    p.set_name("subtraction_parameter");
+    p.set_value(2);
+    check_map[p.get_name()] = p;
+
     ASSERT_EQ(check_map, parameters);
 
     HDL_Resource check_res(package, "test_package", "check_files/test_package.sv");
-    check_res.set_numeric_parameters(check_map);
+    check_res.set_parameters(check_map);
 
     std::shared_ptr<bus_crossbar> root = std::make_shared<bus_crossbar>();
     root->set_parameter("bus_base");
@@ -109,8 +128,15 @@ TEST( analysis_test , sv_module) {
     check_res.add_if_port_specs("data_out", "axi_stream", "master");
     check_res.add_if_port_specs("data_in", "axi_stream", "slave");
 
-    check_res.add_string_parameter("module_parameter_1", "56");
-    check_res.add_string_parameter("module_parameter_2", "74");
+
+    HDL_parameter p;
+    p.set_name("module_parameter_1");
+    p.set_default_value("56");
+    check_res.add_parameter(p);
+    p = HDL_parameter();
+    p.set_name("module_parameter_2");
+    p.set_value("74");
+    check_res.add_parameter(p);
 
     ASSERT_EQ(resource, check_res);
     resource = analyzer.analyze()[1];

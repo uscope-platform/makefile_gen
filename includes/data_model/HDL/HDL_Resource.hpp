@@ -24,6 +24,7 @@
 #include <memory>
 
 #include "data_model/HDL/HDL_dependency.hpp"
+#include "data_model/HDL/HDL_parameter.hpp"
 #include "data_model/documentation/module_documentation.hpp"
 #include "data_model/documentation/bus_structure/bus_structure.hpp"
 
@@ -72,22 +73,23 @@ class HDL_Resource {
         std::vector<processor_instance> get_processor_doc() {return processor_docs;};
         bool has_processors() {return !processor_docs.empty();};
 
-        void add_numeric_parameter(const std::string& param_name, uint32_t val) { numeric_parameters[param_name] = val;};
-        void set_numeric_parameters(std::unordered_map<std::string, uint32_t> p) { numeric_parameters = std::move(p);}
-        std::unordered_map<std::string, uint32_t> get_numeric_parameters() {return numeric_parameters;};
-        uint32_t get_numeric_parameter(const std::string &s){return numeric_parameters[s];};
-        bool is_numeric_parameter(const std::string &s){return numeric_parameters.contains(s);};
 
+        void add_parameter(const HDL_parameter &p) { parameters[p.get_name()] = p;};
+        void set_parameters(std::unordered_map<std::string, HDL_parameter> p);
 
-        void add_string_parameter(const std::string& param_name, const std::string& val) { string_parameter[param_name] = val;};
-        std::string get_string_parameter(const std::string &name){return string_parameter[name];};
-        bool is_string_parameter(const std::string &name){return string_parameter.contains(name);};
+        std::string get_parameter(const std::string &p_n){return parameters[p_n].get_string_value();};
+        uint32_t get_numeric_parameter(const std::string &s){return parameters[s].get_numeric_value();};
+        std::unordered_map<std::string, HDL_parameter> get_parameters() {return parameters;};
+
+        bool is_string_parameter(const std::string &p_n);
+        bool is_numeric_parameter(const std::string &s);
+
         void set_documentation(module_documentation &d) {doc= d;};
         module_documentation get_documentation() const { return doc;};
 
         template<class Archive>
         void serialize( Archive & ar ) {
-            ar(name, path, hdl_type, dependencies, if_specs, numeric_parameters, string_parameter, ports, bus_roots, bus_submodules, doc, processor_docs);
+            ar(name, path, hdl_type, dependencies, if_specs, parameters, ports, bus_roots, bus_submodules, doc, processor_docs);
         }
 
         bool is_empty();
@@ -101,10 +103,9 @@ class HDL_Resource {
         std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
         std::unordered_map<std::string, port_direction_t> ports;
         std::unordered_map<std::string, std::array<std::string, 2>> if_specs;
-        std::unordered_map<std::string, std::string> string_parameter;
 
-        //SV PACKAGE SPECIFIC PARAMETERS
-        std::unordered_map<std::string, uint32_t> numeric_parameters;
+        std::unordered_map<std::string, HDL_parameter> parameters;
+
         std::vector<bus_submodule> bus_submodules;
         std::vector<processor_instance> processor_docs;
 

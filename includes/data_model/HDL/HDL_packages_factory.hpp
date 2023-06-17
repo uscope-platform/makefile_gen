@@ -30,15 +30,15 @@ public:
     void set_package_name(const std::string &n) { set_name(n);};
     void add_numeric_parameter(const std::string &name, uint32_t val);
     void add_string_parameter(const std::string &s);
+
     void add_unresolved_parameter(expression p) {unresolved_parameters.push_back(p);};
-    uint32_t get_numeric_parameter(const std::string &name){ return numeric_parameters[name];};
-    bool numeric_parameter_exists(const std::string &name) {return numeric_parameters.count(name)>0;};
+    uint32_t get_numeric_parameter(const std::string &name);
+    bool numeric_parameter_exists(const std::string &name) {return parameters.count(name)>0;};
 private:
     void calculate_unresolved_parameters();
     std::vector<expression> unresolved_parameters;
-    
-    std::unordered_map<std::string, uint32_t> numeric_parameters;
 
+    std::unordered_map<std::string, HDL_parameter> parameters;
 };
 
 

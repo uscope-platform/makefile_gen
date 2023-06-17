@@ -13,30 +13,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_RESOURCES_FACTORY_BASE_HPP
-#define MAKEFILEGEN_V2_RESOURCES_FACTORY_BASE_HPP
+#include "data_model/HDL/HDL_parameters_factory.hpp"
 
-#include <string>
-#include <stack>
 
-template <class T>
-class resources_factory_base {
+void HDL_parameters_factory::new_parameter() {
+    p = HDL_parameter();
+}
 
-protected:
-    void new_basic_resource();
-    T get_resource();
-
-    virtual void set_name(const std::string &n);
-
-    T current_resource;
-    void push_resource();
-    void pop_resource();
-    std::stack<T> resource_stack;
-
-    bool valid_resource;
-};
+HDL_parameter HDL_parameters_factory::get_parameter() {
+    return p;
+}
 
 
 
+void HDL_parameters_factory::set_value(const std::string &s) {
+    if(is_local)
+        p.set_value(s);
+    else
+        p.set_default_value(s);
+}
 
-#endif //MAKEFILEGEN_V2_RESOURCES_FACTORY_BASE_HPP
+void HDL_parameters_factory::set_parameter_name(const std::string &s) {
+    p.set_name(s);
+}
+
+void HDL_parameters_factory::set_local(bool l) {
+    is_local = l;
+}
+
+
+

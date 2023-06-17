@@ -36,7 +36,7 @@ uint32_t address_resolver::get_address(const std::string &str, HDL_Resource &par
         if(parent_dep.is_parameter_overridden(str)){
             param_value = parent_dep.get_parameter_value(str);
         } else {
-            param_value = parent.get_string_parameter(str);
+            param_value = parent.get_parameter(str);
         }
         try{
             if(is_sv_constant(param_value)) return parse_sv_constant(param_value);

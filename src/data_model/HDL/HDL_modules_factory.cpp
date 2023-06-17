@@ -17,7 +17,8 @@
 
 
 void HDL_modules_factory::new_module(std::string &p) {
-    resources_factory_base<HDL_Resource>::new_resource(p);
+    resources_factory_base<HDL_Resource>::new_basic_resource();
+    current_resource.set_path(p);
     current_resource.set_type(module);
 }
 
@@ -52,8 +53,8 @@ HDL_modules_factory::add_if_port_specs(const std::string &p_n, const std::string
     current_resource.add_if_port_specs(p_n, if_name, modport);
 }
 
-void HDL_modules_factory::add_parameter(const std::string &p_n, const std::string &v) {
-    current_resource.add_string_parameter(p_n, v);
+void HDL_modules_factory::add_parameter(const HDL_parameter &p) {
+    current_resource.add_parameter(p);
 }
 
 

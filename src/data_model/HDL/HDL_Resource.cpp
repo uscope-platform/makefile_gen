@@ -40,8 +40,7 @@ HDL_Resource::HDL_Resource(const HDL_Resource &c) {
     hdl_type = c.hdl_type;
     dependencies = c.dependencies;
 
-    numeric_parameters = c.numeric_parameters;
-    string_parameter = c.string_parameter;
+    parameters = c.parameters;
     bus_roots = c.bus_roots;
     doc = c.doc;
     bus_submodules = c.bus_submodules;
@@ -62,14 +61,13 @@ bool HDL_Resource::is_empty() {
     ret &= name.empty();
     ret &= path.empty();
     ret &= hdl_type == module;
-    ret &= numeric_parameters.empty();
     ret &= bus_submodules.empty();
     ret &= processor_docs.empty();
     ret &= dependencies.empty();
     ret &= ports.empty();
     ret &= if_specs.empty();
     ret &= bus_roots.empty();
-    ret &= string_parameter.empty();
+    ret &= parameters.empty();
 
     return ret;
 }
@@ -96,12 +94,11 @@ bool operator==(const HDL_Resource &lhs, const HDL_Resource &rhs) {
     ret &= lhs.path == rhs.path;
     ret &= lhs.hdl_type == rhs.hdl_type;
     ret &= lhs.dependencies == rhs.dependencies;
-    ret &= lhs.numeric_parameters == rhs.numeric_parameters;
     ret &= lhs.bus_submodules == rhs.bus_submodules;
     ret &= lhs.processor_docs == rhs.processor_docs;
     ret &= lhs.ports == rhs.ports;
     ret &= lhs.if_specs == rhs.if_specs;
-    ret &= lhs.string_parameter == rhs.string_parameter;
+    ret &= lhs.parameters == rhs.parameters;
 
     if(lhs.bus_roots.size() != rhs.bus_roots.size()){
         return false;
@@ -132,4 +129,23 @@ void HDL_Resource::add_if_port_specs(const std::string &p_n, const std::string &
 std::pair<std::string, std::string> HDL_Resource::get_if_port_specs(const std::string &p_n) {
     return std::make_pair(if_specs[p_n][0],if_specs[p_n][1]);
 }
+
+void HDL_Resource::set_parameters(std::unordered_map<std::string, HDL_parameter> p) {
+    parameters = std::move(p);
+}
+
+bool HDL_Resource::is_numeric_parameter(const std::string &s) {
+    if(parameters.contains(s)) {
+        return parameters[s].get_type()==numeric_parameter;
+    } else
+        return false;
+}
+
+bool HDL_Resource::is_string_parameter(const std::string &s) {
+    if(parameters.contains(s)) {
+        return parameters[s].get_type()==string_parameter;
+    } else
+        return false;
+}
+
 

@@ -44,7 +44,7 @@ private:
     void process_hdl();
     void search_bus_defining_package(std::string &content);
 
-    std::unordered_map<std::string, uint32_t> parameters;
+    std::unordered_map<std::string, HDL_parameter> parameters;
 
     std::string path;
     std::string processed_content;

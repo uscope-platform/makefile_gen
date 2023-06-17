@@ -14,14 +14,15 @@
 // limitations under the License.
 
 #include "data_model/HDL/resource_factory_base.hpp"
+#include "data_model/HDL/HDL_Resource.hpp"
 
 template<class T>
-void resources_factory_base<T>::new_resource(std::string &p) {
+void resources_factory_base<T>::new_basic_resource() {
     valid_resource = true;
     push_resource();
     current_resource = T();
-    current_resource.set_path(p);
 }
+
 
 template<class T>
 void resources_factory_base<T>::pop_resource() {

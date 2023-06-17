@@ -17,17 +17,17 @@
 
 
 
-std::unordered_map<std::string, uint32_t>
-expression_evaluator::calculate_expressions(std::vector<expression> exp_vect, std::unordered_map<std::string, uint32_t> params) {
+std::unordered_map<std::string, HDL_parameter>
+expression_evaluator::calculate_expressions(std::vector<expression> exp_vect,  std::unordered_map<std::string, HDL_parameter> params) {
     std::vector<expression> working_set = std::move(exp_vect);
     std::vector<expression> remaining_parameters;
 
     while(!working_set.empty()){
         remaining_parameters.clear();
         //update parameters with calculated values
-        for(auto &np:params){
+        for(auto &p:params){
             for(auto &item:working_set){
-                item.update_expression(np.first, np.second);
+                item.update_expression(p.second.get_name(), p.second.get_numeric_value());
             }
         }
 
@@ -36,7 +36,10 @@ expression_evaluator::calculate_expressions(std::vector<expression> exp_vect, st
             try{
                 std::string param_name = item.get_name();
                 uint32_t res = expression_evaluator::calculate_expression(item.get_expression());
-                params[param_name] = res;
+                HDL_parameter p;
+                p.set_name(param_name);
+                p.set_value(res);
+                params[param_name] = p;
             } catch(std::invalid_argument &ex){
                 remaining_parameters.push_back(item);
             }

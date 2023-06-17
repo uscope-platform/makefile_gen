@@ -17,6 +17,7 @@
 
 sv_visitor::sv_visitor(std::string p) {
     path = std::move(p);
+    params_factory.set_local(false);
 }
 
 
@@ -237,14 +238,17 @@ void sv_visitor::exitNamed_parameter_assignment(sv2017::Named_parameter_assignme
 void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
     auto p_n = ctx->identifier()->getText();
     auto val = ctx->constant_param_expression()->getText();
-    auto vz = val[0];
     if ( val.front() == '"' ) {
         val.erase( 0, 1 ); // erase the first character
         val.erase( val.size() - 1 ); // erase the last character
         val = std::regex_replace(val, std::regex("\\\\"), "");
     }
 
-    modules_factory.add_parameter(p_n, val);
+    params_factory.new_parameter();
+    params_factory.set_parameter_name(p_n);
+    params_factory.set_value(val);
+
+    modules_factory.add_parameter(params_factory.get_parameter());
 }
 
 void sv_visitor::enterName_of_instance(sv2017::Name_of_instanceContext *ctx) {
@@ -263,4 +267,11 @@ void sv_visitor::exitName_of_instance(sv2017::Name_of_instanceContext *ctx) {
 }
 
 
+void sv_visitor::enterLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) {
+    params_factory.set_local(true);
+}
+
+void sv_visitor::exitLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) {
+    params_factory.set_local(false);
+}
 

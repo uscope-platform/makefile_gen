@@ -42,7 +42,7 @@ void documentation_analyzer::parse_documentation(std::istream &stream) {
 }
 
 
-void documentation_analyzer::process_documentation(std::unordered_map<std::string, uint32_t> parameters) {
+void documentation_analyzer::process_documentation(std::unordered_map<std::string, HDL_parameter> parameters) {
     parameters_dict = std::move(parameters);
     std::vector<nlohmann::json> documentation_comments;
 
@@ -127,7 +127,7 @@ void documentation_analyzer::analyze_bus_hierarchy(nlohmann::json &obj) {
             root.add_child(analyze_crossbar(item));
         }
     }
-    root.set_base_address(parameters_dict[obj["name"]]);
+    root.set_base_address(parameters_dict[obj["name"]].get_numeric_value());
     bus_roots.push_back(std::make_shared<bus_crossbar>(root));
 }
 
@@ -174,7 +174,7 @@ std::shared_ptr<bus_module> documentation_analyzer::analyze_module(nlohmann::jso
     std::string target_instance = obj["target"]["name"];
     std::string parameter_name =  obj["name"];
     std::shared_ptr<bus_module> mod = std::make_shared<bus_module>(target_instance, target_module);
-    mod->set_base_address(parameters_dict[parameter_name]);
+    mod->set_base_address(parameters_dict[parameter_name].get_numeric_value());
     return mod;
 }
 
@@ -212,7 +212,7 @@ std::shared_ptr<bus_crossbar> documentation_analyzer::analyze_crossbar(nlohmann:
         }
     }
 
-    xbar->set_base_address(parameters_dict[parameter_name]);
+    xbar->set_base_address(parameters_dict[parameter_name].get_numeric_value());
     return xbar;
 }
 

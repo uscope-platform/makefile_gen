@@ -20,6 +20,7 @@
 #include "mgp_sv/sv2017.h"
 
 #include "data_model/HDL/HDL_Resource.hpp"
+#include "data_model/HDL/HDL_parameters_factory.hpp"
 #include "data_model/HDL/HDL_modules_factory.hpp"
 #include "data_model/HDL/HDL_interfaces_factory.hpp"
 #include "data_model/HDL/HDL_packages_factory.hpp"
@@ -69,16 +70,16 @@ public:
     void exitPrimaryLit(sv2017::PrimaryLitContext *ctx) override;
     void exitPrimaryPath(sv2017::PrimaryPathContext *ctx) override;
 
-
     void exitNamed_port_connection(sv2017::Named_port_connectionContext *ctx) override;
     void exitNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) override;
 
     void enterName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
     void exitName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
 
+    void enterLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) override;
+    void exitLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) override;
+
     static uint32_t parse_number(const std::string& s);
-
-
     std::vector<HDL_Resource> get_entities();
 
 private:
@@ -100,6 +101,8 @@ private:
     HDL_interfaces_factory interfaces_factory;
     HDL_packages_factory packages_factory;
     HDL_dependencies_factory deps_factory;
+    HDL_parameters_factory params_factory;
+
 
 
 };

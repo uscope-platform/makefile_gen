@@ -25,7 +25,8 @@
 #include "data_model/documentation/bus_structure/bus_structure.hpp"
 #include "data_model/documentation/module_documentation.hpp"
 #include "data_model/documentation/register_documentation.hpp"
-#include "data_model//documentation/processor_instance.hpp"
+#include "data_model/HDL/HDL_parameter.hpp"
+#include "data_model/documentation/processor_instance.hpp"
 #include "mgp_sv/sv2017Lexer.h"
 #include "mgp_sv/sv2017.h"
 
@@ -37,7 +38,7 @@ public:
     explicit documentation_analyzer(std::istream &stream);
     void parse_documentation(std::istream &stream);
     void set_source_path(std::string &f_path) {path = f_path;};
-    void process_documentation(std::unordered_map<std::string, uint32_t> parameters);
+    void process_documentation(std::unordered_map<std::string, HDL_parameter> parameters);
     std::vector<std::shared_ptr<bus_crossbar>> get_bus_roots();
     std::unordered_map<std::string, std::vector<bus_submodule>> get_bus_submodules();
     std::unordered_map<std::string, module_documentation> get_modules_documentation();
@@ -56,7 +57,7 @@ private:
     // PROCESSORS DOCUMENTATION
     void analyze_processor_instance(nlohmann::json &obj);
 
-    std::unordered_map<std::string, uint32_t> parameters_dict;
+    std::unordered_map<std::string, HDL_parameter> parameters_dict;
 
     std::vector<std::string> raw_documentation_comments;
 

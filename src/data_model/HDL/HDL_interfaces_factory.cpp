@@ -17,7 +17,8 @@
 
 
 void HDL_interfaces_factory::new_interface(std::string &p) {
-    resources_factory_base<HDL_Resource>::new_resource(p);
+    resources_factory_base<HDL_Resource>::new_basic_resource();
+    current_resource.set_path(p);
     current_resource.set_type(interface);
 }
 

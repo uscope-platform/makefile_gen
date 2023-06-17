@@ -17,10 +17,10 @@
 #define MAKEFILEGEN_V2_HDL_MODULES_FACTORY_HPP
 
 #include "data_model/HDL/HDL_Resource.hpp"
-#include "data_model/HDL/resource_factory_base.hpp"
-
+#include "data_model/HDL/HDL_parameter.hpp"
 #include "data_model/HDL/HDL_dependency.hpp"
 
+#include "data_model/HDL/resource_factory_base.hpp"
 class HDL_modules_factory : protected resources_factory_base<HDL_Resource> {
 
 public:
@@ -33,7 +33,7 @@ public:
     void add_mem_file_dep(const HDL_dependency &i);
     void add_package_dep(const HDL_dependency &i);
 
-    void add_parameter(const std::string&p_n, const std::string &v);
+    void add_parameter(const HDL_parameter &p);
 
     void add_port(const std::string &p_n, port_direction_t dir);
     void add_if_port_specs(const std::string &p_n,const std::string &if_name, const std::string &modport);
