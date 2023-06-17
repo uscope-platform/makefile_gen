@@ -231,7 +231,10 @@ void sv_visitor::exitNamed_parameter_assignment(sv2017::Named_parameter_assignme
     auto param_name = ctx->identifier()->getText();
     auto param_value = ctx->param_expression()->getText();
     if(deps_factory.is_valid_dependency()){
-        deps_factory.add_parameter(param_name, param_value);
+        HDL_parameter p;
+        p.set_name(param_name);
+        p.set_value(param_value);
+        deps_factory.add_parameter(param_name, p);
     }
 }
 

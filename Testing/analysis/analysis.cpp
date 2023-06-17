@@ -104,7 +104,10 @@ TEST( analysis_test , sv_module) {
     d3.add_port_connection("reset", "reset");
     d3.add_port_connection("data_in", "data_in");
     d3.add_port_connection("syndrome", "data_out");
-    d3.add_parameter("TEST_PARAM", "test_package::param");
+    HDL_parameter p;
+    p.set_name("TEST_PARAM");
+    p.set_value("test_package::param");
+    d3.add_parameter("TEST_PARAM", p);
 
     HDL_dependency d2("param", "test_package", package);
     HDL_dependency d1("__init_file__", "file", memory_init);
@@ -129,7 +132,7 @@ TEST( analysis_test , sv_module) {
     check_res.add_if_port_specs("data_in", "axi_stream", "slave");
 
 
-    HDL_parameter p;
+    p = HDL_parameter();
     p.set_name("module_parameter_1");
     p.set_default_value("56");
     check_res.add_parameter(p);

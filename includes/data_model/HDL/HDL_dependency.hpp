@@ -21,7 +21,9 @@
 #include <utility>
 
 #include "data_model/HDL/HDL_definitions.hpp"
+#include "data_model/HDL/HDL_parameter.hpp"
 #include "data_model/expressions/expression.hpp"
+
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/unordered_map.hpp>
@@ -35,9 +37,9 @@ public:
     HDL_dependency() = default;
     HDL_dependency( const HDL_dependency &c );
 
-    void add_parameter(const std::string& parameter_name, std::string value);
-    std::unordered_map<std::string, std::string> get_parameters() { return parameters;};
-    std::string  get_parameter_value(const std::string& parameter_name) {return parameters[parameter_name];};
+    void add_parameter(const std::string& parameter_name, const HDL_parameter &p);
+    std::unordered_map<std::string, HDL_parameter> get_parameters() { return parameters;};
+    std::string  get_parameter_value(const std::string& parameter_name) {return parameters[parameter_name].get_string_value();};
     bool is_parameter_overridden(const std::string& parameter_name) {return parameters.contains(parameter_name);};
 
     void add_port_connection(const std::string& port_name, std::string value);
@@ -63,7 +65,7 @@ public:
 
     friend bool operator==(const HDL_dependency&lhs, const HDL_dependency&rhs);
 private:
-    std::unordered_map<std::string, std::string> parameters;
+    std::unordered_map<std::string, HDL_parameter> parameters;
     std::unordered_map<std::string, std::string> ports_map;
     dependency_class dep_class;
     std::string type;

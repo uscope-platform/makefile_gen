@@ -21,8 +21,8 @@ void HDL_dependencies_factory::new_dependency(const std::string &n, const std::s
     valid_dependency = true;
 }
 
-void HDL_dependencies_factory::add_parameter(const std::string &name, const std::string &value) {
-    current_dependency.add_parameter(name, value);
+void HDL_dependencies_factory::add_parameter(const std::string &name, const HDL_parameter &p) {
+    current_dependency.add_parameter(name, p);
 }
 
 void HDL_dependencies_factory::add_port(const std::string &name, const std::string &value) {

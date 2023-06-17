@@ -32,8 +32,8 @@ HDL_dependency::HDL_dependency(std::string dep_name, std::string dep_type, depen
     type = std::move(dep_type);
 }
 
-void HDL_dependency::add_parameter(const std::string& parameter_name, std::string value) {
-    parameters[parameter_name] = std::move(value);
+void HDL_dependency::add_parameter(const std::string& parameter_name, const HDL_parameter &p) {
+    parameters[parameter_name] = p;
 }
 
 void HDL_dependency::add_port_connection(const std::string& port_name, std::string value) {

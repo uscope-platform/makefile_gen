@@ -22,7 +22,7 @@
 class HDL_dependencies_factory {
 public:
     void new_dependency(const std::string &n, const std::string &p, dependency_class dc);
-    void add_parameter(const std::string &name, const std::string &value);
+    void add_parameter(const std::string &name, const HDL_parameter &p);
     void add_port(const std::string &name, const std::string &value);
     void add_array_quantifier(const expression &exp);
     HDL_dependency get_dependency();
