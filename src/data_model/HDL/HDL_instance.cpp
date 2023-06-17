@@ -15,6 +15,8 @@
 
 #include "data_model/HDL/HDL_instance.hpp"
 
+#include <utility>
+
 
 HDL_instance::HDL_instance(const HDL_instance &c) {
     parameters = c.parameters;
@@ -54,4 +56,8 @@ bool operator==(const HDL_instance &lhs, const HDL_instance &rhs) {
 
 void HDL_instance::add_array_quantifier(const expression &exp) {
     quantifier = exp;
+}
+
+void HDL_instance::add_parameters(std::unordered_map<std::string, HDL_parameter> p) {
+    parameters = std::move(p);
 }

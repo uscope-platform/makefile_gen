@@ -13,22 +13,23 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "analysis/HDL_ast_builder.hpp"
+#ifndef MAKEFILEGEN_V2_HDL_AST_BUILDER_HPP
+#define MAKEFILEGEN_V2_HDL_AST_BUILDER_HPP
 
-#include <utility>
+#include <memory>
+#include "data_model/data_store.hpp"
+#include "data_model/settings_store.hpp"
+#include "data_model/HDL/HDL_instance.hpp"
 
-HDL_ast_builder::HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d) {
-    s_store = s;
-    d_store = d;
-}
+class HDL_ast_builder {
+public:
+    HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d);
+    void build_ast(const std::string& top_level_module, std::unordered_map<std::string, HDL_parameter> external_parameters);
+private:
+    std::shared_ptr<settings_store> s_store;
+    std::shared_ptr<data_store> d_store;
 
-void HDL_ast_builder::build_ast(const std::string& top_level_module, std::unordered_map<std::string, HDL_parameter> external_parameters) {
-    auto tl_res = d_store->get_HDL_resource(top_level_module);
+};
 
-    HDL_instance tl_dep;
-    tl_dep.set_name("TL");
-    tl_dep.set_type(top_level_module);
-    tl_dep.add_parameters(std::move(external_parameters));
 
-    // TODO: RECURSIVELY BUILD THE AST BY WALKING THROUGH THE DEFINITIONS
-}
+#endif //MAKEFILEGEN_V2_HDL_AST_BUILDER_HPP
