@@ -83,12 +83,12 @@ TEST( HDL_resource_test , get_path) {
 
 TEST( HDL_resource_test , get_dependencies) {
     HDL_Resource test_item;
-    HDL_dependency d("inst", "test_module_1", module);
+    HDL_instance d("inst", "test_module_1", module);
     test_item.add_dependency(d);
-    HDL_dependency d2("inst", "test_module_2", module);
+    HDL_instance d2("inst", "test_module_2", module);
     test_item.add_dependency(d2);
 
-    std::vector<HDL_dependency> check = {d, d2};
+    std::vector<HDL_instance> check = {d, d2};
 
     ASSERT_EQ(test_item.get_dependencies(), check);
 }

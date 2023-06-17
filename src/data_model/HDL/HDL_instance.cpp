@@ -13,10 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "data_model/HDL/HDL_dependency.hpp"
+#include "data_model/HDL/HDL_instance.hpp"
 
 
-HDL_dependency::HDL_dependency(const HDL_dependency &c) {
+HDL_instance::HDL_instance(const HDL_instance &c) {
     parameters = c.parameters;
     ports_map = c.ports_map;
     dep_class = c.dep_class;
@@ -26,21 +26,21 @@ HDL_dependency::HDL_dependency(const HDL_dependency &c) {
 }
 
 
-HDL_dependency::HDL_dependency(std::string dep_name, std::string dep_type, dependency_class d_c) {
+HDL_instance::HDL_instance(std::string dep_name, std::string dep_type, dependency_class d_c) {
     dep_class = d_c;
     name = std::move(dep_name);
     type = std::move(dep_type);
 }
 
-void HDL_dependency::add_parameter(const std::string& parameter_name, const HDL_parameter &p) {
+void HDL_instance::add_parameter(const std::string& parameter_name, const HDL_parameter &p) {
     parameters[parameter_name] = p;
 }
 
-void HDL_dependency::add_port_connection(const std::string& port_name, std::string value) {
+void HDL_instance::add_port_connection(const std::string& port_name, std::string value) {
     ports_map[port_name] = std::move(value);
 }
 
-bool operator==(const HDL_dependency &lhs, const HDL_dependency &rhs) {
+bool operator==(const HDL_instance &lhs, const HDL_instance &rhs) {
     bool ret = true;
 
     ret &= lhs.name == rhs.name;
@@ -52,6 +52,6 @@ bool operator==(const HDL_dependency &lhs, const HDL_dependency &rhs) {
     return ret;
 }
 
-void HDL_dependency::add_array_quantifier(const expression &exp) {
+void HDL_instance::add_array_quantifier(const expression &exp) {
     quantifier = exp;
 }

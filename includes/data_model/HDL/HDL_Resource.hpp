@@ -23,7 +23,7 @@
 #include <vector>
 #include <memory>
 
-#include "data_model/HDL/HDL_dependency.hpp"
+#include "data_model/HDL/HDL_instance.hpp"
 #include "data_model/HDL/HDL_parameter.hpp"
 #include "data_model/documentation/module_documentation.hpp"
 #include "data_model/documentation/bus_structure/bus_structure.hpp"
@@ -41,10 +41,10 @@ class HDL_Resource {
         HDL_Resource();
         HDL_Resource(dependency_class type, std::string n, std::string p);
 
-        std::vector<HDL_dependency> get_dependencies();
+        std::vector<HDL_instance> get_dependencies();
 
-        void add_dependencies(std::vector<HDL_dependency> deps);
-        void add_dependency(const HDL_dependency &dep);
+        void add_dependencies(std::vector<HDL_instance> deps);
+        void add_dependency(const HDL_instance &dep);
 
         void add_bus_roots(const std::shared_ptr<bus_crossbar>& bc) { bus_roots.push_back(bc);};
         void add_bus_roots(std::vector<std::shared_ptr<bus_crossbar>> bc) { bus_roots = std::move(bc);};
@@ -99,7 +99,7 @@ class HDL_Resource {
         std::string name;
         std::string path;
         dependency_class hdl_type;
-        std::vector<HDL_dependency> dependencies;
+        std::vector<HDL_instance> dependencies;
         std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
         std::unordered_map<std::string, port_direction_t> ports;
         std::unordered_map<std::string, std::array<std::string, 2>> if_specs;

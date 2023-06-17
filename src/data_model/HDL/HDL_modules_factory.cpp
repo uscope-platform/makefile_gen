@@ -22,20 +22,20 @@ void HDL_modules_factory::new_module(std::string &p) {
     current_resource.set_type(module);
 }
 
-void HDL_modules_factory::add_instance(const HDL_dependency &i) {
+void HDL_modules_factory::add_instance(const HDL_instance &i) {
 
     current_resource.add_dependency(i);
 }
 
-void HDL_modules_factory::add_interface_dep(const HDL_dependency &i) {
+void HDL_modules_factory::add_interface_dep(const HDL_instance &i) {
     current_resource.add_dependency(i);
 }
 
-void HDL_modules_factory::add_mem_file_dep(const HDL_dependency &i) {
+void HDL_modules_factory::add_mem_file_dep(const HDL_instance &i) {
     current_resource.add_dependency(i);
 }
 
-void HDL_modules_factory::add_package_dep(const HDL_dependency &i) {
+void HDL_modules_factory::add_package_dep(const HDL_instance &i) {
     current_resource.add_dependency(i);
 }
 

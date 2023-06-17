@@ -28,7 +28,7 @@ void bus_mapper::map_bus(const nlohmann::json &bus, const std::string &bus_selec
 
     auto tl = d_store->get_HDL_resource(top_level);
 
-    bus_map_node top = {bus_if, tl, HDL_dependency()};
+    bus_map_node top = {bus_if, tl, HDL_instance()};
 
     map_network(top, bus_defining_package.get_bus_roots()[0]->get_base_address(), false);
     for(auto &item:leaf_nodes){
@@ -102,7 +102,7 @@ bool bus_mapper::process_node_type(bus_map_node &node, bus_map_node &parent, uin
     }
 }
 
-void bus_mapper::process_interconnects(HDL_Resource &parent_res, HDL_dependency &parent_dep) {
+void bus_mapper::process_interconnects(HDL_Resource &parent_res, HDL_instance &parent_dep) {
     auto working_set = interconnects;
     interconnects.clear();
     std::string parametrized_bus_instance;
@@ -116,7 +116,7 @@ void bus_mapper::process_interconnects(HDL_Resource &parent_res, HDL_dependency 
         if(item.instance.get_name()==parametrized_bus_instance){
 
             auto masters_str = item.instance.get_ports()[specs_manager.get_interconnect_source_port(bus_type, item.module_spec.getName())];//use spec manager instead of hardcoded name;
-            HDL_dependency master_if_decl;
+            HDL_instance master_if_decl;
             for(auto &dep:parent_res.get_dependencies()){
                 if(dep.get_name()==masters_str){
                     master_if_decl = dep;
@@ -216,9 +216,9 @@ std::vector<std::string> bus_mapper::get_interconnect_addr_vect(bus_map_node &it
     return addresses_vect;
 }
 
-std::vector<uint32_t> bus_mapper::get_parametrised_addrs( const nlohmann::json &spec,
+std::vector<uint32_t> bus_mapper::get_parametrised_addrs(const nlohmann::json &spec,
                                                          uint32_t n_ifs, HDL_Resource &parent_res,
-                                                         HDL_dependency &parent_dep) {
+                                                         HDL_instance &parent_dep) {
     std::vector<uint32_t> ret_val;
 
     uint32_t base_addr = resolver.get_address(spec["base"], parent_res, parent_dep);
@@ -229,7 +229,7 @@ std::vector<uint32_t> bus_mapper::get_parametrised_addrs( const nlohmann::json &
     return ret_val;
 }
 
-std::unordered_map<uint32_t, std::string> bus_mapper::decode_interconnect_map(const nlohmann::ordered_json &map, HDL_Resource &parent_res, HDL_dependency &parent_dep) {
+std::unordered_map<uint32_t, std::string> bus_mapper::decode_interconnect_map(const nlohmann::ordered_json &map, HDL_Resource &parent_res, HDL_instance &parent_dep) {
     int current_if = 0;
     std::unordered_map<uint32_t, std::string> ret_val;
     for(auto &item:map){

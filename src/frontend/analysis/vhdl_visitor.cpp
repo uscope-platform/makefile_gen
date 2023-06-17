@@ -54,7 +54,7 @@ void vhdl_visitor::exitConcurrent_statement(mgp_vh::vhdlParser::Concurrent_state
         } else{
             module_name = instantiation->instantiated_unit()->name()->name_literal()->identifier()->getText();
         }
-        HDL_dependency dep(ctx->label()->getText(), module_name, module);
+        HDL_instance dep(ctx->label()->getText(), module_name, module);
         dependency_map[current_architecture].push_back(dep);
     }
 }

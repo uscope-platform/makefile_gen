@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_HDL_DEPENDENCY_HPP
-#define MAKEFILEGEN_V2_HDL_DEPENDENCY_HPP
+#ifndef MAKEFILEGEN_V2_HDL_INSTANCE_HPP
+#define MAKEFILEGEN_V2_HDL_INSTANCE_HPP
 
 #include <unordered_map>
 #include <string>
@@ -31,11 +31,11 @@
 #include <cereal/types/array.hpp>
 #include <cereal/types/memory.hpp>
 
-class HDL_dependency {
+class HDL_instance {
 public:
-    HDL_dependency(std::string dep_name, std::string dep_type, dependency_class d_c);
-    HDL_dependency() = default;
-    HDL_dependency( const HDL_dependency &c );
+    HDL_instance(std::string dep_name, std::string dep_type, dependency_class d_c);
+    HDL_instance() = default;
+    HDL_instance(const HDL_instance &c );
 
     void add_parameter(const std::string& parameter_name, const HDL_parameter &p);
     std::unordered_map<std::string, HDL_parameter> get_parameters() { return parameters;};
@@ -63,7 +63,7 @@ public:
         ar(name, type, dep_class, ports_map, parameters, quantifier);
     }
 
-    friend bool operator==(const HDL_dependency&lhs, const HDL_dependency&rhs);
+    friend bool operator==(const HDL_instance&lhs, const HDL_instance&rhs);
 private:
     std::unordered_map<std::string, HDL_parameter> parameters;
     std::unordered_map<std::string, std::string> ports_map;
@@ -71,7 +71,8 @@ private:
     std::string type;
     std::string name;
     expression quantifier;
+    std::vector<HDL_instance> child_instances;
 };
 
 
-#endif //MAKEFILEGEN_V2_HDL_DEPENDENCY_HPP
+#endif //MAKEFILEGEN_V2_HDL_INSTANCE_HPP

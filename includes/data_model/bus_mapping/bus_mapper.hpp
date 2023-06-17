@@ -29,7 +29,7 @@
 typedef struct {
     std::string port_name;
     HDL_Resource module_spec;
-    HDL_dependency instance;
+    HDL_instance instance;
     uint32_t node_address;
     std::string module_name;
 }bus_map_node;
@@ -44,14 +44,14 @@ private:
 
     void map_network(bus_map_node &res_v, uint32_t base_address, bool parametrised);
     bool process_node_type(bus_map_node &node, bus_map_node &parent, uint32_t base_address);
-    void process_interconnects(HDL_Resource &parent_res, HDL_dependency &parent_dep);
+    void process_interconnects(HDL_Resource &parent_res, HDL_instance &parent_dep);
 
 
     bool port_contains_if(const std::string &port, const std::string &intf);
     bool is_array_parameter(const std::string &port);
 
-    std::vector<uint32_t> get_parametrised_addrs(const nlohmann::json &spec, uint32_t n_ifs, HDL_Resource &parent_res, HDL_dependency &parent_dep);
-    std::unordered_map<uint32_t, std::string> decode_interconnect_map(const nlohmann::ordered_json &map, HDL_Resource &parent_res, HDL_dependency &parent_dep);
+    std::vector<uint32_t> get_parametrised_addrs(const nlohmann::json &spec, uint32_t n_ifs, HDL_Resource &parent_res, HDL_instance &parent_dep);
+    std::unordered_map<uint32_t, std::string> decode_interconnect_map(const nlohmann::ordered_json &map, HDL_Resource &parent_res, HDL_instance &parent_dep);
     std::vector<std::string> get_interconnect_addr_vect(bus_map_node &item, HDL_Resource &parent);
 
     std::vector<std::string> split_if_array(const std::string &array);

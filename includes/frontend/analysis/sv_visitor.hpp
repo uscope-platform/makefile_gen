@@ -24,9 +24,9 @@
 #include "data_model/HDL/HDL_modules_factory.hpp"
 #include "data_model/HDL/HDL_interfaces_factory.hpp"
 #include "data_model/HDL/HDL_packages_factory.hpp"
-#include "data_model/HDL/HDL_dependencies_factory.hpp"
+#include "data_model/HDL/HDL_instances_factory.hpp"
 
-#include "data_model/HDL/HDL_dependency.hpp"
+#include "data_model/HDL/HDL_instance.hpp"
 #include "data_model/expressions/expression.hpp"
 
 #include <regex>
@@ -100,7 +100,7 @@ private:
     HDL_modules_factory modules_factory;
     HDL_interfaces_factory interfaces_factory;
     HDL_packages_factory packages_factory;
-    HDL_dependencies_factory deps_factory;
+    HDL_instances_factory deps_factory;
     HDL_parameters_factory params_factory;
 
 

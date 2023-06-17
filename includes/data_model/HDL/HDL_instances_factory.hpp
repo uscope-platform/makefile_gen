@@ -13,26 +13,26 @@
 // limitations under the License.
 // Unless required by applicable law or agreed to in writing, software
 
-#ifndef MAKEFILEGEN_V2_HDL_DEPENDENCIES_FACTORY_HPP
-#define MAKEFILEGEN_V2_HDL_DEPENDENCIES_FACTORY_HPP
+#ifndef MAKEFILEGEN_V2_HDL_INSTANCES_FACTORY_HPP
+#define MAKEFILEGEN_V2_HDL_INSTANCES_FACTORY_HPP
 
-#include "data_model/HDL/HDL_dependency.hpp"
+#include "data_model/HDL/HDL_instance.hpp"
 #include "data_model/expressions/expression.hpp"
 
-class HDL_dependencies_factory {
+class HDL_instances_factory {
 public:
     void new_dependency(const std::string &n, const std::string &p, dependency_class dc);
     void add_parameter(const std::string &name, const HDL_parameter &p);
     void add_port(const std::string &name, const std::string &value);
     void add_array_quantifier(const expression &exp);
-    HDL_dependency get_dependency();
-    bool is_valid_dependency(){return valid_dependency;};
+    HDL_instance get_dependency();
+    bool is_valid_dependency(){return valid_instance;};
 private:
-    HDL_dependency current_dependency;
-    bool valid_dependency;
+    HDL_instance current_instance;
+    bool valid_instance;
 };
 
 
 
 
-#endif //MAKEFILEGEN_V2_HDL_DEPENDENCIES_FACTORY_HPP
+#endif //MAKEFILEGEN_V2_HDL_INSTANCES_FACTORY_HPP

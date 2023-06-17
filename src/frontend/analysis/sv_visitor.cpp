@@ -63,7 +63,7 @@ void sv_visitor::exitModule_or_interface_or_program_or_udp_instantiation(sv2017:
 void sv_visitor::exitInterface_header(sv2017::Interface_headerContext *ctx) {
     std::string interface_name = ctx->identifier()->getText();
     if(modules_factory.is_current_valid()){
-        HDL_dependency dep("__scoped_declaration__", interface_name, interface);
+        HDL_instance dep("__scoped_declaration__", interface_name, interface);
         modules_factory.add_interface_dep(dep);
     }
 
@@ -80,7 +80,7 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
         data_file = std::regex_replace(data_file, std::regex("\\\""), "");
         std::filesystem::path p = data_file;
         if(p.extension().string() == ".dat"|| p.extension().string() == ".mem"){
-            HDL_dependency dep("__init_file__", p.stem(), memory_init);
+            HDL_instance dep("__init_file__", p.stem(), memory_init);
             modules_factory.add_mem_file_dep(dep);
         }
     }
@@ -100,7 +100,7 @@ void sv_visitor::exitPackage_or_class_scoped_path(sv2017::Package_or_class_scope
     if(!ctx->DOUBLE_COLON().empty()){
         std::string package_name = ctx->package_or_class_scoped_path_item()[0]->identifier()->getText();
         std::string package_item = ctx->package_or_class_scoped_path_item()[1]->identifier()->getText();
-        HDL_dependency dep(package_item, package_name, package);
+        HDL_instance dep(package_item, package_name, package);
         modules_factory.add_package_dep(dep);
     }
 

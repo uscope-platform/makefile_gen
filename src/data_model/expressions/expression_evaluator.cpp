@@ -120,7 +120,7 @@ expression_evaluator::calculate_expression(expression exp, std::unordered_map<st
 
 }
 
-uint32_t expression_evaluator::calculate_expression(const expression& exp, HDL_Resource &res, HDL_dependency &dep,
+uint32_t expression_evaluator::calculate_expression(const expression& exp, HDL_Resource &res, HDL_instance &dep,
                                                     address_resolver &resolver) {
 
     std::unordered_map<std::string, uint32_t> params;

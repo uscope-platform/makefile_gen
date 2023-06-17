@@ -24,7 +24,7 @@
 
 #include "data_model/expressions/expression.hpp"
 #include "data_model/HDL/HDL_Resource.hpp"
-#include "data_model/HDL/HDL_dependency.hpp"
+#include "data_model/HDL/HDL_instance.hpp"
 #include "data_model/bus_mapping/address_resolver.hpp"
 
 class expression_evaluator {
@@ -34,7 +34,7 @@ public:
     static  std::unordered_map<std::string, HDL_parameter> calculate_expressions(std::vector<expression> exp_vect, std::unordered_map<std::string, HDL_parameter> params);
     static uint32_t calculate_expression(expression exp, std::unordered_map<std::string, uint32_t> params);
     static std::vector<std::string> get_variable_names(expression exp);
-    static uint32_t calculate_expression(const expression& exp, HDL_Resource &res, HDL_dependency &dep, address_resolver &resolver);
+    static uint32_t calculate_expression(const expression& exp, HDL_Resource &res, HDL_instance &dep, address_resolver &resolver);
 };
 
 

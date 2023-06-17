@@ -19,12 +19,12 @@ address_resolver::address_resolver(const HDL_Resource &bdp) {
     bus_defining_package = bdp;
 }
 
-uint32_t address_resolver::get_address(const std::string &str, HDL_Resource &parent_res, HDL_dependency &parent_dep) {
+uint32_t address_resolver::get_address(const std::string &str, HDL_Resource &parent_res, HDL_instance &parent_dep) {
     return get_address(str,parent_res, parent_dep, 0);
 }
 
 
-uint32_t address_resolver::get_address(const std::string &str, HDL_Resource &parent, HDL_dependency &parent_dep, int stack_level) {
+uint32_t address_resolver::get_address(const std::string &str, HDL_Resource &parent, HDL_instance &parent_dep, int stack_level) {
     auto param_name = str.substr(str.find("::")+2, str.size());
     if(bus_defining_package.is_numeric_parameter(param_name)){
         return  bus_defining_package.get_numeric_parameter(param_name);
@@ -113,7 +113,7 @@ uint32_t address_resolver::parse_sv_constant(const std::string &s) {
     return 0;
 }
 
-void address_resolver::push_parameters_map(HDL_dependency &instance) {
+void address_resolver::push_parameters_map(HDL_instance &instance) {
 
     auto params = instance.get_parameters();
     parameters_stack.push_back(params);

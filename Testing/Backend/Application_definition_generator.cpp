@@ -66,17 +66,17 @@ TEST_F( app_def_generation , generate_app_def) {
 
     bus_map_node bmn;
 
-    HDL_dependency d1("register_instance", "register_type", module);
+    HDL_instance d1("register_instance", "register_type", module);
     bmn.node_address = 12;
     bmn.instance = d1;
     mapper.push_back(bmn);
 
-    HDL_dependency d2("SC", "SyndromeCalculator", module);
+    HDL_instance d2("SC", "SyndromeCalculator", module);
     bmn.node_address = 13;
     bmn.instance = d2;
     mapper.push_back(bmn);
 
-    HDL_dependency d3("Decoder", "Decoder", module);
+    HDL_instance d3("Decoder", "Decoder", module);
     bmn.node_address = 23;
     bmn.instance = d3;
     mapper.push_back(bmn);

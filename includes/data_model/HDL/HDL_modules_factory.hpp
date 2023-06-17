@@ -18,7 +18,7 @@
 
 #include "data_model/HDL/HDL_Resource.hpp"
 #include "data_model/HDL/HDL_parameter.hpp"
-#include "data_model/HDL/HDL_dependency.hpp"
+#include "data_model/HDL/HDL_instance.hpp"
 
 #include "data_model/HDL/resource_factory_base.hpp"
 class HDL_modules_factory : protected resources_factory_base<HDL_Resource> {
@@ -28,10 +28,10 @@ public:
     HDL_Resource get_module();
     void set_module_name(const std::string &n) { set_name(n);};
 
-    void add_instance(const HDL_dependency &i);
-    void add_interface_dep(const HDL_dependency &i);
-    void add_mem_file_dep(const HDL_dependency &i);
-    void add_package_dep(const HDL_dependency &i);
+    void add_instance(const HDL_instance &i);
+    void add_interface_dep(const HDL_instance &i);
+    void add_mem_file_dep(const HDL_instance &i);
+    void add_package_dep(const HDL_instance &i);
 
     void add_parameter(const HDL_parameter &p);
 

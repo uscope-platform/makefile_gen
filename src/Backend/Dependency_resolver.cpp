@@ -57,7 +57,7 @@ void Dependency_resolver::resolve_dependencies(const std::string& module_name) {
         detected_processors.insert(detected_processors.end(), proc.begin(), proc.end());
     }
 
-    std::vector<HDL_dependency> deps =  resource.get_dependencies();
+    std::vector<HDL_instance> deps =  resource.get_dependencies();
 
     for(auto &item : deps){
         auto res = d_store->get_HDL_resource(item.get_type());
