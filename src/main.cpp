@@ -20,35 +20,50 @@ int main(int argc, char *argv[]){
     // Command line interface
 
     CLI::App app("Makefile_gen FPGA build system version 2.0");
+
     std::string target;
     app.add_option("-D,--depfile", target, "Target Depfile")->check(CLI::ExistingFile);
+
     bool generate_xilinx = false;
     app.add_flag("--X",generate_xilinx,"Generate Xilinx Makefile");
+
     bool generate_app_definition = false;
     app.add_flag("--A",generate_app_definition,"Generate application definition file");
+
     bool generate_periph_definition = false;
     app.add_flag("--P",generate_periph_definition,"Generate Peripherals definition file");
+
     bool generate_lattice = false;
     app.add_flag("--L",generate_lattice,"Generate Lattice Makefile");
+
     bool synth_design = false;
     app.add_flag("--S", synth_design,"synthetize design");
+
     bool keep_makefile = false;
     app.add_flag("--k", keep_makefile, "if set to true does not remove the makefile after use");
+
     std::string get_setting;
     app.add_option("--get_setting", get_setting, "Print the value of a cached user setting");
+
     std::string set_setting;
     app.add_option("--set_setting", set_setting, "Modify the value of a cached user setting");
+
     std::string new_app_name;
     app.add_option("--new_app", new_app_name, "Setup a new blank application");
+
     std::string new_app_lang;
     app.add_option("--lang", new_app_lang, "Specify the language for the new app");
+
     bool no_cache = false;
     app.add_flag("--no-cache", no_cache, "Run the program without touching the repository cache");
+
+    std::string cache_dir = std::string(std::getenv("HOME")) + "/.makefilegen_store";
+    app.add_option("--cache_dir", cache_dir, "Run the program without touching the repository cache");
 
     CLI11_PARSE(app, argc, argv);
 
     // Setup caches
-    std::shared_ptr<settings_store>  s_store = std::make_shared<settings_store>(false);
+    std::shared_ptr<settings_store>  s_store = std::make_shared<settings_store>(false, cache_dir);
     if(!get_setting.empty()){
         std::cout << s_store->get_setting(get_setting)<<std::endl;
     }
@@ -78,7 +93,7 @@ int main(int argc, char *argv[]){
     }
 
 
-    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(no_cache);
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(no_cache, cache_dir);
 
     // analyze repository content and update cache
     Repository_walker walker(s_store, d_store, no_cache);

@@ -43,7 +43,7 @@ struct cache_t{
 
 class data_store {
 public:
-    data_store(bool e);
+    data_store(bool e, std::string cache_dir_path);
     HDL_Resource get_HDL_resource(const std::string& name);
     void store_hdl_entity(HDL_Resource& entity);
     void store_hdl_entity(std::vector<HDL_Resource> & vect);

@@ -16,9 +16,9 @@
 #include "data_model/data_store.hpp"
 
 
-data_store::data_store(bool e) {
+data_store::data_store(bool e, std::string cache_dir_path) {
     ephemeral = e;
-    store_path = std::string(std::getenv("HOME")) + "/.makefilegen_store";
+    store_path = cache_dir_path;
     std::filesystem::create_directory(store_path);
 
     unified_cache = store_path + "/unified_cache";

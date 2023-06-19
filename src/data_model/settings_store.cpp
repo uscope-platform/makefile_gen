@@ -14,8 +14,8 @@
 // limitations under the License.
 #include "data_model/settings_store.hpp"
 
-settings_store::settings_store(bool e) {
-    store_path = std::string(std::getenv("HOME")) + "/.makefilegen_store";
+settings_store::settings_store(bool e, std::string cache_dir_path) {
+    store_path = cache_dir_path;
     std::filesystem::create_directory(store_path);
     ephemeral = e;
     settings_file = store_path + "/settings";

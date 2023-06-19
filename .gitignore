@@ -15,3 +15,5 @@ cmake-build-debug-coverage/
 build/
 
 CMakeUserPresets.json
+
+.cache/

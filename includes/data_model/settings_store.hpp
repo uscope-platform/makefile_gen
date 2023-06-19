@@ -25,7 +25,7 @@
 
 class settings_store {
 public:
-    settings_store(bool e);
+    settings_store(bool e, std::string cache_dir_path);
 
     std::string get_setting(const std::string& setting);
     void set_setting(const std::string& name, const std::string& value);
