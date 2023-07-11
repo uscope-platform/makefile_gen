@@ -22,13 +22,18 @@
 #include "data_model/HDL/HDL_instance.hpp"
 
 class HDL_ast_builder {
-public:
-    HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d);
-    void build_ast(const std::string& top_level_module, std::unordered_map<std::string, HDL_parameter> external_parameters);
-private:
-    std::shared_ptr<settings_store> s_store;
-    std::shared_ptr<data_store> d_store;
+    public:
+        HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d);
+        HDL_instance build_ast(const std::string& top_level_module, std::unordered_map<std::string, HDL_parameter> external_parameters);
 
+    private:
+        static  std::unordered_map<std::string, HDL_parameter> merge_parameters(std::unordered_map<std::string, HDL_parameter> parent_parameter,  std::unordered_map<std::string, HDL_parameter> instance_parameters, std::unordered_map<std::string, HDL_parameter> module_parameters);
+        std::shared_ptr<settings_store> s_store;
+        std::shared_ptr<data_store> d_store;
+        HDL_instance top_level;
+        int recursion_level;
+        bool log_structure;
+    void recursive_build_ast(HDL_instance &i,const std::unordered_map<std::string, HDL_parameter> &external_parameters);
 };
 
 

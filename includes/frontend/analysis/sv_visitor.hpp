@@ -66,6 +66,7 @@ public:
     void exitExpression(sv2017::ExpressionContext *ctx) override;
     void exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *ctx) override;
     void exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx) override;
+    void exitOperator_shift(sv2017::Operator_shiftContext *ctx) override;
 
     void exitPrimaryLit(sv2017::PrimaryLitContext *ctx) override;
     void exitPrimaryPath(sv2017::PrimaryPathContext *ctx) override;
@@ -78,6 +79,10 @@ public:
 
     void enterLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) override;
     void exitLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) override;
+
+    void enterConstant_param_expression(sv2017::Constant_param_expressionContext *) override;
+    void exitConstant_param_expression(sv2017::Constant_param_expressionContext *) override;
+
 
     static uint32_t parse_number(const std::string& s);
     std::vector<HDL_Resource> get_entities();
@@ -94,6 +99,7 @@ private:
     std::string current_declaration_type;
 
     bool in_module_array_def = false;
+    bool in_expression_def = false;
 
     std::vector<std::string> string_components;
 

@@ -149,13 +149,20 @@ void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
         uint32_t numeric_val = parse_number(ctx->getText());
         string_components.push_back(std::to_string(numeric_val));
     }
-
+    if(in_expression_def){
+        params_factory.add_operand(ctx->getText());
+    }
 }
+
+
 
 void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
     if(file_contains_bus_defining_package || in_module_array_def){
         std::string dbg = ctx->getText();
         string_components.push_back(ctx->getText());
+    }
+    if(in_expression_def){
+        params_factory.add_operand(ctx->getText());
     }
 }
 
@@ -163,13 +170,27 @@ void sv_visitor::exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx
     if(file_contains_bus_defining_package || in_module_array_def){
         string_components.push_back(ctx->getText());
     }
+    if(in_expression_def){
+        params_factory.add_operator(ctx->getText());
+    }
 }
 
 void sv_visitor::exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *ctx) {
     if(file_contains_bus_defining_package || in_module_array_def){
         string_components.push_back(ctx->getText());
     }
+    if(in_expression_def){
+        params_factory.add_operator(ctx->getText());
+    }
 }
+
+
+void sv_visitor::exitOperator_shift(sv2017::Operator_shiftContext *ctx) {
+    if(in_expression_def){
+        params_factory.add_operator(ctx->getText());
+    }
+}
+
 
 uint32_t sv_visitor::parse_number(const std::string& s) {
     std::regex hex_number(R"(\d*'h([0-9a-fA-F]*))");
@@ -276,5 +297,13 @@ void sv_visitor::enterLocal_parameter_declaration(sv2017::Local_parameter_declar
 
 void sv_visitor::exitLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) {
     params_factory.set_local(false);
+}
+
+void sv_visitor::enterConstant_param_expression(sv2017::Constant_param_expressionContext *) {
+    in_expression_def = true;
+}
+
+void sv_visitor::exitConstant_param_expression(sv2017::Constant_param_expressionContext *) {
+    in_expression_def = false;
 }
 

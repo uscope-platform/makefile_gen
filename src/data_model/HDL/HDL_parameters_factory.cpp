@@ -27,10 +27,7 @@ HDL_parameter HDL_parameters_factory::get_parameter() {
 
 
 void HDL_parameters_factory::set_value(const std::string &s) {
-    if(is_local)
-        p.set_value(s);
-    else
-        p.set_default_value(s);
+    p.set_value(s);
 }
 
 void HDL_parameters_factory::set_parameter_name(const std::string &s) {
@@ -39,6 +36,14 @@ void HDL_parameters_factory::set_parameter_name(const std::string &s) {
 
 void HDL_parameters_factory::set_local(bool l) {
     is_local = l;
+}
+
+void HDL_parameters_factory::add_operand(const std::string &s) {
+    p.add_operand(s);
+}
+
+void HDL_parameters_factory::add_operator(const std::string &s) {
+    p.add_operator(s);
 }
 
 

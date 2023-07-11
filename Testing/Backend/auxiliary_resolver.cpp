@@ -21,7 +21,7 @@
 class aux_resolver : public ::testing::Test {
 protected:
     void SetUp() {
-        d_store = std::make_shared<data_store>(true);
+        d_store = std::make_shared<data_store>(true,"/tmp/test_data_store");
 
         Script s1_spec("python_test", "py");
         s1_spec.set_path("/tests/script.py");

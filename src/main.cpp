@@ -122,6 +122,9 @@ int main(int argc, char *argv[]){
 
     walker.analyze_dir();
 
+    HDL_ast_builder b(s_store, d_store);
+    auto synth_ast = b.build_ast(dep.get_synth_tl(), {});
+
     // Resolve top level files dependencies
     Dependency_resolver synth_resolver(dep.get_synth_tl(), d_store);
     synth_resolver.set_excluded_modules(dep.get_excluded_modules());

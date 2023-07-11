@@ -38,7 +38,7 @@ std::string exec(const char* cmd) {
 class cache_manager_Test : public ::testing::Test {
 protected:
     void SetUp() {
-        d_store = std::make_shared<data_store>(true);
+        d_store = std::make_shared<data_store>(true,"/tmp/test_data_store");
 
 
         module_documentation doc;
@@ -59,7 +59,7 @@ protected:
         mod_entity.set_documentation(doc);
         d_store->store_hdl_entity(mod_entity);
 
-        s_store = std::make_shared<settings_store>(true);
+        s_store = std::make_shared<settings_store>(true,"/tmp/test_settings_store");
         s_store->set_setting("cache_dump", "");
 
         std::filesystem::copy("check_files/test_package.sv", "check_files/test_package.sv.test");

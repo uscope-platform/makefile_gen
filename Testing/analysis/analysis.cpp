@@ -134,7 +134,7 @@ TEST( analysis_test , sv_module) {
 
     p = HDL_parameter();
     p.set_name("module_parameter_1");
-    p.set_default_value("56");
+    p.set_value("56");
     check_res.add_parameter(p);
     p = HDL_parameter();
     p.set_name("module_parameter_2");
@@ -158,3 +158,10 @@ TEST( analysis_test , vhdl_module) {
     ASSERT_EQ(resource, check_res);
 }
 
+TEST(analysis_test, verilog_parameter_extraction){
+    sv_analyzer analyzer("check_files/test_sv_parameter_extraction.sv");
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    ASSERT_TRUE(false);
+}

@@ -20,7 +20,7 @@
 
 TEST( data_store_test , evict_constr) {
 
-    auto *store_1 = new data_store(true);
+    auto *store_1 = new data_store(true, "/tmp/test_data_store");
     Constraints test_constr("test");
 
     store_1->store_constraint(test_constr);
@@ -35,7 +35,7 @@ TEST( data_store_test , evict_constr) {
 
 TEST( data_store_test , evict_script) {
 
-    auto *store_1 = new data_store(true);
+    auto *store_1 = new data_store(true, "/tmp/test_data_store");
     Script test_scr("test","py");
 
     store_1->store_script(test_scr);
@@ -50,7 +50,7 @@ TEST( data_store_test , evict_script) {
 
 TEST( data_store_test , evict_data_file) {
 
-    auto *store_1 = new data_store(true);
+    auto *store_1 = new data_store(true, "/tmp/test_data_store");
     DataFile test_df("test","/data/file/path");
 
     store_1->store_data_file(test_df);
@@ -65,7 +65,7 @@ TEST( data_store_test , evict_data_file) {
 
 TEST( data_store_test , evict_hdl_entity) {
 
-    auto *store_1 = new data_store(true);
+    auto *store_1 = new data_store(true, "/tmp/test_data_store");
     HDL_Resource test_entity(module, "test", "/test/path");
 
     store_1->store_hdl_entity(test_entity);
@@ -80,7 +80,7 @@ TEST( data_store_test , evict_hdl_entity) {
 
 TEST( data_store_test , evict_interface_entity) {
 
-    auto *store_1 = new data_store(true);
+    auto *store_1 = new data_store(true, "/tmp/test_data_store");
     HDL_Resource test_entity(interface, "test", "/test/path");
 
     store_1->store_hdl_entity(test_entity);
@@ -118,7 +118,7 @@ TEST( data_store_test , ser_des_data_File) {
 
 TEST( data_store_test , store_script_vect) {
 
-    auto *store = new data_store(true);
+    auto *store = new data_store(true, "/tmp/test_data_store");
     Script test_scr_1("test_1","py");
     Script test_scr_2("test_2","py");
     std::vector<Script> test_vect = {test_scr_1,test_scr_2};
@@ -140,7 +140,7 @@ TEST( data_store_test , store_script_vect) {
 
 TEST( data_store_test , store_data_file_vect) {
 
-    auto *store = new data_store(true);
+    auto *store = new data_store(true, "/tmp/test_data_store");
     DataFile test_df_1("test_1","/path/1");
     DataFile test_df_2("test_2","/path/2");
     std::vector<DataFile> test_vect = {test_df_1,test_df_2};
@@ -164,7 +164,7 @@ TEST( data_store_test , store_data_file_vect) {
 
 TEST( data_store_test , store_interface_vect) {
 
-    auto *store = new data_store(true);
+    auto *store = new data_store(true, "/tmp/test_data_store");
     HDL_Resource test_res_1(interface, "test_1", "/bin/sh");
     HDL_Resource test_res_2(interface, "test_2", "/bin/sh");
     std::vector<HDL_Resource> test_vect = {test_res_1,test_res_2};
@@ -184,7 +184,7 @@ TEST( data_store_test , store_interface_vect) {
 
 TEST( data_store_test , store_hdl_vect) {
 
-    auto *store = new data_store(true);
+    auto *store = new data_store(true, "/tmp/test_data_store");
     HDL_Resource test_res_1(module, "test_1", "/bin/sh");
     HDL_Resource test_res_2(module, "test_2", "/bin/sh");
     std::vector<HDL_Resource> test_vect = {test_res_1,test_res_2};
@@ -204,7 +204,7 @@ TEST( data_store_test , store_hdl_vect) {
 
 TEST( data_store_test , store_const_vect) {
 
-    auto *store = new data_store(true);
+    auto *store = new data_store(true, "/tmp/test_data_store");
     Constraints test_const_1( "test_1");
     Constraints test_const_2("test_2");
     std::vector<Constraints> test_vect = {test_const_1,test_const_2};
@@ -225,12 +225,12 @@ TEST( data_store_test , store_const_vect) {
 
 TEST( data_store_test , constr_clean_up) {
 
-    auto *store_1 = new data_store(true);
+    auto *store_1 = new data_store(true, "/tmp/test_data_store");
     Constraints test_constr("test");
     test_constr.set_path("/test");
     store_1->store_constraint(test_constr);
     delete store_1;
-    auto *store_2 = new data_store(true);
+    auto *store_2 = new data_store(true, "/tmp/test_data_store");
     std::string name = "test";
     Constraints result = store_2->get_constraint(name);
     ASSERT_EQ(result, Constraints());
@@ -242,11 +242,11 @@ TEST( data_store_test , constr_clean_up) {
 
 TEST( data_store_test , data_file_clean_up) {
 
-    auto *store_1 = new data_store(true);
+    auto *store_1 = new data_store(true,"/tmp/test_data_store");
     DataFile test_df("test","/data/file/path");
     store_1->store_data_file(test_df);
     delete store_1;
-    auto *store_2 = new data_store(true);
+    auto *store_2 = new data_store(true,"/tmp/test_data_store");
     std::string name = "test";
     Script result = store_2->get_script(name);
     ASSERT_EQ(result.get_name(), "");
@@ -257,12 +257,12 @@ TEST( data_store_test , data_file_clean_up) {
 
 TEST( data_store_test , script_clean_up) {
 
-    auto *store_1 = new data_store(true);
+    auto *store_1 = new data_store(true, "/tmp/test_data_store");
     Script test_scr("test","py");
     test_scr.set_path("/test");
     store_1->store_script(test_scr);
     delete store_1;
-    auto *store_2 = new data_store(true);
+    auto *store_2 = new data_store(true,"/tmp/test_data_store");
     std::string name = "test";
     Script result = store_2->get_script(name);
     ASSERT_EQ(result.get_name(), "");
@@ -273,13 +273,13 @@ TEST( data_store_test , script_clean_up) {
 
 TEST( data_store_test , resource_clean_up) {
 
-    auto *store_1 = new data_store(true);
+    auto *store_1 = new data_store(true,"/tmp/test_data_store");
 
     HDL_Resource test_entity(module, "test", "/test");
 
     store_1->store_hdl_entity(test_entity);
     delete store_1;
-    auto *store_2 = new data_store(true);
+    auto *store_2 = new data_store(true,"/tmp/test_data_store");
     std::string name = "test";
     HDL_Resource result = store_2->get_HDL_resource(name);
     ASSERT_EQ(result, HDL_Resource());

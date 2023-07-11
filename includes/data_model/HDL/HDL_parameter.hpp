@@ -17,29 +17,54 @@
 #define MAKEFILEGEN_V2_HDL_PARAMETER_HPP
 
 #include <string>
+#include <regex>
 
+#include <cereal/types/vector.hpp>
 
 enum parameter_type {
     string_parameter=0,
-    numeric_parameter=1
+    numeric_parameter=1,
+    string_array_parameter=2,
+    numeric_array_parameter=3
 };
 
 class HDL_parameter {
 public:
     HDL_parameter();
     void set_name(const std::string &n){name = n;};
-    void set_default_value(const std::string &dv);
     void set_value(const std::string &v);
     void set_value(uint32_t val);
-    std::string get_string_value();
-    uint32_t  get_numeric_value();
+    std::string get_string_value() const;
+    uint32_t  get_numeric_value() const;
+
+    operator std::string();
+
+    bool is_numeric_string(const std::string &s) const;
+    bool is_numeric_string() const {return is_numeric_string(string_value_array[0]);};
+    bool is_sv_constant(const std::string &s) const;
+    bool is_sv_constant() const {return is_sv_constant(string_value_array[0]);};
+    bool is_array() const;
+    bool is_repetition_array_init() const;
+    void string_to_array(
+                    const std::unordered_map<std::string, HDL_parameter>& parent_parameter,
+                    const std::unordered_map<std::string, HDL_parameter>& instance_parameters,
+                    const std::unordered_map<std::string, HDL_parameter>& module_parameters
+                         );
+    void string_to_numeric();
+
+    uint32_t parse_sv_constant(const std::string &s) const;
+    uint32_t parse_sv_constant() const {return parse_sv_constant(string_value_array[0]);};
+
     std::string get_name() const {return name;};
+
+    void add_operand(const std::string& component);
+    void add_operator(const std::string& component);
 
     parameter_type get_type(){return type;};
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, default_value, value);
+        ar(name, string_value_array, numeric_value_array);
     }
 
     bool is_empty();
@@ -47,11 +72,31 @@ public:
     friend bool operator==(const HDL_parameter&lhs, const HDL_parameter&rhs);
 
 private:
+
+    uint32_t get_parameter_value(
+            const std::string &p,
+            const std::unordered_map<std::string, HDL_parameter>& parent_parameter,
+            const std::unordered_map<std::string, HDL_parameter>& instance_parameters,
+            const std::unordered_map<std::string, HDL_parameter>& module_parameters
+            );
+
+    struct {
+        std::string numeric = "^\\d*$";
+        std::string sv_constant = "^\\d*'(h|d|o|b)([0-9a-fA-F]+)";
+        std::string array_init = R"(\{([a-zA-Z0-9_']+)\{([a-zA-Z0-9_']+)\}\})";
+        std::string array = R"(\{([^\}]+)\})";
+    } classification_regexes;
+
     std::string name;
-    std::string default_value;
-    std::string value;
-    uint32_t numeric_value;
+    std::vector<std::string> string_value_array;
+    std::vector<uint32_t> numeric_value_array;
     parameter_type type;
+
+    bool regex_string_test(const std::string &r, const std::string &s) const;
+    std::pair<std::string, std::string> split_array_init(std::string s);
+
+    std::stack<std::string> operand_stack;
+    std::stack<std::string> operator_stack;
 };
 
 

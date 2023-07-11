@@ -22,6 +22,7 @@
 #include <CLI/CLI.hpp>
 
 #include "frontend/Repository_walker.hpp"
+#include "analysis/HDL_ast_builder.hpp"
 #include "data_model/data_store.hpp"
 #include "data_model/settings_store.hpp"
 #include "frontend/analysis/sv_analyzer.hpp"

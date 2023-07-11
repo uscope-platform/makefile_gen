@@ -25,7 +25,7 @@
 class periph_def_generation : public ::testing::Test {
 protected:
     void SetUp() {
-        d_store = std::make_shared<data_store>(true);
+        d_store = std::make_shared<data_store>(true,"/tmp/test_data_store");
 
 
         module_documentation doc;

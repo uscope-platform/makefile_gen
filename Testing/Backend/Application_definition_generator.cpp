@@ -27,7 +27,7 @@
 class app_def_generation : public ::testing::Test {
 protected:
     void SetUp() {
-        d_store = std::make_shared<data_store>(true);
+        d_store = std::make_shared<data_store>(true,"/tmp/test_data_store");
 
         HDL_Resource mod_res(module, "module_type", "test/path.sv");
 

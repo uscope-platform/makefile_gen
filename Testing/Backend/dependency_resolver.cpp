@@ -21,7 +21,7 @@
 class dep_resolver : public ::testing::Test {
 protected:
     void SetUp() {
-        d_store = std::make_shared<data_store>(true);
+        d_store = std::make_shared<data_store>(true,"/tmp/test_data_store");
         HDL_instance d1("inst", "test_dep", module);
         HDL_instance d2("mem_init", "test_mem_init", memory_init);
         HDL_instance d3("exm", "excluded_module", module);
