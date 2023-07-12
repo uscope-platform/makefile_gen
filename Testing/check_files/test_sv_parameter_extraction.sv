@@ -14,7 +14,9 @@ module test_mod #(
     parameter mul_expr_p = simple_numeric_parameter * sv_numeric_parameter;
     parameter div_expr_p = simple_numeric_parameter / sv_numeric_parameter;
     parameter modulo_expr_p = simple_numeric_parameter % sv_numeric_parameter;
-    parameter log_expr_p = $clog2(add_expr_p);
+    parameter chained_expression = add_expr_p + mul_expr_p  * 5;
+    parameter simple_log_expr_p = $clog2(add_expr_p);
+    parameter complex_log_expr_p = $clog2(add_expr_p+2);
     localparam local_p = 74;
 
 endmodule

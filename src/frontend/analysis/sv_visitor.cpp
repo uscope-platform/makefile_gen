@@ -87,6 +87,7 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
     if(in_expression_def){
         params_factory.add_operator(call_name);
         if(ctx->list_of_arguments()!= nullptr){
+            int i = 0;
             //TODO: Implement nested expression in call
         } else if(ctx->data_type() != nullptr){
             params_factory.add_operand(ctx->data_type()->getText());

@@ -184,15 +184,15 @@ TEST(analysis_test, verilog_parameter_extraction){
         check_params[item.first] = p;
     }
 
-
-
     std::vector<std::pair<std::string, std::pair<std::vector<std::string>, std::vector<std::string>>>> vect_params = {
-            {"log_expr_p", {{"add_expr_p"}, {"$clog2"}}},
+            {"simple_log_expr_p", {{"add_expr_p"}, {"$clog2"}}},
             {"add_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"}, {"+"}}},
             {"sub_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"}, {"-"}}},
             {"mul_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"}, {"*"}}},
             {"div_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"}, {"/"}}},
-            {"modulo_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"} , {"%"}}}
+            {"modulo_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"} , {"%"}}},
+            {"chained_expression", {{"add_expr_p", "mul_expr_p", "5"},{"+", "*"}}},
+            {"complex_log_expr_p", {{"add_expr_p+2"}, {"$clog2"}}},
 
     };
     for(auto &item:  vect_params){

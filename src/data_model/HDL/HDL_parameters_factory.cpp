@@ -17,21 +17,19 @@
 
 
 void HDL_parameters_factory::new_parameter() {
-    p = HDL_parameter();
+    resources_factory_base<HDL_parameter>::new_basic_resource();
 }
 
 HDL_parameter HDL_parameters_factory::get_parameter() {
-    return p;
+    return get_resource();
 }
 
-
-
 void HDL_parameters_factory::set_value(const std::string &s) {
-    p.set_value(s);
+    current_resource.set_value(s);
 }
 
 void HDL_parameters_factory::set_parameter_name(const std::string &s) {
-    p.set_name(s);
+    current_resource.set_name(s);
 }
 
 void HDL_parameters_factory::set_local(bool l) {
@@ -39,11 +37,11 @@ void HDL_parameters_factory::set_local(bool l) {
 }
 
 void HDL_parameters_factory::add_operand(const std::string &s) {
-    p.add_operand(s);
+    current_resource.add_operand(s);
 }
 
 void HDL_parameters_factory::add_operator(const std::string &s) {
-    p.add_operator(s);
+    current_resource.add_operator(s);
 }
 
 

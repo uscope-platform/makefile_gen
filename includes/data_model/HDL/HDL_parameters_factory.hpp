@@ -21,7 +21,7 @@
 #include "data_model/expressions/expression.hpp"
 #include "data_model/expressions/expression_evaluator.hpp"
 
-class HDL_parameters_factory{
+class HDL_parameters_factory : protected resources_factory_base<HDL_parameter>{
 
 public:
     void new_parameter();
