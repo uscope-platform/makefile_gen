@@ -163,5 +163,49 @@ TEST(analysis_test, verilog_parameter_extraction){
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
 
-    ASSERT_TRUE(false);
+    auto parameters = resource.get_parameters();
+
+    std::unordered_map<std::string, HDL_parameter> check_params;
+
+    std::vector<std::pair<std::string, std::string>> params = {
+            {"simple_numeric_p", "32"},
+            {"sv_numeric_p", "5'o10"},
+            {"dimensionless_sv_numeric_p", "'h3F"},
+            {"string_p", R"("423")"},
+            {"nested_p", "string_parameter"},
+            {"local_p", "74"},
+    };
+
+
+    for(auto &item:  params){
+        HDL_parameter p = HDL_parameter();
+        p.set_name(item.first);
+        p.add_operand(item.second);
+        check_params[item.first] = p;
+    }
+
+
+
+    std::vector<std::pair<std::string, std::pair<std::vector<std::string>, std::vector<std::string>>>> vect_params = {
+            {"log_expr_p", {{"add_expr_p"}, {"$clog2"}}},
+            {"add_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"}, {"+"}}},
+            {"sub_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"}, {"-"}}},
+            {"mul_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"}, {"*"}}},
+            {"div_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"}, {"/"}}},
+            {"modulo_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"} , {"%"}}}
+
+    };
+    for(auto &item:  vect_params){
+        HDL_parameter p = HDL_parameter();
+        p.set_name(item.first);
+        for(auto &op:item.second.first){
+            p.add_operand(op);
+        }
+        for(auto &op:item.second.second){
+            p.add_operator(op);
+        }
+        check_params[item.first] = p;
+    }
+
+    ASSERT_EQ(check_params, parameters);
 }

@@ -17,7 +17,7 @@
 #define MAKEFILEGEN_V2_HDL_MODULES_FACTORY_HPP
 
 #include "data_model/HDL/HDL_Resource.hpp"
-#include "data_model/HDL/HDL_parameter.hpp"
+#include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/HDL_instance.hpp"
 
 #include "data_model/HDL/resource_factory_base.hpp"

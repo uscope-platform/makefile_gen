@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "data_model/HDL/HDL_parameter.hpp"
+#include "data_model/HDL/parameters/HDL_parameter.hpp"
 
 
 HDL_parameter::HDL_parameter() {
@@ -32,6 +32,9 @@ bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
     ret_val &= lhs.name == rhs.name;
     ret_val &= lhs.string_value_array == rhs.string_value_array;
     ret_val &= lhs.numeric_value_array == rhs.numeric_value_array;
+    ret_val &= lhs.type == rhs.type;
+    ret_val &= lhs.operand_stack == rhs.operand_stack;
+    ret_val &= lhs.operator_stack == rhs.operator_stack;
 
     return ret_val;
 }

@@ -80,6 +80,9 @@ private:
             const std::unordered_map<std::string, HDL_parameter>& module_parameters
             );
 
+    bool regex_string_test(const std::string &r, const std::string &s) const;
+    std::pair<std::string, std::string> split_array_init(std::string s);
+
     struct {
         std::string numeric = "^\\d*$";
         std::string sv_constant = "^\\d*'(h|d|o|b)([0-9a-fA-F]+)";
@@ -91,9 +94,6 @@ private:
     std::vector<std::string> string_value_array;
     std::vector<uint32_t> numeric_value_array;
     parameter_type type;
-
-    bool regex_string_test(const std::string &r, const std::string &s) const;
-    std::pair<std::string, std::string> split_array_init(std::string s);
 
     std::stack<std::string> operand_stack;
     std::stack<std::string> operator_stack;

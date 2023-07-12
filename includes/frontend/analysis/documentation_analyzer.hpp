@@ -25,7 +25,7 @@
 #include "data_model/documentation/bus_structure/bus_structure.hpp"
 #include "data_model/documentation/module_documentation.hpp"
 #include "data_model/documentation/register_documentation.hpp"
-#include "data_model/HDL/HDL_parameter.hpp"
+#include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/documentation/processor_instance.hpp"
 #include "mgp_sv/sv2017Lexer.h"
 #include "mgp_sv/sv2017.h"

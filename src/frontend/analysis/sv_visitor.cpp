@@ -84,6 +84,15 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
             modules_factory.add_mem_file_dep(dep);
         }
     }
+    if(in_expression_def){
+        params_factory.add_operator(call_name);
+        if(ctx->list_of_arguments()!= nullptr){
+            //TODO: Implement nested expression in call
+        } else if(ctx->data_type() != nullptr){
+            params_factory.add_operand(ctx->data_type()->getText());
+        }
+
+    }
 }
 
 void sv_visitor::enterPackage_declaration(sv2017::Package_declarationContext *ctx) {
@@ -259,18 +268,26 @@ void sv_visitor::exitNamed_parameter_assignment(sv2017::Named_parameter_assignme
     }
 }
 
-void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
-    auto p_n = ctx->identifier()->getText();
-    auto val = ctx->constant_param_expression()->getText();
-    if ( val.front() == '"' ) {
-        val.erase( 0, 1 ); // erase the first character
-        val.erase( val.size() - 1 ); // erase the last character
-        val = std::regex_replace(val, std::regex("\\\\"), "");
-    }
 
+void sv_visitor::enterParam_assignment(sv2017::Param_assignmentContext *ctx) {
+    auto p_n = ctx->identifier()->getText();
     params_factory.new_parameter();
     params_factory.set_parameter_name(p_n);
-    params_factory.set_value(val);
+}
+
+
+
+void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
+
+    auto val = ctx->constant_param_expression()->getText();
+
+    auto p_n = ctx->identifier()->getText();
+    if(in_expression_def){
+        in_expression_def = false;
+    } else {
+        params_factory.add_operand(val);
+    }
+
 
     modules_factory.add_parameter(params_factory.get_parameter());
 }
@@ -302,8 +319,3 @@ void sv_visitor::exitLocal_parameter_declaration(sv2017::Local_parameter_declara
 void sv_visitor::enterConstant_param_expression(sv2017::Constant_param_expressionContext *) {
     in_expression_def = true;
 }
-
-void sv_visitor::exitConstant_param_expression(sv2017::Constant_param_expressionContext *) {
-    in_expression_def = false;
-}
-

@@ -21,7 +21,7 @@
 #include <utility>
 
 #include "data_model/HDL/HDL_definitions.hpp"
-#include "data_model/HDL/HDL_parameter.hpp"
+#include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/expressions/expression.hpp"
 
 
