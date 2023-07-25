@@ -16,6 +16,16 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
 
+HDL_parameter::HDL_parameter(const HDL_parameter &c) {
+    name = c.name;
+    string_value_array = c.string_value_array;
+    numeric_value_array = c.numeric_value_array;
+    type = c.type;
+
+    operand_stack = c.operand_stack;
+    operator_stack = c.operator_stack;
+}
+
 HDL_parameter::HDL_parameter() {
     type = string_parameter;
     numeric_value_array = {0};

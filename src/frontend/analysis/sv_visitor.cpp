@@ -273,7 +273,7 @@ void sv_visitor::exitNamed_parameter_assignment(sv2017::Named_parameter_assignme
 void sv_visitor::enterParam_assignment(sv2017::Param_assignmentContext *ctx) {
     auto p_n = ctx->identifier()->getText();
     params_factory.new_parameter();
-    params_factory.set_parameter_name(p_n);
+    params_factory.set_parmeter_name(p_n);
 }
 
 

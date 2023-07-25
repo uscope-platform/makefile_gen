@@ -30,8 +30,11 @@ enum parameter_type {
 
 class HDL_parameter {
 public:
+
+    HDL_parameter( const HDL_parameter &c );
     HDL_parameter();
-    void set_name(const std::string &n){name = n;};
+    void set_name(const std::string &n) {name  = n;};
+
     void set_value(const std::string &v);
     void set_value(uint32_t val);
     std::string get_string_value() const;

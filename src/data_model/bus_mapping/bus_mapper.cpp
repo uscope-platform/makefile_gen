@@ -47,7 +47,10 @@ void bus_mapper::map_network( bus_map_node &res, uint32_t base_address, bool par
                 for (auto &port: dep.get_ports()) {
                     if (port.second.substr(0, port.second.find("[")) == res.port_name) {
                         auto module_spec = d_store->get_HDL_resource(dep.get_type());
-                        bus_map_node cur_node(port.first, module_spec, dep);
+                        bus_map_node cur_node;
+                        cur_node.port_name = port.first;
+                        cur_node.module_spec = module_spec;
+                        cur_node.instance = dep;
                         process_node_type(cur_node, res, base_address);
                         sub_network.push_back(cur_node);
                     }
@@ -70,7 +73,10 @@ void bus_mapper::map_network( bus_map_node &res, uint32_t base_address, bool par
                 if(port_contains_if(port_name, if_name)){
                     auto module_spec = d_store->get_HDL_resource(dep.get_type());
                     if(specs_manager.get_port_dir_specs(bus_type, if_port_input) == module_spec.get_if_port_specs(port.first).second){
-                        bus_map_node cur_node(port.first, module_spec, dep);
+                        bus_map_node cur_node;
+                        cur_node.port_name = port.first;
+                        cur_node.module_spec = module_spec;
+                        cur_node.instance = dep;
                         process_node_type(cur_node, res, base_address);
                         sub_network.push_back(cur_node);
                     }

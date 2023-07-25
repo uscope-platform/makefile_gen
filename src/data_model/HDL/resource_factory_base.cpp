@@ -15,6 +15,7 @@
 
 #include "data_model/HDL/resource_factory_base.hpp"
 #include "data_model/HDL/HDL_Resource.hpp"
+#include "data_model/HDL/parameters/HDL_parameter.hpp"
 
 template<class T>
 void resources_factory_base<T>::new_basic_resource() {
@@ -56,3 +57,4 @@ void resources_factory_base<T>::set_name(const std::string &n) {
 
 
 template class resources_factory_base<HDL_Resource>;
+template class resources_factory_base<HDL_parameter>;

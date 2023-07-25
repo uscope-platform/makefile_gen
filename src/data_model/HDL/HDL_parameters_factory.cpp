@@ -21,16 +21,13 @@ void HDL_parameters_factory::new_parameter() {
 }
 
 HDL_parameter HDL_parameters_factory::get_parameter() {
-    return get_resource();
+    return current_resource;
 }
 
 void HDL_parameters_factory::set_value(const std::string &s) {
     current_resource.set_value(s);
 }
 
-void HDL_parameters_factory::set_parameter_name(const std::string &s) {
-    current_resource.set_name(s);
-}
 
 void HDL_parameters_factory::set_local(bool l) {
     is_local = l;
