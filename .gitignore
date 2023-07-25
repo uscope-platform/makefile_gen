@@ -17,3 +17,5 @@ build/
 CMakeUserPresets.json
 
 .cache/
+
+cmake-build-debug-clang/

@@ -4,6 +4,14 @@ project(makefilegen_v2)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
+option(USE_LLD_LINKER "Use LLD to link the project" OFF)
+
+
+
+if(${USE_LLD_LINKER})
+    add_link_options("-fuse-ld=lld")
+endif(${USE_LLD_LINKER})
+
 set(OPENSSL_USE_STATIC_LIBS TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 set(ANTLR_VERSION 4.11.1)
