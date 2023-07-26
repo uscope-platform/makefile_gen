@@ -74,6 +74,8 @@ public:
     friend bool operator <(const HDL_parameter& lhs, const HDL_parameter& rhs);
     friend bool operator==(const HDL_parameter&lhs, const HDL_parameter&rhs);
 
+    friend void PrintTo(const HDL_parameter& point, std::ostream* os);
+
 private:
 
     uint32_t get_parameter_value(
@@ -92,6 +94,7 @@ private:
         std::string array_init = R"(\{([a-zA-Z0-9_']+)\{([a-zA-Z0-9_']+)\}\})";
         std::string array = R"(\{([^\}]+)\})";
     } classification_regexes;
+
 
     std::string name;
     std::vector<std::string> string_value_array;

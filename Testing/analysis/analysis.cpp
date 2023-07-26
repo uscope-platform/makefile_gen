@@ -19,6 +19,7 @@
 
 #include "frontend/analysis/sv_analyzer.hpp"
 #include "frontend/analysis/vhdl_analyzer.hpp"
+#include "data_model/HDL/parameters/HDL_parameter.hpp"
 
 TEST( analysis_test , package) {
 
@@ -206,6 +207,17 @@ TEST(analysis_test, verilog_parameter_extraction){
         }
         check_params[item.first] = p;
     }
+
+    if(check_params.size() != parameters.size()){
+
+    }
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item.first));
+        ASSERT_EQ(item.second, parameters[item.first]);
+    }
+
 
     ASSERT_EQ(check_params, parameters);
 }

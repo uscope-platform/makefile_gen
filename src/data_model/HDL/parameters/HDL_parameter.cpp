@@ -228,3 +228,23 @@ uint32_t HDL_parameter::get_parameter_value(const std::string &p,
 
 
 }
+
+void PrintTo(const HDL_parameter &param, std::ostream *os) {
+    std::string result = "\nHDL parameter:\n  NAME: " + param.name + "\n  OPERAND STACK:\n";
+
+
+    auto op_s = param.operand_stack;
+    while(!op_s.empty()){
+        result += "    " + op_s.top() + "\n";
+        op_s.pop();
+    }
+
+    result += "  OPERATOR STACK:\n";
+
+    op_s = param.operator_stack;
+    while(!op_s.empty()){
+        result += "    " + op_s.top() + "\n";
+        op_s.pop();
+    }
+    *os << result;
+}
