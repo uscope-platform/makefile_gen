@@ -77,7 +77,10 @@ public:
 
     void enterName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
     void exitName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
-    
+
+    void enterPrimaryPar(sv2017::PrimaryParContext *ctx) override;
+    void exitPrimaryPar(sv2017::PrimaryParContext *ctx) override;
+
     void enterConstant_param_expression(sv2017::Constant_param_expressionContext *) override;
 
     static uint32_t parse_number(const std::string& s);

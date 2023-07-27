@@ -307,3 +307,11 @@ void sv_visitor::enterConstant_param_expression(sv2017::Constant_param_expressio
     in_expression_def = true;
 }
 
+void sv_visitor::enterPrimaryPar(sv2017::PrimaryParContext *ctx) {
+    params_factory.add_operator("(");
+}
+
+void sv_visitor::exitPrimaryPar(sv2017::PrimaryParContext *ctx) {
+    params_factory.add_operator(")");
+}
+
