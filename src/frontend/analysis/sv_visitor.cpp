@@ -17,7 +17,6 @@
 
 sv_visitor::sv_visitor(std::string p) {
     path = std::move(p);
-    params_factory.set_local(false);
 }
 
 
@@ -86,13 +85,9 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
     }
     if(in_expression_def){
         params_factory.add_operator(call_name);
-        if(ctx->list_of_arguments()!= nullptr){
-            int i = 0;
-            //TODO: Implement nested expression in call
-        } else if(ctx->data_type() != nullptr){
+        if(ctx->data_type() != nullptr){
             params_factory.add_operand(ctx->data_type()->getText());
         }
-
     }
 }
 
@@ -269,13 +264,11 @@ void sv_visitor::exitNamed_parameter_assignment(sv2017::Named_parameter_assignme
     }
 }
 
-
 void sv_visitor::enterParam_assignment(sv2017::Param_assignmentContext *ctx) {
     auto p_n = ctx->identifier()->getText();
     params_factory.new_parameter();
     params_factory.set_parmeter_name(p_n);
 }
-
 
 
 void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
@@ -309,14 +302,8 @@ void sv_visitor::exitName_of_instance(sv2017::Name_of_instanceContext *ctx) {
 }
 
 
-void sv_visitor::enterLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) {
-    params_factory.set_local(true);
-}
-
-void sv_visitor::exitLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) {
-    params_factory.set_local(false);
-}
 
 void sv_visitor::enterConstant_param_expression(sv2017::Constant_param_expressionContext *) {
     in_expression_def = true;
 }
+

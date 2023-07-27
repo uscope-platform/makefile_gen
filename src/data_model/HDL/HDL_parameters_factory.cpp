@@ -17,11 +17,11 @@
 
 
 void HDL_parameters_factory::new_parameter() {
-    resources_factory_base<HDL_parameter>::new_basic_resource();
+      resources_factory_base<HDL_parameter>::new_basic_resource();
 }
 
 HDL_parameter HDL_parameters_factory::get_parameter() {
-    return current_resource;
+    return resources_factory_base<HDL_parameter>::get_resource();
 }
 
 void HDL_parameters_factory::set_value(const std::string &s) {
@@ -29,9 +29,6 @@ void HDL_parameters_factory::set_value(const std::string &s) {
 }
 
 
-void HDL_parameters_factory::set_local(bool l) {
-    is_local = l;
-}
 
 void HDL_parameters_factory::add_operand(const std::string &s) {
     current_resource.add_operand(s);
@@ -40,6 +37,3 @@ void HDL_parameters_factory::add_operand(const std::string &s) {
 void HDL_parameters_factory::add_operator(const std::string &s) {
     current_resource.add_operator(s);
 }
-
-
-

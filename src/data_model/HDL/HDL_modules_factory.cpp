@@ -23,7 +23,6 @@ void HDL_modules_factory::new_module(std::string &p) {
 }
 
 void HDL_modules_factory::add_instance(const HDL_instance &i) {
-
     current_resource.add_dependency(i);
 }
 

@@ -17,6 +17,7 @@ module test_mod #(
     parameter chained_expression = add_expr_p + mul_expr_p  * 5;
     parameter simple_log_expr_p = $clog2(add_expr_p);
     parameter complex_log_expr_p = $clog2(add_expr_p+2);
+    parameter parenthesised_expr_p = ( add_expr_p + mul_expr_p ) * 5;
     localparam local_p = 74;
 
 endmodule

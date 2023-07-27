@@ -77,12 +77,8 @@ public:
 
     void enterName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
     void exitName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
-
-    void enterLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) override;
-    void exitLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) override;
-
+    
     void enterConstant_param_expression(sv2017::Constant_param_expressionContext *) override;
-
 
     static uint32_t parse_number(const std::string& s);
     std::vector<HDL_Resource> get_entities();

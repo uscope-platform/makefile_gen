@@ -193,8 +193,8 @@ TEST(analysis_test, verilog_parameter_extraction){
             {"div_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"}, {"/"}}},
             {"modulo_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"} , {"%"}}},
             {"chained_expression", {{"add_expr_p", "mul_expr_p", "5"},{"+", "*"}}},
-            {"complex_log_expr_p", {{"add_expr_p+2"}, {"$clog2"}}},
-
+            {"complex_log_expr_p", {{"add_expr_p", "2"}, {"+", "$clog2"}}},
+            {"parenthesised_expr_p", {{"add_expr_p", "mul_expr_p", "5"}, {"+", "*"}}},
     };
     for(auto &item:  vect_params){
         HDL_parameter p = HDL_parameter();
