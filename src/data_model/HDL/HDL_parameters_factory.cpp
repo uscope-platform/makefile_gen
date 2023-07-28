@@ -18,6 +18,7 @@
 
 void HDL_parameters_factory::new_parameter() {
       resources_factory_base<HDL_parameter>::new_basic_resource();
+      current_resource.set_type(expression_parameter);
 }
 
 HDL_parameter HDL_parameters_factory::get_parameter() {

@@ -20,6 +20,7 @@
 #include "frontend/analysis/sv_analyzer.hpp"
 #include "frontend/analysis/vhdl_analyzer.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
+#include "data_model/HDL/parameters/Parameter_processor.hpp"
 
 TEST( analysis_test , package) {
 
@@ -180,6 +181,7 @@ TEST(analysis_test, verilog_parameter_extraction){
 
     for(auto &item:  params){
         HDL_parameter p = HDL_parameter();
+        p.set_type(expression_parameter);
         p.set_name(item.first);
         p.add_operand(item.second);
         check_params[item.first] = p;
@@ -187,17 +189,19 @@ TEST(analysis_test, verilog_parameter_extraction){
 
     std::vector<std::pair<std::string, std::pair<std::vector<std::string>, std::vector<std::string>>>> vect_params = {
             {"simple_log_expr_p", {{"add_expr_p"}, {"$clog2"}}},
-            {"add_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"}, {"+"}}},
-            {"sub_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"}, {"-"}}},
-            {"mul_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"}, {"*"}}},
-            {"div_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"}, {"/"}}},
-            {"modulo_expr_p", {{"simple_numeric_parameter", "sv_numeric_parameter"} , {"%"}}},
+            {"add_expr_p", {{"simple_numeric_p", "sv_numeric_p"}, {"+"}}},
+            {"sub_expr_p", {{"sv_numeric_p", "simple_numeric_p"}, {"-"}}},
+            {"mul_expr_p", {{"simple_numeric_p", "sv_numeric_p"}, {"*"}}},
+            {"div_expr_p", {{"sv_numeric_p", "simple_numeric_p"}, {"/"}}},
+            {"modulo_expr_p", {{"simple_numeric_p", "sv_numeric_p"} , {"%"}}},
             {"chained_expression", {{"add_expr_p", "mul_expr_p", "5"},{"+", "*"}}},
             {"complex_log_expr_p", {{"add_expr_p", "2"}, {"+", "$clog2"}}},
             {"parenthesised_expr_p", {{"add_expr_p", "mul_expr_p", "5"}, {"(", "+", ")", "*"}}},
     };
+
     for(auto &item:  vect_params){
         HDL_parameter p = HDL_parameter();
+        p.set_type(expression_parameter);
         p.set_name(item.first);
         for(auto &op:item.second.first){
             p.add_operand(op);
@@ -220,4 +224,17 @@ TEST(analysis_test, verilog_parameter_extraction){
 
 
     ASSERT_EQ(check_params, parameters);
+}
+
+
+
+TEST(analysis_test, verilog_parameter_processing){
+    sv_analyzer analyzer("check_files/test_sv_parameter_extraction.sv");
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    Parameter_processor p;
+    auto res =  p.process_resource(resource);
+
+    ASSERT_TRUE(false);
 }
