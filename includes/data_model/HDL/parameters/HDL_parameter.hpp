@@ -73,16 +73,14 @@ public:
 
     std::string get_name() const {return name;};
 
-    void add_operand(const std::string& component);
-    void add_operator(const std::string& component);
+    void add_component(const std::string& component);
 
     parameter_type get_type(){return type;};
     void set_type(parameter_type t){type = t;};
 
     bool is_empty();
 
-    std::stack<std::string> get_operands() { return operand_stack;};
-    std::stack<std::string> get_operators() { return operator_stack;};
+    std::vector<std::string>  get_expression_components() { return expression_components;};
 
     template<class Archive>
     void serialize( Archive & ar ) {
@@ -120,8 +118,8 @@ private:
     std::vector<uint32_t> numeric_value_array;
     parameter_type type;
 
-    std::stack<std::string> operand_stack;
-    std::stack<std::string> operator_stack;
+    std::vector<std::string> expression_components;
+
 };
 
 

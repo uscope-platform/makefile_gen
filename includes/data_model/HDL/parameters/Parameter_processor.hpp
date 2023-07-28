@@ -26,7 +26,11 @@ public:
     Parameter_processor() = default;
     HDL_Resource process_resource(const HDL_Resource &res);
     std::pair<HDL_parameter, bool> process_parameter(const HDL_parameter &par);
-    uint32_t process_numeric_parameter(const std::string &val);
+    std::pair<uint32_t, bool>  process_expression(std::vector<std::string> components);
+    uint32_t process_number(const std::string &val);
+
+    std::vector<std::string> expr_vector_to_rpn(const std::vector<std::string>& v);
+
     static uint32_t evaluate_binary_expression(uint32_t op_a, uint32_t op_b, std::string operation);
     static uint32_t evaluate_unary_expression(uint32_t operand, std::string operation);
 private:
@@ -54,13 +58,19 @@ private:
             R"(\{([^\}]+)\})"
     };
 
+    std::set<std::string> operators_set = {
+            "!", "~", "*", "/", "%","+","-","<<",">>"
+    };
+
+    std::set<std::string> functions_set = {
+            "$clog2","$ceil", "$floor","$pow"
+    };
+
     std::unordered_map<std::string, uint32_t> operators_precedence = {
             {"$clog2", 0},
             {"$ceil", 0},
             {"$floor", 0},
             {"$pow", 0},
-            {"(", 0},
-            {")", 0},
             {"!", 1},
             {"~", 1},
             {"*", 2},
@@ -77,8 +87,6 @@ private:
             {"$ceil", unary_operator},
             {"$floor", unary_operator},
             {"$pow", binary_operator},
-            {"(", immediate_operator},
-            {")", immediate_operator},
             {"!", unary_operator},
             {"~", unary_operator},
             {"*", binary_operator},

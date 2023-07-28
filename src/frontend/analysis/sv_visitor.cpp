@@ -72,6 +72,15 @@ std::vector<HDL_Resource> sv_visitor::get_entities() {
     return entities;
 }
 
+void sv_visitor::enterPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
+    if(in_expression_def){
+        std::string call_name = ctx->any_system_tf_identifier()->getText();
+        params_factory.add_component(call_name);
+        if(ctx->data_type() != nullptr){
+            params_factory.add_component(ctx->data_type()->getText());
+        }
+    }
+}
 void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
     std::string call_name = ctx->any_system_tf_identifier()->getText();
     if(call_name=="$readmemh" || call_name=="$readmemb"){
@@ -81,12 +90,6 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
         if(p.extension().string() == ".dat"|| p.extension().string() == ".mem"){
             HDL_instance dep("__init_file__", p.stem(), memory_init);
             modules_factory.add_mem_file_dep(dep);
-        }
-    }
-    if(in_expression_def){
-        params_factory.add_operator(call_name);
-        if(ctx->data_type() != nullptr){
-            params_factory.add_operand(ctx->data_type()->getText());
         }
     }
 }
@@ -155,7 +158,7 @@ void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
         string_components.push_back(std::to_string(numeric_val));
     }
     if(in_expression_def){
-        params_factory.add_operand(ctx->getText());
+        params_factory.add_component(ctx->getText());
     }
 }
 
@@ -167,7 +170,7 @@ void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
         string_components.push_back(ctx->getText());
     }
     if(in_expression_def){
-        params_factory.add_operand(ctx->getText());
+        params_factory.add_component(ctx->getText());
     }
 }
 
@@ -176,7 +179,7 @@ void sv_visitor::exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx
         string_components.push_back(ctx->getText());
     }
     if(in_expression_def){
-        params_factory.add_operator(ctx->getText());
+        params_factory.add_component(ctx->getText());
     }
 }
 
@@ -185,14 +188,14 @@ void sv_visitor::exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *c
         string_components.push_back(ctx->getText());
     }
     if(in_expression_def){
-        params_factory.add_operator(ctx->getText());
+        params_factory.add_component(ctx->getText());
     }
 }
 
 
 void sv_visitor::exitOperator_shift(sv2017::Operator_shiftContext *ctx) {
     if(in_expression_def){
-        params_factory.add_operator(ctx->getText());
+        params_factory.add_component(ctx->getText());
     }
 }
 
@@ -279,7 +282,7 @@ void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
     if(in_expression_def){
         in_expression_def = false;
     } else {
-        params_factory.add_operand(val);
+        params_factory.add_component(val);
     }
 
 
@@ -308,10 +311,10 @@ void sv_visitor::enterConstant_param_expression(sv2017::Constant_param_expressio
 }
 
 void sv_visitor::enterPrimaryPar(sv2017::PrimaryParContext *ctx) {
-    params_factory.add_operator("(");
+    params_factory.add_component("(");
 }
 
 void sv_visitor::exitPrimaryPar(sv2017::PrimaryParContext *ctx) {
-    params_factory.add_operator(")");
+    params_factory.add_component(")");
 }
 

@@ -54,6 +54,7 @@ public:
     void enterModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) override;
     void exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) override;
     void exitInterface_header(sv2017::Interface_headerContext *ctx) override;
+    void enterPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) override;
     void exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) override;
     void enterPackage_declaration(sv2017::Package_declarationContext *ctx) override;
     void exitPackage_declaration(sv2017::Package_declarationContext *ctx) override;

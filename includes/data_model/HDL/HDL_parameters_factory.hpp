@@ -28,8 +28,7 @@ public:
     HDL_parameter get_parameter();
     void set_value(const std::string &s);
     void set_parmeter_name(const std::string &s) { set_name(s);};
-    void add_operand(const std::string &s);
-    void add_operator(const std::string &s);
+    void add_component(const std::string &s);
 private:
 };
 

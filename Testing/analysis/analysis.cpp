@@ -169,52 +169,35 @@ TEST(analysis_test, verilog_parameter_extraction){
 
     std::unordered_map<std::string, HDL_parameter> check_params;
 
-    std::vector<std::pair<std::string, std::string>> params = {
-            {"simple_numeric_p", "32"},
-            {"sv_numeric_p", "5'o10"},
-            {"dimensionless_sv_numeric_p", "'h3F"},
-            {"string_p", R"("423")"},
-            {"nested_p", "string_parameter"},
-            {"local_p", "74"},
+    std::vector<std::pair<std::string, std::vector<std::string>>> vect_params = {
+            {"simple_numeric_p", {"32"}},
+            {"sv_numeric_p", {"5'o10"}},
+            {"dimensionless_sv_numeric_p", {"'h3F"}},
+            {"string_p", {R"("423")"}},
+            {"nested_p", {"string_parameter"}},
+            {"local_p", {"74"}},
+            {"simple_log_expr_p", {"$clog2", "add_expr_p"}},
+            {"add_expr_p", {"simple_numeric_p", "+", "sv_numeric_p"}},
+            {"sub_expr_p", {"simple_numeric_p","-", "sv_numeric_p"}},
+            {"mul_expr_p", {"simple_numeric_p","*", "sv_numeric_p"}},
+            {"div_expr_p", {"simple_numeric_p","/", "sv_numeric_p"}},
+            {"modulo_expr_p", {"simple_numeric_p","%", "sv_numeric_p"}},
+            {"chained_expression", {"add_expr_p","+", "mul_expr_p", "*", "5"}},
+            {"complex_log_expr_p", { "$clog2", "add_expr_p","+", "2"}},
+            {"parenthesised_expr_p", {"(", "add_expr_p","+", "mul_expr_p", ")", "*", "5"}},
     };
 
-
-    for(auto &item:  params){
-        HDL_parameter p = HDL_parameter();
-        p.set_type(expression_parameter);
-        p.set_name(item.first);
-        p.add_operand(item.second);
-        check_params[item.first] = p;
-    }
-
-    std::vector<std::pair<std::string, std::pair<std::vector<std::string>, std::vector<std::string>>>> vect_params = {
-            {"simple_log_expr_p", {{"add_expr_p"}, {"$clog2"}}},
-            {"add_expr_p", {{"simple_numeric_p", "sv_numeric_p"}, {"+"}}},
-            {"sub_expr_p", {{"sv_numeric_p", "simple_numeric_p"}, {"-"}}},
-            {"mul_expr_p", {{"simple_numeric_p", "sv_numeric_p"}, {"*"}}},
-            {"div_expr_p", {{"sv_numeric_p", "simple_numeric_p"}, {"/"}}},
-            {"modulo_expr_p", {{"simple_numeric_p", "sv_numeric_p"} , {"%"}}},
-            {"chained_expression", {{"add_expr_p", "mul_expr_p", "5"},{"+", "*"}}},
-            {"complex_log_expr_p", {{"add_expr_p", "2"}, {"+", "$clog2"}}},
-            {"parenthesised_expr_p", {{"add_expr_p", "mul_expr_p", "5"}, {"(", "+", ")", "*"}}},
-    };
 
     for(auto &item:  vect_params){
         HDL_parameter p = HDL_parameter();
         p.set_type(expression_parameter);
         p.set_name(item.first);
-        for(auto &op:item.second.first){
-            p.add_operand(op);
-        }
-        for(auto &op:item.second.second){
-            p.add_operator(op);
+        for(auto &op:item.second){
+            p.add_component(op);
         }
         check_params[item.first] = p;
     }
 
-    if(check_params.size() != parameters.size()){
-
-    }
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
@@ -231,10 +214,94 @@ TEST(analysis_test, verilog_parameter_extraction){
 TEST(analysis_test, verilog_parameter_processing){
     sv_analyzer analyzer("check_files/test_sv_parameter_extraction.sv");
     analyzer.cleanup_content("`(.*)");
-    auto resource = analyzer.analyze()[0];
+    HDL_Resource resource = analyzer.analyze()[0];
 
     Parameter_processor p;
-    auto res =  p.process_resource(resource);
+    resource =  p.process_resource(resource);
 
-    ASSERT_TRUE(false);
+    auto parameters = resource.get_parameters();
+
+    std::unordered_map<std::string, HDL_parameter> check_params;
+
+
+    std::vector<std::pair<std::string, std::vector<std::string>>> vect_params = {
+            {"simple_numeric_p", {"32"}},
+            {"sv_numeric_p", {"5'o10"}},
+            {"dimensionless_sv_numeric_p", {"'h3F"}},
+            {"string_p", {R"("423")"}},
+            {"nested_p", {"string_parameter"}},
+            {"local_p", {"74"}},
+            {"simple_log_expr_p", {"$clog2", "add_expr_p"}},
+            {"add_expr_p", {"simple_numeric_p", "+", "sv_numeric_p"}},
+            {"sub_expr_p", {"simple_numeric_p","-", "sv_numeric_p"}},
+            {"mul_expr_p", {"simple_numeric_p","*", "sv_numeric_p"}},
+            {"div_expr_p", {"simple_numeric_p","/", "sv_numeric_p"}},
+            {"modulo_expr_p", {"simple_numeric_p","%", "sv_numeric_p"}},
+            {"chained_expression", {"add_expr_p","+", "mul_expr_p", "*", "5"}},
+            {"complex_log_expr_p", { "$clog2", "add_expr_p","+", "2"}},
+            {"parenthesised_expr_p", {"(", "add_expr_p","+", "mul_expr_p", ")", "*", "5"}},
+    };
+
+    std::vector<parameter_type> check_types = {
+            numeric_parameter,
+            numeric_parameter,
+            numeric_parameter,
+            expression_parameter,
+            expression_parameter,
+            numeric_parameter,
+            numeric_parameter,
+            numeric_parameter,
+            numeric_parameter,
+            numeric_parameter,
+            numeric_parameter,
+            numeric_parameter,
+            numeric_parameter,
+            numeric_parameter,
+            numeric_parameter
+    };
+
+    std::vector<uint32_t> check_values = {
+            32,  // simple_numeric_p
+            8, // sv_numeric_p
+            63, //dimensionless_sv_numeric_p
+            9999, // DUMMY VALUE string_p
+            9999, // DUMMY VALUE nested_p
+            74, //local_p
+            6, //simple_log_expr_p
+            40, //add_expr_p
+            24, //sub_expr_p
+            256, //mul_expr_p
+            4, //div_expr_p
+            0, //modulo_expr_p
+            1320, //chained_expression
+            6, //complex_log_expr_p
+            1480 //parenthesised_expr_p
+    };
+
+    for(int i = 0; i<vect_params.size(); i++){
+        HDL_parameter par = HDL_parameter();
+        par.set_name(vect_params[i].first);
+        for(auto &op:vect_params[i].second){
+            par.add_component(op);
+        }
+        par.set_type(check_types[i]);
+        if(check_types[i] == numeric_parameter){
+            par.set_value(check_values[i]);
+        }
+
+        check_params[vect_params[i].first] = par;
+    }
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        auto result = parameters[item.first];
+        auto reference = item.second;
+        ASSERT_TRUE(parameters.contains(item.first));
+        ASSERT_EQ(reference, result);
+    }
+
+
+    ASSERT_EQ(check_params, parameters);
+
 }

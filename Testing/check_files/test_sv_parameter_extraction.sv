@@ -10,9 +10,9 @@ module test_mod #(
 )();
 
     parameter add_expr_p = simple_numeric_p + sv_numeric_p;
-    parameter sub_expr_p = sv_numeric_p - simple_numeric_p;
+    parameter sub_expr_p = simple_numeric_p - sv_numeric_p;
     parameter mul_expr_p = simple_numeric_p * sv_numeric_p;
-    parameter div_expr_p = sv_numeric_p / simple_numeric_p;
+    parameter div_expr_p = simple_numeric_p / sv_numeric_p;
     parameter modulo_expr_p = simple_numeric_p % sv_numeric_p;
     parameter chained_expression = add_expr_p + mul_expr_p  * 5;
     parameter simple_log_expr_p = $clog2(add_expr_p);

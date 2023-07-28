@@ -22,8 +22,7 @@ HDL_parameter::HDL_parameter(const HDL_parameter &c) {
     numeric_value_array = c.numeric_value_array;
     type = c.type;
 
-    operand_stack = c.operand_stack;
-    operator_stack = c.operator_stack;
+    expression_components = c.expression_components;
 }
 
 HDL_parameter::HDL_parameter() {
@@ -43,8 +42,7 @@ bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
     ret_val &= lhs.string_value_array == rhs.string_value_array;
     ret_val &= lhs.numeric_value_array == rhs.numeric_value_array;
     ret_val &= lhs.type == rhs.type;
-    ret_val &= lhs.operand_stack == rhs.operand_stack;
-    ret_val &= lhs.operator_stack == rhs.operator_stack;
+    ret_val &= lhs.expression_components == rhs.expression_components;
 
     return ret_val;
 }
@@ -212,13 +210,10 @@ HDL_parameter::operator std::string() {
 
 }
 
-void HDL_parameter::add_operator(const std::string& component) {
-    operator_stack.push(component);
+void HDL_parameter::add_component(const std::string& component) {
+    expression_components.push_back(component);
 }
 
-void HDL_parameter::add_operand(const std::string& component) {
-    operand_stack.push(component);
-}
 
 uint32_t HDL_parameter::get_parameter_value(const std::string &p,
                                             const std::unordered_map<std::string, HDL_parameter> &parent_parameter,
@@ -230,21 +225,20 @@ uint32_t HDL_parameter::get_parameter_value(const std::string &p,
 }
 
 void PrintTo(const HDL_parameter &param, std::ostream *os) {
-    std::string result = "\nHDL parameter:\n  NAME: " + param.name + "\n  TYPE: " + parameter_type_to_string(param.type) + "\n  OPERAND STACK:\n";
+    std::string result = "\nHDL parameter:\n  NAME: " + param.name +
+            "\n  TYPE: " + parameter_type_to_string(param.type);
+
+    if(param.type == numeric_parameter){
+        result += "\n  VALUE: " + std::to_string(param.numeric_value_array[0]);
+    }
+    result += "\n  OPERAND STACK:\n";
 
 
-    auto op_s = param.operand_stack;
-    while(!op_s.empty()){
-        result += "    " + op_s.top() + "\n";
-        op_s.pop();
+    auto comps = param.expression_components;
+
+    for(auto &item:comps){
+        result += "    " + item + "\n";
     }
 
-    result += "  OPERATOR STACK:\n";
-
-    op_s = param.operator_stack;
-    while(!op_s.empty()){
-        result += "    " + op_s.top() + "\n";
-        op_s.pop();
-    }
     *os << result;
 }
