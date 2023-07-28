@@ -176,14 +176,14 @@ TEST(analysis_test, verilog_parameter_extraction){
             {"string_p", {R"("423")"}},
             {"nested_p", {"string_parameter"}},
             {"local_p", {"74"}},
-            {"simple_log_expr_p", {"$clog2", "add_expr_p"}},
+            {"simple_log_expr_p", {"$clog2", "(", "add_expr_p", ")"}},
             {"add_expr_p", {"simple_numeric_p", "+", "sv_numeric_p"}},
             {"sub_expr_p", {"simple_numeric_p","-", "sv_numeric_p"}},
             {"mul_expr_p", {"simple_numeric_p","*", "sv_numeric_p"}},
             {"div_expr_p", {"simple_numeric_p","/", "sv_numeric_p"}},
             {"modulo_expr_p", {"simple_numeric_p","%", "sv_numeric_p"}},
             {"chained_expression", {"add_expr_p","+", "mul_expr_p", "*", "5"}},
-            {"complex_log_expr_p", { "$clog2", "add_expr_p","+", "2"}},
+            {"complex_log_expr_p", { "$clog2","(", "add_expr_p","+", "2", ")"}},
             {"parenthesised_expr_p", {"(", "add_expr_p","+", "mul_expr_p", ")", "*", "5"}},
     };
 
@@ -211,6 +211,43 @@ TEST(analysis_test, verilog_parameter_extraction){
 
 
 
+TEST(analysis_test, shunting_yard_priority){
+
+
+    Parameter_processor p;
+    std::vector<std::string> expr = {"add_expr_p","+", "mul_expr_p", "*", "5"};
+    auto rpn_expr = p.expr_vector_to_rpn(expr);
+    std::vector<std::string>  expected_result = {"add_expr_p", "mul_expr_p",  "5", "*", "+"};
+
+    ASSERT_EQ(rpn_expr, expected_result);
+
+}
+
+TEST(analysis_test, shunting_yard_parenthesis){
+
+    Parameter_processor p;
+    std::vector<std::string> expr_1 = {"(", "add_expr_p","+", "mul_expr_p",")", "*", "5"};
+    auto rpn_expr_1 = p.expr_vector_to_rpn(expr_1);
+    std::vector<std::string>  expected_result_1 = {"add_expr_p", "mul_expr_p","+",  "5", "*"};
+
+    ASSERT_EQ(rpn_expr_1, expected_result_1);
+
+    std::vector<std::string> expr_2 = {"5", "*", "(", "add_expr_p","+", "mul_expr_p",")"};
+    auto rpn_expr_2 = p.expr_vector_to_rpn(expr_2);
+    std::vector<std::string>  expected_result_2 = {"5", "add_expr_p","mul_expr_p",  "+", "*"};
+    ASSERT_EQ(rpn_expr_2, expected_result_2);
+}
+
+TEST(analysis_test, shunting_yard_function){
+    Parameter_processor p;
+    std::vector<std::string> expr = {"$clog2", "(", "add_expr_p","+", "2", ")"};
+    auto rpn_expr = p.expr_vector_to_rpn(expr);
+    std::vector<std::string>  expected_result = {"add_expr_p","2", "+", "$clog2"};
+
+    ASSERT_EQ(rpn_expr, expected_result);
+}
+
+
 TEST(analysis_test, verilog_parameter_processing){
     sv_analyzer analyzer("check_files/test_sv_parameter_extraction.sv");
     analyzer.cleanup_content("`(.*)");
@@ -231,14 +268,14 @@ TEST(analysis_test, verilog_parameter_processing){
             {"string_p", {R"("423")"}},
             {"nested_p", {"string_parameter"}},
             {"local_p", {"74"}},
-            {"simple_log_expr_p", {"$clog2", "add_expr_p"}},
+            {"simple_log_expr_p", {"$clog2", "(", "add_expr_p", ")"}},
             {"add_expr_p", {"simple_numeric_p", "+", "sv_numeric_p"}},
             {"sub_expr_p", {"simple_numeric_p","-", "sv_numeric_p"}},
             {"mul_expr_p", {"simple_numeric_p","*", "sv_numeric_p"}},
             {"div_expr_p", {"simple_numeric_p","/", "sv_numeric_p"}},
             {"modulo_expr_p", {"simple_numeric_p","%", "sv_numeric_p"}},
             {"chained_expression", {"add_expr_p","+", "mul_expr_p", "*", "5"}},
-            {"complex_log_expr_p", { "$clog2", "add_expr_p","+", "2"}},
+            {"complex_log_expr_p", { "$clog2","(", "add_expr_p","+", "2", ")"}},
             {"parenthesised_expr_p", {"(", "add_expr_p","+", "mul_expr_p", ")", "*", "5"}},
     };
 

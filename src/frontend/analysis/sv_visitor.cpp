@@ -76,6 +76,7 @@ void sv_visitor::enterPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
     if(in_expression_def){
         std::string call_name = ctx->any_system_tf_identifier()->getText();
         params_factory.add_component(call_name);
+        params_factory.add_component("(");
         if(ctx->data_type() != nullptr){
             params_factory.add_component(ctx->data_type()->getText());
         }
@@ -91,6 +92,10 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
             HDL_instance dep("__init_file__", p.stem(), memory_init);
             modules_factory.add_mem_file_dep(dep);
         }
+    }
+    if(in_expression_def) {
+
+        params_factory.add_component(")");
     }
 }
 

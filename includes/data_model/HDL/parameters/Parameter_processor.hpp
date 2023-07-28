@@ -38,6 +38,11 @@ private:
 
     std::unordered_map<std::string, uint32_t> working_param_values;
 
+    typedef struct {
+        std::string type;
+        std::string operation;
+        uint32_t number;
+    }expr_component_t;
 
     typedef enum{
         unary_operator = 0,
@@ -64,6 +69,10 @@ private:
 
     std::set<std::string> functions_set = {
             "$clog2","$ceil", "$floor","$pow"
+    };
+
+    std::set<std::string> right_associative_set = {
+            "$clog2","$ceil", "$floor","$pow", "!", "~"
     };
 
     std::unordered_map<std::string, uint32_t> operators_precedence = {

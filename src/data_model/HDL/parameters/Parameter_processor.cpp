@@ -100,61 +100,52 @@ std::pair<uint32_t , bool>  Parameter_processor::process_expression(std::vector<
     bool return_valid = false;
 
     auto rpn_expr = expr_vector_to_rpn(components);
+    std::vector<expr_component_t> processed_rpn;
 
-    while(!rpn_expr.empty()){
-        auto op_a_s = rpn_expr.front();
-        rpn_expr.erase(rpn_expr.begin());
-        uint32_t op_a;
-        if(!working_param_values.contains(op_a_s)){
-            if(
-                !rpn_expr.empty() &&
-                (
-                    test_parameter_type(classification_regexes.numeric, op_a_s) ||
-                    test_parameter_type(classification_regexes.sv_constant, op_a_s)
-                )
-            ){
-                op_a = process_number(op_a_s);
-            } else {
-                break;
-            }
-        } else {
-            op_a = working_param_values[op_a_s];
-        }
-
-        if(operators_set.contains(rpn_expr.front()) || functions_set.contains(rpn_expr.front())){
-            // execute unary operation
-            auto operation = rpn_expr.front();
-            rpn_expr.erase(rpn_expr.begin());
-
-            ret_value = evaluate_unary_expression(op_a, operation);
-            return_valid = true;
-        } else {
-            auto op_b_s = rpn_expr.front();
-            rpn_expr.erase(rpn_expr.begin());
-            uint32_t op_b;
-            if(!working_param_values.contains(op_b_s)){
-                if(test_parameter_type(classification_regexes.numeric, op_b_s) || test_parameter_type(classification_regexes.sv_constant, op_b_s)){
-                    op_b = process_number(op_b_s);
-                } else{
-                    break;
-                }
-            } else{
-                op_b = working_param_values[op_b_s];
-            }
-            auto operation = rpn_expr.front();
-            rpn_expr.erase(rpn_expr.begin());
-
-            // execute binary operation
-
-            ret_value = evaluate_binary_expression(op_a,op_b, operation);
-            return_valid = true;
-        }
-        if(!rpn_expr.empty()){
-            rpn_expr.insert(rpn_expr.begin(), std::to_string(ret_value));
+    for(const auto & i : rpn_expr){
+        if(working_param_values.contains(i)){
+            expr_component_t c;
+            c.number = working_param_values[i];
+            c.type = "number";
+            processed_rpn.push_back(c);
+        } else if( test_parameter_type(classification_regexes.numeric, i) || test_parameter_type(classification_regexes.sv_constant, i)){
+            expr_component_t c;
+            c.number = process_number(i);
+            c.type = "number";
+            processed_rpn.push_back(c);
+        } else if(operators_set.contains(i) || functions_set.contains(i)) {
+            expr_component_t c;
+            c.operation = i;
+            c.type = "operator";
+            processed_rpn.push_back(c);
+         }else {
+            return {ret_value, return_valid};
         }
     }
 
-    return {ret_value, return_valid};
+    std::stack<expr_component_t> evaluator_stack;
+
+    for(auto & i : processed_rpn){
+        if(i.type == "number"){
+            evaluator_stack.push(i);
+        } else {
+            expr_component_t c;
+            c.type = "number";
+            if(operators_types[i.operation] == unary_operator){
+                c.number = evaluate_unary_expression(evaluator_stack.top().number, i.operation);
+                evaluator_stack.pop();
+            } else if(operators_types[i.operation] == binary_operator){
+                auto op_b = evaluator_stack.top().number;
+                evaluator_stack.pop();
+                auto op_a = evaluator_stack.top().number;
+                evaluator_stack.pop();
+                c.number = evaluate_binary_expression(op_a, op_b, i.operation);
+            }
+            evaluator_stack.push(c);
+        }
+    }
+
+    return {evaluator_stack.top().number, true};
 }
 
 bool Parameter_processor::test_parameter_type(const std::string &r, const std::string &s) {
@@ -237,22 +228,26 @@ std::vector<std::string> Parameter_processor::expr_vector_to_rpn(const std::vect
                     !shunting_stack.empty() &&
                     shunting_stack.top()!="(" &&
                     (
-                        operators_precedence[shunting_stack.top()]>operators_precedence[item] ||
-                        operators_precedence[shunting_stack.top()]==operators_precedence[item]
+                        !functions_set.contains(shunting_stack.top()) &&
+                        operators_precedence[shunting_stack.top()]<operators_precedence[item] ||
+                        operators_precedence[shunting_stack.top()]==operators_precedence[item] &&
+                        !right_associative_set.contains(shunting_stack.top())
                     )
             ){
                 rpn_exp.push_back(shunting_stack.top());
                 shunting_stack.pop();
             }
             shunting_stack.push(item);
-        }else if(functions_set.contains(item)){ // token is function
-            shunting_stack.push(item);
-        } else if(item == "("){
+        } else if(item == "(" || functions_set.contains(item)){
             shunting_stack.push(item);
         } else if(item == ")"){
             while (shunting_stack.top() != "(") {
                 rpn_exp.push_back(shunting_stack.top());
                 shunting_stack.pop();
+                if(functions_set.contains(shunting_stack.top())){
+                    rpn_exp.push_back(shunting_stack.top());
+                    shunting_stack.pop();
+                }
             }
             shunting_stack.pop();
         } else{ // token is number
