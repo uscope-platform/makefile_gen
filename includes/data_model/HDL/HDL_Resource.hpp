@@ -94,7 +94,10 @@ class HDL_Resource {
         bool is_empty();
         friend bool operator <(const HDL_Resource& lhs, const HDL_Resource& rhs);
         friend bool operator==(const HDL_Resource&lhs, const HDL_Resource&rhs);
-    private:
+
+        friend void PrintTo(const HDL_Resource& res, std::ostream* os);
+
+private:
         std::string name;
         std::string path;
         dependency_class hdl_type;

@@ -87,6 +87,7 @@ public:
         ar(name, string_value_array, numeric_value_array);
     }
 
+    std::string to_string() const;
 
     friend bool operator <(const HDL_parameter& lhs, const HDL_parameter& rhs);
     friend bool operator==(const HDL_parameter&lhs, const HDL_parameter&rhs);

@@ -148,4 +148,20 @@ bool HDL_Resource::is_string_parameter(const std::string &s) {
         return false;
 }
 
+void PrintTo(const HDL_Resource &res, std::ostream *os) {
+
+    std::string result = "\n----------------------------------------------------";
+    result += "\nHDL Resource:\n  NAME: " + res.name;
+    result += "\n  PATH: " + res.path;
+    result += "\n  PARAMETERS: \n";
+    for(auto item:res.parameters){
+        result += item.second.to_string();
+    }
+    result += "\n----------------------------------------------------";
+
+    *os << result;
+
+
+}
+
 

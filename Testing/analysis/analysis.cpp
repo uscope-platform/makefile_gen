@@ -136,11 +136,15 @@ TEST( analysis_test , sv_module) {
 
     p = HDL_parameter();
     p.set_name("module_parameter_1");
-    p.set_value("56");
+    p.add_component("56");
+    p.set_type(expression_parameter);
     check_res.add_parameter(p);
+
+
     p = HDL_parameter();
     p.set_name("module_parameter_2");
-    p.set_value("74");
+    p.add_component("74");
+    p.set_type(expression_parameter);
     check_res.add_parameter(p);
 
     ASSERT_EQ(resource, check_res);

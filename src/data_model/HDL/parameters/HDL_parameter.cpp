@@ -225,20 +225,25 @@ uint32_t HDL_parameter::get_parameter_value(const std::string &p,
 }
 
 void PrintTo(const HDL_parameter &param, std::ostream *os) {
-    std::string result = "\nHDL parameter:\n  NAME: " + param.name +
-            "\n  TYPE: " + parameter_type_to_string(param.type);
+    std::string result = param.to_string();
+    *os << result;
+}
 
-    if(param.type == numeric_parameter){
-        result += "\n  VALUE: " + std::to_string(param.numeric_value_array[0]);
+std::string HDL_parameter::to_string() const {
+    std::string result = "\nHDL parameter:\n  NAME: " + name +
+                         "\n  TYPE: " + parameter_type_to_string(type);
+
+    if(type == numeric_parameter){
+        result += "\n  VALUE: " + std::to_string(numeric_value_array[0]);
     }
     result += "\n  OPERAND STACK:\n";
 
 
-    auto comps = param.expression_components;
+    auto comps = expression_components;
 
     for(auto &item:comps){
         result += "    " + item + "\n";
     }
 
-    *os << result;
+    return result;
 }
