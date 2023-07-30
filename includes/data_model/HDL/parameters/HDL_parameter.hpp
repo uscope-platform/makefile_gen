@@ -18,8 +18,10 @@
 
 #include <string>
 #include <regex>
+#include <unordered_set>
 
 #include <cereal/types/vector.hpp>
+#include <cereal/types/unordered_set.hpp>
 
 enum parameter_type {
     string_parameter=0,
@@ -80,7 +82,13 @@ public:
 
     bool is_empty();
 
+
+    void set_expression_components(std::vector<std::string> &c){expression_components = c;};
     std::vector<std::string>  get_expression_components() { return expression_components;};
+
+    void add_dependency(std::string &s){dependencies.insert(s);};
+    std::unordered_set<std::string> get_dependencies() { return dependencies;};
+    void set_dependencies(std::unordered_set<std::string> d) {dependencies = std::move(d);};
 
     template<class Archive>
     void serialize( Archive & ar ) {
@@ -119,6 +127,8 @@ private:
     std::vector<uint32_t> numeric_value_array;
     parameter_type type;
 
+
+    std::unordered_set<std::string> dependencies;
     std::vector<std::string> expression_components;
 
 };

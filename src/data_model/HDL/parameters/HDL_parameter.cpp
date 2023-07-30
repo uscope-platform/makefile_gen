@@ -21,7 +21,7 @@ HDL_parameter::HDL_parameter(const HDL_parameter &c) {
     string_value_array = c.string_value_array;
     numeric_value_array = c.numeric_value_array;
     type = c.type;
-
+    dependencies = c.dependencies;
     expression_components = c.expression_components;
 }
 
@@ -43,6 +43,7 @@ bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
     ret_val &= lhs.numeric_value_array == rhs.numeric_value_array;
     ret_val &= lhs.type == rhs.type;
     ret_val &= lhs.expression_components == rhs.expression_components;
+    ret_val &= lhs.dependencies == rhs.dependencies;
 
     return ret_val;
 }
@@ -57,6 +58,8 @@ bool HDL_parameter::is_empty() {
     ret &= name.empty();
     ret &= string_value_array.empty();
     ret &= numeric_value_array.empty();
+    ret &= expression_components.empty();
+    ret &= dependencies.empty();
 
     return ret;
 }
@@ -184,7 +187,6 @@ std::pair<std::string, std::string> HDL_parameter::split_array_init(std::string 
 HDL_parameter::operator std::string() {
     std::string ret_val;
     switch (type) {
-
         case string_parameter:
             ret_val = string_value_array[0];
             break;
@@ -236,8 +238,16 @@ std::string HDL_parameter::to_string() const {
     if(type == numeric_parameter){
         result += "\n  VALUE: " + std::to_string(numeric_value_array[0]);
     }
-    result += "\n  OPERAND STACK:\n";
 
+    result += "\n  DEPENDENCIES:\n";
+
+    auto deps = dependencies;
+
+    for(auto &item:deps){
+        result += "    " + item + "\n";
+    }
+
+    result += "\n  EXPRESSION:\n";
 
     auto comps = expression_components;
 

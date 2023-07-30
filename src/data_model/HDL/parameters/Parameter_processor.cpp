@@ -85,8 +85,10 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
     }
 
 
-    auto proc_expr = process_expression(components);
+    std::unordered_set<std::string> dependencies;
+    auto proc_expr = process_expression(components, dependencies);
     if(proc_expr.second){
+        return_par.set_dependencies(dependencies);
         return_par.set_type(numeric_parameter);
         return_par.set_value(proc_expr.first);
         processing_complete = true;
@@ -95,19 +97,19 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
     return {return_par, processing_complete};
 }
 
-std::pair<uint32_t , bool>  Parameter_processor::process_expression(std::vector<std::string> components) {
+std::pair<uint32_t , bool>  Parameter_processor::process_expression(const std::vector<std::string>& expr, std::unordered_set<std::string> &deps) {
     uint32_t ret_value = 0;
     bool return_valid = false;
 
-    auto rpn_expr = expr_vector_to_rpn(components);
     std::vector<expr_component_t> processed_rpn;
 
-    for(const auto & i : rpn_expr){
+    for(const auto & i : expr){
         if(working_param_values.contains(i)){
             expr_component_t c;
             c.number = working_param_values[i];
             c.type = "number";
             processed_rpn.push_back(c);
+            deps.insert(i);
         } else if( test_parameter_type(classification_regexes.numeric, i) || test_parameter_type(classification_regexes.sv_constant, i)){
             expr_component_t c;
             c.number = process_number(i);
@@ -261,6 +263,18 @@ std::vector<std::string> Parameter_processor::expr_vector_to_rpn(const std::vect
     }
 
     return rpn_exp;
+}
+
+void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
+    for(auto &res:v){
+        std::unordered_map<std::string, HDL_parameter> new_params;
+        for(auto &item: res.get_parameters()){
+            auto rpn_expr = expr_vector_to_rpn(item.second.get_expression_components());
+            item.second.set_expression_components(rpn_expr);
+            new_params[item.first] = item.second;
+        }
+        res.set_parameters(new_params);
+    }
 }
 
 

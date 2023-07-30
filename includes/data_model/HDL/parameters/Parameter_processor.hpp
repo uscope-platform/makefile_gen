@@ -24,9 +24,10 @@
 class Parameter_processor {
 public:
     Parameter_processor() = default;
+    void convert_parameters(std::vector<HDL_Resource> &v);
     HDL_Resource process_resource(const HDL_Resource &res);
     std::pair<HDL_parameter, bool> process_parameter(const HDL_parameter &par);
-    std::pair<uint32_t, bool>  process_expression(std::vector<std::string> components);
+    std::pair<uint32_t, bool>  process_expression(const std::vector<std::string>& expr, std::unordered_set<std::string> &deps);
     uint32_t process_number(const std::string &val);
 
     std::vector<std::string> expr_vector_to_rpn(const std::vector<std::string>& v);
