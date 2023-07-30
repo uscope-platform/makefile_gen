@@ -321,3 +321,78 @@ TEST(analysis_test, verilog_parameter_processing){
     ASSERT_EQ(check_params, parameters);
 
 }
+
+
+TEST(analysis_test, verilog_parameter_processing_override){
+    sv_analyzer analyzer("check_files/test_sv_parameter_extraction.sv");
+    analyzer.cleanup_content("`(.*)");
+    HDL_Resource resource = analyzer.analyze()[0];
+
+    std::unordered_map<std::string, uint32_t> parent_params = {
+            {"simple_numeric_p", 15},
+            {"sv_numeric_p", 12}
+    };
+
+    Parameter_processor p;
+    resource =  p.process_resource(resource, parent_params);
+
+    auto parameters = resource.get_parameters();
+
+    std::unordered_map<std::string, HDL_parameter> check_params;
+
+    typedef struct {
+        std::string name;
+        std::vector<std::string> components;
+        std::vector<std::string> dependencies;
+        parameter_type type;
+        uint32_t value;
+    }param_check_t;
+
+    std::vector<param_check_t> vect_params = {
+            {"simple_numeric_p", {"32"}, {}, numeric_parameter, 32},
+            {"sv_numeric_p", {"5'o10"}, {}, numeric_parameter, 8},
+            {"dimensionless_sv_numeric_p", {"'h3F"}, {}, numeric_parameter, 63},
+            {"string_p", {R"("423")"}, {}, expression_parameter, 9999},
+            {"nested_p", {"string_parameter"}, {}, expression_parameter, 9999},
+            {"local_p", {"74"}, {}, numeric_parameter, 74},
+            {"simple_log_expr_p", {"add_expr_p", "$clog2"}, {"add_expr_p"}, numeric_parameter, 5},
+            {"add_expr_p", {"simple_numeric_p", "sv_numeric_p", "+"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter,27},
+            {"sub_expr_p", {"simple_numeric_p", "sv_numeric_p","-"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter,3},
+            {"mul_expr_p", {"simple_numeric_p", "sv_numeric_p","*"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter, 180},
+            {"div_expr_p", {"simple_numeric_p", "sv_numeric_p","/"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter, 1},
+            {"modulo_expr_p", {"simple_numeric_p", "sv_numeric_p","%"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter, 3},
+            {"chained_expression", {"add_expr_p", "mul_expr_p", "5", "*","+"}, {"add_expr_p", "mul_expr_p"}, numeric_parameter, 927},
+            {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}, {"add_expr_p"}, numeric_parameter, 5},
+            {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}, {"add_expr_p", "mul_expr_p"}, numeric_parameter, 1035}
+    };
+
+
+    for(auto & vt : vect_params){
+        HDL_parameter par = HDL_parameter();
+        par.set_name(vt.name);
+        for(auto &op:vt.components){
+            par.add_component(op);
+        }
+        for(auto &op:vt.dependencies){
+            par.add_dependency(op);
+        }
+        par.set_type(vt.type);
+        if(vt.type == numeric_parameter){
+            par.set_value(vt.value);
+        }
+
+        check_params[vt.name] = par;
+    }
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        auto result = parameters[item.first];
+        auto reference = item.second;
+        ASSERT_TRUE(parameters.contains(item.first));
+        ASSERT_EQ(reference, result);
+    }
+
+
+    ASSERT_EQ(check_params, parameters);
+}

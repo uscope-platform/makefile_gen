@@ -16,6 +16,11 @@
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
 HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
+    return process_resource(res, {});
+}
+
+HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res,
+                                                   const std::unordered_map<std::string, uint32_t>& parent_parameters) {
 
     HDL_Resource return_res = res;
 
@@ -27,7 +32,7 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
 
     while(!working_set.empty() && !processing_complete){
         for(auto &item:working_set){
-            auto processed_param = process_parameter(item.second);
+            auto processed_param = process_parameter(item.second, parent_parameters);
             if(processed_param.second){
                 processed_parameters[item.first] = processed_param.first;
                 working_param_values[item.first] = processed_param.first.get_numeric_value();
@@ -52,7 +57,14 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
     return return_res;
 }
 
+
+
 std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_parameter &par) {
+    return process_parameter(par, {});
+}
+
+std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_parameter &par,
+                                                                      std::unordered_map<std::string, uint32_t> parent_parameters) {
 
     HDL_parameter return_par = par;
     bool processing_complete = false;
@@ -69,10 +81,14 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
     if(components.size() == 1){
         std::string value = components[0];
         uint32_t val;
-        if(test_parameter_type(classification_regexes.numeric, value) || test_parameter_type(classification_regexes.sv_constant, value)) {
+        if(parent_parameters.contains(par.get_name())){
+            val = parent_parameters[par.get_name()];
+        } else if(test_parameter_type(classification_regexes.numeric, value) || test_parameter_type(classification_regexes.sv_constant, value)) {
             val = process_number(value);
         } else{
-            if(working_param_values.contains(value)){
+            if(parent_parameters.contains(value)){
+                val = parent_parameters[value];
+            } else if(working_param_values.contains(value)){
                 val = working_param_values[value];
             } else {
                 return {return_par, processing_complete};
@@ -86,7 +102,7 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
 
 
     std::unordered_set<std::string> dependencies;
-    auto proc_expr = process_expression(components, dependencies);
+    auto proc_expr = process_expression(components, dependencies, parent_parameters);
     if(proc_expr.second){
         return_par.set_dependencies(dependencies);
         return_par.set_type(numeric_parameter);
@@ -98,13 +114,26 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
 }
 
 std::pair<uint32_t , bool>  Parameter_processor::process_expression(const std::vector<std::string>& expr, std::unordered_set<std::string> &deps) {
+    return process_expression(expr, deps, {});
+}
+
+std::pair<uint32_t, bool>
+Parameter_processor::process_expression(const std::vector<std::string> &expr, std::unordered_set<std::string> &deps,
+                                        std::unordered_map<std::string, uint32_t> parent_parameters) {
     uint32_t ret_value = 0;
     bool return_valid = false;
 
     std::vector<expr_component_t> processed_rpn;
 
     for(const auto & i : expr){
-        if(working_param_values.contains(i)){
+
+        if(parent_parameters.contains(i)){
+            expr_component_t c;
+            c.number = parent_parameters[i];
+            c.type = "number";
+            processed_rpn.push_back(c);
+            deps.insert(i);
+        } else if(working_param_values.contains(i)){
             expr_component_t c;
             c.number = working_param_values[i];
             c.type = "number";
@@ -120,7 +149,7 @@ std::pair<uint32_t , bool>  Parameter_processor::process_expression(const std::v
             c.operation = i;
             c.type = "operator";
             processed_rpn.push_back(c);
-         }else {
+        }else {
             return {ret_value, return_valid};
         }
     }
