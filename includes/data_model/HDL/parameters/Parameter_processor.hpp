@@ -31,87 +31,15 @@ public:
     std::pair<HDL_parameter, bool> process_parameter(const HDL_parameter &par, std::unordered_map<std::string, uint32_t> parent_parameters);
     std::pair<uint32_t, bool>  process_expression(const std::vector<Expression_component>& expr, std::unordered_set<std::string> &deps);
     std::pair<uint32_t, bool>  process_expression(const std::vector<Expression_component>& expr, std::unordered_set<std::string> &deps, std::unordered_map<std::string, uint32_t> parent_parameters);
-    uint32_t process_number(const std::string &val);
+
 
     std::vector<Expression_component> expr_vector_to_rpn(const std::vector<Expression_component>& v);
 
-    static uint32_t evaluate_binary_expression(uint32_t op_a, uint32_t op_b, std::string operation);
-    static uint32_t evaluate_unary_expression(uint32_t operand, std::string operation);
+    static uint32_t evaluate_binary_expression(uint32_t op_a, uint32_t op_b, const std::string& operation);
+    static uint32_t evaluate_unary_expression(uint32_t operand, const std::string& operation);
 private:
-    bool test_parameter_type(const std::string &r, const std::string &s);
 
     std::unordered_map<std::string, uint32_t> working_param_values;
-
-    typedef struct {
-        std::string type;
-        std::string operation;
-        uint32_t number;
-    }expr_component_t;
-
-    typedef enum{
-        unary_operator = 0,
-        binary_operator = 1,
-        immediate_operator = 2
-    } operator_type_t;
-
-
-    struct {
-        std::string numeric;
-        std::string sv_constant;
-        std::string array_init;
-        std::string array;
-    } classification_regexes = {
-            "^\\d*$",
-            "^\\d*'(h|d|o|b)([0-9a-fA-F]+)",
-            R"(\{([a-zA-Z0-9_']+)\{([a-zA-Z0-9_']+)\}\})",
-            R"(\{([^\}]+)\})"
-    };
-
-    std::set<std::string> operators_set = {
-            "!", "~", "*", "/", "%","+","-","<<",">>"
-    };
-
-    std::set<std::string> functions_set = {
-            "$clog2","$ceil", "$floor","$pow"
-    };
-
-    std::set<std::string> right_associative_set = {
-            "$clog2","$ceil", "$floor","$pow", "!", "~"
-    };
-
-    std::unordered_map<std::string, uint32_t> operators_precedence = {
-            {"$clog2", 0},
-            {"$ceil", 0},
-            {"$floor", 0},
-            {"$pow", 0},
-            {"!", 1},
-            {"~", 1},
-            {"*", 2},
-            {"/", 2},
-            {"%", 2},
-            {"+", 3},
-            {"-", 3},
-            {"<<", 4},
-            {">>", 4},
-    };
-
-    std::unordered_map<std::string, operator_type_t> operators_types = {
-            {"$clog2", unary_operator},
-            {"$ceil", unary_operator},
-            {"$floor", unary_operator},
-            {"$pow", binary_operator},
-            {"!", unary_operator},
-            {"~", unary_operator},
-            {"*", binary_operator},
-            {"/", binary_operator},
-            {"%", binary_operator},
-            {"+", binary_operator},
-            {"-", binary_operator},
-            {"<<", binary_operator},
-            {">>", binary_operator},
-    };
-
-
 
 };
 

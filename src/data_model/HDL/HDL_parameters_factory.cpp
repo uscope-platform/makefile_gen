@@ -29,6 +29,6 @@ void HDL_parameters_factory::set_value(const std::string &s) {
     current_resource.set_value(s);
 }
 
-void HDL_parameters_factory::add_component(const std::string &s) {
-    current_resource.add_component(Expression_component(s));
+void HDL_parameters_factory::add_component(const Expression_component &c) {
+    current_resource.add_component(c);
 }

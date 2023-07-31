@@ -5,6 +5,7 @@ module test_mod #(
     parameter simple_numeric_p = 32,
     sv_numeric_p = 5'o10,
     dimensionless_sv_numeric_p  = 'h3F,
+    //parameter [31:0] array_parameter [1:0] = '{32, 5},
     string_p = "423",
     nested_p = string_parameter
 )();
@@ -18,6 +19,7 @@ module test_mod #(
     parameter simple_log_expr_p = $clog2(add_expr_p);
     parameter complex_log_expr_p = $clog2(add_expr_p+2);
     parameter parenthesised_expr_p = ( add_expr_p + mul_expr_p ) * 5;
+    //parameter array_parameter_expr_p = array_parameter[0] + array_parameter[1];
     localparam local_p = 74;
 
 endmodule

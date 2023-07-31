@@ -89,25 +89,31 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
 
     // PROCESS SIMPLE PARAMETERS
     if(components.size() == 1){
-        std::string value = components[0].get_string_value();
-        uint32_t val;
-        if(parent_parameters.contains(par.get_name())){
-            val = parent_parameters[par.get_name()];
-        } else if(test_parameter_type(classification_regexes.numeric, value) || test_parameter_type(classification_regexes.sv_constant, value)) {
-            val = process_number(value);
-        } else{
-            if(parent_parameters.contains(value)){
-                val = parent_parameters[value];
-            } else if(working_param_values.contains(value)){
-                val = working_param_values[value];
-            } else {
-                return {return_par, processing_complete};
+        if(components[0].get_type() ==string_component){
+            std::string value = components[0].get_string_value();
+            uint32_t val;
+            if(parent_parameters.contains(par.get_name())){
+                val = parent_parameters[par.get_name()];
+            } else{
+                if(parent_parameters.contains(value)){
+                    val = parent_parameters[value];
+                } else if(working_param_values.contains(value)){
+                    val = working_param_values[value];
+                } else {
+                    return {return_par, processing_complete};
+                }
             }
-        }
 
-        return_par.set_type(numeric_parameter);
-        return_par.set_value(val);
-        processing_complete = true;
+            return_par.set_type(numeric_parameter);
+            return_par.set_value(val);
+            processing_complete = true;
+        } else if(components[0].get_type()== numeric_component){
+            return_par.set_type(numeric_parameter);
+            return_par.set_value(components[0].get_numeric_value());
+            processing_complete = true;
+        } else {
+            throw std::runtime_error("Error: Malformed expression composed by a single operator or Function");
+        }
     }
 
 
@@ -133,101 +139,52 @@ Parameter_processor::process_expression(const std::vector<Expression_component> 
     uint32_t ret_value = 0;
     bool return_valid = false;
 
-    std::vector<expr_component_t> processed_rpn;
+    std::vector<Expression_component> processed_rpn;
 
     for(auto i : expr){
 
-
-        if(i.get_type() == numeric_component){
-            expr_component_t c;
-            c.number = i.get_numeric_value();
-            c.type = "number";
-            processed_rpn.push_back(c);
-        } else if(i.get_type() == string_component){
-            //TODO: Adapt parameter processor to work directly on expression components
+        if(i.get_type() == numeric_component || i.get_type() == operator_component || i.get_type()==function_component){
+            processed_rpn.push_back(i);
+        } else if(i.get_type() == string_component) {
             if(parent_parameters.contains(i.get_string_value())){
-                expr_component_t c;
-                c.number = parent_parameters[i.get_raw_string_value()];
-                c.type = "number";
-                processed_rpn.push_back(c);
+                processed_rpn.emplace_back(parent_parameters[i.get_raw_string_value()]);
                 deps.insert(i.get_raw_string_value());
             } else if(working_param_values.contains(i.get_raw_string_value())){
-                expr_component_t c;
-                c.number = working_param_values[i.get_raw_string_value()];
-                c.type = "number";
-                processed_rpn.push_back(c);
+                processed_rpn.emplace_back(working_param_values[i.get_raw_string_value()]);
                 deps.insert(i.get_raw_string_value());
-            } else if(operators_set.contains(i.get_raw_string_value()) || functions_set.contains(i.get_raw_string_value())) {
-                expr_component_t c;
-                c.operation = i.get_raw_string_value();
-                c.type = "operator";
-                processed_rpn.push_back(c);
-            }else {
+            } else {
                 return {ret_value, return_valid};
             }
         }
 
     }
 
-    std::stack<expr_component_t> evaluator_stack;
+    std::stack<Expression_component> evaluator_stack;
 
     for(auto & i : processed_rpn){
-        if(i.type == "number"){
+        if(i.get_type() == numeric_component){
             evaluator_stack.push(i);
         } else {
-            expr_component_t c;
-            c.type = "number";
-            if(operators_types[i.operation] == unary_operator){
-                c.number = evaluate_unary_expression(evaluator_stack.top().number, i.operation);
+            uint32_t result;
+            if(i.get_operator_type() == Expression_component::unary_operator){
+                result = evaluate_unary_expression(evaluator_stack.top().get_numeric_value(), i.get_string_value());
                 evaluator_stack.pop();
-            } else if(operators_types[i.operation] == binary_operator){
-                auto op_b = evaluator_stack.top().number;
+            } else if(i.get_operator_type() == Expression_component::binary_operator){
+                auto op_b = evaluator_stack.top().get_numeric_value();
                 evaluator_stack.pop();
-                auto op_a = evaluator_stack.top().number;
+                auto op_a = evaluator_stack.top().get_numeric_value();
                 evaluator_stack.pop();
-                c.number = evaluate_binary_expression(op_a, op_b, i.operation);
+                result = evaluate_binary_expression(op_a, op_b, i.get_raw_string_value());
             }
-            evaluator_stack.push(c);
+            evaluator_stack.push(Expression_component(result));
         }
     }
 
-    return {evaluator_stack.top().number, true};
+    return {evaluator_stack.top().get_numeric_value(),true};
 }
 
-bool Parameter_processor::test_parameter_type(const std::string &r, const std::string &s) {
-    const std::regex regex(r);
-    std::smatch base_match;
-    if(std::regex_search(s, base_match, regex)){
-        return true;
-    } else{
-        return false;
-    }
-}
 
-uint32_t Parameter_processor::process_number(const std::string &raw_value) {
-    if(test_parameter_type(classification_regexes.numeric, raw_value)) {
-        return std::stoul(raw_value);
-    } else if(test_parameter_type(classification_regexes.sv_constant, raw_value)){
-        std::regex r(classification_regexes.sv_constant);
-
-        std::smatch base_match;
-        if(std::regex_search(raw_value, base_match, r)){
-            if(base_match[1].str() =="h"){
-                return std::stoul(base_match[2], nullptr, 16);
-            } else if(base_match[1].str() =="d") {
-                return std::stoul(base_match[2], nullptr, 10);
-            } else if(base_match[1].str() =="o") {
-                return std::stoul(base_match[2], nullptr, 8);
-            } else if(base_match[1].str() =="b") {
-                return std::stoul(base_match[2], nullptr, 2);
-            }
-        }
-
-    }
-    throw std::runtime_error("Invalid SV constant encountered while processing parameters: \"" + raw_value + "\"");
-}
-
-uint32_t Parameter_processor::evaluate_binary_expression(uint32_t op_a, uint32_t op_b, std::string operation) {
+uint32_t Parameter_processor::evaluate_binary_expression(uint32_t op_a, uint32_t op_b, const std::string& operation) {
     if(operation == "+"){
         return op_a + op_b;
     } else if(operation ==  "-"){
@@ -247,7 +204,7 @@ uint32_t Parameter_processor::evaluate_binary_expression(uint32_t op_a, uint32_t
     }
 }
 
-uint32_t Parameter_processor::evaluate_unary_expression(uint32_t operand, std::string operation) {
+uint32_t Parameter_processor::evaluate_unary_expression(uint32_t operand, const std::string& operation) {
     if(operation == "!"){
         return !operand;
     } else if(operation ==  "~"){
@@ -269,28 +226,28 @@ std::vector<Expression_component> Parameter_processor::expr_vector_to_rpn(const 
     std::stack<Expression_component> shunting_stack;
 
     for(auto item:v){
-        if(operators_set.contains(item.get_raw_string_value())){ // token is operator
+        if(item.get_type() == operator_component){ // token is operator
             while (
                     !shunting_stack.empty() &&
                     shunting_stack.top().get_raw_string_value()!="(" &&
                     (
-                        !functions_set.contains(shunting_stack.top().get_raw_string_value()) &&
-                        operators_precedence[shunting_stack.top().get_raw_string_value()]<operators_precedence[item.get_raw_string_value()] ||
-                        operators_precedence[shunting_stack.top().get_raw_string_value()]==operators_precedence[item.get_raw_string_value()] &&
-                        !right_associative_set.contains(shunting_stack.top().get_raw_string_value())
+                        shunting_stack.top().get_type() == function_component &&
+                        shunting_stack.top().get_operator_precedence()<item.get_operator_precedence() ||
+                        shunting_stack.top().get_operator_precedence()==item.get_operator_precedence() &&
+                        !shunting_stack.top().is_right_associative()
                     )
             ){
                 rpn_exp.push_back(shunting_stack.top());
                 shunting_stack.pop();
             }
             shunting_stack.push(item);
-        } else if(item.get_raw_string_value() == "(" || functions_set.contains(item.get_raw_string_value())){
+        } else if(item.get_raw_string_value() == "(" || item.get_type() == function_component){
             shunting_stack.push(item);
         } else if(item.get_raw_string_value() == ")"){
             while (shunting_stack.top().get_raw_string_value() != "(") {
                 rpn_exp.push_back(shunting_stack.top());
                 shunting_stack.pop();
-                if(functions_set.contains(shunting_stack.top().get_raw_string_value())){
+                if(shunting_stack.top().get_type()==function_component){
                     rpn_exp.push_back(shunting_stack.top());
                     shunting_stack.pop();
                 }

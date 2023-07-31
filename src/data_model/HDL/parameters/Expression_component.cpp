@@ -27,19 +27,23 @@ Expression_component::Expression_component() {
 }
 
 Expression_component::Expression_component(std::string s) {
-    string_value =  std::move(s);
     numeric_value = 0;
     string_index = "";
     numeric_index = 0;
     index_type = no_index_type;
-    component_type = string_component;
+    if(operators_set.contains(s)) {
+        component_type = operator_component;
+    } else if(functions_set.contains(s)){
+        component_type = function_component;
+    } else {
+        component_type = string_component;
+    }
+    string_value =  std::move(s);
+    process_number();
 }
 
 Expression_component::Expression_component(uint32_t n) {
-    string_value =  "";
     numeric_value = n;
-    string_index = "";
-    numeric_index = 0;
     index_type = no_index_type;
     component_type = numeric_component;
 }
@@ -82,16 +86,16 @@ std::string Expression_component::print_value() {
     return ret_val;
 }
 
-void Expression_component::process_number(const std::string &val) {
+void Expression_component::process_number() {
     std::regex sv_constant_regex("^\\d*'(h|d|o|b)([0-9a-fA-F]+)");
     std::regex number_regex("^\\d*$");
 
-    if(test_parameter_type(number_regex, val)) {
-        numeric_value = std::stoul(val);
+    if(test_parameter_type(number_regex, string_value)) {
+        numeric_value = std::stoul(string_value);
         component_type = numeric_component;
-    } else if(test_parameter_type(sv_constant_regex, val)){
+    } else if(test_parameter_type(sv_constant_regex, string_value)){
         std::smatch base_match;
-        if(std::regex_search(val, base_match, sv_constant_regex)){
+        if(std::regex_search(string_value, base_match, sv_constant_regex)){
             if(base_match[1].str() =="h"){
                 numeric_value = std::stoul(base_match[2], nullptr, 16);
             } else if(base_match[1].str() =="d") {
@@ -126,5 +130,26 @@ std::string Expression_component::get_raw_string_value() {
     } else {
         throw std::runtime_error("Error: unknown expression component index type");
     }
+}
+
+Expression_component::operator_type_t Expression_component::get_operator_type() {
+    if(component_type != operator_component && component_type != function_component){
+        throw std::runtime_error("Error: attempted to get the type of a non operator/function expression component");
+    }
+    return operators_types[string_value];
+}
+
+uint32_t Expression_component::get_operator_precedence() {
+    if(component_type != operator_component && component_type != function_component){
+        throw std::runtime_error("Error: attempted to get the precedence of a non operator/function expression component");
+    }
+    return operators_precedence[string_value];
+}
+
+bool Expression_component::is_right_associative() {
+    if(component_type != operator_component && component_type != function_component){
+        throw std::runtime_error("Error: attempted to get the right associativity of a non operator/function expression component");
+    }
+    return right_associative_set.contains(string_value);
 }
 
