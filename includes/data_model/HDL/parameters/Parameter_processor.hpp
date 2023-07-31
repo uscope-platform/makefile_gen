@@ -26,14 +26,14 @@ public:
     Parameter_processor() = default;
     void convert_parameters(std::vector<HDL_Resource> &v);
     HDL_Resource process_resource(const HDL_Resource &res);
-    HDL_Resource process_resource(const HDL_Resource &res, const std::unordered_map<std::string, uint32_t>& parent_parameters);
+    HDL_Resource process_resource(const HDL_Resource &res, const std::unordered_map<std::string, HDL_parameter>& parent_parameters);
     std::pair<HDL_parameter, bool> process_parameter(const HDL_parameter &par);
     std::pair<HDL_parameter, bool> process_parameter(const HDL_parameter &par, std::unordered_map<std::string, uint32_t> parent_parameters);
-    std::pair<uint32_t, bool>  process_expression(const std::vector<std::string>& expr, std::unordered_set<std::string> &deps);
-    std::pair<uint32_t, bool>  process_expression(const std::vector<std::string>& expr, std::unordered_set<std::string> &deps, std::unordered_map<std::string, uint32_t> parent_parameters);
+    std::pair<uint32_t, bool>  process_expression(const std::vector<Expression_component>& expr, std::unordered_set<std::string> &deps);
+    std::pair<uint32_t, bool>  process_expression(const std::vector<Expression_component>& expr, std::unordered_set<std::string> &deps, std::unordered_map<std::string, uint32_t> parent_parameters);
     uint32_t process_number(const std::string &val);
 
-    std::vector<std::string> expr_vector_to_rpn(const std::vector<std::string>& v);
+    std::vector<Expression_component> expr_vector_to_rpn(const std::vector<Expression_component>& v);
 
     static uint32_t evaluate_binary_expression(uint32_t op_a, uint32_t op_b, std::string operation);
     static uint32_t evaluate_unary_expression(uint32_t operand, std::string operation);

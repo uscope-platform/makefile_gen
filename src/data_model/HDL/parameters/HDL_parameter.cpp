@@ -212,7 +212,7 @@ HDL_parameter::operator std::string() {
 
 }
 
-void HDL_parameter::add_component(const std::string& component) {
+void HDL_parameter::add_component(const Expression_component& component) {
     expression_components.push_back(component);
 }
 
@@ -252,7 +252,7 @@ std::string HDL_parameter::to_string() const {
     auto comps = expression_components;
 
     for(auto &item:comps){
-        result += "    " + item + "\n";
+        result += "    " + item.print_value() + "\n";
     }
 
     return result;

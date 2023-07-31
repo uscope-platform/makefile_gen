@@ -20,6 +20,8 @@
 #include <regex>
 #include <unordered_set>
 
+#include "data_model/HDL/parameters/Expression_component.hpp"
+
 #include <cereal/types/vector.hpp>
 #include <cereal/types/unordered_set.hpp>
 
@@ -30,6 +32,7 @@ enum parameter_type {
     numeric_array_parameter=3,
     expression_parameter = 4
 };
+
 
 constexpr std::string parameter_type_to_string(parameter_type in){
     switch(in){
@@ -75,16 +78,14 @@ public:
 
     std::string get_name() const {return name;};
 
-    void add_component(const std::string& component);
-
-    parameter_type get_type(){return type;};
+    parameter_type get_type() const {return type;};
     void set_type(parameter_type t){type = t;};
 
     bool is_empty();
 
-
-    void set_expression_components(std::vector<std::string> &c){expression_components = c;};
-    std::vector<std::string>  get_expression_components() { return expression_components;};
+    void add_component(const Expression_component &component);
+    void set_expression_components(std::vector<Expression_component> &c){expression_components = c;};
+    std::vector<Expression_component>  get_expression_components() { return expression_components;};
 
     void add_dependency(std::string &s){dependencies.insert(s);};
     std::unordered_set<std::string> get_dependencies() { return dependencies;};
@@ -129,7 +130,7 @@ private:
 
 
     std::unordered_set<std::string> dependencies;
-    std::vector<std::string> expression_components;
+    std::vector<Expression_component> expression_components;
 
 };
 

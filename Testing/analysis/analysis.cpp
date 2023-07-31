@@ -136,14 +136,14 @@ TEST( analysis_test , sv_module) {
 
     p = HDL_parameter();
     p.set_name("module_parameter_1");
-    p.add_component("56");
+    p.add_component(Expression_component("56"));
     p.set_type(expression_parameter);
     check_res.add_parameter(p);
 
 
     p = HDL_parameter();
     p.set_name("module_parameter_2");
-    p.add_component("74");
+    p.add_component(Expression_component("74"));
     p.set_type(expression_parameter);
     check_res.add_parameter(p);
 
@@ -189,6 +189,7 @@ TEST(analysis_test, verilog_parameter_extraction){
             {"chained_expression", {"add_expr_p", "mul_expr_p", "5", "*","+"}},
             {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}},
             {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}}
+
     };
 
 
@@ -197,7 +198,7 @@ TEST(analysis_test, verilog_parameter_extraction){
         p.set_type(expression_parameter);
         p.set_name(item.first);
         for(auto &op:item.second){
-            p.add_component(op);
+            p.add_component(Expression_component(op));
         }
         check_params[item.first] = p;
     }
@@ -219,9 +220,21 @@ TEST(analysis_test, shunting_yard_priority){
 
 
     Parameter_processor p;
-    std::vector<std::string> expr = {"add_expr_p","+", "mul_expr_p", "*", "5"};
+    std::vector<Expression_component> expr = {
+            Expression_component("add_expr_p"),
+            Expression_component("+"),
+            Expression_component("mul_expr_p"),
+            Expression_component("*"),
+            Expression_component("5")
+    };
     auto rpn_expr = p.expr_vector_to_rpn(expr);
-    std::vector<std::string>  expected_result = {"add_expr_p", "mul_expr_p",  "5", "*", "+"};
+    std::vector<Expression_component> expected_result = {
+            Expression_component("add_expr_p"),
+            Expression_component("mul_expr_p"),
+            Expression_component("5"),
+            Expression_component("*"),
+            Expression_component("+")
+    };
 
     ASSERT_EQ(rpn_expr, expected_result);
 
@@ -230,23 +243,70 @@ TEST(analysis_test, shunting_yard_priority){
 TEST(analysis_test, shunting_yard_parenthesis){
 
     Parameter_processor p;
-    std::vector<std::string> expr_1 = {"(", "add_expr_p","+", "mul_expr_p",")", "*", "5"};
+    std::vector<Expression_component> expr_1 = {
+            Expression_component("("),
+            Expression_component("add_expr_p"),
+            Expression_component("+"),
+            Expression_component("mul_expr_p"),
+            Expression_component(")"),
+            Expression_component("*"),
+            Expression_component("5")
+    };
     auto rpn_expr_1 = p.expr_vector_to_rpn(expr_1);
-    std::vector<std::string>  expected_result_1 = {"add_expr_p", "mul_expr_p","+",  "5", "*"};
+
+    std::vector<Expression_component> expected_result_1 = {
+            Expression_component("add_expr_p"),
+            Expression_component("mul_expr_p"),
+            Expression_component("+"),
+            Expression_component("5"),
+            Expression_component("*")
+    };
 
     ASSERT_EQ(rpn_expr_1, expected_result_1);
 
-    std::vector<std::string> expr_2 = {"5", "*", "(", "add_expr_p","+", "mul_expr_p",")"};
+    std::vector<Expression_component> expr_2 = {
+            Expression_component("5"),
+            Expression_component("*"),
+            Expression_component("("),
+            Expression_component("add_expr_p"),
+            Expression_component("+"),
+            Expression_component("mul_expr_p"),
+            Expression_component(")")
+
+    };
+
     auto rpn_expr_2 = p.expr_vector_to_rpn(expr_2);
-    std::vector<std::string>  expected_result_2 = {"5", "add_expr_p","mul_expr_p",  "+", "*"};
+
+    std::vector<Expression_component> expected_result_2 = {
+            Expression_component("5"),
+            Expression_component("add_expr_p"),
+            Expression_component("mul_expr_p"),
+            Expression_component("+"),
+            Expression_component("*")
+    };
     ASSERT_EQ(rpn_expr_2, expected_result_2);
 }
 
 TEST(analysis_test, shunting_yard_function){
     Parameter_processor p;
-    std::vector<std::string> expr = {"$clog2", "(", "add_expr_p","+", "2", ")"};
+    std::vector<Expression_component> expr = {
+            Expression_component("$clog2"),
+            Expression_component("("),
+            Expression_component("add_expr_p"),
+            Expression_component("+"),
+            Expression_component("2"),
+            Expression_component(")")
+
+    };
+
     auto rpn_expr = p.expr_vector_to_rpn(expr);
-    std::vector<std::string>  expected_result = {"add_expr_p","2", "+", "$clog2"};
+    std::vector<Expression_component> expected_result = {
+            Expression_component("add_expr_p"),
+            Expression_component("2"),
+            Expression_component("+"),
+            Expression_component("$clog2")
+    };
+
 
     ASSERT_EQ(rpn_expr, expected_result);
 }
@@ -294,11 +354,11 @@ TEST(analysis_test, verilog_parameter_processing){
     for(auto & vt : vect_params){
         HDL_parameter par = HDL_parameter();
         par.set_name(vt.name);
-        for(auto &op:vt.components){
-            par.add_component(op);
+        for(auto &cpt:vt.components){
+            par.add_component(Expression_component(cpt));
         }
-        for(auto &op:vt.dependencies){
-            par.add_dependency(op);
+        for(auto &dep:vt.dependencies){
+            par.add_dependency(dep);
         }
         par.set_type(vt.type);
         if(vt.type == numeric_parameter){
@@ -328,10 +388,17 @@ TEST(analysis_test, verilog_parameter_processing_override){
     analyzer.cleanup_content("`(.*)");
     HDL_Resource resource = analyzer.analyze()[0];
 
-    std::unordered_map<std::string, uint32_t> parent_params = {
-            {"simple_numeric_p", 15},
-            {"sv_numeric_p", 12}
-    };
+    std::unordered_map<std::string, HDL_parameter> parent_params;
+
+    HDL_parameter par = HDL_parameter();
+    par.set_name("simple_numeric_p");
+    par.set_value(15);
+    parent_params["simple_numeric_p"] = par;
+
+
+    par.set_name("sv_numeric_p");
+    par.set_value(12);
+    parent_params["sv_numeric_p"] = par;
 
     Parameter_processor p;
     resource =  p.process_resource(resource, parent_params);
@@ -370,8 +437,8 @@ TEST(analysis_test, verilog_parameter_processing_override){
     for(auto & vt : vect_params){
         HDL_parameter par = HDL_parameter();
         par.set_name(vt.name);
-        for(auto &op:vt.components){
-            par.add_component(op);
+        for(auto &cpt:vt.components){
+            par.add_component(Expression_component(cpt));
         }
         for(auto &op:vt.dependencies){
             par.add_dependency(op);

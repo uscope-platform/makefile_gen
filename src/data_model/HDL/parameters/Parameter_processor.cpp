@@ -20,7 +20,17 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
 }
 
 HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res,
-                                                   const std::unordered_map<std::string, uint32_t>& parent_parameters) {
+                                                   const std::unordered_map<std::string, HDL_parameter>& pp) {
+
+
+    std::unordered_map<std::string, uint32_t> external_parameters;
+
+    for(auto &item:pp){
+        if(item.second.get_type() != numeric_parameter){
+            throw std::runtime_error("ERROR: Non numeric parameter reached the parameter processor as external value");
+        }
+        external_parameters[item.first] = item.second.get_numeric_value();
+    }
 
     HDL_Resource return_res = res;
 
@@ -32,7 +42,7 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res,
 
     while(!working_set.empty() && !processing_complete){
         for(auto &item:working_set){
-            auto processed_param = process_parameter(item.second, parent_parameters);
+            auto processed_param = process_parameter(item.second, external_parameters);
             if(processed_param.second){
                 processed_parameters[item.first] = processed_param.first;
                 working_param_values[item.first] = processed_param.first.get_numeric_value();
@@ -79,7 +89,7 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
 
     // PROCESS SIMPLE PARAMETERS
     if(components.size() == 1){
-        std::string value = components[0];
+        std::string value = components[0].get_string_value();
         uint32_t val;
         if(parent_parameters.contains(par.get_name())){
             val = parent_parameters[par.get_name()];
@@ -113,45 +123,50 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
     return {return_par, processing_complete};
 }
 
-std::pair<uint32_t , bool>  Parameter_processor::process_expression(const std::vector<std::string>& expr, std::unordered_set<std::string> &deps) {
+std::pair<uint32_t , bool>  Parameter_processor::process_expression(const std::vector<Expression_component>& expr, std::unordered_set<std::string> &deps) {
     return process_expression(expr, deps, {});
 }
 
 std::pair<uint32_t, bool>
-Parameter_processor::process_expression(const std::vector<std::string> &expr, std::unordered_set<std::string> &deps,
+Parameter_processor::process_expression(const std::vector<Expression_component> &expr, std::unordered_set<std::string> &deps,
                                         std::unordered_map<std::string, uint32_t> parent_parameters) {
     uint32_t ret_value = 0;
     bool return_valid = false;
 
     std::vector<expr_component_t> processed_rpn;
 
-    for(const auto & i : expr){
+    for(auto i : expr){
 
-        if(parent_parameters.contains(i)){
+
+        if(i.get_type() == numeric_component){
             expr_component_t c;
-            c.number = parent_parameters[i];
+            c.number = i.get_numeric_value();
             c.type = "number";
             processed_rpn.push_back(c);
-            deps.insert(i);
-        } else if(working_param_values.contains(i)){
-            expr_component_t c;
-            c.number = working_param_values[i];
-            c.type = "number";
-            processed_rpn.push_back(c);
-            deps.insert(i);
-        } else if( test_parameter_type(classification_regexes.numeric, i) || test_parameter_type(classification_regexes.sv_constant, i)){
-            expr_component_t c;
-            c.number = process_number(i);
-            c.type = "number";
-            processed_rpn.push_back(c);
-        } else if(operators_set.contains(i) || functions_set.contains(i)) {
-            expr_component_t c;
-            c.operation = i;
-            c.type = "operator";
-            processed_rpn.push_back(c);
-        }else {
-            return {ret_value, return_valid};
+        } else if(i.get_type() == string_component){
+            //TODO: Adapt parameter processor to work directly on expression components
+            if(parent_parameters.contains(i.get_string_value())){
+                expr_component_t c;
+                c.number = parent_parameters[i.get_raw_string_value()];
+                c.type = "number";
+                processed_rpn.push_back(c);
+                deps.insert(i.get_raw_string_value());
+            } else if(working_param_values.contains(i.get_raw_string_value())){
+                expr_component_t c;
+                c.number = working_param_values[i.get_raw_string_value()];
+                c.type = "number";
+                processed_rpn.push_back(c);
+                deps.insert(i.get_raw_string_value());
+            } else if(operators_set.contains(i.get_raw_string_value()) || functions_set.contains(i.get_raw_string_value())) {
+                expr_component_t c;
+                c.operation = i.get_raw_string_value();
+                c.type = "operator";
+                processed_rpn.push_back(c);
+            }else {
+                return {ret_value, return_valid};
+            }
         }
+
     }
 
     std::stack<expr_component_t> evaluator_stack;
@@ -248,34 +263,34 @@ uint32_t Parameter_processor::evaluate_unary_expression(uint32_t operand, std::s
     }
 }
 
-std::vector<std::string> Parameter_processor::expr_vector_to_rpn(const std::vector<std::string>& v) {
+std::vector<Expression_component> Parameter_processor::expr_vector_to_rpn(const std::vector<Expression_component>& v) {
     // IMPLEMENTATION OF THE SHUNTING YARD ALGORITHM
-    std::vector<std::string> rpn_exp;
-    std::stack<std::string> shunting_stack;
+    std::vector<Expression_component> rpn_exp;
+    std::stack<Expression_component> shunting_stack;
 
-    for(auto &item:v){
-        if(operators_set.contains(item)){ // token is operator
+    for(auto item:v){
+        if(operators_set.contains(item.get_raw_string_value())){ // token is operator
             while (
                     !shunting_stack.empty() &&
-                    shunting_stack.top()!="(" &&
+                    shunting_stack.top().get_raw_string_value()!="(" &&
                     (
-                        !functions_set.contains(shunting_stack.top()) &&
-                        operators_precedence[shunting_stack.top()]<operators_precedence[item] ||
-                        operators_precedence[shunting_stack.top()]==operators_precedence[item] &&
-                        !right_associative_set.contains(shunting_stack.top())
+                        !functions_set.contains(shunting_stack.top().get_raw_string_value()) &&
+                        operators_precedence[shunting_stack.top().get_raw_string_value()]<operators_precedence[item.get_raw_string_value()] ||
+                        operators_precedence[shunting_stack.top().get_raw_string_value()]==operators_precedence[item.get_raw_string_value()] &&
+                        !right_associative_set.contains(shunting_stack.top().get_raw_string_value())
                     )
             ){
                 rpn_exp.push_back(shunting_stack.top());
                 shunting_stack.pop();
             }
             shunting_stack.push(item);
-        } else if(item == "(" || functions_set.contains(item)){
+        } else if(item.get_raw_string_value() == "(" || functions_set.contains(item.get_raw_string_value())){
             shunting_stack.push(item);
-        } else if(item == ")"){
-            while (shunting_stack.top() != "(") {
+        } else if(item.get_raw_string_value() == ")"){
+            while (shunting_stack.top().get_raw_string_value() != "(") {
                 rpn_exp.push_back(shunting_stack.top());
                 shunting_stack.pop();
-                if(functions_set.contains(shunting_stack.top())){
+                if(functions_set.contains(shunting_stack.top().get_raw_string_value())){
                     rpn_exp.push_back(shunting_stack.top());
                     shunting_stack.pop();
                 }
