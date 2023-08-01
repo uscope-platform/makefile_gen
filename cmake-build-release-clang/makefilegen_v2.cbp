@@ -1,0 +1,981 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="makefilegen_v2"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="clang"/>
+		<Option virtualFolders="CMake Files\;CMake Files\cmake-conan\;CMake Files\cmake-build-release-clang\;CMake Files\cmake-build-release-clang\conan\;CMake Files\cmake-build-release-clang\antlr_runtime-prefix\;CMake Files\cmake-build-release-clang\antlr_runtime-prefix\tmp\;CMake Files\cmake-build-release-clang\grammars\;CMake Files\cmake-build-release-clang\grammars\antlr_jar-prefix\;CMake Files\cmake-build-release-clang\grammars\antlr_jar-prefix\tmp\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\.conan2\;CMake Files\..\..\.conan2\p\;CMake Files\..\..\.conan2\p\b\;CMake Files\..\..\.conan2\p\b\opens98a9ccc86bac4\;CMake Files\..\..\.conan2\p\b\opens98a9ccc86bac4\p\;CMake Files\..\..\.conan2\p\b\opens98a9ccc86bac4\p\lib\;CMake Files\..\..\.conan2\p\b\opens98a9ccc86bac4\p\lib\cmake\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\usr\;CMake Files\..\..\..\..\usr\local\;CMake Files\..\..\..\..\usr\local\lib\;CMake Files\..\..\..\..\usr\local\lib\cmake\;CMake Files\..\..\..\..\usr\local\lib\cmake\GTest\;CMake Files\includes\;CMake Files\includes\mgp_sv\;CMake Files\includes\mgp_vh\;CMake Files\src\;CMake Files\Testing\;CMake Files\Testing\files\;CMake Files\Testing\check_files\;CMake Files\Testing\check_files\documentation_analyzer\;CMake Files\Testing\check_files\repository_walker\;CMake Files\Testing\check_files\repository_walker\ignored_dir\;CMake Files\Testing\check_files\repository_walker\ignored_dir_2\;CMake Files\grammars\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="antlr_runtime">
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 antlr_runtime"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="parsers">
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 parsers"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="package">
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 package"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="package_source">
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 package_source"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="list_install_components">
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 list_install_components"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install">
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 install"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install/local">
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 install/local"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install/strip">
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 install/strip"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="mgp_sv_lib">
+				<Option output="/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_sv/libmgp_sv_lib.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_sv"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add option="-DTEMPLATES_FOLDER=&quot;/usr/local/etc/makefile_gen/templates&quot;"/>
+					<Add option="-DSPECS_FOLDER=&quot;/usr/local/etc/makefile_gen/specs&quot;"/>
+					<Add directory="/home/fils/git/makefilegen_v2/includes"/>
+					<Add directory="/home/fils/.conan2/p/injab1c05d020a6f7/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include/antlr4-runtime"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/x86_64-linux-gnu/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/backward"/>
+					<Add directory="/usr/lib/llvm-15/lib/clang/15.0.7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_sv/Makefile&quot;  VERBOSE=1 mgp_sv_lib"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_sv/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_sv/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_sv/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="mgp_sv_lib/fast">
+				<Option output="/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_sv/libmgp_sv_lib.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_sv"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add option="-DTEMPLATES_FOLDER=&quot;/usr/local/etc/makefile_gen/templates&quot;"/>
+					<Add option="-DSPECS_FOLDER=&quot;/usr/local/etc/makefile_gen/specs&quot;"/>
+					<Add directory="/home/fils/git/makefilegen_v2/includes"/>
+					<Add directory="/home/fils/.conan2/p/injab1c05d020a6f7/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include/antlr4-runtime"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/x86_64-linux-gnu/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/backward"/>
+					<Add directory="/usr/lib/llvm-15/lib/clang/15.0.7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_sv/Makefile&quot;  VERBOSE=1 mgp_sv_lib/fast"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_sv/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_sv/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_sv/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="mgp_vh_lib">
+				<Option output="/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_vh/libmgp_vh_lib.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_vh"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add option="-DTEMPLATES_FOLDER=&quot;/usr/local/etc/makefile_gen/templates&quot;"/>
+					<Add option="-DSPECS_FOLDER=&quot;/usr/local/etc/makefile_gen/specs&quot;"/>
+					<Add directory="/home/fils/git/makefilegen_v2/includes"/>
+					<Add directory="/home/fils/.conan2/p/injab1c05d020a6f7/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include/antlr4-runtime"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/x86_64-linux-gnu/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/backward"/>
+					<Add directory="/usr/lib/llvm-15/lib/clang/15.0.7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_vh/Makefile&quot;  VERBOSE=1 mgp_vh_lib"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_vh/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_vh/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_vh/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="mgp_vh_lib/fast">
+				<Option output="/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_vh/libmgp_vh_lib.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_vh"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add option="-DTEMPLATES_FOLDER=&quot;/usr/local/etc/makefile_gen/templates&quot;"/>
+					<Add option="-DSPECS_FOLDER=&quot;/usr/local/etc/makefile_gen/specs&quot;"/>
+					<Add directory="/home/fils/git/makefilegen_v2/includes"/>
+					<Add directory="/home/fils/.conan2/p/injab1c05d020a6f7/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include/antlr4-runtime"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/x86_64-linux-gnu/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/backward"/>
+					<Add directory="/usr/lib/llvm-15/lib/clang/15.0.7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_vh/Makefile&quot;  VERBOSE=1 mgp_vh_lib/fast"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_vh/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_vh/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/includes/mgp_vh/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="makefile_gen">
+				<Option output="/home/fils/git/makefilegen_v2/cmake-build-release-clang/src/makefile_gen" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang/src"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add option="-DTEMPLATES_FOLDER=&quot;/usr/local/etc/makefile_gen/templates&quot;"/>
+					<Add option="-DSPECS_FOLDER=&quot;/usr/local/etc/makefile_gen/specs&quot;"/>
+					<Add directory="/home/fils/git/makefilegen_v2/includes"/>
+					<Add directory="/home/fils/.conan2/p/injab1c05d020a6f7/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include/antlr4-runtime"/>
+					<Add directory="/home/fils/.conan2/p/cerea4cf7b92f85513/p/include"/>
+					<Add directory="/home/fils/.conan2/p/nlohm552351c8663ae/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/opens98a9ccc86bac4/p/include"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/x86_64-linux-gnu/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/backward"/>
+					<Add directory="/usr/lib/llvm-15/lib/clang/15.0.7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/src/Makefile&quot;  VERBOSE=1 makefile_gen"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/src/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/src/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/src/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="makefile_gen/fast">
+				<Option output="/home/fils/git/makefilegen_v2/cmake-build-release-clang/src/makefile_gen" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang/src"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add option="-DTEMPLATES_FOLDER=&quot;/usr/local/etc/makefile_gen/templates&quot;"/>
+					<Add option="-DSPECS_FOLDER=&quot;/usr/local/etc/makefile_gen/specs&quot;"/>
+					<Add directory="/home/fils/git/makefilegen_v2/includes"/>
+					<Add directory="/home/fils/.conan2/p/injab1c05d020a6f7/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include/antlr4-runtime"/>
+					<Add directory="/home/fils/.conan2/p/cerea4cf7b92f85513/p/include"/>
+					<Add directory="/home/fils/.conan2/p/nlohm552351c8663ae/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/opens98a9ccc86bac4/p/include"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/x86_64-linux-gnu/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/backward"/>
+					<Add directory="/usr/lib/llvm-15/lib/clang/15.0.7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/src/Makefile&quot;  VERBOSE=1 makefile_gen/fast"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/src/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/src/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/src/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="tests">
+				<Option output="/home/fils/git/makefilegen_v2/cmake-build-release-clang/Testing/tests" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang/Testing"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add option="-DTEMPLATES_FOLDER=&quot;/usr/local/etc/makefile_gen/templates&quot;"/>
+					<Add option="-DSPECS_FOLDER=&quot;/usr/local/etc/makefile_gen/specs&quot;"/>
+					<Add directory="/home/fils/git/makefilegen_v2/includes"/>
+					<Add directory="/home/fils/.conan2/p/injab1c05d020a6f7/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include/antlr4-runtime"/>
+					<Add directory="/home/fils/.conan2/p/cerea4cf7b92f85513/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/opens98a9ccc86bac4/p/include"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/x86_64-linux-gnu/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/backward"/>
+					<Add directory="/usr/lib/llvm-15/lib/clang/15.0.7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Testing/Makefile&quot;  VERBOSE=1 tests"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Testing/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Testing/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Testing/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="tests/fast">
+				<Option output="/home/fils/git/makefilegen_v2/cmake-build-release-clang/Testing/tests" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang/Testing"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add option="-DTEMPLATES_FOLDER=&quot;/usr/local/etc/makefile_gen/templates&quot;"/>
+					<Add option="-DSPECS_FOLDER=&quot;/usr/local/etc/makefile_gen/specs&quot;"/>
+					<Add directory="/home/fils/git/makefilegen_v2/includes"/>
+					<Add directory="/home/fils/.conan2/p/injab1c05d020a6f7/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/antlr8807f0504349e/p/include/antlr4-runtime"/>
+					<Add directory="/home/fils/.conan2/p/cerea4cf7b92f85513/p/include"/>
+					<Add directory="/home/fils/.conan2/p/b/opens98a9ccc86bac4/p/include"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/x86_64-linux-gnu/c++/12"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/backward"/>
+					<Add directory="/usr/lib/llvm-15/lib/clang/15.0.7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Testing/Makefile&quot;  VERBOSE=1 tests/fast"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Testing/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Testing/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/Testing/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="antlr_jar">
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars/Makefile&quot;  VERBOSE=1 antlr_jar"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="sv_parser_gen">
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars/Makefile&quot;  VERBOSE=1 sv_parser_gen"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="vh_parser_gen">
+				<Option working_dir="/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars/Makefile&quot;  VERBOSE=1 vh_parser_gen"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="//">
+			<Option target="mgp_sv_lib"/>
+			<Option target="mgp_vh_lib"/>
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/Backend/Application_definition_generator.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/Backend/Application_management_test.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/Backend/Peripheral_definition_generator.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/Backend/auxiliary_resolver.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/Backend/dependency_resolver.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/Backend/project_generator.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/Backend/python_script_runner.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/Backend/toolchain_manager.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/analysis/analysis.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/analysis/documentation_analyzer.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/data_model/Constraints_test.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/data_model/DataFile_test.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/data_model/Depfile_test.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/data_model/Script_test.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/data_model/bus_structure/bus_specs_manager.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/data_model/bus_structure/bus_structure_test.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/data_model/data_store_test.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/data_model/hdl_resource_testing.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/data_model/module_register_documentation.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/data_model/settings_store_test.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/frontend/cache_manager.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/frontend/repository_walker.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/test_main.cpp">
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_sv/sv2017.cpp">
+			<Option target="mgp_sv_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_sv/sv2017.h">
+			<Option target="mgp_sv_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_sv/sv2017BaseListener.cpp">
+			<Option target="mgp_sv_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_sv/sv2017BaseListener.h">
+			<Option target="mgp_sv_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_sv/sv2017BaseVisitor.cpp">
+			<Option target="mgp_sv_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_sv/sv2017BaseVisitor.h">
+			<Option target="mgp_sv_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_sv/sv2017Lexer.cpp">
+			<Option target="mgp_sv_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_sv/sv2017Lexer.h">
+			<Option target="mgp_sv_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_sv/sv2017Listener.cpp">
+			<Option target="mgp_sv_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_sv/sv2017Listener.h">
+			<Option target="mgp_sv_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_sv/sv2017Visitor.cpp">
+			<Option target="mgp_sv_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_sv/sv2017Visitor.h">
+			<Option target="mgp_sv_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_vh/vhdlLexer.cpp">
+			<Option target="mgp_vh_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_vh/vhdlLexer.h">
+			<Option target="mgp_vh_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_vh/vhdlParser.cpp">
+			<Option target="mgp_vh_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_vh/vhdlParser.h">
+			<Option target="mgp_vh_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_vh/vhdlParserBaseListener.cpp">
+			<Option target="mgp_vh_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_vh/vhdlParserBaseListener.h">
+			<Option target="mgp_vh_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_vh/vhdlParserBaseVisitor.cpp">
+			<Option target="mgp_vh_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_vh/vhdlParserBaseVisitor.h">
+			<Option target="mgp_vh_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_vh/vhdlParserListener.cpp">
+			<Option target="mgp_vh_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_vh/vhdlParserListener.h">
+			<Option target="mgp_vh_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_vh/vhdlParserVisitor.cpp">
+			<Option target="mgp_vh_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_vh/vhdlParserVisitor.h">
+			<Option target="mgp_vh_lib"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/Backend/Auxiliary_resolver.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/Backend/Dependency_resolver.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/Backend/Lattice/Radiant_manager.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/Backend/Toolchain_manager.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/Backend/Xilinx/Vivado_manager.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/Backend/new_app_generator.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/Backend/project_generator_base.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/Backend/python_script_runner.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/Backend/uplatform/application_definition_generator.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/Backend/uplatform/peripheral_definition_generator.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/analysis/HDL_ast_builder.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/Constraints.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/DataFile.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/Depfile.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/HDL/HDL_Resource.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/HDL/HDL_instance.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/HDL/HDL_instances_factory.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/HDL/HDL_interfaces_factory.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/HDL/HDL_modules_factory.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/HDL/HDL_packages_factory.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/HDL/HDL_parameters_factory.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/HDL/parameters/Expression_component.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/HDL/parameters/HDL_parameter.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/HDL/parameters/Parameter_processor.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/HDL/resource_factory_base.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/Script.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/bus_mapping/address_resolver.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/bus_mapping/bus_mapper.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/bus_mapping/bus_specs_manager.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/bus_mapping/mapper_bus_component.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/data_store.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/documentation/bus_structure/bus_component.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/documentation/bus_structure/bus_crossbar.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/documentation/bus_structure/bus_module.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/documentation/bus_structure/bus_submodule.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/documentation/field_documentation.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/documentation/module_documentation.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/documentation/processor_instance.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/documentation/register_documentation.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/expressions/expression.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/expressions/expression_evaluator.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/data_model/settings_store.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/frontend/Repository_walker.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/frontend/analysis/documentation_analyzer.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/frontend/analysis/sv_analyzer.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/frontend/analysis/sv_visitor.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/frontend/analysis/vhdl_analyzer.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/frontend/analysis/vhdl_visitor.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/frontend/cache_manager.cpp">
+			<Option target="makefile_gen"/>
+			<Option target="tests"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/main.cpp">
+			<Option target="makefile_gen"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/conanfile.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-conan/conan_provider.cmake">
+			<Option virtualFolder="CMake Files\cmake-conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/CLI11-Target-minsizerel.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/CLI11-minsizerel-x86_64-data.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/CLI11Config.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/CLI11ConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/CLI11Targets.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/FindOpenSSL.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/OpenSSL-Target-minsizerel.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/OpenSSL-minsizerel-x86_64-data.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/OpenSSLConfig.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/OpenSSLConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/OpenSSLTargets.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/ZLIB-Target-minsizerel.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/ZLIB-minsizerel-x86_64-data.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/ZLIBConfig.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/ZLIBConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/ZLIBTargets.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/antlr4-runtime-Target-minsizerel.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/antlr4-runtime-config-version.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/antlr4-runtime-config.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/antlr4-runtime-minsizerel-x86_64-data.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/antlr4-runtimeTargets.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/cereal-Target-minsizerel.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/cereal-config-version.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/cereal-config.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/cereal-minsizerel-x86_64-data.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/cerealTargets.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/cmakedeps_macros.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/inja-Target-minsizerel.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/inja-config-version.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/inja-config.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/inja-minsizerel-x86_64-data.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/injaTargets.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/module-OpenSSL-Target-minsizerel.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/module-OpenSSL-minsizerel-x86_64-data.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/module-OpenSSLTargets.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/nlohmann_json-Target-minsizerel.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/nlohmann_json-config-version.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/nlohmann_json-config.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/nlohmann_json-minsizerel-x86_64-data.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/nlohmann_jsonTargets.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/utf8cpp-Target-minsizerel.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/utf8cpp-config-version.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/utf8cpp-config.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/utf8cpp-minsizerel-x86_64-data.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/conan/utf8cppTargets.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\conan\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/antlr_runtime-prefix/tmp/antlr_runtime-mkdirs.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\antlr_runtime-prefix\tmp\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/cmake-build-release-clang/grammars/antlr_jar-prefix/tmp/antlr_jar-mkdirs.cmake">
+			<Option virtualFolder="CMake Files\cmake-build-release-clang\grammars\antlr_jar-prefix\tmp\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/../../.conan2/p/b/opens98a9ccc86bac4/p/lib/cmake/conan-official-openssl-variables.cmake">
+			<Option virtualFolder="CMake Files\..\..\.conan2\p\b\opens98a9ccc86bac4\p\lib\cmake\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/../../../../usr/local/lib/cmake/GTest/GTestConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\local\lib\cmake\GTest\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/../../../../usr/local/lib/cmake/GTest/GTestConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\local\lib\cmake\GTest\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/../../../../usr/local/lib/cmake/GTest/GTestTargets-release.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\local\lib\cmake\GTest\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/../../../../usr/local/lib/cmake/GTest/GTestTargets.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\local\lib\cmake\GTest\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\includes\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_sv/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\includes\mgp_sv\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/includes/mgp_vh/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\includes\mgp_vh\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\Testing\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/files/Depfile">
+			<Option virtualFolder="CMake Files\Testing\files\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/Depfile_gs">
+			<Option virtualFolder="CMake Files\Testing\check_files\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/python_test.py">
+			<Option virtualFolder="CMake Files\Testing\check_files\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/test_package.sv">
+			<Option virtualFolder="CMake Files\Testing\check_files\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/test_sv_module.sv">
+			<Option virtualFolder="CMake Files\Testing\check_files\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/test_sv_parameter_extraction.sv">
+			<Option virtualFolder="CMake Files\Testing\check_files\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/test_vhdl_module.vhd">
+			<Option virtualFolder="CMake Files\Testing\check_files\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/top_synth_sv.sv">
+			<Option virtualFolder="CMake Files\Testing\check_files\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/top_tb_sv.sv">
+			<Option virtualFolder="CMake Files\Testing\check_files\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/documentation_analyzer/test_bus_hierarchy.sv">
+			<Option virtualFolder="CMake Files\Testing\check_files\documentation_analyzer\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/documentation_analyzer/test_module_hierarchy.sv">
+			<Option virtualFolder="CMake Files\Testing\check_files\documentation_analyzer\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/documentation_analyzer/test_peripheral_definition.sv">
+			<Option virtualFolder="CMake Files\Testing\check_files\documentation_analyzer\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/documentation_analyzer/test_processor_doc.sv">
+			<Option virtualFolder="CMake Files\Testing\check_files\documentation_analyzer\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/repository_walker/constraints.xdc">
+			<Option virtualFolder="CMake Files\Testing\check_files\repository_walker\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/repository_walker/data.dat">
+			<Option virtualFolder="CMake Files\Testing\check_files\repository_walker\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/repository_walker/script_1.tcl">
+			<Option virtualFolder="CMake Files\Testing\check_files\repository_walker\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/repository_walker/script_2.py">
+			<Option virtualFolder="CMake Files\Testing\check_files\repository_walker\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/repository_walker/test_sv_module.sv">
+			<Option virtualFolder="CMake Files\Testing\check_files\repository_walker\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/repository_walker/test_vhdl_module.vhd">
+			<Option virtualFolder="CMake Files\Testing\check_files\repository_walker\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/repository_walker/ignored_dir/test_sv_module2.sv">
+			<Option virtualFolder="CMake Files\Testing\check_files\repository_walker\ignored_dir\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/repository_walker/ignored_dir_2/example_proj.xpr">
+			<Option virtualFolder="CMake Files\Testing\check_files\repository_walker\ignored_dir_2\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/Testing/check_files/repository_walker/ignored_dir_2/test_sv_module2.sv">
+			<Option virtualFolder="CMake Files\Testing\check_files\repository_walker\ignored_dir_2\"/>
+		</Unit>
+		<Unit filename="/home/fils/git/makefilegen_v2/grammars/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\grammars\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

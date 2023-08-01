@@ -73,7 +73,7 @@ std::vector<HDL_Resource> sv_visitor::get_entities() {
 }
 
 void sv_visitor::enterPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
-    if(in_expression_def){
+    if(params_factory.is_component_relevant()){
         std::string call_name = ctx->any_system_tf_identifier()->getText();
         params_factory.add_component(Expression_component(call_name));
         params_factory.add_component(Expression_component("("));
@@ -93,8 +93,7 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
             modules_factory.add_mem_file_dep(dep);
         }
     }
-    if(in_expression_def) {
-
+    if(params_factory.is_component_relevant()) {
         params_factory.add_component(Expression_component(")"));
     }
 }
@@ -162,7 +161,7 @@ void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
         uint32_t numeric_val = parse_number(ctx->getText());
         string_components.push_back(std::to_string(numeric_val));
     }
-    if(in_expression_def){
+    if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
 }
@@ -174,7 +173,7 @@ void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
         std::string dbg = ctx->getText();
         string_components.push_back(ctx->getText());
     }
-    if(in_expression_def){
+    if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
 }
@@ -183,7 +182,7 @@ void sv_visitor::exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx
     if(file_contains_bus_defining_package || in_module_array_def){
         string_components.push_back(ctx->getText());
     }
-    if(in_expression_def){
+    if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
 }
@@ -192,14 +191,14 @@ void sv_visitor::exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *c
     if(file_contains_bus_defining_package || in_module_array_def){
         string_components.push_back(ctx->getText());
     }
-    if(in_expression_def){
+    if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
 }
 
 
 void sv_visitor::exitOperator_shift(sv2017::Operator_shiftContext *ctx) {
-    if(in_expression_def){
+    if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
 }
@@ -284,8 +283,8 @@ void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
     auto val = ctx->constant_param_expression()->getText();
 
     auto p_n = ctx->identifier()->getText();
-    if(in_expression_def){
-        in_expression_def = false;
+    if(params_factory.in_expression_context()){
+        params_factory.stop_expression();
     } else {
         params_factory.add_component(Expression_component(val));
     }
@@ -310,16 +309,38 @@ void sv_visitor::exitName_of_instance(sv2017::Name_of_instanceContext *ctx) {
 }
 
 
-
-void sv_visitor::enterConstant_param_expression(sv2017::Constant_param_expressionContext *) {
-    in_expression_def = true;
-}
-
 void sv_visitor::enterPrimaryPar(sv2017::PrimaryParContext *ctx) {
     params_factory.add_component(Expression_component("("));
 }
 
 void sv_visitor::exitPrimaryPar(sv2017::PrimaryParContext *ctx) {
     params_factory.add_component(Expression_component(")"));
+}
+
+void sv_visitor::enterAssignment_pattern(sv2017::Assignment_patternContext *ctx) {
+    params_factory.start_initialization_list();
+}
+
+void sv_visitor::exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) {
+    params_factory.stop_initializaiton_list();
+}
+
+
+void sv_visitor::exitPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
+    params_factory.add_array_component();
+}
+
+
+
+void sv_visitor::enterConstant_param_expression(sv2017::Constant_param_expressionContext *) {
+    params_factory.start_expression();
+}
+
+void sv_visitor::enterBit_select(sv2017::Bit_selectContext *ctx) {
+    params_factory.start_bit_selection();
+}
+
+void sv_visitor::exitBit_select(sv2017::Bit_selectContext *ctx) {
+    params_factory.stop_bit_selection();
 }
 

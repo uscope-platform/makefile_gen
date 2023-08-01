@@ -1,0 +1,2 @@
+"/usr/bin/llvm-ar-15" cr libmgp_sv_lib.a CMakeFiles/mgp_sv_lib.dir/sv2017Lexer.cpp.o CMakeFiles/mgp_sv_lib.dir/sv2017.cpp.o CMakeFiles/mgp_sv_lib.dir/sv2017BaseListener.cpp.o CMakeFiles/mgp_sv_lib.dir/sv2017BaseVisitor.cpp.o CMakeFiles/mgp_sv_lib.dir/sv2017Listener.cpp.o CMakeFiles/mgp_sv_lib.dir/sv2017Visitor.cpp.o
+"/usr/bin/llvm-ranlib-15" libmgp_sv_lib.a

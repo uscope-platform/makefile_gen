@@ -127,6 +127,7 @@ real_number:
 any_system_tf_identifier:
     SYSTEM_TF_IDENTIFIER
     | KW_DOLAR_SETUPHOLD
+    | KW_DOLAR_SETUPHOLD
     | KW_DOLAR_SETUP
     | KW_DOLAR_FULLSKEW
     | KW_DOLAR_WARNING

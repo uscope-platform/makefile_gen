@@ -83,6 +83,15 @@ public:
     void enterPrimaryPar(sv2017::PrimaryParContext *ctx) override;
     void exitPrimaryPar(sv2017::PrimaryParContext *ctx) override;
 
+    void enterAssignment_pattern(sv2017::Assignment_patternContext *ctx) override;
+    void exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) override;
+
+    void exitPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) override;
+
+    void enterBit_select(sv2017::Bit_selectContext *ctx) override;
+    void exitBit_select(sv2017::Bit_selectContext *ctx) override;
+
+
     void enterConstant_param_expression(sv2017::Constant_param_expressionContext *) override;
 
     static uint32_t parse_number(const std::string& s);
@@ -100,7 +109,6 @@ private:
     std::string current_declaration_type;
 
     bool in_module_array_def = false;
-    bool in_expression_def = false;
 
     std::vector<std::string> string_components;
 

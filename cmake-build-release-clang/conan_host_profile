@@ -1,0 +1,10 @@
+include(default)
+[settings]
+arch=x86_64
+os=Linux
+compiler=clang
+compiler.version=15
+compiler.cppstd=20
+build_type=MinSizeRel
+[conf]
+tools.cmake.cmaketoolchain:generator=Unix Makefiles

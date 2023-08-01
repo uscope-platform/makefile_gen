@@ -29,7 +29,28 @@ public:
     void set_value(const std::string &s);
     void set_parmeter_name(const std::string &s) { set_name(s);};
     void add_component(const Expression_component &c);
+
+    void start_initialization_list();
+    void stop_initializaiton_list();
+    void start_expression();
+    void stop_expression();
+
+    void start_bit_selection();
+    void stop_bit_selection();
+
+    void add_array_component();
+
+    bool in_expression_context() {return in_expression;};
+    bool is_component_relevant() const {return  in_initialization_list || in_expression;};
 private:
+    bool in_initialization_list = false;
+    bool in_expression = false;
+    bool in_bit_select = false;
+
+    std::stack<std::vector<Expression_component>> expression_stack;
+    std::vector<std::vector<Expression_component>> initialization_list;
+    std::vector<Expression_component> current_expression;
+    std::vector<Expression_component> bit_selection;
 };
 
 

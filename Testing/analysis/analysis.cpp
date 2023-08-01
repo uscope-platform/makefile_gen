@@ -189,7 +189,6 @@ TEST(analysis_test, verilog_parameter_extraction){
             {"chained_expression", {"add_expr_p", "mul_expr_p", "5", "*","+"}},
             {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}},
             {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}}
-
     };
 
 
@@ -202,6 +201,29 @@ TEST(analysis_test, verilog_parameter_extraction){
         }
         check_params[item.first] = p;
     }
+
+    HDL_parameter p = HDL_parameter();
+    p.set_type(expression_parameter);
+    p.set_name("array_parameter");
+    Expression_component il_c;
+    std::vector<std::vector<Expression_component>> il = {{Expression_component("32")}, {Expression_component("5")}};
+    p.set_initialization_list(il);
+    check_params["array_parameter"] = p;
+
+    p = HDL_parameter();
+    p.set_type(expression_parameter);
+    p.set_name("array_parameter_expr_p");
+    Expression_component e("array_parameter");
+    std::vector<std::vector<Expression_component>> ai = {{Expression_component("sv_numeric_p")}, {Expression_component("*")}, {Expression_component(0)}};
+    e.set_array_index(ai);
+    p.add_component(e);
+    e = Expression_component("array_parameter");
+    ai = {{Expression_component(1)}};
+    e.set_array_index(ai);
+    p.add_component(e);
+    p.add_component(Expression_component("+"));
+    check_params["array_parameter_expr_p"] = p;
+
 
     ASSERT_EQ(check_params.size(), parameters.size());
 

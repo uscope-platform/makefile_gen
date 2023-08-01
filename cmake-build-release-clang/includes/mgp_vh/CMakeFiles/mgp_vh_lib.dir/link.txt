@@ -1,0 +1,2 @@
+"/usr/bin/llvm-ar-15" cr libmgp_vh_lib.a CMakeFiles/mgp_vh_lib.dir/vhdlLexer.cpp.o CMakeFiles/mgp_vh_lib.dir/vhdlParser.cpp.o CMakeFiles/mgp_vh_lib.dir/vhdlParserBaseListener.cpp.o CMakeFiles/mgp_vh_lib.dir/vhdlParserBaseVisitor.cpp.o CMakeFiles/mgp_vh_lib.dir/vhdlParserVisitor.cpp.o CMakeFiles/mgp_vh_lib.dir/vhdlParserListener.cpp.o
+"/usr/bin/llvm-ranlib-15" libmgp_vh_lib.a

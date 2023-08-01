@@ -103,6 +103,9 @@ public:
 
     friend void PrintTo(const HDL_parameter& point, std::ostream* os);
 
+    void set_initialization_list(std::vector<std::vector<Expression_component>> &list) {initialization_list = list;};
+    std::vector<std::vector<Expression_component>> get_initialization_list(){ return initialization_list;};
+
 private:
 
     uint32_t get_parameter_value(
@@ -131,7 +134,7 @@ private:
 
     std::unordered_set<std::string> dependencies;
     std::vector<Expression_component> expression_components;
-
+    std::vector<std::vector<Expression_component>> initialization_list;
 };
 
 

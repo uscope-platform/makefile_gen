@@ -20,17 +20,11 @@
 Expression_component::Expression_component() {
     string_value = "";
     numeric_value = 0;
-    string_index = "";
-    numeric_index = 0;
-    index_type = no_index_type;
     component_type = string_component;
 }
 
 Expression_component::Expression_component(std::string s) {
     numeric_value = 0;
-    string_index = "";
-    numeric_index = 0;
-    index_type = no_index_type;
     if(operators_set.contains(s)) {
         component_type = operator_component;
     } else if(functions_set.contains(s)){
@@ -44,7 +38,6 @@ Expression_component::Expression_component(std::string s) {
 
 Expression_component::Expression_component(uint32_t n) {
     numeric_value = n;
-    index_type = no_index_type;
     component_type = numeric_component;
 }
 
@@ -53,36 +46,26 @@ bool operator==(const Expression_component &lhs, const Expression_component &rhs
     bool ret_val = true;
     ret_val &= lhs.string_value == rhs.string_value;
     ret_val &= lhs.numeric_value == rhs.numeric_value;
-    ret_val &= lhs.numeric_index == rhs.numeric_index;
-    ret_val &= lhs.string_index == rhs.string_index;
-    ret_val &= lhs.index_type == rhs.index_type;
     ret_val &= lhs.component_type == rhs.component_type;
+    ret_val &= lhs.array_value == rhs.array_value;
     return ret_val;
 }
 
 std::string Expression_component::print_value() {
     std::string ret_val;
+    if(component_type == array_component) {
 
-    switch (index_type) {
-        case no_index_type:
-            if(component_type==string_component)
-                ret_val = string_value;
-            else
-                ret_val = std::to_string(numeric_value);
-            break;
-        case string_index_type:
-            if(component_type==string_component)
-                ret_val = string_value + "[" + string_index + "]";
-            else
-                ret_val =  std::to_string(numeric_value); + "[" + string_index + "]";
-            break;
-        case numeric_index_type:
-            if(component_type==string_component)
-                ret_val = string_value + "[" + std::to_string(numeric_index)+ "]";
-            else
-                ret_val =  std::to_string(numeric_value); + "[" +  std::to_string(numeric_index)+ "]";
-            break;
+    } else if(component_type == numeric_component){
+        ret_val = std::to_string(numeric_value);
+    } else {
+        if(!array_index.empty()){
+            ret_val = string_value + print_index(array_index);
+        } else {
+            ret_val = string_value;
+        }
     }
+
+
     return ret_val;
 }
 
@@ -121,14 +104,10 @@ bool Expression_component::test_parameter_type(const std::regex &r, const std::s
 }
 
 std::string Expression_component::get_raw_string_value() {
-    if(index_type == no_index_type){
+    if(array_index.empty()){
         return string_value;
-    } else if(index_type == string_index_type){
-        return string_value + "[" + string_index + "]";
-    } else if(index_type == numeric_index_type){
-        return string_value + "[" + std::to_string(numeric_index) + "]";
     } else {
-        throw std::runtime_error("Error: unknown expression component index type");
+        return string_value + print_index(array_index);
     }
 }
 
@@ -152,4 +131,25 @@ bool Expression_component::is_right_associative() {
     }
     return right_associative_set.contains(string_value);
 }
+
+const std::string Expression_component::print_expression(const std::vector<Expression_component> &exp) {
+    std::string ret_val;
+    for(auto &item:exp){
+        if(item.get_type() == numeric_component){
+            ret_val += std::to_string(item.numeric_value);
+        } else if(item.get_type() == string_component || item.get_type() == operator_component || item.get_type()== function_component) {
+            ret_val += item.string_value;
+        }
+    }
+    return ret_val;
+}
+
+const std::string Expression_component::print_index(const std::vector<std::vector<Expression_component>> &index) {
+    std::string ret_val;
+    for(auto &item:array_index){
+        ret_val += "[" + print_expression(item) + "]";
+    }
+    return ret_val;
+}
+
 

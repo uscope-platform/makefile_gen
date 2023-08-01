@@ -30,5 +30,55 @@ void HDL_parameters_factory::set_value(const std::string &s) {
 }
 
 void HDL_parameters_factory::add_component(const Expression_component &c) {
-    current_resource.add_component(c);
+    if(in_initialization_list){
+        initialization_list.push_back({c});
+    } else if (in_expression){
+        current_expression.push_back(c);
+    } else {
+        current_resource.add_component(c);
+    }
 }
+
+void HDL_parameters_factory::start_initialization_list() {
+    in_initialization_list = true;
+    initialization_list.clear();
+}
+
+
+void HDL_parameters_factory::stop_initializaiton_list() {
+    in_initialization_list = false;
+    //TODO:implement initialization list support;
+    current_resource.set_initialization_list(initialization_list);
+    int i = 0;
+}
+
+void HDL_parameters_factory::start_expression() {
+    in_expression = true;
+    current_expression.clear();
+}
+
+void HDL_parameters_factory::stop_expression() {
+    in_expression = false;
+    current_resource.set_expression_components(current_expression);
+    current_expression.clear();
+}
+
+void HDL_parameters_factory::start_bit_selection() {
+    in_bit_select = true;
+    expression_stack.push(current_expression);
+    current_expression.clear();
+}
+
+void HDL_parameters_factory::stop_bit_selection() {
+    bit_selection = current_expression;
+    current_expression = expression_stack.top();
+    expression_stack.pop();
+}
+
+void HDL_parameters_factory::add_array_component() {
+
+    current_expression.back().add_array_index(bit_selection);
+}
+
+
+

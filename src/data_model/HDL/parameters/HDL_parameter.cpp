@@ -23,6 +23,7 @@ HDL_parameter::HDL_parameter(const HDL_parameter &c) {
     type = c.type;
     dependencies = c.dependencies;
     expression_components = c.expression_components;
+    initialization_list = c.initialization_list;
 }
 
 HDL_parameter::HDL_parameter() {
@@ -44,6 +45,7 @@ bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
     ret_val &= lhs.type == rhs.type;
     ret_val &= lhs.expression_components == rhs.expression_components;
     ret_val &= lhs.dependencies == rhs.dependencies;
+    ret_val &= lhs.initialization_list == rhs.initialization_list;
 
     return ret_val;
 }
@@ -60,6 +62,7 @@ bool HDL_parameter::is_empty() {
     ret &= numeric_value_array.empty();
     ret &= expression_components.empty();
     ret &= dependencies.empty();
+    ret &= initialization_list.empty();
 
     return ret;
 }
@@ -207,6 +210,8 @@ HDL_parameter::operator std::string() {
             }
             ret_val += "}";
             break;
+        case expression_parameter:
+            break;
     }
     return ret_val;
 
@@ -254,6 +259,16 @@ std::string HDL_parameter::to_string() const {
     for(auto &item:comps){
         result += "    " + item.print_value() + "\n";
     }
+
+    result += "\n  INITIALIZATION LIST:\n    ";
+
+    auto il = initialization_list;
+
+    for(auto &item:il){
+        auto val = Expression_component::print_expression(item);
+        result += val + ", ";
+    }
+
 
     return result;
 }
