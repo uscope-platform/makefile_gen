@@ -30,6 +30,7 @@ enum expression_component_type {
     array_component = 4
 };
 
+
 class Expression_component {
 public:
     Expression_component();
@@ -123,5 +124,6 @@ private:
             "$clog2","$ceil", "$floor","$pow", "!", "~"
     };
 };
+
 
 #endif //MAKEFILEGEN_V2_EXPRESSION_COMPONENT_HPP

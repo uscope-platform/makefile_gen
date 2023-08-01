@@ -87,7 +87,7 @@ public:
     void set_expression_components(std::vector<Expression_component> &c){expression_components = c;};
     std::vector<Expression_component>  get_expression_components() { return expression_components;};
 
-    void add_dependency(std::string &s){dependencies.insert(s);};
+    void add_dependency(const std::string &s){dependencies.insert(s);};
     std::unordered_set<std::string> get_dependencies() { return dependencies;};
     void set_dependencies(std::unordered_set<std::string> d) {dependencies = std::move(d);};
 

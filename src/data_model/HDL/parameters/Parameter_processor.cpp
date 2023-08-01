@@ -42,13 +42,25 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res,
 
     while(!working_set.empty() && !processing_complete){
         for(auto &item:working_set){
-            auto processed_param = process_parameter(item.second, external_parameters);
-            if(processed_param.second){
-                processed_parameters[item.first] = processed_param.first;
-                working_param_values[item.first] = processed_param.first.get_numeric_value();
-            } else{
-                next_working_set[item.first] = item.second;
+            if(!item.second.get_initialization_list().empty()){
+                auto init_list = item.second.get_initialization_list();
+                for(int i = 0; i<init_list.size(); i++){
+                    HDL_parameter p;
+                    auto name = item.first+"_"+std::to_string(i);
+                    p.set_name(name);
+                    p.set_expression_components(init_list[i]);
+                    next_working_set[name] = p;
+                }
+            } else {
+                auto processed_param = process_parameter(item.second, external_parameters);
+                if(processed_param.second){
+                    processed_parameters[item.first] = processed_param.first;
+                    working_param_values[item.first] = processed_param.first.get_numeric_value();
+                } else{
+                    next_working_set[item.first] = item.second;
+                }
             }
+
         }
 
         if(working_set == next_working_set){
@@ -87,8 +99,14 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
         throw std::runtime_error("PARAMETER PROCESSING ERROR:\n Empty parameter");
     }
 
+
+
     // PROCESS SIMPLE PARAMETERS
     if(components.size() == 1){
+        if(!components[0].get_array_index().empty()){
+            int i = 0;
+        }
+
         if(components[0].get_type() ==string_component){
             std::string value = components[0].get_string_value();
             uint32_t val;
@@ -142,6 +160,25 @@ Parameter_processor::process_expression(const std::vector<Expression_component> 
     std::vector<Expression_component> processed_rpn;
 
     for(auto i : expr){
+        if(!i.get_array_index().empty()){
+            bool index_ready = true;
+            std::vector<uint32_t> array_index_values;
+            for(auto &item:i.get_array_index()){
+                auto rpn_expr = expr_vector_to_rpn(item);
+                auto res = process_expression(rpn_expr, deps, parent_parameters);
+                index_ready |= res.second;
+                if(res.second){
+                    array_index_values.push_back(res.first);
+                }
+            }
+            if(index_ready){
+                Expression_component ne(i.get_string_value() + "_"+ std::to_string(array_index_values[0]));
+                i = ne;
+            } else{
+                return {ret_value, return_valid};
+            }
+
+        }
 
         if(i.get_type() == numeric_component || i.get_type() == operator_component || i.get_type()==function_component){
             processed_rpn.push_back(i);

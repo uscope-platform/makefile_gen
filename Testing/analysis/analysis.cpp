@@ -369,7 +369,9 @@ TEST(analysis_test, verilog_parameter_processing){
             {"modulo_expr_p", {"simple_numeric_p", "sv_numeric_p","%"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter, 0},
             {"chained_expression", {"add_expr_p", "mul_expr_p", "5", "*","+"}, {"add_expr_p", "mul_expr_p"}, numeric_parameter, 1320},
             {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}, {"add_expr_p"}, numeric_parameter, 6},
-            {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}, {"add_expr_p", "mul_expr_p"}, numeric_parameter, 1480}
+            {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}, {"add_expr_p", "mul_expr_p"}, numeric_parameter, 1480},
+            {"array_parameter_0", {"32"}, {}, numeric_parameter, 32},
+            {"array_parameter_1", {"5"}, {}, numeric_parameter, 5}
     };
 
 
@@ -389,6 +391,27 @@ TEST(analysis_test, verilog_parameter_processing){
 
         check_params[vt.name] = par;
     }
+
+
+        HDL_parameter param;
+        param.set_type(numeric_parameter);
+        param.set_value(37);
+        param.set_name("array_parameter_expr_p");
+        Expression_component e("array_parameter");
+        std::vector<std::vector<Expression_component>> ai = {{Expression_component("sv_numeric_p"), {Expression_component("*")}, {Expression_component(0)}}};
+        e.set_array_index(ai);
+        param.add_component(e);
+        e = Expression_component("array_parameter");
+        ai = {{Expression_component(1)}};
+        e.set_array_index(ai);
+        param.add_component(e);
+        param.add_component(Expression_component("+"));
+        param.add_dependency("array_parameter_1");
+        param.add_dependency("array_parameter_0");
+        param.add_dependency("sv_numeric_p");
+        check_params["array_parameter_expr_p"] = param;
+
+
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
@@ -452,7 +475,9 @@ TEST(analysis_test, verilog_parameter_processing_override){
             {"modulo_expr_p", {"simple_numeric_p", "sv_numeric_p","%"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter, 3},
             {"chained_expression", {"add_expr_p", "mul_expr_p", "5", "*","+"}, {"add_expr_p", "mul_expr_p"}, numeric_parameter, 927},
             {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}, {"add_expr_p"}, numeric_parameter, 5},
-            {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}, {"add_expr_p", "mul_expr_p"}, numeric_parameter, 1035}
+            {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}, {"add_expr_p", "mul_expr_p"}, numeric_parameter, 1035},
+            {"array_parameter_0", {"32"}, {}, numeric_parameter, 32},
+            {"array_parameter_1", {"5"}, {}, numeric_parameter, 5}
     };
 
 
@@ -472,6 +497,28 @@ TEST(analysis_test, verilog_parameter_processing_override){
 
         check_params[vt.name] = par;
     }
+
+
+
+    HDL_parameter param;
+    param.set_type(numeric_parameter);
+    param.set_value(37);
+    param.set_name("array_parameter_expr_p");
+    Expression_component e("array_parameter");
+    std::vector<std::vector<Expression_component>> ai = {{Expression_component("sv_numeric_p"), {Expression_component("*")}, {Expression_component(0)}}};
+    e.set_array_index(ai);
+    param.add_component(e);
+    e = Expression_component("array_parameter");
+    ai = {{Expression_component(1)}};
+    e.set_array_index(ai);
+    param.add_component(e);
+    param.add_component(Expression_component("+"));
+    param.add_dependency("array_parameter_1");
+    param.add_dependency("array_parameter_0");
+    param.add_dependency("sv_numeric_p");
+    check_params["array_parameter_expr_p"] = param;
+
+
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
