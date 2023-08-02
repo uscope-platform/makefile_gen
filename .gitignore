@@ -23,3 +23,5 @@ cmake-build-debug-clang/
 includes/mgp_sv/
 
 cmake-build-debug-coverage-1/
+
+cmake-build-release-clang/
