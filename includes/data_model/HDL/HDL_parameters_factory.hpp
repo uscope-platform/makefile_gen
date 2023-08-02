@@ -21,31 +21,47 @@
 #include "data_model/expressions/bus_mapping_expression.hpp"
 #include "data_model/expressions/expression_evaluator.hpp"
 
-class HDL_parameters_factory : protected resources_factory_base<HDL_parameter>{
+class HDL_parameters_factory : protected resources_factory_base<HDL_parameter> {
 
 public:
     void new_parameter();
+
     HDL_parameter get_parameter();
+
     void set_value(const std::string &s);
-    void set_parmeter_name(const std::string &s) { set_name(s);};
+
+    void set_parmeter_name(const std::string &s) { set_name(s); };
+
     void add_component(const Expression_component &c);
 
     void start_initialization_list();
+
     void stop_initializaiton_list();
+
     void start_expression();
+
     void stop_expression();
 
     void start_bit_selection();
+
     void stop_bit_selection();
+
+    void start_unpacked_dimension_declaration() { in_unpacked_declaration = true; };
+
+    void stop_unpacked_dimension_declaration();
+
+    void close_first_range();
 
     void add_array_component();
 
-    bool in_expression_context() {return in_expression;};
-    bool is_component_relevant() const {return  in_initialization_list || in_expression;};
+    bool in_expression_context() { return in_expression; };
+
+    bool is_component_relevant() const { return in_initialization_list || in_expression || in_unpacked_declaration; };
 private:
     bool in_initialization_list = false;
     bool in_expression = false;
     bool in_bit_select = false;
+    bool in_unpacked_declaration = false;
 
     std::stack<std::vector<Expression_component>> expression_stack;
     std::vector<std::vector<Expression_component>> initialization_list;

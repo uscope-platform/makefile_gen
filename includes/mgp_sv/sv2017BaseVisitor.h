@@ -1133,6 +1133,14 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitFirst_range_identifier(sv2017::First_range_identifierContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitSecond_range_identifier(sv2017::Second_range_identifierContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitRange_expression(sv2017::Range_expressionContext *ctx) override {
     return visitChildren(ctx);
   }

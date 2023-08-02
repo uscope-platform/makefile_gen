@@ -205,9 +205,9 @@ TEST(analysis_test, verilog_parameter_extraction){
     HDL_parameter p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("array_parameter");
-    Expression_component il_c;
     std::vector<std::vector<Expression_component>> il = {{Expression_component("32")}, {Expression_component("5")}};
     p.set_initialization_list(il);
+    p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
     check_params["array_parameter"] = p;
 
     p = HDL_parameter();
@@ -223,6 +223,27 @@ TEST(analysis_test, verilog_parameter_extraction){
     p.add_component(e);
     p.add_component(Expression_component("+"));
     check_params["array_parameter_expr_p"] = p;
+
+
+    p = HDL_parameter();
+    p.set_type(expression_parameter);
+    p.set_name("multidim_array_parameter");
+    il = {{Expression_component("32")},{Expression_component("32")}, {Expression_component("5")}, {Expression_component("6")}};
+    p.set_initialization_list(il);
+    p.add_dimension({{Expression_component("TEST_PARAM"),Expression_component("-"), Expression_component("1")},{Expression_component("0")}});
+    p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
+    check_params["multidim_array_parameter"] = p;
+
+
+
+    p = HDL_parameter();
+    p.set_type(expression_parameter);
+    p.set_name("multidim_array_access");
+    e = Expression_component("multidim_array_parameter");
+    ai = {{Expression_component("1")},{Expression_component("0")}};
+    e.set_array_index(ai);
+    p.add_component(e);
+    check_params["multidim_array_access"] = p;
 
 
     ASSERT_EQ(check_params.size(), parameters.size());

@@ -6,6 +6,7 @@ module test_mod #(
     sv_numeric_p = 5'o10,
     dimensionless_sv_numeric_p  = 'h3F,
     parameter [31:0] array_parameter [1:0] = '{32, 5},
+    parameter [31:0] multidim_array_parameter [TEST_PARAM-1:0][1:0] = '{{32,32}, {5,6}},
     string_p = "423",
     nested_p = string_parameter
 )();
@@ -21,5 +22,6 @@ module test_mod #(
     parameter parenthesised_expr_p = ( add_expr_p + mul_expr_p ) * 5;
     parameter array_parameter_expr_p = array_parameter[sv_numeric_p*0] + array_parameter[1];
     localparam local_p = 74;
+    parameter multidim_array_access = multidim_array_parameter[1][0];
 
 endmodule

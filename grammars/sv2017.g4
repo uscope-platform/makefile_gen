@@ -1247,7 +1247,9 @@ class_type:
        ( parameter_value_assignment )? )*
 ;
 class_scope: class_type DOUBLE_COLON;
-range_expression: expression ( COLON expression )?;
+first_range_identifier: expression;
+second_range_identifier: expression;
+range_expression: first_range_identifier ( COLON second_range_identifier )?;
 constant_range_expression: range_expression;
 constant_mintypmax_expression: mintypmax_expression;
 mintypmax_expression: expression ( COLON expression COLON expression )?;

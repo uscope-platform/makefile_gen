@@ -24,6 +24,7 @@ HDL_parameter::HDL_parameter(const HDL_parameter &c) {
     dependencies = c.dependencies;
     expression_components = c.expression_components;
     initialization_list = c.initialization_list;
+    array_dimensions = c.array_dimensions;
 }
 
 HDL_parameter::HDL_parameter() {
@@ -46,7 +47,7 @@ bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
     ret_val &= lhs.expression_components == rhs.expression_components;
     ret_val &= lhs.dependencies == rhs.dependencies;
     ret_val &= lhs.initialization_list == rhs.initialization_list;
-
+    ret_val &= lhs.array_dimensions == rhs.array_dimensions;
     return ret_val;
 }
 
@@ -63,7 +64,7 @@ bool HDL_parameter::is_empty() {
     ret &= expression_components.empty();
     ret &= dependencies.empty();
     ret &= initialization_list.empty();
-
+    ret &= array_dimensions.empty();
     return ret;
 }
 
@@ -140,7 +141,7 @@ void HDL_parameter::string_to_array(
         } else if(is_sv_constant(init_strings.first)){
             arr_size = parse_sv_constant(init_strings.first);
         } else {
-            arr_size = get_parameter_value(init_strings.first, parent_parameter,instance_parameters, module_parameters);
+
         }
         array.insert(array.end(), arr_size, init_strings.second);
         type = string_array_parameter;
@@ -222,14 +223,6 @@ void HDL_parameter::add_component(const Expression_component& component) {
 }
 
 
-uint32_t HDL_parameter::get_parameter_value(const std::string &p,
-                                            const std::unordered_map<std::string, HDL_parameter> &parent_parameter,
-                                            const std::unordered_map<std::string, HDL_parameter> &instance_parameters,
-                                            const std::unordered_map<std::string, HDL_parameter> &module_parameters) {
-
-
-
-}
 
 void PrintTo(const HDL_parameter &param, std::ostream *os) {
     std::string result = param.to_string();
@@ -267,6 +260,13 @@ std::string HDL_parameter::to_string() const {
     for(auto &item:il){
         auto val = Expression_component::print_expression(item);
         result += val + ", ";
+    }
+
+    result += "\n  ARRAY DIMENSIONS:\n    ";
+
+    for(auto &item:array_dimensions){
+        result += "[" + Expression_component::print_expression(item.first) +
+                ":" +  Expression_component::print_expression(item.second) + "]" ;
     }
 
 

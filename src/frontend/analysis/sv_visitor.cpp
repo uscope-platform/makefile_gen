@@ -344,3 +344,19 @@ void sv_visitor::exitBit_select(sv2017::Bit_selectContext *ctx) {
     params_factory.stop_bit_selection();
 }
 
+void sv_visitor::exitRange_expression(sv2017::Range_expressionContext *ctx) {
+}
+
+void sv_visitor::enterUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) {
+    params_factory.start_unpacked_dimension_declaration();
+}
+
+void sv_visitor::exitUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) {
+    params_factory.stop_unpacked_dimension_declaration();
+}
+
+void sv_visitor::exitFirst_range_identifier(sv2017::First_range_identifierContext *ctx) {
+
+    params_factory.close_first_range();
+}
+

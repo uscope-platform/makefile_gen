@@ -91,6 +91,13 @@ public:
     void enterBit_select(sv2017::Bit_selectContext *ctx) override;
     void exitBit_select(sv2017::Bit_selectContext *ctx) override;
 
+    void exitRange_expression(sv2017::Range_expressionContext *ctx) override;
+
+    void enterUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) override;
+    void exitUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) override;
+
+
+    void exitFirst_range_identifier(sv2017::First_range_identifierContext *ctx) override;
 
     void enterConstant_param_expression(sv2017::Constant_param_expressionContext *) override;
 

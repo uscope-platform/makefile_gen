@@ -855,6 +855,12 @@ public:
   virtual void enterClass_scope(sv2017::Class_scopeContext * /*ctx*/) override { }
   virtual void exitClass_scope(sv2017::Class_scopeContext * /*ctx*/) override { }
 
+  virtual void enterFirst_range_identifier(sv2017::First_range_identifierContext * /*ctx*/) override { }
+  virtual void exitFirst_range_identifier(sv2017::First_range_identifierContext * /*ctx*/) override { }
+
+  virtual void enterSecond_range_identifier(sv2017::Second_range_identifierContext * /*ctx*/) override { }
+  virtual void exitSecond_range_identifier(sv2017::Second_range_identifierContext * /*ctx*/) override { }
+
   virtual void enterRange_expression(sv2017::Range_expressionContext * /*ctx*/) override { }
   virtual void exitRange_expression(sv2017::Range_expressionContext * /*ctx*/) override { }
 

@@ -32,7 +32,7 @@ void HDL_parameters_factory::set_value(const std::string &s) {
 void HDL_parameters_factory::add_component(const Expression_component &c) {
     if(in_initialization_list){
         initialization_list.push_back({c});
-    } else if (in_expression){
+    } else if (in_expression || in_unpacked_declaration){
         current_expression.push_back(c);
     } else {
         current_resource.add_component(c);
@@ -78,6 +78,22 @@ void HDL_parameters_factory::stop_bit_selection() {
 void HDL_parameters_factory::add_array_component() {
 
     current_expression.back().add_array_index(bit_selection);
+}
+
+void HDL_parameters_factory::close_first_range() {
+    if(in_unpacked_declaration){
+        expression_stack.push(current_expression);
+        current_expression.clear();
+    }
+}
+
+void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
+    in_unpacked_declaration = false;
+    auto first_expr = expression_stack.top();
+    expression_stack.pop();
+    auto second_expr= current_expression;
+    current_expression.clear();
+    current_resource.add_dimension({first_expr, second_expr});
 }
 
 

@@ -853,6 +853,12 @@ public:
   virtual void enterClass_scope(sv2017::Class_scopeContext *ctx) = 0;
   virtual void exitClass_scope(sv2017::Class_scopeContext *ctx) = 0;
 
+  virtual void enterFirst_range_identifier(sv2017::First_range_identifierContext *ctx) = 0;
+  virtual void exitFirst_range_identifier(sv2017::First_range_identifierContext *ctx) = 0;
+
+  virtual void enterSecond_range_identifier(sv2017::Second_range_identifierContext *ctx) = 0;
+  virtual void exitSecond_range_identifier(sv2017::Second_range_identifierContext *ctx) = 0;
+
   virtual void enterRange_expression(sv2017::Range_expressionContext *ctx) = 0;
   virtual void exitRange_expression(sv2017::Range_expressionContext *ctx) = 0;
 

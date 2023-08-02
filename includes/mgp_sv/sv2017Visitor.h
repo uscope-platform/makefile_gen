@@ -578,6 +578,10 @@ public:
 
     virtual std::any visitClass_scope(sv2017::Class_scopeContext *context) = 0;
 
+    virtual std::any visitFirst_range_identifier(sv2017::First_range_identifierContext *context) = 0;
+
+    virtual std::any visitSecond_range_identifier(sv2017::Second_range_identifierContext *context) = 0;
+
     virtual std::any visitRange_expression(sv2017::Range_expressionContext *context) = 0;
 
     virtual std::any visitConstant_range_expression(sv2017::Constant_range_expressionContext *context) = 0;

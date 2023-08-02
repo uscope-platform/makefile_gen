@@ -45,6 +45,8 @@ constexpr std::string parameter_type_to_string(parameter_type in){
     }
 }
 
+typedef  std::vector<Expression_component> Expression;
+
 class HDL_parameter {
 public:
 
@@ -84,8 +86,8 @@ public:
     bool is_empty();
 
     void add_component(const Expression_component &component);
-    void set_expression_components(std::vector<Expression_component> &c){expression_components = c;};
-    std::vector<Expression_component>  get_expression_components() { return expression_components;};
+    void set_expression_components(Expression  &c){expression_components = c;};
+    Expression  get_expression_components() { return expression_components;};
 
     void add_dependency(const std::string &s){dependencies.insert(s);};
     std::unordered_set<std::string> get_dependencies() { return dependencies;};
@@ -103,17 +105,13 @@ public:
 
     friend void PrintTo(const HDL_parameter& point, std::ostream* os);
 
-    void set_initialization_list(std::vector<std::vector<Expression_component>> &list) {initialization_list = list;};
-    std::vector<std::vector<Expression_component>> get_initialization_list(){ return initialization_list;};
+    void set_initialization_list(std::vector<Expression> &list) {initialization_list = list;};
+    std::vector<Expression> get_initialization_list(){ return initialization_list;};
+
+    void add_dimension(const std::pair<Expression, Expression> &e) {array_dimensions.push_back(e);};
+    std::vector<std::pair<Expression, Expression>> get_dimensions(){return array_dimensions;};
 
 private:
-
-    uint32_t get_parameter_value(
-            const std::string &p,
-            const std::unordered_map<std::string, HDL_parameter>& parent_parameter,
-            const std::unordered_map<std::string, HDL_parameter>& instance_parameters,
-            const std::unordered_map<std::string, HDL_parameter>& module_parameters
-            );
 
     bool regex_string_test(const std::string &r, const std::string &s) const;
     std::pair<std::string, std::string> split_array_init(std::string s);
@@ -133,8 +131,9 @@ private:
 
 
     std::unordered_set<std::string> dependencies;
-    std::vector<Expression_component> expression_components;
-    std::vector<std::vector<Expression_component>> initialization_list;
+    Expression expression_components;
+    std::vector<Expression> initialization_list;
+    std::vector<std::pair<Expression, Expression>> array_dimensions;
 };
 
 
