@@ -35,25 +35,20 @@ public:
     void add_component(const Expression_component &c);
 
     void start_initialization_list();
-
     void stop_initializaiton_list();
-
+    void set_repeated_initialization();
     void start_expression();
-
     void stop_expression();
 
     void start_bit_selection();
-
     void stop_bit_selection();
 
     void start_unpacked_dimension_declaration() { in_unpacked_declaration = true; };
-
     void stop_unpacked_dimension_declaration();
 
     void close_first_range();
 
     void add_array_component();
-
 
     void start_param_assignment() { in_param_assignment = true; };
     void stop_param_assignment() { in_param_assignment = false; };
@@ -67,6 +62,7 @@ private:
     bool in_expression = false;
     bool in_bit_select = false;
     bool in_unpacked_declaration = false;
+    bool repeated_initialization = false;
 
     std::stack<std::vector<Expression_component>> expression_stack;
     std::vector<std::vector<Expression_component>> initialization_list;

@@ -39,17 +39,19 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res,
     std::unordered_map<std::basic_string<char>, HDL_parameter> next_working_set;
 
     bool processing_complete = false;
-
+;
     while(!working_set.empty() && !processing_complete){
+        bool list_init_complete = true;
         for(auto &item:working_set){
             if(!item.second.get_initialization_list().empty()){
-                auto init_list = item.second.get_initialization_list();
-                for(int i = 0; i<init_list.size(); i++){
-                    HDL_parameter p;
-                    auto name = item.first+"_"+std::to_string(i);
-                    p.set_name(name);
-                    p.set_expression_components(init_list[i]);
-                    next_working_set[name] = p;
+                auto il = item.second.get_initialization_list();
+                auto ret = process_initialization_list(item.first, il, external_parameters);
+                if(ret.second){
+                    next_working_set.insert(ret.first.begin(), ret.first.end());
+                    list_init_complete = true;
+                } else{
+                    next_working_set.insert(item);
+                    list_init_complete = false;
                 }
             } else {
                 auto processed_param = process_parameter(item.second, external_parameters);
@@ -63,7 +65,7 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res,
 
         }
 
-        if(working_set == next_working_set){
+        if(working_set == next_working_set && list_init_complete){
             processing_complete = true;
         }
         working_set = next_working_set;
@@ -210,7 +212,7 @@ Parameter_processor::process_expression(const std::vector<Expression_component> 
 
     for(auto i : expr){
         if(!i.get_array_index().empty()){
-            bool index_ready = true;
+            bool index_ready = false;
             std::vector<uint32_t> array_index_values;
             for(auto &item:i.get_array_index()){
                 auto rpn_expr = expr_vector_to_rpn(item);
@@ -362,5 +364,40 @@ void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
         }
         res.set_parameters(new_params);
     }
+}
+
+std::pair<std::unordered_map<std::string, HDL_parameter>, bool>
+Parameter_processor::process_initialization_list(const std::string& param_name, std::vector<std::vector<Expression_component>> &il,const std::unordered_map<std::string, uint32_t> parent_parameters) {
+    std::unordered_map<std::string, HDL_parameter> ret;
+    bool ret_valid = false;
+    for(int i = 0; i<il.size(); i++){
+        if(il[i][0].get_string_value() == "$repeat_init"){
+            std::unordered_set<std::string> deps;
+            auto init_size = process_expression(il[i+1], deps, parent_parameters);
+            auto init_val = process_expression(il[i+2], deps, parent_parameters);
+            i +=3;
+            if(init_size.second && init_val.second){
+                for(int j =0; j<init_size.first; j++){
+                    HDL_parameter p;
+                    auto name = param_name+"_"+std::to_string(j);
+                    p.set_name(name);
+                    p.set_expression_components({Expression_component(std::to_string(init_val.first))});
+                    ret[name] = p;
+                }
+                ret_valid = true;
+            } else {
+                ret_valid = false;
+            }
+
+        } else{
+            HDL_parameter p;
+            auto name = param_name+"_"+std::to_string(i);
+            p.set_name(name);
+            p.set_expression_components(il[i]);
+            ret[name] = p;
+            ret_valid = true;
+        }
+    }
+    return {ret,ret_valid};
 }
 

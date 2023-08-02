@@ -15,7 +15,6 @@
 
 #include "analysis/HDL_ast_builder.hpp"
 
-#include <utility>
 
 HDL_ast_builder::HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d) {
     s_store = s;
@@ -32,7 +31,12 @@ HDL_instance HDL_ast_builder::build_ast(const std::string& top_level_module, std
 
 
     top_level.set_type(top_level_module);
-    top_level.add_parameters(merge_parameters(std::move(external_parameters), {}, tl_res.get_parameters()));
+
+    Parameter_processor p;
+    auto res = p.process_resource(tl_res, external_parameters);
+
+
+    //top_level.add_parameters(merge_parameters(std::move(external_parameters), {}, tl_res.get_parameters()));
 
     // TODO: RECURSIVELY BUILD THE AST BY WALKING THROUGH THE DEFINITIONS
     for(auto &dep: tl_res.get_dependencies()){
@@ -81,12 +85,12 @@ HDL_ast_builder::merge_parameters(std::unordered_map<std::string, HDL_parameter>
 
 
 
-void HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::unordered_map<std::string, HDL_parameter> &external_parameters) {
+void HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::map<std::string, HDL_parameter> &external_parameters) {
     recursion_level++;
 
     auto res = d_store->get_HDL_resource(i.get_type());
 
-    auto merged_params = merge_parameters(external_parameters, i.get_parameters(), res.get_parameters());
+  //  auto merged_params = merge_parameters(external_parameters, i.get_parameters(), res.get_parameters());
 
     std::string prefix;
     for(int j =  0; j<recursion_level; j++){
@@ -99,17 +103,17 @@ void HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::unordered_m
         std::cout<<"------------------------------------------------"<<std::endl;
         std::cout<< prefix << "MODULE: "<<  module_name << " INSTANCE: " << i.get_name() << std::endl;
         std::cout<<"------------------------------------------------"<<std::endl;
-        for(auto &item: merged_params){
-            std::cout<< prefix << item.first<< " ------ " << std::string(item.second) <<std::endl;
-        }
+       // for(auto &item: merged_params){
+        //    std::cout<< prefix << item.first<< " ------ " << std::string(item.second) <<std::endl;
+       // }
         std::cout<<"------------------------------------------------"<<std::endl;
 
     }
 
 
     for(auto &dep: res.get_dependencies()){
-        if(dep.get_dependency_class() != package)
-            recursive_build_ast(dep,merged_params);
+        if(dep.get_dependency_class() != package);
+    //        recursive_build_ast(dep,merged_params);
     }
     recursion_level--;
 }

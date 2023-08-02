@@ -58,6 +58,6 @@ void HDL_instance::add_array_quantifier(const bus_mapping_expression &exp) {
     quantifier = exp;
 }
 
-void HDL_instance::add_parameters(std::unordered_map<std::string, HDL_parameter> p) {
+void HDL_instance::add_parameters(std::map<std::string, HDL_parameter> p) {
     parameters = std::move(p);
 }

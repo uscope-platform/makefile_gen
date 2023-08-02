@@ -17,9 +17,12 @@
 #define MAKEFILEGEN_V2_HDL_AST_BUILDER_HPP
 
 #include <memory>
+#include <utility>
+
 #include "data_model/data_store.hpp"
 #include "data_model/settings_store.hpp"
 #include "data_model/HDL/HDL_instance.hpp"
+#include "data_model/HDL/parameters/Parameter_processor.hpp"
 
 class HDL_ast_builder {
     public:
@@ -33,7 +36,7 @@ class HDL_ast_builder {
         HDL_instance top_level;
         int recursion_level;
         bool log_structure;
-    void recursive_build_ast(HDL_instance &i,const std::unordered_map<std::string, HDL_parameter> &external_parameters);
+    void recursive_build_ast(HDL_instance &i,const std::map<std::string, HDL_parameter> &external_parameters);
 };
 
 

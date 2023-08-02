@@ -34,7 +34,7 @@ public:
 private:
 
     HDL_Resource bus_defining_package;
-    std::vector<std::unordered_map<std::string, HDL_parameter >> parameters_stack;
+    std::vector<std::map<std::string, HDL_parameter >> parameters_stack;
 };
 
 #endif //MAKEFILEGEN_V2_ADDRESS_RESOLVER_HPP

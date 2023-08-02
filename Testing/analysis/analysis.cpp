@@ -178,7 +178,7 @@ TEST(analysis_test, verilog_parameter_extraction){
             {"sv_numeric_p", {"5'o10"}},
             {"dimensionless_sv_numeric_p", {"'h3F"}},
             {"string_p", {R"("423")"}},
-            {"nested_p", {"string_parameter"}},
+            {"nested_p", {"string_p"}},
             {"local_p", {"74"}},
             {"simple_log_expr_p", {"add_expr_p", "$clog2"}},
             {"add_expr_p", {"simple_numeric_p", "sv_numeric_p", "+"}},
@@ -188,7 +188,8 @@ TEST(analysis_test, verilog_parameter_extraction){
             {"modulo_expr_p", {"simple_numeric_p", "sv_numeric_p","%"}},
             {"chained_expression", {"add_expr_p", "mul_expr_p", "5", "*","+"}},
             {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}},
-            {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}}
+            {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}},
+            {"repetition_size", {"2"}}
     };
 
 
@@ -230,7 +231,7 @@ TEST(analysis_test, verilog_parameter_extraction){
     p.set_name("multidim_array_parameter");
     il = {{Expression_component("32")},{Expression_component("32")}, {Expression_component("5")}, {Expression_component("6")}};
     p.set_initialization_list(il);
-    p.add_dimension({{Expression_component("TEST_PARAM"),Expression_component("-"), Expression_component("1")},{Expression_component("0")}});
+    p.add_dimension({{Expression_component("repetition_size"),Expression_component("-"), Expression_component("1")},{Expression_component("0")}});
     p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
     check_params["multidim_array_parameter"] = p;
 
@@ -244,6 +245,16 @@ TEST(analysis_test, verilog_parameter_extraction){
     e.set_array_index(ai);
     p.add_component(e);
     check_params["multidim_array_access"] = p;
+
+
+    p = HDL_parameter();
+    p.set_type(expression_parameter);
+    p.set_name("repetition_parameter");
+    il = {{Expression_component("$repeat_init")},{Expression_component("repetition_size")}, {Expression_component("1")}};
+    p.set_initialization_list(il);
+    p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
+    check_params["repetition_parameter"] = p;
+
 
 
     ASSERT_EQ(check_params.size(), parameters.size());
@@ -380,8 +391,9 @@ TEST(analysis_test, verilog_parameter_processing){
             {"sv_numeric_p", {"5'o10"}, {}, numeric_parameter, 8},
             {"dimensionless_sv_numeric_p", {"'h3F"}, {}, numeric_parameter, 63},
             {"string_p", {R"("423")"}, {}, expression_parameter, 9999},
-            {"nested_p", {"string_parameter"}, {}, expression_parameter, 9999},
+            {"nested_p", {"string_p"}, {}, expression_parameter, 9999},
             {"local_p", {"74"}, {}, numeric_parameter, 74},
+            {"repetition_size", {"2"},{}, numeric_parameter, 2},
             {"simple_log_expr_p", {"add_expr_p", "$clog2"}, {"add_expr_p"}, numeric_parameter, 6},
             {"add_expr_p", {"simple_numeric_p", "sv_numeric_p", "+"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter,40},
             {"sub_expr_p", {"simple_numeric_p", "sv_numeric_p","-"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter,24},
@@ -397,6 +409,8 @@ TEST(analysis_test, verilog_parameter_processing){
             {"multidim_array_parameter_1", {"32"}, {}, numeric_parameter, 32},
             {"multidim_array_parameter_2", {"5"}, {}, numeric_parameter, 5},
             {"multidim_array_parameter_3", {"6"}, {}, numeric_parameter, 6},
+            {"repetition_parameter_0", {"1"}, {}, numeric_parameter, 1},
+            {"repetition_parameter_1", {"1"}, {}, numeric_parameter, 1},
     };
 
 
@@ -503,8 +517,9 @@ TEST(analysis_test, verilog_parameter_processing_override){
             {"sv_numeric_p", {"5'o10"}, {}, numeric_parameter, 8},
             {"dimensionless_sv_numeric_p", {"'h3F"}, {}, numeric_parameter, 63},
             {"string_p", {R"("423")"}, {}, expression_parameter, 9999},
-            {"nested_p", {"string_parameter"}, {}, expression_parameter, 9999},
+            {"nested_p", {"string_p"}, {}, expression_parameter, 9999},
             {"local_p", {"74"}, {}, numeric_parameter, 74},
+            {"repetition_size", {"2"},{}, numeric_parameter, 2},
             {"simple_log_expr_p", {"add_expr_p", "$clog2"}, {"add_expr_p"}, numeric_parameter, 5},
             {"add_expr_p", {"simple_numeric_p", "sv_numeric_p", "+"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter,27},
             {"sub_expr_p", {"simple_numeric_p", "sv_numeric_p","-"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter,3},
@@ -520,6 +535,8 @@ TEST(analysis_test, verilog_parameter_processing_override){
             {"multidim_array_parameter_1", {"32"}, {}, numeric_parameter, 32},
             {"multidim_array_parameter_2", {"5"}, {}, numeric_parameter, 5},
             {"multidim_array_parameter_3", {"6"}, {}, numeric_parameter, 6},
+            {"repetition_parameter_0", {"1"}, {}, numeric_parameter, 1},
+            {"repetition_parameter_1", {"1"}, {}, numeric_parameter, 1}
     };
 
 

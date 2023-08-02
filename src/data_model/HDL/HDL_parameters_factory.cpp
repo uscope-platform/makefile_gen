@@ -41,15 +41,21 @@ void HDL_parameters_factory::add_component(const Expression_component &c) {
 
 void HDL_parameters_factory::start_initialization_list() {
     in_initialization_list = true;
+    repeated_initialization = false;
     initialization_list.clear();
 }
 
 
 void HDL_parameters_factory::stop_initializaiton_list() {
     in_initialization_list = false;
-    //TODO:implement initialization list support;
+    if(repeated_initialization){
+        initialization_list.insert(initialization_list.begin(),{Expression_component("$repeat_init")});
+    }
     current_resource.set_initialization_list(initialization_list);
-    int i = 0;
+}
+
+void HDL_parameters_factory::set_repeated_initialization() {
+    repeated_initialization = true;
 }
 
 void HDL_parameters_factory::start_expression() {
@@ -96,6 +102,7 @@ void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
     current_expression.clear();
     current_resource.add_dimension({first_expr, second_expr});
 }
+
 
 
 

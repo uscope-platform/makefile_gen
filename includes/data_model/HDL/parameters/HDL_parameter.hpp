@@ -86,7 +86,7 @@ public:
     bool is_empty();
 
     void add_component(const Expression_component &component);
-    void set_expression_components(Expression  &c){expression_components = c;};
+    void set_expression_components(const Expression  &c){expression_components = c;};
     Expression  get_expression_components() { return expression_components;};
 
     void add_dependency(const std::string &s){dependencies.insert(s);};

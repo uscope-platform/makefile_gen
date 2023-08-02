@@ -38,8 +38,8 @@ public:
     HDL_instance(const HDL_instance &c );
 
     void add_parameter(const std::string& parameter_name, const HDL_parameter &p);
-    void add_parameters(std::unordered_map<std::string, HDL_parameter> p);
-    std::unordered_map<std::string, HDL_parameter> get_parameters() { return parameters;};
+    void add_parameters(std::map<std::string, HDL_parameter> p);
+    std::map<std::string, HDL_parameter> get_parameters() { return parameters;};
     std::string  get_parameter_value(const std::string& parameter_name) {return parameters[parameter_name].get_string_value();};
     bool is_parameter_overridden(const std::string& parameter_name) {return parameters.contains(parameter_name);};
 
@@ -66,7 +66,7 @@ public:
 
     friend bool operator==(const HDL_instance&lhs, const HDL_instance&rhs);
 private:
-    std::unordered_map<std::string, HDL_parameter> parameters;
+    std::map<std::string, HDL_parameter> parameters;
     std::unordered_map<std::string, std::string> ports_map;
     dependency_class dep_class;
     std::string type;

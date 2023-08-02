@@ -6,9 +6,11 @@ module test_mod #(
     sv_numeric_p = 5'o10,
     dimensionless_sv_numeric_p  = 'h3F,
     parameter [31:0] array_parameter [1:0] = '{32, 5},
-    parameter [31:0] multidim_array_parameter [TEST_PARAM-1:0][1:0] = '{{32,32}, {5,6}},
+    parameter repetition_size = 2,
+    parameter [31:0] multidim_array_parameter [repetition_size-1:0][1:0] = '{{32,32}, {5,6}},
+    parameter bit repetition_parameter [1:0]  = '{repetition_size{1}},
     string_p = "423",
-    nested_p = string_parameter
+    nested_p = string_p
 )();
 
     parameter add_expr_p = simple_numeric_p + sv_numeric_p;
