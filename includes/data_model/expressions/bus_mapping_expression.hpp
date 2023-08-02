@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_EXPRESSION_HPP
-#define MAKEFILEGEN_V2_EXPRESSION_HPP
+#ifndef MAKEFILEGEN_V2_BUS_MAPPING_EXPRESSION_HPP
+#define MAKEFILEGEN_V2_BUS_MAPPING_EXPRESSION_HPP
 
 
 #include <string>
@@ -26,13 +26,13 @@
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/vector.hpp>
 
-class expression {
+class bus_mapping_expression {
 public:
-    expression()=default;
-    explicit expression(std::string text);
-    expression( const expression &e );
-    expression(std::string n, uint32_t a);
-    expression(std::string n, std::vector<std::string> e);
+    bus_mapping_expression()=default;
+    explicit bus_mapping_expression(std::string text);
+    bus_mapping_expression(const bus_mapping_expression &e );
+    bus_mapping_expression(std::string n, uint32_t a);
+    bus_mapping_expression(std::string n, std::vector<std::string> e);
     void set_name(const std::string &n){ name = n;};
     std::string get_name() {return name;};
     [[nodiscard]] std::vector<std::string> get_expression() const {return expression_components;};
@@ -43,11 +43,11 @@ public:
         ar(name, expression_components);
     }
 
-    friend bool operator==(const expression &lhs, const expression&rhs);
+    friend bool operator==(const bus_mapping_expression &lhs, const bus_mapping_expression&rhs);
 private:
     std::string name;
     std::vector<std::string> expression_components;
 };
 
 
-#endif //MAKEFILEGEN_V2_EXPRESSION_HPP
+#endif //MAKEFILEGEN_V2_BUS_MAPPING_EXPRESSION_HPP

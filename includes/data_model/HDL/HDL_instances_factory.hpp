@@ -17,14 +17,14 @@
 #define MAKEFILEGEN_V2_HDL_INSTANCES_FACTORY_HPP
 
 #include "data_model/HDL/HDL_instance.hpp"
-#include "data_model/expressions/expression.hpp"
+#include "data_model/expressions/bus_mapping_expression.hpp"
 
 class HDL_instances_factory {
 public:
     void new_dependency(const std::string &n, const std::string &p, dependency_class dc);
     void add_parameter(const std::string &name, const HDL_parameter &p);
     void add_port(const std::string &name, const std::string &value);
-    void add_array_quantifier(const expression &exp);
+    void add_array_quantifier(const bus_mapping_expression &exp);
     HDL_instance get_dependency();
     bool is_valid_dependency(){return valid_instance;};
 private:

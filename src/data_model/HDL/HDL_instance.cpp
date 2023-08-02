@@ -54,7 +54,7 @@ bool operator==(const HDL_instance &lhs, const HDL_instance &rhs) {
     return ret;
 }
 
-void HDL_instance::add_array_quantifier(const expression &exp) {
+void HDL_instance::add_array_quantifier(const bus_mapping_expression &exp) {
     quantifier = exp;
 }
 

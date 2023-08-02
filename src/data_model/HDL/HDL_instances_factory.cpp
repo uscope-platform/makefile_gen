@@ -34,6 +34,6 @@ HDL_instance HDL_instances_factory::get_dependency() {
     return current_instance;
 }
 
-void HDL_instances_factory::add_array_quantifier(const expression &exp) {
+void HDL_instances_factory::add_array_quantifier(const bus_mapping_expression &exp) {
     current_instance.add_array_quantifier(exp);
 }

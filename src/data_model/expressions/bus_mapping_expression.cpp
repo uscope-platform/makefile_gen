@@ -13,24 +13,24 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "data_model/expressions/expression.hpp"
+#include "data_model/expressions/bus_mapping_expression.hpp"
 
 
-expression::expression(std::string n, uint32_t a) {
+bus_mapping_expression::bus_mapping_expression(std::string n, uint32_t a) {
     name = std::move(n);
 }
 
-expression::expression(const expression &e) {
+bus_mapping_expression::bus_mapping_expression(const bus_mapping_expression &e) {
     name = e.name;
     expression_components = e.expression_components;
 }
 
-expression::expression(std::string n, std::vector<std::string> e) {
+bus_mapping_expression::bus_mapping_expression(std::string n, std::vector<std::string> e) {
     name = std::move(n);
     expression_components = std::move(e);
 }
 
-void expression::update_expression(const std::string& n, uint32_t value) {
+void bus_mapping_expression::update_expression(const std::string& n, uint32_t value) {
     for (auto & expression_component : expression_components) {
         if(expression_component == n){
             expression_component = std::to_string(value);
@@ -38,7 +38,7 @@ void expression::update_expression(const std::string& n, uint32_t value) {
     }
 }
 
-bool operator==(const expression &lhs, const expression &rhs) {
+bool operator==(const bus_mapping_expression &lhs, const bus_mapping_expression &rhs) {
     bool ret = true;
 
     ret &= lhs.name == rhs.name;
@@ -46,7 +46,7 @@ bool operator==(const expression &lhs, const expression &rhs) {
     return ret;
 }
 
-expression::expression(std::string text) {
+bus_mapping_expression::bus_mapping_expression(std::string text) {
     name = "exp";
     std::vector<std::string> tokens;
     std::string purged_text = std::regex_replace (text,std::regex("\\s+"),"sub-$2");

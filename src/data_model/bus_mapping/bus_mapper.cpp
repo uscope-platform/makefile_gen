@@ -239,7 +239,7 @@ std::unordered_map<uint32_t, std::string> bus_mapper::decode_interconnect_map(co
     int current_if = 0;
     std::unordered_map<uint32_t, std::string> ret_val;
     for(auto &item:map){
-        expression e = expression(item["len"]);
+        bus_mapping_expression e = bus_mapping_expression(item["len"]);
         auto quantifier = expression_evaluator::calculate_expression(e, parent_res, parent_dep, resolver);
         for(int i = 0; i<quantifier; i++){
            ret_val[current_if] = item["mod"];

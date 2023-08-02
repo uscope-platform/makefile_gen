@@ -18,9 +18,9 @@
 
 
 std::unordered_map<std::string, HDL_parameter>
-expression_evaluator::calculate_expressions(std::vector<expression> exp_vect,  std::unordered_map<std::string, HDL_parameter> params) {
-    std::vector<expression> working_set = std::move(exp_vect);
-    std::vector<expression> remaining_parameters;
+expression_evaluator::calculate_expressions(std::vector<bus_mapping_expression> exp_vect, std::unordered_map<std::string, HDL_parameter> params) {
+    std::vector<bus_mapping_expression> working_set = std::move(exp_vect);
+    std::vector<bus_mapping_expression> remaining_parameters;
 
     while(!working_set.empty()){
         remaining_parameters.clear();
@@ -94,7 +94,7 @@ uint32_t expression_evaluator::calculate_expression(std::vector<std::string> exp
     return std::stoul(exp[0]);
 }
 
-std::vector<std::string> expression_evaluator::get_variable_names(expression exp) {
+std::vector<std::string> expression_evaluator::get_variable_names(bus_mapping_expression exp) {
     std::vector<std::string> ret_val;
     for(auto &item:exp.get_expression()){
         std::set<std::string> operators = {"+", "*", "-", "/", "%"};
@@ -110,7 +110,7 @@ std::vector<std::string> expression_evaluator::get_variable_names(expression exp
 }
 
 uint32_t
-expression_evaluator::calculate_expression(expression exp, std::unordered_map<std::string, uint32_t> params) {
+expression_evaluator::calculate_expression(bus_mapping_expression exp, std::unordered_map<std::string, uint32_t> params) {
 
     for(auto &np:params){
         exp.update_expression(np.first, np.second);
@@ -120,7 +120,7 @@ expression_evaluator::calculate_expression(expression exp, std::unordered_map<st
 
 }
 
-uint32_t expression_evaluator::calculate_expression(const expression& exp, HDL_Resource &res, HDL_instance &dep,
+uint32_t expression_evaluator::calculate_expression(const bus_mapping_expression& exp, HDL_Resource &res, HDL_instance &dep,
                                                     address_resolver &resolver) {
 
     std::unordered_map<std::string, uint32_t> params;

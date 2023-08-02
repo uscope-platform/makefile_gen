@@ -18,7 +18,7 @@
 
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/resource_factory_base.hpp"
-#include "data_model/expressions/expression.hpp"
+#include "data_model/expressions/bus_mapping_expression.hpp"
 #include "data_model/expressions/expression_evaluator.hpp"
 
 class HDL_parameters_factory : protected resources_factory_base<HDL_parameter>{

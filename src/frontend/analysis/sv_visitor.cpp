@@ -133,12 +133,12 @@ void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext 
                 if(packages_factory.numeric_parameter_exists(string_components.front())){
                     packages_factory.add_numeric_parameter(current_parameter, packages_factory.get_numeric_parameter(string_components.front()));
                 } else{
-                    expression par(current_parameter, string_components);
+                    bus_mapping_expression par(current_parameter, string_components);
                     packages_factory.add_unresolved_parameter(par);
                 }
             }
         } else{
-            expression par(current_parameter, string_components);
+            bus_mapping_expression par(current_parameter, string_components);
             packages_factory.add_unresolved_parameter(par);
         }
         string_components.clear();
@@ -301,7 +301,7 @@ void sv_visitor::enterName_of_instance(sv2017::Name_of_instanceContext *ctx) {
 
 void sv_visitor::exitName_of_instance(sv2017::Name_of_instanceContext *ctx) {
     if(in_module_array_def){
-        expression q(ctx->identifier()->getText(), string_components);
+        bus_mapping_expression q(ctx->identifier()->getText(), string_components);
         deps_factory.add_array_quantifier(q);
         string_components.clear();
     }

@@ -35,7 +35,7 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Depfile.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Script.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Constraints.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/expressions/expression.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/expressions/bus_mapping_expression.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/expressions/expression_evaluator.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/analysis/HDL_ast_builder.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Dependency_resolver.cpp /

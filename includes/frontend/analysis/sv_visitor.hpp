@@ -28,7 +28,7 @@
 #include "data_model/HDL/HDL_instance.hpp"
 #include "data_model/HDL/HDL_Resource.hpp"
 
-#include "data_model/expressions/expression.hpp"
+#include "data_model/expressions/bus_mapping_expression.hpp"
 
 #include <regex>
 #include <utility>

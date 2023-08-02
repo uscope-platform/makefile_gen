@@ -19,7 +19,7 @@
 
 #include "data_model/HDL/HDL_Resource.hpp"
 #include "data_model/HDL/resource_factory_base.hpp"
-#include "data_model/expressions/expression.hpp"
+#include "data_model/expressions/bus_mapping_expression.hpp"
 #include "data_model/expressions/expression_evaluator.hpp"
 
 class HDL_packages_factory : protected resources_factory_base<HDL_Resource>{
@@ -31,12 +31,12 @@ public:
     void add_numeric_parameter(const std::string &name, uint32_t val);
     void add_string_parameter(const std::string &s);
 
-    void add_unresolved_parameter(expression p) {unresolved_parameters.push_back(p);};
+    void add_unresolved_parameter(bus_mapping_expression p) {unresolved_parameters.push_back(p);};
     uint32_t get_numeric_parameter(const std::string &name);
     bool numeric_parameter_exists(const std::string &name) {return parameters.count(name)>0;};
 private:
     void calculate_unresolved_parameters();
-    std::vector<expression> unresolved_parameters;
+    std::vector<bus_mapping_expression> unresolved_parameters;
 
     std::unordered_map<std::string, HDL_parameter> parameters;
 };
