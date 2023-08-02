@@ -119,7 +119,7 @@ void sv_visitor::exitPackage_or_class_scoped_path(sv2017::Package_or_class_scope
 }
 
 void sv_visitor::enterParameter_declaration(sv2017::Parameter_declarationContext *ctx) {
-    std::string dbg = ctx->getText();
+
     current_parameter = ctx->list_of_param_assignments()[0].param_assignment()[0]->identifier()->getText();
 }
 
@@ -273,12 +273,15 @@ void sv_visitor::exitNamed_parameter_assignment(sv2017::Named_parameter_assignme
 
 void sv_visitor::enterParam_assignment(sv2017::Param_assignmentContext *ctx) {
     auto p_n = ctx->identifier()->getText();
+    params_factory.start_param_assignment();
     params_factory.new_parameter();
     params_factory.set_parmeter_name(p_n);
 }
 
 
 void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
+
+    params_factory.stop_param_assignment();
 
     auto val = ctx->constant_param_expression()->getText();
 
@@ -327,6 +330,7 @@ void sv_visitor::exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) 
 
 
 void sv_visitor::exitPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
+    auto dbg = ctx->getText();
     params_factory.add_array_component();
 }
 

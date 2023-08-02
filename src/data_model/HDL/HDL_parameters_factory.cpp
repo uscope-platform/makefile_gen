@@ -76,8 +76,9 @@ void HDL_parameters_factory::stop_bit_selection() {
 }
 
 void HDL_parameters_factory::add_array_component() {
-
-    current_expression.back().add_array_index(bit_selection);
+    if(in_param_assignment){
+        current_expression.back().add_array_index(bit_selection);
+    }
 }
 
 void HDL_parameters_factory::close_first_range() {

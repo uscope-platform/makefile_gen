@@ -392,7 +392,11 @@ TEST(analysis_test, verilog_parameter_processing){
             {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}, {"add_expr_p"}, numeric_parameter, 6},
             {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}, {"add_expr_p", "mul_expr_p"}, numeric_parameter, 1480},
             {"array_parameter_0", {"32"}, {}, numeric_parameter, 32},
-            {"array_parameter_1", {"5"}, {}, numeric_parameter, 5}
+            {"array_parameter_1", {"5"}, {}, numeric_parameter, 5},
+            {"multidim_array_parameter_0", {"32"}, {}, numeric_parameter, 32},
+            {"multidim_array_parameter_1", {"32"}, {}, numeric_parameter, 32},
+            {"multidim_array_parameter_2", {"5"}, {}, numeric_parameter, 5},
+            {"multidim_array_parameter_3", {"6"}, {}, numeric_parameter, 6},
     };
 
 
@@ -431,6 +435,19 @@ TEST(analysis_test, verilog_parameter_processing){
         param.add_dependency("array_parameter_0");
         param.add_dependency("sv_numeric_p");
         check_params["array_parameter_expr_p"] = param;
+
+
+
+        param = HDL_parameter();
+        param.set_type(numeric_parameter);
+        param.set_value(5);
+        param.set_name("multidim_array_access");
+        e = Expression_component("multidim_array_parameter");
+        ai = {{Expression_component("1")},{Expression_component("0")}};
+        e.set_array_index(ai);
+        param.add_component(e);
+        param.add_dependency("multidim_array_parameter_2");
+        check_params["multidim_array_access"] = param;
 
 
 
@@ -498,7 +515,11 @@ TEST(analysis_test, verilog_parameter_processing_override){
             {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}, {"add_expr_p"}, numeric_parameter, 5},
             {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}, {"add_expr_p", "mul_expr_p"}, numeric_parameter, 1035},
             {"array_parameter_0", {"32"}, {}, numeric_parameter, 32},
-            {"array_parameter_1", {"5"}, {}, numeric_parameter, 5}
+            {"array_parameter_1", {"5"}, {}, numeric_parameter, 5},
+            {"multidim_array_parameter_0", {"32"}, {}, numeric_parameter, 32},
+            {"multidim_array_parameter_1", {"32"}, {}, numeric_parameter, 32},
+            {"multidim_array_parameter_2", {"5"}, {}, numeric_parameter, 5},
+            {"multidim_array_parameter_3", {"6"}, {}, numeric_parameter, 6},
     };
 
 
@@ -538,6 +559,20 @@ TEST(analysis_test, verilog_parameter_processing_override){
     param.add_dependency("array_parameter_0");
     param.add_dependency("sv_numeric_p");
     check_params["array_parameter_expr_p"] = param;
+
+
+
+    param = HDL_parameter();
+    param.set_type(numeric_parameter);
+    param.set_value(5);
+    param.set_name("multidim_array_access");
+    e = Expression_component("multidim_array_parameter");
+    ai = {{Expression_component("1")},{Expression_component("0")}};
+    e.set_array_index(ai);
+    param.add_component(e);
+    param.add_dependency("multidim_array_parameter_2");
+    check_params["multidim_array_access"] = param;
+
 
 
 

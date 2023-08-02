@@ -54,10 +54,15 @@ public:
 
     void add_array_component();
 
+
+    void start_param_assignment() { in_param_assignment = true; };
+    void stop_param_assignment() { in_param_assignment = false; };
+
     bool in_expression_context() { return in_expression; };
 
     bool is_component_relevant() const { return in_initialization_list || in_expression || in_unpacked_declaration; };
 private:
+    bool in_param_assignment = false;
     bool in_initialization_list = false;
     bool in_expression = false;
     bool in_bit_select = false;
