@@ -48,6 +48,7 @@ public:
     void store_hdl_entity(HDL_Resource& entity);
     void store_hdl_entity(std::vector<HDL_Resource> & vect);
     void evict_hdl_entity(const std::string& name);
+    bool contains_hdl_entity(const std::string& name) const;
 
     Script get_script(std::string& name);
     void store_script(Script entity);

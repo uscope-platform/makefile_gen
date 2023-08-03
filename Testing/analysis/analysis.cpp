@@ -402,11 +402,19 @@ TEST(analysis_test, shunting_yard_function){
 
 
 TEST(analysis_test, verilog_parameter_processing){
-    sv_analyzer analyzer("check_files/test_sv_parameter_extraction.sv");
-    analyzer.cleanup_content("`(.*)");
-    HDL_Resource resource = analyzer.analyze()[0];
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+
+    sv_analyzer analyzer("check_files/test_package.sv");
+    analyzer.cleanup_content("`(.*)");
+
+    d_store->store_hdl_entity(analyzer.analyze()[0]);
+
+    analyzer = sv_analyzer("check_files/test_sv_parameter_extraction.sv");
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+
     Parameter_processor p({},d_store);
 
     resource =  p.process_resource(resource);
@@ -476,6 +484,7 @@ TEST(analysis_test, verilog_parameter_processing){
     HDL_parameter param = HDL_parameter();
     param.set_type(expression_parameter);
     param.set_name("package_param");
+    param.set_value(0x43c00000);
     Expression_component ec("bus_base");
     ec.set_package_prefix("test_package");
     param.add_component(ec);
@@ -526,9 +535,17 @@ TEST(analysis_test, verilog_parameter_processing){
 
 
 TEST(analysis_test, verilog_parameter_processing_override){
-    sv_analyzer analyzer("check_files/test_sv_parameter_extraction.sv");
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+
+    sv_analyzer analyzer("check_files/test_package.sv");
     analyzer.cleanup_content("`(.*)");
-    HDL_Resource resource = analyzer.analyze()[0];
+
+    d_store->store_hdl_entity(analyzer.analyze()[0]);
+
+    analyzer = sv_analyzer("check_files/test_sv_parameter_extraction.sv");
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
 
     std::map<std::string, HDL_parameter> parent_params;
 
@@ -542,7 +559,6 @@ TEST(analysis_test, verilog_parameter_processing_override){
     par.set_value(12);
     parent_params["sv_numeric_p"] = par;
 
-    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     Parameter_processor p(parent_params, d_store);
     resource =  p.process_resource(resource);
 
@@ -610,6 +626,7 @@ TEST(analysis_test, verilog_parameter_processing_override){
     HDL_parameter param = HDL_parameter();
     param.set_type(expression_parameter);
     param.set_name("package_param");
+    param.set_value(0x43c00000);
     Expression_component ec("bus_base");
     ec.set_package_prefix("test_package");
     param.add_component(ec);

@@ -248,3 +248,7 @@ std::unordered_map<std::string, HDL_Resource> data_store::get_hdl_cache() {
 
     return ret_val;
 }
+
+bool data_store::contains_hdl_entity(const std::string &name) const {
+    return cache.hdl.contains(name) || cache.interfaces.contains(name);
+}

@@ -289,7 +289,7 @@ void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
 std::unordered_map<std::string, HDL_parameter>
 Parameter_processor::process_initialization_list(const std::string& param_name, std::vector<std::vector<Expression_component>> &il) {
     std::unordered_map<std::string, HDL_parameter> ret;
-    int last_list_item = 0;
+    uint32_t last_list_item = 0;
     for(int i = 0; i<il.size(); i++){
         if(il[i][0].get_string_value() == "$repeat_init"){
             auto init_size = process_expression(il[i+1]);
@@ -333,6 +333,18 @@ uint32_t Parameter_processor::get_component_value(Expression_component &ec) {
         return ec.get_numeric_value();
     } else if(ec.get_type() == operator_component || ec.get_type() == function_component){
         throw std::runtime_error("Error: attempted to get the numeric value of an operator or Function");
+    }
+
+    if(!ec.get_package_prefix().empty()){
+
+        auto pkg = ec.get_package_prefix();
+        if(d_store->contains_hdl_entity(pkg)){
+            auto res = d_store->get_HDL_resource(pkg);
+            auto val = res.get_parameters()[ec.get_string_value()].get_numeric_value();
+            return val;
+        } else{
+            throw std::runtime_error("Error: Encountered unknown package: " + ec.get_package_prefix());
+        }
     }
 
     std::string param_name;
