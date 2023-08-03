@@ -96,54 +96,13 @@ HDL_parameter Parameter_processor::process_parameter(const HDL_parameter &par) {
 
 
 
-    // PROCESS SIMPLE PARAMETERS
-    if(components.size() == 1){
-        if(!components[0].get_array_index().empty()){
-            auto comp = get_array_index(components[0].get_string_value(), components[0].get_array_index());
-            std::string param_name = components[0].get_string_value() + "_" + std::to_string(comp);
-            uint32_t val;
-            if(external_parameters.contains(param_name)){
-                val = external_parameters[param_name];
-            } if(working_param_values.contains(param_name)){
-                val = working_param_values[param_name];
-            } else {
-                throw Parameter_processor_Exception();
-            }
-            return_par.set_type(numeric_parameter);
-            return_par.set_value(val);
-            return return_par;
-        }else if(components[0].get_type() ==string_component){
-            std::string value = components[0].get_string_value();
-            uint32_t val;
-            if(external_parameters.contains(par.get_name())){
-                val = external_parameters[par.get_name()];
-            } else{
-                if(external_parameters.contains(value)){
-                    val = external_parameters[value];
-                } else if(working_param_values.contains(value)){
-                    val = working_param_values[value];
-                } else {
-                    throw Parameter_processor_Exception();
-                }
-            }
-
-            return_par.set_type(numeric_parameter);
-            return_par.set_value(val);
-        } else if(components[0].get_type()== numeric_component){
-            return_par.set_type(numeric_parameter);
-            return_par.set_value(components[0].get_numeric_value());
-        } else {
-            throw std::runtime_error("Error: Malformed expression composed by a single operator or Function");
-        }
-    }
-
     return_par.set_value(process_expression(components));
     return_par.set_type(numeric_parameter);
     return return_par;
 }
 
-uint32_t Parameter_processor::get_array_index(std::string param_name, std::vector<Expression> idx) {
-    
+uint32_t Parameter_processor::get_flattened_array_index(std::string param_name, std::vector<Expression> idx) {
+
     std::vector<uint32_t> array_index_values;
     for(auto &item:idx){
         auto rpn_expr = expr_vector_to_rpn(item);
@@ -174,6 +133,11 @@ uint32_t Parameter_processor::process_expression(const std::vector<Expression_co
 
     std::vector<Expression_component> processed_rpn;
 
+    if(expr.size() == 1){
+        auto comp = expr[0];
+        return get_component_value(comp);
+    }
+
     for(auto i : expr){
         if(!i.get_array_index().empty()){
             std::vector<uint32_t> array_index_values;
@@ -184,7 +148,6 @@ uint32_t Parameter_processor::process_expression(const std::vector<Expression_co
             }
             Expression_component ne(i.get_string_value() + "_"+ std::to_string(array_index_values[0]));
             i = ne;
-
 
         }
 
@@ -210,12 +173,13 @@ uint32_t Parameter_processor::process_expression(const std::vector<Expression_co
         } else {
             uint32_t result;
             if(i.get_operator_type() == Expression_component::unary_operator){
-                result = evaluate_unary_expression(evaluator_stack.top().get_numeric_value(), i.get_string_value());
+                auto op = get_component_value(evaluator_stack.top());
+                result = evaluate_unary_expression(op, i.get_string_value());
                 evaluator_stack.pop();
             } else if(i.get_operator_type() == Expression_component::binary_operator){
-                auto op_b = evaluator_stack.top().get_numeric_value();
+                auto op_b = get_component_value(evaluator_stack.top());
                 evaluator_stack.pop();
-                auto op_a = evaluator_stack.top().get_numeric_value();
+                auto op_a = get_component_value(evaluator_stack.top());
                 evaluator_stack.pop();
                 result = evaluate_binary_expression(op_a, op_b, i.get_raw_string_value());
             }
@@ -361,6 +325,35 @@ std::vector<uint32_t> Parameter_processor::process_array_dimensions(std::vector<
         ret.push_back(std::max(first_val, second_val)+1);
     }
     return ret;
+}
+
+uint32_t Parameter_processor::get_component_value(Expression_component &ec) {
+
+    if(ec.get_type() == numeric_component){
+        return ec.get_numeric_value();
+    } else if(ec.get_type() == operator_component || ec.get_type() == function_component){
+        throw std::runtime_error("Error: attempted to get the numeric value of an operator or Function");
+    }
+
+    std::string param_name;
+    if(!ec.get_array_index().empty()){
+        auto comp = get_flattened_array_index(ec.get_string_value(), ec.get_array_index());
+        param_name = ec.get_string_value() + "_" + std::to_string(comp);
+    } else{
+        param_name = ec.get_string_value();
+    }
+
+
+    uint32_t val;
+    if(external_parameters.contains(param_name)){
+        val = external_parameters[param_name];
+    } else if(working_param_values.contains(param_name)){
+        val = working_param_values[param_name];
+    } else {
+        throw Parameter_processor_Exception();
+    }
+
+    return val;
 }
 
 

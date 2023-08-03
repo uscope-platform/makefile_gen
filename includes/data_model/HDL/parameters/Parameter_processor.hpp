@@ -40,14 +40,14 @@ public:
 
     std::vector<uint32_t> process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims);
 
-    uint32_t get_array_index(std::string param_name, std::vector<Expression> idx);
+    uint32_t get_flattened_array_index(std::string param_name, std::vector<Expression> idx);
 
     static std::vector<Expression_component> expr_vector_to_rpn(const std::vector<Expression_component>& v);
 
     static uint32_t evaluate_binary_expression(uint32_t op_a, uint32_t op_b, const std::string& operation);
     static uint32_t evaluate_unary_expression(uint32_t operand, const std::string& operation);
 
-    uint32_t get_param_value(Expression_component &ec);
+    uint32_t get_component_value(Expression_component &ec);
 private:
 
     std::unordered_map<std::string, uint32_t> working_param_values;
