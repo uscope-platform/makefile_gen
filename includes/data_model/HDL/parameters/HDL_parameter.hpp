@@ -106,6 +106,7 @@ public:
     friend void PrintTo(const HDL_parameter& point, std::ostream* os);
 
     void set_initialization_list(std::vector<Expression> &list) {initialization_list = list;};
+    void add_initialization_list(std::vector<Expression> &list);
     std::vector<Expression> get_initialization_list(){ return initialization_list;};
 
     void add_dimension(const std::pair<Expression, Expression> &e) {array_dimensions.push_back(e);};

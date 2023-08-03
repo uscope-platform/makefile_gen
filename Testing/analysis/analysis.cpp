@@ -256,6 +256,14 @@ TEST(analysis_test, verilog_parameter_extraction){
     check_params["repetition_parameter"] = p;
 
 
+    p = HDL_parameter();
+    p.set_type(expression_parameter);
+    p.set_name("multi_repetition_parameter");
+    il = {{Expression_component("$repeat_init")},{Expression_component("repetition_size")}, {Expression_component("1")},
+          {Expression_component("$repeat_init")},{Expression_component("repetition_size")}, {Expression_component("4")}};
+    p.set_initialization_list(il);
+    p.add_dimension({{Expression_component("3")},{Expression_component("0")}});
+    check_params["multi_repetition_parameter"] = p;
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
@@ -411,6 +419,10 @@ TEST(analysis_test, verilog_parameter_processing){
             {"multidim_array_parameter_3", {"6"}, {}, numeric_parameter, 6},
             {"repetition_parameter_0", {"1"}, {}, numeric_parameter, 1},
             {"repetition_parameter_1", {"1"}, {}, numeric_parameter, 1},
+            {"multi_repetition_parameter_0", {"1"}, {}, numeric_parameter, 1},
+            {"multi_repetition_parameter_1", {"1"}, {}, numeric_parameter, 1},
+            {"multi_repetition_parameter_2", {"4"}, {}, numeric_parameter, 4},
+            {"multi_repetition_parameter_3", {"4"}, {}, numeric_parameter, 4},
     };
 
 
@@ -536,7 +548,11 @@ TEST(analysis_test, verilog_parameter_processing_override){
             {"multidim_array_parameter_2", {"5"}, {}, numeric_parameter, 5},
             {"multidim_array_parameter_3", {"6"}, {}, numeric_parameter, 6},
             {"repetition_parameter_0", {"1"}, {}, numeric_parameter, 1},
-            {"repetition_parameter_1", {"1"}, {}, numeric_parameter, 1}
+            {"repetition_parameter_1", {"1"}, {}, numeric_parameter, 1},
+            {"multi_repetition_parameter_0", {"1"}, {}, numeric_parameter, 1},
+            {"multi_repetition_parameter_1", {"1"}, {}, numeric_parameter, 1},
+            {"multi_repetition_parameter_2", {"4"}, {}, numeric_parameter, 4},
+            {"multi_repetition_parameter_3", {"4"}, {}, numeric_parameter, 4},
     };
 
 

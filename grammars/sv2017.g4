@@ -1270,6 +1270,7 @@ primary:
     | primary bit_select                          #PrimaryBitSelect
     | primary DOT identifier                      #PrimaryDot
     | primary LSQUARE_BR array_range_expression RSQUARE_BR #PrimaryIndex
+    | replication                                          #PrimaryRepl
     | concatenation                                        #PrimaryConcat
     | streaming_concatenation                              #PrimaryStreaming_concatenation
     | any_system_tf_identifier ( LPAREN data_type (COMMA list_of_arguments)?
@@ -1315,6 +1316,10 @@ expression:
     | <assoc=right> expression ( KW_MATCHES pattern )? QUESTIONMARK ( attribute_instance )* expression COLON expression
     | <assoc=right> expression operator_impl        ( attribute_instance )* expression
 ;
+
+replication: LBRACE replication_size LBRACE replication_value RBRACE RBRACE;
+replication_size : expression;
+replication_value : expression;
 
 concatenation:
     LBRACE (expression ( concatenation | ( COMMA expression )+)?)? RBRACE;

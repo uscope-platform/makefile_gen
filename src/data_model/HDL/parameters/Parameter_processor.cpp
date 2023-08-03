@@ -370,20 +370,22 @@ std::pair<std::unordered_map<std::string, HDL_parameter>, bool>
 Parameter_processor::process_initialization_list(const std::string& param_name, std::vector<std::vector<Expression_component>> &il,const std::unordered_map<std::string, uint32_t> parent_parameters) {
     std::unordered_map<std::string, HDL_parameter> ret;
     bool ret_valid = false;
+    int last_list_item = 0;
     for(int i = 0; i<il.size(); i++){
         if(il[i][0].get_string_value() == "$repeat_init"){
             std::unordered_set<std::string> deps;
             auto init_size = process_expression(il[i+1], deps, parent_parameters);
             auto init_val = process_expression(il[i+2], deps, parent_parameters);
-            i +=3;
+            i +=2;
             if(init_size.second && init_val.second){
-                for(int j =0; j<init_size.first; j++){
+                for(int j =last_list_item; j<last_list_item+init_size.first; j++){
                     HDL_parameter p;
                     auto name = param_name+"_"+std::to_string(j);
                     p.set_name(name);
                     p.set_expression_components({Expression_component(std::to_string(init_val.first))});
                     ret[name] = p;
                 }
+                last_list_item += init_size.first;
                 ret_valid = true;
             } else {
                 ret_valid = false;
@@ -396,6 +398,7 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
             p.set_expression_components(il[i]);
             ret[name] = p;
             ret_valid = true;
+            last_list_item++;
         }
     }
     return {ret,ret_valid};

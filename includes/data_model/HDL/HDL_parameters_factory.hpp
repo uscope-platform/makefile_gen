@@ -21,6 +21,8 @@
 #include "data_model/expressions/bus_mapping_expression.hpp"
 #include "data_model/expressions/expression_evaluator.hpp"
 
+typedef std::vector<Expression_component> Expression;
+
 class HDL_parameters_factory : protected resources_factory_base<HDL_parameter> {
 
 public:
@@ -36,6 +38,7 @@ public:
 
     void start_initialization_list();
     void stop_initializaiton_list();
+    void init_list_concatenation();
     void set_repeated_initialization();
     void start_expression();
     void stop_expression();
@@ -47,15 +50,19 @@ public:
     void stop_unpacked_dimension_declaration();
 
     void close_first_range();
-
     void add_array_component();
 
     void start_param_assignment() { in_param_assignment = true; };
     void stop_param_assignment() { in_param_assignment = false; };
 
+    void start_replication() {in_replication = true;};
+    void stop_replication();
+
+
     bool in_expression_context() { return in_expression; };
 
-    bool is_component_relevant() const { return in_initialization_list || in_expression || in_unpacked_declaration; };
+bool is_component_relevant() const { return in_initialization_list || in_expression || in_unpacked_declaration; };
+
 private:
     bool in_param_assignment = false;
     bool in_initialization_list = false;
@@ -63,11 +70,14 @@ private:
     bool in_bit_select = false;
     bool in_unpacked_declaration = false;
     bool repeated_initialization = false;
+    bool in_replication = false;
 
-    std::stack<std::vector<Expression_component>> expression_stack;
-    std::vector<std::vector<Expression_component>> initialization_list;
-    std::vector<Expression_component> current_expression;
-    std::vector<Expression_component> bit_selection;
+    std::stack<Expression> expression_stack;
+    std::vector<Expression> initialization_list;
+    std::vector<Expression> replication_components;
+    Expression current_expression;
+    Expression bit_selection;
+    std::vector<Expression> concatenation_content;
 };
 
 

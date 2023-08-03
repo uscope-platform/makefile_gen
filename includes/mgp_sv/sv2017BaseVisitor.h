@@ -1165,6 +1165,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitPrimaryRepl(sv2017::PrimaryReplContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitPrimaryRandomize(sv2017::PrimaryRandomizeContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -1246,6 +1250,18 @@ public:
   }
 
   virtual std::any visitExpression(sv2017::ExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitReplication(sv2017::ReplicationContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitReplication_size(sv2017::Replication_sizeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitReplication_value(sv2017::Replication_valueContext *ctx) override {
     return visitChildren(ctx);
   }
 

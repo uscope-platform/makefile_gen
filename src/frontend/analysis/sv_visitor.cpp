@@ -367,3 +367,11 @@ void sv_visitor::exitFirst_range_identifier(sv2017::First_range_identifierContex
     params_factory.close_first_range();
 }
 
+
+void sv_visitor::enterReplication(sv2017::ReplicationContext *ctx) {
+    params_factory.start_replication();
+}
+
+void sv_visitor::exitReplication(sv2017::ReplicationContext *ctx) {
+    params_factory.stop_replication();
+}

@@ -877,6 +877,9 @@ public:
   virtual void enterPrimaryLit(sv2017::PrimaryLitContext *ctx) = 0;
   virtual void exitPrimaryLit(sv2017::PrimaryLitContext *ctx) = 0;
 
+  virtual void enterPrimaryRepl(sv2017::PrimaryReplContext *ctx) = 0;
+  virtual void exitPrimaryRepl(sv2017::PrimaryReplContext *ctx) = 0;
+
   virtual void enterPrimaryRandomize(sv2017::PrimaryRandomizeContext *ctx) = 0;
   virtual void exitPrimaryRandomize(sv2017::PrimaryRandomizeContext *ctx) = 0;
 
@@ -939,6 +942,15 @@ public:
 
   virtual void enterExpression(sv2017::ExpressionContext *ctx) = 0;
   virtual void exitExpression(sv2017::ExpressionContext *ctx) = 0;
+
+  virtual void enterReplication(sv2017::ReplicationContext *ctx) = 0;
+  virtual void exitReplication(sv2017::ReplicationContext *ctx) = 0;
+
+  virtual void enterReplication_size(sv2017::Replication_sizeContext *ctx) = 0;
+  virtual void exitReplication_size(sv2017::Replication_sizeContext *ctx) = 0;
+
+  virtual void enterReplication_value(sv2017::Replication_valueContext *ctx) = 0;
+  virtual void exitReplication_value(sv2017::Replication_valueContext *ctx) = 0;
 
   virtual void enterConcatenation(sv2017::ConcatenationContext *ctx) = 0;
   virtual void exitConcatenation(sv2017::ConcatenationContext *ctx) = 0;

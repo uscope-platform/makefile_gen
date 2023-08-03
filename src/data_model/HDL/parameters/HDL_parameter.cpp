@@ -272,3 +272,7 @@ std::string HDL_parameter::to_string() const {
 
     return result;
 }
+
+void HDL_parameter::add_initialization_list(std::vector<Expression> &list) {
+    initialization_list.insert(initialization_list.end(), list.begin(), list.end());
+}

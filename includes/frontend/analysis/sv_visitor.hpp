@@ -101,6 +101,10 @@ public:
 
     void enterConstant_param_expression(sv2017::Constant_param_expressionContext *) override;
 
+    void enterReplication(sv2017::ReplicationContext *ctx) override;
+    void exitReplication(sv2017::ReplicationContext *ctx) override;
+
+
     static uint32_t parse_number(const std::string& s);
     std::vector<HDL_Resource> get_entities();
 

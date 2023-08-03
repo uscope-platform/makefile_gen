@@ -594,6 +594,8 @@ public:
 
     virtual std::any visitPrimaryLit(sv2017::PrimaryLitContext *context) = 0;
 
+    virtual std::any visitPrimaryRepl(sv2017::PrimaryReplContext *context) = 0;
+
     virtual std::any visitPrimaryRandomize(sv2017::PrimaryRandomizeContext *context) = 0;
 
     virtual std::any visitPrimaryAssig(sv2017::PrimaryAssigContext *context) = 0;
@@ -635,6 +637,12 @@ public:
     virtual std::any visitInc_or_dec_expressionPost(sv2017::Inc_or_dec_expressionPostContext *context) = 0;
 
     virtual std::any visitExpression(sv2017::ExpressionContext *context) = 0;
+
+    virtual std::any visitReplication(sv2017::ReplicationContext *context) = 0;
+
+    virtual std::any visitReplication_size(sv2017::Replication_sizeContext *context) = 0;
+
+    virtual std::any visitReplication_value(sv2017::Replication_valueContext *context) = 0;
 
     virtual std::any visitConcatenation(sv2017::ConcatenationContext *context) = 0;
 

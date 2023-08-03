@@ -879,6 +879,9 @@ public:
   virtual void enterPrimaryLit(sv2017::PrimaryLitContext * /*ctx*/) override { }
   virtual void exitPrimaryLit(sv2017::PrimaryLitContext * /*ctx*/) override { }
 
+  virtual void enterPrimaryRepl(sv2017::PrimaryReplContext * /*ctx*/) override { }
+  virtual void exitPrimaryRepl(sv2017::PrimaryReplContext * /*ctx*/) override { }
+
   virtual void enterPrimaryRandomize(sv2017::PrimaryRandomizeContext * /*ctx*/) override { }
   virtual void exitPrimaryRandomize(sv2017::PrimaryRandomizeContext * /*ctx*/) override { }
 
@@ -941,6 +944,15 @@ public:
 
   virtual void enterExpression(sv2017::ExpressionContext * /*ctx*/) override { }
   virtual void exitExpression(sv2017::ExpressionContext * /*ctx*/) override { }
+
+  virtual void enterReplication(sv2017::ReplicationContext * /*ctx*/) override { }
+  virtual void exitReplication(sv2017::ReplicationContext * /*ctx*/) override { }
+
+  virtual void enterReplication_size(sv2017::Replication_sizeContext * /*ctx*/) override { }
+  virtual void exitReplication_size(sv2017::Replication_sizeContext * /*ctx*/) override { }
+
+  virtual void enterReplication_value(sv2017::Replication_valueContext * /*ctx*/) override { }
+  virtual void exitReplication_value(sv2017::Replication_valueContext * /*ctx*/) override { }
 
   virtual void enterConcatenation(sv2017::ConcatenationContext * /*ctx*/) override { }
   virtual void exitConcatenation(sv2017::ConcatenationContext * /*ctx*/) override { }
