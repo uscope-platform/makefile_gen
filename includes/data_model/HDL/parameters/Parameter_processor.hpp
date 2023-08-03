@@ -34,6 +34,8 @@ public:
 
     std::pair<std::unordered_map<std::string, HDL_parameter>, bool> process_initialization_list(const std::string& param_name, std::vector<std::vector<Expression_component>> &il,const std::unordered_map<std::string, uint32_t> parent_parameters);
 
+    std::vector<uint32_t> process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims, std::unordered_map<std::string, uint32_t> parent_parameters);
+
     std::pair<uint32_t , bool> get_array_index(std::string param_name, std::vector<Expression> idx, std::unordered_set<std::string> &deps, std::unordered_map<std::string, uint32_t> parent_parameters);
 
     std::vector<Expression_component> expr_vector_to_rpn(const std::vector<Expression_component>& v);
@@ -43,7 +45,7 @@ public:
 private:
 
     std::unordered_map<std::string, uint32_t> working_param_values;
-
+    std::unordered_map<std::string, std::vector<std::pair<Expression, Expression>>> array_dimensions;
 };
 
 

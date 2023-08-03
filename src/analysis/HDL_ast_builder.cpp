@@ -112,7 +112,8 @@ void HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::map<std::st
 
 
     for(auto &dep: res.get_dependencies()){
-        if(dep.get_dependency_class() != package);
+        if(dep.get_dependency_class() != package)
+            ;
     //        recursive_build_ast(dep,merged_params);
     }
     recursion_level--;

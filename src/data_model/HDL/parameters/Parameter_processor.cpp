@@ -44,6 +44,9 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res,
         bool list_init_complete = true;
         for(auto &item:working_set){
             if(!item.second.get_initialization_list().empty()){
+                if(!item.second.get_dimensions().empty()){
+                    array_dimensions[item.first] = item.second.get_dimensions();
+                }
                 auto il = item.second.get_initialization_list();
                 auto ret = process_initialization_list(item.first, il, external_parameters);
                 if(ret.second){
@@ -179,7 +182,10 @@ std::pair<uint32_t , bool> Parameter_processor::get_array_index(std::string para
     }
 
     if(index_ready){
-        constexpr std::size_t dimensions[] = {2, 2};
+        //TODO:
+
+        auto dims = process_array_dimensions(array_dimensions[param_name], parent_parameters);
+
 
         size_t index = 0;
         size_t mul = 1;
@@ -187,7 +193,7 @@ std::pair<uint32_t , bool> Parameter_processor::get_array_index(std::string para
         for (size_t i = 0; i < array_index_values.size(); ++i) {
             auto j = array_index_values.size()-i-1;
             index += array_index_values[j] * mul;
-            mul *= dimensions[j];
+            mul *= dims[j];
         }
         return {index, true};
     } else{
@@ -402,5 +408,21 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
         }
     }
     return {ret,ret_valid};
+}
+
+std::vector<uint32_t> Parameter_processor::process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims,
+                                                                    std::unordered_map<std::string, uint32_t> parent_parameters) {
+    std::vector<uint32_t> ret;
+    std::unordered_set<std::basic_string<char>> deps;
+    for(auto &item:dims){
+        auto first_val = process_expression(expr_vector_to_rpn(item.first), deps, parent_parameters);
+        auto second_val = process_expression(expr_vector_to_rpn(item.second), deps, parent_parameters);
+        if(first_val.second && second_val.second){
+            ret.push_back(std::max(first_val.first, second_val.first)+1);
+        } else {
+            throw std::invalid_argument("");
+        }
+    }
+    return ret;
 }
 
