@@ -34,7 +34,7 @@ public:
     static void convert_parameters(std::vector<HDL_Resource> &v);
     HDL_Resource process_resource(const HDL_Resource &res);
     std::pair<HDL_parameter, bool> process_parameter(const HDL_parameter &par);
-    std::pair<uint32_t, bool>  process_expression(const std::vector<Expression_component>& expr);
+    uint32_t process_expression(const std::vector<Expression_component>& expr);
 
     std::unordered_map<std::string, HDL_parameter>process_initialization_list(const std::string& param_name, std::vector<std::vector<Expression_component>> &il);
 

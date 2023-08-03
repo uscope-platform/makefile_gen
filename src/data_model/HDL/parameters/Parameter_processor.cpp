@@ -145,12 +145,12 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
         }
     }
 
-
-    auto proc_expr = process_expression(components);
-    if(proc_expr.second){
+    try{
+        return_par.set_value(process_expression(components));
         return_par.set_type(numeric_parameter);
-        return_par.set_value(proc_expr.first);
         processing_complete = true;
+    } catch (Parameter_processor_Exception &ex){
+        processing_complete = false;
     }
 
     return {return_par, processing_complete};
@@ -162,61 +162,43 @@ uint32_t Parameter_processor::get_array_index(std::string param_name, std::vecto
     for(auto &item:idx){
         auto rpn_expr = expr_vector_to_rpn(item);
         auto res = process_expression(rpn_expr);
-        index_ready |= res.second;
-        if(res.second){
-            array_index_values.push_back(res.first);
-        }
+        array_index_values.push_back(res);
     }
 
-    if(index_ready){
-
-        auto dims = process_array_dimensions(array_dimensions[param_name]);
-        if(dims.empty()){
-            throw Parameter_processor_Exception();
-        }
-
-        size_t index = 0;
-        size_t mul = 1;
-
-        for (size_t i = 0; i < array_index_values.size(); ++i) {
-            auto j = array_index_values.size()-i-1;
-            index += array_index_values[j] * mul;
-            mul *= dims[j];
-        }
-        return index;
-    } else{
+    auto dims = process_array_dimensions(array_dimensions[param_name]);
+    if(dims.empty()){
         throw Parameter_processor_Exception();
     }
+
+    size_t index = 0;
+    size_t mul = 1;
+
+    for (size_t i = 0; i < array_index_values.size(); ++i) {
+        auto j = array_index_values.size()-i-1;
+        index += array_index_values[j] * mul;
+        mul *= dims[j];
+    }
+    return index;
 
 }
 
 
 
-std::pair<uint32_t, bool>
-Parameter_processor::process_expression(const std::vector<Expression_component> &expr) {
-    uint32_t ret_value = 0;
-    bool return_valid = false;
+uint32_t Parameter_processor::process_expression(const std::vector<Expression_component> &expr) {
 
     std::vector<Expression_component> processed_rpn;
 
     for(auto i : expr){
         if(!i.get_array_index().empty()){
-            bool index_ready = false;
             std::vector<uint32_t> array_index_values;
             for(auto &item:i.get_array_index()){
                 auto rpn_expr = expr_vector_to_rpn(item);
                 auto res = process_expression(rpn_expr);
-                index_ready |= res.second;
-                if(res.second){
-                    array_index_values.push_back(res.first);
-                }
+                array_index_values.push_back(res);
             }
-            if(index_ready){
-                Expression_component ne(i.get_string_value() + "_"+ std::to_string(array_index_values[0]));
-                i = ne;
-            } else{
-                return {ret_value, return_valid};
-            }
+            Expression_component ne(i.get_string_value() + "_"+ std::to_string(array_index_values[0]));
+            i = ne;
+
 
         }
 
@@ -228,7 +210,7 @@ Parameter_processor::process_expression(const std::vector<Expression_component> 
             } else if(working_param_values.contains(i.get_raw_string_value())){
                 processed_rpn.emplace_back(working_param_values[i.get_raw_string_value()]);
             } else {
-                return {ret_value, return_valid};
+                throw Parameter_processor_Exception();
             }
         }
 
@@ -251,11 +233,11 @@ Parameter_processor::process_expression(const std::vector<Expression_component> 
                 evaluator_stack.pop();
                 result = evaluate_binary_expression(op_a, op_b, i.get_raw_string_value());
             }
-            evaluator_stack.push(Expression_component(result));
+            evaluator_stack.emplace(result);
         }
     }
 
-    return {evaluator_stack.top().get_numeric_value(),true};
+    return evaluator_stack.top().get_numeric_value();
 }
 
 
@@ -363,18 +345,14 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
             auto init_size = process_expression(il[i+1]);
             auto init_val = process_expression(il[i+2]);
             i +=2;
-            if(init_size.second && init_val.second){
-                for(int j =last_list_item; j<last_list_item+init_size.first; j++){
-                    HDL_parameter p;
-                    auto name = param_name+"_"+std::to_string(j);
-                    p.set_name(name);
-                    p.set_expression_components({Expression_component(std::to_string(init_val.first))});
-                    ret[name] = p;
-                }
-                last_list_item += init_size.first;
-            } else {
-                throw Parameter_processor_Exception();
+            for(int j =last_list_item; j<last_list_item+init_size; j++){
+                HDL_parameter p;
+                auto name = param_name+"_"+std::to_string(j);
+                p.set_name(name);
+                p.set_expression_components({Expression_component(std::to_string(init_val))});
+                ret[name] = p;
             }
+            last_list_item += init_size;
 
         } else{
             HDL_parameter p;
@@ -394,11 +372,7 @@ std::vector<uint32_t> Parameter_processor::process_array_dimensions(std::vector<
     for(auto &item:dims){
         auto first_val = process_expression(expr_vector_to_rpn(item.first));
         auto second_val = process_expression(expr_vector_to_rpn(item.second));
-        if(first_val.second && second_val.second){
-            ret.push_back(std::max(first_val.first, second_val.first)+1);
-        } else {
-            throw Parameter_processor_Exception();
-        }
+        ret.push_back(std::max(first_val, second_val)+1);
     }
     return ret;
 }
