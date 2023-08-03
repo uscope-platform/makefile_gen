@@ -18,12 +18,11 @@
 
 #include <string>
 #include <regex>
-#include <unordered_set>
 
 #include "data_model/HDL/parameters/Expression_component.hpp"
 
 #include <cereal/types/vector.hpp>
-#include <cereal/types/unordered_set.hpp>
+
 
 enum parameter_type {
     string_parameter=0,
@@ -89,11 +88,6 @@ public:
     void set_expression_components(const Expression  &c){expression_components = c;};
     Expression  get_expression_components() { return expression_components;};
 
-    template<class Archive>
-    void serialize( Archive & ar ) {
-        ar(name, string_value_array, numeric_value_array);
-    }
-
     std::string to_string() const;
 
     friend bool operator <(const HDL_parameter& lhs, const HDL_parameter& rhs);
@@ -107,6 +101,11 @@ public:
 
     void add_dimension(const std::pair<Expression, Expression> &e) {array_dimensions.push_back(e);};
     std::vector<std::pair<Expression, Expression>> get_dimensions(){return array_dimensions;};
+
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(name, string_value_array, numeric_value_array, type, expression_components, initialization_list);
+    }
 
 private:
 

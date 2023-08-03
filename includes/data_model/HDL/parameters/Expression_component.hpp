@@ -22,6 +22,8 @@
 #include <set>
 #include <unordered_map>
 
+#include <cereal/types/vector.hpp>
+
 enum expression_component_type {
     string_component=0,
     numeric_component=1,
@@ -34,6 +36,7 @@ enum expression_component_type {
 class Expression_component {
 public:
     Expression_component();
+    Expression_component( const Expression_component &c );
     explicit Expression_component(std::string s);
     explicit Expression_component(uint32_t n);
 
@@ -64,6 +67,11 @@ public:
 
     static const std::string print_expression(const std::vector<Expression_component> &exp);
     const std::string print_index(const std::vector<std::vector<Expression_component>> &index);
+
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(component_type, string_value, numeric_value, array_index, array_value);
+    }
 
 private:
     void process_number();

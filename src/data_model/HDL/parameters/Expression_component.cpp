@@ -16,6 +16,14 @@
 #include "data_model/HDL/parameters/Expression_component.hpp"
 
 
+Expression_component::Expression_component(const Expression_component &c) {
+    component_type = c.component_type;
+    string_value = c.string_value;
+    numeric_value = c.numeric_value;
+    array_index = c.array_index;
+    array_value = c.array_value;
+}
+
 
 Expression_component::Expression_component() {
     string_value = "";
@@ -48,6 +56,7 @@ bool operator==(const Expression_component &lhs, const Expression_component &rhs
     ret_val &= lhs.numeric_value == rhs.numeric_value;
     ret_val &= lhs.component_type == rhs.component_type;
     ret_val &= lhs.array_value == rhs.array_value;
+    ret_val &= lhs.array_index == rhs.array_index;
     return ret_val;
 }
 

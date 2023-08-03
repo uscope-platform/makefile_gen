@@ -233,7 +233,7 @@ std::string HDL_parameter::to_string() const {
     if(type == numeric_parameter){
         result += "\n  VALUE: " + std::to_string(numeric_value_array[0]);
     }
-    
+
     result += "\n  EXPRESSION:\n";
 
     auto comps = expression_components;
