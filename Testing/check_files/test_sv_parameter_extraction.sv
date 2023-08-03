@@ -10,6 +10,7 @@ module test_mod #(
     parameter [31:0] multidim_array_parameter [repetition_size-1:0][1:0] = '{{32,32}, {5,6}},
     parameter bit repetition_parameter [1:0]  = '{repetition_size{1}},
     parameter bit multi_repetition_parameter [3:0]  = '{{repetition_size{1}},{repetition_size{4}}},
+    parameter bit mixed_repetition_parameter [3:0]  = '{1,2,{repetition_size{4}}},
     string_p = "423",
     nested_p = string_p
 )();
