@@ -15,28 +15,25 @@
 
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
-HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
-    return process_resource(res, {});
-}
+Parameter_processor::Parameter_processor(const std::map<std::string, HDL_parameter> &parent_parameters) {
 
-HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res,
-                                                   const std::unordered_map<std::string, HDL_parameter>& pp) {
-
-
-    std::unordered_map<std::string, uint32_t> external_parameters;
-
-    for(auto &item:pp){
+    for(auto &item:parent_parameters){
         if(item.second.get_type() != numeric_parameter){
             throw std::runtime_error("ERROR: Non numeric parameter reached the parameter processor as external value");
         }
         external_parameters[item.first] = item.second.get_numeric_value();
     }
+}
+
+
+HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
+
 
     HDL_Resource return_res = res;
 
-    std::unordered_map<std::basic_string<char>, HDL_parameter> processed_parameters;
-    std::unordered_map<std::basic_string<char>, HDL_parameter> working_set = return_res.get_parameters();
-    std::unordered_map<std::basic_string<char>, HDL_parameter> next_working_set;
+    std::map<std::basic_string<char>, HDL_parameter> processed_parameters;
+    std::map<std::basic_string<char>, HDL_parameter> working_set = return_res.get_parameters();
+    std::map<std::basic_string<char>, HDL_parameter> next_working_set;
 
     bool processing_complete = false;
 ;
@@ -48,7 +45,7 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res,
                     array_dimensions[item.first] = item.second.get_dimensions();
                 }
                 auto il = item.second.get_initialization_list();
-                auto ret = process_initialization_list(item.first, il, external_parameters);
+                auto ret = process_initialization_list(item.first, il);
                 if(ret.second){
                     next_working_set.insert(ret.first.begin(), ret.first.end());
                     list_init_complete = true;
@@ -57,7 +54,7 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res,
                     list_init_complete = false;
                 }
             } else {
-                auto processed_param = process_parameter(item.second, external_parameters);
+                auto processed_param = process_parameter(item.second);
                 if(processed_param.second){
                     processed_parameters[item.first] = processed_param.first;
                     working_param_values[item.first] = processed_param.first.get_numeric_value();
@@ -85,13 +82,7 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res,
 }
 
 
-
 std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_parameter &par) {
-    return process_parameter(par, {});
-}
-
-std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_parameter &par,
-                                                                      std::unordered_map<std::string, uint32_t> parent_parameters) {
 
     HDL_parameter return_par = par;
     bool processing_complete = false;
@@ -110,12 +101,12 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
     // PROCESS SIMPLE PARAMETERS
     if(components.size() == 1){
         if(!components[0].get_array_index().empty()){
-            auto comp = get_array_index(components[0].get_string_value(), components[0].get_array_index(), dependencies,parent_parameters);
+            auto comp = get_array_index(components[0].get_string_value(), components[0].get_array_index(), dependencies);
             if(comp.second){
                 std::string param_name = components[0].get_string_value() + "_" + std::to_string(comp.first);
                 uint32_t val;
-                if(parent_parameters.contains(param_name)){
-                    val = parent_parameters[param_name];
+                if(external_parameters.contains(param_name)){
+                    val = external_parameters[param_name];
                     dependencies.insert(param_name);
                 } if(working_param_values.contains(param_name)){
                     val = working_param_values[param_name];
@@ -133,11 +124,11 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
         }else if(components[0].get_type() ==string_component){
             std::string value = components[0].get_string_value();
             uint32_t val;
-            if(parent_parameters.contains(par.get_name())){
-                val = parent_parameters[par.get_name()];
+            if(external_parameters.contains(par.get_name())){
+                val = external_parameters[par.get_name()];
             } else{
-                if(parent_parameters.contains(value)){
-                    val = parent_parameters[value];
+                if(external_parameters.contains(value)){
+                    val = external_parameters[value];
                 } else if(working_param_values.contains(value)){
                     val = working_param_values[value];
                 } else {
@@ -158,7 +149,7 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
     }
 
 
-    auto proc_expr = process_expression(components, dependencies, parent_parameters);
+    auto proc_expr = process_expression(components, dependencies);
     if(proc_expr.second){
         return_par.set_dependencies(dependencies);
         return_par.set_type(numeric_parameter);
@@ -169,12 +160,12 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
     return {return_par, processing_complete};
 }
 
-std::pair<uint32_t , bool> Parameter_processor::get_array_index(std::string param_name, std::vector<Expression> idx, std::unordered_set<std::string> &deps, std::unordered_map<std::string, uint32_t> parent_parameters) {
+std::pair<uint32_t , bool> Parameter_processor::get_array_index(std::string param_name, std::vector<Expression> idx, std::unordered_set<std::string> &deps) {
     bool index_ready = true;
     std::vector<uint32_t> array_index_values;
     for(auto &item:idx){
         auto rpn_expr = expr_vector_to_rpn(item);
-        auto res = process_expression(rpn_expr, deps, parent_parameters);
+        auto res = process_expression(rpn_expr, deps);
         index_ready |= res.second;
         if(res.second){
             array_index_values.push_back(res.first);
@@ -182,10 +173,11 @@ std::pair<uint32_t , bool> Parameter_processor::get_array_index(std::string para
     }
 
     if(index_ready){
-        //TODO:
 
-        auto dims = process_array_dimensions(array_dimensions[param_name], parent_parameters);
-
+        auto dims = process_array_dimensions(array_dimensions[param_name]);
+        if(dims.empty()){
+            return {0, false};
+        }
 
         size_t index = 0;
         size_t mul = 1;
@@ -204,13 +196,8 @@ std::pair<uint32_t , bool> Parameter_processor::get_array_index(std::string para
 
 
 
-std::pair<uint32_t , bool>  Parameter_processor::process_expression(const std::vector<Expression_component>& expr, std::unordered_set<std::string> &deps) {
-    return process_expression(expr, deps, {});
-}
-
 std::pair<uint32_t, bool>
-Parameter_processor::process_expression(const std::vector<Expression_component> &expr, std::unordered_set<std::string> &deps,
-                                        std::unordered_map<std::string, uint32_t> parent_parameters) {
+Parameter_processor::process_expression(const std::vector<Expression_component> &expr, std::unordered_set<std::string> &deps) {
     uint32_t ret_value = 0;
     bool return_valid = false;
 
@@ -222,7 +209,7 @@ Parameter_processor::process_expression(const std::vector<Expression_component> 
             std::vector<uint32_t> array_index_values;
             for(auto &item:i.get_array_index()){
                 auto rpn_expr = expr_vector_to_rpn(item);
-                auto res = process_expression(rpn_expr, deps, parent_parameters);
+                auto res = process_expression(rpn_expr, deps);
                 index_ready |= res.second;
                 if(res.second){
                     array_index_values.push_back(res.first);
@@ -240,8 +227,8 @@ Parameter_processor::process_expression(const std::vector<Expression_component> 
         if(i.get_type() == numeric_component || i.get_type() == operator_component || i.get_type()==function_component){
             processed_rpn.push_back(i);
         } else if(i.get_type() == string_component) {
-            if(parent_parameters.contains(i.get_string_value())){
-                processed_rpn.emplace_back(parent_parameters[i.get_raw_string_value()]);
+            if(external_parameters.contains(i.get_string_value())){
+                processed_rpn.emplace_back(external_parameters[i.get_raw_string_value()]);
                 deps.insert(i.get_raw_string_value());
             } else if(working_param_values.contains(i.get_raw_string_value())){
                 processed_rpn.emplace_back(working_param_values[i.get_raw_string_value()]);
@@ -362,7 +349,7 @@ std::vector<Expression_component> Parameter_processor::expr_vector_to_rpn(const 
 
 void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
     for(auto &res:v){
-        std::unordered_map<std::string, HDL_parameter> new_params;
+        std::map<std::string, HDL_parameter> new_params;
         for(auto &item: res.get_parameters()){
             auto rpn_expr = expr_vector_to_rpn(item.second.get_expression_components());
             item.second.set_expression_components(rpn_expr);
@@ -373,15 +360,15 @@ void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
 }
 
 std::pair<std::unordered_map<std::string, HDL_parameter>, bool>
-Parameter_processor::process_initialization_list(const std::string& param_name, std::vector<std::vector<Expression_component>> &il,const std::unordered_map<std::string, uint32_t> parent_parameters) {
+Parameter_processor::process_initialization_list(const std::string& param_name, std::vector<std::vector<Expression_component>> &il) {
     std::unordered_map<std::string, HDL_parameter> ret;
     bool ret_valid = false;
     int last_list_item = 0;
     for(int i = 0; i<il.size(); i++){
         if(il[i][0].get_string_value() == "$repeat_init"){
             std::unordered_set<std::string> deps;
-            auto init_size = process_expression(il[i+1], deps, parent_parameters);
-            auto init_val = process_expression(il[i+2], deps, parent_parameters);
+            auto init_size = process_expression(il[i+1], deps);
+            auto init_val = process_expression(il[i+2], deps);
             i +=2;
             if(init_size.second && init_val.second){
                 for(int j =last_list_item; j<last_list_item+init_size.first; j++){
@@ -410,13 +397,12 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
     return {ret,ret_valid};
 }
 
-std::vector<uint32_t> Parameter_processor::process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims,
-                                                                    std::unordered_map<std::string, uint32_t> parent_parameters) {
+std::vector<uint32_t> Parameter_processor::process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims) {
     std::vector<uint32_t> ret;
     std::unordered_set<std::basic_string<char>> deps;
     for(auto &item:dims){
-        auto first_val = process_expression(expr_vector_to_rpn(item.first), deps, parent_parameters);
-        auto second_val = process_expression(expr_vector_to_rpn(item.second), deps, parent_parameters);
+        auto first_val = process_expression(expr_vector_to_rpn(item.first), deps);
+        auto second_val = process_expression(expr_vector_to_rpn(item.second), deps);
         if(first_val.second && second_val.second){
             ret.push_back(std::max(first_val.first, second_val.first)+1);
         } else {

@@ -29,9 +29,9 @@ TEST( analysis_test , package) {
     auto resource = analyzer.analyze()[0];
     ASSERT_EQ(resource.getName(), "test_package");
 
-    std::unordered_map<std::string, HDL_parameter> parameters = resource.get_parameters();
+    std::map<std::string, HDL_parameter> parameters = resource.get_parameters();
 
-    std::unordered_map<std::string, HDL_parameter> check_map;
+    std::map<std::string, HDL_parameter> check_map;
     HDL_parameter p;
     p.set_name("bus_base");
     p.set_value(0x43c00000);
@@ -171,7 +171,7 @@ TEST(analysis_test, verilog_parameter_extraction){
 
     auto parameters = resource.get_parameters();
 
-    std::unordered_map<std::string, HDL_parameter> check_params;
+    std::map<std::string, HDL_parameter> check_params;
 
     std::vector<std::pair<std::string, std::vector<std::string>>> vect_params = {
             {"simple_numeric_p", {"32"}},
@@ -393,7 +393,7 @@ TEST(analysis_test, verilog_parameter_processing){
 
     auto parameters = resource.get_parameters();
 
-    std::unordered_map<std::string, HDL_parameter> check_params;
+    std::map<std::string, HDL_parameter> check_params;
 
     typedef struct {
         std::string name;
@@ -510,7 +510,7 @@ TEST(analysis_test, verilog_parameter_processing_override){
     analyzer.cleanup_content("`(.*)");
     HDL_Resource resource = analyzer.analyze()[0];
 
-    std::unordered_map<std::string, HDL_parameter> parent_params;
+    std::map<std::string, HDL_parameter> parent_params;
 
     HDL_parameter par = HDL_parameter();
     par.set_name("simple_numeric_p");
@@ -522,12 +522,12 @@ TEST(analysis_test, verilog_parameter_processing_override){
     par.set_value(12);
     parent_params["sv_numeric_p"] = par;
 
-    Parameter_processor p;
-    resource =  p.process_resource(resource, parent_params);
+    Parameter_processor p(parent_params);
+    resource =  p.process_resource(resource);
 
     auto parameters = resource.get_parameters();
 
-    std::unordered_map<std::string, HDL_parameter> check_params;
+    std::map<std::string, HDL_parameter> check_params;
 
     typedef struct {
         std::string name;

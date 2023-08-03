@@ -38,7 +38,7 @@ public:
     explicit documentation_analyzer(std::istream &stream);
     void parse_documentation(std::istream &stream);
     void set_source_path(std::string &f_path) {path = f_path;};
-    void process_documentation(std::unordered_map<std::string, HDL_parameter> parameters);
+    void process_documentation(std::map<std::string, HDL_parameter> parameters);
     std::vector<std::shared_ptr<bus_crossbar>> get_bus_roots();
     std::unordered_map<std::string, std::vector<bus_submodule>> get_bus_submodules();
     std::unordered_map<std::string, module_documentation> get_modules_documentation();
@@ -57,7 +57,7 @@ private:
     // PROCESSORS DOCUMENTATION
     void analyze_processor_instance(nlohmann::json &obj);
 
-    std::unordered_map<std::string, HDL_parameter> parameters_dict;
+    std::map<std::string, HDL_parameter> parameters_dict;
 
     std::vector<std::string> raw_documentation_comments;
 

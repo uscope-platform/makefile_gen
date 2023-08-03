@@ -27,7 +27,7 @@
 class HDL_ast_builder {
     public:
         HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d);
-        HDL_instance build_ast(const std::string& top_level_module, std::unordered_map<std::string, HDL_parameter> external_parameters);
+        HDL_instance build_ast(const std::string& top_level_module, std::map<std::string, HDL_parameter> external_parameters);
 
     private:
         static  std::unordered_map<std::string, HDL_parameter> merge_parameters(std::unordered_map<std::string, HDL_parameter> parent_parameter,  std::unordered_map<std::string, HDL_parameter> instance_parameters, std::unordered_map<std::string, HDL_parameter> module_parameters);

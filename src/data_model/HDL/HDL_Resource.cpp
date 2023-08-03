@@ -130,7 +130,7 @@ std::pair<std::string, std::string> HDL_Resource::get_if_port_specs(const std::s
     return std::make_pair(if_specs[p_n][0],if_specs[p_n][1]);
 }
 
-void HDL_Resource::set_parameters(std::unordered_map<std::string, HDL_parameter> p) {
+void HDL_Resource::set_parameters(std::map<std::string, HDL_parameter> p) {
     parameters = std::move(p);
 }
 

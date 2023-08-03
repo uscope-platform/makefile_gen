@@ -17,8 +17,8 @@
 
 
 
-std::unordered_map<std::string, HDL_parameter>
-expression_evaluator::calculate_expressions(std::vector<bus_mapping_expression> exp_vect, std::unordered_map<std::string, HDL_parameter> params) {
+std::map<std::string, HDL_parameter>
+expression_evaluator::calculate_expressions(std::vector<bus_mapping_expression> exp_vect, std::map<std::string, HDL_parameter> params) {
     std::vector<bus_mapping_expression> working_set = std::move(exp_vect);
     std::vector<bus_mapping_expression> remaining_parameters;
 

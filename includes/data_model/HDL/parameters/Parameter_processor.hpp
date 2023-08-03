@@ -24,19 +24,17 @@
 class Parameter_processor {
 public:
     Parameter_processor() = default;
+    Parameter_processor(const std::map<std::string, HDL_parameter>& parent_parameters);
     void convert_parameters(std::vector<HDL_Resource> &v);
     HDL_Resource process_resource(const HDL_Resource &res);
-    HDL_Resource process_resource(const HDL_Resource &res, const std::unordered_map<std::string, HDL_parameter>& parent_parameters);
     std::pair<HDL_parameter, bool> process_parameter(const HDL_parameter &par);
-    std::pair<HDL_parameter, bool> process_parameter(const HDL_parameter &par, std::unordered_map<std::string, uint32_t> parent_parameters);
     std::pair<uint32_t, bool>  process_expression(const std::vector<Expression_component>& expr, std::unordered_set<std::string> &deps);
-    std::pair<uint32_t, bool>  process_expression(const std::vector<Expression_component>& expr, std::unordered_set<std::string> &deps, std::unordered_map<std::string, uint32_t> parent_parameters);
 
-    std::pair<std::unordered_map<std::string, HDL_parameter>, bool> process_initialization_list(const std::string& param_name, std::vector<std::vector<Expression_component>> &il,const std::unordered_map<std::string, uint32_t> parent_parameters);
+    std::pair<std::unordered_map<std::string, HDL_parameter>, bool> process_initialization_list(const std::string& param_name, std::vector<std::vector<Expression_component>> &il);
 
-    std::vector<uint32_t> process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims, std::unordered_map<std::string, uint32_t> parent_parameters);
+    std::vector<uint32_t> process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims);
 
-    std::pair<uint32_t , bool> get_array_index(std::string param_name, std::vector<Expression> idx, std::unordered_set<std::string> &deps, std::unordered_map<std::string, uint32_t> parent_parameters);
+    std::pair<uint32_t , bool> get_array_index(std::string param_name, std::vector<Expression> idx, std::unordered_set<std::string> &deps);
 
     std::vector<Expression_component> expr_vector_to_rpn(const std::vector<Expression_component>& v);
 
@@ -46,6 +44,7 @@ private:
 
     std::unordered_map<std::string, uint32_t> working_param_values;
     std::unordered_map<std::string, std::vector<std::pair<Expression, Expression>>> array_dimensions;
+    std::unordered_map<std::string, uint32_t> external_parameters;
 };
 
 

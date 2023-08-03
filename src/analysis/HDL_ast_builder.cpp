@@ -22,7 +22,7 @@ HDL_ast_builder::HDL_ast_builder(const std::shared_ptr<settings_store> &s, const
     log_structure = true;
 }
 
-HDL_instance HDL_ast_builder::build_ast(const std::string& top_level_module, std::unordered_map<std::string, HDL_parameter> external_parameters) {
+HDL_instance HDL_ast_builder::build_ast(const std::string& top_level_module, std::map<std::string, HDL_parameter> external_parameters) {
     top_level = HDL_instance();
     top_level.set_name("TL");
 
@@ -32,11 +32,10 @@ HDL_instance HDL_ast_builder::build_ast(const std::string& top_level_module, std
 
     top_level.set_type(top_level_module);
 
-    Parameter_processor p;
-    auto res = p.process_resource(tl_res, external_parameters);
+    Parameter_processor p(external_parameters);
+    auto res = p.process_resource(tl_res);
 
-
-    //top_level.add_parameters(merge_parameters(std::move(external_parameters), {}, tl_res.get_parameters()));
+    top_level.add_parameters(res.get_parameters());
 
     // TODO: RECURSIVELY BUILD THE AST BY WALKING THROUGH THE DEFINITIONS
     for(auto &dep: tl_res.get_dependencies()){
@@ -90,7 +89,11 @@ void HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::map<std::st
 
     auto res = d_store->get_HDL_resource(i.get_type());
 
-  //  auto merged_params = merge_parameters(external_parameters, i.get_parameters(), res.get_parameters());
+    Parameter_processor p(external_parameters);
+    res = p.process_resource(res);
+
+
+    //  auto merged_params = merge_parameters(external_parameters, i.get_parameters(), res.get_parameters());
 
     std::string prefix;
     for(int j =  0; j<recursion_level; j++){

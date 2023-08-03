@@ -38,7 +38,7 @@ private:
     void calculate_unresolved_parameters();
     std::vector<bus_mapping_expression> unresolved_parameters;
 
-    std::unordered_map<std::string, HDL_parameter> parameters;
+    std::map<std::string, HDL_parameter> parameters;
 };
 
 

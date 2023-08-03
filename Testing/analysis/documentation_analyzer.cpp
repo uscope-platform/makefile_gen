@@ -22,7 +22,7 @@ TEST( documentation_analyzer , package_bus_hierarchy) {
 
     std::ifstream is("check_files/documentation_analyzer/test_bus_hierarchy.sv");
 
-    std::unordered_map<std::string, HDL_parameter> params;
+    std::map<std::string, HDL_parameter> params;
     HDL_parameter p;
     p.set_name("bus_base");
     p.set_value(1136656384);
@@ -68,7 +68,7 @@ TEST( documentation_analyzer , module_bus_hierarchy) {
 
     std::ifstream is("check_files/documentation_analyzer/test_module_hierarchy.sv");
 
-    std::unordered_map<std::string, HDL_parameter> params;
+    std::map<std::string, HDL_parameter> params;
 
     documentation_analyzer doc(is);
     doc.process_documentation(params);
@@ -102,7 +102,7 @@ TEST( documentation_analyzer , peripheral) {
 
     std::ifstream is("check_files/documentation_analyzer/test_peripheral_definition.sv");
 
-    std::unordered_map<std::string, HDL_parameter> params;
+    std::map<std::string, HDL_parameter> params;
 
     documentation_analyzer doc(is);
     doc.process_documentation(params);
@@ -132,7 +132,7 @@ TEST( documentation_analyzer , processor_doc) {
 
     std::ifstream is("check_files/documentation_analyzer/test_processor_doc.sv");
 
-    std::unordered_map<std::string, HDL_parameter> params;
+    std::map<std::string, HDL_parameter> params;
 
     documentation_analyzer doc(is);
     doc.process_documentation(params);

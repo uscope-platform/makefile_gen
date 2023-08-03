@@ -59,6 +59,7 @@ public:
     bool is_module_array(){return quantifier != bus_mapping_expression();};
     bus_mapping_expression get_quantifier(){return quantifier;};
 
+
     template<class Archive>
     void serialize( Archive & ar ) {
         ar(name, type, dep_class, ports_map, parameters, quantifier);
@@ -66,6 +67,7 @@ public:
 
     friend bool operator==(const HDL_instance&lhs, const HDL_instance&rhs);
 private:
+
     std::map<std::string, HDL_parameter> parameters;
     std::unordered_map<std::string, std::string> ports_map;
     dependency_class dep_class;

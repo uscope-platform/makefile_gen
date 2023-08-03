@@ -42,7 +42,7 @@ void documentation_analyzer::parse_documentation(std::istream &stream) {
 }
 
 
-void documentation_analyzer::process_documentation(std::unordered_map<std::string, HDL_parameter> parameters) {
+void documentation_analyzer::process_documentation(std::map<std::string, HDL_parameter> parameters) {
     parameters_dict = std::move(parameters);
     std::vector<nlohmann::json> documentation_comments;
 
