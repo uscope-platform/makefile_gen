@@ -50,7 +50,7 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
                     auto processed_list = process_initialization_list(item.first, il);
                     next_working_set.insert(processed_list.begin(), processed_list.end());
                     list_init_complete = true;
-                } catch (std::invalid_argument &ex) {
+                } catch (Parameter_processor_Exception &ex) {
                     next_working_set.insert(item);
                     list_init_complete = false;
                 }
@@ -101,9 +101,9 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
     // PROCESS SIMPLE PARAMETERS
     if(components.size() == 1){
         if(!components[0].get_array_index().empty()){
-            auto comp = get_array_index(components[0].get_string_value(), components[0].get_array_index());
-            if(comp.second){
-                std::string param_name = components[0].get_string_value() + "_" + std::to_string(comp.first);
+            try{
+                auto comp = get_array_index(components[0].get_string_value(), components[0].get_array_index());
+                std::string param_name = components[0].get_string_value() + "_" + std::to_string(comp);
                 uint32_t val;
                 if(external_parameters.contains(param_name)){
                     val = external_parameters[param_name];
@@ -115,7 +115,7 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
                 return_par.set_type(numeric_parameter);
                 return_par.set_value(val);
                 return {return_par, true};
-            } else{
+            } catch (Parameter_processor_Exception &ex){
                 return {return_par, false};
             }
         }else if(components[0].get_type() ==string_component){
@@ -156,7 +156,7 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
     return {return_par, processing_complete};
 }
 
-std::pair<uint32_t , bool> Parameter_processor::get_array_index(std::string param_name, std::vector<Expression> idx) {
+uint32_t Parameter_processor::get_array_index(std::string param_name, std::vector<Expression> idx) {
     bool index_ready = true;
     std::vector<uint32_t> array_index_values;
     for(auto &item:idx){
@@ -172,7 +172,7 @@ std::pair<uint32_t , bool> Parameter_processor::get_array_index(std::string para
 
         auto dims = process_array_dimensions(array_dimensions[param_name]);
         if(dims.empty()){
-            return {0, false};
+            throw Parameter_processor_Exception();
         }
 
         size_t index = 0;
@@ -183,9 +183,9 @@ std::pair<uint32_t , bool> Parameter_processor::get_array_index(std::string para
             index += array_index_values[j] * mul;
             mul *= dims[j];
         }
-        return {index, true};
+        return index;
     } else{
-        return {0, false};
+        throw Parameter_processor_Exception();
     }
 
 }
@@ -353,6 +353,7 @@ void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
     }
 }
 
+
 std::unordered_map<std::string, HDL_parameter>
 Parameter_processor::process_initialization_list(const std::string& param_name, std::vector<std::vector<Expression_component>> &il) {
     std::unordered_map<std::string, HDL_parameter> ret;
@@ -372,7 +373,7 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
                 }
                 last_list_item += init_size.first;
             } else {
-                throw std::invalid_argument("");
+                throw Parameter_processor_Exception();
             }
 
         } else{
@@ -396,7 +397,7 @@ std::vector<uint32_t> Parameter_processor::process_array_dimensions(std::vector<
         if(first_val.second && second_val.second){
             ret.push_back(std::max(first_val.first, second_val.first)+1);
         } else {
-            throw std::invalid_argument("");
+            throw Parameter_processor_Exception();
         }
     }
     return ret;

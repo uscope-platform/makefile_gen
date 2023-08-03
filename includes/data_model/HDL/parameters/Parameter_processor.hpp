@@ -21,6 +21,13 @@
 #include "data_model/HDL/HDL_Resource.hpp"
 #include "data_model/data_store.hpp"
 
+class Parameter_processor_Exception : public std::exception {
+public:
+    char * what () {
+        return  (char*) "Internal exception, it should always be handled";
+    }
+};
+
 class Parameter_processor {
 public:
     Parameter_processor(const std::map<std::string, HDL_parameter>& parent_parameters, const std::shared_ptr<data_store> &ds);
@@ -33,7 +40,7 @@ public:
 
     std::vector<uint32_t> process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims);
 
-    std::pair<uint32_t , bool> get_array_index(std::string param_name, std::vector<Expression> idx);
+    uint32_t get_array_index(std::string param_name, std::vector<Expression> idx);
 
     static std::vector<Expression_component> expr_vector_to_rpn(const std::vector<Expression_component>& v);
 
