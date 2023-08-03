@@ -56,11 +56,11 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
                 }
 
             } else {
-                auto processed_param = process_parameter(item.second);
-                if(processed_param.second){
-                    processed_parameters[item.first] = processed_param.first;
-                    working_param_values[item.first] = processed_param.first.get_numeric_value();
-                } else{
+                try{
+                    auto processed_param = process_parameter(item.second);
+                    processed_parameters[item.first] = processed_param;
+                    working_param_values[item.first] = processed_param.get_numeric_value();
+                } catch (Parameter_processor_Exception &ex){
                     next_working_set[item.first] = item.second;
                 }
             }
@@ -84,11 +84,9 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
 }
 
 
-std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_parameter &par) {
+HDL_parameter Parameter_processor::process_parameter(const HDL_parameter &par) {
 
     HDL_parameter return_par = par;
-    bool processing_complete = false;
-
     auto components = return_par.get_expression_components();
 
 
@@ -101,23 +99,19 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
     // PROCESS SIMPLE PARAMETERS
     if(components.size() == 1){
         if(!components[0].get_array_index().empty()){
-            try{
-                auto comp = get_array_index(components[0].get_string_value(), components[0].get_array_index());
-                std::string param_name = components[0].get_string_value() + "_" + std::to_string(comp);
-                uint32_t val;
-                if(external_parameters.contains(param_name)){
-                    val = external_parameters[param_name];
-                } if(working_param_values.contains(param_name)){
-                    val = working_param_values[param_name];
-                } else {
-                    return {return_par, processing_complete};
-                }
-                return_par.set_type(numeric_parameter);
-                return_par.set_value(val);
-                return {return_par, true};
-            } catch (Parameter_processor_Exception &ex){
-                return {return_par, false};
+            auto comp = get_array_index(components[0].get_string_value(), components[0].get_array_index());
+            std::string param_name = components[0].get_string_value() + "_" + std::to_string(comp);
+            uint32_t val;
+            if(external_parameters.contains(param_name)){
+                val = external_parameters[param_name];
+            } if(working_param_values.contains(param_name)){
+                val = working_param_values[param_name];
+            } else {
+                throw Parameter_processor_Exception();
             }
+            return_par.set_type(numeric_parameter);
+            return_par.set_value(val);
+            return return_par;
         }else if(components[0].get_type() ==string_component){
             std::string value = components[0].get_string_value();
             uint32_t val;
@@ -129,35 +123,27 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
                 } else if(working_param_values.contains(value)){
                     val = working_param_values[value];
                 } else {
-                    return {return_par, processing_complete};
+                    throw Parameter_processor_Exception();
                 }
             }
 
             return_par.set_type(numeric_parameter);
             return_par.set_value(val);
-            processing_complete = true;
         } else if(components[0].get_type()== numeric_component){
             return_par.set_type(numeric_parameter);
             return_par.set_value(components[0].get_numeric_value());
-            processing_complete = true;
         } else {
             throw std::runtime_error("Error: Malformed expression composed by a single operator or Function");
         }
     }
 
-    try{
-        return_par.set_value(process_expression(components));
-        return_par.set_type(numeric_parameter);
-        processing_complete = true;
-    } catch (Parameter_processor_Exception &ex){
-        processing_complete = false;
-    }
-
-    return {return_par, processing_complete};
+    return_par.set_value(process_expression(components));
+    return_par.set_type(numeric_parameter);
+    return return_par;
 }
 
 uint32_t Parameter_processor::get_array_index(std::string param_name, std::vector<Expression> idx) {
-    bool index_ready = true;
+    
     std::vector<uint32_t> array_index_values;
     for(auto &item:idx){
         auto rpn_expr = expr_vector_to_rpn(item);
