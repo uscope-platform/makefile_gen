@@ -44,8 +44,7 @@ std::vector<HDL_Resource> sv_analyzer::analyze() {
 
     auto entities = sv_modules_explorer.get_entities();
 
-    Parameter_processor p;
-    p.convert_parameters(entities);
+    Parameter_processor::convert_parameters(entities);
 
     documentation_analyzer doc(processed_content);
     doc.set_source_path(path);

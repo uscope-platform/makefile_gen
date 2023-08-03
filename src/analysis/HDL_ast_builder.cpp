@@ -32,7 +32,7 @@ HDL_instance HDL_ast_builder::build_ast(const std::string& top_level_module, std
 
     top_level.set_type(top_level_module);
 
-    Parameter_processor p(external_parameters);
+    Parameter_processor p(external_parameters, d_store);
     auto res = p.process_resource(tl_res);
 
     top_level.add_parameters(res.get_parameters());
@@ -89,7 +89,7 @@ void HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::map<std::st
 
     auto res = d_store->get_HDL_resource(i.get_type());
 
-    Parameter_processor p(external_parameters);
+    Parameter_processor p(external_parameters, d_store);
     res = p.process_resource(res);
 
 

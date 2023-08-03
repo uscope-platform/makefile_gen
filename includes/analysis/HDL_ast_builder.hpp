@@ -36,7 +36,7 @@ class HDL_ast_builder {
         HDL_instance top_level;
         int recursion_level;
         bool log_structure;
-    void recursive_build_ast(HDL_instance &i,const std::map<std::string, HDL_parameter> &external_parameters);
+        void recursive_build_ast(HDL_instance &i,const std::map<std::string, HDL_parameter> &external_parameters);
 };
 
 

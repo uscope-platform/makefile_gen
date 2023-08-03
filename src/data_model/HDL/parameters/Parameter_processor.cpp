@@ -15,8 +15,9 @@
 
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
-Parameter_processor::Parameter_processor(const std::map<std::string, HDL_parameter> &parent_parameters) {
 
+Parameter_processor::Parameter_processor(const std::map<std::string, HDL_parameter> &parent_parameters, const std::shared_ptr<data_store> &ds) {
+    d_store = ds;
     for(auto &item:parent_parameters){
         if(item.second.get_type() != numeric_parameter){
             throw std::runtime_error("ERROR: Non numeric parameter reached the parameter processor as external value");
@@ -45,14 +46,15 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
                     array_dimensions[item.first] = item.second.get_dimensions();
                 }
                 auto il = item.second.get_initialization_list();
-                auto ret = process_initialization_list(item.first, il);
-                if(ret.second){
-                    next_working_set.insert(ret.first.begin(), ret.first.end());
+                try{
+                    auto processed_list = process_initialization_list(item.first, il);
+                    next_working_set.insert(processed_list.begin(), processed_list.end());
                     list_init_complete = true;
-                } else{
+                } catch (std::invalid_argument &ex) {
                     next_working_set.insert(item);
                     list_init_complete = false;
                 }
+
             } else {
                 auto processed_param = process_parameter(item.second);
                 if(processed_param.second){
@@ -351,10 +353,9 @@ void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
     }
 }
 
-std::pair<std::unordered_map<std::string, HDL_parameter>, bool>
+std::unordered_map<std::string, HDL_parameter>
 Parameter_processor::process_initialization_list(const std::string& param_name, std::vector<std::vector<Expression_component>> &il) {
     std::unordered_map<std::string, HDL_parameter> ret;
-    bool ret_valid = false;
     int last_list_item = 0;
     for(int i = 0; i<il.size(); i++){
         if(il[i][0].get_string_value() == "$repeat_init"){
@@ -370,9 +371,8 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
                     ret[name] = p;
                 }
                 last_list_item += init_size.first;
-                ret_valid = true;
             } else {
-                ret_valid = false;
+                throw std::invalid_argument("");
             }
 
         } else{
@@ -381,11 +381,11 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
             p.set_name(name);
             p.set_expression_components(il[i]);
             ret[name] = p;
-            ret_valid = true;
             last_list_item++;
         }
     }
-    return {ret,ret_valid};
+
+    return ret;
 }
 
 std::vector<uint32_t> Parameter_processor::process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims) {
@@ -401,4 +401,5 @@ std::vector<uint32_t> Parameter_processor::process_array_dimensions(std::vector<
     }
     return ret;
 }
+
 

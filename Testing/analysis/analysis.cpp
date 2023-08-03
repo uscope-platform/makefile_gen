@@ -301,7 +301,9 @@ TEST(analysis_test, verilog_parameter_extraction){
 TEST(analysis_test, shunting_yard_priority){
 
 
-    Parameter_processor p;
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    Parameter_processor p({},d_store);
+
     std::vector<Expression_component> expr = {
             Expression_component("add_expr_p"),
             Expression_component("+"),
@@ -324,7 +326,9 @@ TEST(analysis_test, shunting_yard_priority){
 
 TEST(analysis_test, shunting_yard_parenthesis){
 
-    Parameter_processor p;
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    Parameter_processor p({},d_store);
+
     std::vector<Expression_component> expr_1 = {
             Expression_component("("),
             Expression_component("add_expr_p"),
@@ -370,7 +374,10 @@ TEST(analysis_test, shunting_yard_parenthesis){
 }
 
 TEST(analysis_test, shunting_yard_function){
-    Parameter_processor p;
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    Parameter_processor p({},d_store);
+
     std::vector<Expression_component> expr = {
             Expression_component("$clog2"),
             Expression_component("("),
@@ -399,7 +406,9 @@ TEST(analysis_test, verilog_parameter_processing){
     analyzer.cleanup_content("`(.*)");
     HDL_Resource resource = analyzer.analyze()[0];
 
-    Parameter_processor p;
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    Parameter_processor p({},d_store);
+
     resource =  p.process_resource(resource);
 
     auto parameters = resource.get_parameters();
@@ -533,7 +542,8 @@ TEST(analysis_test, verilog_parameter_processing_override){
     par.set_value(12);
     parent_params["sv_numeric_p"] = par;
 
-    Parameter_processor p(parent_params);
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    Parameter_processor p(parent_params, d_store);
     resource =  p.process_resource(resource);
 
     auto parameters = resource.get_parameters();
