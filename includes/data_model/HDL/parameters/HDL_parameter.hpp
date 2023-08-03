@@ -22,7 +22,7 @@
 #include "data_model/HDL/parameters/Expression_component.hpp"
 
 #include <cereal/types/vector.hpp>
-
+#include "cereal/types/utility.hpp"
 
 enum parameter_type {
     string_parameter=0,
@@ -104,7 +104,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, string_value_array, numeric_value_array, type, expression_components, initialization_list);
+        ar(name, string_value_array, numeric_value_array, type, expression_components, initialization_list,array_dimensions);
     }
 
 private:

@@ -11,6 +11,7 @@ module test_mod #(
     parameter bit repetition_parameter [1:0]  = '{repetition_size{1}},
     parameter bit multi_repetition_parameter [3:0]  = '{{repetition_size{1}},{repetition_size{4}}},
     parameter bit mixed_repetition_parameter [3:0]  = '{1,2,{repetition_size{4}}},
+    parameter package_param = test_package::bus_base,
     string_p = "423",
     nested_p = string_p
 )();

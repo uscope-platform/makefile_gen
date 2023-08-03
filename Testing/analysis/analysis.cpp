@@ -189,7 +189,7 @@ TEST(analysis_test, verilog_parameter_extraction){
             {"chained_expression", {"add_expr_p", "mul_expr_p", "5", "*","+"}},
             {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}},
             {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}},
-            {"repetition_size", {"2"}}
+            {"repetition_size", {"2"}},
     };
 
 
@@ -203,7 +203,18 @@ TEST(analysis_test, verilog_parameter_extraction){
         check_params[item.first] = p;
     }
 
+
     HDL_parameter p = HDL_parameter();
+    p.set_type(expression_parameter);
+    p.set_name("package_param");
+    Expression_component ec("bus_base");
+    ec.set_package_prefix("test_package");
+    p.add_component(ec);
+    check_params["package_param"] = p;
+
+
+
+    p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("array_parameter");
     std::vector<std::vector<Expression_component>> il = {{Expression_component("32")}, {Expression_component("5")}};
@@ -453,32 +464,40 @@ TEST(analysis_test, verilog_parameter_processing){
     }
 
 
-        HDL_parameter param;
-        param.set_type(numeric_parameter);
-        param.set_value(37);
-        param.set_name("array_parameter_expr_p");
-        Expression_component e("array_parameter");
-        std::vector<std::vector<Expression_component>> ai = {{Expression_component("sv_numeric_p"), {Expression_component("*")}, {Expression_component("0")}}};
-        e.set_array_index(ai);
-        param.add_component(e);
-        e = Expression_component("array_parameter");
-        ai = {{Expression_component("1")}};
-        e.set_array_index(ai);
-        param.add_component(e);
-        param.add_component(Expression_component("+"));
-        check_params["array_parameter_expr_p"] = param;
+    HDL_parameter param = HDL_parameter();
+    param.set_type(expression_parameter);
+    param.set_name("package_param");
+    Expression_component ec("bus_base");
+    ec.set_package_prefix("test_package");
+    param.add_component(ec);
+    check_params["package_param"] = param;
+
+     param = HDL_parameter();
+    param.set_type(numeric_parameter);
+    param.set_value(37);
+    param.set_name("array_parameter_expr_p");
+    Expression_component e("array_parameter");
+    std::vector<std::vector<Expression_component>> ai = {{Expression_component("sv_numeric_p"), {Expression_component("*")}, {Expression_component("0")}}};
+    e.set_array_index(ai);
+    param.add_component(e);
+    e = Expression_component("array_parameter");
+    ai = {{Expression_component("1")}};
+    e.set_array_index(ai);
+    param.add_component(e);
+    param.add_component(Expression_component("+"));
+    check_params["array_parameter_expr_p"] = param;
 
 
 
-        param = HDL_parameter();
-        param.set_type(numeric_parameter);
-        param.set_value(5);
-        param.set_name("multidim_array_access");
-        e = Expression_component("multidim_array_parameter");
-        ai = {{Expression_component("1")},{Expression_component("0")}};
-        e.set_array_index(ai);
-        param.add_component(e);
-        check_params["multidim_array_access"] = param;
+    param = HDL_parameter();
+    param.set_type(numeric_parameter);
+    param.set_value(5);
+    param.set_name("multidim_array_access");
+    e = Expression_component("multidim_array_parameter");
+    ai = {{Expression_component("1")},{Expression_component("0")}};
+    e.set_array_index(ai);
+    param.add_component(e);
+    check_params["multidim_array_access"] = param;
 
 
 
@@ -578,9 +597,16 @@ TEST(analysis_test, verilog_parameter_processing_override){
         check_params[vt.name] = par;
     }
 
+    HDL_parameter param = HDL_parameter();
+    param.set_type(expression_parameter);
+    param.set_name("package_param");
+    Expression_component ec("bus_base");
+    ec.set_package_prefix("test_package");
+    param.add_component(ec);
+    check_params["package_param"] = param;
 
 
-    HDL_parameter param;
+    param = HDL_parameter();
     param.set_type(numeric_parameter);
     param.set_value(37);
     param.set_name("array_parameter_expr_p");

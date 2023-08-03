@@ -93,8 +93,6 @@ void HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::map<std::st
     res = p.process_resource(res);
 
 
-    //  auto merged_params = merge_parameters(external_parameters, i.get_parameters(), res.get_parameters());
-
     std::string prefix;
     for(int j =  0; j<recursion_level; j++){
         prefix += "  ";
@@ -106,9 +104,9 @@ void HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::map<std::st
         std::cout<<"------------------------------------------------"<<std::endl;
         std::cout<< prefix << "MODULE: "<<  module_name << " INSTANCE: " << i.get_name() << std::endl;
         std::cout<<"------------------------------------------------"<<std::endl;
-       // for(auto &item: merged_params){
-        //    std::cout<< prefix << item.first<< " ------ " << std::string(item.second) <<std::endl;
-       // }
+        for(auto &item: res.get_parameters()){
+            std::cout<< prefix << item.first<< " ------ " << std::string(item.second) <<std::endl;
+        }
         std::cout<<"------------------------------------------------"<<std::endl;
 
     }
@@ -116,8 +114,7 @@ void HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::map<std::st
 
     for(auto &dep: res.get_dependencies()){
         if(dep.get_dependency_class() != package)
-            ;
-    //        recursive_build_ast(dep,merged_params);
+            recursive_build_ast(dep,res.get_parameters());
     }
     recursion_level--;
 }

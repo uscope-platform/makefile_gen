@@ -44,6 +44,9 @@ public:
     std::string get_string_value(){ return string_value;};
     uint32_t  get_numeric_value() {return numeric_value;};
 
+    void set_package_prefix(const std::string &s) {package_prefix = s;};
+    std::string get_package_prefix() {return package_prefix;};
+
     bool is_right_associative();
     uint32_t get_operator_precedence();
     std::string print_value();
@@ -70,7 +73,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(component_type, string_value, numeric_value, array_index, array_value);
+        ar(component_type, string_value, numeric_value, array_index, array_value, package_prefix);
     }
 
 private:
@@ -80,6 +83,7 @@ private:
     expression_component_type component_type;
 
     std::string string_value;
+    std::string package_prefix;
     uint32_t numeric_value;
 
     std::vector<Expression_component> array_value;

@@ -118,9 +118,3 @@ void HDL_parameters_factory::stop_replication() {
     initialization_list.insert(initialization_list.end(), replication_components.begin(), replication_components.end());
     replication_components.clear();
 }
-
-
-
-
-
-

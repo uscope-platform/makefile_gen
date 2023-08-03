@@ -78,7 +78,16 @@ void sv_visitor::enterPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
         params_factory.add_component(Expression_component(call_name));
         params_factory.add_component(Expression_component("("));
         if(ctx->data_type() != nullptr){
-            params_factory.add_component(Expression_component(ctx->data_type()->getText()));
+            if(!package_prefix.empty()){
+                Expression_component ec(package_item);
+                ec.set_package_prefix(package_prefix);
+                params_factory.add_component(ec);
+                package_prefix.clear();
+                package_item.clear();
+            } else{
+                params_factory.add_component(Expression_component(ctx->data_type()->getText()));
+            }
+
         }
     }
 }
@@ -110,12 +119,11 @@ void sv_visitor::exitPackage_declaration(sv2017::Package_declarationContext *ctx
 
 void sv_visitor::exitPackage_or_class_scoped_path(sv2017::Package_or_class_scoped_pathContext *ctx) {
     if(!ctx->DOUBLE_COLON().empty()){
-        std::string package_name = ctx->package_or_class_scoped_path_item()[0]->identifier()->getText();
-        std::string package_item = ctx->package_or_class_scoped_path_item()[1]->identifier()->getText();
-        HDL_instance dep(package_item, package_name, package);
+        package_prefix = ctx->package_or_class_scoped_path_item()[0]->identifier()->getText();
+        package_item = ctx->package_or_class_scoped_path_item()[1]->identifier()->getText();
+        HDL_instance dep(package_item, package_prefix, package);
         modules_factory.add_package_dep(dep);
     }
-
 }
 
 void sv_visitor::enterParameter_declaration(sv2017::Parameter_declarationContext *ctx) {
@@ -174,7 +182,16 @@ void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
         string_components.push_back(ctx->getText());
     }
     if(params_factory.is_component_relevant()){
-        params_factory.add_component(Expression_component(ctx->getText()));
+        if(!package_prefix.empty()){
+            Expression_component ec(package_item);
+            ec.set_package_prefix(package_prefix);
+            params_factory.add_component(ec);
+            package_prefix.clear();
+            package_item.clear();
+        } else {
+            params_factory.add_component(Expression_component(ctx->getText()));
+        }
+
     }
 }
 
@@ -289,7 +306,16 @@ void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
     if(params_factory.in_expression_context()){
         params_factory.stop_expression();
     } else {
-        params_factory.add_component(Expression_component(val));
+
+        if(!package_prefix.empty()){
+            Expression_component ec(package_item);
+            ec.set_package_prefix(package_prefix);
+            params_factory.add_component(ec);
+            package_prefix.clear();
+            package_item.clear();
+        } else{
+            params_factory.add_component(Expression_component(val));
+        }
     }
 
 

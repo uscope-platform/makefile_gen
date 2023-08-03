@@ -129,8 +129,8 @@ private:
     HDL_instances_factory deps_factory;
     HDL_parameters_factory params_factory;
 
-
-
+    std::string package_prefix;
+    std::string package_item;
 };
 
 

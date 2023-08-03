@@ -22,6 +22,7 @@ Expression_component::Expression_component(const Expression_component &c) {
     numeric_value = c.numeric_value;
     array_index = c.array_index;
     array_value = c.array_value;
+    package_prefix = c.package_prefix;
 }
 
 
@@ -57,6 +58,7 @@ bool operator==(const Expression_component &lhs, const Expression_component &rhs
     ret_val &= lhs.component_type == rhs.component_type;
     ret_val &= lhs.array_value == rhs.array_value;
     ret_val &= lhs.array_index == rhs.array_index;
+    ret_val &= lhs.package_prefix == rhs.package_prefix;
     return ret_val;
 }
 
@@ -147,6 +149,9 @@ const std::string Expression_component::print_expression(const std::vector<Expre
         if(item.get_type() == numeric_component){
             ret_val += std::to_string(item.numeric_value);
         } else if(item.get_type() == string_component || item.get_type() == operator_component || item.get_type()== function_component) {
+            if(!item.package_prefix.empty()){
+                ret_val += item.package_prefix + "::";
+            }
             ret_val += item.string_value;
         }
     }
