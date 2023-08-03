@@ -89,8 +89,6 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
 
     auto components = return_par.get_expression_components();
 
-    std::unordered_set<std::string> dependencies;
-
 
     if(components.empty()){
         throw std::runtime_error("PARAMETER PROCESSING ERROR:\n Empty parameter");
@@ -101,22 +99,19 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
     // PROCESS SIMPLE PARAMETERS
     if(components.size() == 1){
         if(!components[0].get_array_index().empty()){
-            auto comp = get_array_index(components[0].get_string_value(), components[0].get_array_index(), dependencies);
+            auto comp = get_array_index(components[0].get_string_value(), components[0].get_array_index());
             if(comp.second){
                 std::string param_name = components[0].get_string_value() + "_" + std::to_string(comp.first);
                 uint32_t val;
                 if(external_parameters.contains(param_name)){
                     val = external_parameters[param_name];
-                    dependencies.insert(param_name);
                 } if(working_param_values.contains(param_name)){
                     val = working_param_values[param_name];
-                    dependencies.insert(param_name);
                 } else {
                     return {return_par, processing_complete};
                 }
                 return_par.set_type(numeric_parameter);
                 return_par.set_value(val);
-                return_par.set_dependencies(dependencies);
                 return {return_par, true};
             } else{
                 return {return_par, false};
@@ -149,9 +144,8 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
     }
 
 
-    auto proc_expr = process_expression(components, dependencies);
+    auto proc_expr = process_expression(components);
     if(proc_expr.second){
-        return_par.set_dependencies(dependencies);
         return_par.set_type(numeric_parameter);
         return_par.set_value(proc_expr.first);
         processing_complete = true;
@@ -160,12 +154,12 @@ std::pair<HDL_parameter, bool> Parameter_processor::process_parameter(const HDL_
     return {return_par, processing_complete};
 }
 
-std::pair<uint32_t , bool> Parameter_processor::get_array_index(std::string param_name, std::vector<Expression> idx, std::unordered_set<std::string> &deps) {
+std::pair<uint32_t , bool> Parameter_processor::get_array_index(std::string param_name, std::vector<Expression> idx) {
     bool index_ready = true;
     std::vector<uint32_t> array_index_values;
     for(auto &item:idx){
         auto rpn_expr = expr_vector_to_rpn(item);
-        auto res = process_expression(rpn_expr, deps);
+        auto res = process_expression(rpn_expr);
         index_ready |= res.second;
         if(res.second){
             array_index_values.push_back(res.first);
@@ -197,7 +191,7 @@ std::pair<uint32_t , bool> Parameter_processor::get_array_index(std::string para
 
 
 std::pair<uint32_t, bool>
-Parameter_processor::process_expression(const std::vector<Expression_component> &expr, std::unordered_set<std::string> &deps) {
+Parameter_processor::process_expression(const std::vector<Expression_component> &expr) {
     uint32_t ret_value = 0;
     bool return_valid = false;
 
@@ -209,7 +203,7 @@ Parameter_processor::process_expression(const std::vector<Expression_component> 
             std::vector<uint32_t> array_index_values;
             for(auto &item:i.get_array_index()){
                 auto rpn_expr = expr_vector_to_rpn(item);
-                auto res = process_expression(rpn_expr, deps);
+                auto res = process_expression(rpn_expr);
                 index_ready |= res.second;
                 if(res.second){
                     array_index_values.push_back(res.first);
@@ -229,10 +223,8 @@ Parameter_processor::process_expression(const std::vector<Expression_component> 
         } else if(i.get_type() == string_component) {
             if(external_parameters.contains(i.get_string_value())){
                 processed_rpn.emplace_back(external_parameters[i.get_raw_string_value()]);
-                deps.insert(i.get_raw_string_value());
             } else if(working_param_values.contains(i.get_raw_string_value())){
                 processed_rpn.emplace_back(working_param_values[i.get_raw_string_value()]);
-                deps.insert(i.get_raw_string_value());
             } else {
                 return {ret_value, return_valid};
             }
@@ -366,9 +358,8 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
     int last_list_item = 0;
     for(int i = 0; i<il.size(); i++){
         if(il[i][0].get_string_value() == "$repeat_init"){
-            std::unordered_set<std::string> deps;
-            auto init_size = process_expression(il[i+1], deps);
-            auto init_val = process_expression(il[i+2], deps);
+            auto init_size = process_expression(il[i+1]);
+            auto init_val = process_expression(il[i+2]);
             i +=2;
             if(init_size.second && init_val.second){
                 for(int j =last_list_item; j<last_list_item+init_size.first; j++){
@@ -399,10 +390,9 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
 
 std::vector<uint32_t> Parameter_processor::process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims) {
     std::vector<uint32_t> ret;
-    std::unordered_set<std::basic_string<char>> deps;
     for(auto &item:dims){
-        auto first_val = process_expression(expr_vector_to_rpn(item.first), deps);
-        auto second_val = process_expression(expr_vector_to_rpn(item.second), deps);
+        auto first_val = process_expression(expr_vector_to_rpn(item.first));
+        auto second_val = process_expression(expr_vector_to_rpn(item.second));
         if(first_val.second && second_val.second){
             ret.push_back(std::max(first_val.first, second_val.first)+1);
         } else {

@@ -89,10 +89,6 @@ public:
     void set_expression_components(const Expression  &c){expression_components = c;};
     Expression  get_expression_components() { return expression_components;};
 
-    void add_dependency(const std::string &s){dependencies.insert(s);};
-    std::unordered_set<std::string> get_dependencies() { return dependencies;};
-    void set_dependencies(std::unordered_set<std::string> d) {dependencies = std::move(d);};
-
     template<class Archive>
     void serialize( Archive & ar ) {
         ar(name, string_value_array, numeric_value_array);
@@ -131,7 +127,6 @@ private:
     parameter_type type;
 
 
-    std::unordered_set<std::string> dependencies;
     Expression expression_components;
     std::vector<Expression> initialization_list;
     std::vector<std::pair<Expression, Expression>> array_dimensions;

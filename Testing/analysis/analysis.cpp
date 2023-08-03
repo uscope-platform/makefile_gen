@@ -398,44 +398,43 @@ TEST(analysis_test, verilog_parameter_processing){
     typedef struct {
         std::string name;
         std::vector<std::string> components;
-        std::vector<std::string> dependencies;
         parameter_type type;
         uint32_t value;
     }param_check_t;
 
     std::vector<param_check_t> vect_params = {
-            {"simple_numeric_p", {"32"}, {}, numeric_parameter, 32},
-            {"sv_numeric_p", {"5'o10"}, {}, numeric_parameter, 8},
-            {"dimensionless_sv_numeric_p", {"'h3F"}, {}, numeric_parameter, 63},
-            {"string_p", {R"("423")"}, {}, expression_parameter, 9999},
-            {"nested_p", {"string_p"}, {}, expression_parameter, 9999},
-            {"local_p", {"74"}, {}, numeric_parameter, 74},
-            {"repetition_size", {"2"},{}, numeric_parameter, 2},
-            {"simple_log_expr_p", {"add_expr_p", "$clog2"}, {"add_expr_p"}, numeric_parameter, 6},
-            {"add_expr_p", {"simple_numeric_p", "sv_numeric_p", "+"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter,40},
-            {"sub_expr_p", {"simple_numeric_p", "sv_numeric_p","-"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter,24},
-            {"mul_expr_p", {"simple_numeric_p", "sv_numeric_p","*"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter, 256},
-            {"div_expr_p", {"simple_numeric_p", "sv_numeric_p","/"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter, 4},
-            {"modulo_expr_p", {"simple_numeric_p", "sv_numeric_p","%"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter, 0},
-            {"chained_expression", {"add_expr_p", "mul_expr_p", "5", "*","+"}, {"add_expr_p", "mul_expr_p"}, numeric_parameter, 1320},
-            {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}, {"add_expr_p"}, numeric_parameter, 6},
-            {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}, {"add_expr_p", "mul_expr_p"}, numeric_parameter, 1480},
-            {"array_parameter_0", {"32"}, {}, numeric_parameter, 32},
-            {"array_parameter_1", {"5"}, {}, numeric_parameter, 5},
-            {"multidim_array_parameter_0", {"32"}, {}, numeric_parameter, 32},
-            {"multidim_array_parameter_1", {"32"}, {}, numeric_parameter, 32},
-            {"multidim_array_parameter_2", {"5"}, {}, numeric_parameter, 5},
-            {"multidim_array_parameter_3", {"6"}, {}, numeric_parameter, 6},
-            {"repetition_parameter_0", {"1"}, {}, numeric_parameter, 1},
-            {"repetition_parameter_1", {"1"}, {}, numeric_parameter, 1},
-            {"multi_repetition_parameter_0", {"1"}, {}, numeric_parameter, 1},
-            {"multi_repetition_parameter_1", {"1"}, {}, numeric_parameter, 1},
-            {"multi_repetition_parameter_2", {"4"}, {}, numeric_parameter, 4},
-            {"multi_repetition_parameter_3", {"4"}, {}, numeric_parameter, 4},
-            {"mixed_repetition_parameter_0", {"1"}, {}, numeric_parameter, 1},
-            {"mixed_repetition_parameter_1", {"2"}, {}, numeric_parameter, 2},
-            {"mixed_repetition_parameter_2", {"4"}, {}, numeric_parameter, 4},
-            {"mixed_repetition_parameter_3", {"4"}, {}, numeric_parameter, 4}
+            {"simple_numeric_p", {"32"}, numeric_parameter, 32},
+            {"sv_numeric_p", {"5'o10"}, numeric_parameter, 8},
+            {"dimensionless_sv_numeric_p", {"'h3F"}, numeric_parameter, 63},
+            {"string_p", {R"("423")"}, expression_parameter, 9999},
+            {"nested_p", {"string_p"}, expression_parameter, 9999},
+            {"local_p", {"74"}, numeric_parameter, 74},
+            {"repetition_size", {"2"}, numeric_parameter, 2},
+            {"simple_log_expr_p", {"add_expr_p", "$clog2"}, numeric_parameter, 6},
+            {"add_expr_p", {"simple_numeric_p", "sv_numeric_p", "+"}, numeric_parameter,40},
+            {"sub_expr_p", {"simple_numeric_p", "sv_numeric_p","-"}, numeric_parameter,24},
+            {"mul_expr_p", {"simple_numeric_p", "sv_numeric_p","*"}, numeric_parameter, 256},
+            {"div_expr_p", {"simple_numeric_p", "sv_numeric_p","/"}, numeric_parameter, 4},
+            {"modulo_expr_p", {"simple_numeric_p", "sv_numeric_p","%"}, numeric_parameter, 0},
+            {"chained_expression", {"add_expr_p", "mul_expr_p", "5", "*","+"}, numeric_parameter, 1320},
+            {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}, numeric_parameter, 6},
+            {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}, numeric_parameter, 1480},
+            {"array_parameter_0", {"32"}, numeric_parameter, 32},
+            {"array_parameter_1", {"5"}, numeric_parameter, 5},
+            {"multidim_array_parameter_0", {"32"}, numeric_parameter, 32},
+            {"multidim_array_parameter_1", {"32"}, numeric_parameter, 32},
+            {"multidim_array_parameter_2", {"5"}, numeric_parameter, 5},
+            {"multidim_array_parameter_3", {"6"}, numeric_parameter, 6},
+            {"repetition_parameter_0", {"1"}, numeric_parameter, 1},
+            {"repetition_parameter_1", {"1"}, numeric_parameter, 1},
+            {"multi_repetition_parameter_0", {"1"}, numeric_parameter, 1},
+            {"multi_repetition_parameter_1", {"1"}, numeric_parameter, 1},
+            {"multi_repetition_parameter_2", {"4"}, numeric_parameter, 4},
+            {"multi_repetition_parameter_3", {"4"}, numeric_parameter, 4},
+            {"mixed_repetition_parameter_0", {"1"}, numeric_parameter, 1},
+            {"mixed_repetition_parameter_1", {"2"}, numeric_parameter, 2},
+            {"mixed_repetition_parameter_2", {"4"}, numeric_parameter, 4},
+            {"mixed_repetition_parameter_3", {"4"}, numeric_parameter, 4}
     };
 
 
@@ -444,9 +443,6 @@ TEST(analysis_test, verilog_parameter_processing){
         par.set_name(vt.name);
         for(auto &cpt:vt.components){
             par.add_component(Expression_component(cpt));
-        }
-        for(auto &dep:vt.dependencies){
-            par.add_dependency(dep);
         }
         par.set_type(vt.type);
         if(vt.type == numeric_parameter){
@@ -470,9 +466,6 @@ TEST(analysis_test, verilog_parameter_processing){
         e.set_array_index(ai);
         param.add_component(e);
         param.add_component(Expression_component("+"));
-        param.add_dependency("array_parameter_1");
-        param.add_dependency("array_parameter_0");
-        param.add_dependency("sv_numeric_p");
         check_params["array_parameter_expr_p"] = param;
 
 
@@ -485,7 +478,6 @@ TEST(analysis_test, verilog_parameter_processing){
         ai = {{Expression_component("1")},{Expression_component("0")}};
         e.set_array_index(ai);
         param.add_component(e);
-        param.add_dependency("multidim_array_parameter_2");
         check_params["multidim_array_access"] = param;
 
 
@@ -532,44 +524,43 @@ TEST(analysis_test, verilog_parameter_processing_override){
     typedef struct {
         std::string name;
         std::vector<std::string> components;
-        std::vector<std::string> dependencies;
         parameter_type type;
         uint32_t value;
     }param_check_t;
 
     std::vector<param_check_t> vect_params = {
-            {"simple_numeric_p", {"32"}, {}, numeric_parameter, 32},
-            {"sv_numeric_p", {"5'o10"}, {}, numeric_parameter, 8},
-            {"dimensionless_sv_numeric_p", {"'h3F"}, {}, numeric_parameter, 63},
-            {"string_p", {R"("423")"}, {}, expression_parameter, 9999},
-            {"nested_p", {"string_p"}, {}, expression_parameter, 9999},
-            {"local_p", {"74"}, {}, numeric_parameter, 74},
-            {"repetition_size", {"2"},{}, numeric_parameter, 2},
-            {"simple_log_expr_p", {"add_expr_p", "$clog2"}, {"add_expr_p"}, numeric_parameter, 5},
-            {"add_expr_p", {"simple_numeric_p", "sv_numeric_p", "+"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter,27},
-            {"sub_expr_p", {"simple_numeric_p", "sv_numeric_p","-"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter,3},
-            {"mul_expr_p", {"simple_numeric_p", "sv_numeric_p","*"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter, 180},
-            {"div_expr_p", {"simple_numeric_p", "sv_numeric_p","/"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter, 1},
-            {"modulo_expr_p", {"simple_numeric_p", "sv_numeric_p","%"}, {"simple_numeric_p","sv_numeric_p"}, numeric_parameter, 3},
-            {"chained_expression", {"add_expr_p", "mul_expr_p", "5", "*","+"}, {"add_expr_p", "mul_expr_p"}, numeric_parameter, 927},
-            {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}, {"add_expr_p"}, numeric_parameter, 5},
-            {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}, {"add_expr_p", "mul_expr_p"}, numeric_parameter, 1035},
-            {"array_parameter_0", {"32"}, {}, numeric_parameter, 32},
-            {"array_parameter_1", {"5"}, {}, numeric_parameter, 5},
-            {"multidim_array_parameter_0", {"32"}, {}, numeric_parameter, 32},
-            {"multidim_array_parameter_1", {"32"}, {}, numeric_parameter, 32},
-            {"multidim_array_parameter_2", {"5"}, {}, numeric_parameter, 5},
-            {"multidim_array_parameter_3", {"6"}, {}, numeric_parameter, 6},
-            {"repetition_parameter_0", {"1"}, {}, numeric_parameter, 1},
-            {"repetition_parameter_1", {"1"}, {}, numeric_parameter, 1},
-            {"multi_repetition_parameter_0", {"1"}, {}, numeric_parameter, 1},
-            {"multi_repetition_parameter_1", {"1"}, {}, numeric_parameter, 1},
-            {"multi_repetition_parameter_2", {"4"}, {}, numeric_parameter, 4},
-            {"multi_repetition_parameter_3", {"4"}, {}, numeric_parameter, 4},
-            {"mixed_repetition_parameter_0", {"1"}, {}, numeric_parameter, 1},
-            {"mixed_repetition_parameter_1", {"2"}, {}, numeric_parameter, 2},
-            {"mixed_repetition_parameter_2", {"4"}, {}, numeric_parameter, 4},
-            {"mixed_repetition_parameter_3", {"4"}, {}, numeric_parameter, 4}
+            {"simple_numeric_p", {"32"},  numeric_parameter, 32},
+            {"sv_numeric_p", {"5'o10"},  numeric_parameter, 8},
+            {"dimensionless_sv_numeric_p", {"'h3F"},numeric_parameter, 63},
+            {"string_p", {R"("423")"}, expression_parameter, 9999},
+            {"nested_p", {"string_p"}, expression_parameter, 9999},
+            {"local_p", {"74"}, numeric_parameter, 74},
+            {"repetition_size", {"2"}, numeric_parameter, 2},
+            {"simple_log_expr_p", {"add_expr_p", "$clog2"}, numeric_parameter, 5},
+            {"add_expr_p", {"simple_numeric_p", "sv_numeric_p", "+"}, numeric_parameter,27},
+            {"sub_expr_p", {"simple_numeric_p", "sv_numeric_p","-"}, numeric_parameter,3},
+            {"mul_expr_p", {"simple_numeric_p", "sv_numeric_p","*"}, numeric_parameter, 180},
+            {"div_expr_p", {"simple_numeric_p", "sv_numeric_p","/"}, numeric_parameter, 1},
+            {"modulo_expr_p", {"simple_numeric_p", "sv_numeric_p","%"}, numeric_parameter, 3},
+            {"chained_expression", {"add_expr_p", "mul_expr_p", "5", "*","+"}, numeric_parameter, 927},
+            {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}, numeric_parameter, 5},
+            {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}, numeric_parameter, 1035},
+            {"array_parameter_0", {"32"}, numeric_parameter, 32},
+            {"array_parameter_1", {"5"}, numeric_parameter, 5},
+            {"multidim_array_parameter_0", {"32"}, numeric_parameter, 32},
+            {"multidim_array_parameter_1", {"32"}, numeric_parameter, 32},
+            {"multidim_array_parameter_2", {"5"}, numeric_parameter, 5},
+            {"multidim_array_parameter_3", {"6"}, numeric_parameter, 6},
+            {"repetition_parameter_0", {"1"}, numeric_parameter, 1},
+            {"repetition_parameter_1", {"1"}, numeric_parameter, 1},
+            {"multi_repetition_parameter_0", {"1"}, numeric_parameter, 1},
+            {"multi_repetition_parameter_1", {"1"}, numeric_parameter, 1},
+            {"multi_repetition_parameter_2", {"4"}, numeric_parameter, 4},
+            {"multi_repetition_parameter_3", {"4"}, numeric_parameter, 4},
+            {"mixed_repetition_parameter_0", {"1"}, numeric_parameter, 1},
+            {"mixed_repetition_parameter_1", {"2"}, numeric_parameter, 2},
+            {"mixed_repetition_parameter_2", {"4"}, numeric_parameter, 4},
+            {"mixed_repetition_parameter_3", {"4"}, numeric_parameter, 4}
     };
 
 
@@ -578,9 +569,6 @@ TEST(analysis_test, verilog_parameter_processing_override){
         par.set_name(vt.name);
         for(auto &cpt:vt.components){
             par.add_component(Expression_component(cpt));
-        }
-        for(auto &op:vt.dependencies){
-            par.add_dependency(op);
         }
         par.set_type(vt.type);
         if(vt.type == numeric_parameter){
@@ -605,9 +593,6 @@ TEST(analysis_test, verilog_parameter_processing_override){
     e.set_array_index(ai);
     param.add_component(e);
     param.add_component(Expression_component("+"));
-    param.add_dependency("array_parameter_1");
-    param.add_dependency("array_parameter_0");
-    param.add_dependency("sv_numeric_p");
     check_params["array_parameter_expr_p"] = param;
 
 
@@ -620,7 +605,6 @@ TEST(analysis_test, verilog_parameter_processing_override){
     ai = {{Expression_component("1")},{Expression_component("0")}};
     e.set_array_index(ai);
     param.add_component(e);
-    param.add_dependency("multidim_array_parameter_2");
     check_params["multidim_array_access"] = param;
 
 
