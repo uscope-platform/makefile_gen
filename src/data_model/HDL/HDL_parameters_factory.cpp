@@ -31,7 +31,7 @@ void HDL_parameters_factory::set_value(const std::string &s) {
 
 void HDL_parameters_factory::add_component(const Expression_component &c) {
     if(in_replication){
-        replication_components.push_back({c});
+        replication_components.push_back(c);
     }else if(in_initialization_list){
         initialization_list.push_back({c});
     } else if(in_packed_assignment){
@@ -106,7 +106,7 @@ void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
 void HDL_parameters_factory::stop_replication() {
     in_replication = false;
     replication_components.insert(replication_components.begin(), {Expression_component("$repeat_init")});
-    initialization_list.insert(initialization_list.end(), replication_components.begin(), replication_components.end());
+    initialization_list.insert(initialization_list.end(), replication_components);
     replication_components.clear();
 }
 
@@ -117,4 +117,8 @@ void HDL_parameters_factory::stop_packed_assignment() {
         in_packed_assignment = false;
         initialization_list.clear();
     }
+}
+
+void HDL_parameters_factory::close_replication_size() {
+    replication_components.push_back(Expression_component(","));
 }

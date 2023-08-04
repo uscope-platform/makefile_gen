@@ -996,6 +996,9 @@ public:
   virtual void enterAssignment_pattern(sv2017::Assignment_patternContext * /*ctx*/) override { }
   virtual void exitAssignment_pattern(sv2017::Assignment_patternContext * /*ctx*/) override { }
 
+  virtual void enterReplication_assignment(sv2017::Replication_assignmentContext * /*ctx*/) override { }
+  virtual void exitReplication_assignment(sv2017::Replication_assignmentContext * /*ctx*/) override { }
+
   virtual void enterStructure_pattern_key(sv2017::Structure_pattern_keyContext * /*ctx*/) override { }
   virtual void exitStructure_pattern_key(sv2017::Structure_pattern_keyContext * /*ctx*/) override { }
 

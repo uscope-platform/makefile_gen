@@ -672,6 +672,8 @@ public:
 
     virtual std::any visitAssignment_pattern(sv2017::Assignment_patternContext *context) = 0;
 
+    virtual std::any visitReplication_assignment(sv2017::Replication_assignmentContext *context) = 0;
+
     virtual std::any visitStructure_pattern_key(sv2017::Structure_pattern_keyContext *context) = 0;
 
     virtual std::any visitArray_pattern_key(sv2017::Array_pattern_keyContext *context) = 0;

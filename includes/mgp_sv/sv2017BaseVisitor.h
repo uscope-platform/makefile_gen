@@ -1321,6 +1321,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitReplication_assignment(sv2017::Replication_assignmentContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitStructure_pattern_key(sv2017::Structure_pattern_keyContext *ctx) override {
     return visitChildren(ctx);
   }

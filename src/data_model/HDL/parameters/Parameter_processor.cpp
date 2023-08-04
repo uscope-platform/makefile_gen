@@ -312,11 +312,20 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
         uint32_t last_list_item = 0;
         for(int i = 0; i<il.size(); i++){
             if(il[i][0].get_string_value() == "$repeat_init"){
+                Expression init_size_expr, init_val_expr;
+                bool size_sect = true;
+                for(int j = 1; j<il[i].size(); j++){
+                        if(il[i][j].get_string_value() == ","){
+                            size_sect = false;
+                        } else if(size_sect){
+                            init_size_expr.push_back(il[i][j]);
+                        } else {
+                            init_val_expr.push_back(il[i][j]);
+                        }
+                }
+                auto init_size = process_expression(expr_vector_to_rpn(init_size_expr));
+                auto init_val = process_expression(expr_vector_to_rpn(init_val_expr));
 
-
-                auto init_size = process_expression(expr_vector_to_rpn(il[i+1]));
-                auto init_val = process_expression(expr_vector_to_rpn(il[i+2]));
-                i +=2;
                 for(uint32_t j = last_list_item; j<last_list_item+init_size; j++){
                     HDL_parameter p;
                     auto name = param_name+"_"+std::to_string(j);

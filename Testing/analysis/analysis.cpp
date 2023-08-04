@@ -277,7 +277,7 @@ TEST(analysis_test, verilog_parameter_extraction){
     p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("repetition_parameter");
-    il = {{Expression_component("$repeat_init")},{Expression_component("repetition_size")}, {Expression_component("1")}};
+    il = {{Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("1")}};
     p.set_initialization_list(il);
     p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
     check_params["repetition_parameter"] = p;
@@ -286,8 +286,8 @@ TEST(analysis_test, verilog_parameter_extraction){
     p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("multi_repetition_parameter");
-    il = {{Expression_component("$repeat_init")},{Expression_component("repetition_size")}, {Expression_component("1")},
-          {Expression_component("$repeat_init")},{Expression_component("repetition_size")}, {Expression_component("4")}};
+    il = {{Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("1")},
+          {Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("4")}};
     p.set_initialization_list(il);
     p.add_dimension({{Expression_component("3")},{Expression_component("0")}});
     check_params["multi_repetition_parameter"] = p;
@@ -296,7 +296,8 @@ TEST(analysis_test, verilog_parameter_extraction){
     p.set_type(expression_parameter);
     p.set_name("mixed_repetition_parameter");
     il = {{Expression_component("1")},{Expression_component("2")},
-          {Expression_component("$repeat_init")},{Expression_component("repetition_size")}, {Expression_component("4")}};
+          {Expression_component("$repeat_init"),Expression_component("repetition_size"),
+           Expression_component(","), Expression_component("4")}};
     p.set_initialization_list(il);
     p.add_dimension({{Expression_component("3")},{Expression_component("0")}});
     check_params["mixed_repetition_parameter"] = p;

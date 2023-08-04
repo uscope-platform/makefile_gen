@@ -99,7 +99,11 @@ public:
 
     void exitFirst_range_identifier(sv2017::First_range_identifierContext *ctx) override;
 
-    void enterConstant_param_expression(sv2017::Constant_param_expressionContext *) override;
+    void enterConstant_param_expression(sv2017::Constant_param_expressionContext *ctx) override;
+
+    void enterReplication_assignment(sv2017::Replication_assignmentContext *ctx) override;
+    void exitReplication_size(sv2017::Replication_sizeContext *ctx) override;
+
 
     void enterReplication(sv2017::ReplicationContext *ctx) override;
     void exitReplication(sv2017::ReplicationContext *ctx) override;

@@ -994,6 +994,9 @@ public:
   virtual void enterAssignment_pattern(sv2017::Assignment_patternContext *ctx) = 0;
   virtual void exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) = 0;
 
+  virtual void enterReplication_assignment(sv2017::Replication_assignmentContext *ctx) = 0;
+  virtual void exitReplication_assignment(sv2017::Replication_assignmentContext *ctx) = 0;
+
   virtual void enterStructure_pattern_key(sv2017::Structure_pattern_keyContext *ctx) = 0;
   virtual void exitStructure_pattern_key(sv2017::Structure_pattern_keyContext *ctx) = 0;
 

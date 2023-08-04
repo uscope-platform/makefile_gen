@@ -349,9 +349,6 @@ void sv_visitor::exitPrimaryPar(sv2017::PrimaryParContext *ctx) {
 
 void sv_visitor::enterAssignment_pattern(sv2017::Assignment_patternContext *ctx) {
     params_factory.start_initialization_list();
-    if(ctx->constant_expression() != nullptr){
-        params_factory.start_replication();
-    }
 }
 
 void sv_visitor::exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) {
@@ -402,7 +399,19 @@ void sv_visitor::enterReplication(sv2017::ReplicationContext *ctx) {
     params_factory.start_replication();
 }
 
+
+
+void sv_visitor::exitReplication_size(sv2017::Replication_sizeContext *ctx) {
+    params_factory.close_replication_size();
+}
+
+
+
 void sv_visitor::exitReplication(sv2017::ReplicationContext *ctx) {
     params_factory.stop_replication();
+}
+
+void sv_visitor::enterReplication_assignment(sv2017::Replication_assignmentContext *ctx) {
+    params_factory.start_replication();
 }
 

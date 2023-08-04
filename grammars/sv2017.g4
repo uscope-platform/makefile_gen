@@ -1372,8 +1372,11 @@ assignment_pattern:
            ( COMMA structure_pattern_key COLON expression )*
         | array_pattern_key COLON expression
            ( COMMA array_pattern_key COLON expression )*
-        | constant_expression LBRACE expression ( COMMA expression )* RBRACE
+        | replication_assignment
     )? RBRACE;
+
+replication_assignment:
+    replication_size LBRACE replication_value ( COMMA expression )* RBRACE;
 structure_pattern_key:
  identifier
   | assignment_pattern_key

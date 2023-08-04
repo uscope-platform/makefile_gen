@@ -54,7 +54,9 @@ public:
     void stop_param_assignment() { in_param_assignment = false; };
 
     void start_replication() {in_replication = true;};
+    void close_replication_size();
     void stop_replication();
+
 
     void start_packed_assignment() {in_packed_assignment = true;};
     void stop_packed_assignment();
@@ -72,9 +74,10 @@ private:
 
     std::stack<Expression> expression_stack;
     std::vector<Expression> initialization_list;
-    std::vector<Expression> replication_components;
+    Expression replication_components;
     Expression current_expression;
     Expression bit_selection;
+    Expression replication_size;
     std::vector<Expression> concatenation_content;
 };
 
