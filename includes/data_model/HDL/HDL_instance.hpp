@@ -59,6 +59,7 @@ public:
     bool is_module_array(){return quantifier != bus_mapping_expression();};
     bus_mapping_expression get_quantifier(){return quantifier;};
 
+    void add_child(const HDL_instance &i) {child_instances.push_back(i);};
 
     template<class Archive>
     void serialize( Archive & ar ) {

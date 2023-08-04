@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <utility>
+#include <nlohmann/json.hpp>
 
 #include "data_model/data_store.hpp"
 #include "data_model/settings_store.hpp"
@@ -30,13 +31,12 @@ class HDL_ast_builder {
         HDL_instance build_ast(const std::string& top_level_module, std::map<std::string, HDL_parameter> external_parameters);
 
     private:
-        static  std::unordered_map<std::string, HDL_parameter> merge_parameters(std::unordered_map<std::string, HDL_parameter> parent_parameter,  std::unordered_map<std::string, HDL_parameter> instance_parameters, std::unordered_map<std::string, HDL_parameter> module_parameters);
         std::shared_ptr<settings_store> s_store;
         std::shared_ptr<data_store> d_store;
         HDL_instance top_level;
-        int recursion_level;
         bool log_structure;
-        void recursive_build_ast(HDL_instance &i,const std::map<std::string, HDL_parameter> &external_parameters);
+        std::pair<HDL_instance,nlohmann::json> recursive_build_ast(HDL_instance &i,const std::map<std::string, HDL_parameter> &external_parameters);
+        nlohmann::json log;
 };
 
 

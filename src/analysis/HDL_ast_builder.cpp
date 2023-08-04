@@ -26,9 +26,7 @@ HDL_instance HDL_ast_builder::build_ast(const std::string& top_level_module, std
     top_level = HDL_instance();
     top_level.set_name("TL");
 
-    recursion_level = 0;
     auto tl_res = d_store->get_HDL_resource(top_level_module);
-
 
     top_level.set_type(top_level_module);
 
@@ -37,55 +35,41 @@ HDL_instance HDL_ast_builder::build_ast(const std::string& top_level_module, std
 
     top_level.add_parameters(res.get_parameters());
 
-    // TODO: RECURSIVELY BUILD THE AST BY WALKING THROUGH THE DEFINITIONS
+    std::vector<nlohmann::json> leaves;
     for(auto &dep: tl_res.get_dependencies()){
-        recursive_build_ast(dep, top_level.get_parameters());
+        auto ll_ret =recursive_build_ast(dep, top_level.get_parameters());
+        top_level.add_child(ll_ret.first);
+        leaves.push_back(ll_ret.second);
     }
+
+    if(log_structure) {
+        log["module_type"] = top_level.get_type();
+        log["instance_name"] = top_level.get_name();
+        nlohmann::json params;
+        for(auto &item: top_level.get_parameters()){
+            if(item.second.get_type()== string_parameter){
+                params[item.first] = item.second.get_string_value();
+            } else{
+                params[item.first] = item.second.get_numeric_value();
+            }
+        }
+        log["parameters"] = params;
+        log["leaves"] = leaves;
+
+        std::ofstream file("mkfg_tree_dump.json");
+        file << std::setw(4) << log << std::endl;
+        file.close();
+    }
+
 
     return  top_level;
 }
 
-std::unordered_map<std::string, HDL_parameter>
-HDL_ast_builder::merge_parameters(std::unordered_map<std::string, HDL_parameter> parent_parameter,
-                                  std::unordered_map<std::string, HDL_parameter> instance_parameters,
-                                  std::unordered_map<std::string, HDL_parameter> module_parameters) {
-
-    std::unordered_map<std::string, HDL_parameter> merged_parameters;
 
 
-
-    for(auto &item:module_parameters){
-        HDL_parameter selected_param;
-        if(instance_parameters.contains(item.first)){
-             selected_param = instance_parameters[item.first];
-        } else {
-            selected_param = item.second;
-        }
-
-        if(selected_param.is_numeric_string()) {
-            selected_param.string_to_numeric();
-        }else if(selected_param.is_array()){
-            selected_param.string_to_array(parent_parameter, instance_parameters, module_parameters);
-            //manage individual array components
-        } else{
-            if(parent_parameter.contains(selected_param.get_string_value())) {
-                selected_param = parent_parameter[selected_param.get_string_value()];
-            } else{
-                int i = 0;
-            }
-        }
-
-        merged_parameters.insert({item.first, selected_param});
-
-    }
-
-    return merged_parameters;
-}
-
-
-
-void HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::map<std::string, HDL_parameter> &external_parameters) {
-    recursion_level++;
+std::pair<HDL_instance,nlohmann::json> HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::map<std::string, HDL_parameter> &external_parameters) {
+    nlohmann::json current_log;
+    HDL_instance ret_inst;
 
     auto res = d_store->get_HDL_resource(i.get_type());
 
@@ -93,30 +77,40 @@ void HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::map<std::st
     res = p.process_resource(res);
 
 
-    std::string prefix;
-    for(int j =  0; j<recursion_level; j++){
-        prefix += "  ";
-    }
 
-    auto module_name = i.get_type();
+    ret_inst.set_name(i.get_name());
+    ret_inst.set_type(i.get_type());
+    ret_inst.add_parameters(res.get_parameters());
 
     if(log_structure){
-        //std::cout<<"------------------------------------------------"<<std::endl;
-        std::cout<< prefix << "MODULE: "<<  module_name << " INSTANCE: " << i.get_name() << std::endl;
-        /*std::cout<<"------------------------------------------------"<<std::endl;
-
-
+        std::cout << "Processing Instance "<< i.get_name() << " of module "<<  i.get_type() << std::endl;
+        current_log["module_type"] = i.get_type();
+        current_log["instance_name"]= i.get_name();
+        nlohmann::json params;
         for(auto &item: res.get_parameters()){
-            std::cout<< prefix << item.first<< " ------ " << std::string(item.second) <<std::endl;
+            if(item.second.get_type()== string_parameter){
+                params[item.first] = item.second.get_string_value();
+            } else{
+                params[item.first] = item.second.get_numeric_value();
+            }
         }
-        std::cout<<"------------------------------------------------"<<std::endl;*/
-
+        current_log["parameters"] = params;
     }
 
 
+    std::vector<nlohmann::json> leaves;
     for(auto &dep: res.get_dependencies()){
-        if(dep.get_dependency_class() != package)
-            recursive_build_ast(dep,res.get_parameters());
+        if(dep.get_dependency_class() != package){
+            auto ll_ret = recursive_build_ast(dep,res.get_parameters());
+            ret_inst.add_child(ll_ret.first);
+            leaves.push_back(ll_ret.second);
+        }
     }
-    recursion_level--;
+
+
+    if(log_structure){
+        current_log["leaves"] = leaves;
+    }
+
+    return {ret_inst, current_log};
 }

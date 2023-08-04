@@ -37,7 +37,7 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
     std::map<std::basic_string<char>, HDL_parameter> next_working_set;
 
     bool processing_complete = false;
-    int nesting_limit = 5000;
+    int nesting_limit = 1000;
     while(!working_set.empty() && !processing_complete && nesting_limit >0){
         bool list_init_complete = true;
         for(auto &item:working_set){
