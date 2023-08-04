@@ -178,7 +178,6 @@ void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
 
 void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
     if(file_contains_bus_defining_package || in_module_array_def){
-        std::string dbg = ctx->getText();
         string_components.push_back(ctx->getText());
     }
     if(params_factory.is_component_relevant()){
@@ -351,7 +350,7 @@ void sv_visitor::exitPrimaryPar(sv2017::PrimaryParContext *ctx) {
 void sv_visitor::enterAssignment_pattern(sv2017::Assignment_patternContext *ctx) {
     params_factory.start_initialization_list();
     if(ctx->constant_expression() != nullptr){
-        params_factory.set_repeated_initialization();
+        params_factory.start_replication();
     }
 }
 
@@ -361,7 +360,6 @@ void sv_visitor::exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) 
 
 
 void sv_visitor::exitPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
-    auto dbg = ctx->getText();
     params_factory.add_array_component();
 }
 

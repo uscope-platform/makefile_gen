@@ -45,22 +45,18 @@ void HDL_parameters_factory::add_component(const Expression_component &c) {
 
 void HDL_parameters_factory::start_initialization_list() {
     in_initialization_list = true;
-    repeated_initialization = false;
 }
 
 
 void HDL_parameters_factory::stop_initializaiton_list() {
-    in_initialization_list = false;
-    if(repeated_initialization){
-        initialization_list.insert(initialization_list.begin(),{Expression_component("$repeat_init")});
-        repeated_initialization = false;
+
+    if(in_replication){
+        stop_replication();
     }
+    in_initialization_list = false;
     current_resource.add_initialization_list(initialization_list);
     initialization_list.clear();
-}
 
-void HDL_parameters_factory::set_repeated_initialization() {
-    repeated_initialization = true;
 }
 
 void HDL_parameters_factory::start_expression() {
@@ -75,7 +71,6 @@ void HDL_parameters_factory::stop_expression() {
 }
 
 void HDL_parameters_factory::start_bit_selection() {
-    in_bit_select = true;
     expression_stack.push(current_expression);
     current_expression.clear();
 }
@@ -106,12 +101,6 @@ void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
     auto second_expr= current_expression;
     current_expression.clear();
     current_resource.add_dimension({first_expr, second_expr});
-}
-
-void HDL_parameters_factory::init_list_concatenation() {
-    if(in_initialization_list){
-        initialization_list.insert(initialization_list.end(),{Expression_component("$repeat_init")});
-    }
 }
 
 void HDL_parameters_factory::stop_replication() {

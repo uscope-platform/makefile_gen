@@ -38,8 +38,6 @@ public:
 
     void start_initialization_list();
     void stop_initializaiton_list();
-    void init_list_concatenation();
-    void set_repeated_initialization();
     void start_expression();
     void stop_expression();
 
@@ -68,9 +66,7 @@ private:
     bool in_param_assignment = false;
     bool in_initialization_list = false;
     bool in_expression = false;
-    bool in_bit_select = false;
     bool in_unpacked_declaration = false;
-    bool repeated_initialization = false;
     bool in_replication = false;
     bool in_packed_assignment = false;
 
