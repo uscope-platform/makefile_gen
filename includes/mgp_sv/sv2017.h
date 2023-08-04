@@ -5886,6 +5886,7 @@ public:
   public:
     Constant_param_expressionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    ConcatenationContext *concatenation();
     Param_expressionContext *param_expression();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;

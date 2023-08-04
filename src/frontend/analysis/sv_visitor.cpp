@@ -303,8 +303,10 @@ void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
     auto val = ctx->constant_param_expression()->getText();
 
     auto p_n = ctx->identifier()->getText();
-    if(params_factory.in_expression_context()){
+    if(params_factory.in_expression_context()) {
         params_factory.stop_expression();
+    } else if(params_factory.in_packed_context()){
+        params_factory.stop_packed_assignment();
     } else {
 
         if(!package_prefix.empty()){
@@ -365,8 +367,13 @@ void sv_visitor::exitPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
 
 
 
-void sv_visitor::enterConstant_param_expression(sv2017::Constant_param_expressionContext *) {
-    params_factory.start_expression();
+void sv_visitor::enterConstant_param_expression(sv2017::Constant_param_expressionContext *ctx) {
+
+    if(ctx->concatenation() != nullptr){
+        params_factory.start_packed_assignment();
+    } else {
+        params_factory.start_expression();
+    }
 }
 
 void sv_visitor::enterBit_select(sv2017::Bit_selectContext *ctx) {
@@ -389,7 +396,6 @@ void sv_visitor::exitUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) 
 }
 
 void sv_visitor::exitFirst_range_identifier(sv2017::First_range_identifierContext *ctx) {
-
     params_factory.close_first_range();
 }
 
@@ -401,3 +407,4 @@ void sv_visitor::enterReplication(sv2017::ReplicationContext *ctx) {
 void sv_visitor::exitReplication(sv2017::ReplicationContext *ctx) {
     params_factory.stop_replication();
 }
+

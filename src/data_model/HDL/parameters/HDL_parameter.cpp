@@ -24,6 +24,7 @@ HDL_parameter::HDL_parameter(const HDL_parameter &c) {
     expression_components = c.expression_components;
     initialization_list = c.initialization_list;
     array_dimensions = c.array_dimensions;
+    packed_init = c.packed_init;
 }
 
 HDL_parameter::HDL_parameter() {
@@ -46,6 +47,7 @@ bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
     ret_val &= lhs.expression_components == rhs.expression_components;
     ret_val &= lhs.initialization_list == rhs.initialization_list;
     ret_val &= lhs.array_dimensions == rhs.array_dimensions;
+    ret_val &= lhs.packed_init == rhs.packed_init;
     return ret_val;
 }
 
@@ -251,12 +253,17 @@ std::string HDL_parameter::to_string() const {
         result += val + ", ";
     }
 
+    if(packed_init){
+        result += "\n  PACKED\n";
+    }
+
     result += "\n  ARRAY DIMENSIONS:\n    ";
 
     for(auto &item:array_dimensions){
         result += "[" + Expression_component::print_expression(item.first) +
                 ":" +  Expression_component::print_expression(item.second) + "]" ;
     }
+
 
 
     return result;

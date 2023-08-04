@@ -34,9 +34,11 @@ void HDL_parameters_factory::add_component(const Expression_component &c) {
         replication_components.push_back({c});
     }else if(in_initialization_list){
         initialization_list.push_back({c});
-    } else if (in_expression || in_unpacked_declaration){
+    } else if(in_packed_assignment){
+        initialization_list.push_back({c});
+    }  else if (in_expression || in_unpacked_declaration){
         current_expression.push_back(c);
-    } else {
+    }else {
         current_resource.add_component(c);
     }
 }
@@ -44,7 +46,6 @@ void HDL_parameters_factory::add_component(const Expression_component &c) {
 void HDL_parameters_factory::start_initialization_list() {
     in_initialization_list = true;
     repeated_initialization = false;
-    initialization_list.clear();
 }
 
 
@@ -55,6 +56,7 @@ void HDL_parameters_factory::stop_initializaiton_list() {
         repeated_initialization = false;
     }
     current_resource.add_initialization_list(initialization_list);
+    initialization_list.clear();
 }
 
 void HDL_parameters_factory::set_repeated_initialization() {
@@ -117,4 +119,13 @@ void HDL_parameters_factory::stop_replication() {
     replication_components.insert(replication_components.begin(), {Expression_component("$repeat_init")});
     initialization_list.insert(initialization_list.end(), replication_components.begin(), replication_components.end());
     replication_components.clear();
+}
+
+void HDL_parameters_factory::stop_packed_assignment() {
+    if(in_packed_assignment && !in_initialization_list){
+        current_resource.add_initialization_list(initialization_list);
+        current_resource.set_packed_initialization(true);
+        in_packed_assignment = false;
+        initialization_list.clear();
+    }
 }

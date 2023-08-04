@@ -58,11 +58,12 @@ public:
     void start_replication() {in_replication = true;};
     void stop_replication();
 
+    void start_packed_assignment() {in_packed_assignment = true;};
+    void stop_packed_assignment();
 
-    bool in_expression_context() { return in_expression; };
-
-bool is_component_relevant() const { return in_initialization_list || in_expression || in_unpacked_declaration; };
-
+    bool in_expression_context() const { return in_expression; };
+    bool in_packed_context() const {return in_packed_assignment; };
+    bool is_component_relevant() const { return in_initialization_list || in_expression || in_unpacked_declaration || in_packed_assignment; };
 private:
     bool in_param_assignment = false;
     bool in_initialization_list = false;
@@ -71,6 +72,7 @@ private:
     bool in_unpacked_declaration = false;
     bool repeated_initialization = false;
     bool in_replication = false;
+    bool in_packed_assignment = false;
 
     std::stack<Expression> expression_stack;
     std::vector<Expression> initialization_list;

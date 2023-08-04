@@ -36,7 +36,11 @@ public:
     HDL_parameter process_parameter(const HDL_parameter &par);
     uint32_t process_expression(const std::vector<Expression_component>& expr);
 
-    std::unordered_map<std::string, HDL_parameter>process_initialization_list(const std::string& param_name, std::vector<std::vector<Expression_component>> &il);
+    std::unordered_map<std::string, HDL_parameter> process_initialization_list(
+        const std::string& param_name,
+        std::vector<std::vector<Expression_component>> &il,
+        bool packed
+    );
 
     std::vector<uint32_t> process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims);
 

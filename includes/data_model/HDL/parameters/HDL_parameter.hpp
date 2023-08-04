@@ -99,12 +99,16 @@ public:
     void add_initialization_list(std::vector<Expression> &list);
     std::vector<Expression> get_initialization_list(){ return initialization_list;};
 
+    void set_packed_initialization(const bool &b) {packed_init = b;};
+    bool is_packed_initialization(){ return packed_init;};
+
     void add_dimension(const std::pair<Expression, Expression> &e) {array_dimensions.push_back(e);};
     std::vector<std::pair<Expression, Expression>> get_dimensions(){return array_dimensions;};
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, string_value_array, numeric_value_array, type, expression_components, initialization_list,array_dimensions);
+        ar(name, string_value_array, numeric_value_array, type,
+           expression_components, initialization_list,array_dimensions, packed_init);
     }
 
 private:
@@ -128,6 +132,7 @@ private:
 
     Expression expression_components;
     std::vector<Expression> initialization_list;
+    bool packed_init = false;
     std::vector<std::pair<Expression, Expression>> array_dimensions;
 };
 

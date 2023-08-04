@@ -189,7 +189,7 @@ TEST(analysis_test, verilog_parameter_extraction){
             {"chained_expression", {"add_expr_p", "mul_expr_p", "5", "*","+"}},
             {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}},
             {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}},
-            {"repetition_size", {"2"}},
+            {"repetition_size", {"2"}}
     };
 
 
@@ -212,12 +212,28 @@ TEST(analysis_test, verilog_parameter_extraction){
     p.add_component(ec);
     check_params["package_param"] = p;
 
+    p = HDL_parameter();
+    p.set_type(expression_parameter);
+    p.set_name("packed_param");
+    std::vector<std::vector<Expression_component>> il = {
+            {Expression_component("1'b1")},
+            {Expression_component("1'b0")},
+            {Expression_component("1'b1")},
+            {Expression_component("1'b0")},
+            {Expression_component("1'b1")},
+            {Expression_component("1'b0")},
+            {Expression_component("1'b0")},
+            {Expression_component("1'b1")}
+    };
+    p.set_packed_initialization(true);
+    p.set_initialization_list(il);
+    check_params["packed_param"] = p;
 
 
     p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("array_parameter");
-    std::vector<std::vector<Expression_component>> il = {{Expression_component("32")}, {Expression_component("5")}};
+    il = {{Expression_component("32")}, {Expression_component("5")}};
     p.set_initialization_list(il);
     p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
     check_params["array_parameter"] = p;
@@ -490,6 +506,13 @@ TEST(analysis_test, verilog_parameter_processing){
     param.add_component(ec);
     check_params["package_param"] = param;
 
+    param = HDL_parameter();
+    param.set_type(numeric_parameter);
+    param.set_value(169);
+    param.set_name("packed_param");
+    param.add_component(Expression_component("169"));
+    check_params["packed_param"] = param;
+
      param = HDL_parameter();
     param.set_type(numeric_parameter);
     param.set_value(37);
@@ -649,6 +672,12 @@ TEST(analysis_test, verilog_parameter_processing_override){
     check_params["array_parameter_expr_p"] = param;
 
 
+    param = HDL_parameter();
+    param.set_type(numeric_parameter);
+    param.set_value(169);
+    param.set_name("packed_param");
+    param.add_component(Expression_component("169"));
+    check_params["packed_param"] = param;
 
     param = HDL_parameter();
     param.set_type(numeric_parameter);

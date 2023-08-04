@@ -101,13 +101,15 @@ void HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::map<std::st
     auto module_name = i.get_type();
 
     if(log_structure){
-        std::cout<<"------------------------------------------------"<<std::endl;
+        //std::cout<<"------------------------------------------------"<<std::endl;
         std::cout<< prefix << "MODULE: "<<  module_name << " INSTANCE: " << i.get_name() << std::endl;
-        std::cout<<"------------------------------------------------"<<std::endl;
+        /*std::cout<<"------------------------------------------------"<<std::endl;
+
+
         for(auto &item: res.get_parameters()){
             std::cout<< prefix << item.first<< " ------ " << std::string(item.second) <<std::endl;
         }
-        std::cout<<"------------------------------------------------"<<std::endl;
+        std::cout<<"------------------------------------------------"<<std::endl;*/
 
     }
 

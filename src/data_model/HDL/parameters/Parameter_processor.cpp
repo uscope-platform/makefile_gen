@@ -20,7 +20,7 @@ Parameter_processor::Parameter_processor(const std::map<std::string, HDL_paramet
     d_store = ds;
     for(auto &item:parent_parameters){
         if(item.second.get_type() != numeric_parameter){
-            throw std::runtime_error("ERROR: Non numeric parameter reached the parameter processor as external value");
+            continue;
         }
         external_parameters[item.first] = item.second.get_numeric_value();
     }
@@ -37,8 +37,8 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
     std::map<std::basic_string<char>, HDL_parameter> next_working_set;
 
     bool processing_complete = false;
-;
-    while(!working_set.empty() && !processing_complete){
+    int nesting_limit = 5000;
+    while(!working_set.empty() && !processing_complete && nesting_limit >0){
         bool list_init_complete = true;
         for(auto &item:working_set){
             if(!item.second.get_initialization_list().empty()){
@@ -47,7 +47,7 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
                 }
                 auto il = item.second.get_initialization_list();
                 try{
-                    auto processed_list = process_initialization_list(item.first, il);
+                    auto processed_list = process_initialization_list(item.first, il, item.second.is_packed_initialization());
                     next_working_set.insert(processed_list.begin(), processed_list.end());
                     list_init_complete = true;
                 } catch (Parameter_processor_Exception &ex) {
@@ -72,6 +72,14 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
         }
         working_set = next_working_set;
         next_working_set.clear();
+        nesting_limit--;
+        if(nesting_limit==0){
+            std::cerr<<"Warning: infinite loop detected while processing the following parameters: \n";
+            for(const auto& item:working_set){
+                std::cerr<< "    - " + item.second.get_name() + "\n";
+            }
+            std::cerr<<return_res.get_path() + "\n";
+        }
     }
 
     for(auto &item:working_set){
@@ -287,32 +295,48 @@ void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
 
 
 std::unordered_map<std::string, HDL_parameter>
-Parameter_processor::process_initialization_list(const std::string& param_name, std::vector<std::vector<Expression_component>> &il) {
+Parameter_processor::process_initialization_list(const std::string& param_name, std::vector<std::vector<Expression_component>> &il, bool packed) {
     std::unordered_map<std::string, HDL_parameter> ret;
-    uint32_t last_list_item = 0;
-    for(int i = 0; i<il.size(); i++){
-        if(il[i][0].get_string_value() == "$repeat_init"){
-            auto init_size = process_expression(il[i+1]);
-            auto init_val = process_expression(il[i+2]);
-            i +=2;
-            for(int j =last_list_item; j<last_list_item+init_size; j++){
-                HDL_parameter p;
-                auto name = param_name+"_"+std::to_string(j);
-                p.set_name(name);
-                p.set_expression_components({Expression_component(std::to_string(init_val))});
-                ret[name] = p;
-            }
-            last_list_item += init_size;
+    if(packed){
 
-        } else{
-            HDL_parameter p;
-            auto name = param_name+"_"+std::to_string(i);
-            p.set_name(name);
-            p.set_expression_components(il[i]);
-            ret[name] = p;
-            last_list_item++;
+        uint32_t val = 0;
+        for(int i = 0; i<il.size(); i++){
+            auto init_val = process_expression(il[il.size()-1-i]);
+            val += (uint32_t)std::pow(2, i)*init_val;
+        }
+        HDL_parameter p;
+        p.set_name(param_name);
+        p.set_expression_components({Expression_component(std::to_string(val))});
+        ret[param_name] = p;
+    } else {
+        uint32_t last_list_item = 0;
+        for(int i = 0; i<il.size(); i++){
+            if(il[i][0].get_string_value() == "$repeat_init"){
+
+
+                auto init_size = process_expression(expr_vector_to_rpn(il[i+1]));
+                auto init_val = process_expression(expr_vector_to_rpn(il[i+2]));
+                i +=2;
+                for(uint32_t j = last_list_item; j<last_list_item+init_size; j++){
+                    HDL_parameter p;
+                    auto name = param_name+"_"+std::to_string(j);
+                    p.set_name(name);
+                    p.set_expression_components({Expression_component(std::to_string(init_val))});
+                    ret[name] = p;
+                }
+                last_list_item += init_size;
+
+            } else{
+                HDL_parameter p;
+                auto name = param_name+"_"+std::to_string(i);
+                p.set_name(name);
+                p.set_expression_components(il[i]);
+                ret[name] = p;
+                last_list_item++;
+            }
         }
     }
+
 
     return ret;
 }

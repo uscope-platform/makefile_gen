@@ -1154,7 +1154,7 @@ param_expression:
     mintypmax_expression
     | data_type
 ;
-constant_param_expression: param_expression ;
+constant_param_expression: concatenation | param_expression ;
 
 unpacked_dimension: LSQUARE_BR range_expression RSQUARE_BR;
 packed_dimension: LSQUARE_BR  ( range_expression )? RSQUARE_BR;
