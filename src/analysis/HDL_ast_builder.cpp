@@ -71,6 +71,9 @@ std::pair<HDL_instance,nlohmann::json> HDL_ast_builder::recursive_build_ast(HDL_
     nlohmann::json current_log;
     HDL_instance ret_inst;
 
+    if(!d_store->contains_hdl_entity(i.get_type())){
+        std::cerr << "ERROR:\n HDL entity :" + i.get_type() + " Not found\n";
+    }
     auto res = d_store->get_HDL_resource(i.get_type());
 
     Parameter_processor p(external_parameters, d_store);

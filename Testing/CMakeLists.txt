@@ -1,3 +1,15 @@
+
+set(CHECK_FILES_DIR ${CMAKE_CURRENT_BINARY_DIR}/check_files/test_data)
+file(MAKE_DIRECTORY ${CHECK_FILES_DIR})
+
+include(FetchContent)
+FetchContent_Populate(
+        test_data
+        GIT_REPOSITORY https://github.com/uscope-platform/uscope_hdl.git
+        GIT_TAG        35195634a81b54eb00f738eac8e1211d1dd23338
+        SOURCE_DIR ${CHECK_FILES_DIR}
+)
+
 set(MAKEFILEGEN_TESTS
         test_main.cpp
         data_model/Depfile_test.cpp
@@ -12,6 +24,7 @@ set(MAKEFILEGEN_TESTS
         data_model/module_register_documentation.cpp
         analysis/documentation_analyzer.cpp
         analysis/analysis.cpp
+        analysis/hdl_ast_builder.cpp
         Backend/Application_management_test.cpp
         Backend/Application_definition_generator.cpp
         Backend/Peripheral_definition_generator.cpp
