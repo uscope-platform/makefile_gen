@@ -45,7 +45,7 @@ Expression_component::Expression_component(std::string s) {
     process_number();
 }
 
-Expression_component::Expression_component(uint32_t n) {
+Expression_component::Expression_component(int64_t n) {
     numeric_value = n;
     component_type = numeric_component;
 }
@@ -81,7 +81,8 @@ std::string Expression_component::print_value() {
 }
 
 void Expression_component::process_number() {
-    std::regex sv_constant_regex("^\\d*'(h|d|o|b)([0-9a-fA-F]+)");
+
+    std::regex sv_constant_regex(R"(^\d*'(s)?(h|d|o|b)([0-9a-fA-F]+))");
     std::regex number_regex("^\\d*$");
 
     if(test_parameter_type(number_regex, string_value)) {
@@ -90,14 +91,26 @@ void Expression_component::process_number() {
     } else if(test_parameter_type(sv_constant_regex, string_value)){
         std::smatch base_match;
         if(std::regex_search(string_value, base_match, sv_constant_regex)){
-            if(base_match[1].str() =="h"){
-                numeric_value = std::stoul(base_match[2], nullptr, 16);
-            } else if(base_match[1].str() =="d") {
-                numeric_value = std::stoul(base_match[2], nullptr, 10);
-            } else if(base_match[1].str() =="o") {
-                numeric_value = std::stoul(base_match[2], nullptr, 8);
-            } else if(base_match[1].str() =="b") {
-                numeric_value = std::stoul(base_match[2], nullptr, 2);
+            std::string base;
+            std::string value;
+            switch (base_match.size()) {
+                case 3:
+                    base = base_match[1].str();
+                    value = base_match[2].str();
+                    break;
+                case 4:
+                    base = base_match[2].str();
+                    value = base_match[3].str();
+                    break;
+            }
+            if(base =="h"){
+                numeric_value = std::stoul(value, nullptr, 16);
+            } else if(base =="d") {
+                numeric_value = std::stoul(value, nullptr, 10);
+            } else if(base =="o") {
+                numeric_value = std::stoul(value, nullptr, 8);
+            } else if(base =="b") {
+                numeric_value = std::stoul(value, nullptr, 2);
             }
         }
         component_type = numeric_component;
@@ -129,7 +142,7 @@ Expression_component::operator_type_t Expression_component::get_operator_type() 
     return operators_types[string_value];
 }
 
-uint32_t Expression_component::get_operator_precedence() {
+int64_t Expression_component::get_operator_precedence() {
     if(component_type != operator_component && component_type != function_component){
         throw std::runtime_error("Error: attempted to get the precedence of a non operator/function expression component");
     }
@@ -164,6 +177,12 @@ const std::string Expression_component::print_index(const std::vector<std::vecto
         ret_val += "[" + print_expression(item) + "]";
     }
     return ret_val;
+}
+
+nlohmann::json Expression_component::dump() {
+    nlohmann::json ret;
+
+    return ret;
 }
 
 

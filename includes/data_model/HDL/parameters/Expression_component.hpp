@@ -20,6 +20,7 @@
 #include <utility>
 #include <regex>
 #include <set>
+#include <nlohmann/json.hpp>
 #include <unordered_map>
 
 #include <cereal/types/vector.hpp>
@@ -38,17 +39,17 @@ public:
     Expression_component();
     Expression_component( const Expression_component &c );
     explicit Expression_component(std::string s);
-    explicit Expression_component(uint32_t n);
+    explicit Expression_component(int64_t n);
 
     std::string get_raw_string_value();
     std::string get_string_value(){ return string_value;};
-    uint32_t  get_numeric_value() {return numeric_value;};
+    int64_t  get_numeric_value() {return numeric_value;};
 
     void set_package_prefix(const std::string &s) {package_prefix = s;};
     std::string get_package_prefix() {return package_prefix;};
 
     bool is_right_associative();
-    uint32_t get_operator_precedence();
+    int64_t get_operator_precedence();
     std::string print_value();
     expression_component_type get_type()const {return component_type;};
 
@@ -76,6 +77,9 @@ public:
         ar(component_type, string_value, numeric_value, array_index, array_value, package_prefix);
     }
 
+    nlohmann::json dump();
+
+
 private:
     void process_number();
     bool test_parameter_type(const std::regex &r, const std::string &s);
@@ -84,7 +88,7 @@ private:
 
     std::string string_value;
     std::string package_prefix;
-    uint32_t numeric_value;
+    int64_t numeric_value;
 
     std::vector<Expression_component> array_value;
     std::vector<std::vector<Expression_component>> array_index;
@@ -116,7 +120,7 @@ private:
     };
 
 
-    std::unordered_map<std::string, uint32_t> operators_precedence = {
+    std::unordered_map<std::string, int64_t> operators_precedence = {
             {"$clog2", 0},
             {"$ceil", 0},
             {"$floor", 0},

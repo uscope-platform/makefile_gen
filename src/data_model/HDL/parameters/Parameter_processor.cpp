@@ -103,15 +103,15 @@ HDL_parameter Parameter_processor::process_parameter(const HDL_parameter &par) {
     }
 
 
-
-    return_par.set_value(process_expression(components));
+    auto value = process_expression(components);
+    return_par.set_value(value);
     return_par.set_type(numeric_parameter);
     return return_par;
 }
 
-uint32_t Parameter_processor::get_flattened_array_index(std::string param_name, std::vector<Expression> idx) {
+int64_t Parameter_processor::get_flattened_array_index(std::string param_name, std::vector<Expression> idx) {
 
-    std::vector<uint32_t> array_index_values;
+    std::vector<int64_t> array_index_values;
     for(auto &item:idx){
         auto rpn_expr = expr_vector_to_rpn(item);
         auto res = process_expression(rpn_expr);
@@ -137,7 +137,7 @@ uint32_t Parameter_processor::get_flattened_array_index(std::string param_name, 
 
 
 
-uint32_t Parameter_processor::process_expression(const std::vector<Expression_component> &expr) {
+int64_t Parameter_processor::process_expression(const std::vector<Expression_component> &expr) {
 
     std::vector<Expression_component> processed_rpn;
 
@@ -148,7 +148,7 @@ uint32_t Parameter_processor::process_expression(const std::vector<Expression_co
 
     for(auto i : expr){
         if(!i.get_array_index().empty()){
-            std::vector<uint32_t> array_index_values;
+            std::vector<int64_t> array_index_values;
             for(auto &item:i.get_array_index()){
                 auto rpn_expr = expr_vector_to_rpn(item);
                 auto res = process_expression(rpn_expr);
@@ -179,18 +179,26 @@ uint32_t Parameter_processor::process_expression(const std::vector<Expression_co
         if(i.get_type() == numeric_component){
             evaluator_stack.push(i);
         } else {
-            uint32_t result;
-            if(i.get_operator_type() == Expression_component::unary_operator){
+            int64_t result;
+            if(processed_rpn.size()== 2 && processed_rpn[1].get_type()== operator_component){
+                // THE EXPRESSION INDICATES A SIGNED NUMBER DEFINITION
                 auto op = get_component_value(evaluator_stack.top());
-                result = evaluate_unary_expression(op, i.get_string_value());
+                result = evaluate_binary_expression(0, op, i.get_string_value());
                 evaluator_stack.pop();
-            } else if(i.get_operator_type() == Expression_component::binary_operator){
-                auto op_b = get_component_value(evaluator_stack.top());
-                evaluator_stack.pop();
-                auto op_a = get_component_value(evaluator_stack.top());
-                evaluator_stack.pop();
-                result = evaluate_binary_expression(op_a, op_b, i.get_raw_string_value());
+            } else{
+                if(i.get_operator_type() == Expression_component::unary_operator){
+                    auto op = get_component_value(evaluator_stack.top());
+                    result = evaluate_unary_expression(op, i.get_string_value());
+                    evaluator_stack.pop();
+                } else if(i.get_operator_type() == Expression_component::binary_operator){
+                    auto op_b = get_component_value(evaluator_stack.top());
+                    evaluator_stack.pop();
+                    auto op_a = get_component_value(evaluator_stack.top());
+                    evaluator_stack.pop();
+                    result = evaluate_binary_expression(op_a, op_b, i.get_raw_string_value());
+                }
             }
+
             evaluator_stack.emplace(result);
         }
     }
@@ -199,7 +207,7 @@ uint32_t Parameter_processor::process_expression(const std::vector<Expression_co
 }
 
 
-uint32_t Parameter_processor::evaluate_binary_expression(uint32_t op_a, uint32_t op_b, const std::string& operation) {
+int64_t Parameter_processor::evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string& operation) {
     if(operation == "+"){
         return op_a + op_b;
     } else if(operation ==  "-"){
@@ -219,17 +227,17 @@ uint32_t Parameter_processor::evaluate_binary_expression(uint32_t op_a, uint32_t
     }
 }
 
-uint32_t Parameter_processor::evaluate_unary_expression(uint32_t operand, const std::string& operation) {
+int64_t Parameter_processor::evaluate_unary_expression(int64_t operand, const std::string& operation) {
     if(operation == "!"){
         return !operand;
     } else if(operation ==  "~"){
         return ~operand;
     } else if(operation ==  "$clog2"){
-        return (uint32_t) ceil(log2(operand));
+        return (int64_t) ceil(log2(operand));
     } else if(operation ==  "$ceil"){
-        return (uint32_t) ceil(operand);
+        return (int64_t) ceil(operand);
     } else if(operation ==  "$floor"){
-        return (uint32_t) floor(operand);
+        return (int64_t) floor(operand);
     } else{
         throw std::runtime_error("Error: Attempted evaluation of an unsupported unary expression expression " + operation);
     }
@@ -299,17 +307,17 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
     std::unordered_map<std::string, HDL_parameter> ret;
     if(packed){
 
-        uint32_t val = 0;
+        int64_t val = 0;
         for(int i = 0; i<il.size(); i++){
             auto init_val = process_expression(il[il.size()-1-i]);
-            val += (uint32_t)std::pow(2, i)*init_val;
+            val += (int64_t)std::pow(2, i)*init_val;
         }
         HDL_parameter p;
         p.set_name(param_name);
         p.set_expression_components({Expression_component(std::to_string(val))});
         ret[param_name] = p;
     } else {
-        uint32_t last_list_item = 0;
+        int64_t last_list_item = 0;
         for(int i = 0; i<il.size(); i++){
             if(il[i][0].get_string_value() == "$repeat_init"){
                 Expression init_size_expr, init_val_expr;
@@ -326,7 +334,7 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
                 auto init_size = process_expression(expr_vector_to_rpn(init_size_expr));
                 auto init_val = process_expression(expr_vector_to_rpn(init_val_expr));
 
-                for(uint32_t j = last_list_item; j<last_list_item+init_size; j++){
+                for(int64_t j = last_list_item; j<last_list_item+init_size; j++){
                     HDL_parameter p;
                     auto name = param_name+"_"+std::to_string(j);
                     p.set_name(name);
@@ -350,8 +358,8 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
     return ret;
 }
 
-std::vector<uint32_t> Parameter_processor::process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims) {
-    std::vector<uint32_t> ret;
+std::vector<int64_t> Parameter_processor::process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims) {
+    std::vector<int64_t> ret;
     for(auto &item:dims){
         auto first_val = process_expression(expr_vector_to_rpn(item.first));
         auto second_val = process_expression(expr_vector_to_rpn(item.second));
@@ -360,7 +368,7 @@ std::vector<uint32_t> Parameter_processor::process_array_dimensions(std::vector<
     return ret;
 }
 
-uint32_t Parameter_processor::get_component_value(Expression_component &ec) {
+int64_t Parameter_processor::get_component_value(Expression_component &ec) {
 
     if(ec.get_type() == numeric_component){
         return ec.get_numeric_value();
@@ -389,7 +397,7 @@ uint32_t Parameter_processor::get_component_value(Expression_component &ec) {
     }
 
 
-    uint32_t val;
+    int64_t val;
     if(external_parameters.contains(param_name)){
         val = external_parameters[param_name];
     } else if(working_param_values.contains(param_name)){

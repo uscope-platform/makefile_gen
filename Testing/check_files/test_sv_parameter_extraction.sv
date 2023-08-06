@@ -13,6 +13,8 @@ module test_mod #(
     parameter bit mixed_repetition_parameter [3:0]  = '{1,2,{repetition_size{4}}},
     parameter logic [7:0] packed_param = {1'b1,1'b0,1'b1,1'b0,1'b1,1'b0,1'b0,1'b1},
     parameter package_param = test_package::bus_base,
+    parameter negative_param = -16'sd32767,
+    parameter negative_array_param [1:0] = '{-16'sd32767, 16'sd32767},
     string_p = "423",
     nested_p = string_p
 )();

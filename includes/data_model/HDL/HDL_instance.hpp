@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <string>
 #include <utility>
+#include <nlohmann/json.hpp>
 
 #include "data_model/HDL/HDL_definitions.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
@@ -65,6 +66,8 @@ public:
     void serialize( Archive & ar ) {
         ar(name, type, dep_class, ports_map, parameters, quantifier);
     }
+
+    nlohmann::json dump();
 
     friend bool operator==(const HDL_instance&lhs, const HDL_instance&rhs);
 private:

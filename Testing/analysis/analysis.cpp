@@ -189,7 +189,8 @@ TEST(analysis_test, verilog_parameter_extraction){
             {"chained_expression", {"add_expr_p", "mul_expr_p", "5", "*","+"}},
             {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}},
             {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}},
-            {"repetition_size", {"2"}}
+            {"repetition_size", {"2"}},
+            {"negative_param", {"16'sd32767","-"}}
     };
 
 
@@ -301,6 +302,15 @@ TEST(analysis_test, verilog_parameter_extraction){
     p.set_initialization_list(il);
     p.add_dimension({{Expression_component("3")},{Expression_component("0")}});
     check_params["mixed_repetition_parameter"] = p;
+
+    p = HDL_parameter();
+    p.set_type(expression_parameter);
+    p.set_name("negative_array_param");
+    il = {{Expression_component("16'sd32767"), Expression_component("-")}, {Expression_component("16'sd32767")}};
+    p.set_initialization_list(il);
+    p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
+    check_params["negative_array_param"] = p;
+
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
@@ -444,7 +454,7 @@ TEST(analysis_test, verilog_parameter_processing){
         std::string name;
         std::vector<std::string> components;
         parameter_type type;
-        uint32_t value;
+        int64_t value;
     }param_check_t;
 
     std::vector<param_check_t> vect_params = {
@@ -479,7 +489,8 @@ TEST(analysis_test, verilog_parameter_processing){
             {"mixed_repetition_parameter_0", {"1"}, numeric_parameter, 1},
             {"mixed_repetition_parameter_1", {"2"}, numeric_parameter, 2},
             {"mixed_repetition_parameter_2", {"4"}, numeric_parameter, 4},
-            {"mixed_repetition_parameter_3", {"4"}, numeric_parameter, 4}
+            {"mixed_repetition_parameter_3", {"4"}, numeric_parameter, 4},
+            {"negative_param", {"16'sd32767","-"}, numeric_parameter, -32767}
     };
 
 
@@ -594,7 +605,7 @@ TEST(analysis_test, verilog_parameter_processing_override){
         std::string name;
         std::vector<std::string> components;
         parameter_type type;
-        uint32_t value;
+        int64_t value;
     }param_check_t;
 
     std::vector<param_check_t> vect_params = {
@@ -629,7 +640,8 @@ TEST(analysis_test, verilog_parameter_processing_override){
             {"mixed_repetition_parameter_0", {"1"}, numeric_parameter, 1},
             {"mixed_repetition_parameter_1", {"2"}, numeric_parameter, 2},
             {"mixed_repetition_parameter_2", {"4"}, numeric_parameter, 4},
-            {"mixed_repetition_parameter_3", {"4"}, numeric_parameter, 4}
+            {"mixed_repetition_parameter_3", {"4"}, numeric_parameter, 4},
+            {"negative_param", {"16'sd32767","-"}, numeric_parameter, -32767}
     };
 
 

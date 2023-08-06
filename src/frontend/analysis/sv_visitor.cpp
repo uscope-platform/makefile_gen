@@ -219,6 +219,14 @@ void sv_visitor::exitOperator_shift(sv2017::Operator_shiftContext *ctx) {
     }
 }
 
+void sv_visitor::exitUnary_operator(sv2017::Unary_operatorContext *ctx) {
+    if(ctx->PLUS() != nullptr || ctx->MINUS() != nullptr){
+        if(params_factory.is_component_relevant()){
+            params_factory.add_component(Expression_component(ctx->getText()));
+        }
+    }
+}
+
 
 uint32_t sv_visitor::parse_number(const std::string& s) {
     std::regex hex_number(R"(\d*'h([0-9a-fA-F]*))");

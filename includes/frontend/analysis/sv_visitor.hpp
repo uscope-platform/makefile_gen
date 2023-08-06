@@ -70,6 +70,7 @@ public:
     void exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *ctx) override;
     void exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx) override;
     void exitOperator_shift(sv2017::Operator_shiftContext *ctx) override;
+    void exitUnary_operator(sv2017::Unary_operatorContext *ctx) override;
 
     void exitPrimaryLit(sv2017::PrimaryLitContext *ctx) override;
     void exitPrimaryPath(sv2017::PrimaryPathContext *ctx) override;

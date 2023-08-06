@@ -18,6 +18,7 @@
 
 #include <string>
 #include <regex>
+#include <nlohmann/json.hpp>
 
 #include "data_model/HDL/parameters/Expression_component.hpp"
 
@@ -54,9 +55,9 @@ public:
     void set_name(const std::string &n) {name  = n;};
 
     void set_value(const std::string &v);
-    void set_value(uint32_t val);
+    void set_value(int64_t val);
     std::string get_string_value() const;
-    uint32_t  get_numeric_value() const;
+    int64_t  get_numeric_value() const;
 
     operator std::string();
 
@@ -74,8 +75,8 @@ public:
                          );
     void string_to_numeric();
 
-    uint32_t parse_sv_constant(const std::string &s) const;
-    uint32_t parse_sv_constant() const {return parse_sv_constant(string_value_array[0]);};
+    int64_t parse_sv_constant(const std::string &s) const;
+    int64_t parse_sv_constant() const {return parse_sv_constant(string_value_array[0]);};
 
     std::string get_name() const {return name;};
 
@@ -111,6 +112,8 @@ public:
            expression_components, initialization_list,array_dimensions, packed_init);
     }
 
+    nlohmann::json dump();
+
 private:
 
     bool regex_string_test(const std::string &r, const std::string &s) const;
@@ -126,7 +129,7 @@ private:
 
     std::string name;
     std::vector<std::string> string_value_array;
-    std::vector<uint32_t> numeric_value_array;
+    std::vector<int64_t> numeric_value_array;
     parameter_type type;
 
 

@@ -67,7 +67,7 @@ bool HDL_parameter::is_empty() {
     return ret;
 }
 
-void HDL_parameter::set_value(uint32_t val) {
+void HDL_parameter::set_value(int64_t val) {
     type = numeric_parameter;
     numeric_value_array[0] = val;
 }
@@ -77,7 +77,7 @@ void HDL_parameter::set_value(const std::string &v) {
     string_value_array[0] = v;
 }
 
-uint32_t HDL_parameter::get_numeric_value() const {
+int64_t HDL_parameter::get_numeric_value() const {
     return numeric_value_array[0];
 }
 
@@ -85,7 +85,7 @@ bool HDL_parameter::is_sv_constant(const std::string &s) const {
     return regex_string_test(classification_regexes.sv_constant, s);
 }
 
-uint32_t HDL_parameter::parse_sv_constant(const std::string &s) const {
+int64_t HDL_parameter::parse_sv_constant(const std::string &s) const {
     std::regex r(classification_regexes.sv_constant);
     auto val = std::regex_replace(s, r, "");
 
@@ -134,7 +134,7 @@ void HDL_parameter::string_to_array(
     if(is_repetition_array_init()){
         //implement support for these
         auto init_strings = split_array_init(s);
-        uint32_t arr_size;
+        int64_t arr_size;
         if(is_numeric_string(init_strings.first)){
             arr_size = std::stoul(init_strings.first, nullptr, 0);
         } else if(is_sv_constant(init_strings.first)){
@@ -271,4 +271,17 @@ std::string HDL_parameter::to_string() const {
 
 void HDL_parameter::add_initialization_list(std::vector<Expression> &list) {
     initialization_list.insert(initialization_list.end(), list.begin(), list.end());
+}
+
+nlohmann::json HDL_parameter::dump() {
+    nlohmann::json ret;
+
+    ret["name"] = name;
+    ret["type"] = parameter_type_to_string(type);
+    ret["string_value"] = string_value_array;
+    ret["numeric_value"]= numeric_value_array;
+    ret["packed"] = packed_init;
+
+
+    return ret;
 }

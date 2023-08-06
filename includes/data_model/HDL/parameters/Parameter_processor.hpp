@@ -34,7 +34,7 @@ public:
     static void convert_parameters(std::vector<HDL_Resource> &v);
     HDL_Resource process_resource(const HDL_Resource &res);
     HDL_parameter process_parameter(const HDL_parameter &par);
-    uint32_t process_expression(const std::vector<Expression_component>& expr);
+    int64_t process_expression(const std::vector<Expression_component>& expr);
 
     std::unordered_map<std::string, HDL_parameter> process_initialization_list(
         const std::string& param_name,
@@ -42,21 +42,21 @@ public:
         bool packed
     );
 
-    std::vector<uint32_t> process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims);
+    std::vector<int64_t> process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims);
 
-    uint32_t get_flattened_array_index(std::string param_name, std::vector<Expression> idx);
+    int64_t get_flattened_array_index(std::string param_name, std::vector<Expression> idx);
 
     static std::vector<Expression_component> expr_vector_to_rpn(const std::vector<Expression_component>& v);
 
-    static uint32_t evaluate_binary_expression(uint32_t op_a, uint32_t op_b, const std::string& operation);
-    static uint32_t evaluate_unary_expression(uint32_t operand, const std::string& operation);
+    static int64_t evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string& operation);
+    static int64_t evaluate_unary_expression(int64_t operand, const std::string& operation);
 
-    uint32_t get_component_value(Expression_component &ec);
+    int64_t get_component_value(Expression_component &ec);
 private:
 
-    std::unordered_map<std::string, uint32_t> working_param_values;
+    std::unordered_map<std::string, int64_t> working_param_values;
     std::unordered_map<std::string, std::vector<std::pair<Expression, Expression>>> array_dimensions;
-    std::unordered_map<std::string, uint32_t> external_parameters;
+    std::unordered_map<std::string, int64_t> external_parameters;
 
     std::shared_ptr<data_store> d_store;
 };

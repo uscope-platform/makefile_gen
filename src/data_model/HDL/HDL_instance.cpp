@@ -25,6 +25,7 @@ HDL_instance::HDL_instance(const HDL_instance &c) {
     type = c.type;
     name = c.name;
     quantifier = c.quantifier;
+    child_instances = c.child_instances;
 }
 
 
@@ -60,4 +61,28 @@ void HDL_instance::add_array_quantifier(const bus_mapping_expression &exp) {
 
 void HDL_instance::add_parameters(std::map<std::string, HDL_parameter> p) {
     parameters = std::move(p);
+}
+
+nlohmann::json HDL_instance::dump() {
+    nlohmann::json ret;
+
+    ret["instance_name"] = name;
+    ret["instance_type"] = type;
+    ret["ports_map"] = ports_map;
+
+    std::vector<nlohmann::json> children;
+    for(auto &child:child_instances){
+        children.push_back(child.dump());
+    }
+    ret["children"] = children;
+
+    std::map<std::string, nlohmann::json> params_vect;
+    for(auto &param:parameters){
+        params_vect.insert({param.first, param.second.dump()});
+    }
+    ret["parameters"] = params_vect;
+
+
+
+    return ret;
 }
