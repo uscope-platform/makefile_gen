@@ -19,17 +19,22 @@
 
 sv_analyzer::sv_analyzer(const std::string& file_path) : sv_modules_explorer(file_path){
     path = file_path;
+    input = std::make_shared<std::ifstream>(path);
+}
+
+sv_analyzer::sv_analyzer(const std::shared_ptr<std::istringstream> &iss) : sv_modules_explorer(""){
+    input = iss;
 }
 
 void sv_analyzer::cleanup_content(const std::string& regex) {
-    std::ifstream t(path);
+
     std::string raw_content;
 
-    t.seekg(0, std::ios::end);
-    raw_content.reserve(t.tellg());
-    t.seekg(0, std::ios::beg);
+    input->seekg(0, std::ios::end);
+    raw_content.reserve(input->tellg());
+    input->seekg(0, std::ios::beg);
 
-    raw_content.assign((std::istreambuf_iterator<char>(t)),
+    raw_content.assign((std::istreambuf_iterator<char>(*input)),
                        std::istreambuf_iterator<char>());
 
     std::regex e (regex);

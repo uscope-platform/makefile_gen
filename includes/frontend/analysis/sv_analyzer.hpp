@@ -39,6 +39,7 @@
 class sv_analyzer {
 public:
     explicit sv_analyzer(const std::string& file_path);
+    explicit sv_analyzer(const std::shared_ptr<std::istringstream>  &iss);
     void cleanup_content(const std::string& regex);
     std::vector<HDL_Resource> analyze();
 
@@ -49,6 +50,7 @@ private:
 
     std::map<std::string, HDL_parameter> parameters;
 
+    std::shared_ptr<std::istream> input;
     std::string path;
     std::string processed_content;
     sv_visitor sv_modules_explorer;

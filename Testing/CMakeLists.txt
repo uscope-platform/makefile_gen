@@ -24,6 +24,9 @@ set(MAKEFILEGEN_TESTS
         data_model/module_register_documentation.cpp
         analysis/documentation_analyzer.cpp
         analysis/analysis.cpp
+        analysis/parameter_extraction.cpp
+        analysis/shunting_yard.cpp
+        analysis/parameter_processing.cpp
         analysis/hdl_ast_builder.cpp
         Backend/Application_management_test.cpp
         Backend/Application_definition_generator.cpp
