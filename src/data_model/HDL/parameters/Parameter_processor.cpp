@@ -47,7 +47,8 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
                 }
                 auto il = item.second.get_initialization_list();
                 try{
-                    auto processed_list = process_initialization_list(item.first, il, item.second.is_packed_initialization());
+                    auto dims = item.second.get_dimensions();
+                    auto processed_list = process_initialization_list(item.first, il,dims);
                     next_working_set.insert(processed_list.begin(), processed_list.end());
                     list_init_complete = true;
                 } catch (Parameter_processor_Exception &ex) {
@@ -303,9 +304,20 @@ void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
 
 
 std::unordered_map<std::string, HDL_parameter>
-Parameter_processor::process_initialization_list(const std::string& param_name, std::vector<std::vector<Expression_component>> &il, bool packed) {
+Parameter_processor::process_initialization_list(
+        const std::string& param_name,
+        std::vector<std::vector<Expression_component>> &il,
+        std::vector<dimension_t> &dims) {
+
     std::unordered_map<std::string, HDL_parameter> ret;
-    if(packed){
+    bool packing_status = dims[0].packed;
+    for(int i = 1; i<dims.size();i++){
+        if(packing_status != dims[i].packed){
+            throw std::invalid_argument("ERROR: mixed packed and unpacked parameter initialization is not supported yet");
+        }
+    }
+
+    if(packing_status){
 
         int64_t val = 0;
         for(int i = 0; i<il.size(); i++){
@@ -315,6 +327,7 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
         HDL_parameter p;
         p.set_name(param_name);
         p.set_expression_components({Expression_component(std::to_string(val))});
+        array_parameter_values[param_name].push_back(val);
         ret[param_name] = p;
     } else {
         int64_t last_list_item = 0;
@@ -339,17 +352,43 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
                     auto name = param_name+"_"+std::to_string(j);
                     p.set_name(name);
                     p.set_expression_components({Expression_component(std::to_string(init_val))});
+                    array_parameter_values[param_name].push_back(init_val);
                     ret[name] = p;
                 }
                 last_list_item += init_size;
 
             } else{
-                HDL_parameter p;
-                auto name = param_name+"_"+std::to_string(i);
-                p.set_name(name);
-                p.set_expression_components(il[i]);
-                ret[name] = p;
-                last_list_item++;
+                if(il[i][0].get_type() == string_component){
+                    if(array_parameter_values.contains(il[i][0].get_string_value())){
+                        auto array_to_concat = array_parameter_values[il[i][0].get_string_value()];
+
+                        for(int64_t j = last_list_item; j<last_list_item+array_to_concat.size(); j++){
+                            HDL_parameter p;
+                            auto name = param_name+"_"+std::to_string(j);
+                            p.set_name(name);
+                            auto val = array_to_concat[j-last_list_item];
+                            p.set_expression_components({Expression_component(std::to_string(val))});
+                            array_parameter_values[param_name].push_back(val);
+                            ret[name] = p;
+                        }
+                        last_list_item += array_to_concat.size();
+
+                    } else{
+                        throw Parameter_processor_Exception();
+                    }
+
+                } else {
+                    HDL_parameter p;
+                    auto name = param_name+"_"+std::to_string(i);
+                    p.set_name(name);
+                    p.set_expression_components(il[i]);
+                    auto val = process_expression(expr_vector_to_rpn(il[i]));
+                    array_parameter_values[param_name].push_back(val);
+                    ret[name] = p;
+                    last_list_item++;
+                }
+
+
             }
         }
     }
@@ -358,11 +397,11 @@ Parameter_processor::process_initialization_list(const std::string& param_name, 
     return ret;
 }
 
-std::vector<int64_t> Parameter_processor::process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims) {
+std::vector<int64_t> Parameter_processor::process_array_dimensions(std::vector<dimension_t> dims) {
     std::vector<int64_t> ret;
     for(auto &item:dims){
-        auto first_val = process_expression(expr_vector_to_rpn(item.first));
-        auto second_val = process_expression(expr_vector_to_rpn(item.second));
+        auto first_val = process_expression(expr_vector_to_rpn(item.first_bound));
+        auto second_val = process_expression(expr_vector_to_rpn(item.second_bound));
         ret.push_back(std::max(first_val, second_val)+1);
     }
     return ret;

@@ -42,7 +42,7 @@ public:
     void start_bit_selection();
     void stop_bit_selection();
 
-    void start_unpacked_dimension_declaration() { in_unpacked_declaration = true; };
+    void start_unpacked_dimension_declaration();
     void stop_unpacked_dimension_declaration();
 
     void close_first_range();
@@ -65,6 +65,9 @@ public:
     void start_concatenation();
     void stop_concatenation();
 
+    void start_packed_dimension();
+    void stop_packed_dimension();
+
     bool in_packed_context() const {return in_packed_assignment; };
     bool is_component_relevant() const { return in_initialization_list || in_expression_new || in_unpacked_declaration || in_packed_assignment ; };
 
@@ -76,6 +79,7 @@ private:
     bool in_replication = false;
     bool in_packed_assignment = false;
     bool in_concatenation = false;
+    bool in_packed_dimension = false;
 
     std::stack<Expression> expression_stack;
     std::vector<Expression> initialization_list;

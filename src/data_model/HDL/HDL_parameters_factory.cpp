@@ -71,12 +71,14 @@ void HDL_parameters_factory::close_first_range() {
 }
 
 void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
-    in_unpacked_declaration = false;
-    auto second_expr = expression_stack.top();
-    expression_stack.pop();
-    auto first_expr = expression_stack.top();
-    expression_stack.pop();
-    current_resource.add_dimension({first_expr, second_expr});
+    if(in_unpacked_declaration){
+        in_unpacked_declaration = false;
+        auto second_expr = expression_stack.top();
+        expression_stack.pop();
+        auto first_expr = expression_stack.top();
+        expression_stack.pop();
+        current_resource.add_dimension({first_expr, second_expr, false});
+    }
 }
 
 void HDL_parameters_factory::stop_replication() {
@@ -90,7 +92,6 @@ void HDL_parameters_factory::stop_replication() {
 void HDL_parameters_factory::stop_packed_assignment() {
     if(in_packed_assignment && !in_initialization_list){
         current_resource.add_initialization_list(initialization_list);
-        current_resource.set_packed_initialization(true);
         in_packed_assignment = false;
         initialization_list.clear();
     }
@@ -110,7 +111,7 @@ void HDL_parameters_factory::stop_expression_new() {
     expression_level--;
     if(expression_level == 0){
         if(!new_expression.empty()){
-             if(in_unpacked_declaration) {
+             if(in_unpacked_declaration || in_packed_dimension) {
                  expression_stack.push(new_expression);
              } else if(in_replication){
                  replication_components.insert(replication_components.end(), new_expression.begin(), new_expression.end());
@@ -143,5 +144,27 @@ void HDL_parameters_factory::stop_concatenation() {
 
 void HDL_parameters_factory::start_replication() {
     in_replication = true;
+}
+
+void HDL_parameters_factory::start_unpacked_dimension_declaration() {
+    if(in_param_assignment){
+        in_unpacked_declaration = true;
+    }
+}
+
+void HDL_parameters_factory::start_packed_dimension() {
+    in_packed_dimension = true;
+}
+
+void HDL_parameters_factory::stop_packed_dimension() {
+
+    if(in_packed_dimension){
+        in_packed_dimension = false;
+        auto second_expr = expression_stack.top();
+        expression_stack.pop();
+        auto first_expr = expression_stack.top();
+        expression_stack.pop();
+        current_resource.add_dimension({first_expr, second_expr, true});
+    }
 }
 

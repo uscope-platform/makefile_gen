@@ -396,7 +396,6 @@ void sv_visitor::enterUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx)
 }
 
 void sv_visitor::exitUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) {
-    auto dbg = ctx->getText();
     params_factory.stop_unpacked_dimension_declaration();
 }
 
@@ -431,6 +430,14 @@ void sv_visitor::enterConcatenation(sv2017::ConcatenationContext *ctx) {
 
 void sv_visitor::exitConcatenation(sv2017::ConcatenationContext *ctx) {
     params_factory.stop_concatenation();
+}
+
+void sv_visitor::enterVariable_dimension(sv2017::Variable_dimensionContext *ctx) {
+    params_factory.start_packed_dimension();
+}
+
+void sv_visitor::exitVariable_dimension(sv2017::Variable_dimensionContext *ctx) {
+    params_factory.stop_packed_dimension();
 }
 
 

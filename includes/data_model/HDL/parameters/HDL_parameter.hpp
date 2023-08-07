@@ -47,6 +47,18 @@ constexpr std::string parameter_type_to_string(parameter_type in){
 
 typedef  std::vector<Expression_component> Expression;
 
+typedef struct{
+    Expression first_bound;
+    Expression second_bound;
+    bool packed;
+
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(first_bound, second_bound, packed);
+    }
+
+} dimension_t;
+
 class HDL_parameter {
 public:
 
@@ -100,16 +112,14 @@ public:
     void add_initialization_list(std::vector<Expression> &list);
     std::vector<Expression> get_initialization_list(){ return initialization_list;};
 
-    void set_packed_initialization(const bool &b) {packed_init = b;};
-    bool is_packed_initialization(){ return packed_init;};
 
-    void add_dimension(const std::pair<Expression, Expression> &e) {array_dimensions.push_back(e);};
-    std::vector<std::pair<Expression, Expression>> get_dimensions(){return array_dimensions;};
+    void add_dimension(const dimension_t &e) {array_dimensions.push_back(e);};
+    std::vector<dimension_t> get_dimensions(){return array_dimensions;};
 
     template<class Archive>
     void serialize( Archive & ar ) {
         ar(name, string_value_array, numeric_value_array, type,
-           expression_components, initialization_list,array_dimensions, packed_init);
+           expression_components, initialization_list,array_dimensions);
     }
 
     nlohmann::json dump();
@@ -135,8 +145,7 @@ private:
 
     Expression expression_components;
     std::vector<Expression> initialization_list;
-    bool packed_init = false;
-    std::vector<std::pair<Expression, Expression>> array_dimensions;
+    std::vector<dimension_t> array_dimensions;
 };
 
 

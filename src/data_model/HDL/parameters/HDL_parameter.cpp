@@ -24,7 +24,6 @@ HDL_parameter::HDL_parameter(const HDL_parameter &c) {
     expression_components = c.expression_components;
     initialization_list = c.initialization_list;
     array_dimensions = c.array_dimensions;
-    packed_init = c.packed_init;
 }
 
 HDL_parameter::HDL_parameter() {
@@ -46,8 +45,13 @@ bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
     ret_val &= lhs.type == rhs.type;
     ret_val &= lhs.expression_components == rhs.expression_components;
     ret_val &= lhs.initialization_list == rhs.initialization_list;
-    ret_val &= lhs.array_dimensions == rhs.array_dimensions;
-    ret_val &= lhs.packed_init == rhs.packed_init;
+
+    if(lhs.array_dimensions.size() != rhs.array_dimensions.size()) return false;
+    for(int i = 0; i<lhs.array_dimensions.size(); i++){
+        ret_val &= lhs.array_dimensions[i].packed == rhs.array_dimensions[i].packed;
+        ret_val &= lhs.array_dimensions[i].first_bound == rhs.array_dimensions[i].first_bound;
+        ret_val &= lhs.array_dimensions[i].second_bound == rhs.array_dimensions[i].second_bound;
+    }
     return ret_val;
 }
 
@@ -253,15 +257,16 @@ std::string HDL_parameter::to_string() const {
         result += val + ", ";
     }
 
-    if(packed_init){
-        result += "\n  PACKED\n";
-    }
-
     result += "\n  ARRAY DIMENSIONS:\n    ";
 
     for(auto &item:array_dimensions){
-        result += "[" + Expression_component::print_expression(item.first) +
-                ":" +  Expression_component::print_expression(item.second) + "]" ;
+        result += "[" + Expression_component::print_expression(item.first_bound) +
+                ":" +  Expression_component::print_expression(item.second_bound) + "](" ;
+        if(item.packed){
+            result +="packed)";
+        } else {
+            result +="unpacked)";
+        }
     }
 
 
@@ -280,7 +285,6 @@ nlohmann::json HDL_parameter::dump() {
     ret["type"] = parameter_type_to_string(type);
     ret["string_value"] = string_value_array;
     ret["numeric_value"]= numeric_value_array;
-    ret["packed"] = packed_init;
 
 
     return ret;

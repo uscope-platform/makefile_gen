@@ -306,9 +306,10 @@ TEST(parameter_processing, repetition_initialization) {
     std::string test_pattern = R"(
         module test_mod #(
             parameter repetition_size = 2,
-            parameter bit repetition_parameter [1:0]  = '{repetition_size{1}},
-            parameter bit multi_repetition_parameter [3:0]  = '{{repetition_size{1}},{repetition_size{4}}},
-            parameter bit mixed_repetition_parameter [3:0]  = '{1,2,{repetition_size{4}}}
+            parameter bit repetition_parameter_a [1:0]  = '{repetition_size{1}},
+            parameter bit repetition_parameter_b [1:0]  = '{repetition_size{4}},
+            parameter bit multi_repetition_parameter [3:0]  = {repetition_parameter_a,repetition_parameter_b},
+            parameter bit mixed_repetition_parameter [3:0]  = {1,2,repetition_parameter_b}
         )();
 
         endmodule
@@ -327,8 +328,10 @@ TEST(parameter_processing, repetition_initialization) {
 
     std::vector<param_check_t> vect_params = {
             {"repetition_size", {"2"}, numeric_parameter, 2},
-            {"repetition_parameter_0", {"1"}, numeric_parameter, 1},
-            {"repetition_parameter_1", {"1"}, numeric_parameter, 1},
+            {"repetition_parameter_a_0", {"1"}, numeric_parameter, 1},
+            {"repetition_parameter_a_1", {"1"}, numeric_parameter, 1},
+            {"repetition_parameter_b_0", {"4"}, numeric_parameter, 4},
+            {"repetition_parameter_b_1", {"4"}, numeric_parameter, 4},
             {"multi_repetition_parameter_0", {"1"}, numeric_parameter, 1},
             {"multi_repetition_parameter_1", {"1"}, numeric_parameter, 1},
             {"multi_repetition_parameter_2", {"4"}, numeric_parameter, 4},

@@ -39,10 +39,10 @@ public:
     std::unordered_map<std::string, HDL_parameter> process_initialization_list(
         const std::string& param_name,
         std::vector<std::vector<Expression_component>> &il,
-        bool packed
+        std::vector<dimension_t> &dims
     );
 
-    std::vector<int64_t> process_array_dimensions(std::vector<std::pair<Expression, Expression>> dims);
+    std::vector<int64_t> process_array_dimensions(std::vector<dimension_t> dims);
 
     int64_t get_flattened_array_index(std::string param_name, std::vector<Expression> idx);
 
@@ -55,8 +55,10 @@ public:
 private:
 
     std::unordered_map<std::string, int64_t> working_param_values;
-    std::unordered_map<std::string, std::vector<std::pair<Expression, Expression>>> array_dimensions;
+    std::unordered_map<std::string, std::vector<dimension_t>> array_dimensions;
     std::unordered_map<std::string, int64_t> external_parameters;
+
+    std::unordered_map<std::string, std::vector<int64_t>> array_parameter_values;
 
     std::shared_ptr<data_store> d_store;
 };

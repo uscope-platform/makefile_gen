@@ -284,7 +284,6 @@ TEST(parameter_extraction, repetition_initialization) {
     p.set_name("multi_repetition_parameter");
     il = {{Expression_component("repetition_parameter_1")},{Expression_component("repetition_parameter_2")}};
     p.set_initialization_list(il);
-    p.set_packed_initialization(true);
     p.add_dimension({{Expression_component("3")},{Expression_component("0")}});
     check_params["multi_repetition_parameter"] = p;
 
@@ -293,7 +292,6 @@ TEST(parameter_extraction, repetition_initialization) {
     p.set_name("mixed_repetition_parameter");
     il = {{Expression_component("1")},{Expression_component("2")},{Expression_component("repetition_parameter_2")}};
     p.set_initialization_list(il);
-    p.set_packed_initialization(true);
     p.add_dimension({{Expression_component("3")},{Expression_component("0")}});
     check_params["mixed_repetition_parameter"] = p;
 
@@ -335,7 +333,6 @@ TEST(parameter_extraction, packed_array) {
             {Expression_component("1'b0")},
             {Expression_component("1'b1")}
     };
-    p.set_packed_initialization(true);
     p.set_initialization_list(il);
     check_params["packed_param"] = p;
 

@@ -117,6 +117,10 @@ public:
     static uint32_t parse_number(const std::string& s);
     std::vector<HDL_Resource> get_entities();
 
+    void enterVariable_dimension(sv2017::Variable_dimensionContext *ctx) override;
+    void exitVariable_dimension(sv2017::Variable_dimensionContext *ctx) override;
+
+
 private:
 
     std::string path;
