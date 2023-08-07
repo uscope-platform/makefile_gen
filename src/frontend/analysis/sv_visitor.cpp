@@ -153,7 +153,12 @@ void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext 
     }
 }
 
+void sv_visitor::enterExpression(sv2017::ExpressionContext *ctx) {
+    params_factory.start_expression_new();
+}
+
 void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
+    params_factory.stop_expression_new();
     if(file_contains_bus_defining_package){
         if(ctx->expression().size()>1){
             if(ctx->operator_plus_minus()== nullptr && ctx->operator_mul_div_mod()== nullptr){
@@ -310,9 +315,7 @@ void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
     auto val = ctx->constant_param_expression()->getText();
 
     auto p_n = ctx->identifier()->getText();
-    if(params_factory.in_expression_context()) {
-        params_factory.stop_expression();
-    } else if(params_factory.in_packed_context()){
+    if(params_factory.in_packed_context()){
         params_factory.stop_packed_assignment();
     } else {
 
@@ -357,6 +360,7 @@ void sv_visitor::exitPrimaryPar(sv2017::PrimaryParContext *ctx) {
 
 void sv_visitor::enterAssignment_pattern(sv2017::Assignment_patternContext *ctx) {
     params_factory.start_initialization_list();
+
 }
 
 void sv_visitor::exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) {
@@ -365,17 +369,14 @@ void sv_visitor::exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) 
 
 
 void sv_visitor::exitPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
-    params_factory.add_array_component();
+    params_factory.close_array_index();
 }
 
 
 
 void sv_visitor::enterConstant_param_expression(sv2017::Constant_param_expressionContext *ctx) {
-
     if(ctx->concatenation() != nullptr){
         params_factory.start_packed_assignment();
-    } else {
-        params_factory.start_expression();
     }
 }
 
@@ -395,6 +396,7 @@ void sv_visitor::enterUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx)
 }
 
 void sv_visitor::exitUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) {
+    auto dbg = ctx->getText();
     params_factory.stop_unpacked_dimension_declaration();
 }
 
@@ -422,4 +424,14 @@ void sv_visitor::exitReplication(sv2017::ReplicationContext *ctx) {
 void sv_visitor::enterReplication_assignment(sv2017::Replication_assignmentContext *ctx) {
     params_factory.start_replication();
 }
+
+void sv_visitor::enterConcatenation(sv2017::ConcatenationContext *ctx) {
+    params_factory.start_concatenation();
+}
+
+void sv_visitor::exitConcatenation(sv2017::ConcatenationContext *ctx) {
+    params_factory.stop_concatenation();
+}
+
+
 

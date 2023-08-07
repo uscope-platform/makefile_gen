@@ -38,8 +38,6 @@ public:
 
     void start_initialization_list();
     void stop_initializaiton_list();
-    void start_expression();
-    void stop_expression();
 
     void start_bit_selection();
     void stop_bit_selection();
@@ -48,37 +46,47 @@ public:
     void stop_unpacked_dimension_declaration();
 
     void close_first_range();
-    void add_array_component();
+    void close_array_index();
 
     void start_param_assignment() { in_param_assignment = true; };
     void stop_param_assignment() { in_param_assignment = false; };
 
-    void start_replication() {in_replication = true;};
+    void start_replication();
     void close_replication_size();
     void stop_replication();
 
 
-    void start_packed_assignment() {in_packed_assignment = true;};
+    void start_expression_new();
+    void stop_expression_new();
+
+    void start_packed_assignment();
     void stop_packed_assignment();
 
-    bool in_expression_context() const { return in_expression; };
+    void start_concatenation();
+    void stop_concatenation();
+
     bool in_packed_context() const {return in_packed_assignment; };
-    bool is_component_relevant() const { return in_initialization_list || in_expression || in_unpacked_declaration || in_packed_assignment; };
+    bool is_component_relevant() const { return in_initialization_list || in_expression_new || in_unpacked_declaration || in_packed_assignment ; };
+
 private:
     bool in_param_assignment = false;
     bool in_initialization_list = false;
-    bool in_expression = false;
+    bool in_expression_new = false;
     bool in_unpacked_declaration = false;
     bool in_replication = false;
     bool in_packed_assignment = false;
+    bool in_concatenation = false;
 
     std::stack<Expression> expression_stack;
     std::vector<Expression> initialization_list;
     Expression replication_components;
-    Expression current_expression;
     Expression bit_selection;
     Expression replication_size;
     std::vector<Expression> concatenation_content;
+
+    Expression new_expression;
+    int expression_level=0;
+    std::stack<int> expression_level_stack;
 };
 
 

@@ -238,9 +238,10 @@ TEST(parameter_extraction, repetition_initialization) {
     std::string test_pattern = R"(
         module test_mod #(
             parameter repetition_size = 2,
-            parameter bit repetition_parameter [1:0]  = '{repetition_size{1}},
-            parameter bit multi_repetition_parameter [3:0]  = '{{repetition_size{1}},{repetition_size{4}}},
-            parameter bit mixed_repetition_parameter [3:0]  = '{1,2,{repetition_size{4}}}
+            parameter bit repetition_parameter_1 [1:0]  = '{repetition_size{1}},
+            parameter bit repetition_parameter_2 [1:0]  = '{repetition_size{4}},
+            parameter bit multi_repetition_parameter [3:0]  = {repetition_parameter_1,repetition_parameter_2},
+            parameter bit mixed_repetition_parameter [3:0]  = {1,2,repetition_parameter_2}
         )();
 
         endmodule
@@ -263,32 +264,38 @@ TEST(parameter_extraction, repetition_initialization) {
 
     p = HDL_parameter();
     p.set_type(expression_parameter);
-    p.set_name("repetition_parameter");
+    p.set_name("repetition_parameter_1");
     std::vector<Expression> il = {{Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("1")}};
     p.set_initialization_list(il);
     p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
-    check_params["repetition_parameter"] = p;
+    check_params["repetition_parameter_1"] = p;
+
+    p = HDL_parameter();
+    p.set_type(expression_parameter);
+    p.set_name("repetition_parameter_2");
+    il = {{Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("4")}};
+    p.set_initialization_list(il);
+    p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
+    check_params["repetition_parameter_2"] = p;
 
 
     p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("multi_repetition_parameter");
-    il = {{Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("1")},
-          {Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("4")}};
+    il = {{Expression_component("repetition_parameter_1")},{Expression_component("repetition_parameter_2")}};
     p.set_initialization_list(il);
+    p.set_packed_initialization(true);
     p.add_dimension({{Expression_component("3")},{Expression_component("0")}});
     check_params["multi_repetition_parameter"] = p;
 
     p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("mixed_repetition_parameter");
-    il = {{Expression_component("1")},{Expression_component("2")},
-          {Expression_component("$repeat_init"),Expression_component("repetition_size"),
-                  Expression_component(","), Expression_component("4")}};
+    il = {{Expression_component("1")},{Expression_component("2")},{Expression_component("repetition_parameter_2")}};
     p.set_initialization_list(il);
+    p.set_packed_initialization(true);
     p.add_dimension({{Expression_component("3")},{Expression_component("0")}});
     check_params["mixed_repetition_parameter"] = p;
-
 
 
     ASSERT_EQ(check_params.size(), parameters.size());
@@ -426,11 +433,13 @@ TEST(parameter_extraction, negative_number_array_init) {
 
     HDL_parameter p = HDL_parameter();
     p.set_type(expression_parameter);
-    p.set_name("negative_param");
-    for(auto &op:{"16'sd32767","-"}){
-        p.add_component(Expression_component(op));
-    }
-    check_params["negative_param"] = p;
+    p.set_name("negative_array_param");
+    std::vector<Expression> il = {{Expression_component("-"),Expression_component("16'sd32767")},{Expression_component("16'sd32767")}};
+    p.set_initialization_list(il);
+    p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
+    check_params["negative_array_param"] = p;
+
+
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
@@ -459,11 +468,13 @@ TEST(parameter_extraction, expression_array_init) {
 
     HDL_parameter p = HDL_parameter();
     p.set_type(expression_parameter);
-    p.set_name("negative_param");
-    for(auto &op:{"16'sd32767","-"}){
-        p.add_component(Expression_component(op));
-    }
-    check_params["negative_param"] = p;
+    p.set_name("expression_array_param");
+    std::vector<Expression> il = {{Expression_component("5"),Expression_component("+"),Expression_component("4")},
+                                  {Expression_component("7"),Expression_component("*"),Expression_component("6")}};
+    p.set_initialization_list(il);
+    p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
+    check_params["expression_array_param"] = p;
+
 
     ASSERT_EQ(check_params.size(), parameters.size());
 

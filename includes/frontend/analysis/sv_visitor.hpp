@@ -66,6 +66,7 @@ public:
     void exitParam_assignment(sv2017::Param_assignmentContext *ctx) override;
     void exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext *ctx) override;
 
+    void enterExpression(sv2017::ExpressionContext *ctx) override;
     void exitExpression(sv2017::ExpressionContext *ctx) override;
     void exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *ctx) override;
     void exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx) override;
@@ -104,6 +105,10 @@ public:
 
     void enterReplication_assignment(sv2017::Replication_assignmentContext *ctx) override;
     void exitReplication_size(sv2017::Replication_sizeContext *ctx) override;
+
+
+    void enterConcatenation(sv2017::ConcatenationContext *ctx) override;
+    void exitConcatenation(sv2017::ConcatenationContext *ctx) override;
 
 
     void enterReplication(sv2017::ReplicationContext *ctx) override;

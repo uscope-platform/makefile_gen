@@ -30,76 +30,52 @@ void HDL_parameters_factory::set_value(const std::string &s) {
 }
 
 void HDL_parameters_factory::add_component(const Expression_component &c) {
-    if(in_replication){
-        replication_components.push_back(c);
-    }else if(in_initialization_list){
-        initialization_list.push_back({c});
-    } else if(in_packed_assignment){
-        initialization_list.push_back({c});
-    }  else if (in_expression || in_unpacked_declaration){
-        current_expression.push_back(c);
-    }else {
-        current_resource.add_component(c);
+    if(in_expression_new){
+        new_expression.push_back(c);
     }
 }
 
 void HDL_parameters_factory::start_initialization_list() {
     in_initialization_list = true;
+    expression_level--; // This is needed because in the grammar there is an expressionb before the list initialization;
 }
 
 
 void HDL_parameters_factory::stop_initializaiton_list() {
-
     if(in_replication){
         stop_replication();
     }
     in_initialization_list = false;
     current_resource.add_initialization_list(initialization_list);
     initialization_list.clear();
-
+    expression_level++;
 }
 
-void HDL_parameters_factory::start_expression() {
-    in_expression = true;
-    current_expression.clear();
-}
-
-void HDL_parameters_factory::stop_expression() {
-    in_expression = false;
-    current_resource.set_expression_components(current_expression);
-    current_expression.clear();
-}
 
 void HDL_parameters_factory::start_bit_selection() {
-    expression_stack.push(current_expression);
-    current_expression.clear();
+    expression_stack.push(new_expression);
+    new_expression.clear();
 }
 
 void HDL_parameters_factory::stop_bit_selection() {
-    bit_selection = current_expression;
-    current_expression = expression_stack.top();
+    bit_selection = new_expression;
+    new_expression = expression_stack.top();
     expression_stack.pop();
 }
 
-void HDL_parameters_factory::add_array_component() {
-    if(in_param_assignment){
-        current_expression.back().add_array_index(bit_selection);
-    }
+void HDL_parameters_factory::close_array_index() {
+    new_expression.back().add_array_index(bit_selection);
 }
 
 void HDL_parameters_factory::close_first_range() {
-    if(in_unpacked_declaration){
-        expression_stack.push(current_expression);
-        current_expression.clear();
-    }
 }
 
 void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
     in_unpacked_declaration = false;
+    auto second_expr = expression_stack.top();
+    expression_stack.pop();
     auto first_expr = expression_stack.top();
     expression_stack.pop();
-    auto second_expr= current_expression;
-    current_expression.clear();
     current_resource.add_dimension({first_expr, second_expr});
 }
 
@@ -108,6 +84,7 @@ void HDL_parameters_factory::stop_replication() {
     replication_components.insert(replication_components.begin(), {Expression_component("$repeat_init")});
     initialization_list.insert(initialization_list.end(), replication_components);
     replication_components.clear();
+
 }
 
 void HDL_parameters_factory::stop_packed_assignment() {
@@ -120,5 +97,51 @@ void HDL_parameters_factory::stop_packed_assignment() {
 }
 
 void HDL_parameters_factory::close_replication_size() {
-    replication_components.push_back(Expression_component(","));
+    replication_components.emplace_back(",");
 }
+
+void HDL_parameters_factory::start_expression_new() {
+    in_expression_new = true;
+    expression_level++;
+}
+
+void HDL_parameters_factory::stop_expression_new() {
+
+    expression_level--;
+    if(expression_level == 0){
+        if(!new_expression.empty()){
+             if(in_unpacked_declaration) {
+                 expression_stack.push(new_expression);
+             } else if(in_replication){
+                 replication_components.insert(replication_components.end(), new_expression.begin(), new_expression.end());
+            } else if(in_concatenation || in_packed_assignment || in_initialization_list){
+                initialization_list.push_back(new_expression);
+            } else {
+                current_resource.set_expression_components(new_expression);
+            }
+        }
+        new_expression.clear();
+        in_expression_new = false;
+    }
+}
+
+void HDL_parameters_factory::start_packed_assignment() {
+    in_packed_assignment = true;
+}
+
+void HDL_parameters_factory::start_concatenation() {
+    expression_level_stack.push(expression_level);
+    expression_level = 0;
+    in_concatenation = true;
+}
+
+void HDL_parameters_factory::stop_concatenation() {
+    expression_level = expression_level_stack.top();
+    expression_level_stack.pop();
+    in_concatenation = false;
+}
+
+void HDL_parameters_factory::start_replication() {
+    in_replication = true;
+}
+
