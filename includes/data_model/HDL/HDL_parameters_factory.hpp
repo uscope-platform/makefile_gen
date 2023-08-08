@@ -55,7 +55,8 @@ public:
     void close_replication_size();
     void stop_replication();
 
-
+    void start_replication_assignment() {in_replication_assignment = true;};
+    void stop_replication_assignment();
     void start_expression_new();
     void stop_expression_new();
 
@@ -72,6 +73,8 @@ public:
     bool is_component_relevant() const { return in_initialization_list || in_expression_new || in_unpacked_declaration || in_packed_assignment ; };
 
 private:
+    void close_init_list_dimension();
+
     bool in_param_assignment = false;
     bool in_initialization_list = false;
     bool in_expression_new = false;
@@ -80,13 +83,14 @@ private:
     bool in_packed_assignment = false;
     bool in_concatenation = false;
     bool in_packed_dimension = false;
+    bool in_replication_assignment = false;
 
     std::stack<Expression> expression_stack;
-    std::vector<Expression> initialization_list;
+    std::vector<std::vector<Expression>> initialization_list;
     Expression replication_components;
     Expression bit_selection;
     Expression replication_size;
-    std::vector<Expression> concatenation_content;
+    std::vector<Expression> current_dimension_init;
 
     Expression new_expression;
     int expression_level=0;

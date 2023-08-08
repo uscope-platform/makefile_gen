@@ -108,9 +108,9 @@ public:
 
     friend void PrintTo(const HDL_parameter& point, std::ostream* os);
 
-    void set_initialization_list(std::vector<Expression> &list) {initialization_list = list;};
-    void add_initialization_list(std::vector<Expression> &list);
-    std::vector<Expression> get_initialization_list(){ return initialization_list;};
+    void set_initialization_list(std::vector<std::vector<Expression>> &list) {initialization_list = list;};
+    void append_initialization_list(std::vector<std::vector<Expression>> &list);
+    std::vector<std::vector<Expression>> get_initialization_list(){ return initialization_list;};
 
 
     void add_dimension(const dimension_t &e) {array_dimensions.push_back(e);};
@@ -144,7 +144,7 @@ private:
 
 
     Expression expression_components;
-    std::vector<Expression> initialization_list;
+    std::vector<std::vector<Expression>> initialization_list;
     std::vector<dimension_t> array_dimensions;
 };
 

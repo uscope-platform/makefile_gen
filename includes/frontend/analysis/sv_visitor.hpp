@@ -104,6 +104,7 @@ public:
     void enterConstant_param_expression(sv2017::Constant_param_expressionContext *ctx) override;
 
     void enterReplication_assignment(sv2017::Replication_assignmentContext *ctx) override;
+    void exitReplication_assignment(sv2017::Replication_assignmentContext *ctx) override;
     void exitReplication_size(sv2017::Replication_sizeContext *ctx) override;
 
 

@@ -22,6 +22,7 @@ void HDL_parameters_factory::new_parameter() {
       for(auto &dim:packed_dimensions){
           current_resource.add_dimension(dim);
       }
+      packed_dimensions.clear();
 }
 
 HDL_parameter HDL_parameters_factory::get_parameter() {
@@ -49,7 +50,11 @@ void HDL_parameters_factory::stop_initializaiton_list() {
         stop_replication();
     }
     in_initialization_list = false;
-    current_resource.add_initialization_list(initialization_list);
+    if(!current_dimension_init.empty()){
+        initialization_list.push_back(current_dimension_init);
+        current_dimension_init.clear();
+    }
+    current_resource.append_initialization_list(initialization_list);
     initialization_list.clear();
     expression_level++;
 }
@@ -87,14 +92,25 @@ void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
 void HDL_parameters_factory::stop_replication() {
     in_replication = false;
     replication_components.insert(replication_components.begin(), {Expression_component("$repeat_init")});
-    initialization_list.insert(initialization_list.end(), replication_components);
+    current_dimension_init.insert(current_dimension_init.end(), replication_components);
     replication_components.clear();
+    initialization_list.push_back(current_dimension_init);
+    current_dimension_init.clear();
+    expression_level++;
+}
 
+void HDL_parameters_factory::stop_replication_assignment() {
+    in_replication_assignment = false;
+    replication_components.insert(replication_components.begin(), {Expression_component("$repeat_init")});
+    current_dimension_init.insert(current_dimension_init.end(), replication_components);
+    replication_components.clear();
 }
 
 void HDL_parameters_factory::stop_packed_assignment() {
     if(in_packed_assignment && !in_initialization_list){
-        current_resource.add_initialization_list(initialization_list);
+        initialization_list.push_back(current_dimension_init);
+        current_dimension_init.clear();
+        current_resource.append_initialization_list(initialization_list);
         in_packed_assignment = false;
         initialization_list.clear();
     }
@@ -114,12 +130,14 @@ void HDL_parameters_factory::stop_expression_new() {
     expression_level--;
     if(expression_level == 0){
         if(!new_expression.empty()){
-             if(in_unpacked_declaration || in_packed_dimension) {
-                 expression_stack.push(new_expression);
-             } else if(in_replication){
-                 replication_components.insert(replication_components.end(), new_expression.begin(), new_expression.end());
-            } else if(in_concatenation || in_packed_assignment || in_initialization_list){
-                initialization_list.push_back(new_expression);
+            if(in_replication||in_replication_assignment) {
+                replication_components.insert(replication_components.end(), new_expression.begin(), new_expression.end());
+            } else if(in_unpacked_declaration || in_packed_dimension){
+                expression_stack.push(new_expression);
+            } else if(in_packed_assignment || in_initialization_list) {
+                 current_dimension_init.push_back(new_expression);
+            } else if(in_concatenation) {
+                current_dimension_init.push_back(new_expression);
             } else {
                 current_resource.set_expression_components(new_expression);
             }
@@ -142,11 +160,15 @@ void HDL_parameters_factory::start_concatenation() {
 void HDL_parameters_factory::stop_concatenation() {
     expression_level = expression_level_stack.top();
     expression_level_stack.pop();
+    if(in_initialization_list){
+        close_init_list_dimension();
+    }
     in_concatenation = false;
 }
 
 void HDL_parameters_factory::start_replication() {
     in_replication = true;
+    expression_level--;
 }
 
 void HDL_parameters_factory::start_unpacked_dimension_declaration() {
@@ -169,4 +191,12 @@ void HDL_parameters_factory::stop_packed_dimension() {
         packed_dimensions.push_back({first_expr, second_expr, true});
     }
 }
+
+void HDL_parameters_factory::close_init_list_dimension() {
+    if(!current_dimension_init.empty()){
+        initialization_list.push_back(current_dimension_init);
+        current_dimension_init.clear();
+    }
+}
+
 

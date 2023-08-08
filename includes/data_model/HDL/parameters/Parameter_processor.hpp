@@ -38,7 +38,7 @@ public:
 
     std::unordered_map<std::string, HDL_parameter> process_initialization_list(
         const std::string& param_name,
-        std::vector<std::vector<Expression_component>> &il,
+        std::vector<std::vector<Expression>> &il,
         std::vector<dimension_t> &dims
     );
 

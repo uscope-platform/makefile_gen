@@ -306,19 +306,21 @@ void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
 std::unordered_map<std::string, HDL_parameter>
 Parameter_processor::process_initialization_list(
         const std::string& param_name,
-        std::vector<std::vector<Expression_component>> &raw_il,
+        std::vector<std::vector<Expression>> &raw_il,
         std::vector<dimension_t> &dims) {
 
     auto il = raw_il;
-
+    std::unordered_map<std::string, HDL_parameter> ret;
+/*
     std::reverse(il.begin(),il.end());
 
 
-    std::unordered_map<std::string, HDL_parameter> ret;
+
     bool packing_status = dims[0].packed;
     for(int i = 1; i<dims.size();i++){
         if(packing_status != dims[i].packed){
-            throw std::invalid_argument("ERROR: mixed packed and unpacked parameter initialization is not supported yet");
+            packing_status = false;
+            break;
         }
     }
 
@@ -399,7 +401,7 @@ Parameter_processor::process_initialization_list(
         }
     }
 
-
+*/
     return ret;
 }
 

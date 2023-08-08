@@ -20,7 +20,7 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
-TEST(parameter_extraction, shunting_yard_priority){
+TEST(shunting_yard, shunting_yard_priority){
 
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
@@ -46,7 +46,7 @@ TEST(parameter_extraction, shunting_yard_priority){
 
 }
 
-TEST(parameter_extraction, shunting_yard_parenthesis){
+TEST(shunting_yard, shunting_yard_parenthesis){
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     Parameter_processor p({},d_store);
@@ -95,7 +95,7 @@ TEST(parameter_extraction, shunting_yard_parenthesis){
     ASSERT_EQ(rpn_expr_2, expected_result_2);
 }
 
-TEST(parameter_extraction, shunting_yard_function){
+TEST(shunting_yard, shunting_yard_function){
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     Parameter_processor p({},d_store);

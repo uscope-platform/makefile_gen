@@ -421,8 +421,13 @@ void sv_visitor::exitReplication(sv2017::ReplicationContext *ctx) {
 }
 
 void sv_visitor::enterReplication_assignment(sv2017::Replication_assignmentContext *ctx) {
-    params_factory.start_replication();
+    params_factory.start_replication_assignment();
 }
+
+void sv_visitor::exitReplication_assignment(sv2017::Replication_assignmentContext *ctx) {
+    params_factory.stop_replication_assignment();
+}
+
 
 void sv_visitor::enterConcatenation(sv2017::ConcatenationContext *ctx) {
     params_factory.start_concatenation();
@@ -439,6 +444,7 @@ void sv_visitor::enterVariable_dimension(sv2017::Variable_dimensionContext *ctx)
 void sv_visitor::exitVariable_dimension(sv2017::Variable_dimensionContext *ctx) {
     params_factory.stop_packed_dimension();
 }
+
 
 
 

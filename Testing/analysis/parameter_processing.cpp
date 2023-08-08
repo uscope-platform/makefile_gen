@@ -608,6 +608,62 @@ TEST(parameter_processing, expression_array_init) {
 
 }
 
+
+
+TEST(parameter_processing, mixed_packed_unpacked_init) {
+    std::string test_pattern = R"(
+    module test_mod #(
+      parameter reg [7:0] param_a [1:0] = '{{1'b1,1'b1,1'b1,1'b0,1'b0,1'b0,1'b1,1'b0}, {1'b0,1'b0,1'b0,1'b1,1'b1,1'b1,1'b0,1'b1}},
+      parameter reg [7:0] param_b [1:0] = '{{8{1'b1}},{8{1'b0}}}
+    )();
+
+    )";
+
+
+    auto parameters = run_test(test_pattern);
+
+    std::map<std::string, HDL_parameter> check_params;
+
+
+    typedef struct {
+        std::string name;
+        std::vector<std::string> components;
+        parameter_type type;
+        int64_t value;
+    }param_check_t;
+
+    std::vector<param_check_t> vect_params = {
+            {"param_a_0", {"7", "*", "6"}, numeric_parameter, 29},
+            {"param_a_1", {"7", "*", "6"}, numeric_parameter, 226},
+            {"param_b_0", {"7", "*", "6"}, numeric_parameter, 0},
+            {"param_b_1", {"7", "*", "6"}, numeric_parameter, 255}
+    };
+
+    HDL_parameter par = HDL_parameter();
+    for(auto & vt : vect_params){
+        par = HDL_parameter();
+        par.set_name(vt.name);
+        for(auto &cpt:vt.components){
+            par.add_component(Expression_component(cpt));
+        }
+        par.set_type(vt.type);
+        if(vt.type == numeric_parameter){
+            par.set_value(vt.value);
+        }
+
+        check_params[vt.name] = par;
+    }
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item.first));
+        ASSERT_EQ(item.second, parameters[item.first]);
+    }
+
+}
+
+
 /*
 TEST(parameter_processing, verilog_parameter_processing_override){
 

@@ -253,8 +253,13 @@ std::string HDL_parameter::to_string() const {
     auto il = initialization_list;
 
     for(auto &item:il){
-        auto val = Expression_component::print_expression(item);
-        result += val + ", ";
+        result += "{";
+        for(auto &dim:item){
+            result += Expression_component::print_expression(dim);
+            if (&dim != &item.back()) result += ", ";
+
+        }
+        result += "}";
     }
 
     result += "\n  ARRAY DIMENSIONS:\n    ";
@@ -274,7 +279,7 @@ std::string HDL_parameter::to_string() const {
     return result;
 }
 
-void HDL_parameter::add_initialization_list(std::vector<Expression> &list) {
+void HDL_parameter::append_initialization_list(std::vector<std::vector<Expression>> &list) {
     initialization_list.insert(initialization_list.end(), list.begin(), list.end());
 }
 
