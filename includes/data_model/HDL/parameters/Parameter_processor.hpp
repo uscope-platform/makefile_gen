@@ -54,6 +54,28 @@ public:
     int64_t get_component_value(Expression_component &ec);
 private:
 
+    std::vector<HDL_parameter> process_repeat_initialization(const std::string &param_name, Expression &e, uint64_t last_item_addr);
+
+    std::unordered_map<std::string, HDL_parameter> process_complete_2d_init_list(
+            const std::string& param_name,
+            std::vector<std::vector<Expression>> &il,
+            std::vector<dimension_t> &dims
+    );
+
+    std::unordered_map<std::string, HDL_parameter> process_simple_2d_init_list(
+            const std::string& param_name,
+            std::vector<std::vector<Expression>> &il,
+            std::vector<dimension_t> &dims
+    );
+
+    std::unordered_map<std::string, HDL_parameter> process_1d_init_list(
+            const std::string& param_name,
+            std::vector<std::vector<Expression>> &il,
+            std::vector<dimension_t> &dims
+    );
+
+    uint64_t get_dimension_size(dimension_t &d);
+
     std::unordered_map<std::string, int64_t> working_param_values;
     std::unordered_map<std::string, std::vector<dimension_t>> array_dimensions;
     std::unordered_map<std::string, int64_t> external_parameters;

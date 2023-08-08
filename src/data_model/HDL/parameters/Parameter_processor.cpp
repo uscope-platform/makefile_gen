@@ -309,8 +309,18 @@ Parameter_processor::process_initialization_list(
         std::vector<std::vector<Expression>> &raw_il,
         std::vector<dimension_t> &dims) {
 
-    auto il = raw_il;
     std::unordered_map<std::string, HDL_parameter> ret;
+
+
+    if(raw_il.size() == 2 && dims.size() == 2){
+        ret = process_complete_2d_init_list(param_name, raw_il, dims);
+    } else if(raw_il.size()== 1 && dims.size() == 2) {
+        ret = process_simple_2d_init_list(param_name, raw_il, dims);
+    } else if(raw_il.size() == 1 && dims.size() == 1){
+        ret = process_1d_init_list(param_name, raw_il, dims);
+    } else{
+        throw std::invalid_argument("Error: Unsupported multidimentional array");
+    }
 /*
     std::reverse(il.begin(),il.end());
 
@@ -340,29 +350,6 @@ Parameter_processor::process_initialization_list(
         int64_t last_list_item = 0;
         for(int i = 0; i<il.size(); i++){
             if(il[i][0].get_string_value() == "$repeat_init"){
-                Expression init_size_expr, init_val_expr;
-                bool size_sect = true;
-                for(int j = 1; j<il[i].size(); j++){
-                        if(il[i][j].get_string_value() == ","){
-                            size_sect = false;
-                        } else if(size_sect){
-                            init_size_expr.push_back(il[i][j]);
-                        } else {
-                            init_val_expr.push_back(il[i][j]);
-                        }
-                }
-                auto init_size = process_expression(expr_vector_to_rpn(init_size_expr));
-                auto init_val = process_expression(expr_vector_to_rpn(init_val_expr));
-
-                for(int64_t j = last_list_item; j<last_list_item+init_size; j++){
-                    HDL_parameter p;
-                    auto name = param_name+"_"+std::to_string(j);
-                    p.set_name(name);
-                    p.set_expression_components({Expression_component(std::to_string(init_val))});
-                    array_parameter_values[param_name].push_back(init_val);
-                    ret[name] = p;
-                }
-                last_list_item += init_size;
 
             } else{
                 if(il[i][0].get_type() == string_component){
@@ -437,8 +424,13 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec) {
 
     std::string param_name;
     if(!ec.get_array_index().empty()){
-        auto comp = get_flattened_array_index(ec.get_string_value(), ec.get_array_index());
-        param_name = ec.get_string_value() + "_" + std::to_string(comp);
+            param_name = ec.get_string_value();
+            std::vector<int64_t> array_index_values;
+            for(auto &item:ec.get_array_index()){
+                auto rpn_expr = expr_vector_to_rpn(item);
+                auto res = process_expression(rpn_expr);
+                param_name += "_"+ std::to_string(res);
+            }
     } else{
         param_name = ec.get_string_value();
     }
@@ -456,4 +448,203 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec) {
     return val;
 }
 
+std::unordered_map<std::string, HDL_parameter>
+Parameter_processor::process_complete_2d_init_list(const std::string &param_name,
+                                                   std::vector<std::vector<Expression>> &il,
+                                                   std::vector<dimension_t> &dims) {
+    std::vector<std::vector<int64_t>> raw_values;
 
+    std::unordered_map<std::string, HDL_parameter> ret_val;
+
+    for(int i = 0; i<il.size(); i++){
+        raw_values.push_back({});
+        for(auto item:il[i]){
+            if(item[0].get_string_value()=="$repeat_init"){
+
+                Expression init_size_expr, init_val_expr;
+                bool size_sect = true;
+                for(int j = 1; j<item.size(); j++){
+                    if(item[j].get_string_value() == ","){
+                        size_sect = false;
+                    } else if(size_sect){
+                        init_size_expr.push_back(item[j]);
+                    } else {
+                        init_val_expr.push_back(item[j]);
+                    }
+                }
+                auto init_size = process_expression(expr_vector_to_rpn(init_size_expr));
+                auto init_val = process_expression(expr_vector_to_rpn(init_val_expr));
+
+                for(int64_t j = 0; j<init_size; j++){
+                    raw_values[i].push_back(init_val);
+                }
+            } else{
+                raw_values[i].push_back(process_expression(item));
+            }
+        }
+
+    }
+
+    if(dims[0].packed){
+        std::vector<int64_t> values;
+        for(int j = 0; j<raw_values.size(); j++){
+            int64_t val = 0;
+            auto packed_values = raw_values[j];
+            std::reverse(packed_values.begin(), packed_values.end());
+            for(int i = 0; i<packed_values.size(); i++){
+                val += (int64_t)std::pow(2, i)*packed_values[i];
+            }
+            values.push_back(val);
+        }
+        for(int i = 0; i< values.size(); i++){
+            HDL_parameter p;
+            p.set_name(param_name + "_" + std::to_string(i));
+            p.set_expression_components({Expression_component(std::to_string(values[values.size()-1-i]))});
+            array_parameter_values[param_name].push_back(values[values.size()-1-i]);
+            ret_val[param_name + "_" + std::to_string(i)] = p;
+        }
+
+    } else{
+        std::vector<std::vector<uint64_t>> raw_values;
+
+        auto outer_dim = get_dimension_size(dims[1]);
+        auto inner_dim = get_dimension_size(dims[0]);
+
+        for(int i = 0; i<outer_dim; i++){
+            raw_values.push_back({});
+            for(int j = 0; j<inner_dim; j++){
+                if(il[i][j][0].get_string_value() == "$repeat_init"){
+                    int i = 0;
+                }
+                raw_values[i].push_back(process_expression(il[i][j]));
+            }
+        }
+        for(int i = 0; i<outer_dim; i++){
+            for(int j = 0; j<inner_dim; j++){
+                HDL_parameter p;
+                auto name = param_name+"_"+std::to_string(i) + "_" +std::to_string(j);
+                p.set_name(name);
+                p.set_expression_components(il[outer_dim-1-i][inner_dim-1-j]);
+                p.set_value(raw_values[outer_dim-1-i][inner_dim-1-j]);
+                array_parameter_values[param_name].push_back(raw_values[outer_dim-1-i][inner_dim-1-j]);
+                ret_val[name] = p;
+            }
+        }
+    }
+
+    return ret_val;
+}
+
+std::unordered_map<std::string, HDL_parameter>
+Parameter_processor::process_simple_2d_init_list(const std::string &param_name,
+                                                 std::vector<std::vector<Expression>> &il,
+                                                 std::vector<dimension_t> &dims) {
+    throw std::invalid_argument("SIMPLE 2D LIST NOT IMPLEMENTED YET");
+}
+
+std::unordered_map<std::string, HDL_parameter>
+Parameter_processor::process_1d_init_list(const std::string &param_name, std::vector<std::vector<Expression>> &il,
+                                          std::vector<dimension_t> &dims) {
+
+    std::unordered_map<std::string, HDL_parameter> ret_val;
+    if(dims[0].packed){
+        int64_t val = 0;
+        auto packed_values = il[0];
+        std::reverse(packed_values.begin(), packed_values.end());
+        for(int i = 0; i<packed_values.size(); i++){
+            val += (int64_t)std::pow(2, i)* process_expression(expr_vector_to_rpn(packed_values[i]));
+        }
+        HDL_parameter p;
+        p.set_name(param_name);
+        p.set_expression_components({Expression_component(std::to_string(val))});
+        p.set_value(val);
+        array_parameter_values[param_name].push_back(val);
+        ret_val[param_name] = p;
+    } else {
+
+        auto reverse_il = il[0];
+        std::reverse(reverse_il.begin(), reverse_il.end());
+
+        auto arr_size = get_dimension_size(dims[0]);
+
+        int last_item_addr = 0;
+        for(int i = 0; ret_val.size()<arr_size; i++){
+
+            if(reverse_il[i][0].get_string_value() == "$repeat_init"){
+                auto expanded_list = process_repeat_initialization(param_name, reverse_il[i], last_item_addr);
+                for(auto item:expanded_list){
+                    ret_val[item.get_name()] = item;
+                    array_parameter_values[param_name].push_back(item.get_numeric_value());
+                }
+                last_item_addr += expanded_list.size();
+            } else{
+                if(reverse_il[i][0].get_type() == string_component){
+                    if(array_parameter_values.contains(reverse_il[i][0].get_string_value())){
+                        auto array_to_concat = array_parameter_values[reverse_il[i][0].get_string_value()];
+
+                        for(int64_t j = last_item_addr; j<last_item_addr+array_to_concat.size(); j++){
+                            HDL_parameter p;
+                            auto name = param_name+"_"+std::to_string(j);
+                            p.set_name(name);
+                            auto val = array_to_concat[j-last_item_addr];
+                            p.set_expression_components({Expression_component(std::to_string(val))});
+                            array_parameter_values[param_name].push_back(val);
+                            ret_val[name] = p;
+                        }
+                        last_item_addr += array_to_concat.size();
+                    } else{
+                        throw Parameter_processor_Exception();
+                    }
+
+                } else{
+                    HDL_parameter p;
+                    auto name = param_name+"_"+std::to_string(last_item_addr);
+                    p.set_name(name);
+                    p.set_expression_components(reverse_il[i]);
+                    auto val = process_expression(expr_vector_to_rpn(reverse_il[i]));
+                    p.set_value(val);
+                    array_parameter_values[param_name].push_back(val);
+                    ret_val[name] = p;
+                    last_item_addr++;
+                }
+            }
+
+
+        }
+        int i = 0;
+    }
+
+
+    return ret_val;
+}
+
+uint64_t Parameter_processor::get_dimension_size(dimension_t &d) {
+    return std::max(process_expression(expr_vector_to_rpn(d.first_bound)), process_expression(expr_vector_to_rpn(d.second_bound)))+1;
+}
+
+std::vector<HDL_parameter> Parameter_processor::process_repeat_initialization(const std::string &param_name, Expression &e, uint64_t last_item_addr) {
+    std::vector<HDL_parameter> ret;
+    Expression init_size_expr, init_val_expr;
+    bool size_sect = true;
+    for(int j = 1; j<e.size(); j++){
+        if(e[j].get_string_value() == ","){
+            size_sect = false;
+        } else if(size_sect){
+            init_size_expr.push_back(e[j]);
+        } else {
+            init_val_expr.push_back(e[j]);
+        }
+    }
+    auto init_size = process_expression(expr_vector_to_rpn(init_size_expr));
+    auto init_val = process_expression(expr_vector_to_rpn(init_val_expr));
+
+    for(int64_t j = last_item_addr; j<last_item_addr+init_size; j++){
+        HDL_parameter p;
+        auto name = param_name+"_"+std::to_string(last_item_addr+j);
+        p.set_name(name);
+        p.set_expression_components({Expression_component(std::to_string(init_val))});
+        p.set_value(init_val);
+        ret.push_back(p);
+    }
+    return ret;
+}

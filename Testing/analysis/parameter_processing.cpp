@@ -258,10 +258,10 @@ TEST(parameter_processing, multidimensional_array_expression) {
     }param_check_t;
 
     std::vector<param_check_t> vect_params = {
-            {"multidim_array_parameter_0", {"6"}, numeric_parameter, 6},
-            {"multidim_array_parameter_1", {"5"}, numeric_parameter, 5},
-            {"multidim_array_parameter_2", {"32"}, numeric_parameter, 32},
-            {"multidim_array_parameter_3", {"32"}, numeric_parameter, 32},
+            {"multidim_array_parameter_0_0", {"6"}, numeric_parameter, 6},
+            {"multidim_array_parameter_0_1", {"5"}, numeric_parameter, 5},
+            {"multidim_array_parameter_1_0", {"32"}, numeric_parameter, 32},
+            {"multidim_array_parameter_1_1", {"32"}, numeric_parameter, 32},
             {"repetition_size", {"2"}, numeric_parameter, 2}
     };
 
@@ -616,7 +616,7 @@ TEST(parameter_processing, mixed_packed_unpacked_init) {
       parameter reg [7:0] param_a [1:0] = '{{1'b1,1'b1,1'b1,1'b0,1'b0,1'b0,1'b1,1'b0}, {1'b0,1'b0,1'b0,1'b1,1'b1,1'b1,1'b0,1'b1}},
       parameter reg [7:0] param_b [1:0] = '{{8{1'b1}},{8{1'b0}}}
     )();
-
+    endmodule
     )";
 
 
@@ -633,10 +633,10 @@ TEST(parameter_processing, mixed_packed_unpacked_init) {
     }param_check_t;
 
     std::vector<param_check_t> vect_params = {
-            {"param_a_0", {"7", "*", "6"}, numeric_parameter, 29},
-            {"param_a_1", {"7", "*", "6"}, numeric_parameter, 226},
-            {"param_b_0", {"7", "*", "6"}, numeric_parameter, 0},
-            {"param_b_1", {"7", "*", "6"}, numeric_parameter, 255}
+            {"param_a_0", {"29"}, numeric_parameter, 29},
+            {"param_a_1", {"226"}, numeric_parameter, 226},
+            {"param_b_0", {"0"}, numeric_parameter, 0},
+            {"param_b_1", {"255"}, numeric_parameter, 255}
     };
 
     HDL_parameter par = HDL_parameter();
