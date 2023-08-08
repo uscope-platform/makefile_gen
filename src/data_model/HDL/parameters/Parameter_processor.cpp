@@ -103,7 +103,9 @@ HDL_parameter Parameter_processor::process_parameter(const HDL_parameter &par) {
         throw std::runtime_error("PARAMETER PROCESSING ERROR:\n Empty parameter");
     }
 
-
+    if(par.get_type() == numeric_parameter){
+        return return_par;
+    }
     auto value = process_expression(components);
     return_par.set_value(value);
     return_par.set_type(numeric_parameter);
@@ -181,25 +183,23 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
             evaluator_stack.push(i);
         } else {
             int64_t result;
-            if(processed_rpn.size()== 2 && processed_rpn[1].get_type()== operator_component){
-                // THE EXPRESSION INDICATES A SIGNED NUMBER DEFINITION
+            if(i.get_operator_type() == Expression_component::unary_operator){
                 auto op = get_component_value(evaluator_stack.top());
-                result = evaluate_binary_expression(0, op, i.get_string_value());
+                result = evaluate_unary_expression(op, i.get_string_value());
                 evaluator_stack.pop();
-            } else{
-                if(i.get_operator_type() == Expression_component::unary_operator){
-                    auto op = get_component_value(evaluator_stack.top());
-                    result = evaluate_unary_expression(op, i.get_string_value());
+            } else if(i.get_operator_type() == Expression_component::binary_operator){
+                int64_t op_a;
+                auto op_b = get_component_value(evaluator_stack.top());
+                evaluator_stack.pop();
+                if(processed_rpn.size()==2)
+                    op_a = 0;
+                else {
+                    op_a = get_component_value(evaluator_stack.top());
                     evaluator_stack.pop();
-                } else if(i.get_operator_type() == Expression_component::binary_operator){
-                    auto op_b = get_component_value(evaluator_stack.top());
-                    evaluator_stack.pop();
-                    auto op_a = get_component_value(evaluator_stack.top());
-                    evaluator_stack.pop();
-                    result = evaluate_binary_expression(op_a, op_b, i.get_raw_string_value());
                 }
-            }
 
+                result = evaluate_binary_expression(op_a, op_b, i.get_raw_string_value());
+            }
             evaluator_stack.emplace(result);
         }
     }
@@ -383,6 +383,7 @@ Parameter_processor::process_initialization_list(
                     p.set_name(name);
                     p.set_expression_components(il[i]);
                     auto val = process_expression(expr_vector_to_rpn(il[i]));
+                    p.set_value(val);
                     array_parameter_values[param_name].push_back(val);
                     ret[name] = p;
                     last_list_item++;

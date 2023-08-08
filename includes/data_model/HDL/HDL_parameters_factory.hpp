@@ -91,6 +91,8 @@ private:
     Expression new_expression;
     int expression_level=0;
     std::stack<int> expression_level_stack;
+
+    std::vector<dimension_t> packed_dimensions;
 };
 
 

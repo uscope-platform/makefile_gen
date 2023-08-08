@@ -512,7 +512,7 @@ TEST(parameter_processing, negative_number_parameters) {
 TEST(parameter_processing, negative_number_array_init) {
     std::string test_pattern = R"(
         module test_mod #(
-             //parameter negative_array_param [1:0] = '{-16'sd32767, 16'sd32767}
+             parameter negative_array_param [1:0] = '{-16'sd32767, 16'sd32767}
         )();
         endmodule
     )";
@@ -529,7 +529,7 @@ TEST(parameter_processing, negative_number_array_init) {
     }param_check_t;
 
     std::vector<param_check_t> vect_params = {
-            {"negative_array_param_0", {"16'sd32767","-"}, numeric_parameter, -32767},
+            {"negative_array_param_0", {"-", "16'sd32767"}, numeric_parameter, -32767},
             {"negative_array_param_1", {"16'sd32767"}, numeric_parameter, 32767},
     };
 
@@ -561,26 +561,43 @@ TEST(parameter_processing, negative_number_array_init) {
 TEST(parameter_processing, expression_array_init) {
     std::string test_pattern = R"(
         module test_mod #(
-             //parameter expression_array_param [1:0] = '{5+4, 7*6}
+             parameter integer expression_array_param [1:0] = '{5+4, 7*6}
         )();
         endmodule
     )";
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
-    auto resource = analyzer.analyze()[0];
-    auto parameters = resource.get_parameters();
+
+    auto parameters = run_test(test_pattern);
 
     std::map<std::string, HDL_parameter> check_params;
 
 
-    HDL_parameter p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("negative_param");
-    for(auto &op:{"16'sd32767","-"}){
-        p.add_component(Expression_component(op));
+    typedef struct {
+        std::string name;
+        std::vector<std::string> components;
+        parameter_type type;
+        int64_t value;
+    }param_check_t;
+
+    std::vector<param_check_t> vect_params = {
+            {"expression_array_param_0", {"5","+","4"}, numeric_parameter, 9},
+            {"expression_array_param_1", {"7", "*", "6"}, numeric_parameter, 42},
+    };
+
+    HDL_parameter par = HDL_parameter();
+    for(auto & vt : vect_params){
+        par = HDL_parameter();
+        par.set_name(vt.name);
+        for(auto &cpt:vt.components){
+            par.add_component(Expression_component(cpt));
+        }
+        par.set_type(vt.type);
+        if(vt.type == numeric_parameter){
+            par.set_value(vt.value);
+        }
+
+        check_params[vt.name] = par;
     }
-    check_params["negative_param"] = p;
 
     ASSERT_EQ(check_params.size(), parameters.size());
 

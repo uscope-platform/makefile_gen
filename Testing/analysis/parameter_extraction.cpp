@@ -333,6 +333,8 @@ TEST(parameter_extraction, packed_array) {
             {Expression_component("1'b0")},
             {Expression_component("1'b1")}
     };
+    dimension_t  d = {{Expression_component("7")}, {Expression_component("0")}, true};
+    p.add_dimension(d);
     p.set_initialization_list(il);
     check_params["packed_param"] = p;
 

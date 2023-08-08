@@ -19,6 +19,9 @@
 void HDL_parameters_factory::new_parameter() {
       resources_factory_base<HDL_parameter>::new_basic_resource();
       current_resource.set_type(expression_parameter);
+      for(auto &dim:packed_dimensions){
+          current_resource.add_dimension(dim);
+      }
 }
 
 HDL_parameter HDL_parameters_factory::get_parameter() {
@@ -157,14 +160,13 @@ void HDL_parameters_factory::start_packed_dimension() {
 }
 
 void HDL_parameters_factory::stop_packed_dimension() {
-
     if(in_packed_dimension){
         in_packed_dimension = false;
         auto second_expr = expression_stack.top();
         expression_stack.pop();
         auto first_expr = expression_stack.top();
         expression_stack.pop();
-        current_resource.add_dimension({first_expr, second_expr, true});
+        packed_dimensions.push_back({first_expr, second_expr, true});
     }
 }
 
