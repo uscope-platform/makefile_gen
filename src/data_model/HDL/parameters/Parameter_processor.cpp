@@ -306,8 +306,13 @@ void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
 std::unordered_map<std::string, HDL_parameter>
 Parameter_processor::process_initialization_list(
         const std::string& param_name,
-        std::vector<std::vector<Expression_component>> &il,
+        std::vector<std::vector<Expression_component>> &raw_il,
         std::vector<dimension_t> &dims) {
+
+    auto il = raw_il;
+
+    std::reverse(il.begin(),il.end());
+
 
     std::unordered_map<std::string, HDL_parameter> ret;
     bool packing_status = dims[0].packed;
@@ -321,7 +326,7 @@ Parameter_processor::process_initialization_list(
 
         int64_t val = 0;
         for(int i = 0; i<il.size(); i++){
-            auto init_val = process_expression(il[il.size()-1-i]);
+            auto init_val = process_expression(il[i]);
             val += (int64_t)std::pow(2, i)*init_val;
         }
         HDL_parameter p;
@@ -379,7 +384,7 @@ Parameter_processor::process_initialization_list(
 
                 } else {
                     HDL_parameter p;
-                    auto name = param_name+"_"+std::to_string(i);
+                    auto name = param_name+"_"+std::to_string(last_list_item);
                     p.set_name(name);
                     p.set_expression_components(il[i]);
                     auto val = process_expression(expr_vector_to_rpn(il[i]));

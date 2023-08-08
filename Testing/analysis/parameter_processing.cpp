@@ -189,8 +189,8 @@ TEST(parameter_processing, array_expression) {
     }param_check_t;
 
     std::vector<param_check_t> vect_params = {
-            {"array_parameter_0", {"32"}, numeric_parameter, 32},
-            {"array_parameter_1", {"5"}, numeric_parameter, 5},
+            {"array_parameter_0", {"5"}, numeric_parameter, 5},
+            {"array_parameter_1", {"32"}, numeric_parameter, 32},
             {"sv_numeric_p", {"5'o10"}, numeric_parameter, 8},
     };
 
@@ -258,10 +258,10 @@ TEST(parameter_processing, multidimensional_array_expression) {
     }param_check_t;
 
     std::vector<param_check_t> vect_params = {
-            {"multidim_array_parameter_0", {"32"}, numeric_parameter, 32},
-            {"multidim_array_parameter_1", {"32"}, numeric_parameter, 32},
-            {"multidim_array_parameter_2", {"5"}, numeric_parameter, 5},
-            {"multidim_array_parameter_3", {"6"}, numeric_parameter, 6},
+            {"multidim_array_parameter_0", {"6"}, numeric_parameter, 6},
+            {"multidim_array_parameter_1", {"5"}, numeric_parameter, 5},
+            {"multidim_array_parameter_2", {"32"}, numeric_parameter, 32},
+            {"multidim_array_parameter_3", {"32"}, numeric_parameter, 32},
             {"repetition_size", {"2"}, numeric_parameter, 2}
     };
 
@@ -283,7 +283,7 @@ TEST(parameter_processing, multidimensional_array_expression) {
 
     par = HDL_parameter();
     par.set_type(numeric_parameter);
-    par.set_value(5);
+    par.set_value(32);
     par.set_name("multidim_array_access");
     Expression_component e = Expression_component("multidim_array_parameter");
     std::vector<Expression> ai = {{Expression_component("1")},{Expression_component("0")}};
@@ -332,14 +332,14 @@ TEST(parameter_processing, repetition_initialization) {
             {"repetition_parameter_a_1", {"1"}, numeric_parameter, 1},
             {"repetition_parameter_b_0", {"4"}, numeric_parameter, 4},
             {"repetition_parameter_b_1", {"4"}, numeric_parameter, 4},
-            {"multi_repetition_parameter_0", {"1"}, numeric_parameter, 1},
-            {"multi_repetition_parameter_1", {"1"}, numeric_parameter, 1},
-            {"multi_repetition_parameter_2", {"4"}, numeric_parameter, 4},
-            {"multi_repetition_parameter_3", {"4"}, numeric_parameter, 4},
-            {"mixed_repetition_parameter_0", {"1"}, numeric_parameter, 1},
-            {"mixed_repetition_parameter_1", {"2"}, numeric_parameter, 2},
-            {"mixed_repetition_parameter_2", {"4"}, numeric_parameter, 4},
-            {"mixed_repetition_parameter_3", {"4"}, numeric_parameter, 4},
+            {"multi_repetition_parameter_0", {"4"}, numeric_parameter, 4},
+            {"multi_repetition_parameter_1", {"4"}, numeric_parameter, 4},
+            {"multi_repetition_parameter_2", {"1"}, numeric_parameter, 1},
+            {"multi_repetition_parameter_3", {"1"}, numeric_parameter, 1},
+            {"mixed_repetition_parameter_0", {"4"}, numeric_parameter, 4},
+            {"mixed_repetition_parameter_1", {"4"}, numeric_parameter, 4},
+            {"mixed_repetition_parameter_2", {"2"}, numeric_parameter, 2},
+            {"mixed_repetition_parameter_3", {"1"}, numeric_parameter, 1},
     };
 
     HDL_parameter par = HDL_parameter();
@@ -529,8 +529,8 @@ TEST(parameter_processing, negative_number_array_init) {
     }param_check_t;
 
     std::vector<param_check_t> vect_params = {
-            {"negative_array_param_0", {"-", "16'sd32767"}, numeric_parameter, -32767},
-            {"negative_array_param_1", {"16'sd32767"}, numeric_parameter, 32767},
+            {"negative_array_param_0", { "16'sd32767"}, numeric_parameter, 32767},
+            {"negative_array_param_1", {"-","16'sd32767"}, numeric_parameter, -32767},
     };
 
     HDL_parameter par = HDL_parameter();
@@ -580,8 +580,8 @@ TEST(parameter_processing, expression_array_init) {
     }param_check_t;
 
     std::vector<param_check_t> vect_params = {
-            {"expression_array_param_0", {"5","+","4"}, numeric_parameter, 9},
-            {"expression_array_param_1", {"7", "*", "6"}, numeric_parameter, 42},
+            {"expression_array_param_0", {"7", "*", "6"}, numeric_parameter, 42},
+            {"expression_array_param_1", {"5","+","4"}, numeric_parameter, 9},
     };
 
     HDL_parameter par = HDL_parameter();
