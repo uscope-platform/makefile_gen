@@ -77,6 +77,11 @@ std::pair<HDL_instance,nlohmann::json> HDL_ast_builder::recursive_build_ast(HDL_
     auto res = d_store->get_HDL_resource(i.get_type());
 
     Parameter_processor p(external_parameters, d_store);
+
+    auto parent_parameters = i.get_parameters();
+    auto instance_parameters = p.process_parameters_map( parent_parameters);
+
+    p = Parameter_processor(instance_parameters, d_store);
     res = p.process_resource(res);
 
 

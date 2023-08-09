@@ -108,7 +108,10 @@ TEST( analysis_test , sv_module) {
     d3.add_port_connection("syndrome", "data_out");
     HDL_parameter p;
     p.set_name("TEST_PARAM");
-    p.set_value("test_package::param");
+    Expression_component e("param");
+    e.set_package_prefix("test_package");
+    p.set_expression_components({e});
+    p.set_type(expression_parameter);
     d3.add_parameter("TEST_PARAM", p);
 
     HDL_instance d2("param", "test_package", package);

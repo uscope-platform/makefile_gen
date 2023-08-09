@@ -47,7 +47,7 @@ constexpr std::string parameter_type_to_string(parameter_type in){
 
 typedef  std::vector<Expression_component> Expression;
 
-typedef struct{
+typedef struct dims_struct{
     Expression first_bound;
     Expression second_bound;
     bool packed;
@@ -112,6 +112,9 @@ public:
     void append_initialization_list(std::vector<std::vector<Expression>> &list);
     std::vector<std::vector<Expression>> get_initialization_list(){ return initialization_list;};
 
+    void set_array_index(const std::vector<int64_t> &i) {array_index = i;};
+    std::vector<int64_t> get_array_index(){return array_index;};
+    bool is_array_element() {return !array_index.empty();};
 
     void add_dimension(const dimension_t &e) {array_dimensions.push_back(e);};
     std::vector<dimension_t> get_dimensions(){return array_dimensions;};
@@ -119,7 +122,8 @@ public:
     template<class Archive>
     void serialize( Archive & ar ) {
         ar(name, string_value_array, numeric_value_array, type,
-           expression_components, initialization_list,array_dimensions);
+           expression_components, initialization_list,array_dimensions,
+           array_index);
     }
 
     nlohmann::json dump();
@@ -142,6 +146,7 @@ private:
     std::vector<int64_t> numeric_value_array;
     parameter_type type;
 
+    std::vector<int64_t> array_index;
 
     Expression expression_components;
     std::vector<std::vector<Expression>> initialization_list;

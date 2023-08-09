@@ -17,6 +17,7 @@
 #define MAKEFILEGEN_V2_PARAMETER_PROCESSOR_HPP
 
 #include <cmath>
+#include <utility>
 
 #include "data_model/HDL/HDL_Resource.hpp"
 #include "data_model/data_store.hpp"
@@ -28,9 +29,23 @@ public:
     }
 };
 
+class array_override_exception  : public std::exception {
+public:
+    explicit array_override_exception(std::map<std::vector<int64_t>, int64_t> v, std::string &s) {
+        array_value = std::move(v);
+        param_name = s;
+    };
+    char * what () {
+        return  (char*) "Internal exception, it should always be handled";
+    }
+    std::string param_name;
+    std::map<std::vector<int64_t>, int64_t> array_value;
+};
+
 class Parameter_processor {
 public:
     Parameter_processor(const std::map<std::string, HDL_parameter>& parent_parameters, const std::shared_ptr<data_store> &ds);
+    std::map<std::string, HDL_parameter> process_parameters_map(std::map<std::string, HDL_parameter> &map);
     static void convert_parameters(std::vector<HDL_Resource> &v);
     HDL_Resource process_resource(const HDL_Resource &res);
     HDL_parameter process_parameter(const HDL_parameter &par);
@@ -74,9 +89,10 @@ private:
 
     uint64_t get_dimension_size(dimension_t &d);
 
+    std::string current_parameter;
     std::unordered_map<std::string, int64_t> working_param_values;
     std::unordered_map<std::string, std::vector<dimension_t>> array_dimensions;
-    std::unordered_map<std::string, int64_t> external_parameters;
+    std::map<std::string, HDL_parameter> external_parameters;
 
     std::unordered_map<std::string, std::vector<int64_t>> array_parameter_values;
 

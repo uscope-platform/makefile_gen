@@ -18,12 +18,7 @@
 
 Parameter_processor::Parameter_processor(const std::map<std::string, HDL_parameter> &parent_parameters, const std::shared_ptr<data_store> &ds) {
     d_store = ds;
-    for(auto &item:parent_parameters){
-        if(item.second.get_type() != numeric_parameter){
-            continue;
-        }
-        external_parameters[item.first] = item.second.get_numeric_value();
-    }
+    external_parameters = parent_parameters;
 }
 
 
@@ -92,10 +87,31 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
     return return_res;
 }
 
+std::map<std::string, HDL_parameter> Parameter_processor::process_parameters_map(std::map<std::string, HDL_parameter> &map) {
+    std::map<std::string, HDL_parameter> ret;
+    for(auto &item:map){
+        try{
+            auto par = item.second;
+            par.set_expression_components(expr_vector_to_rpn(par.get_expression_components()));
+            ret[item.first] = process_parameter(par);
+        } catch (array_override_exception &ex) {
+            auto array_value = ex.array_value;
+            auto p_n = ex.param_name;
+            for(const auto& item:array_value){
+                auto param = produce_array_item(ex.param_name, item.first, item.second);
+                ret[param.get_name()] = param;
+            }
+        }
+    }
+
+    return ret;
+}
+
 
 HDL_parameter Parameter_processor::process_parameter(const HDL_parameter &par) {
 
     HDL_parameter return_par = par;
+    current_parameter = par.get_name();
     auto components = return_par.get_expression_components();
 
 
@@ -108,7 +124,7 @@ HDL_parameter Parameter_processor::process_parameter(const HDL_parameter &par) {
     }
     int64_t value;
     if(external_parameters.contains(return_par.get_name())){
-        value = external_parameters[return_par.get_name()];
+        value = external_parameters[return_par.get_name()].get_numeric_value();
         return_par.set_expression_components({Expression_component(std::to_string(value) )});
     } else{
         value = process_expression(components);
@@ -339,13 +355,37 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec) {
         param_name = ec.get_string_value();
     }
 
+    int value_type = 0;
 
+    std::map<std::vector<int64_t>, int64_t>   result_array;
     int64_t val;
-    if(external_parameters.contains(param_name)){
-        val = external_parameters[param_name];
+    for(auto &item:external_parameters){
+        if(param_name == item.first){
+            val = external_parameters[param_name].get_numeric_value();
+            value_type = 1;
+        } else{
+            bool is_prefix = item.first.compare(0, param_name.size(), param_name) == 0;
+            if(is_prefix && external_parameters[item.first].is_array_element()){
+
+                std::istringstream iss(item.first.substr(param_name.length()));
+                std::vector<int64_t> indexes;
+                std::string s;
+                while (std::getline(iss, s, '_')) {
+                    if(!s.empty()){
+                        indexes.push_back(std::stoll(s));
+                    }
+                }
+                result_array[indexes] = item.second.get_numeric_value();
+                value_type = 2;
+            }
+        }
+    }
+
+    if(value_type == 2) {
+        throw array_override_exception(result_array, current_parameter);
     } else if(working_param_values.contains(param_name)){
-        val = working_param_values[param_name];
-    } else {
+            val = working_param_values[param_name];
+    } else if(value_type == 0) {
         throw Parameter_processor_Exception();
     }
 
@@ -538,9 +578,10 @@ HDL_parameter Parameter_processor::produce_array_item(const std::string& name, c
     }
     int64_t param_value = default_value;
     if(external_parameters.contains(param_name)){
-        param_value = external_parameters[param_name];
+        param_value = external_parameters[param_name].get_numeric_value();
     }
     p.set_name(param_name);
+    p.set_array_index(index);
     p.set_expression_components({Expression_component(std::to_string(param_value))});
     p.set_value(param_value);
     return p;
