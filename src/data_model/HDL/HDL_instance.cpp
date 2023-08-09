@@ -82,7 +82,5 @@ nlohmann::json HDL_instance::dump() {
     }
     ret["parameters"] = params_vect;
 
-
-
     return ret;
 }

@@ -84,7 +84,7 @@ std::pair<HDL_instance,nlohmann::json> HDL_ast_builder::recursive_build_ast(HDL_
     p = Parameter_processor(instance_parameters, d_store);
     res = p.process_resource(res);
 
-
+    ret_inst.set_ports(i.get_ports());
 
     ret_inst.set_name(i.get_name());
     ret_inst.set_type(i.get_type());

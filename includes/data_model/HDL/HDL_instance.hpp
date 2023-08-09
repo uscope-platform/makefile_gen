@@ -45,6 +45,7 @@ public:
     bool is_parameter_overridden(const std::string& parameter_name) {return parameters.contains(parameter_name);};
 
     void add_port_connection(const std::string& port_name, std::string value);
+    void set_ports(const std::unordered_map<std::string, std::string> &p) {ports_map = p;};
     std::unordered_map<std::string, std::string> get_ports() { return ports_map;};
 
     std::string get_name() const {return name;};
