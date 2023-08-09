@@ -42,10 +42,6 @@ public:
         std::vector<dimension_t> &dims
     );
 
-    std::vector<int64_t> process_array_dimensions(std::vector<dimension_t> dims);
-
-    int64_t get_flattened_array_index(std::string param_name, std::vector<Expression> idx);
-
     static std::vector<Expression_component> expr_vector_to_rpn(const std::vector<Expression_component>& v);
 
     static int64_t evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string& operation);
@@ -54,7 +50,9 @@ public:
     int64_t get_component_value(Expression_component &ec);
 private:
 
-    std::vector<HDL_parameter> process_repeat_initialization(const std::string &param_name, Expression &e, uint64_t last_item_addr);
+    std::vector<HDL_parameter> process_repeat_initialization(const std::string &param_name, Expression &e, int64_t last_item_addr);
+    HDL_parameter produce_array_item(const std::string& name, const std::vector<int64_t>& index, int64_t value);
+
 
     std::unordered_map<std::string, HDL_parameter> process_complete_2d_init_list(
             const std::string& param_name,
