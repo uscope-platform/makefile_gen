@@ -200,3 +200,10 @@ void HDL_parameters_factory::close_init_list_dimension() {
 }
 
 
+void HDL_parameters_factory::start_instance_parameter_assignment(std::string parameter_name) {
+    resources_factory_base<HDL_parameter>::new_basic_resource();
+    current_resource.set_type(expression_parameter);
+    current_resource.set_name(parameter_name);
+}
+
+

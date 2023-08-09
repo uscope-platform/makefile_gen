@@ -289,14 +289,15 @@ void sv_visitor::exitNamed_port_connection(sv2017::Named_port_connectionContext 
     }
 }
 
+void sv_visitor::enterNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) {
+    params_factory.start_instance_parameter_assignment(ctx->identifier()->getText());
+}
+
 void sv_visitor::exitNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) {
-    auto param_name = ctx->identifier()->getText();
-    auto param_value = ctx->param_expression()->getText();
+
+    auto param = params_factory.get_parameter();
     if(deps_factory.is_valid_dependency()){
-        HDL_parameter p;
-        p.set_name(param_name);
-        p.set_value(param_value);
-        deps_factory.add_parameter(param_name, p);
+        deps_factory.add_parameter(ctx->identifier()->getText(), param);
     }
 }
 
@@ -444,6 +445,8 @@ void sv_visitor::enterVariable_dimension(sv2017::Variable_dimensionContext *ctx)
 void sv_visitor::exitVariable_dimension(sv2017::Variable_dimensionContext *ctx) {
     params_factory.stop_packed_dimension();
 }
+
+
 
 
 

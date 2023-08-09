@@ -72,6 +72,7 @@ public:
     bool in_packed_context() const {return in_packed_assignment; };
     bool is_component_relevant() const { return in_initialization_list || in_expression_new || in_unpacked_declaration || in_packed_assignment ; };
 
+    void start_instance_parameter_assignment(std::string parameter_name);
 private:
     void close_init_list_dimension();
 

@@ -484,7 +484,6 @@ TEST(parameter_extraction, expression_array_init) {
 
 }
 
-
 TEST(parameter_extraction, mixed_packed_unpacked_init) {
     std::string test_pattern = R"(
     module test_mod #(
@@ -573,4 +572,78 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
     }
 
 }
+
+TEST(parameter_extraction, instance_parameter) {
+    std::string test_pattern = R"(
+    module test_mod #(
+        parameter test_param = 4
+    )();
+
+    module_type #(
+        .param_1(test_param),
+        .param_2(test_param+5),
+        .param_3((test_param + 7)*1)
+    ) test_instance ();
+
+    endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto def_parameters = resource.get_parameters();
+
+    auto inst_parameters = resource.get_dependencies()[0].get_parameters();
+
+    std::vector<std::pair<std::string, std::vector<std::string>>> vect_params = {
+            {"test_param", {"4"}}
+    };
+
+    std::map<std::string, HDL_parameter> check_params;
+    for(auto &item:  vect_params){
+        HDL_parameter p = HDL_parameter();
+        p.set_type(expression_parameter);
+        p.set_name(item.first);
+        for(auto &op:item.second){
+            p.add_component(Expression_component(op));
+        }
+        check_params[item.first] = p;
+    }
+
+
+    ASSERT_EQ(check_params.size(), def_parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(def_parameters.contains(item.first));
+        ASSERT_EQ(item.second, def_parameters[item.first]);
+    }
+
+    vect_params = {
+            {"param_1", {"test_param"}},
+            {"param_2", {"test_param", "+", "5"}},
+            {"param_3", {"(", "test_param", "+", "7", ")", "*", "1"}},
+    };
+
+    check_params.clear();
+
+    for(auto &item:  vect_params){
+        HDL_parameter p = HDL_parameter();
+        p.set_type(expression_parameter);
+        p.set_name(item.first);
+        for(auto &op:item.second){
+            p.add_component(Expression_component(op));
+        }
+        check_params[item.first] = p;
+    }
+
+
+    ASSERT_EQ(check_params.size(), inst_parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(inst_parameters.contains(item.first));
+        ASSERT_EQ(item.second, inst_parameters[item.first]);
+    }
+
+}
+
 
