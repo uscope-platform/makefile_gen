@@ -515,8 +515,9 @@ Parameter_processor::process_1d_init_list(const std::string &param_name, std::ve
                 last_item_addr += expanded_list.size();
             } else{
                 if(reverse_il[i][0].get_type() == string_component){
-                    if(array_parameter_values.contains(reverse_il[i][0].get_string_value())){
-                        auto array_to_concat = array_parameter_values[reverse_il[i][0].get_string_value()];
+                    auto param_value = reverse_il[i][0].get_string_value();
+                    if(array_parameter_values.contains(param_value)){
+                        auto array_to_concat = array_parameter_values[param_value];
 
                         for(int64_t j = last_item_addr; j<last_item_addr+array_to_concat.size(); j++){
                             auto param = produce_array_item(param_name, {j}, array_to_concat[j-last_item_addr]);
@@ -524,6 +525,11 @@ Parameter_processor::process_1d_init_list(const std::string &param_name, std::ve
                             ret_val[param.get_name()] = param;
                         }
                         last_item_addr += array_to_concat.size();
+                    }else if(working_param_values.contains(param_value)){
+                        auto param = produce_array_item(param_name, {last_item_addr}, working_param_values[param_value]);
+                        array_parameter_values[param.get_name()].push_back(param.get_numeric_value());
+                        ret_val[param.get_name()] = param;
+                        last_item_addr++;
                     } else{
                         throw Parameter_processor_Exception();
                     }

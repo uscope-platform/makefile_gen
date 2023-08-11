@@ -65,6 +65,43 @@ TEST( hdl_ast_builder, pid_ast_build) {
 
 
 
+TEST( hdl_ast_builder, spi_ast_build) {
+
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    std::vector<std::string> paths = {
+            "Components/comms/SPI/rtl",
+            "Components/system/EnableGenerator/rtl/",
+            "Components/Common",
+            "Components/system/axi_lite/simple_register_cu/rtl",
+            "Components/system/axi_lite/skid_buffer/rtl"
+    };
+
+    auto prefix = "check_files/test_data/";
+    for(auto &p:paths){
+        for(auto &f:std::filesystem::directory_iterator(prefix + p)){
+            if(f.path().extension() == ".v" || f.path().extension() == ".sv"){
+                sv_analyzer analyzer(f.path());
+                analyzer.cleanup_content("`(.*)");
+
+                for(auto &entity:analyzer.analyze()){
+                    d_store->store_hdl_entity(entity);
+                }
+            }
+        }
+    }
+
+
+
+    HDL_ast_builder b(s_store, d_store);
+    auto synth_ast = b.build_ast("SPI", {});
+
+
+    auto ast_dump = synth_ast.dump();
+    nlohmann::json check_obj = nlohmann::json::parse(R"({"children":[{"children":[{"children":[],"instance_name":"address_read_buffer","instance_type":"axil_skid_buffer","parameters":{"DATA_WIDTH":{"name":"DATA_WIDTH","numeric_value":[32],"string_value":[""],"type":"numeric_parameter"},"REGISTER_OUTPUT":{"name":"REGISTER_OUTPUT","numeric_value":[0],"string_value":[""],"type":"numeric_parameter"}},"ports_map":{"clock":"clock","in_data":"axil.ARADDR","in_ready":"axil.ARREADY","in_valid":"axil.ARVALID","out_data":"read_address","out_ready":"read_ready","out_valid":"read_address_valid","reset":"reset"}},{"children":[],"instance_name":"address_write_buffer","instance_type":"axil_skid_buffer","parameters":{"DATA_WIDTH":{"name":"DATA_WIDTH","numeric_value":[32],"string_value":[""],"type":"numeric_parameter"},"REGISTER_OUTPUT":{"name":"REGISTER_OUTPUT","numeric_value":[0],"string_value":[""],"type":"numeric_parameter"}},"ports_map":{"clock":"clock","in_data":"axil.AWADDR","in_ready":"axil.AWREADY","in_valid":"axil.AWVALID","out_data":"write_address","out_ready":"write_ready","out_valid":"write_address_valid","reset":"reset"}},{"children":[],"instance_name":"write_data_buffer","instance_type":"axil_skid_buffer","parameters":{"DATA_WIDTH":{"name":"DATA_WIDTH","numeric_value":[36],"string_value":[""],"type":"numeric_parameter"},"REGISTER_OUTPUT":{"name":"REGISTER_OUTPUT","numeric_value":[0],"string_value":[""],"type":"numeric_parameter"}},"ports_map":{"clock":"clock","in_data":"{axil.WDATA,axil.WSTRB}","in_ready":"axil.WREADY","in_valid":"axil.WVALID","out_data":"{write_data,write_strobe}","out_ready":"write_ready","out_valid":"write_data_valid","reset":"reset"}}],"instance_name":"CU","instance_type":"axil_simple_register_cu","parameters":{"ADDRESS_MASK":{"name":"ADDRESS_MASK","numeric_value":[63],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_0":{"name":"INITIAL_OUTPUT_VALUES_0","numeric_value":[0],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_1":{"name":"INITIAL_OUTPUT_VALUES_1","numeric_value":[0],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_2":{"name":"INITIAL_OUTPUT_VALUES_2","numeric_value":[0],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_3":{"name":"INITIAL_OUTPUT_VALUES_3","numeric_value":[0],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_4":{"name":"INITIAL_OUTPUT_VALUES_4","numeric_value":[32767],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_5":{"name":"INITIAL_OUTPUT_VALUES_5","numeric_value":[-32767],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_6":{"name":"INITIAL_OUTPUT_VALUES_6","numeric_value":[32767],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_7":{"name":"INITIAL_OUTPUT_VALUES_7","numeric_value":[-32767],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_8":{"name":"INITIAL_OUTPUT_VALUES_8","numeric_value":[65793],"string_value":[""],"type":"numeric_parameter"},"N_READ_REGISTERS":{"name":"N_READ_REGISTERS","numeric_value":[9],"string_value":[""],"type":"numeric_parameter"},"N_TRIGGER_REGISTERS":{"name":"N_TRIGGER_REGISTERS","numeric_value":[1],"string_value":[""],"type":"numeric_parameter"},"N_WRITE_REGISTERS":{"name":"N_WRITE_REGISTERS","numeric_value":[9],"string_value":[""],"type":"numeric_parameter"},"REGISTERED_BUFFERS":{"name":"REGISTERED_BUFFERS","numeric_value":[0],"string_value":[""],"type":"numeric_parameter"},"REGISTERS_WIDTH":{"name":"REGISTERS_WIDTH","numeric_value":[32],"string_value":[""],"type":"numeric_parameter"},"TRIGGER_REGISTERS_IDX_0":{"name":"TRIGGER_REGISTERS_IDX_0","numeric_value":[0],"string_value":[""],"type":"numeric_parameter"}},"ports_map":{"axil":"axil","clock":"clock","input_registers":"cu_read_registers","output_registers":"cu_write_registers","reset":"reset"}},{"children":[],"instance_name":"pid_int","instance_type":"Integrator","parameters":{"DATA_WIDTH":{"name":"DATA_WIDTH","numeric_value":[16],"string_value":[""],"type":"numeric_parameter"}},"ports_map":{"clock":"clock","error_in":"integrator_in","input_valid":"integrator_in_valid","limit_int_down":"limit_int_down","limit_int_up":"limit_int_up","out":"integral_out","reset":"reset"}}],"instance_name":"TL","instance_type":"PID","parameters":{"ADDITIONAL_BITS":{"name":"ADDITIONAL_BITS","numeric_value":[16],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_0":{"name":"INITIAL_OUTPUT_VALUES_0","numeric_value":[0],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_1":{"name":"INITIAL_OUTPUT_VALUES_1","numeric_value":[0],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_2":{"name":"INITIAL_OUTPUT_VALUES_2","numeric_value":[0],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_3":{"name":"INITIAL_OUTPUT_VALUES_3","numeric_value":[0],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_4":{"name":"INITIAL_OUTPUT_VALUES_4","numeric_value":[32767],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_5":{"name":"INITIAL_OUTPUT_VALUES_5","numeric_value":[-32767],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_6":{"name":"INITIAL_OUTPUT_VALUES_6","numeric_value":[32767],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_7":{"name":"INITIAL_OUTPUT_VALUES_7","numeric_value":[-32767],"string_value":[""],"type":"numeric_parameter"},"INITIAL_OUTPUT_VALUES_8":{"name":"INITIAL_OUTPUT_VALUES_8","numeric_value":[65793],"string_value":[""],"type":"numeric_parameter"},"INPUT_DATA_WIDTH":{"name":"INPUT_DATA_WIDTH","numeric_value":[12],"string_value":[""],"type":"numeric_parameter"},"OUTPUT_DATA_WIDTH":{"name":"OUTPUT_DATA_WIDTH","numeric_value":[16],"string_value":[""],"type":"numeric_parameter"}},"ports_map":{}})");
 
     ASSERT_EQ(ast_dump, check_obj);
+    ASSERT_TRUE(false); // FIXED_REGISTER_VALUES[0] in spi control unit is not correctly parsed as a mixed packed/unpacked parameter and the calculated value is wrong
 }

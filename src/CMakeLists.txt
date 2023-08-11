@@ -16,6 +16,7 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/HDL_parameter.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/Expression_component.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/Parameter_processor.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/Initialization_list.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/resource_factory_base.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_mapping/bus_specs_manager.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_mapping/mapper_bus_component.cpp /

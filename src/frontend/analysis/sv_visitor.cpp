@@ -365,7 +365,7 @@ void sv_visitor::enterAssignment_pattern(sv2017::Assignment_patternContext *ctx)
 }
 
 void sv_visitor::exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) {
-    params_factory.stop_initializaiton_list();
+    params_factory.stop_initialization_list();
 }
 
 
@@ -418,6 +418,7 @@ void sv_visitor::exitReplication_size(sv2017::Replication_sizeContext *ctx) {
 
 
 void sv_visitor::exitReplication(sv2017::ReplicationContext *ctx) {
+    auto dbg = ctx->getText();
     params_factory.stop_replication();
 }
 
@@ -431,18 +432,33 @@ void sv_visitor::exitReplication_assignment(sv2017::Replication_assignmentContex
 
 
 void sv_visitor::enterConcatenation(sv2017::ConcatenationContext *ctx) {
+    auto dbg = ctx->getText();
     params_factory.start_concatenation();
 }
 
 void sv_visitor::exitConcatenation(sv2017::ConcatenationContext *ctx) {
+    auto dbg = ctx->getText();
     params_factory.stop_concatenation();
 }
 
-void sv_visitor::enterVariable_dimension(sv2017::Variable_dimensionContext *ctx) {
-    params_factory.start_packed_dimension();
+void sv_visitor::enterData_type_or_implicit(sv2017::Data_type_or_implicitContext *ctx) {
+    bool is_packed = false;
+    if(ctx->implicit_data_type() != nullptr){
+        if(!ctx->implicit_data_type()->packed_dimension().empty()){
+            is_packed = true;
+        }
+    } else{
+        if(!ctx->data_type()->variable_dimension().empty()){
+            is_packed = true;
+        }
+    }
+    if(is_packed){
+        params_factory.start_packed_dimension();
+    }
+
 }
 
-void sv_visitor::exitVariable_dimension(sv2017::Variable_dimensionContext *ctx) {
+void sv_visitor::exitData_type_or_implicit(sv2017::Data_type_or_implicitContext *ctx) {
     params_factory.stop_packed_dimension();
 }
 

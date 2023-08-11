@@ -25,6 +25,7 @@ HDL_parameter::HDL_parameter(const HDL_parameter &c) {
     initialization_list = c.initialization_list;
     array_dimensions = c.array_dimensions;
     array_index = c.array_index;
+    i_l = c.i_l;
 }
 
 HDL_parameter::HDL_parameter() {
@@ -45,7 +46,7 @@ bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
     ret_val &= lhs.numeric_value_array == rhs.numeric_value_array;
     ret_val &= lhs.type == rhs.type;
     ret_val &= lhs.expression_components == rhs.expression_components;
-    ret_val &= lhs.initialization_list == rhs.initialization_list;
+    //ret_val &= lhs.initialization_list == rhs.initialization_list;
 
     if(lhs.array_dimensions.size() != rhs.array_dimensions.size()) return false;
     for(int i = 0; i<lhs.array_dimensions.size(); i++){
@@ -54,6 +55,7 @@ bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
         ret_val &= lhs.array_dimensions[i].second_bound == rhs.array_dimensions[i].second_bound;
     }
     ret_val &= lhs.array_index == rhs.array_index;
+    ret_val &= lhs.i_l == rhs.i_l;
     return ret_val;
 }
 

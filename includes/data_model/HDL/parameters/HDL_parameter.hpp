@@ -21,6 +21,7 @@
 #include <nlohmann/json.hpp>
 
 #include "data_model/HDL/parameters/Expression_component.hpp"
+#include "data_model/HDL/parameters/Initialization_list.hpp"
 
 #include <cereal/types/vector.hpp>
 #include "cereal/types/utility.hpp"
@@ -45,19 +46,6 @@ constexpr std::string parameter_type_to_string(parameter_type in){
     }
 }
 
-typedef  std::vector<Expression_component> Expression;
-
-typedef struct dims_struct{
-    Expression first_bound;
-    Expression second_bound;
-    bool packed;
-
-    template<class Archive>
-    void serialize( Archive & ar ) {
-        ar(first_bound, second_bound, packed);
-    }
-
-} dimension_t;
 
 class HDL_parameter {
 public:
@@ -108,6 +96,8 @@ public:
 
     friend void PrintTo(const HDL_parameter& point, std::ostream* os);
 
+
+    void add_initialization_list(const Initialization_list &i){ i_l = i;};
     void set_initialization_list(std::vector<std::vector<Expression>> &list) {initialization_list = list;};
     void append_initialization_list(std::vector<std::vector<Expression>> &list);
     std::vector<std::vector<Expression>> get_initialization_list(){ return initialization_list;};
@@ -151,6 +141,8 @@ private:
     Expression expression_components;
     std::vector<std::vector<Expression>> initialization_list;
     std::vector<dimension_t> array_dimensions;
+
+    Initialization_list i_l;
 };
 
 

@@ -20,6 +20,26 @@
 #include "frontend/analysis/sv_analyzer.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
+typedef struct{
+    std::vector<std::vector<Expression>> values;
+    std::vector<dimension_t> dimensions;
+}init_list_t;
+
+Initialization_list produce_check_init_list(const init_list_t &i){
+    Initialization_list il;
+    for(auto &item:i.dimensions){
+        il.add_dimension(item);
+    }
+    for(const auto &item:i.values){
+        il.open_level();
+        for(const auto &expr:item){
+            il.add_item(expr);
+        }
+        il.close_level();
+    }
+
+    return  il;
+}
 
 TEST(parameter_extraction, simple_parameters) {
     std::string test_pattern = R"(
@@ -150,10 +170,21 @@ TEST(parameter_extraction, array_expression) {
     HDL_parameter p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("array_parameter");
-    std::vector<std::vector<Expression>> il = {{{Expression_component("32")}, {Expression_component("5")}}};
-    p.set_initialization_list(il);
-    p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
+
+
+
+    Initialization_list il;
+    il.add_dimension({{Expression_component("31")}, {Expression_component("0")}, true});
+    il.add_dimension({{Expression_component("1")},{Expression_component("0")}, false});
+    il.add_item({Expression_component("32")});
+    il.add_item({Expression_component("5")});
+
+    p.add_initialization_list(il);
+
+    p.add_dimension({{Expression_component("31")}, {Expression_component("0")}, true});
+    p.add_dimension({{Expression_component("1")},{Expression_component("0")}, false});
     check_params["array_parameter"] = p;
+
 
     p = HDL_parameter();
     p.set_type(expression_parameter);
@@ -206,10 +237,31 @@ TEST(parameter_extraction, multidimensional_array_expression) {
     p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("multidim_array_parameter");
-    std::vector<std::vector<Expression>> il = {{{Expression_component("32")},{Expression_component("32")}}, {{Expression_component("5")}, {Expression_component("6")}}};
-    p.set_initialization_list(il);
-    p.add_dimension({{Expression_component("repetition_size"),Expression_component("-"), Expression_component("1")},{Expression_component("0")}});
-    p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
+
+
+    init_list_t init;
+    init.dimensions = {
+            {{Expression_component("31")}, {Expression_component("0")}, true},
+            {{Expression_component("repetition_size"),Expression_component("-"), Expression_component("1")},{Expression_component("0")}},
+            {{Expression_component("1")},{Expression_component("0")}}
+                       };
+
+    init.values = {
+        {
+            {Expression_component("32")},
+            {Expression_component("32")}
+        },{
+            {Expression_component("5")},
+            {Expression_component("6")}
+        }
+    };
+
+    p.add_initialization_list(produce_check_init_list(init));
+
+
+    p.add_dimension(init.dimensions[0]);
+    p.add_dimension(init.dimensions[1]);
+    p.add_dimension(init.dimensions[2]);
     check_params["multidim_array_parameter"] = p;
 
 
@@ -265,34 +317,62 @@ TEST(parameter_extraction, repetition_initialization) {
     p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("repetition_parameter_1");
-    std::vector<std::vector<Expression>> il = {{{Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("1")}}};
-    p.set_initialization_list(il);
-    p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
+
+    init_list_t init;
+    init.dimensions = {{{Expression_component("1")},{Expression_component("0")}, false}};
+    init.values = {{
+                           {Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("1")}
+                   }};
+
+    p.add_dimension(init.dimensions[0]);
+    p.add_initialization_list(produce_check_init_list(init));
+
     check_params["repetition_parameter_1"] = p;
 
     p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("repetition_parameter_2");
-    il = {{{Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("4")}}};
-    p.set_initialization_list(il);
-    p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
+
+    init.dimensions = {{{Expression_component("1")},{Expression_component("0")}, false}};
+    init.values = {{
+                           {Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("4")}
+                   }};
+
+    p.add_dimension(init.dimensions[0]);
+    p.add_initialization_list(produce_check_init_list(init));
+
     check_params["repetition_parameter_2"] = p;
 
 
     p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("multi_repetition_parameter");
-    il = {{{Expression_component("repetition_parameter_1")},{Expression_component("repetition_parameter_2")}}};
-    p.set_initialization_list(il);
-    p.add_dimension({{Expression_component("3")},{Expression_component("0")}});
+
+    init.dimensions = {{{Expression_component("3")},{Expression_component("0")}}};
+    init.values = {{
+                           {Expression_component("repetition_parameter_1")},
+                           {Expression_component("repetition_parameter_2")}
+                   }};
+
+    p.add_dimension(init.dimensions[0]);
+    p.add_initialization_list(produce_check_init_list(init));
+
     check_params["multi_repetition_parameter"] = p;
 
     p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("mixed_repetition_parameter");
-    il = {{{Expression_component("1")},{Expression_component("2")},{Expression_component("repetition_parameter_2")}}};
-    p.set_initialization_list(il);
-    p.add_dimension({{Expression_component("3")},{Expression_component("0")}});
+
+    init.dimensions = {{{Expression_component("3")},{Expression_component("0")}}};
+    init.values = {{
+                           {Expression_component("1")},
+                           {Expression_component("2")},
+                           {Expression_component("repetition_parameter_2")}
+                   }};
+
+    p.add_dimension(init.dimensions[0]);
+    p.add_initialization_list(produce_check_init_list(init));
+
     check_params["mixed_repetition_parameter"] = p;
 
 
@@ -323,7 +403,10 @@ TEST(parameter_extraction, packed_array) {
     HDL_parameter p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("packed_param");
-    std::vector<std::vector<Expression>> il = {{
+
+    init_list_t init;
+    init.dimensions = {{{Expression_component("7")}, {Expression_component("0")}, true}};
+    init.values = {{
             {Expression_component("1'b1")},
             {Expression_component("1'b0")},
             {Expression_component("1'b1")},
@@ -333,9 +416,10 @@ TEST(parameter_extraction, packed_array) {
             {Expression_component("1'b0")},
             {Expression_component("1'b1")}
     }};
-    dimension_t  d = {{Expression_component("7")}, {Expression_component("0")}, true};
-    p.add_dimension(d);
-    p.set_initialization_list(il);
+
+    p.add_dimension(init.dimensions[0]);
+    p.add_initialization_list(produce_check_init_list(init));
+
     check_params["packed_param"] = p;
 
 
@@ -433,12 +517,20 @@ TEST(parameter_extraction, negative_number_array_init) {
     HDL_parameter p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("negative_array_param");
-    std::vector<std::vector<Expression>> il = {{{Expression_component("-"),Expression_component("16'sd32767")},{Expression_component("16'sd32767")}}};
-    p.set_initialization_list(il);
-    p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
+
+    init_list_t init;
+    init.dimensions = {
+            {{Expression_component("1")},{Expression_component("0")}, false}
+    };
+    init.values = {{
+       {Expression_component("-"),Expression_component("16'sd32767")},
+       {Expression_component("16'sd32767")}
+    }};
+
+    p.add_initialization_list(produce_check_init_list(init));
+    p.add_dimension(init.dimensions[0]);
+
     check_params["negative_array_param"] = p;
-
-
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
@@ -468,12 +560,20 @@ TEST(parameter_extraction, expression_array_init) {
     HDL_parameter p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("expression_array_param");
-    std::vector<std::vector<Expression>> il = {{{Expression_component("5"),Expression_component("+"),Expression_component("4")},
-                                  {Expression_component("7"),Expression_component("*"),Expression_component("6")}}};
-    p.set_initialization_list(il);
-    p.add_dimension({{Expression_component("1")},{Expression_component("0")}});
-    check_params["expression_array_param"] = p;
 
+    init_list_t init;
+    init.dimensions = {
+            {{Expression_component("1")},{Expression_component("0")}, false}
+    };
+    init.values = {{
+        {Expression_component("5"),Expression_component("+"),Expression_component("4")},
+        {Expression_component("7"),Expression_component("*"),Expression_component("6")}
+   }};
+
+    p.add_initialization_list(produce_check_init_list(init));
+    p.add_dimension(init.dimensions[0]);
+
+    check_params["expression_array_param"] = p;
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
@@ -484,7 +584,7 @@ TEST(parameter_extraction, expression_array_init) {
 
 }
 
-TEST(parameter_extraction, mixed_packed_unpacked_init) {
+TEST(parameter_extraction, combined_packed_unpacked_init) {
     std::string test_pattern = R"(
     module test_mod #(
       parameter reg [7:0] param_a [1:0] = '{{1'b1,1'b1,1'b1,1'b0,1'b0,1'b0,1'b1,1'b0}, {1'b0,1'b0,1'b0,1'b1,1'b1,1'b1,1'b0,1'b1}},
@@ -504,63 +604,64 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
     HDL_parameter p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("param_a");
-    std::vector<std::vector<Expression>>  il =
-            {
-                    {
-                            {Expression_component("1'b1")},
-                            {Expression_component("1'b1")},
-                            {Expression_component("1'b1")},
-                            {Expression_component("1'b0")},
-                            {Expression_component("1'b0")},
-                            {Expression_component("1'b0")},
-                            {Expression_component("1'b1")},
-                            {Expression_component("1'b0")}
-                    },
-                    {
-                            {Expression_component("1'b0")},
-                            {Expression_component("1'b0")},
-                            {Expression_component("1'b0")},
-                            {Expression_component("1'b1")},
-                            {Expression_component("1'b1")},
-                            {Expression_component("1'b1")},
-                            {Expression_component("1'b0")},
-                            {Expression_component("1'b1")}
-                    }
-            };
 
-    p.set_initialization_list(il);
+    init_list_t init;
+    init.dimensions = {
+            {{Expression_component("7")}, {Expression_component("0")}, true},
+            {{Expression_component("1")}, {Expression_component("0")}, false}
+    };
+    init.values = {{
+                           {Expression_component("1'b1")},
+                           {Expression_component("1'b1")},
+                           {Expression_component("1'b1")},
+                           {Expression_component("1'b0")},
+                           {Expression_component("1'b0")},
+                           {Expression_component("1'b0")},
+                           {Expression_component("1'b1")},
+                           {Expression_component("1'b0")}
+                   },
+                   {
+                           {Expression_component("1'b0")},
+                           {Expression_component("1'b0")},
+                           {Expression_component("1'b0")},
+                           {Expression_component("1'b1")},
+                           {Expression_component("1'b1")},
+                           {Expression_component("1'b1")},
+                           {Expression_component("1'b0")},
+                           {Expression_component("1'b1")}
+                   }};
 
-    dimension_t d = {{Expression_component("7")}, {Expression_component("0")}, true};
-    p.add_dimension(d);
-    d = {{Expression_component("1")}, {Expression_component("0")}, false};
-    p.add_dimension(d);
+    p.add_initialization_list(produce_check_init_list(init));
+    p.add_dimension(init.dimensions[0]);
+    p.add_dimension(init.dimensions[1]);
+
     check_params["param_a"] = p;
 
 
     p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("param_b");
-    il = {
-                    {
-                            {{Expression_component("$repeat_init"),
+
+    init.dimensions = {
+            {{Expression_component("7")}, {Expression_component("0")}, true},
+            {{Expression_component("1")}, {Expression_component("0")}, false}
+    };
+    init.values = {{
+                           {Expression_component("$repeat_init"),
+                                   Expression_component("8"),
+                                   Expression_component(","),
+                                   Expression_component("1'b1")}
+                   },
+                   {{Expression_component("$repeat_init"),
                             Expression_component("8"),
                             Expression_component(","),
-                            Expression_component("1'b1")}}
-                    },
-                    {
-                            {{Expression_component("$repeat_init"),
-                            Expression_component("8"),
-                            Expression_component(","),
-                            Expression_component("1'b0")}}
-                    }
-            };
+                            Expression_component("1'b0")}
+                   }};
 
-    p.set_initialization_list(il);
+    p.add_initialization_list(produce_check_init_list(init));
+    p.add_dimension(init.dimensions[0]);
+    p.add_dimension(init.dimensions[1]);
 
-    d = {{Expression_component("7")}, {Expression_component("0")}, true};
-    p.add_dimension(d);
-    d = {{Expression_component("1")}, {Expression_component("0")}, false};
-    p.add_dimension(d);
     check_params["param_b"] = p;
 
 
@@ -647,3 +748,93 @@ TEST(parameter_extraction, instance_parameter) {
 }
 
 
+TEST(parameter_extraction, mixed_packed_unpacked_init) {
+    std::string test_pattern = R"(
+    module test_mod #(
+        SS_POLARITY_DEFAULT = 0
+    )();
+
+
+        localparam logic [31:0] FIXED_REGISTER_VALUES [4:0]= '{
+            3,
+            3,
+            3,
+            {SS_POLARITY_DEFAULT,3'b0,SS_POLARITY_DEFAULT,5'b0,4'hE,4'b0},
+            {2'h2,2'b1,2'h3,4'hE,4'b0}
+        };
+    endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    std::map<std::string, HDL_parameter> check_params;
+
+    std::vector<std::pair<std::string, std::vector<std::string>>> vect_params = {
+            {"", {}}
+    };
+
+    check_params.clear();
+
+    HDL_parameter p = HDL_parameter();
+    p.set_type(expression_parameter);
+    p.set_name("SS_POLARITY_DEFAULT");
+    p.add_component(Expression_component("0"));
+    check_params["SS_POLARITY_DEFAULT"] = p;
+
+
+    p = HDL_parameter();
+    p.set_type(expression_parameter);
+    p.set_name("FIXED_REGISTER_VALUES");
+
+    init_list_t init;
+    init.dimensions = {
+            {{Expression_component("31")}, {Expression_component("0")}, true},
+            {{Expression_component("4")}, {Expression_component("0")}, false}
+    };
+    init.values = {{
+                           {Expression_component("3")},
+                   },
+                   {
+                           {Expression_component("3")},
+                   },
+                   {
+                           {Expression_component("3")},
+                   },
+                   {
+                           {Expression_component("SS_POLARITY_DEFAULT")},
+                           {Expression_component("3'b0")},
+                           {Expression_component("SS_POLARITY_DEFAULT")},
+                           {Expression_component("5'b0")},
+                           {Expression_component("4'hE")},
+                           {Expression_component("4'b0")}
+                   },
+                   {
+                           {Expression_component("2'h2")},
+                           {Expression_component("2'b1")},
+                           {Expression_component("2'h3")},
+                           {Expression_component("4'hE")},
+                           {Expression_component("4'b0")},
+                   },
+                   };
+    p.add_initialization_list(produce_check_init_list(init));
+    p.add_dimension(init.dimensions[0]);
+    p.add_dimension(init.dimensions[1]);
+
+    check_params["FIXED_REGISTER_VALUES"] = p;
+
+
+
+
+
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item.first));
+        ASSERT_EQ(item.second, parameters[item.first]);
+    }
+
+}

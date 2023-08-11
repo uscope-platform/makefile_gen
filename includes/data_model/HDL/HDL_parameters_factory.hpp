@@ -17,6 +17,7 @@
 #define MAKEFILEGEN_V2_HDL_PARAMETERS_FACTORY_HPP
 
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
+#include "data_model/HDL/parameters/Initialization_list.hpp"
 #include "data_model/HDL/resource_factory_base.hpp"
 #include "data_model/expressions/bus_mapping_expression.hpp"
 #include "data_model/expressions/expression_evaluator.hpp"
@@ -37,7 +38,7 @@ public:
     void add_component(const Expression_component &c);
 
     void start_initialization_list();
-    void stop_initializaiton_list();
+    void stop_initialization_list();
 
     void start_bit_selection();
     void stop_bit_selection();
@@ -74,7 +75,6 @@ public:
 
     void start_instance_parameter_assignment(std::string parameter_name);
 private:
-    void close_init_list_dimension();
 
     bool in_param_assignment = false;
     bool in_initialization_list = false;
@@ -92,10 +92,14 @@ private:
     Expression bit_selection;
     Expression replication_size;
     std::vector<Expression> current_dimension_init;
+    std::vector<Expression> concat_components;
+    int dimension_level = 0;
 
     Expression new_expression;
     int expression_level=0;
     std::stack<int> expression_level_stack;
+
+    Initialization_list init_list;
 
     std::vector<dimension_t> packed_dimensions;
 };
