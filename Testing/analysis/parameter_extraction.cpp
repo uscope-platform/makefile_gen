@@ -25,10 +25,25 @@ typedef struct{
     std::vector<dimension_t> dimensions;
 }init_list_t;
 
+Initialization_list produce_check_init_list_1d(const init_list_t &i){
+    Initialization_list il;
+    for(auto &item:i.dimensions){
+        il.add_dimension(item, item.packed);
+    }
+    for(const auto &item:i.values){
+        for(const auto &expr:item){
+            il.add_item(expr);
+        }
+    }
+
+    return  il;
+}
+
+
 Initialization_list produce_check_init_list(const init_list_t &i){
     Initialization_list il;
     for(auto &item:i.dimensions){
-        il.add_dimension(item);
+        il.add_dimension(item, item.packed);
     }
     for(const auto &item:i.values){
         il.open_level();
@@ -40,6 +55,7 @@ Initialization_list produce_check_init_list(const init_list_t &i){
 
     return  il;
 }
+
 
 TEST(parameter_extraction, simple_parameters) {
     std::string test_pattern = R"(
@@ -172,10 +188,9 @@ TEST(parameter_extraction, array_expression) {
     p.set_name("array_parameter");
 
 
-
     Initialization_list il;
-    il.add_dimension({{Expression_component("31")}, {Expression_component("0")}, true});
-    il.add_dimension({{Expression_component("1")},{Expression_component("0")}, false});
+    il.add_dimension({{Expression_component("31")}, {Expression_component("0")},true},true);
+    il.add_dimension({{Expression_component("1")},{Expression_component("0")}},false);
     il.add_item({Expression_component("32")});
     il.add_item({Expression_component("5")});
 
@@ -325,7 +340,7 @@ TEST(parameter_extraction, repetition_initialization) {
                    }};
 
     p.add_dimension(init.dimensions[0]);
-    p.add_initialization_list(produce_check_init_list(init));
+    p.add_initialization_list(produce_check_init_list_1d(init));
 
     check_params["repetition_parameter_1"] = p;
 
@@ -339,7 +354,7 @@ TEST(parameter_extraction, repetition_initialization) {
                    }};
 
     p.add_dimension(init.dimensions[0]);
-    p.add_initialization_list(produce_check_init_list(init));
+    p.add_initialization_list(produce_check_init_list_1d(init));
 
     check_params["repetition_parameter_2"] = p;
 
@@ -527,7 +542,7 @@ TEST(parameter_extraction, negative_number_array_init) {
        {Expression_component("16'sd32767")}
     }};
 
-    p.add_initialization_list(produce_check_init_list(init));
+    p.add_initialization_list(produce_check_init_list_1d(init));
     p.add_dimension(init.dimensions[0]);
 
     check_params["negative_array_param"] = p;
@@ -570,7 +585,7 @@ TEST(parameter_extraction, expression_array_init) {
         {Expression_component("7"),Expression_component("*"),Expression_component("6")}
    }};
 
-    p.add_initialization_list(produce_check_init_list(init));
+    p.add_initialization_list(produce_check_init_list_1d(init));
     p.add_dimension(init.dimensions[0]);
 
     check_params["expression_array_param"] = p;
@@ -892,9 +907,9 @@ TEST(parameter_extraction, multidimensional_packed_array) {
     p.set_name("param_a");
 
     Initialization_list il;
-    il.add_dimension({{Expression_component("7")}, {Expression_component("0")}, true});
-    il.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false});
-    il.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false});
+    il.add_dimension({{Expression_component("7")}, {Expression_component("0")},true}, true);
+    il.add_dimension({{Expression_component("1")}, {Expression_component("0")},false},false);
+    il.add_dimension({{Expression_component("1")}, {Expression_component("0")},false},false);
 
     il.open_level();
     il.open_level();

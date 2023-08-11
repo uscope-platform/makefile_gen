@@ -46,7 +46,7 @@ class Initialization_list {
 public:
     Initialization_list() = default;
     explicit Initialization_list(const Expression &e);
-    void add_dimension(const dimension_t &d);
+    void add_dimension(const dimension_t &d, bool packed);
     void add_item(const Expression &e);
     void open_level();
     void close_level();
@@ -66,7 +66,9 @@ private:
     std::shared_ptr<std::unordered_map<std::string, int64_t>> working_param_values;
     std::shared_ptr<std::map<std::string, HDL_parameter>> external_parameters;
 
-    std::vector<dimension_t> dimensions;
+    std::vector<dimension_t> unpacked_dimensions;
+    std::vector<dimension_t> packed_dimensions;
+
     bool last_dimension = true;
     std::vector<Expression> expression_leaves;
     std::vector<Initialization_list> lower_dimension_leaves;

@@ -23,8 +23,13 @@ Initialization_list::Initialization_list(const Expression &e) {
 }
 
 
-void Initialization_list::add_dimension(const dimension_t &d) {
-    dimensions.push_back(d);
+void Initialization_list::add_dimension(const dimension_t &d, bool packed) {
+    if(packed){
+        packed_dimensions.push_back(d);
+    } else{
+        unpacked_dimensions.push_back(d);
+    }
+
 }
 
 void Initialization_list::add_item(const Expression &e) {
@@ -38,30 +43,27 @@ void Initialization_list::add_item(const Expression &e) {
 void Initialization_list::open_level() {
     if(last_dimension){
 
-        int64_t n_dims_to_push;
-        if(dimensions[0].packed){
-            n_dims_to_push = dimensions.size()-2;
-        } else {
-            n_dims_to_push = dimensions.size()-1;
-        }
-        bool packed_concat = false;
-        if(dimensions.size() == 2){
-            packed_concat = dimensions[0].packed;
+        last_dimension = false;
+        for(auto &item:expression_leaves){
+            Initialization_list ll(item);
+            for(const auto& dim:packed_dimensions){
+                ll.add_dimension(dim, true);
+            }
+
+            for(int i = 1; i< unpacked_dimensions.size(); i++){
+                ll.add_dimension(unpacked_dimensions[i], false);
+            }
+            lower_dimension_leaves.push_back(ll);
         }
 
-        if(n_dims_to_push>=1 || packed_concat){
-            last_dimension = false;
-            for(auto &item:expression_leaves){
-                lower_dimension_leaves.emplace_back(item);
-                for(uint64_t i = dimensions.size()-1; i>n_dims_to_push; i--){
-                    lower_dimension_leaves.back().add_dimension(dimensions[i]);
-                }
-            }
-            expression_leaves.clear();
-            lower_dimension_leaves.emplace_back();
-            for(uint64_t i = dimensions.size()-1; i>n_dims_to_push; i--){
-                lower_dimension_leaves.back().add_dimension(dimensions[i]);
-            }
+        expression_leaves.clear();
+        lower_dimension_leaves.emplace_back();
+        for(const auto& dim:packed_dimensions){
+            lower_dimension_leaves.back().add_dimension(dim, true);
+        }
+
+        for(int i = 1; i< unpacked_dimensions.size(); i++){
+            lower_dimension_leaves.back().add_dimension(unpacked_dimensions[i], false);
         }
     } else{
         lower_dimension_leaves.back().open_level();
@@ -70,7 +72,7 @@ void Initialization_list::open_level() {
 }
 
 void Initialization_list::close_level() {
-    if(dimensions.size()>1){
+    if(!unpacked_dimensions.empty()){
         if(!last_dimension){
             lower_dimension_leaves.back().close_level();
             last_dimension = true;
@@ -84,16 +86,24 @@ void Initialization_list::close_level() {
 bool operator==(const Initialization_list &lhs, const Initialization_list &rhs) {
     bool ret = true;
 
-    ret &= lhs.last_dimension == rhs.last_dimension;
+    // last dimension is an internal variable only needed during construction, as such it does not need comparison
     ret &= lhs.lower_dimension_leaves == rhs.lower_dimension_leaves;
     ret &= lhs.expression_leaves == rhs.expression_leaves;
 
-    if(lhs.dimensions.size() != rhs.dimensions.size()) return false;
-    for(int i = 0; i<lhs.dimensions.size(); i++){
-        ret &= lhs.dimensions[i].packed == rhs.dimensions[i].packed;
-        ret &= lhs.dimensions[i].first_bound == rhs.dimensions[i].first_bound;
-        ret &= lhs.dimensions[i].second_bound == rhs.dimensions[i].second_bound;
+    if(lhs.unpacked_dimensions.size() != rhs.unpacked_dimensions.size()) return false;
+    for(int i = 0; i<lhs.unpacked_dimensions.size(); i++){
+        ret &= lhs.unpacked_dimensions[i].packed == rhs.unpacked_dimensions[i].packed;
+        ret &= lhs.unpacked_dimensions[i].first_bound == rhs.unpacked_dimensions[i].first_bound;
+        ret &= lhs.unpacked_dimensions[i].second_bound == rhs.unpacked_dimensions[i].second_bound;
     }
+
+    if(lhs.packed_dimensions.size() != rhs.packed_dimensions.size()) return false;
+    for(int i = 0; i<lhs.packed_dimensions.size(); i++){
+        ret &= lhs.packed_dimensions[i].packed == rhs.packed_dimensions[i].packed;
+        ret &= lhs.packed_dimensions[i].first_bound == rhs.packed_dimensions[i].first_bound;
+        ret &= lhs.packed_dimensions[i].second_bound == rhs.packed_dimensions[i].second_bound;
+    }
+
 
     return ret;
 }

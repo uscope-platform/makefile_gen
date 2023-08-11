@@ -26,8 +26,8 @@
 
 TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
     Initialization_list il;
-    il.add_dimension({{Expression_component("31")}, {Expression_component("0")}, true});
-    il.add_dimension({{Expression_component("4")}, {Expression_component("0")}, false});
+    il.add_dimension({{Expression_component("31")}, {Expression_component("0")}},true);
+    il.add_dimension({{Expression_component("4")}, {Expression_component("0")}},false);
     il.open_level();
     il.add_item({Expression_component("3")});
     il.close_level();
@@ -98,9 +98,9 @@ TEST(Initialization_list, multidimensional_packed_array) {
     };
 
     Initialization_list il;
-    il.add_dimension({{Expression_component("7")}, {Expression_component("0")}, true});
-    il.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false});
-    il.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false});
+    il.add_dimension({{Expression_component("7")}, {Expression_component("0")}},true);
+    il.add_dimension({{Expression_component("1")}, {Expression_component("0")}},false);
+    il.add_dimension({{Expression_component("1")}, {Expression_component("0")}},false);
 
     il.open_level();
     il.open_level();
