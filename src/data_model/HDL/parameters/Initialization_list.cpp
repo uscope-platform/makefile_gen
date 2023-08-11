@@ -14,6 +14,7 @@
 //  limitations under the License.
 
 #include "data_model/HDL/parameters/Initialization_list.hpp"
+#include "data_model/HDL/parameters/Parameter_processor.hpp"
 
 
 
@@ -99,4 +100,55 @@ bool operator==(const Initialization_list &lhs, const Initialization_list &rhs) 
 
 bool Initialization_list::empty() {
     return expression_leaves.empty() && lower_dimension_leaves.empty();
+}
+
+void Initialization_list::link_processor(const std::shared_ptr<std::unordered_map<std::string, int64_t>> &wp,
+                                         const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep) {
+    external_parameters = ep;
+    working_param_values = wp;
+    for(auto &item:lower_dimension_leaves){
+        item.link_processor(wp, ep);
+    }
+}
+
+int64_t Initialization_list::get_value_at(std::vector<uint64_t> idx) {
+    return 0;
+}
+
+xt::xarray<int64_t> Initialization_list::get_values() {
+    xt::xarray<int64_t> ret;
+
+    if(!expression_leaves.empty()){
+        return get_1d_list_values();
+    } else {
+        std::vector<xt::xarray<int64_t>> leaves_values;
+        for(auto &item:lower_dimension_leaves){
+            leaves_values.push_back(item.get_values());
+        }
+    }
+    return ret;
+}
+
+xt::xarray<int64_t> Initialization_list::get_1d_list_values() {
+
+
+    std::map<std::string, HDL_parameter> e_p;
+    for(const auto& item:*external_parameters){
+        e_p.insert(item);
+    }
+    for(const auto&item:*working_param_values){
+        HDL_parameter p;
+        p.set_name(item.first);
+        p.set_value(item.second);
+        e_p.insert({item.first, p});
+    }
+    std::vector<uint64_t> values;
+    for(auto &expr:expression_leaves){
+
+        Parameter_processor p(e_p, nullptr);
+        values.push_back(p.process_expression(expr));
+    }
+    std::vector<std::size_t> shape = { 1,values.size()};
+    auto ret = xt::adapt(values, shape);
+    return ret;
 }

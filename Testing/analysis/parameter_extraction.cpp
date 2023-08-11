@@ -826,9 +826,107 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
     check_params["FIXED_REGISTER_VALUES"] = p;
 
 
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item.first));
+        ASSERT_EQ(item.second, parameters[item.first]);
+    }
+
+}
 
 
+TEST(parameter_extraction, multidimensional_packed_array) {
+    std::string test_pattern = R"(
+    module test_mod #(
+        parameter reg [7:0] param_a [1:0][1:0] = '{
+            {
+                {1'b1,1'b1,1'b1,1'b0,1'b0,1'b0,1'b1,1'b0},
+                {1'b0,1'b0,1'b0,1'b1,1'b1,1'b1,1'b0,1'b1}
+            },
+            {
+                {1'b0,1'b0,1'b0,1'b1,1'b1,1'b1,1'b0,1'b1},
+                {1'b1,1'b1,1'b1,1'b0,1'b0,1'b0,1'b1,1'b0}
+            }
+        }
+    )();
 
+
+    endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    std::map<std::string, HDL_parameter> check_params;
+
+
+    check_params.clear();
+
+
+    Expression v1 = {
+            Expression_component("1'b1"),
+            Expression_component("1'b1"),
+            Expression_component("1'b1"),
+            Expression_component("1'b0"),
+            Expression_component("1'b0"),
+            Expression_component("1'b0"),
+            Expression_component("1'b1"),
+            Expression_component("1'b0")
+    };
+    Expression v2 = {
+            Expression_component("1'b0"),
+            Expression_component("1'b0"),
+            Expression_component("1'b0"),
+            Expression_component("1'b1"),
+            Expression_component("1'b1"),
+            Expression_component("1'b1"),
+            Expression_component("1'b0"),
+            Expression_component("1'b1")
+    };
+
+    HDL_parameter p = HDL_parameter();
+    p.set_type(expression_parameter);
+    p.set_name("param_a");
+
+    Initialization_list il;
+    il.add_dimension({{Expression_component("7")}, {Expression_component("0")}, true});
+    il.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false});
+    il.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false});
+
+    il.open_level();
+    il.open_level();
+    for(const auto& item:v1){
+        il.add_item({item});
+    }
+    il.close_level();
+    il.open_level();
+    for(const auto& item:v2){
+        il.add_item({item});
+    }
+    il.close_level();
+    il.close_level();
+    il.open_level();
+    il.open_level();
+    for(const auto& item:v2){
+        il.add_item({item});
+    }
+    il.close_level();
+    il.open_level();
+    for(const auto& item:v1){
+        il.add_item({item});
+    }
+    il.close_level();
+    il.close_level();
+
+    p.add_initialization_list(il);
+    p.add_dimension({{Expression_component("7")}, {Expression_component("0")}, true});
+    p.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false});
+    p.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false});
+
+    check_params["param_a"] = p;
 
     ASSERT_EQ(check_params.size(), parameters.size());
 

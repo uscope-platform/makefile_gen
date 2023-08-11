@@ -91,10 +91,13 @@ private:
 
     std::string current_parameter;
     std::unordered_map<std::string, int64_t> working_param_values;
-    std::unordered_map<std::string, std::vector<dimension_t>> array_dimensions;
     std::map<std::string, HDL_parameter> external_parameters;
-
     std::unordered_map<std::string, std::vector<int64_t>> array_parameter_values;
+
+    std::unordered_map<std::string, std::vector<dimension_t>> array_dimensions;
+
+
+
 
     std::shared_ptr<data_store> d_store;
 };

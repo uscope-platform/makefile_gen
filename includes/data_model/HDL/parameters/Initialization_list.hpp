@@ -18,9 +18,14 @@
 
 
 #include <vector>
+#include <utility>
+#include <xtensor/xarray.hpp>
+#include <xtensor/xadapt.hpp>
 
 #include "data_model/HDL/parameters/Expression_component.hpp"
 
+// FORWARD DECLARATIONS
+class HDL_parameter;
 
 typedef  std::vector<Expression_component> Expression;
 
@@ -47,9 +52,19 @@ public:
     void close_level();
     bool is_last_level() {return last_dimension;};
     bool empty();
+
+    void link_processor(const std::shared_ptr<std::unordered_map<std::string, int64_t>> &wp, const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep);
+    int64_t get_value_at(std::vector<uint64_t> idx);
+    xt::xarray<int64_t> get_values();
+
     friend bool operator==(const Initialization_list&lhs, const Initialization_list&rhs);
 
 private:
+
+    xt::xarray<int64_t> get_1d_list_values();
+
+    std::shared_ptr<std::unordered_map<std::string, int64_t>> working_param_values;
+    std::shared_ptr<std::map<std::string, HDL_parameter>> external_parameters;
 
     std::vector<dimension_t> dimensions;
     bool last_dimension = true;
