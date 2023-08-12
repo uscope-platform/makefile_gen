@@ -74,8 +74,11 @@ void Initialization_list::open_level() {
 void Initialization_list::close_level() {
     if(!unpacked_dimensions.empty()){
         if(!last_dimension){
+            if(lower_dimension_leaves.back().last_dimension){
+                last_dimension = true;
+            }
             lower_dimension_leaves.back().close_level();
-            last_dimension = true;
+
         } else {
             last_dimension = true;
         }
@@ -125,23 +128,80 @@ int64_t Initialization_list::get_value_at(std::vector<uint64_t> idx) {
     return 0;
 }
 
-xt::xarray<int64_t> Initialization_list::get_values() {
-    xt::xarray<int64_t> ret;
+mdarray  Initialization_list::get_values() {
+    mdarray ret;
 
-    if(!expression_leaves.empty()){
+    auto size = unpacked_dimensions.size();
+
+    if(size == 1){
         return get_1d_list_values();
-    } else {
-        std::vector<xt::xarray<int64_t>> leaves_values;
-        for(auto &item:lower_dimension_leaves){
-            leaves_values.push_back(item.get_values());
-        }
+    } else if(size ==2){
+        return get_2d_list_values();
+    } else if(size == 3){
+        return get_3d_list_values();
     }
     return ret;
 }
 
-xt::xarray<int64_t> Initialization_list::get_1d_list_values() {
+mdarray Initialization_list::get_1d_list_values() {
+
+    if(!packed_dimensions.empty() && !lower_dimension_leaves.empty())
+        return get_packed_1d_list_values();
+
+    auto p = get_parameter_processor();
+    md_1d_array values;
+    for(auto &expr:expression_leaves){
+        values.push_back(p.process_expression(expr));
+    }
+    std::reverse(values.begin(), values.end());
+    mdarray ret;
+    ret.set_1d_slice({0, 0}, values);
+    return ret;
+}
+
+mdarray Initialization_list::get_packed_1d_list_values() {
+
+    auto p = get_parameter_processor();
+    md_1d_array values;
+    for(auto &item:lower_dimension_leaves){
+
+        auto packed_arr = item.get_1d_list_values().get_1d_slice({0,0});
+        int64_t packed_val = 0;
+        for(int i = 0; i<packed_arr.size(); i++){
+            packed_val += (int64_t)std::pow(2, i)*packed_arr[i];
+        }
+        values.push_back(packed_val);
+    }
+    std::reverse(values.begin(), values.end());
+    mdarray ret;
+    ret.set_1d_slice({0, 0}, values);
+    return ret;
+}
+
+mdarray Initialization_list::get_2d_list_values() {
+    mdarray ret;
+    for(int i = 0; i< lower_dimension_leaves.size(); i++){
+        auto sub_list = lower_dimension_leaves[i];
+        auto row_val = sub_list.get_1d_list_values();
+        auto idx = (int64_t)lower_dimension_leaves.size()-1-i;
+        ret.set_1d_slice({0, idx}, row_val.get_1d_slice({0, 0}));
+    }
+
+    return ret;
+}
+
+mdarray Initialization_list::get_3d_list_values() {
+    mdarray ret;
+    for(int i = 0; i< lower_dimension_leaves.size(); i++){
+        auto row_val = lower_dimension_leaves[i].get_2d_list_values();
+        auto idx = (int64_t)lower_dimension_leaves.size()-1-i;
+        ret.set_2d_slice({idx}, row_val.get_2d_slice({0}));
+    }
+    return ret;
+}
 
 
+Parameter_processor Initialization_list::get_parameter_processor() {
     std::map<std::string, HDL_parameter> e_p;
     for(const auto& item:*external_parameters){
         e_p.insert(item);
@@ -152,13 +212,37 @@ xt::xarray<int64_t> Initialization_list::get_1d_list_values() {
         p.set_value(item.second);
         e_p.insert({item.first, p});
     }
-    std::vector<uint64_t> values;
-    for(auto &expr:expression_leaves){
 
-        Parameter_processor p(e_p, nullptr);
-        values.push_back(p.process_expression(expr));
-    }
-    std::vector<std::size_t> shape = { 1,values.size()};
-    auto ret = xt::adapt(values, shape);
-    return ret;
+    return {e_p, nullptr};
 }
+
+void PrintTo(const Initialization_list &il, std::ostream *os) {
+    std::string result = "-----------------------------\n";
+    result += "-----------------------------\n";
+    result += "UNPACKED DIMENSIONS\n";
+    for(const auto &item:il.unpacked_dimensions){
+        result +="[" + Expression_component::print_expression(item.first_bound) + ":" + Expression_component::print_expression(item.second_bound)+ "]";
+    }
+    result += "PACKED DIMENSIONS\n";
+    for(const auto &item:il.packed_dimensions){
+        result +="[" + Expression_component::print_expression(item.first_bound) + ":" + Expression_component::print_expression(item.second_bound)+ "]";
+    }
+
+    result += "EXPRESSION LEAVES\n";
+    for(const auto &item:il.expression_leaves){
+        result +=  "  " + Expression_component::print_expression(item) + "\n";
+    }
+
+    for(const auto &item:il.lower_dimension_leaves){
+        std::ostringstream ss;
+        PrintTo(item, &ss);
+        result +=  "    " +  ss.str() + "\n";
+    }
+    result += "-----------------------------\n";
+    result += "-----------------------------\n";
+
+    *os << result;
+}
+
+
+

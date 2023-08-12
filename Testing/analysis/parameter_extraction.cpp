@@ -865,8 +865,6 @@ TEST(parameter_extraction, multidimensional_packed_array) {
             }
         }
     )();
-
-
     endmodule
     )";
 

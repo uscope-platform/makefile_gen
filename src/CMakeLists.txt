@@ -25,6 +25,7 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/settings_store.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/data_store.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/DataFile.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/mdarray.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/bus_structure/bus_component.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/bus_structure/bus_submodule.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/bus_structure/bus_module.cpp /

@@ -179,13 +179,14 @@ void HDL_parameters_factory::stop_concatenation() {
         expression_level = expression_level_stack.top();
         expression_level_stack.pop();
         if(in_initialization_list){
-            init_list.close_level();
+
             initialization_list.push_back(concat_components);
             concat_components.clear();
             current_dimension_init.clear();
         }
         in_concatenation = false;
     }
+    init_list.close_level();
 }
 
 void HDL_parameters_factory::start_replication() {

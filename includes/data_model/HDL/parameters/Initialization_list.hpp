@@ -19,13 +19,13 @@
 
 #include <vector>
 #include <utility>
-#include <xtensor/xarray.hpp>
-#include <xtensor/xadapt.hpp>
 
 #include "data_model/HDL/parameters/Expression_component.hpp"
+#include "data_model/mdarray.hpp"
 
 // FORWARD DECLARATIONS
 class HDL_parameter;
+class Parameter_processor;
 
 typedef  std::vector<Expression_component> Expression;
 
@@ -50,18 +50,21 @@ public:
     void add_item(const Expression &e);
     void open_level();
     void close_level();
-    bool is_last_level() {return last_dimension;};
     bool empty();
 
     void link_processor(const std::shared_ptr<std::unordered_map<std::string, int64_t>> &wp, const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep);
     int64_t get_value_at(std::vector<uint64_t> idx);
-    xt::xarray<int64_t> get_values();
+    mdarray get_values();
 
     friend bool operator==(const Initialization_list&lhs, const Initialization_list&rhs);
-
+    friend void PrintTo(const Initialization_list& res, std::ostream* os);
 private:
 
-    xt::xarray<int64_t> get_1d_list_values();
+    Parameter_processor get_parameter_processor();
+    mdarray get_packed_1d_list_values();
+    mdarray get_1d_list_values();
+    mdarray get_2d_list_values();
+    mdarray get_3d_list_values();
 
     std::shared_ptr<std::unordered_map<std::string, int64_t>> working_param_values;
     std::shared_ptr<std::map<std::string, HDL_parameter>> external_parameters;
