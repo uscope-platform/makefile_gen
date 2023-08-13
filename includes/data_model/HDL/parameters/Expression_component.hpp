@@ -22,6 +22,7 @@
 #include <set>
 #include <nlohmann/json.hpp>
 #include <unordered_map>
+#include <cmath>
 
 #include <cereal/types/vector.hpp>
 
@@ -72,6 +73,8 @@ public:
     static const std::string print_expression(const std::vector<Expression_component> &exp);
     const std::string print_index(const std::vector<std::vector<Expression_component>> &index);
 
+    int64_t get_binary_size() const{return binary_size;};
+
     template<class Archive>
     void serialize( Archive & ar ) {
         ar(component_type, string_value, numeric_value, array_index, array_value, package_prefix);
@@ -89,6 +92,8 @@ private:
     std::string string_value;
     std::string package_prefix;
     int64_t numeric_value;
+
+    int64_t binary_size = 0;
 
     std::vector<Expression_component> array_value;
     std::vector<std::vector<Expression_component>> array_index;

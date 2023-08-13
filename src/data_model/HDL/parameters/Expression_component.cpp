@@ -91,6 +91,7 @@ void Expression_component::process_number() {
     } else if(test_parameter_type(sv_constant_regex, string_value)){
         std::smatch base_match;
         if(std::regex_search(string_value, base_match, sv_constant_regex)){
+            // Process value
             std::string base;
             std::string value;
             switch (base_match.size()) {
@@ -111,6 +112,16 @@ void Expression_component::process_number() {
                 numeric_value = std::stoul(value, nullptr, 8);
             } else if(base =="b") {
                 numeric_value = std::stoul(value, nullptr, 2);
+            }
+            // Process size
+            std::regex r(R"(^(\d*)'[0-9a-zA-Z]+)");
+
+            if(std::regex_search(string_value, base_match, r)){
+                if(!base_match[1].str().empty()) {
+                    binary_size = std::stoll(base_match[1].str());
+                } else {
+                    binary_size = std::ceil(std::log2(numeric_value));
+                }
             }
         }
         component_type = numeric_component;
