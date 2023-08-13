@@ -50,7 +50,7 @@ public:
     void add_item(const Expression &e);
     void open_level();
     void close_level();
-    bool empty();
+    bool empty() const;
 
     void link_processor(const std::shared_ptr<std::unordered_map<std::string, int64_t>> &wp, const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep);
     int64_t get_value_at(std::vector<uint64_t> idx);

@@ -111,7 +111,7 @@ bool operator==(const Initialization_list &lhs, const Initialization_list &rhs) 
     return ret;
 }
 
-bool Initialization_list::empty() {
+bool Initialization_list::empty() const {
     return expression_leaves.empty() && lower_dimension_leaves.empty();
 }
 

@@ -18,7 +18,8 @@
 
 Parameter_processor::Parameter_processor(const std::map<std::string, HDL_parameter> &parent_parameters, const std::shared_ptr<data_store> &ds) {
     d_store = ds;
-    external_parameters = parent_parameters;
+    external_parameters = std::make_shared<std::map<std::string, HDL_parameter>>(parent_parameters);
+    working_param_values = std::make_shared<std::unordered_map<std::string, int64_t>>();
 }
 
 
@@ -36,31 +37,29 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
     while(!working_set.empty() && !processing_complete && nesting_limit >0){
         bool list_init_complete = true;
         for(auto &item:working_set){
-            if(!item.second.get_initialization_list().empty()){
+            if(item.second.is_array()){
                 if(!item.second.get_dimensions().empty()){
                     array_dimensions[item.first] = item.second.get_dimensions();
                 }
-                auto il = item.second.get_initialization_list();
                 try{
-                    auto dims = item.second.get_dimensions();
-                    auto processed_list = process_initialization_list(item.first, il,dims);
-                    next_working_set.insert(processed_list.begin(), processed_list.end());
+                    auto il = item.second.get_i_l();
+                    il.link_processor(working_param_values, external_parameters);
+                    working_param_array_values[item.first] = il.get_values();
+                    processed_parameters[item.first] = item.second;
                     list_init_complete = true;
                 } catch (Parameter_processor_Exception &ex) {
                     next_working_set.insert(item);
                     list_init_complete = false;
                 }
-
             } else {
                 try{
                     auto processed_param = process_parameter(item.second);
                     processed_parameters[item.first] = processed_param;
-                    working_param_values[item.first] = processed_param.get_numeric_value();
+                    working_param_values->insert({item.first, processed_param.get_numeric_value()});
                 } catch (Parameter_processor_Exception &ex){
                     next_working_set[item.first] = item.second;
                 }
             }
-
         }
 
         if(working_set == next_working_set && list_init_complete){
@@ -123,8 +122,8 @@ HDL_parameter Parameter_processor::process_parameter(const HDL_parameter &par) {
         return return_par;
     }
     int64_t value;
-    if(external_parameters.contains(return_par.get_name())){
-        value = external_parameters[return_par.get_name()].get_numeric_value();
+    if(external_parameters->contains(return_par.get_name())){
+        value = external_parameters->at(return_par.get_name()).get_numeric_value();
         return_par.set_expression_components({Expression_component(std::to_string(value) )});
     } else{
         value = process_expression(components);
@@ -147,24 +146,33 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
 
     for(auto i : expr){
         if(!i.get_array_index().empty()){
+            if(i.get_array_index().size() > 3){
+                throw std::invalid_argument("ERROR: Arrays with more than 3 parameters are not supported");
+            }
             std::vector<int64_t> array_index_values;
             for(auto &item:i.get_array_index()){
                 auto rpn_expr = expr_vector_to_rpn(item);
                 auto res = process_expression(rpn_expr);
                 array_index_values.push_back(res);
             }
-            Expression_component ne(i.get_string_value() + "_"+ std::to_string(array_index_values[0]));
-            i = ne;
+            array_index_values.resize(3);
+            std::reverse(array_index_values.begin(), array_index_values.end());
 
+            if(working_param_array_values.contains(i.get_string_value())){
+                auto val = working_param_array_values[i.get_string_value()].get_value(array_index_values);
+                i = Expression_component(val);
+            } else {
+                throw Parameter_processor_Exception();
+            }
         }
 
         if(i.get_type() == numeric_component || i.get_type() == operator_component || i.get_type()==function_component){
             processed_rpn.push_back(i);
         } else if(i.get_type() == string_component) {
-            if(external_parameters.contains(i.get_string_value())){
-                processed_rpn.emplace_back(external_parameters[i.get_raw_string_value()]);
-            } else if(working_param_values.contains(i.get_raw_string_value())){
-                processed_rpn.emplace_back(working_param_values[i.get_raw_string_value()]);
+            if(external_parameters->contains(i.get_string_value())){
+                processed_rpn.emplace_back(external_parameters->at(i.get_raw_string_value()));
+            } else if(working_param_values->contains(i.get_raw_string_value())){
+                processed_rpn.emplace_back(working_param_values->at(i.get_raw_string_value()));
             } else {
                 throw Parameter_processor_Exception();
             }
@@ -298,30 +306,6 @@ void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
     }
 }
 
-
-std::unordered_map<std::string, HDL_parameter>
-Parameter_processor::process_initialization_list(
-        const std::string& param_name,
-        std::vector<std::vector<Expression>> &raw_il,
-        std::vector<dimension_t> &dims) {
-
-    std::unordered_map<std::string, HDL_parameter> ret;
-
-
-    if(raw_il.size() == 2 && dims.size() == 2){
-        ret = process_complete_2d_init_list(param_name, raw_il, dims);
-    } else if(raw_il.size()== 1 && dims.size() == 2) {
-        ret = process_simple_2d_init_list(param_name, raw_il, dims);
-    } else if(raw_il.size() == 1 && dims.size() == 1){
-        ret = process_1d_init_list(param_name, raw_il, dims);
-    } else{
-        throw std::invalid_argument("Error: Unsupported multidimentional array");
-    }
-
-    return ret;
-}
-
-
 int64_t Parameter_processor::get_component_value(Expression_component &ec) {
 
     if(ec.get_type() == numeric_component){
@@ -359,13 +343,13 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec) {
 
     std::map<std::vector<int64_t>, int64_t>   result_array;
     int64_t val;
-    for(auto &item:external_parameters){
+    for(auto &item:*external_parameters){
         if(param_name == item.first){
-            val = external_parameters[param_name].get_numeric_value();
+            val = external_parameters->at(param_name).get_numeric_value();
             value_type = 1;
         } else{
             bool is_prefix = item.first.compare(0, param_name.size(), param_name) == 0;
-            if(is_prefix && external_parameters[item.first].is_array_element()){
+            if(is_prefix && external_parameters->at(item.first).is_array_element()){
 
                 std::istringstream iss(item.first.substr(param_name.length()));
                 std::vector<int64_t> indexes;
@@ -383,197 +367,13 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec) {
 
     if(value_type == 2) {
         throw array_override_exception(result_array, current_parameter);
-    } else if(working_param_values.contains(param_name)){
-            val = working_param_values[param_name];
+    } else if(working_param_values->contains(param_name)){
+            val = working_param_values->at(param_name);
     } else if(value_type == 0) {
         throw Parameter_processor_Exception();
     }
 
     return val;
-}
-
-std::unordered_map<std::string, HDL_parameter>
-Parameter_processor::process_complete_2d_init_list(const std::string &param_name,
-                                                   std::vector<std::vector<Expression>> &il,
-                                                   std::vector<dimension_t> &dims) {
-    std::vector<std::vector<int64_t>> raw_values;
-
-    std::unordered_map<std::string, HDL_parameter> ret_val;
-
-    for(int i = 0; i<il.size(); i++){
-        raw_values.emplace_back();
-        for(auto item:il[i]){
-            if(item[0].get_string_value()=="$repeat_init"){
-
-                Expression init_size_expr, init_val_expr;
-                bool size_sect = true;
-                for(int j = 1; j<item.size(); j++){
-                    if(item[j].get_string_value() == ","){
-                        size_sect = false;
-                    } else if(size_sect){
-                        init_size_expr.push_back(item[j]);
-                    } else {
-                        init_val_expr.push_back(item[j]);
-                    }
-                }
-                auto init_size = process_expression(expr_vector_to_rpn(init_size_expr));
-                auto init_val = process_expression(expr_vector_to_rpn(init_val_expr));
-
-                for(int64_t j = 0; j<init_size; j++){
-                    raw_values[i].push_back(init_val);
-                }
-            } else{
-                raw_values[i].push_back(process_expression(item));
-            }
-        }
-
-    }
-
-    if(dims[0].packed){
-        std::vector<int64_t> values;
-        for(auto packed_values : raw_values){
-            int64_t val = 0;
-            std::reverse(packed_values.begin(), packed_values.end());
-            for(int i = 0; i<packed_values.size(); i++){
-                val += (int64_t)std::pow(2, i)*packed_values[i];
-            }
-            values.push_back(val);
-        }
-        for(int i = 0; i< values.size(); i++){
-            auto param = produce_array_item(param_name, {i}, values[values.size()-1-i]);
-            array_parameter_values[param_name].push_back(param.get_numeric_value());
-            ret_val[param.get_name()] = param;
-        }
-
-    } else{
-
-        auto outer_dim = get_dimension_size(dims[1]);
-        auto inner_dim = get_dimension_size(dims[0]);
-
-        for(int i = 0; i<outer_dim; i++){
-            raw_values.emplace_back();
-            for(int j = 0; j<inner_dim; j++){
-                if(il[i][j][0].get_string_value() == "$repeat_init"){
-                    int i = 0;
-                }
-                raw_values[i].push_back(process_expression(il[i][j]));
-            }
-        }
-        for(int i = 0; i<outer_dim; i++){
-            for(int j = 0; j<inner_dim; j++){
-                auto param = produce_array_item(param_name, {i,j}, raw_values[outer_dim-1-i][inner_dim-1-j]);
-                array_parameter_values[param_name].push_back(param.get_numeric_value());
-                ret_val[param.get_name()] = param;
-            }
-        }
-    }
-
-    return ret_val;
-}
-
-std::unordered_map<std::string, HDL_parameter>
-Parameter_processor::process_simple_2d_init_list(const std::string &param_name,
-                                                 std::vector<std::vector<Expression>> &il,
-                                                 std::vector<dimension_t> &dims) {
-    throw std::invalid_argument("SIMPLE 2D LIST NOT IMPLEMENTED YET");
-}
-
-std::unordered_map<std::string, HDL_parameter>
-Parameter_processor::process_1d_init_list(const std::string &param_name, std::vector<std::vector<Expression>> &il,
-                                          std::vector<dimension_t> &dims) {
-
-    std::unordered_map<std::string, HDL_parameter> ret_val;
-    if(dims[0].packed){
-        int64_t val = 0;
-        auto packed_values = il[0];
-        std::reverse(packed_values.begin(), packed_values.end());
-        for(int i = 0; i<packed_values.size(); i++){
-            val += (int64_t)std::pow(2, i)* process_expression(expr_vector_to_rpn(packed_values[i]));
-        }
-        HDL_parameter p;
-        p.set_name(param_name);
-        p.set_expression_components({Expression_component(std::to_string(val))});
-        p.set_value(val);
-        array_parameter_values[param_name].push_back(val);
-        ret_val[param_name] = p;
-    } else {
-
-        auto reverse_il = il[0];
-        std::reverse(reverse_il.begin(), reverse_il.end());
-
-        auto arr_size = get_dimension_size(dims[0]);
-
-        int last_item_addr = 0;
-        for(int i = 0; ret_val.size()<arr_size; i++){
-
-            if(reverse_il[i][0].get_string_value() == "$repeat_init"){
-                auto expanded_list = process_repeat_initialization(param_name, reverse_il[i], last_item_addr);
-                for(const auto& item:expanded_list){
-                    ret_val[item.get_name()] = item;
-                    array_parameter_values[param_name].push_back(item.get_numeric_value());
-                }
-                last_item_addr += expanded_list.size();
-            } else{
-                if(reverse_il[i][0].get_type() == string_component){
-                    auto param_value = reverse_il[i][0].get_string_value();
-                    if(array_parameter_values.contains(param_value)){
-                        auto array_to_concat = array_parameter_values[param_value];
-
-                        for(int64_t j = last_item_addr; j<last_item_addr+array_to_concat.size(); j++){
-                            auto param = produce_array_item(param_name, {j}, array_to_concat[j-last_item_addr]);
-                            array_parameter_values[param.get_name()].push_back(param.get_numeric_value());
-                            ret_val[param.get_name()] = param;
-                        }
-                        last_item_addr += array_to_concat.size();
-                    }else if(working_param_values.contains(param_value)){
-                        auto param = produce_array_item(param_name, {last_item_addr}, working_param_values[param_value]);
-                        array_parameter_values[param.get_name()].push_back(param.get_numeric_value());
-                        ret_val[param.get_name()] = param;
-                        last_item_addr++;
-                    } else{
-                        throw Parameter_processor_Exception();
-                    }
-
-                } else{
-                    auto param = produce_array_item(param_name, {last_item_addr}, process_expression(expr_vector_to_rpn(reverse_il[i])));
-                    array_parameter_values[param_name].push_back(param.get_numeric_value());
-                    ret_val[param.get_name()] = param;
-                    last_item_addr++;
-                }
-            }
-
-
-        }
-    }
-
-
-    return ret_val;
-}
-
-uint64_t Parameter_processor::get_dimension_size(dimension_t &d) {
-    return std::max(process_expression(expr_vector_to_rpn(d.first_bound)), process_expression(expr_vector_to_rpn(d.second_bound)))+1;
-}
-
-std::vector<HDL_parameter> Parameter_processor::process_repeat_initialization(const std::string &param_name, Expression &e, int64_t last_item_addr) {
-    std::vector<HDL_parameter> ret;
-    Expression init_size_expr, init_val_expr;
-    bool size_sect = true;
-    for(int j = 1; j<e.size(); j++){
-        if(e[j].get_string_value() == ","){
-            size_sect = false;
-        } else if(size_sect){
-            init_size_expr.push_back(e[j]);
-        } else {
-            init_val_expr.push_back(e[j]);
-        }
-    }
-    auto init_size = process_expression(expr_vector_to_rpn(init_size_expr));
-    auto init_val = process_expression(expr_vector_to_rpn(init_val_expr));
-
-    for(int64_t j = last_item_addr; j<last_item_addr+init_size; j++){
-        ret.push_back(produce_array_item(param_name, {last_item_addr+j}, init_val));
-    }
-    return ret;
 }
 
 HDL_parameter Parameter_processor::produce_array_item(const std::string& name, const std::vector<int64_t>& index, int64_t default_value) {
@@ -583,8 +383,8 @@ HDL_parameter Parameter_processor::produce_array_item(const std::string& name, c
         param_name +="_"+std::to_string(item);
     }
     int64_t param_value = default_value;
-    if(external_parameters.contains(param_name)){
-        param_value = external_parameters[param_name].get_numeric_value();
+    if(external_parameters->contains(param_name)){
+        param_value = external_parameters->at(param_name).get_numeric_value();
     }
     p.set_name(param_name);
     p.set_array_index(index);

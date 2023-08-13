@@ -116,61 +116,7 @@ bool HDL_parameter::is_numeric_string(const std::string &s) const {
     return regex_string_test(classification_regexes.numeric, s);
 }
 
-void HDL_parameter::string_to_numeric() {
-    if(is_numeric_string()){
-        numeric_value_array[0] = std::stoul(get_string_value(), nullptr, 0);
-    } else if(is_sv_constant()) {
-        numeric_value_array[0] = parse_sv_constant();
-    }
-    type = numeric_parameter;
-}
 
-
-bool HDL_parameter::is_array() const {
-    return regex_string_test(classification_regexes.array, get_string_value());
-}
-
-void HDL_parameter::string_to_array(
-        const std::unordered_map<std::string, HDL_parameter>& parent_parameter,
-        const std::unordered_map<std::string, HDL_parameter>& instance_parameters,
-        const std::unordered_map<std::string, HDL_parameter>& module_parameters
-        ) {
-    std::vector<std::string> array;
-    const std::regex regex(classification_regexes.array);
-    std::smatch base_match;
-    auto s = get_string_value();
-    if(is_repetition_array_init()){
-        //implement support for these
-        auto init_strings = split_array_init(s);
-        int64_t arr_size;
-        if(is_numeric_string(init_strings.first)){
-            arr_size = std::stoul(init_strings.first, nullptr, 0);
-        } else if(is_sv_constant(init_strings.first)){
-            arr_size = parse_sv_constant(init_strings.first);
-        } else {
-
-        }
-        array.insert(array.end(), arr_size, init_strings.second);
-        type = string_array_parameter;
-    }else{
-        if(std::regex_search(s, base_match, regex)){
-            std::stringstream ss(base_match[1].str());
-            std::string item;
-
-            while (std::getline(ss, item, ',')) {
-                array.push_back(item);
-            }
-        }else{
-            array.push_back(s);
-        }
-    }
-
-    string_value_array = array;
-}
-
-bool HDL_parameter::is_repetition_array_init() const {
-    return regex_string_test(classification_regexes.array_init, get_string_value()); // this regex is still wonky
-}
 
 bool HDL_parameter::regex_string_test(const std::string &r, const std::string &s) const{
     const std::regex regex(r);
@@ -298,3 +244,4 @@ nlohmann::json HDL_parameter::dump() {
 
     return ret;
 }
+

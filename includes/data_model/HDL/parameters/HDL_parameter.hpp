@@ -65,15 +65,8 @@ public:
     bool is_numeric_string() const {return is_numeric_string(string_value_array[0]);};
     bool is_sv_constant(const std::string &s) const;
     bool is_sv_constant() const {return is_sv_constant(string_value_array[0]);};
-    bool is_array() const;
-    bool is_repetition_array_init() const;
+    bool is_array() const {return !i_l.empty();};
 
-    void string_to_array(
-                    const std::unordered_map<std::string, HDL_parameter>& parent_parameter,
-                    const std::unordered_map<std::string, HDL_parameter>& instance_parameters,
-                    const std::unordered_map<std::string, HDL_parameter>& module_parameters
-                         );
-    void string_to_numeric();
 
     int64_t parse_sv_constant(const std::string &s) const;
     int64_t parse_sv_constant() const {return parse_sv_constant(string_value_array[0]);};
@@ -101,6 +94,7 @@ public:
     void set_initialization_list(std::vector<std::vector<Expression>> &list) {initialization_list = list;};
     void append_initialization_list(std::vector<std::vector<Expression>> &list);
     std::vector<std::vector<Expression>> get_initialization_list(){ return initialization_list;};
+    Initialization_list get_i_l() {return i_l;};
 
     void set_array_index(const std::vector<int64_t> &i) {array_index = i;};
     std::vector<int64_t> get_array_index(){return array_index;};

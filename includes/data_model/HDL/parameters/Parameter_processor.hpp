@@ -51,12 +51,6 @@ public:
     HDL_parameter process_parameter(const HDL_parameter &par);
     int64_t process_expression(const std::vector<Expression_component>& expr);
 
-    std::unordered_map<std::string, HDL_parameter> process_initialization_list(
-        const std::string& param_name,
-        std::vector<std::vector<Expression>> &il,
-        std::vector<dimension_t> &dims
-    );
-
     static std::vector<Expression_component> expr_vector_to_rpn(const std::vector<Expression_component>& v);
 
     static int64_t evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string& operation);
@@ -65,33 +59,18 @@ public:
     int64_t get_component_value(Expression_component &ec);
 private:
 
-    std::vector<HDL_parameter> process_repeat_initialization(const std::string &param_name, Expression &e, int64_t last_item_addr);
+
     HDL_parameter produce_array_item(const std::string& name, const std::vector<int64_t>& index, int64_t value);
 
 
-    std::unordered_map<std::string, HDL_parameter> process_complete_2d_init_list(
-            const std::string& param_name,
-            std::vector<std::vector<Expression>> &il,
-            std::vector<dimension_t> &dims
-    );
-
-    std::unordered_map<std::string, HDL_parameter> process_simple_2d_init_list(
-            const std::string& param_name,
-            std::vector<std::vector<Expression>> &il,
-            std::vector<dimension_t> &dims
-    );
-
-    std::unordered_map<std::string, HDL_parameter> process_1d_init_list(
-            const std::string& param_name,
-            std::vector<std::vector<Expression>> &il,
-            std::vector<dimension_t> &dims
-    );
-
-    uint64_t get_dimension_size(dimension_t &d);
-
     std::string current_parameter;
-    std::unordered_map<std::string, int64_t> working_param_values;
-    std::map<std::string, HDL_parameter> external_parameters;
+
+    std::shared_ptr<std::unordered_map<std::string, int64_t>> working_param_values;
+    std::shared_ptr<std::map<std::string, HDL_parameter>> external_parameters;
+    std::unordered_map<std::string, mdarray> working_param_array_values;
+
+
+
     std::unordered_map<std::string, std::vector<int64_t>> array_parameter_values;
 
     std::unordered_map<std::string, std::vector<dimension_t>> array_dimensions;
