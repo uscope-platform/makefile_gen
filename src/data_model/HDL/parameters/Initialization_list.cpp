@@ -151,7 +151,7 @@ mdarray Initialization_list::get_1d_list_values() {
     auto p = get_parameter_processor();
     md_1d_array values;
     for(auto &expr:expression_leaves){
-        values.push_back(p.process_expression(expr));
+        values.push_back(p.process_expression(Parameter_processor::expr_vector_to_rpn(expr)));
     }
     std::reverse(values.begin(), values.end());
     mdarray ret;

@@ -146,24 +146,7 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
 
     for(auto i : expr){
         if(!i.get_array_index().empty()){
-            if(i.get_array_index().size() > 3){
-                throw std::invalid_argument("ERROR: Arrays with more than 3 parameters are not supported");
-            }
-            std::vector<int64_t> array_index_values;
-            for(auto &item:i.get_array_index()){
-                auto rpn_expr = expr_vector_to_rpn(item);
-                auto res = process_expression(rpn_expr);
-                array_index_values.push_back(res);
-            }
-            array_index_values.resize(3);
-            std::reverse(array_index_values.begin(), array_index_values.end());
-
-            if(working_param_array_values.contains(i.get_string_value())){
-                auto val = working_param_array_values[i.get_string_value()].get_value(array_index_values);
-                i = Expression_component(val);
-            } else {
-                throw Parameter_processor_Exception();
-            }
+            i = process_array_access(i);
         }
 
         if(i.get_type() == numeric_component || i.get_type() == operator_component || i.get_type()==function_component){
@@ -328,13 +311,7 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec) {
 
     std::string param_name;
     if(!ec.get_array_index().empty()){
-            param_name = ec.get_string_value();
-            std::vector<int64_t> array_index_values;
-            for(auto &item:ec.get_array_index()){
-                auto rpn_expr = expr_vector_to_rpn(item);
-                auto res = process_expression(rpn_expr);
-                param_name += "_"+ std::to_string(res);
-            }
+        return process_array_access(ec).get_numeric_value();
     } else{
         param_name = ec.get_string_value();
     }
@@ -391,4 +368,30 @@ HDL_parameter Parameter_processor::produce_array_item(const std::string& name, c
     p.set_expression_components({Expression_component(std::to_string(param_value))});
     p.set_value(param_value);
     return p;
+}
+
+Expression_component Parameter_processor::process_array_access(Expression_component &e) {
+    if(e.get_array_index().size() > 3){
+        throw std::invalid_argument("ERROR: Arrays with more than 3 parameters are not supported");
+    }
+    std::vector<int64_t> array_index_values(3, 0);
+
+    auto raw_idx = e.get_array_index();
+
+    for(uint64_t i = 0; i<raw_idx.size(); i++){
+        auto rpn_expr = expr_vector_to_rpn(raw_idx[i]);
+        auto res = process_expression(rpn_expr);
+        array_index_values[raw_idx.size()-1-i] = res;
+    }
+
+    std::reverse(array_index_values.begin(), array_index_values.end());
+
+
+
+    if(working_param_array_values.contains(e.get_string_value())){
+        auto val = working_param_array_values[e.get_string_value()].get_value(array_index_values);
+        return Expression_component(val);
+    } else {
+        throw Parameter_processor_Exception();
+    }
 }

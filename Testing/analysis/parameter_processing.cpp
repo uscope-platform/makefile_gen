@@ -220,10 +220,6 @@ TEST(parameter_processing, multidimensional_array_expression) {
     auto parameters = run_test(test_pattern);
 
     std::vector<param_check_t> vect_params = {
-            {"multidim_array_parameter_0_0", {"6"}, numeric_parameter, 6, {0,0}},
-            {"multidim_array_parameter_0_1", {"5"}, numeric_parameter, 5, {0,1}},
-            {"multidim_array_parameter_1_0", {"32"}, numeric_parameter, 32, {1,0}},
-            {"multidim_array_parameter_1_1", {"32"}, numeric_parameter, 32, {1,1}},
             {"repetition_size", {"2"}, numeric_parameter, 2}
     };
 
@@ -239,6 +235,30 @@ TEST(parameter_processing, multidimensional_array_expression) {
     par.add_component(e);
     check_params["multidim_array_access"] = par;
 
+    par = HDL_parameter();
+    par.set_name("multidim_array_parameter");
+    par.set_type(expression_parameter);
+    Initialization_list i;
+    dimension_t  d = {{Expression_component("31")}, {Expression_component("0")}, true};
+    par.add_dimension(d);
+    i.add_dimension(d,true);
+    d = {{Expression_component("repetition_size"), Expression_component("-"), Expression_component("1")}, {Expression_component("0")}, false};
+    par.add_dimension(d);
+    i.add_dimension(d, false);
+    d = {{Expression_component("1")}, {Expression_component("0")}, false};
+    par.add_dimension(d);
+    i.add_dimension(d, false);
+
+    i.open_level();
+    i.add_item({Expression_component("32")});
+    i.add_item({Expression_component("32")});
+    i.close_level();
+    i.open_level();
+    i.add_item({Expression_component("5")});
+    i.add_item({Expression_component("6")});
+    i.close_level();
+    par.add_initialization_list(i);
+    check_params["multidim_array_parameter"] = par;
 
 
     ASSERT_EQ(check_params.size(), parameters.size());
@@ -323,6 +343,7 @@ TEST(parameter_processing, package_parameters) {
         module test_mod #(
              parameter package_param = test_package::bus_base
         )();
+
         endmodule
     )";
 
@@ -398,17 +419,45 @@ TEST(parameter_processing, negative_number_array_init) {
         module test_mod #(
              parameter negative_array_param [1:0] = '{-16'sd32767, 16'sd32767}
         )();
+
+            parameter result_param = negative_array_param[1] - negative_array_param[0];
         endmodule
     )";
 
     auto parameters = run_test(test_pattern);
 
-    std::vector<param_check_t> vect_params = {
-            {"negative_array_param_0", { "32767"}, numeric_parameter, 32767, {0}},
-            {"negative_array_param_1", {"-32767"}, numeric_parameter, -32767, {1}},
-    };
 
-    std::map<std::string, HDL_parameter> check_params = produce_check_components(vect_params);
+    std::map<std::string, HDL_parameter> check_params;
+
+    HDL_parameter par;
+    par.set_name("result_param");
+    par.set_type(numeric_parameter);
+    par.set_value(-65534);
+    Expression_component ec("negative_array_param");
+    std::vector<Expression_component> idx = {Expression_component("1")};
+    ec.add_array_index(idx);
+    par.add_component(ec);
+    ec = Expression_component("negative_array_param");
+    idx = {Expression_component("0")};
+    ec.add_array_index(idx);
+    par.add_component(ec);
+    par.add_component(Expression_component("-"));
+
+    check_params["result_param"] = par;
+
+    par=HDL_parameter();
+    par.set_name("negative_array_param");
+    par.set_type(expression_parameter);
+    Initialization_list i;
+    dimension_t  d = {{Expression_component("1")}, {Expression_component("0")}, false};
+    par.add_dimension(d);
+    i.add_dimension(d, false);
+
+    i.add_item({Expression_component("-"), Expression_component("16'sd32767")});
+    i.add_item({Expression_component("16'sd32767")});
+
+    par.add_initialization_list(i);
+    check_params["negative_array_param"] = par;
 
 
     ASSERT_EQ(check_params.size(), parameters.size());
@@ -425,18 +474,55 @@ TEST(parameter_processing, expression_array_init) {
         module test_mod #(
              parameter integer expression_array_param [1:0] = '{5+4, 7*6}
         )();
+
+            parameter p1 = expression_array_param[0];
+            parameter p2 = expression_array_param[1];
         endmodule
     )";
 
 
     auto parameters = run_test(test_pattern);
 
-    std::vector<param_check_t> vect_params = {
-            {"expression_array_param_0", {"42"}, numeric_parameter, 42, {0}},
-            {"expression_array_param_1", {"9"}, numeric_parameter, 9, {1}},
-    };
 
-    std::map<std::string, HDL_parameter> check_params = produce_check_components(vect_params);
+    std::map<std::string, HDL_parameter> check_params;
+
+
+    HDL_parameter par;
+    par.set_name("p1");
+    par.set_type(numeric_parameter);
+    par.set_value(42);
+    Expression_component ec("expression_array_param");
+    std::vector<Expression_component> idx = {Expression_component("0")};
+    ec.add_array_index(idx);
+    par.add_component(ec);
+
+    check_params["p1"] = par;
+
+    par=HDL_parameter();
+    par.set_name("p2");
+    par.set_type(numeric_parameter);
+    par.set_value(9);
+    ec = Expression_component("expression_array_param");
+    idx = {Expression_component("1")};
+    ec.add_array_index(idx);
+    par.add_component(ec);
+
+    check_params["p2"] = par;
+
+    par=HDL_parameter();
+    par.set_name("expression_array_param");
+    par.set_type(expression_parameter);
+    Initialization_list i;
+    dimension_t  d = {{Expression_component("1")}, {Expression_component("0")}, false};
+    par.add_dimension(d);
+    i.add_dimension(d, false);
+
+    i.add_item({Expression_component("5"), Expression_component("+"), Expression_component("4")});
+    i.add_item({Expression_component("7"), Expression_component("*"), Expression_component("6")});
+
+    par.add_initialization_list(i);
+    check_params["expression_array_param"] = par;
+
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
