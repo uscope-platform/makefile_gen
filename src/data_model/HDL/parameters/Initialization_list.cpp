@@ -129,15 +129,13 @@ bool Initialization_list::empty() const {
     return expression_leaves.empty() && lower_dimension_leaves.empty();
 }
 
-void Initialization_list::link_processor(const std::shared_ptr<std::unordered_map<std::string, int64_t>> &wp,
-                                         const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep,
-                                         const std::shared_ptr<std::unordered_map<std::string, mdarray>> &wap) {
+void Initialization_list::link_processor(const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep,
+                                         const std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> &cs) {
     external_parameters = ep;
-    working_param_values = wp;
+    compleated_set = cs;
     for(auto &item:lower_dimension_leaves){
-        item.link_processor(wp, ep, wap);
+        item.link_processor( ep, cs);
     }
-    working_param_array_values = wap;
 }
 
 int64_t Initialization_list::get_value_at(std::vector<uint64_t> idx) {
@@ -237,7 +235,7 @@ Parameter_processor Initialization_list::get_parameter_processor() {
         e_p.insert(item);
     }
 
-    return {e_p, working_param_values, working_param_array_values};
+    return {e_p, compleated_set};
 }
 
 void PrintTo(const Initialization_list &il, std::ostream *os) {

@@ -135,8 +135,16 @@ nlohmann::json HDL_parameter::dump() {
 
     ret["name"] = name;
     ret["type"] = parameter_type_to_string(type);
-    ret["string_value"] = string_value_array;
-    ret["numeric_value"]= numeric_value_array;
+    if(type == string_parameter){
+        ret["value"] = string_value_array;
+    } else if(type == numeric_parameter){
+
+        ret["value"]= numeric_value_array;
+    } else if(type == array_parameter){
+        ret["value"] = array_value.dump();
+    }
+
+
 
     return ret;
 }

@@ -53,9 +53,9 @@ public:
     void close_level();
     bool empty() const;
     bool is_packed() const{return unpacked_dimensions.empty() && !packed_dimensions.empty();};
-    void link_processor(const std::shared_ptr<std::unordered_map<std::string, int64_t>> &wp,
+    void link_processor(
                         const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep,
-                        const std::shared_ptr<std::unordered_map<std::string, mdarray>> &wap);
+                        const std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> &cs);
     int64_t get_value_at(std::vector<uint64_t> idx);
     mdarray get_values();
 
@@ -81,6 +81,7 @@ private:
     std::shared_ptr<std::unordered_map<std::string, int64_t>> working_param_values;
     std::shared_ptr<std::map<std::string, HDL_parameter>> external_parameters;
     std::shared_ptr<std::unordered_map<std::string, mdarray>> working_param_array_values;
+    std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> compleated_set;
 
     std::vector<dimension_t> unpacked_dimensions;
     std::vector<dimension_t> packed_dimensions;

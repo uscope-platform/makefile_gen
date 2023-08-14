@@ -19,7 +19,7 @@
 #include <vector>
 #include <cstdint>
 #include <iostream>
-
+#include <nlohmann/json.hpp>
 
 typedef std::vector<int64_t> md_1d_array;
 typedef std::vector<md_1d_array> md_2d_array;
@@ -38,6 +38,7 @@ public:
     md_2d_array get_2d_slice(std::vector<int64_t> idx){return data[idx[0]];};
     md_1d_array get_1d_slice(std::vector<int64_t> idx){return data[idx[0]][idx[1]];};
     int64_t get_value(std::vector<int64_t> idx){return data[idx[0]][idx[1]][idx[2]];};
+    md_3d_array dump();
 
     friend bool operator==(const mdarray&lhs, const mdarray&rhs){
         return lhs.data == rhs.data;

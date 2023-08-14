@@ -64,3 +64,8 @@ void PrintTo(const mdarray &res, std::ostream *os) {
 
     *os << result;
 }
+
+md_3d_array mdarray::dump() {
+    return data;
+}
+
