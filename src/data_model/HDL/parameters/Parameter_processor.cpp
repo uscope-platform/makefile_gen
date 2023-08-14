@@ -49,42 +49,26 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
         for(auto &item:working_set){
             if(item.second.is_packed_array()) {
                 try{
-                    Initialization_list il;
-                    if(external_parameters->contains(item.first)){
-                        il = external_parameters->at(item.first).get_i_l();
-                    } else {
-                        il = item.second.get_i_l();
-                    }
-                    il.link_processor(working_param_values, external_parameters, working_param_array_values);
-                    auto val = il.get_values().get_value({0,0,0});
-                    HDL_parameter p;
-                    p.set_name(item.first);
-                    p.set_value(val);
-                    processed_parameters[item.first] = p;
-                    working_param_values->insert({item.first, val});
+                    auto processed_param = process_packed_parameter(item.second);
+                    processed_parameters[item.first] = processed_param;
+                    working_param_values->insert({item.first, processed_param.get_numeric_value()});
                 } catch (Parameter_processor_Exception &ex) {
                     next_working_set.insert(item);
                     list_init_complete = false;
                 }
             }else if(item.second.is_array()){
-                    try{
-                        Initialization_list il;
-                        if(external_parameters->contains(item.first)){
-                            il = external_parameters->at(item.first).get_i_l();
-                        } else {
-                            il = item.second.get_i_l();
-                        }
-                        il.link_processor(working_param_values, external_parameters, working_param_array_values);
-                        working_param_array_values->insert({item.first, il.get_values()});
-                        processed_parameters[item.first] = item.second;
-                        list_init_complete = true;
-                    } catch (Parameter_processor_Exception &ex) {
-                        next_working_set.insert(item);
-                        list_init_complete = false;
-                    }
+                try{
+                    auto processed_param = process_array_parameter(item.second);
+                    processed_parameters[item.first] = processed_param;
+                    working_param_array_values->insert({item.first, processed_param.get_array_value()});
+                    list_init_complete = true;
+                } catch (Parameter_processor_Exception &ex) {
+                    next_working_set.insert(item);
+                    list_init_complete = false;
+                }
             } else {
                 try{
-                    auto processed_param = process_parameter(item.second);
+                    auto processed_param = process_scalar_parameter(item.second);
                     processed_parameters[item.first] = processed_param;
                     working_param_values->insert({item.first, processed_param.get_numeric_value()});
                 } catch (Parameter_processor_Exception &ex){
@@ -120,27 +104,17 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
 std::map<std::string, HDL_parameter> Parameter_processor::process_parameters_map(std::map<std::string, HDL_parameter> &map) {
     std::map<std::string, HDL_parameter> ret;
     for(auto &item:map){
-        try{
-            auto par = item.second;
-            par.set_expression_components(expr_vector_to_rpn(par.get_expression_components()));
-            ret[item.first] = process_parameter(par);
-        } catch (array_override_exception &ex) {
-            auto array_value = ex.array_value;
-            auto p_n = ex.param_name;
-            for(const auto& item:array_value){
-                //TODO: harray balues
-            }
-        }
+        auto par = item.second;
+        par.set_expression_components(expr_vector_to_rpn(par.get_expression_components()));
+        ret[item.first] = process_scalar_parameter(par);
     }
-
     return ret;
 }
 
 
-HDL_parameter Parameter_processor::process_parameter(const HDL_parameter &par) {
+HDL_parameter Parameter_processor::process_scalar_parameter(const HDL_parameter &par) {
 
     HDL_parameter return_par = par;
-    current_parameter = par.get_name();
     auto components = return_par.get_expression_components();
 
 
@@ -151,16 +125,22 @@ HDL_parameter Parameter_processor::process_parameter(const HDL_parameter &par) {
     if(par.get_type() == numeric_parameter){
         return return_par;
     }
-    int64_t value;
-    if(external_parameters->contains(return_par.get_name())){
-        value = external_parameters->at(return_par.get_name()).get_numeric_value();
-        return_par.set_expression_components({Expression_component(std::to_string(value) )});
-    } else{
-        value = process_expression(components);
-    }
 
-    return_par.set_value(value);
-    return_par.set_type(numeric_parameter);
+    try {
+        int64_t value;
+        if (external_parameters->contains(return_par.get_name())) {
+            value = external_parameters->at(return_par.get_name()).get_numeric_value();
+            return_par.set_expression_components({Expression_component(std::to_string(value))});
+        } else {
+            value = process_expression(components);
+        }
+
+        return_par.set_value(value);
+        return_par.set_type(numeric_parameter);
+    } catch (array_value_exception &ex){
+        return_par.set_type(array_parameter);
+        return_par.set_array_value(ex.array_value);
+    }
     return return_par;
 }
 
@@ -347,39 +327,20 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec) {
         param_name = ec.get_string_value();
     }
 
-    int value_type = 0;
-
     std::map<std::vector<int64_t>, int64_t>   result_array;
     int64_t val;
-    for(auto &item:*external_parameters){
-        if(param_name == item.first){
+
+    if(external_parameters->contains(param_name)) {
+        if(external_parameters->at(param_name).get_type()== array_parameter){
+            throw array_value_exception(external_parameters->at(param_name).get_array_value());
+        } else {
             val = external_parameters->at(param_name).get_numeric_value();
-            value_type = 1;
-        } else{
-            bool is_prefix = item.first.compare(0, param_name.size(), param_name) == 0;
-            if(is_prefix){
-
-                std::istringstream iss(item.first.substr(param_name.length()));
-                std::vector<int64_t> indexes;
-                std::string s;
-                while (std::getline(iss, s, '_')) {
-                    if(!s.empty()){
-                        indexes.push_back(std::stoll(s));
-                    }
-                }
-                result_array[indexes] = item.second.get_numeric_value();
-                value_type = 2;
-            }
         }
-    }
-
-    if(value_type == 2) {
-        throw array_override_exception(result_array, current_parameter);
     } else if(working_param_values->contains(param_name)) {
         val = working_param_values->at(param_name);
     } else if(working_param_array_values->contains(param_name)){
         throw array_value_exception(working_param_array_values->at(param_name));
-    } else if(value_type == 0) {
+    } else {
         throw Parameter_processor_Exception();
     }
 
@@ -401,12 +362,53 @@ Expression_component Parameter_processor::process_array_access(Expression_compon
     }
 
     std::reverse(array_index_values.begin(), array_index_values.end());
-
-    if(working_param_array_values->contains(e.get_string_value())){
+    if(external_parameters->contains(e.get_string_value())){
+        auto val = external_parameters->at(e.get_string_value()).get_array_value().get_value(array_index_values);
+        return Expression_component(val);
+    }else if(working_param_array_values->contains(e.get_string_value())){
         auto val = working_param_array_values->at(e.get_string_value()).get_value(array_index_values);
         return Expression_component(val);
     } else {
         throw Parameter_processor_Exception();
     }
+}
+
+HDL_parameter Parameter_processor::process_array_parameter(const HDL_parameter &par) {
+    HDL_parameter return_par = par;
+    mdarray arr_val;
+    if(external_parameters->contains(par.get_name())){
+        if(external_parameters->at(par.get_name()).get_type()==array_parameter){
+            arr_val = external_parameters->at(par.get_name()).get_array_value();
+            return_par.add_initialization_list({});
+        } else {
+            Initialization_list il = external_parameters->at(par.get_name()).get_i_l();
+            il.link_processor(working_param_values, external_parameters, working_param_array_values);
+            arr_val = il.get_values();
+        }
+
+    } else {
+        Initialization_list il = return_par.get_i_l();
+        il.link_processor(working_param_values, external_parameters, working_param_array_values);
+        arr_val = il.get_values();
+    }
+
+    working_param_array_values->insert({par.get_name(), arr_val});
+    return_par.set_array_value(arr_val);
+    return_par.clear_expression_components();
+    return return_par;
+}
+
+HDL_parameter Parameter_processor::process_packed_parameter(const HDL_parameter &par) {
+    HDL_parameter return_par = par;
+    Initialization_list il;
+    if(external_parameters->contains(return_par.get_name())){
+        il = external_parameters->at(return_par.get_name()).get_i_l();
+    } else {
+        il = return_par.get_i_l();
+    }
+    il.link_processor(working_param_values, external_parameters, working_param_array_values);
+    auto val = il.get_values().get_value({0,0,0});
+    return_par.set_value(val);
+    return return_par;
 }
 

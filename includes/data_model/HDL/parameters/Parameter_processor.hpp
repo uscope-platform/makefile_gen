@@ -29,20 +29,6 @@ public:
     }
 };
 
-class array_override_exception  : public std::exception {
-public:
-    explicit array_override_exception(std::map<std::vector<int64_t>, int64_t> v, std::string &s) {
-        array_value = std::move(v);
-        param_name = s;
-    };
-    char * what () {
-        return  (char*) "Internal exception, it should always be handled";
-    }
-    std::string param_name;
-    std::map<std::vector<int64_t>, int64_t> array_value;
-};
-
-
 class array_value_exception  : public std::exception {
 public:
     explicit array_value_exception(mdarray v) {
@@ -62,7 +48,9 @@ public:
     std::map<std::string, HDL_parameter> process_parameters_map(std::map<std::string, HDL_parameter> &map);
     static void convert_parameters(std::vector<HDL_Resource> &v);
     HDL_Resource process_resource(const HDL_Resource &res);
-    HDL_parameter process_parameter(const HDL_parameter &par);
+    HDL_parameter process_scalar_parameter(const HDL_parameter &par);
+    HDL_parameter process_array_parameter(const HDL_parameter &par);
+    HDL_parameter process_packed_parameter(const HDL_parameter &par);
     int64_t process_expression(const std::vector<Expression_component>& expr);
 
     static std::vector<Expression_component> expr_vector_to_rpn(const std::vector<Expression_component>& v);
@@ -74,8 +62,6 @@ public:
 
     int64_t get_component_value(Expression_component &ec);
 private:
-
-    std::string current_parameter;
 
     std::shared_ptr<std::unordered_map<std::string, int64_t>> working_param_values;
     std::shared_ptr<std::map<std::string, HDL_parameter>> external_parameters;

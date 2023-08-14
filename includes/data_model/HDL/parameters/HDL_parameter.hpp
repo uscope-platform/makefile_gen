@@ -29,8 +29,7 @@
 enum parameter_type {
     string_parameter=0,
     numeric_parameter=1,
-    string_array_parameter=2,
-    numeric_array_parameter=3,
+    array_parameter = 2,
     expression_parameter = 4
 };
 
@@ -39,8 +38,7 @@ constexpr std::string parameter_type_to_string(parameter_type in){
     switch(in){
         case string_parameter: return "string_parameter";
         case numeric_parameter: return "numeric_parameter";
-        case string_array_parameter: return "string_array_parameter";
-        case numeric_array_parameter: return "numeric_array_parameter";
+        case array_parameter: return "array_parameter";
         case expression_parameter: return "expression_parameter";
         default: return "unknown parameter type";
     }
@@ -74,6 +72,13 @@ public:
     void add_component(const Expression_component &component);
     void set_expression_components(const Expression  &c){expression_components = c;};
     Expression  get_expression_components() { return expression_components;};
+    void clear_expression_components(){expression_components.clear();};
+
+    void set_array_value(const mdarray &arr){
+        type = array_parameter;
+        array_value = arr;
+    };
+    mdarray get_array_value(){return array_value;};
 
     std::string to_string() const;
 
@@ -99,6 +104,7 @@ private:
     std::string name;
     std::vector<std::string> string_value_array;
     std::vector<int64_t> numeric_value_array;
+    mdarray array_value;
     parameter_type type;
 
     Expression expression_components;

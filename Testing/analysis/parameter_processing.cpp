@@ -187,6 +187,7 @@ TEST(parameter_processing, array_expression) {
     dimension_t  d = {{Expression_component("31")}, {Expression_component("0")}, true};
 
     i.add_dimension(d,true);
+
     d = {{Expression_component("1")}, {Expression_component("0")}, false};
 
     i.add_dimension(d, false);
@@ -194,6 +195,9 @@ TEST(parameter_processing, array_expression) {
     i.add_item({Expression_component("32")});
     i.add_item({Expression_component("5")});
     par.add_initialization_list(i);
+    mdarray av;
+    av.set_1d_slice({0,0}, {5,32});
+    par.set_array_value(av);
     check_params["array_parameter"] = par;
 
     ASSERT_EQ(check_params.size(), parameters.size());
@@ -253,6 +257,10 @@ TEST(parameter_processing, multidimensional_array_expression) {
     i.add_item({Expression_component("6")});
     i.close_level();
     par.add_initialization_list(i);
+
+    mdarray av;
+    av.set_2d_slice({0}, {{6,5}, {32,32}});
+    par.set_array_value(av);
     check_params["multidim_array_parameter"] = par;
 
 
@@ -346,6 +354,9 @@ TEST(parameter_processing, packed_array) {
     };
 
     std::map<std::string, HDL_parameter> check_params = produce_check_components(vect_params);
+
+    parameters["packed_param"].add_initialization_list({}); // clear Initialiation_list because it is not the aim of this test;
+
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
@@ -475,6 +486,9 @@ TEST(parameter_processing, negative_number_array_init) {
     i.add_item({Expression_component("16'sd32767")});
 
     par.add_initialization_list(i);
+    mdarray av;
+    av.set_1d_slice({0,0}, {32767,-32767});
+    par.set_array_value(av);
     check_params["negative_array_param"] = par;
 
 
@@ -537,6 +551,10 @@ TEST(parameter_processing, expression_array_init) {
 
     i.add_item({Expression_component("5"), Expression_component("+"), Expression_component("4")});
     i.add_item({Expression_component("7"), Expression_component("*"), Expression_component("6")});
+
+    mdarray av;
+    av.set_1d_slice({0,0}, {42,9});
+    par.set_array_value(av);
 
     par.add_initialization_list(i);
     check_params["expression_array_param"] = par;
@@ -742,6 +760,9 @@ TEST(parameter_processing, array_expression_override) {
     il.add_item({Expression_component("2")});
     il.add_item({Expression_component("22")});
     par.add_initialization_list(il);
+    mdarray av;
+    av.set_1d_slice({0,0}, {2,22});
+    par.set_array_value(av);
     parent_param["array_parameter"] = par;
 
     auto parameters = run_override_test(test_pattern, parent_param);
@@ -773,17 +794,10 @@ TEST(parameter_processing, array_expression_override) {
     par = HDL_parameter();
     par.set_name("array_parameter");
     par.set_type(expression_parameter);
-    Initialization_list i;
-    dimension_t  d = {{Expression_component("31")}, {Expression_component("0")}, true};
 
-    i.add_dimension(d,true);
-    d = {{Expression_component("1")}, {Expression_component("0")}, false};
-
-    i.add_dimension(d, false);
-
-    i.add_item({Expression_component("32")});
-    i.add_item({Expression_component("5")});
-    par.add_initialization_list(i);
+    av = mdarray();
+    av.set_1d_slice({0,0}, {2,22});
+    par.set_array_value(av);
     check_params["array_parameter"] = par;
 
 
@@ -849,6 +863,9 @@ TEST(parameter_processing, array_instance_parameter_override) {
             param_3 = 6
         )();
 
+            parameter p1_t = param_2[0];
+            parameter p2_t = param_2[1];
+
         endmodule
 
         module test_mod #(
@@ -890,14 +907,29 @@ TEST(parameter_processing, array_instance_parameter_override) {
 
     std::vector<param_check_t> vect_params = {
             {"param_1", {"4"}, numeric_parameter, 4},
-            {"param_2_0", {"9"}, numeric_parameter, 9},
-            {"param_2_1", {"8"}, numeric_parameter, 8},
+            {"p1_t", {"param_2"}, numeric_parameter, 9},
+            {"p2_t", {"param_2"}, numeric_parameter, 8},
             {"param_3", {"11"}, numeric_parameter, 11}
     };
 
     std::map<std::string, HDL_parameter> check_params = produce_check_components(vect_params);
 
+    auto ec = check_params["p1_t"].get_expression_components();
+    ec[0].set_array_index({{Expression_component("0")}});
+    check_params["p1_t"].set_expression_components(ec);
 
+
+    ec = check_params["p2_t"].get_expression_components();
+    ec[0].set_array_index({{Expression_component("1")}});
+    check_params["p2_t"].set_expression_components(ec);
+
+    HDL_parameter par;
+    par.set_name("param_2");
+    mdarray av;
+    av.set_1d_slice({0,0}, {9,8});
+    par.set_array_value(av);
+
+    check_params["param_2"]=par;
     ASSERT_EQ(check_params.size(), dependency_params.size());
 
     for(const auto& item:check_params){

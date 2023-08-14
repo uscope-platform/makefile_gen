@@ -64,7 +64,7 @@ public:
     friend bool operator==(const Expression_component&lhs, const Expression_component&rhs);
 
 
-    void set_array_index(std::vector<std::vector<Expression_component>> &v) {array_index = v;};
+    void set_array_index(const std::vector<std::vector<Expression_component>> &v) {array_index = v;};
     void add_array_index(std::vector<Expression_component> &c) {array_index.push_back(c);};
     std::vector<std::vector<Expression_component>> get_array_index() {return array_index;};
 
