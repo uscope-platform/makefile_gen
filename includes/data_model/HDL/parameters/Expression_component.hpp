@@ -63,8 +63,6 @@ public:
 
     friend bool operator==(const Expression_component&lhs, const Expression_component&rhs);
 
-    void set_array_value(std::vector<Expression_component> &v) {array_value = v;};
-    std::vector<Expression_component> get_array_value() {return array_value;};
 
     void set_array_index(std::vector<std::vector<Expression_component>> &v) {array_index = v;};
     void add_array_index(std::vector<Expression_component> &c) {array_index.push_back(c);};
@@ -77,7 +75,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(component_type, string_value, numeric_value, array_index, array_value, package_prefix);
+        ar(component_type, string_value, numeric_value, array_index, package_prefix);
     }
 
     nlohmann::json dump();
@@ -95,7 +93,6 @@ private:
 
     int64_t binary_size = 0;
 
-    std::vector<Expression_component> array_value;
     std::vector<std::vector<Expression_component>> array_index;
 
 

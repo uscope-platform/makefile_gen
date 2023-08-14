@@ -49,7 +49,13 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
         for(auto &item:working_set){
             if(item.second.is_array()){
                 try{
-                    auto il = item.second.get_i_l();
+                    Initialization_list il;
+                    if(external_parameters->contains(item.first)){
+                        il = external_parameters->at(item.first).get_i_l();
+                    } else {
+                        il = item.second.get_i_l();
+                    }
+
                     il.link_processor(working_param_values, external_parameters, working_param_array_values);
                     working_param_array_values->insert({item.first, il.get_values()});
                     processed_parameters[item.first] = item.second;
@@ -104,8 +110,7 @@ std::map<std::string, HDL_parameter> Parameter_processor::process_parameters_map
             auto array_value = ex.array_value;
             auto p_n = ex.param_name;
             for(const auto& item:array_value){
-                auto param = produce_array_item(ex.param_name, item.first, item.second);
-                ret[param.get_name()] = param;
+                //TODO: harray balues
             }
         }
     }
@@ -361,22 +366,6 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec) {
     }
 
     return val;
-}
-
-HDL_parameter Parameter_processor::produce_array_item(const std::string& name, const std::vector<int64_t>& index, int64_t default_value) {
-    HDL_parameter p;
-    std::string param_name = name;
-    for(auto &item:index){
-        param_name +="_"+std::to_string(item);
-    }
-    int64_t param_value = default_value;
-    if(external_parameters->contains(param_name)){
-        param_value = external_parameters->at(param_name).get_numeric_value();
-    }
-    p.set_name(param_name);
-    p.set_expression_components({Expression_component(std::to_string(param_value))});
-    p.set_value(param_value);
-    return p;
 }
 
 Expression_component Parameter_processor::process_array_access(Expression_component &e) {

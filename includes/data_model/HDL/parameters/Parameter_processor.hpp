@@ -75,10 +75,6 @@ public:
     int64_t get_component_value(Expression_component &ec);
 private:
 
-
-    HDL_parameter produce_array_item(const std::string& name, const std::vector<int64_t>& index, int64_t value);
-
-
     std::string current_parameter;
 
     std::shared_ptr<std::unordered_map<std::string, int64_t>> working_param_values;

@@ -21,7 +21,6 @@ Expression_component::Expression_component(const Expression_component &c) {
     string_value = c.string_value;
     numeric_value = c.numeric_value;
     array_index = c.array_index;
-    array_value = c.array_value;
     package_prefix = c.package_prefix;
 }
 
@@ -56,7 +55,6 @@ bool operator==(const Expression_component &lhs, const Expression_component &rhs
     ret_val &= lhs.string_value == rhs.string_value;
     ret_val &= lhs.numeric_value == rhs.numeric_value;
     ret_val &= lhs.component_type == rhs.component_type;
-    ret_val &= lhs.array_value == rhs.array_value;
     ret_val &= lhs.array_index == rhs.array_index;
     ret_val &= lhs.package_prefix == rhs.package_prefix;
     return ret_val;

@@ -675,25 +675,21 @@ TEST(parameter_processing, array_expression_override) {
     std::map<std::string, HDL_parameter> parent_param;
 
     HDL_parameter par = HDL_parameter();
-    par.set_name("array_parameter_0");
+    par.set_name("array_parameter");
     par.add_component(Expression_component("22"));
-    par.set_type(numeric_parameter);
-    par.set_value(22);
-    parent_param["array_parameter_0"] = par;
-
-    par = HDL_parameter();
-    par.set_name("array_parameter_1");
-    par.add_component(Expression_component("2"));
-    par.set_type(numeric_parameter);
-    par.set_value(2);
-    parent_param["array_parameter_1"] = par;
+    par.set_type(expression_parameter);
+    Initialization_list il;
+    il.add_dimension({{Expression_component("31")}, {Expression_component("0")}, true}, true);
+    il.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false}, false);
+    il.add_item({Expression_component("2")});
+    il.add_item({Expression_component("22")});
+    par.add_initialization_list(il);
+    parent_param["array_parameter"] = par;
 
     auto parameters = run_override_test(test_pattern, parent_param);
 
 
     std::vector<param_check_t> vect_params = {
-            {"array_parameter_0", {"22"}, numeric_parameter, 22},
-            {"array_parameter_1", {"2"}, numeric_parameter, 2},
             {"sv_numeric_p", {"5'o10"}, numeric_parameter, 8}
     };
 
@@ -715,6 +711,22 @@ TEST(parameter_processing, array_expression_override) {
     par.add_component(Expression_component("+"));
     check_params["array_parameter_expr_p"] = par;
 
+
+    par = HDL_parameter();
+    par.set_name("array_parameter");
+    par.set_type(expression_parameter);
+    Initialization_list i;
+    dimension_t  d = {{Expression_component("31")}, {Expression_component("0")}, true};
+
+    i.add_dimension(d,true);
+    d = {{Expression_component("1")}, {Expression_component("0")}, false};
+
+    i.add_dimension(d, false);
+
+    i.add_item({Expression_component("32")});
+    i.add_item({Expression_component("5")});
+    par.add_initialization_list(i);
+    check_params["array_parameter"] = par;
 
 
     ASSERT_EQ(check_params.size(), parameters.size());
