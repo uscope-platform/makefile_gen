@@ -62,7 +62,7 @@ public:
     explicit operator std::string();
 
     bool is_array() const {return !i_l.empty();};
-
+    bool is_packed_array() {return i_l.is_packed();};
 
     std::string get_name() const {return name;};
 

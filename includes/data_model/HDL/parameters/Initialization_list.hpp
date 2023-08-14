@@ -45,13 +45,14 @@ class Initialization_list {
 
 public:
     Initialization_list() = default;
+    Initialization_list( const Initialization_list &i);
     explicit Initialization_list(const Expression &e);
     void add_dimension(const dimension_t &d, bool packed);
     void add_item(const Expression &e);
     void open_level();
     void close_level();
     bool empty() const;
-
+    bool is_packed() const{return unpacked_dimensions.empty() && !packed_dimensions.empty();};
     void link_processor(const std::shared_ptr<std::unordered_map<std::string, int64_t>> &wp,
                         const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep,
                         const std::shared_ptr<std::unordered_map<std::string, mdarray>> &wap);

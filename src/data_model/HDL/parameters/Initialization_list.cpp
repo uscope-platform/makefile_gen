@@ -17,6 +17,18 @@
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
 
+Initialization_list::Initialization_list(const Initialization_list &i) {
+    working_param_array_values = i.working_param_array_values;
+    working_param_values = i.working_param_values;
+    external_parameters = i.external_parameters;
+
+    unpacked_dimensions = i.unpacked_dimensions;
+    packed_dimensions = i.packed_dimensions;
+
+    last_dimension = i.last_dimension;
+    expression_leaves = i.expression_leaves;
+    lower_dimension_leaves = i.lower_dimension_leaves;
+}
 
 Initialization_list::Initialization_list(const Expression &e) {
     expression_leaves.push_back(e);
@@ -136,8 +148,9 @@ mdarray  Initialization_list::get_values() {
     mdarray ret;
 
     auto size = unpacked_dimensions.size();
-
-    if(size == 1){
+    if(size == 0 && !packed_dimensions.empty()){
+        return get_packed_1d_list_values();
+    } else if(size == 1){
         return get_1d_list_values();
     } else if(size ==2){
         return get_2d_list_values();
@@ -188,6 +201,7 @@ mdarray Initialization_list::get_packed_1d_list_values() {
         }
         values.push_back(packed_val);
     }
+
     std::reverse(values.begin(), values.end());
     mdarray ret;
     ret.set_1d_slice({0, 0}, values);
@@ -273,6 +287,8 @@ std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Param
     auto ret_val = std::vector<int64_t>(repetition_size, repetition_value);
     return ret_val;
 }
+
+
 
 
 

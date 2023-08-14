@@ -342,7 +342,7 @@ TEST(parameter_processing, packed_array) {
     auto parameters = run_test(test_pattern);
 
     std::vector<param_check_t> vect_params = {
-            {"packed_param", {"169"}, numeric_parameter, 169}
+            {"packed_param", {}, numeric_parameter, 169}
     };
 
     std::map<std::string, HDL_parameter> check_params = produce_check_components(vect_params);
@@ -557,6 +557,13 @@ TEST(parameter_processing, mixed_packed_unpacked_init) {
       parameter reg [7:0] param_a [1:0] = '{{1'b1,1'b1,1'b1,1'b0,1'b0,1'b0,1'b1,1'b0}, {1'b0,1'b0,1'b0,1'b1,1'b1,1'b1,1'b0,1'b1}},
       parameter reg [7:0] param_b [1:0] = '{{8{1'b1}},{8{1'b0}}}
     )();
+
+
+        parameter p1 = param_a[0];
+        parameter p2 = param_a[1];
+        parameter p3 = param_b[0];
+        parameter p4 = param_b[1];
+
     endmodule
     )";
 
@@ -569,15 +576,66 @@ TEST(parameter_processing, mixed_packed_unpacked_init) {
             {"param_b_0", {"0"}, numeric_parameter, 0},
             {"param_b_1", {"255"}, numeric_parameter, 255}
     };
+    std::map<std::string, HDL_parameter> check_params;
 
-    std::map<std::string, HDL_parameter> check_params = produce_check_components(vect_params);
+    HDL_parameter par;
+    par.set_name("p1");
+    par.set_type(numeric_parameter);
+    par.set_value(29);
+    Expression_component ec("param_a");
+    std::vector<Expression_component> idx = {Expression_component("0")};
+    ec.add_array_index(idx);
+    par.add_component(ec);
+    check_params["p1"] = par;
 
-    ASSERT_EQ(check_params.size(), parameters.size());
+    par = HDL_parameter();
+    par.set_name("p2");
+    par.set_type(numeric_parameter);
+    par.set_value(226);
+    ec = Expression_component ("param_a");
+    idx = {Expression_component("1")};
+    ec.add_array_index(idx);
+    par.add_component(ec);
 
-    for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
-    }
+    check_params["p2"] = par;
+
+    par = HDL_parameter();
+    par.set_name("p3");
+    par.set_type(numeric_parameter);
+    par.set_value(0);
+    ec = Expression_component ("param_b");
+    idx = {Expression_component("0")};
+    ec.add_array_index(idx);
+    par.add_component(ec);
+
+    check_params["p3"] = par;
+
+    par = HDL_parameter();
+    par.set_name("p4");
+    par.set_type(numeric_parameter);
+    par.set_value(255);
+    ec = Expression_component ("param_b");
+    idx = {Expression_component("1")};
+    ec.add_array_index(idx);
+    par.add_component(ec);
+
+    check_params["p4"] = par;
+
+
+    ASSERT_TRUE(parameters.contains("p1"));
+    ASSERT_EQ(parameters["p1"], check_params["p1"]);
+
+
+    ASSERT_TRUE(parameters.contains("p2"));
+    ASSERT_EQ(parameters["p2"], check_params["p2"]);
+
+
+    ASSERT_TRUE(parameters.contains("p3"));
+    ASSERT_EQ(parameters["p3"], check_params["p3"]);
+
+
+    ASSERT_TRUE(parameters.contains("p4"));
+    ASSERT_EQ(parameters["p4"], check_params["p4"]);
 
 }
 
@@ -744,7 +802,7 @@ TEST(parameter_processing, repetition_array_override) {
             parameter repetition_size = 2,
             parameter bit repetition_parameter_a [repetition_size-1:0]  = '{repetition_size{1}}
         )();
-
+            parameter p1 = repetition_parameter_a[2];
         endmodule
     )";
 
@@ -757,25 +815,28 @@ TEST(parameter_processing, repetition_array_override) {
     par.set_value(3);
     parent_param["repetition_size"] = par;
 
-
     auto parameters = run_override_test(test_pattern, parent_param);
 
     std::vector<param_check_t> vect_params = {
-            {"repetition_parameter_a_0", {"1"}, numeric_parameter, 1},
-            {"repetition_parameter_a_1", {"1"}, numeric_parameter, 1},
-            {"repetition_parameter_a_2", {"1"}, numeric_parameter, 1},
             {"repetition_size", {"3"}, numeric_parameter, 3}
     };
 
-    std::map<std::string, HDL_parameter> check_params = produce_check_components(vect_params);
+    std::map<std::string, HDL_parameter> check_params;
 
 
-    ASSERT_EQ(check_params.size(), parameters.size());
+    par = HDL_parameter();
+    par.set_type(numeric_parameter);
+    par.set_value(1);
+    par.set_name("p1");
+    Expression_component e("repetition_parameter_a");
+    std::vector<std::vector<Expression_component>> ai = {{Expression_component("2")}};
+    e.set_array_index(ai);
+    Initialization_list il;
+    par.add_component(e);
+    check_params["p1"] = par;
 
-    for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
-    }
+    ASSERT_TRUE(parameters.contains("p1"));
+    ASSERT_EQ(parameters["p1"], check_params["p1"]);
 
 }
 

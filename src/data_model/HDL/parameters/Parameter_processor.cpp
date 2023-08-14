@@ -47,7 +47,7 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
     while(!working_set.empty() && !processing_complete && nesting_limit >0){
         bool list_init_complete = true;
         for(auto &item:working_set){
-            if(item.second.is_array()){
+            if(item.second.is_packed_array()) {
                 try{
                     Initialization_list il;
                     if(external_parameters->contains(item.first)){
@@ -55,15 +55,33 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
                     } else {
                         il = item.second.get_i_l();
                     }
-
                     il.link_processor(working_param_values, external_parameters, working_param_array_values);
-                    working_param_array_values->insert({item.first, il.get_values()});
-                    processed_parameters[item.first] = item.second;
-                    list_init_complete = true;
+                    auto val = il.get_values().get_value({0,0,0});
+                    HDL_parameter p;
+                    p.set_name(item.first);
+                    p.set_value(val);
+                    processed_parameters[item.first] = p;
+                    working_param_values->insert({item.first, val});
                 } catch (Parameter_processor_Exception &ex) {
                     next_working_set.insert(item);
                     list_init_complete = false;
                 }
+            }else if(item.second.is_array()){
+                    try{
+                        Initialization_list il;
+                        if(external_parameters->contains(item.first)){
+                            il = external_parameters->at(item.first).get_i_l();
+                        } else {
+                            il = item.second.get_i_l();
+                        }
+                        il.link_processor(working_param_values, external_parameters, working_param_array_values);
+                        working_param_array_values->insert({item.first, il.get_values()});
+                        processed_parameters[item.first] = item.second;
+                        list_init_complete = true;
+                    } catch (Parameter_processor_Exception &ex) {
+                        next_working_set.insert(item);
+                        list_init_complete = false;
+                    }
             } else {
                 try{
                     auto processed_param = process_parameter(item.second);
