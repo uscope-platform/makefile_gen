@@ -112,16 +112,22 @@ HDL_parameter Parameter_processor::process_scalar_parameter(const HDL_parameter 
     }
 
     try {
-        int64_t value;
         if (external_parameters->contains(return_par.get_name())) {
-            value = external_parameters->at(return_par.get_name()).get_numeric_value();
-            return_par.set_expression_components({Expression_component(std::to_string(value))});
+            if(external_parameters->at(return_par.get_name()).is_array()){
+                auto value = external_parameters->at(return_par.get_name()).get_array_value();
+                return_par.set_array_value(value);
+            } else {
+                auto value = external_parameters->at(return_par.get_name()).get_numeric_value();
+                return_par.set_expression_components({Expression_component(std::to_string(value))});
+                return_par.set_value(value);
+            }
+
         } else {
-            value = process_expression(components);
+            return_par.set_value(process_expression(components));;
         }
 
-        return_par.set_value(value);
-        return_par.set_type(numeric_parameter);
+
+
     } catch (array_value_exception &ex){
         return_par.set_type(array_parameter);
         return_par.set_array_value(ex.array_value);
