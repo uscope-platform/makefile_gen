@@ -35,59 +35,47 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
 
     HDL_Resource return_res = res;
 
-    std::map<std::basic_string<char>, HDL_parameter> processed_parameters;
     std::map<std::basic_string<char>, HDL_parameter> working_set = return_res.get_parameters();
     std::map<std::basic_string<char>, HDL_parameter> next_working_set;
 
-    bool processing_complete = false;
     int nesting_limit = 1000;
-    while(!working_set.empty() && !processing_complete && nesting_limit >0){
-        bool list_init_complete = true;
+    bool processing_complete = false;
+    while(!working_set.empty() && !processing_complete){
         for(auto &item:working_set){
-            if(item.second.is_packed_array()) {
-                try{
-                    auto processed_param = process_packed_parameter(item.second);
-                    processed_parameters[item.first] = processed_param;
-                    compleated_set->insert({item.first, processed_param});
-                } catch (Parameter_processor_Exception &ex) {
-                    next_working_set.insert(item);
-                    list_init_complete = false;
+            try{
+                HDL_parameter processed_param;
+                if(item.second.is_packed_array()){
+                    processed_param = process_packed_parameter(item.second);
+                }else if(item.second.is_array()){
+                    processed_param = process_array_parameter(item.second);
+                } else {
+                    processed_param = process_scalar_parameter(item.second);
                 }
-            }else if(item.second.is_array()){
-                try{
-                    auto processed_param = process_array_parameter(item.second);
-                    processed_parameters[item.first] = processed_param;
-                    compleated_set->insert({item.first, processed_param});
-                    list_init_complete = true;
-                } catch (Parameter_processor_Exception &ex) {
-                    next_working_set.insert(item);
-                    list_init_complete = false;
-                }
-            } else {
-                try{
-                    auto processed_param = process_scalar_parameter(item.second);
-                    processed_parameters[item.first] = processed_param;
-                    compleated_set->insert({item.first, processed_param});
-                } catch (Parameter_processor_Exception &ex){
-                    next_working_set[item.first] = item.second;
-                }
+                compleated_set->insert({item.first, processed_param});
+            } catch (Parameter_processor_Exception &ex) {
+                next_working_set.insert(item);
             }
         }
 
-        if(working_set == next_working_set && list_init_complete){
+        if(working_set == next_working_set){
             processing_complete = true;
         }
         working_set = next_working_set;
         next_working_set.clear();
         nesting_limit--;
+
         if(nesting_limit==0){
             std::cerr<<"Warning: infinite loop detected while processing the following parameters: \n";
             for(const auto& item:working_set){
                 std::cerr<< "    - " + item.second.get_name() + "\n";
             }
             std::cerr<<return_res.get_path() + "\n";
+            exit(1);
         }
     }
+
+
+    std::map<std::basic_string<char>, HDL_parameter> processed_parameters(compleated_set->begin(), compleated_set->end());
 
     for(auto &item:working_set){
         processed_parameters[item.first] = item.second;
