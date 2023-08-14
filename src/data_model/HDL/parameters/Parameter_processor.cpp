@@ -20,6 +20,16 @@ Parameter_processor::Parameter_processor(const std::map<std::string, HDL_paramet
     d_store = ds;
     external_parameters = std::make_shared<std::map<std::string, HDL_parameter>>(parent_parameters);
     working_param_values = std::make_shared<std::unordered_map<std::string, int64_t>>();
+    working_param_array_values = std::make_shared<std::unordered_map<std::string, mdarray>>();
+}
+
+Parameter_processor::Parameter_processor(const std::map<std::string, HDL_parameter> &ep,
+                                         std::shared_ptr<std::unordered_map<std::string, int64_t>> &wp,
+                                         std::shared_ptr<std::unordered_map<std::string, mdarray>> &wpa) {
+    d_store = {};
+    external_parameters = std::make_shared<std::map<std::string, HDL_parameter>>(ep);
+    working_param_values = wp;
+    working_param_array_values = wpa;
 }
 
 
@@ -38,13 +48,10 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
         bool list_init_complete = true;
         for(auto &item:working_set){
             if(item.second.is_array()){
-                if(!item.second.get_dimensions().empty()){
-                    array_dimensions[item.first] = item.second.get_dimensions();
-                }
                 try{
                     auto il = item.second.get_i_l();
-                    il.link_processor(working_param_values, external_parameters);
-                    working_param_array_values[item.first] = il.get_values();
+                    il.link_processor(working_param_values, external_parameters, working_param_array_values);
+                    working_param_array_values->insert({item.first, il.get_values()});
                     processed_parameters[item.first] = item.second;
                     list_init_complete = true;
                 } catch (Parameter_processor_Exception &ex) {
@@ -153,7 +160,8 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
             processed_rpn.push_back(i);
         } else if(i.get_type() == string_component) {
             if(external_parameters->contains(i.get_string_value())){
-                processed_rpn.emplace_back(external_parameters->at(i.get_raw_string_value()));
+                Expression_component e(external_parameters->at(i.get_raw_string_value()).get_numeric_value());
+                processed_rpn.emplace_back(e);
             } else if(working_param_values->contains(i.get_raw_string_value())){
                 processed_rpn.emplace_back(working_param_values->at(i.get_raw_string_value()));
             } else {
@@ -326,7 +334,7 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec) {
             value_type = 1;
         } else{
             bool is_prefix = item.first.compare(0, param_name.size(), param_name) == 0;
-            if(is_prefix && external_parameters->at(item.first).is_array_element()){
+            if(is_prefix){
 
                 std::istringstream iss(item.first.substr(param_name.length()));
                 std::vector<int64_t> indexes;
@@ -344,8 +352,10 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec) {
 
     if(value_type == 2) {
         throw array_override_exception(result_array, current_parameter);
-    } else if(working_param_values->contains(param_name)){
-            val = working_param_values->at(param_name);
+    } else if(working_param_values->contains(param_name)) {
+        val = working_param_values->at(param_name);
+    } else if(working_param_array_values->contains(param_name)){
+        throw array_value_exception(working_param_array_values->at(param_name));
     } else if(value_type == 0) {
         throw Parameter_processor_Exception();
     }
@@ -364,7 +374,6 @@ HDL_parameter Parameter_processor::produce_array_item(const std::string& name, c
         param_value = external_parameters->at(param_name).get_numeric_value();
     }
     p.set_name(param_name);
-    p.set_array_index(index);
     p.set_expression_components({Expression_component(std::to_string(param_value))});
     p.set_value(param_value);
     return p;
@@ -386,12 +395,11 @@ Expression_component Parameter_processor::process_array_access(Expression_compon
 
     std::reverse(array_index_values.begin(), array_index_values.end());
 
-
-
-    if(working_param_array_values.contains(e.get_string_value())){
-        auto val = working_param_array_values[e.get_string_value()].get_value(array_index_values);
+    if(working_param_array_values->contains(e.get_string_value())){
+        auto val = working_param_array_values->at(e.get_string_value()).get_value(array_index_values);
         return Expression_component(val);
     } else {
         throw Parameter_processor_Exception();
     }
 }
+

@@ -84,10 +84,11 @@ TEST(Initialization_list, get_values_1d_unpacked)  {
 
     auto working_param_values = std::make_shared<std::unordered_map<std::string, int64_t>>();
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
+    auto working_param_array_values = std::make_shared<std::unordered_map<std::string, mdarray>>();
 
     working_param_values->insert({"SS_POLARITY_DEFAULT", 1});
 
-    il.link_processor(working_param_values, external_parameters);
+    il.link_processor(working_param_values, external_parameters, working_param_array_values);
 
     mdarray check_array;
     check_array.set_1d_slice({0, 0}, {69, 6, 4 , 3, 5});
@@ -109,10 +110,11 @@ TEST(Initialization_list, get_values_2d_unpacked) {
 
     auto working_param_values = std::make_shared<std::unordered_map<std::string, int64_t>>();
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
+    auto working_param_array_values = std::make_shared<std::unordered_map<std::string, mdarray>>();
 
     working_param_values->insert({"SS_POLARITY_DEFAULT", 1});
 
-    il.link_processor(working_param_values, external_parameters);
+    il.link_processor(working_param_values, external_parameters, working_param_array_values);
 
     mdarray check_array;
     check_array.set_2d_slice({0, 0}, {{54,69,6},{4,3,5}});
@@ -135,10 +137,11 @@ TEST(Initialization_list, get_values_3d_unpacked) {
 
     auto working_param_values = std::make_shared<std::unordered_map<std::string, int64_t>>();
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
+    auto working_param_array_values = std::make_shared<std::unordered_map<std::string, mdarray>>();
 
     working_param_values->insert({"SS_POLARITY_DEFAULT", 1});
 
-    il.link_processor(working_param_values, external_parameters);
+    il.link_processor(working_param_values, external_parameters, working_param_array_values);
 
     mdarray check_array;
     check_array.set_data({{{11,82,43},{24,13,57}},{{54,69,6},{4,3,5}}});
@@ -160,10 +163,11 @@ TEST(Initialization_list, get_values_1d_packed) {
 
     auto working_param_values = std::make_shared<std::unordered_map<std::string, int64_t>>();
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
+    auto working_param_array_values = std::make_shared<std::unordered_map<std::string, mdarray>>();
 
     working_param_values->insert({"SS_POLARITY_DEFAULT", 1});
 
-    il.link_processor(working_param_values, external_parameters);
+    il.link_processor(working_param_values, external_parameters, working_param_array_values);
 
     mdarray check_array;
     check_array.set_1d_slice({0, 0}, {1, 6, 5, 2, 5});
@@ -184,10 +188,11 @@ TEST(Initialization_list, get_values_2d_packed) {
 
     auto working_param_values = std::make_shared<std::unordered_map<std::string, int64_t>>();
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
+    auto working_param_array_values = std::make_shared<std::unordered_map<std::string, mdarray>>();
 
     working_param_values->insert({"SS_POLARITY_DEFAULT", 1});
 
-    il.link_processor(working_param_values, external_parameters);
+    il.link_processor(working_param_values, external_parameters, working_param_array_values);
 
     mdarray check_array;
     check_array.set_2d_slice({0}, {{6, 5}, {2, 5}});
@@ -228,10 +233,11 @@ TEST(Initialization_list, get_values_3d_packed) {
     );
     auto working_param_values = std::make_shared<std::unordered_map<std::string, int64_t>>();
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
+    auto working_param_array_values = std::make_shared<std::unordered_map<std::string, mdarray>>();
 
     working_param_values->insert({"SS_POLARITY_DEFAULT", 1});
 
-    il.link_processor(working_param_values, external_parameters);
+    il.link_processor(working_param_values, external_parameters, working_param_array_values);
 
     mdarray check_array;
     check_array.set_data(
@@ -288,10 +294,11 @@ TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
 
     auto working_param_values = std::make_shared<std::unordered_map<std::string, int64_t>>();
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
+    auto working_param_array_values = std::make_shared<std::unordered_map<std::string, mdarray>>();
 
     working_param_values->insert({"SS_POLARITY_DEFAULT", 1});
 
-    il.link_processor(working_param_values, external_parameters);
+    il.link_processor(working_param_values, external_parameters, working_param_array_values);
 
     mdarray check_array;
     check_array.set_1d_slice({0, 0}, {3, 3, 3 , 226, 0});
@@ -323,8 +330,9 @@ TEST(Initialization_list, multidimensional_packed_array) {
 
     auto working_param_values = std::make_shared<std::unordered_map<std::string, int64_t>>();
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
+    auto working_param_array_values = std::make_shared<std::unordered_map<std::string, mdarray>>();
 
-    il.link_processor(working_param_values, external_parameters);
+    il.link_processor(working_param_values, external_parameters, working_param_array_values);
 
 
 

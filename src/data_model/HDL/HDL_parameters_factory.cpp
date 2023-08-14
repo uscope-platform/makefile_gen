@@ -20,7 +20,6 @@ void HDL_parameters_factory::new_parameter() {
       resources_factory_base<HDL_parameter>::new_basic_resource();
       current_resource.set_type(expression_parameter);
       for(auto &dim:packed_dimensions){
-          current_resource.add_dimension(dim);
           init_list.add_dimension(dim, dim.packed);
       }
       packed_dimensions.clear();
@@ -51,14 +50,9 @@ void HDL_parameters_factory::stop_initialization_list() {
         stop_replication();
     }
     in_initialization_list = false;
-    if(!current_dimension_init.empty()){
-        initialization_list.push_back(current_dimension_init);
-        current_dimension_init.clear();
-    }
-    current_resource.append_initialization_list(initialization_list);
+
     current_resource.add_initialization_list(init_list);
     init_list = Initialization_list();
-    initialization_list.clear();
     expression_level++;
 }
 
@@ -89,7 +83,6 @@ void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
         auto first_expr = expression_stack.top();
         expression_stack.pop();
         dimension_t dim = {first_expr, second_expr, false};
-        current_resource.add_dimension(dim);
         init_list.add_dimension(dim, dim.packed);
     }
 }
@@ -97,32 +90,24 @@ void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
 void HDL_parameters_factory::stop_replication() {
     in_replication = false;
     replication_components.insert(replication_components.begin(), {Expression_component("$repeat_init")});
-    current_dimension_init.insert(current_dimension_init.end(), replication_components);
-    initialization_list.push_back(current_dimension_init);
     init_list.add_item(replication_components);
     init_list.close_level();
     replication_components.clear();
-    current_dimension_init.clear();
     expression_level++;
 }
 
 void HDL_parameters_factory::stop_replication_assignment() {
     in_replication_assignment = false;
     replication_components.insert(replication_components.begin(), {Expression_component("$repeat_init")});
-    current_dimension_init.insert(current_dimension_init.end(), replication_components);
     init_list.add_item(replication_components);
     replication_components.clear();
 }
 
 void HDL_parameters_factory::stop_packed_assignment() {
     if(in_packed_assignment && !in_initialization_list){
-        initialization_list.push_back(current_dimension_init);
-        current_dimension_init.clear();
-        current_resource.append_initialization_list(initialization_list);
         current_resource.add_initialization_list(init_list);
         init_list = Initialization_list();
         in_packed_assignment = false;
-        initialization_list.clear();
     }
 }
 
@@ -145,7 +130,6 @@ void HDL_parameters_factory::stop_expression_new() {
             } else if(in_unpacked_declaration || in_packed_dimension){
                 expression_stack.push(new_expression);
             } else if(in_packed_assignment || in_initialization_list) {
-                 current_dimension_init.push_back(new_expression);
                 init_list.add_item(new_expression);
             }  else if(in_concatenation) {
                 concat_components.push_back(new_expression);
@@ -165,7 +149,6 @@ void HDL_parameters_factory::start_packed_assignment() {
 
 void HDL_parameters_factory::start_concatenation() {
     if(in_param_assignment || in_packed_assignment || in_initialization_list){
-        dimension_level++;
         init_list.open_level();
         expression_level_stack.push(expression_level);
         expression_level = 0;
@@ -179,10 +162,7 @@ void HDL_parameters_factory::stop_concatenation() {
         expression_level = expression_level_stack.top();
         expression_level_stack.pop();
         if(in_initialization_list){
-
-            initialization_list.push_back(concat_components);
             concat_components.clear();
-            current_dimension_init.clear();
         }
         in_concatenation = false;
     }
@@ -192,7 +172,6 @@ void HDL_parameters_factory::stop_concatenation() {
 void HDL_parameters_factory::start_replication() {
     if(in_param_assignment || in_initialization_list || in_packed_assignment){
         init_list.open_level();
-        dimension_level++;
         in_replication = true;
         expression_level--;
     }
@@ -220,7 +199,7 @@ void HDL_parameters_factory::stop_packed_dimension() {
 }
 
 
-void HDL_parameters_factory::start_instance_parameter_assignment(std::string parameter_name) {
+void HDL_parameters_factory::start_instance_parameter_assignment(const std::string& parameter_name) {
     resources_factory_base<HDL_parameter>::new_basic_resource();
     current_resource.set_type(expression_parameter);
     current_resource.set_name(parameter_name);

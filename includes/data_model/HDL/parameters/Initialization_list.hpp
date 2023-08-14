@@ -52,13 +52,24 @@ public:
     void close_level();
     bool empty() const;
 
-    void link_processor(const std::shared_ptr<std::unordered_map<std::string, int64_t>> &wp, const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep);
+    void link_processor(const std::shared_ptr<std::unordered_map<std::string, int64_t>> &wp,
+                        const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep,
+                        const std::shared_ptr<std::unordered_map<std::string, mdarray>> &wap);
     int64_t get_value_at(std::vector<uint64_t> idx);
     mdarray get_values();
+
+    static bool is_repetition(Expression &e){
+        if(!e.empty()){
+            return e[0].get_string_value() == "$repeat_init";
+        }
+        return false;
+    }
 
     friend bool operator==(const Initialization_list&lhs, const Initialization_list&rhs);
     friend void PrintTo(const Initialization_list& res, std::ostream* os);
 private:
+
+    std::vector<int64_t> expand_repetition(Expression &e, Parameter_processor &p);
 
     Parameter_processor get_parameter_processor();
     mdarray get_packed_1d_list_values();
@@ -68,6 +79,7 @@ private:
 
     std::shared_ptr<std::unordered_map<std::string, int64_t>> working_param_values;
     std::shared_ptr<std::map<std::string, HDL_parameter>> external_parameters;
+    std::shared_ptr<std::unordered_map<std::string, mdarray>> working_param_array_values;
 
     std::vector<dimension_t> unpacked_dimensions;
     std::vector<dimension_t> packed_dimensions;

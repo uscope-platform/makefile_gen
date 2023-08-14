@@ -196,8 +196,6 @@ TEST(parameter_extraction, array_expression) {
 
     p.add_initialization_list(il);
 
-    p.add_dimension({{Expression_component("31")}, {Expression_component("0")}, true});
-    p.add_dimension({{Expression_component("1")},{Expression_component("0")}, false});
     check_params["array_parameter"] = p;
 
 
@@ -274,9 +272,6 @@ TEST(parameter_extraction, multidimensional_array_expression) {
     p.add_initialization_list(produce_check_init_list(init));
 
 
-    p.add_dimension(init.dimensions[0]);
-    p.add_dimension(init.dimensions[1]);
-    p.add_dimension(init.dimensions[2]);
     check_params["multidim_array_parameter"] = p;
 
 
@@ -339,7 +334,6 @@ TEST(parameter_extraction, repetition_initialization) {
                            {Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("1")}
                    }};
 
-    p.add_dimension(init.dimensions[0]);
     p.add_initialization_list(produce_check_init_list_1d(init));
 
     check_params["repetition_parameter_1"] = p;
@@ -353,7 +347,6 @@ TEST(parameter_extraction, repetition_initialization) {
                            {Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("4")}
                    }};
 
-    p.add_dimension(init.dimensions[0]);
     p.add_initialization_list(produce_check_init_list_1d(init));
 
     check_params["repetition_parameter_2"] = p;
@@ -369,7 +362,6 @@ TEST(parameter_extraction, repetition_initialization) {
                            {Expression_component("repetition_parameter_2")}
                    }};
 
-    p.add_dimension(init.dimensions[0]);
     p.add_initialization_list(produce_check_init_list(init));
 
     check_params["multi_repetition_parameter"] = p;
@@ -385,7 +377,7 @@ TEST(parameter_extraction, repetition_initialization) {
                            {Expression_component("repetition_parameter_2")}
                    }};
 
-    p.add_dimension(init.dimensions[0]);
+    
     p.add_initialization_list(produce_check_init_list(init));
 
     check_params["mixed_repetition_parameter"] = p;
@@ -431,8 +423,7 @@ TEST(parameter_extraction, packed_array) {
             {Expression_component("1'b0")},
             {Expression_component("1'b1")}
     }};
-
-    p.add_dimension(init.dimensions[0]);
+    
     p.add_initialization_list(produce_check_init_list(init));
 
     check_params["packed_param"] = p;
@@ -543,7 +534,7 @@ TEST(parameter_extraction, negative_number_array_init) {
     }};
 
     p.add_initialization_list(produce_check_init_list_1d(init));
-    p.add_dimension(init.dimensions[0]);
+    
 
     check_params["negative_array_param"] = p;
 
@@ -586,7 +577,7 @@ TEST(parameter_extraction, expression_array_init) {
    }};
 
     p.add_initialization_list(produce_check_init_list_1d(init));
-    p.add_dimension(init.dimensions[0]);
+    
 
     check_params["expression_array_param"] = p;
 
@@ -647,8 +638,8 @@ TEST(parameter_extraction, combined_packed_unpacked_init) {
                    }};
 
     p.add_initialization_list(produce_check_init_list(init));
-    p.add_dimension(init.dimensions[0]);
-    p.add_dimension(init.dimensions[1]);
+    
+    
 
     check_params["param_a"] = p;
 
@@ -674,8 +665,8 @@ TEST(parameter_extraction, combined_packed_unpacked_init) {
                    }};
 
     p.add_initialization_list(produce_check_init_list(init));
-    p.add_dimension(init.dimensions[0]);
-    p.add_dimension(init.dimensions[1]);
+    
+    
 
     check_params["param_b"] = p;
 
@@ -835,8 +826,8 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
                    },
                    };
     p.add_initialization_list(produce_check_init_list(init));
-    p.add_dimension(init.dimensions[0]);
-    p.add_dimension(init.dimensions[1]);
+    
+    
 
     check_params["FIXED_REGISTER_VALUES"] = p;
 
@@ -935,9 +926,6 @@ TEST(parameter_extraction, multidimensional_packed_array) {
     il.close_level();
 
     p.add_initialization_list(il);
-    p.add_dimension({{Expression_component("7")}, {Expression_component("0")}, true});
-    p.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false});
-    p.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false});
 
     check_params["param_a"] = p;
 

@@ -73,7 +73,7 @@ public:
     bool in_packed_context() const {return in_packed_assignment; };
     bool is_component_relevant() const { return in_initialization_list || in_expression_new || in_unpacked_declaration || in_packed_assignment ; };
 
-    void start_instance_parameter_assignment(std::string parameter_name);
+    void start_instance_parameter_assignment(const std::string& parameter_name);
 private:
 
     bool in_param_assignment = false;
@@ -87,13 +87,11 @@ private:
     bool in_replication_assignment = false;
 
     std::stack<Expression> expression_stack;
-    std::vector<std::vector<Expression>> initialization_list;
+
     Expression replication_components;
     Expression bit_selection;
     Expression replication_size;
-    std::vector<Expression> current_dimension_init;
     std::vector<Expression> concat_components;
-    int dimension_level = 0;
 
     Expression new_expression;
     int expression_level=0;
@@ -101,7 +99,7 @@ private:
 
     Initialization_list init_list;
 
-    std::vector<dimension_t> packed_dimensions;
+    std::vector<dimension_t> packed_dimensions{};
 };
 
 

@@ -42,9 +42,23 @@ public:
     std::map<std::vector<int64_t>, int64_t> array_value;
 };
 
+
+class array_value_exception  : public std::exception {
+public:
+    explicit array_value_exception(mdarray v) {
+        array_value = v;
+    };
+    char * what () {
+        return  (char*) "Internal exception, it should always be handled";
+    }
+    mdarray array_value;
+};
+
+
 class Parameter_processor {
 public:
     Parameter_processor(const std::map<std::string, HDL_parameter>& parent_parameters, const std::shared_ptr<data_store> &ds);
+    Parameter_processor(const std::map<std::string, HDL_parameter>& ep, std::shared_ptr<std::unordered_map<std::string, int64_t>> &wp, std::shared_ptr<std::unordered_map<std::string, mdarray>> &wpa);
     std::map<std::string, HDL_parameter> process_parameters_map(std::map<std::string, HDL_parameter> &map);
     static void convert_parameters(std::vector<HDL_Resource> &v);
     HDL_Resource process_resource(const HDL_Resource &res);
@@ -69,16 +83,9 @@ private:
 
     std::shared_ptr<std::unordered_map<std::string, int64_t>> working_param_values;
     std::shared_ptr<std::map<std::string, HDL_parameter>> external_parameters;
-    std::unordered_map<std::string, mdarray> working_param_array_values;
-
-
+    std::shared_ptr<std::unordered_map<std::string, mdarray>> working_param_array_values;
 
     std::unordered_map<std::string, std::vector<int64_t>> array_parameter_values;
-
-    std::unordered_map<std::string, std::vector<dimension_t>> array_dimensions;
-
-
-
 
     std::shared_ptr<data_store> d_store;
 };

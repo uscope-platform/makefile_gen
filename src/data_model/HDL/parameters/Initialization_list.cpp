@@ -83,7 +83,9 @@ void Initialization_list::close_level() {
             last_dimension = true;
         }
     }
-
+    if(!lower_dimension_leaves.empty() && packed_dimensions.size() + unpacked_dimensions.size() == 1){
+        expression_leaves = lower_dimension_leaves[0].expression_leaves;
+    }
 }
 
 bool operator==(const Initialization_list &lhs, const Initialization_list &rhs) {
@@ -116,12 +118,14 @@ bool Initialization_list::empty() const {
 }
 
 void Initialization_list::link_processor(const std::shared_ptr<std::unordered_map<std::string, int64_t>> &wp,
-                                         const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep) {
+                                         const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep,
+                                         const std::shared_ptr<std::unordered_map<std::string, mdarray>> &wap) {
     external_parameters = ep;
     working_param_values = wp;
     for(auto &item:lower_dimension_leaves){
-        item.link_processor(wp, ep);
+        item.link_processor(wp, ep, wap);
     }
+    working_param_array_values = wap;
 }
 
 int64_t Initialization_list::get_value_at(std::vector<uint64_t> idx) {
@@ -151,7 +155,19 @@ mdarray Initialization_list::get_1d_list_values() {
     auto p = get_parameter_processor();
     md_1d_array values;
     for(auto &expr:expression_leaves){
-        values.push_back(p.process_expression(Parameter_processor::expr_vector_to_rpn(expr)));
+        if(is_repetition(expr)){
+            auto res = expand_repetition(expr, p);
+            values.insert(values.end(), res.begin(), res.end());
+        } else{
+            try{
+                auto val = p.process_expression(Parameter_processor::expr_vector_to_rpn(expr));
+                values.push_back(val);
+            } catch(array_value_exception &ex ){
+                auto v = ex.array_value.get_1d_slice({0,0});
+                values.insert(values.end(), v.begin(), v.end());
+            }
+
+        }
     }
     std::reverse(values.begin(), values.end());
     mdarray ret;
@@ -206,14 +222,8 @@ Parameter_processor Initialization_list::get_parameter_processor() {
     for(const auto& item:*external_parameters){
         e_p.insert(item);
     }
-    for(const auto&item:*working_param_values){
-        HDL_parameter p;
-        p.set_name(item.first);
-        p.set_value(item.second);
-        e_p.insert({item.first, p});
-    }
 
-    return {e_p, nullptr};
+    return {e_p, working_param_values, working_param_array_values};
 }
 
 void PrintTo(const Initialization_list &il, std::ostream *os) {
@@ -242,6 +252,26 @@ void PrintTo(const Initialization_list &il, std::ostream *os) {
     result += "-----------------------------\n";
 
     *os << result;
+}
+
+std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Parameter_processor &p) {
+    Expression size_expr, val_expr;
+    bool in_size = true;
+    for(int i = 1; i<e.size(); i++){
+        if(in_size){
+            if(e[i].get_string_value() == ","){
+                in_size = false;
+            } else{
+                size_expr.push_back(e[i]);
+            }
+        } else {
+            val_expr.push_back(e[i]);
+        }
+    }
+    auto repetition_size = p.process_expression(Parameter_processor::expr_vector_to_rpn(size_expr));
+    auto repetition_value = p.process_expression(Parameter_processor::expr_vector_to_rpn(val_expr));
+    auto ret_val = std::vector<int64_t>(repetition_size, repetition_value);
+    return ret_val;
 }
 
 
