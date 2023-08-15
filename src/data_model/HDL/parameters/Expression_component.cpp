@@ -88,8 +88,7 @@ void Expression_component::process_number() {
     if(test_parameter_type(number_regex, string_value)) {
         numeric_value = std::stoul(string_value);
         component_type = numeric_component;
-        binary_size = std::ceil(std::log2(numeric_value));
-        if(binary_size == 0) binary_size = 1;
+        binary_size = calculate_binary_size(numeric_value);
     } else if(test_parameter_type(sv_constant_regex, string_value)){
         std::smatch base_match;
         if(std::regex_search(string_value, base_match, sv_constant_regex)){
@@ -122,8 +121,7 @@ void Expression_component::process_number() {
                 if(!base_match[1].str().empty()) {
                     binary_size = std::stoll(base_match[1].str());
                 } else {
-                    binary_size = std::ceil(std::log2(numeric_value));
-                    if(binary_size == 0) binary_size = 1;
+                    binary_size = calculate_binary_size(numeric_value);
                 }
             }
         }
@@ -197,6 +195,15 @@ nlohmann::json Expression_component::dump() {
     nlohmann::json ret;
 
     return ret;
+}
+
+int64_t Expression_component::calculate_binary_size(int64_t in) {
+    auto n_bits = std::log2(in);
+    if(std::isinf(n_bits) || n_bits == 0) {
+        return 1;
+    }else{
+        return  std::ceil(n_bits);
+    }
 }
 
 

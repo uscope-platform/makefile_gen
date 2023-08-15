@@ -54,6 +54,7 @@ public:
     std::string print_value();
     expression_component_type get_type()const {return component_type;};
 
+    static int64_t calculate_binary_size(int64_t in);
     typedef enum{
         unary_operator = 0,
         binary_operator = 1
@@ -75,7 +76,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(component_type, string_value, numeric_value, array_index, package_prefix);
+        ar(component_type, string_value, numeric_value, array_index, package_prefix, binary_size);
     }
 
     nlohmann::json dump();

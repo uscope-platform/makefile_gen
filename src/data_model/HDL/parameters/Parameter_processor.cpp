@@ -193,8 +193,8 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
         }
     }
     if(result_size != nullptr){
-        *result_size = std::ceil(std::log2(evaluator_stack.top().get_numeric_value()));
-        if(*result_size == 0) *result_size = 1;
+
+        *result_size = Expression_component::calculate_binary_size(evaluator_stack.top().get_numeric_value());
     }
     return evaluator_stack.top().get_numeric_value();
 }
@@ -312,8 +312,7 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
             auto res = d_store->get_HDL_resource(pkg);
             auto val = res.get_parameters()[ec.get_string_value()].get_numeric_value();
             if(result_size != nullptr){
-                *result_size = std::ceil(std::log2(val));
-                if(*result_size == 0) *result_size = 1;
+                *result_size = Expression_component::calculate_binary_size(val);
             }
             return val;
         } else{
@@ -338,7 +337,9 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
             val = external_parameters->at(param_name).get_numeric_value();
             if(result_size != nullptr){
                 *result_size = std::ceil(std::log2(val));
-                if(*result_size == 0) *result_size = 1;
+                if(val == 0) {
+                    *result_size = Expression_component::calculate_binary_size(val);
+                }
             }
         }
     } else if(compleated_set->contains(param_name)){
@@ -347,8 +348,7 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
         } else {
             val = compleated_set->at(param_name).get_numeric_value();
             if(result_size != nullptr){
-                *result_size = std::ceil(std::log2(val));
-                if(*result_size == 0) *result_size = 1;
+                *result_size = Expression_component::calculate_binary_size(val);
             }
         }
     } else {

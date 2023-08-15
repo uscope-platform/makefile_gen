@@ -214,9 +214,7 @@ std::pair<md_1d_array, md_1d_array> Initialization_list::get_sized_1d_list_value
                 auto v = ex.array_value.get_1d_slice({0,0});
                 for(ssize_t i; i<v.size(); i++){
                     values.push_back(v[i]);
-                    int64_t s = std::ceil(std::log2(v[i]));
-                    if(s == 0) s = 1;
-                    sizes.push_back(s);
+                    sizes.push_back(Expression_component::calculate_binary_size(v[i]));
                 }
                 values.insert(values.end(), v.begin(), v.end());
             }
