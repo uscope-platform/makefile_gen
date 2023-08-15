@@ -159,7 +159,7 @@ mdarray  Initialization_list::get_values() {
 
 mdarray Initialization_list::get_1d_list_values() {
 
-    if(!packed_dimensions.empty() && !lower_dimension_leaves.empty())
+    if(!packed_dimensions.empty() && !lower_dimension_leaves.empty() && unpacked_dimensions.empty())
         return get_packed_1d_list_values();
 
     auto p = get_parameter_processor();
