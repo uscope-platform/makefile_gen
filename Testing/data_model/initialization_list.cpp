@@ -314,10 +314,16 @@ TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
     auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
 
 
+    HDL_parameter p;
+    p.set_name("SS_POLARITY_DEFAULT");
+    p.set_value(1);
+
+    cs->insert({"SS_POLARITY_DEFAULT", p});
+
     il.link_processor( external_parameters,cs);
 
     mdarray check_array;
-    check_array.set_1d_slice({0, 0}, {3, 3, 3 , 226, 0});
+    check_array.set_1d_slice({0, 0}, {0x27e0, 0x220e0, 3 , 3, 3});
 
     auto values = il.get_values();
 

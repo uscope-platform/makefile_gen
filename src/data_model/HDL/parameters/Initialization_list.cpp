@@ -18,8 +18,7 @@
 
 
 Initialization_list::Initialization_list(const Initialization_list &i) {
-    working_param_array_values = i.working_param_array_values;
-    working_param_values = i.working_param_values;
+    completed_set = i.completed_set;
     external_parameters = i.external_parameters;
 
     unpacked_dimensions = i.unpacked_dimensions;
@@ -132,7 +131,7 @@ bool Initialization_list::empty() const {
 void Initialization_list::link_processor(const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep,
                                          const std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> &cs) {
     external_parameters = ep;
-    compleated_set = cs;
+    completed_set = cs;
     for(auto &item:lower_dimension_leaves){
         item.link_processor( ep, cs);
     }
@@ -167,11 +166,11 @@ mdarray Initialization_list::get_1d_list_values() {
     md_1d_array values;
     for(auto &expr:expression_leaves){
         if(is_repetition(expr)){
-            auto res = expand_repetition(expr, p);
+            auto res = expand_repetition(expr, p, nullptr);
             values.insert(values.end(), res.begin(), res.end());
         } else{
             try{
-                auto val = p.process_expression(Parameter_processor::expr_vector_to_rpn(expr));
+                auto val = p.process_expression(Parameter_processor::expr_vector_to_rpn(expr), nullptr);
                 values.push_back(val);
             } catch(array_value_exception &ex ){
                 auto v = ex.array_value.get_1d_slice({0,0});
@@ -186,18 +185,58 @@ mdarray Initialization_list::get_1d_list_values() {
     return ret;
 }
 
+
+std::pair<md_1d_array, md_1d_array> Initialization_list::get_sized_1d_list_values() {
+    md_1d_array values;
+    md_1d_array sizes;
+
+    auto p = get_parameter_processor();
+
+    for(auto &expr:expression_leaves){
+        if(is_repetition(expr)){
+            std::vector<int64_t> sizes_tmp;
+            auto res = expand_repetition(expr, p, &sizes_tmp);
+            sizes.insert(sizes.end(), sizes_tmp.begin(), sizes_tmp.end());
+            values.insert(values.end(), res.begin(), res.end());
+        } else{
+            try{
+                if(expr.size() == 1 && expr[0].get_type() == numeric_component){
+                    values.push_back(expr[0].get_numeric_value());
+                    sizes.push_back(expr[0].get_binary_size());
+                } else {
+                    int64_t  bin_size;
+                    auto val = p.process_expression(Parameter_processor::expr_vector_to_rpn(expr), &bin_size);
+                    sizes.push_back(bin_size);
+                    values.push_back(val);
+                }
+
+            } catch(array_value_exception &ex ){
+                auto v = ex.array_value.get_1d_slice({0,0});
+                for(ssize_t i; i<v.size(); i++){
+                    values.push_back(v[i]);
+                    int64_t s = std::ceil(std::log2(v[i]));
+                    if(s == 0) s = 1;
+                    sizes.push_back(s);
+                }
+                values.insert(values.end(), v.begin(), v.end());
+            }
+
+        }
+    }
+    std::reverse(values.begin(), values.end());
+    std::reverse(sizes.begin(), sizes.end());
+    return {values, sizes};
+}
+
+
+
 mdarray Initialization_list::get_packed_1d_list_values() {
 
     auto p = get_parameter_processor();
     md_1d_array values;
     for(auto &item:lower_dimension_leaves){
-
-        auto packed_arr = item.get_1d_list_values().get_1d_slice({0,0});
-        int64_t packed_val = 0;
-        for(int i = 0; i<packed_arr.size(); i++){
-            packed_val += (int64_t)std::pow(2, i)*packed_arr[i];
-        }
-        values.push_back(packed_val);
+        auto val = pack_values(item.get_sized_1d_list_values());
+        values.push_back(val);
     }
 
     std::reverse(values.begin(), values.end());
@@ -205,6 +244,33 @@ mdarray Initialization_list::get_packed_1d_list_values() {
     ret.set_1d_slice({0, 0}, values);
     return ret;
 }
+
+int64_t Initialization_list::pack_values(const std::pair<md_1d_array, md_1d_array> &components) {
+
+    int64_t total_size = 0;
+    for(auto &size:components.second){
+        total_size += size;
+    }
+    std::vector<bool> result(total_size, false);
+
+    uint64_t current_wp = 0;
+    for(ssize_t i =0; i<components.first.size(); i++){
+        std::bitset<64> data = components.first[i];
+        auto size = components.second[i];
+        for(int j = 0; j<size; j++){
+            result[current_wp] = data[j];
+            current_wp++;
+        }
+    }
+
+    int64_t packed_result = 0;
+    for(int i = 0; i<result.size(); i++){
+        packed_result += result[i]*std::pow(2, i);
+    }
+
+    return packed_result;
+}
+
 
 mdarray Initialization_list::get_2d_list_values() {
     mdarray ret;
@@ -235,7 +301,7 @@ Parameter_processor Initialization_list::get_parameter_processor() {
         e_p.insert(item);
     }
 
-    return {e_p, compleated_set};
+    return {e_p, completed_set};
 }
 
 void PrintTo(const Initialization_list &il, std::ostream *os) {
@@ -266,7 +332,7 @@ void PrintTo(const Initialization_list &il, std::ostream *os) {
     *os << result;
 }
 
-std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Parameter_processor &p) {
+std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Parameter_processor &p, std::vector<int64_t> *sizes) {
     Expression size_expr, val_expr;
     bool in_size = true;
     for(int i = 1; i<e.size(); i++){
@@ -280,12 +346,20 @@ std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Param
             val_expr.push_back(e[i]);
         }
     }
-    auto repetition_size = p.process_expression(Parameter_processor::expr_vector_to_rpn(size_expr));
-    auto repetition_value = p.process_expression(Parameter_processor::expr_vector_to_rpn(val_expr));
+
+
+    auto repetition_size = p.process_expression(Parameter_processor::expr_vector_to_rpn(size_expr), nullptr);
+    int64_t value_bin_size;
+    auto repetition_value = p.process_expression(Parameter_processor::expr_vector_to_rpn(val_expr),&value_bin_size);
+    if(sizes != nullptr){
+        for(int i = 0; i<repetition_size; i++){
+            sizes->push_back(value_bin_size);
+        }
+    }
+
     auto ret_val = std::vector<int64_t>(repetition_size, repetition_value);
     return ret_val;
 }
-
 
 
 

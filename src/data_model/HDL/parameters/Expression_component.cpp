@@ -22,6 +22,7 @@ Expression_component::Expression_component(const Expression_component &c) {
     numeric_value = c.numeric_value;
     array_index = c.array_index;
     package_prefix = c.package_prefix;
+    binary_size = c.binary_size;
 }
 
 
@@ -57,6 +58,7 @@ bool operator==(const Expression_component &lhs, const Expression_component &rhs
     ret_val &= lhs.component_type == rhs.component_type;
     ret_val &= lhs.array_index == rhs.array_index;
     ret_val &= lhs.package_prefix == rhs.package_prefix;
+    ret_val &= lhs.binary_size == rhs.binary_size;
     return ret_val;
 }
 
@@ -86,6 +88,8 @@ void Expression_component::process_number() {
     if(test_parameter_type(number_regex, string_value)) {
         numeric_value = std::stoul(string_value);
         component_type = numeric_component;
+        binary_size = std::ceil(std::log2(numeric_value));
+        if(binary_size == 0) binary_size = 1;
     } else if(test_parameter_type(sv_constant_regex, string_value)){
         std::smatch base_match;
         if(std::regex_search(string_value, base_match, sv_constant_regex)){
@@ -119,6 +123,7 @@ void Expression_component::process_number() {
                     binary_size = std::stoll(base_match[1].str());
                 } else {
                     binary_size = std::ceil(std::log2(numeric_value));
+                    if(binary_size == 0) binary_size = 1;
                 }
             }
         }

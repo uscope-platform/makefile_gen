@@ -50,20 +50,21 @@ public:
     std::map<std::string, HDL_parameter> process_parameters_map(std::map<std::string, HDL_parameter> &map);
     static void convert_parameters(std::vector<HDL_Resource> &v);
     HDL_Resource process_resource(const HDL_Resource &res);
-    HDL_parameter process_scalar_parameter(const HDL_parameter &par);
-    HDL_parameter process_array_parameter(const HDL_parameter &par);
-    HDL_parameter process_packed_parameter(const HDL_parameter &par);
-    int64_t process_expression(const std::vector<Expression_component>& expr);
+    int64_t process_expression(const std::vector<Expression_component>& expr, int64_t *reslt_size);
 
     static std::vector<Expression_component> expr_vector_to_rpn(const std::vector<Expression_component>& v);
 
     static int64_t evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string& operation);
     static int64_t evaluate_unary_expression(int64_t operand, const std::string& operation);
 
-    Expression_component process_array_access(Expression_component &e);
 
-    int64_t get_component_value(Expression_component &ec);
 private:
+
+    HDL_parameter process_scalar_parameter(const HDL_parameter &par);
+    HDL_parameter process_array_parameter(const HDL_parameter &par);
+    HDL_parameter process_packed_parameter(const HDL_parameter &par);
+    Expression_component process_array_access(Expression_component &e);
+    int64_t get_component_value(Expression_component &ec, int64_t *result_size);
 
     std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> compleated_set;
 

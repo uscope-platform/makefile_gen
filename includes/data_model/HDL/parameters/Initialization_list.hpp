@@ -70,18 +70,19 @@ public:
     friend void PrintTo(const Initialization_list& res, std::ostream* os);
 private:
 
-    std::vector<int64_t> expand_repetition(Expression &e, Parameter_processor &p);
+    std::vector<int64_t> expand_repetition(Expression &e, Parameter_processor &p, std::vector<int64_t> *sizes);
 
     Parameter_processor get_parameter_processor();
     mdarray get_packed_1d_list_values();
     mdarray get_1d_list_values();
+    std::pair<md_1d_array, md_1d_array> get_sized_1d_list_values();
     mdarray get_2d_list_values();
     mdarray get_3d_list_values();
 
-    std::shared_ptr<std::unordered_map<std::string, int64_t>> working_param_values;
+    int64_t pack_values(const std::pair<md_1d_array, md_1d_array> &components);
+
     std::shared_ptr<std::map<std::string, HDL_parameter>> external_parameters;
-    std::shared_ptr<std::unordered_map<std::string, mdarray>> working_param_array_values;
-    std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> compleated_set;
+    std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> completed_set;
 
     std::vector<dimension_t> unpacked_dimensions;
     std::vector<dimension_t> packed_dimensions;

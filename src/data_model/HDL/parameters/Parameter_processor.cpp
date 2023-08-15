@@ -123,7 +123,7 @@ HDL_parameter Parameter_processor::process_scalar_parameter(const HDL_parameter 
             }
 
         } else {
-            return_par.set_value(process_expression(components));;
+            return_par.set_value(process_expression(components, nullptr));;
         }
 
 
@@ -136,13 +136,13 @@ HDL_parameter Parameter_processor::process_scalar_parameter(const HDL_parameter 
 }
 
 
-int64_t Parameter_processor::process_expression(const std::vector<Expression_component> &expr) {
+int64_t Parameter_processor::process_expression(const std::vector<Expression_component> &expr, int64_t *result_size) {
 
     std::vector<Expression_component> processed_rpn;
 
     if(expr.size() == 1){
         auto comp = expr[0];
-        return get_component_value(comp);
+        return get_component_value(comp, result_size);
     }
 
     for(auto i : expr){
@@ -173,17 +173,17 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
         } else {
             int64_t result;
             if(i.get_operator_type() == Expression_component::unary_operator){
-                auto op = get_component_value(evaluator_stack.top());
+                auto op = get_component_value(evaluator_stack.top(), nullptr);
                 result = evaluate_unary_expression(op, i.get_string_value());
                 evaluator_stack.pop();
             } else if(i.get_operator_type() == Expression_component::binary_operator){
                 int64_t op_a;
-                auto op_b = get_component_value(evaluator_stack.top());
+                auto op_b = get_component_value(evaluator_stack.top(), nullptr);
                 evaluator_stack.pop();
                 if(processed_rpn.size()==2)
                     op_a = 0;
                 else {
-                    op_a = get_component_value(evaluator_stack.top());
+                    op_a = get_component_value(evaluator_stack.top(), nullptr);
                     evaluator_stack.pop();
                 }
 
@@ -192,7 +192,10 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
             evaluator_stack.emplace(result);
         }
     }
-
+    if(result_size != nullptr){
+        *result_size = std::ceil(std::log2(evaluator_stack.top().get_numeric_value()));
+        if(*result_size == 0) *result_size = 1;
+    }
     return evaluator_stack.top().get_numeric_value();
 }
 
@@ -291,9 +294,12 @@ void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
     }
 }
 
-int64_t Parameter_processor::get_component_value(Expression_component &ec) {
+int64_t Parameter_processor::get_component_value(Expression_component &ec, int64_t *result_size) {
 
     if(ec.get_type() == numeric_component){
+        if(result_size != nullptr){
+            *result_size = ec.get_binary_size();
+        }
         return ec.get_numeric_value();
     } else if(ec.get_type() == operator_component || ec.get_type() == function_component){
         throw std::runtime_error("Error: attempted to get the numeric value of an operator or Function");
@@ -305,6 +311,10 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec) {
         if(d_store->contains_hdl_entity(pkg)){
             auto res = d_store->get_HDL_resource(pkg);
             auto val = res.get_parameters()[ec.get_string_value()].get_numeric_value();
+            if(result_size != nullptr){
+                *result_size = std::ceil(std::log2(val));
+                if(*result_size == 0) *result_size = 1;
+            }
             return val;
         } else{
             throw std::runtime_error("Error: Encountered unknown package: " + ec.get_package_prefix());
@@ -326,12 +336,20 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec) {
             throw array_value_exception(external_parameters->at(param_name).get_array_value());
         } else {
             val = external_parameters->at(param_name).get_numeric_value();
+            if(result_size != nullptr){
+                *result_size = std::ceil(std::log2(val));
+                if(*result_size == 0) *result_size = 1;
+            }
         }
     } else if(compleated_set->contains(param_name)){
         if(compleated_set->at(param_name).is_array()){
             throw array_value_exception(compleated_set->at(param_name).get_array_value());
         } else {
             val = compleated_set->at(param_name).get_numeric_value();
+            if(result_size != nullptr){
+                *result_size = std::ceil(std::log2(val));
+                if(*result_size == 0) *result_size = 1;
+            }
         }
     } else {
         throw Parameter_processor_Exception();
@@ -350,7 +368,7 @@ Expression_component Parameter_processor::process_array_access(Expression_compon
 
     for(uint64_t i = 0; i<raw_idx.size(); i++){
         auto rpn_expr = expr_vector_to_rpn(raw_idx[i]);
-        auto res = process_expression(rpn_expr);
+        auto res = process_expression(rpn_expr, nullptr);
         array_index_values[raw_idx.size()-1-i] = res;
     }
 
