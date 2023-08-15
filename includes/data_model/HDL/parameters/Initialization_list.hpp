@@ -75,7 +75,7 @@ private:
     Parameter_processor get_parameter_processor();
     mdarray get_packed_1d_list_values();
     mdarray get_1d_list_values();
-    std::pair<md_1d_array, md_1d_array> get_sized_1d_list_values();
+    std::pair<md_1d_array, md_1d_array> get_sized_1d_list_values(bool &already_packed);
     mdarray get_2d_list_values();
     mdarray get_3d_list_values();
 

@@ -19,6 +19,7 @@
 
 #include "data_model/HDL/parameters/Initialization_list.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
+#include "frontend/analysis/sv_analyzer.hpp"
 
 Initialization_list construct_unpacked_list(const md_3d_array &in, const md_2d_array &dims, std::vector<bool> packing){
     Initialization_list li;
@@ -363,4 +364,44 @@ TEST(Initialization_list, multidimensional_packed_array) {
     check_array.set_2d_slice({0, 0}, {{29, 226}, {28 , 227}});
 
     ASSERT_EQ(check_array, values);
+}
+
+
+TEST(Initialization_list, concatenation_of_packed_arrays) {
+    std::string test_pattern = R"(
+        module dependency #(
+            parameter SS_POLARITY_DEFAULT = 0,
+            N_CHANNELS=3
+        )();
+
+            localparam [31:0] FIXED_REGISTER_VALUES [3:0]= '{
+            0,
+            0,
+            1,
+            {SS_POLARITY_DEFAULT,3'b0,SS_POLARITY_DEFAULT,5'b0,4'hE,4'b0}
+            };
+
+            localparam [31:0] A_VARIABLE_INITIAL_VALUES [2:0] = '{3{2'h2}};
+            parameter [31:0] INITIAL_REGISTER_VALUES [6:0] = {A_VARIABLE_INITIAL_VALUES, FIXED_REGISTER_VALUES};
+
+        endmodule
+
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    Parameter_processor p({},std::make_shared<data_store>(true, "/tmp/test_data_store"));
+    resource =  p.process_resource(resource);
+
+
+    auto parameters = resource.get_parameters();
+
+    auto processed_array = parameters["INITIAL_REGISTER_VALUES"].get_array_value().get_1d_slice({0,0});
+
+    md_1d_array check_array = {224,1,0,0,2,2,2};
+
+    ASSERT_EQ(check_array, processed_array);
 }

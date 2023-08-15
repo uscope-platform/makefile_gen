@@ -159,8 +159,10 @@ mdarray  Initialization_list::get_values() {
 
 mdarray Initialization_list::get_1d_list_values() {
 
-    if(!packed_dimensions.empty() && !lower_dimension_leaves.empty() && unpacked_dimensions.empty())
+    if(!packed_dimensions.empty() && !lower_dimension_leaves.empty()) {
         return get_packed_1d_list_values();
+    }
+
 
     auto p = get_parameter_processor();
     md_1d_array values;
@@ -186,10 +188,10 @@ mdarray Initialization_list::get_1d_list_values() {
 }
 
 
-std::pair<md_1d_array, md_1d_array> Initialization_list::get_sized_1d_list_values() {
+std::pair<md_1d_array, md_1d_array> Initialization_list::get_sized_1d_list_values(bool &already_packed) {
     md_1d_array values;
     md_1d_array sizes;
-
+    already_packed = false;
     auto p = get_parameter_processor();
 
     for(auto &expr:expression_leaves){
@@ -216,13 +218,16 @@ std::pair<md_1d_array, md_1d_array> Initialization_list::get_sized_1d_list_value
                     values.push_back(v[i]);
                     sizes.push_back(Expression_component::calculate_binary_size(v[i]));
                 }
-                values.insert(values.end(), v.begin(), v.end());
+                already_packed = true;
+                values.insert(values.end(), v.rbegin(), v.rend());
             }
 
         }
     }
-    std::reverse(values.begin(), values.end());
-    std::reverse(sizes.begin(), sizes.end());
+    if(!already_packed){
+        std::reverse(values.begin(), values.end());
+        std::reverse(sizes.begin(), sizes.end());
+    }
     return {values, sizes};
 }
 
@@ -230,11 +235,19 @@ std::pair<md_1d_array, md_1d_array> Initialization_list::get_sized_1d_list_value
 
 mdarray Initialization_list::get_packed_1d_list_values() {
 
+
     auto p = get_parameter_processor();
     md_1d_array values;
     for(auto &item:lower_dimension_leaves){
-        auto val = pack_values(item.get_sized_1d_list_values());
-        values.push_back(val);
+        bool already_packed = false;
+        auto raw_values = item.get_sized_1d_list_values(already_packed);
+        if(!already_packed){
+            auto val = pack_values(raw_values);
+            values.push_back(val);
+        } else{
+            values.insert(values.end(), raw_values.first.begin(), raw_values.first.end());
+        }
+
     }
 
     std::reverse(values.begin(), values.end());
