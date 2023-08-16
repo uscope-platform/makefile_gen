@@ -393,9 +393,8 @@ Expression_component Parameter_processor::process_array_access(Expression_compon
         throw Parameter_processor_Exception();
     }
     int64_t  val;
-    if(p.is_array()){
+    if(p.get_type() == array_parameter){
         val = p.get_array_value().get_value(array_index_values);
-
     } else {
         auto mask = 0x1<<array_index_values[2];
         val = (p.get_numeric_value()&mask)>>array_index_values[2];

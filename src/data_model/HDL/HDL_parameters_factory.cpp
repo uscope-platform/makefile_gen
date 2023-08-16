@@ -24,18 +24,6 @@ void HDL_parameters_factory::new_parameter() {
       }
       packed_dimensions.clear();
 
-    expression_stack = std::stack<Expression>();
-
-    replication_components.clear();
-    bit_selection.clear();
-    replication_size.clear();
-    concat_components.clear();
-
-    new_expression.clear();
-    expression_level=0;
-    expression_level_stack = std::stack<int>();
-
-    init_list = Initialization_list();
 }
 
 HDL_parameter HDL_parameters_factory::get_parameter() {
