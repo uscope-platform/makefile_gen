@@ -36,9 +36,9 @@ HDL_Resource data_store::get_HDL_resource(const std::string& name) {
 
 void data_store::store_hdl_entity(HDL_Resource& entity) {
     if(entity.get_type()==interface){
-        cache.hdl[entity.getName()] = entity;
-    } else {
         cache.interfaces[entity.getName()] = entity;
+    } else {
+        cache.hdl[entity.getName()] = entity;
     }
 
 }

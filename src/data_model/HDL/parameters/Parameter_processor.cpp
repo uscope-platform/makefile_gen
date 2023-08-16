@@ -91,7 +91,11 @@ std::map<std::string, HDL_parameter> Parameter_processor::process_parameters_map
     for(auto &item:map){
         auto par = item.second;
         par.set_expression_components(expr_vector_to_rpn(par.get_expression_components()));
-        ret[item.first] = process_scalar_parameter(par);
+        if(par.is_array()){
+            ret[item.first] = process_array_parameter(par);
+        } else {
+            ret[item.first] = process_scalar_parameter(par);
+        }
     }
     return ret;
 }

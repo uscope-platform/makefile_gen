@@ -122,8 +122,13 @@ public:
     void enterData_type_or_implicit(sv2017::Data_type_or_implicitContext *ctx) override;
     void exitData_type_or_implicit(sv2017::Data_type_or_implicitContext *ctx) override;
 
+
+    void enterLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) override { in_param_declaration = true;};
+    void exitLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) override { in_param_declaration = false;};
+
 private:
 
+    bool in_param_declaration = false;
     std::string path;
     std::vector<HDL_Resource> entities;
 

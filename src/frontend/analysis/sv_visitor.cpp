@@ -127,11 +127,12 @@ void sv_visitor::exitPackage_or_class_scoped_path(sv2017::Package_or_class_scope
 }
 
 void sv_visitor::enterParameter_declaration(sv2017::Parameter_declarationContext *ctx) {
-
+    in_param_declaration = true;
     current_parameter = ctx->list_of_param_assignments()[0].param_assignment()[0]->identifier()->getText();
 }
 
 void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext *ctx) {
+    in_param_declaration = false;
     if(file_contains_bus_defining_package){
         if(string_components.size() == 1){
             try {
@@ -452,14 +453,16 @@ void sv_visitor::enterData_type_or_implicit(sv2017::Data_type_or_implicitContext
             is_packed = true;
         }
     }
-    if(is_packed){
+    if(is_packed & in_param_declaration){
         params_factory.start_packed_dimension();
     }
 
 }
 
 void sv_visitor::exitData_type_or_implicit(sv2017::Data_type_or_implicitContext *ctx) {
-    params_factory.stop_packed_dimension();
+    if(in_param_declaration){
+        params_factory.stop_packed_dimension();
+    }
 }
 
 
