@@ -291,11 +291,12 @@ void sv_visitor::exitNamed_port_connection(sv2017::Named_port_connectionContext 
 }
 
 void sv_visitor::enterNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) {
+    auto dbg = ctx->getText();
     params_factory.start_instance_parameter_assignment(ctx->identifier()->getText());
 }
 
 void sv_visitor::exitNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) {
-
+    auto dbg = ctx->getText();
     auto param = params_factory.get_parameter();
     if(deps_factory.is_valid_dependency()){
         deps_factory.add_parameter(ctx->identifier()->getText(), param);
@@ -311,7 +312,6 @@ void sv_visitor::enterParam_assignment(sv2017::Param_assignmentContext *ctx) {
 
 
 void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
-
     params_factory.stop_param_assignment();
 
     auto val = ctx->constant_param_expression()->getText();
@@ -398,6 +398,8 @@ void sv_visitor::enterUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx)
 }
 
 void sv_visitor::exitUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) {
+    auto dbg = ctx->getText();
+    auto dbg2 = ctx->parent->getText();
     params_factory.stop_unpacked_dimension_declaration();
 }
 
@@ -419,7 +421,6 @@ void sv_visitor::exitReplication_size(sv2017::Replication_sizeContext *ctx) {
 
 
 void sv_visitor::exitReplication(sv2017::ReplicationContext *ctx) {
-    auto dbg = ctx->getText();
     params_factory.stop_replication();
 }
 
@@ -462,6 +463,8 @@ void sv_visitor::enterData_type_or_implicit(sv2017::Data_type_or_implicitContext
 void sv_visitor::exitData_type_or_implicit(sv2017::Data_type_or_implicitContext *ctx) {
     if(in_param_declaration){
         params_factory.stop_packed_dimension();
+    } else{
+        params_factory.clear_expression();
     }
 }
 

@@ -91,11 +91,17 @@ std::map<std::string, HDL_parameter> Parameter_processor::process_parameters_map
     for(auto &item:map){
         auto par = item.second;
         par.set_expression_components(expr_vector_to_rpn(par.get_expression_components()));
-        if(par.is_array()){
-            ret[item.first] = process_array_parameter(par);
+        if(external_parameters->contains(item.first)){
+            ret[item.first] = external_parameters->at(item.first);
         } else {
-            ret[item.first] = process_scalar_parameter(par);
+            if(par.is_array()){
+                ret[item.first] = process_array_parameter(par);
+            } else {
+                ret[item.first] = process_scalar_parameter(par);
+            }
         }
+
+
     }
     return ret;
 }
@@ -377,15 +383,24 @@ Expression_component Parameter_processor::process_array_access(Expression_compon
     }
 
     std::reverse(array_index_values.begin(), array_index_values.end());
+
+    HDL_parameter p;
     if(external_parameters->contains(e.get_string_value())){
-        auto val = external_parameters->at(e.get_string_value()).get_array_value().get_value(array_index_values);
-        return Expression_component(val);
+        p = external_parameters->at(e.get_string_value());
     }else if(compleated_set->contains(e.get_string_value())){
-        auto val = compleated_set->at(e.get_string_value()).get_array_value().get_value(array_index_values);
-        return Expression_component(val);
+        p = compleated_set->at(e.get_string_value());
     } else {
         throw Parameter_processor_Exception();
     }
+    int64_t  val;
+    if(p.is_array()){
+        val = p.get_array_value().get_value(array_index_values);
+
+    } else {
+        auto mask = 0x1<<array_index_values[2];
+        val = (p.get_numeric_value()&mask)>>array_index_values[2];
+    }
+    return Expression_component(val);
 }
 
 HDL_parameter Parameter_processor::process_array_parameter(const HDL_parameter &par) {

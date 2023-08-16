@@ -23,6 +23,19 @@ void HDL_parameters_factory::new_parameter() {
           init_list.add_dimension(dim, dim.packed);
       }
       packed_dimensions.clear();
+
+    expression_stack = std::stack<Expression>();
+
+    replication_components.clear();
+    bit_selection.clear();
+    replication_size.clear();
+    concat_components.clear();
+
+    new_expression.clear();
+    expression_level=0;
+    expression_level_stack = std::stack<int>();
+
+    init_list = Initialization_list();
 }
 
 HDL_parameter HDL_parameters_factory::get_parameter() {
@@ -203,6 +216,11 @@ void HDL_parameters_factory::start_instance_parameter_assignment(const std::stri
     resources_factory_base<HDL_parameter>::new_basic_resource();
     current_resource.set_type(expression_parameter);
     current_resource.set_name(parameter_name);
+}
+
+void HDL_parameters_factory::clear_expression() {
+    expression_stack = std::stack<Expression>();
+    expression_level = 0;
 }
 
 

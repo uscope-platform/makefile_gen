@@ -74,6 +74,9 @@ public:
     bool is_component_relevant() const { return in_initialization_list || in_expression_new || in_unpacked_declaration || in_packed_assignment ; };
 
     void start_instance_parameter_assignment(const std::string& parameter_name);
+
+    void clear_expression();
+
 private:
 
     bool in_param_assignment = false;
