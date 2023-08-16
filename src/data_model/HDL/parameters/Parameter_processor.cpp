@@ -78,7 +78,15 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
     std::map<std::basic_string<char>, HDL_parameter> processed_parameters(compleated_set->begin(), compleated_set->end());
 
     for(auto &item:working_set){
-        processed_parameters[item.first] = item.second;
+        auto param = item.second;
+        std::string value;
+        for(auto &val : param.get_expression_components()){
+            value += val.get_raw_string_value();
+        }
+
+        value.erase(std::remove( value.begin(), value.end(), '\"' ),value.end());
+        param.set_value(value);
+        processed_parameters[item.first] = param;
     }
 
     return_res.set_parameters(processed_parameters);

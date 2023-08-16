@@ -82,12 +82,27 @@ TEST(parameter_processing, simple_parameters) {
             {"simple_numeric_p", {"32"}, numeric_parameter, 32},
             {"sv_numeric_p", {"5'o10"}, numeric_parameter, 8},
             {"dimensionless_sv_numeric_p", {"'h3F"}, numeric_parameter, 63},
-            {"string_p", {R"("423")"}, expression_parameter, 9999},
-            {"nested_p", {"string_p"}, expression_parameter, 9999},
             {"local_p", {"74"}, numeric_parameter, 74},
     };
 
+
+
+
     std::map<std::string, HDL_parameter> check_params = produce_check_components(vect_params);
+
+    HDL_parameter p;
+    p.set_value("423");
+    p.set_name("string_p");
+    p.set_expression_components({Expression_component(R"("423")")});
+
+    check_params["string_p"] = p;
+
+    p = HDL_parameter();
+    p.set_value("string_p");
+    p.set_name("nested_p");
+    p.set_expression_components({Expression_component("string_p")});
+
+    check_params["nested_p"] = p;
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
@@ -937,6 +952,36 @@ TEST(parameter_processing, array_instance_parameter_override) {
         ASSERT_EQ(item.second, dependency_params[item.first]);
     }
 
-
 }
 
+
+
+TEST(parameter_processing, string_parameter) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            parameter string_param = "TEST PARAM"
+        )();
+
+        endmodule
+    )";
+
+    std::map<std::string, HDL_parameter> parent_param;
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    Parameter_processor p({}, std::make_shared<data_store>(true, "/tmp/test_data_store"));
+    resource =  p.process_resource(resource);
+
+    auto parameters = resource.get_parameters();
+
+    HDL_parameter check_param;
+    check_param.set_value("TEST PARAM");
+    check_param.set_name("string_param");
+    check_param.set_expression_components({Expression_component("\"TEST PARAM\"")});
+
+    ASSERT_EQ(check_param, parameters["string_param"]);
+
+}
