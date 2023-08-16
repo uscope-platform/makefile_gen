@@ -121,3 +121,35 @@ TEST(shunting_yard, shunting_yard_function){
 
     ASSERT_EQ(rpn_expr, expected_result);
 }
+
+
+
+TEST(shunting_yard, shunting_yard_parenthesis_complex){
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    Parameter_processor p({},d_store);
+    std::vector<Expression_component> expr_1 = {
+            Expression_component("("),
+            Expression_component("4"),
+            Expression_component("*"),
+            Expression_component("3"),
+            Expression_component("+"),
+            Expression_component("5"),
+            Expression_component(")"),
+            Expression_component("+"),
+            Expression_component("1")
+    };
+    auto rpn_expr_1 = p.expr_vector_to_rpn(expr_1);
+
+    std::vector<Expression_component> expected_result_1 = {
+            Expression_component("4"),
+            Expression_component("3"),
+            Expression_component("*"),
+            Expression_component("5"),
+            Expression_component("+"),
+            Expression_component("1"),
+            Expression_component("+")
+    };
+
+    ASSERT_EQ(rpn_expr_1, expected_result_1);
+}

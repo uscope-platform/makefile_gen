@@ -257,7 +257,7 @@ std::vector<Expression_component> Parameter_processor::expr_vector_to_rpn(const 
                     !shunting_stack.empty() &&
                     shunting_stack.top().get_raw_string_value()!="(" &&
                     (
-                        shunting_stack.top().get_type() == function_component &&
+                        shunting_stack.top().get_type() == function_component ||
                         shunting_stack.top().get_operator_precedence()<item.get_operator_precedence() ||
                         shunting_stack.top().get_operator_precedence()==item.get_operator_precedence() &&
                         !shunting_stack.top().is_right_associative()
