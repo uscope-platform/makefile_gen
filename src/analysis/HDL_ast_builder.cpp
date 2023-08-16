@@ -71,13 +71,15 @@ std::pair<HDL_instance,nlohmann::json> HDL_ast_builder::recursive_build_ast(HDL_
     nlohmann::json current_log;
     HDL_instance ret_inst;
 
-    if(!d_store->contains_hdl_entity(i.get_type())){
-        std::cerr << "ERROR:\n HDL entity :" + i.get_type() + " Not found\n";
+    auto type = i.get_type();
+
+    if(!d_store->contains_hdl_entity(type)){
+        std::cerr << "ERROR:\n HDL entity :" + type + " Not found\n";
     }
-    auto res = d_store->get_HDL_resource(i.get_type());
+    auto res = d_store->get_HDL_resource(type);
+
 
     Parameter_processor p(external_parameters, d_store);
-
     auto parent_parameters = i.get_parameters();
     auto instance_parameters = p.process_parameters_map( parent_parameters);
 
@@ -87,12 +89,12 @@ std::pair<HDL_instance,nlohmann::json> HDL_ast_builder::recursive_build_ast(HDL_
     ret_inst.set_ports(i.get_ports());
 
     ret_inst.set_name(i.get_name());
-    ret_inst.set_type(i.get_type());
+    ret_inst.set_type(type);
     ret_inst.add_parameters(res.get_parameters());
 
     if(log_structure){
-        std::cout << "Processing Instance "<< i.get_name() << " of module "<<  i.get_type() << std::endl;
-        current_log["module_type"] = i.get_type();
+        std::cout << "Processing Instance "<< i.get_name() << " of module "<<  type << std::endl;
+        current_log["module_type"] = type;
         current_log["instance_name"]= i.get_name();
         nlohmann::json params;
         for(auto &item: res.get_parameters()){

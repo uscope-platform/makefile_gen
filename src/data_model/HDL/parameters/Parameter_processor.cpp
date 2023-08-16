@@ -135,9 +135,16 @@ HDL_parameter Parameter_processor::process_scalar_parameter(const HDL_parameter 
                 auto value = external_parameters->at(return_par.get_name()).get_array_value();
                 return_par.set_array_value(value);
             } else {
-                auto value = external_parameters->at(return_par.get_name()).get_numeric_value();
-                return_par.set_expression_components({Expression_component(std::to_string(value))});
-                return_par.set_value(value);
+                auto parameter = external_parameters->at(return_par.get_name());
+                if(parameter.get_type() == numeric_parameter){
+                    auto value = parameter.get_numeric_value();
+                    return_par.set_expression_components({Expression_component(std::to_string(value))});
+                    return_par.set_value(value);
+                } else {
+                    auto value = parameter.get_string_value();
+                    return_par.set_expression_components({Expression_component(value)});
+                    return_par.set_value(value);
+                }
             }
 
         } else {
@@ -147,9 +154,11 @@ HDL_parameter Parameter_processor::process_scalar_parameter(const HDL_parameter 
 
 
     } catch (array_value_exception &ex){
-        return_par.set_type(array_parameter);
         return_par.set_array_value(ex.array_value);
+    } catch (string_parameter_exception &ex){
+        return_par.set_value(ex.str_val);
     }
+
     return return_par;
 }
 
@@ -349,10 +358,13 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
     int64_t val;
 
     if(external_parameters->contains(param_name)) {
-        if (external_parameters->at(param_name).get_type() == array_parameter) {
-            throw array_value_exception(external_parameters->at(param_name).get_array_value());
+        auto parameter = external_parameters->at(param_name);
+        if (parameter.get_type() == array_parameter) {
+            throw array_value_exception(parameter.get_array_value());
+        } else if(parameter.get_type() == string_parameter) {
+            throw string_parameter_exception(parameter.get_string_value());
         } else {
-            val = external_parameters->at(param_name).get_numeric_value();
+            val = parameter.get_numeric_value();
             if(result_size != nullptr){
                 *result_size = std::ceil(std::log2(val));
                 if(val == 0) {

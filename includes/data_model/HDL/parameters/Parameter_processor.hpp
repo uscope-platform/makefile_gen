@@ -22,6 +22,19 @@
 #include "data_model/HDL/HDL_Resource.hpp"
 #include "data_model/data_store.hpp"
 
+
+
+class string_parameter_exception : public std::exception {
+public:
+    explicit string_parameter_exception(std::string v) {
+        str_val = v;
+    };
+    char * what () {
+        return  (char*) "Internal exception, it should always be handled";
+    }
+    std::string str_val;
+};
+
 class Parameter_processor_Exception : public std::exception {
 public:
     char * what () {
