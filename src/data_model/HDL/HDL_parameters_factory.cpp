@@ -46,12 +46,14 @@ void HDL_parameters_factory::start_initialization_list() {
 }
 
 
-void HDL_parameters_factory::stop_initialization_list() {
-    if(in_replication){
+void HDL_parameters_factory::stop_initialization_list(bool default_assignment) {
+    if (in_replication) {
         stop_replication();
     }
     in_initialization_list = false;
-
+    if (default_assignment){
+        init_list.set_default();
+    }
     current_resource.add_initialization_list(init_list);
     init_list = Initialization_list();
     expression_level++;

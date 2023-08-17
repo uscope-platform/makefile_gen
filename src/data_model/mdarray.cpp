@@ -15,6 +15,18 @@
 
 #include "data_model/mdarray.hpp"
 
+mdarray::mdarray(std::vector<int64_t> dimensions, int64_t value) {
+    for(auto &item:dimensions){
+        if(item == 0){
+            item = 1;
+        }
+    }
+    md_1d_array l3(dimensions[2],value);
+    md_2d_array l2(dimensions[1], l3);
+    data = md_3d_array(dimensions[0], l2);
+}
+
+
 void mdarray::set_2d_slice(std::vector<int64_t> idx, const md_2d_array &val) {
     if(idx[0]>=data.size()){
         data.resize(idx[0]+1);
@@ -68,4 +80,5 @@ void PrintTo(const mdarray &res, std::ostream *os) {
 md_3d_array mdarray::dump() {
     return data;
 }
+
 

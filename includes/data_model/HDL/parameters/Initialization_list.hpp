@@ -59,12 +59,16 @@ public:
     int64_t get_value_at(std::vector<uint64_t> idx);
     mdarray get_values();
 
+    mdarray process_default_initialization();
+
     static bool is_repetition(Expression &e){
         if(!e.empty()){
             return e[0].get_string_value() == "$repeat_init";
         }
         return false;
     }
+
+    void set_default() { default_initialization = true;};
 
     friend bool operator==(const Initialization_list&lhs, const Initialization_list&rhs);
     friend void PrintTo(const Initialization_list& res, std::ostream* os);
@@ -90,6 +94,7 @@ private:
     bool last_dimension = true;
     std::vector<Expression> expression_leaves;
     std::vector<Initialization_list> lower_dimension_leaves;
+    bool default_initialization = false;
 };
 
 

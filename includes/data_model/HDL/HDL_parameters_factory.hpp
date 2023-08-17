@@ -38,7 +38,7 @@ public:
     void add_component(const Expression_component &c);
 
     void start_initialization_list();
-    void stop_initialization_list();
+    void stop_initialization_list(bool default_assignment);
 
     void start_bit_selection();
     void stop_bit_selection();

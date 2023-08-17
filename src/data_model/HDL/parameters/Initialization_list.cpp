@@ -27,6 +27,7 @@ Initialization_list::Initialization_list(const Initialization_list &i) {
     last_dimension = i.last_dimension;
     expression_leaves = i.expression_leaves;
     lower_dimension_leaves = i.lower_dimension_leaves;
+    default_initialization = i.default_initialization;
 }
 
 Initialization_list::Initialization_list(const Expression &e) {
@@ -105,6 +106,7 @@ bool operator==(const Initialization_list &lhs, const Initialization_list &rhs) 
     // last dimension is an internal variable only needed during construction, as such it does not need comparison
     ret &= lhs.lower_dimension_leaves == rhs.lower_dimension_leaves;
     ret &= lhs.expression_leaves == rhs.expression_leaves;
+    ret &= lhs.default_initialization == rhs.default_initialization;
 
     if(lhs.unpacked_dimensions.size() != rhs.unpacked_dimensions.size()) return false;
     for(int i = 0; i<lhs.unpacked_dimensions.size(); i++){
@@ -144,6 +146,9 @@ int64_t Initialization_list::get_value_at(std::vector<uint64_t> idx) {
 mdarray  Initialization_list::get_values() {
     mdarray ret;
 
+    if(default_initialization){
+        return process_default_initialization();
+    }
     auto size = unpacked_dimensions.size();
     if(size == 0 && !packed_dimensions.empty()){
         return get_packed_1d_list_values();
@@ -386,6 +391,34 @@ std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Param
 
     auto ret_val = std::vector<int64_t>(repetition_size, repetition_value);
     return ret_val;
+}
+
+mdarray Initialization_list::process_default_initialization() {
+
+    std::vector<int64_t> dimensions;
+    mdarray result;
+
+    auto p = get_parameter_processor();
+
+    if(unpacked_dimensions.size()>3){
+        throw std::runtime_error("Error: unpacked arrays with more than 3 dimensions are not supported");
+    }
+
+    for(const auto &item : unpacked_dimensions){
+        auto first_dim = p.process_expression(Parameter_processor::expr_vector_to_rpn(item.first_bound), nullptr);
+        auto second_dim = p.process_expression(Parameter_processor::expr_vector_to_rpn(item.second_bound), nullptr);
+        dimensions.push_back(std::max(first_dim, second_dim)+1);
+    }
+
+    while(dimensions.size()<3){
+        dimensions.insert(dimensions.begin(), 0);
+    }
+
+    auto init_value = p.process_expression(Parameter_processor::expr_vector_to_rpn(expression_leaves[0]), nullptr);
+
+    return {dimensions,init_value};
+
+
 }
 
 

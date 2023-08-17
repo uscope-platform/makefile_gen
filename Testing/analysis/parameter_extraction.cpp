@@ -979,3 +979,68 @@ TEST(parameter_extraction, packed_replication_init) {
         ASSERT_EQ(item.second, parameters[item.first]);
     }
 }
+
+
+TEST(parameter_extraction, array_initialization_default) {
+    std::string test_pattern = R"(
+        module test_mod #(
+             parameter [4:0] test_parameter [2:0][1:0] = '{default:0}
+        )();
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    std::map<std::string, HDL_parameter> check_params;
+
+    HDL_parameter p;
+    p.set_name("test_parameter");
+    p.set_type(expression_parameter);
+    Initialization_list i;
+    i.add_dimension({{Expression_component("4")}, {Expression_component("0")}, true}, true);
+    i.add_dimension({{Expression_component("2")}, {Expression_component("0")}, false}, false);
+    i.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false}, false);
+    i.add_item({Expression_component("0")});
+    i.set_default();
+    p.add_initialization_list(i);
+    check_params["test_parameter"] = p;
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item.first));
+        ASSERT_EQ(item.second, parameters[item.first]);
+    }
+
+}
+
+
+TEST(parameter_extraction, param_ternary_conditional) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            parameter condition = 2,
+            parameter test_positive = condition > 1 ? 12 : 34,
+            parameter test_positive = condition > 65 ? 12 : 34
+        )();
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    std::map<std::string, HDL_parameter> check_params;
+
+
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item.first));
+        ASSERT_EQ(item.second, parameters[item.first]);
+    }
+}

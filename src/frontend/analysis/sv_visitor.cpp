@@ -375,7 +375,16 @@ void sv_visitor::enterAssignment_pattern(sv2017::Assignment_patternContext *ctx)
 }
 
 void sv_visitor::exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) {
-    params_factory.stop_initialization_list();
+    bool default_assignment = false;
+    if(!ctx->structure_pattern_key().empty()){
+        if(ctx->structure_pattern_key()[0]->assignment_pattern_key() != nullptr){
+            if(ctx->structure_pattern_key()[0]->assignment_pattern_key()->KW_DEFAULT() != nullptr){
+                default_assignment = true;
+            }
+        }
+    }
+
+    params_factory.stop_initialization_list(default_assignment);
 }
 
 

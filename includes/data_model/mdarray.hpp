@@ -29,6 +29,8 @@ typedef std::vector<md_2d_array> md_3d_array;
 class mdarray {
 
 public:
+    mdarray() = default;
+    mdarray(std::vector<int64_t> dimensions, int64_t value);
     void set_value(std::vector<int64_t> idx, int64_t val);
     void set_1d_slice(std::vector<int64_t> idx, const md_1d_array &val);
     void set_2d_slice(std::vector<int64_t> idx, const md_2d_array& val);
@@ -39,6 +41,8 @@ public:
     md_1d_array get_1d_slice(std::vector<int64_t> idx){return data[idx[0]][idx[1]];};
     int64_t get_value(std::vector<int64_t> idx){return data[idx[0]][idx[1]][idx[2]];};
     md_3d_array dump();
+
+
 
     friend bool operator==(const mdarray&lhs, const mdarray&rhs){
         return lhs.data == rhs.data;

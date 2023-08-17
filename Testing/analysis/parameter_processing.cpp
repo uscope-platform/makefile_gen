@@ -1020,3 +1020,61 @@ TEST(parameter_processing, packed_replication_init) {
 
     ASSERT_EQ(check_param, parameters["test_parameter"]);
 }
+
+
+TEST(parameter_processing, array_initialization_default) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            parameter p_1 = 5,
+            parameter p_2 = 4,
+            parameter [4:0] test_parameter [2:0][1:0] = '{default:p_1+p_2}
+        )();
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    Parameter_processor proc({}, std::make_shared<data_store>(true, "/tmp/test_data_store"));
+    resource =  proc.process_resource(resource);
+
+    auto parameters = resource.get_parameters();
+    std::map<std::string, HDL_parameter> check_params;
+
+    HDL_parameter p;
+    p.set_name("test_parameter");
+    p.set_type(expression_parameter);
+    Initialization_list i;
+    i.add_dimension({{Expression_component("4")}, {Expression_component("0")}, true}, true);
+    i.add_dimension({{Expression_component("2")}, {Expression_component("0")}, false}, false);
+    i.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false}, false);
+    i.add_item({{Expression_component("p_1"), Expression_component("+"), Expression_component("p_2")}});
+    i.set_default();
+    p.add_initialization_list(i);
+    mdarray array;
+    array.set_data({{{9,9},{9,9},{9,9}}});
+
+    p.set_array_value(array);
+    check_params["test_parameter"] = p;
+
+    p = HDL_parameter();
+    p.set_name("p_1");
+    p.set_value(5);
+    p.set_expression_components({Expression_component("5")});
+    check_params["p_1"] = p;
+
+    p = HDL_parameter();
+    p.set_name("p_2");
+    p.set_value(4);
+    p.set_expression_components({Expression_component("4")});
+    check_params["p_2"] = p;
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item.first));
+        ASSERT_EQ(item.second, parameters[item.first]);
+    }
+
+}
