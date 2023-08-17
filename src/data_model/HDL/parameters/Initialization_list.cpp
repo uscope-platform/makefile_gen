@@ -131,11 +131,13 @@ bool Initialization_list::empty() const {
 }
 
 void Initialization_list::link_processor(const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep,
-                                         const std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> &cs) {
+                                         const std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> &cs,
+                                         const std::shared_ptr<data_store> &ds) {
     external_parameters = ep;
     completed_set = cs;
+    d_store = ds;
     for(auto &item:lower_dimension_leaves){
-        item.link_processor( ep, cs);
+        item.link_processor( ep, cs, ds);
     }
 }
 
@@ -333,8 +335,9 @@ Parameter_processor Initialization_list::get_parameter_processor() {
     for(const auto& item:*external_parameters){
         e_p.insert(item);
     }
-
-    return {e_p, completed_set};
+    Parameter_processor p(e_p, completed_set);
+    p.set_data_store(d_store);
+    return p;
 }
 
 void PrintTo(const Initialization_list &il, std::ostream *os) {

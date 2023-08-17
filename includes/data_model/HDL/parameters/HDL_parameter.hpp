@@ -94,7 +94,7 @@ public:
     template<class Archive>
     void serialize( Archive & ar ) {
         ar(name, string_value_array, numeric_value_array, type,
-           expression_components);
+           expression_components, i_l);
     }
 
     nlohmann::json dump();

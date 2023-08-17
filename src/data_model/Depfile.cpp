@@ -24,6 +24,7 @@ Depfile::Depfile(const std::string& filename) {
 Depfile::Depfile(const Depfile &file) {
     content = file.get_content();
 }
+
 std::string Depfile::get_synth_tl() {
     return content["general"]["synth_tl"];
 }
@@ -82,4 +83,12 @@ std::vector<std::string> Depfile::get_include_directories() {
 
 json Depfile::get_bus_section() {
     return content["bus"];
+}
+
+bool Depfile::is_module_excluded(const std::string &s) {
+    bool ret = false;
+    for(auto &item: content["excluded_modules"]){
+        ret |= (std::string) item == s;
+    }
+    return ret;
 }

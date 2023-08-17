@@ -16,7 +16,7 @@
 #include "analysis/HDL_ast_builder.hpp"
 
 
-HDL_ast_builder::HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d) {
+HDL_ast_builder::HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d, const Depfile& d_f) :dep_file(d_f) {
     s_store = s;
     d_store = d;
     log_structure = true;
@@ -28,6 +28,7 @@ HDL_instance HDL_ast_builder::build_ast(const std::string& top_level_module, std
 
     auto tl_res = d_store->get_HDL_resource(top_level_module);
 
+    auto test = d_store->get_HDL_resource("SicDriveMasterAdc");
     top_level.set_type(top_level_module);
 
     Parameter_processor p(external_parameters, d_store);
@@ -73,11 +74,14 @@ std::pair<HDL_instance,nlohmann::json> HDL_ast_builder::recursive_build_ast(HDL_
 
     auto type = i.get_type();
 
+    if(dep_file.is_module_excluded(type)){
+        return {};
+    }
+
     if(!d_store->contains_hdl_entity(type)){
         std::cerr << "ERROR:\n HDL entity :" + type + " Not found\n";
     }
     auto res = d_store->get_HDL_resource(type);
-
 
     Parameter_processor p(external_parameters, d_store);
     auto parent_parameters = i.get_parameters();

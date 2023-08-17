@@ -74,7 +74,7 @@ public:
 
     static int64_t evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string& operation);
     static int64_t evaluate_unary_expression(int64_t operand, const std::string& operation);
-
+    void set_data_store(std::shared_ptr<data_store> &ds){d_store = ds;};
 
 private:
 

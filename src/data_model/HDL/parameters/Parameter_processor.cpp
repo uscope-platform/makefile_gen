@@ -120,8 +120,6 @@ std::map<std::string, HDL_parameter> Parameter_processor::process_parameters_map
 
             }
         }
-
-
     }
     return ret;
 }
@@ -445,13 +443,13 @@ HDL_parameter Parameter_processor::process_array_parameter(const HDL_parameter &
             return_par.add_initialization_list({});
         } else {
             Initialization_list il = external_parameters->at(par.get_name()).get_i_l();
-            il.link_processor( external_parameters, compleated_set);
+            il.link_processor( external_parameters, compleated_set, d_store);
             arr_val = il.get_values();
         }
 
     } else {
         Initialization_list il = return_par.get_i_l();
-        il.link_processor( external_parameters, compleated_set);
+        il.link_processor( external_parameters, compleated_set, d_store);
         arr_val = il.get_values();
     }
     return_par.set_array_value(arr_val);
@@ -468,7 +466,7 @@ HDL_parameter Parameter_processor::process_packed_parameter(const HDL_parameter 
     } else {
         il = return_par.get_i_l();
     }
-    il.link_processor( external_parameters,  compleated_set);
+    il.link_processor( external_parameters,  compleated_set, d_store);
     auto val_array = il.get_values();
     return_par.set_value(val_array.get_value({0,0,0}));
     return return_par;

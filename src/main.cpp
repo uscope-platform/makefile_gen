@@ -122,7 +122,7 @@ int main(int argc, char *argv[]){
 
     walker.analyze_dir();
 
-    HDL_ast_builder b(s_store, d_store);
+    HDL_ast_builder b(s_store, d_store, dep);
     auto synth_ast = b.build_ast(dep.get_synth_tl(), {});
 
     // Resolve top level files dependencies

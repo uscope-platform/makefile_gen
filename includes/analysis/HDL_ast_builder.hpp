@@ -21,13 +21,14 @@
 #include <nlohmann/json.hpp>
 
 #include "data_model/data_store.hpp"
+#include "data_model/Depfile.hpp"
 #include "data_model/settings_store.hpp"
 #include "data_model/HDL/HDL_instance.hpp"
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
 class HDL_ast_builder {
     public:
-        HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d);
+        HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d, const Depfile& d_f);
         HDL_instance build_ast(const std::string& top_level_module, std::map<std::string, HDL_parameter> external_parameters);
 
     private:
@@ -37,6 +38,7 @@ class HDL_ast_builder {
         bool log_structure;
         std::pair<HDL_instance,nlohmann::json> recursive_build_ast(HDL_instance &i,const std::map<std::string, HDL_parameter> &external_parameters);
         nlohmann::json log;
+        Depfile dep_file;
 };
 
 

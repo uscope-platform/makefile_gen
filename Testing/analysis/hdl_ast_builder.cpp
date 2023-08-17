@@ -52,8 +52,7 @@ TEST( hdl_ast_builder, pid_ast_build) {
     }
 
 
-
-    HDL_ast_builder b(s_store, d_store);
+    HDL_ast_builder b(s_store, d_store, Depfile());
     auto synth_ast = b.build_ast("PID", {});
 
 
@@ -95,7 +94,7 @@ TEST( hdl_ast_builder, spi_ast_build) {
 
 
 
-    HDL_ast_builder b(s_store, d_store);
+    HDL_ast_builder b(s_store, d_store, Depfile());
     auto synth_ast = b.build_ast("SPI", {});
 
 
@@ -135,7 +134,7 @@ TEST( hdl_ast_builder, pwm_ast_build) {
     }
 
 
-    HDL_ast_builder b(s_store, d_store);
+    HDL_ast_builder b(s_store, d_store, Depfile());
     auto synth_ast = b.build_ast("PwmGenerator", {});
 
 
@@ -178,7 +177,7 @@ TEST( hdl_ast_builder, adc_ast_build) {
     }
 
 
-    HDL_ast_builder b(s_store, d_store);
+    HDL_ast_builder b(s_store, d_store, Depfile());
     auto synth_ast = b.build_ast("AdcProcessing", {});
 
 

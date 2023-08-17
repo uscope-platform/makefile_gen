@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <utility>
+#include <cereal/types/vector.hpp>
 
 #include "data_model/HDL/parameters/Expression_component.hpp"
 #include "data_model/mdarray.hpp"
@@ -26,6 +27,7 @@
 // FORWARD DECLARATIONS
 class HDL_parameter;
 class Parameter_processor;
+class data_store;
 
 typedef  std::vector<Expression_component> Expression;
 
@@ -55,7 +57,8 @@ public:
     bool is_packed() const{return unpacked_dimensions.empty() && !packed_dimensions.empty();};
     void link_processor(
                         const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep,
-                        const std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> &cs);
+                        const std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> &cs,
+                        const std::shared_ptr<data_store> &ds);
     int64_t get_value_at(std::vector<uint64_t> idx);
     mdarray get_values();
 
@@ -77,6 +80,14 @@ public:
 
     friend bool operator==(const Initialization_list&lhs, const Initialization_list&rhs);
     friend void PrintTo(const Initialization_list& res, std::ostream* os);
+
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(unpacked_dimensions, packed_dimensions, last_dimension, expression_leaves,
+           lower_dimension_leaves, default_initialization);
+    }
+
+
 private:
 
     std::vector<int64_t> expand_repetition(Expression &e, Parameter_processor &p, std::vector<int64_t> *sizes);
@@ -92,6 +103,7 @@ private:
 
     std::shared_ptr<std::map<std::string, HDL_parameter>> external_parameters;
     std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> completed_set;
+    std::shared_ptr<data_store> d_store;
 
     std::vector<dimension_t> unpacked_dimensions;
     std::vector<dimension_t> packed_dimensions;

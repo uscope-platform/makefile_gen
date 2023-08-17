@@ -85,6 +85,7 @@ TEST(Initialization_list, get_values_1d_unpacked)  {
 
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
     auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     HDL_parameter p;
     p.set_name("SS_POLARITY_DEFAULT");
@@ -92,7 +93,7 @@ TEST(Initialization_list, get_values_1d_unpacked)  {
 
     cs->insert({"SS_POLARITY_DEFAULT", p});
 
-    il.link_processor( external_parameters,cs);
+    il.link_processor( external_parameters,cs,d_store);
 
     mdarray check_array;
     check_array.set_1d_slice({0, 0}, {69, 6, 4 , 3, 5});
@@ -114,6 +115,7 @@ TEST(Initialization_list, get_values_2d_unpacked) {
 
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
     auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     HDL_parameter p;
     p.set_name("SS_POLARITY_DEFAULT");
@@ -121,7 +123,7 @@ TEST(Initialization_list, get_values_2d_unpacked) {
 
     cs->insert({"SS_POLARITY_DEFAULT", p});
 
-    il.link_processor( external_parameters,cs);
+    il.link_processor( external_parameters,cs, d_store);
 
     mdarray check_array;
     check_array.set_2d_slice({0, 0}, {{54,69,6},{4,3,5}});
@@ -144,6 +146,7 @@ TEST(Initialization_list, get_values_3d_unpacked) {
 
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
     auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     HDL_parameter p;
     p.set_name("SS_POLARITY_DEFAULT");
@@ -151,7 +154,7 @@ TEST(Initialization_list, get_values_3d_unpacked) {
 
     cs->insert({"SS_POLARITY_DEFAULT", p});
 
-    il.link_processor( external_parameters,cs);
+    il.link_processor( external_parameters,cs, d_store);
 
     mdarray check_array;
     check_array.set_data({{{11,82,43},{24,13,57}},{{54,69,6},{4,3,5}}});
@@ -173,6 +176,7 @@ TEST(Initialization_list, get_values_1d_packed) {
 
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
     auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     HDL_parameter p;
     p.set_name("SS_POLARITY_DEFAULT");
@@ -180,7 +184,7 @@ TEST(Initialization_list, get_values_1d_packed) {
 
     cs->insert({"SS_POLARITY_DEFAULT", p});
 
-    il.link_processor( external_parameters,cs);
+    il.link_processor( external_parameters,cs, d_store);
 
     mdarray check_array;
     check_array.set_1d_slice({0, 0}, {1, 6, 5, 2, 5});
@@ -201,6 +205,7 @@ TEST(Initialization_list, get_values_2d_packed) {
 
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
     auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     HDL_parameter p;
     p.set_name("SS_POLARITY_DEFAULT");
@@ -208,7 +213,7 @@ TEST(Initialization_list, get_values_2d_packed) {
 
     cs->insert({"SS_POLARITY_DEFAULT", p});
 
-    il.link_processor( external_parameters,cs);
+    il.link_processor( external_parameters,cs, d_store);
 
     mdarray check_array;
     check_array.set_2d_slice({0}, {{6, 5}, {2, 5}});
@@ -249,6 +254,7 @@ TEST(Initialization_list, get_values_3d_packed) {
     );
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
     auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     HDL_parameter p;
     p.set_name("SS_POLARITY_DEFAULT");
@@ -256,7 +262,7 @@ TEST(Initialization_list, get_values_3d_packed) {
 
     cs->insert({"SS_POLARITY_DEFAULT", p});
 
-    il.link_processor( external_parameters,cs);
+    il.link_processor( external_parameters,cs, d_store);
 
     mdarray check_array;
     check_array.set_data(
@@ -313,7 +319,7 @@ TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
 
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
     auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
-
+    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     HDL_parameter p;
     p.set_name("SS_POLARITY_DEFAULT");
@@ -321,7 +327,7 @@ TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
 
     cs->insert({"SS_POLARITY_DEFAULT", p});
 
-    il.link_processor( external_parameters,cs);
+    il.link_processor( external_parameters,cs, d_store);
 
     mdarray check_array;
     check_array.set_1d_slice({0, 0}, {0x27e0, 0x220e0, 3 , 3, 3});
@@ -353,8 +359,9 @@ TEST(Initialization_list, multidimensional_packed_array) {
 
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
     auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
-    il.link_processor( external_parameters,cs);
+    il.link_processor( external_parameters,cs, d_store);
 
 
 

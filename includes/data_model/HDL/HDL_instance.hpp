@@ -65,7 +65,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, type, dep_class, ports_map, parameters, quantifier);
+        ar(name, type, dep_class, ports_map, parameters, quantifier, child_instances);
     }
 
     nlohmann::json dump();
