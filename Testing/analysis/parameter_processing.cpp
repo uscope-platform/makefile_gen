@@ -988,6 +988,36 @@ TEST(parameter_processing, string_parameter) {
 
 }
 
+TEST(parameter_processing, string_parameter_map_processing) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            parameter string_param = "TEST PARAM"
+        )();
+
+        endmodule
+    )";
+
+    std::map<std::string, HDL_parameter> parent_param;
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    Parameter_processor p({}, std::make_shared<data_store>(true, "/tmp/test_data_store"));
+    auto params = resource.get_parameters();
+
+    auto parameters = p.process_parameters_map(params, resource);
+
+    HDL_parameter check_param;
+    check_param.set_value("TEST PARAM");
+    check_param.set_name("string_param");
+    check_param.set_expression_components({Expression_component("\"TEST PARAM\"")});
+
+    ASSERT_EQ(check_param, parameters["string_param"]);
+
+}
+
 
 
 TEST(parameter_processing, packed_replication_init) {
@@ -1022,7 +1052,6 @@ TEST(parameter_processing, packed_replication_init) {
 
     ASSERT_EQ(check_param, parameters["test_parameter"]);
 }
-
 
 TEST(parameter_processing, array_initialization_default) {
     std::string test_pattern = R"(
@@ -1080,8 +1109,6 @@ TEST(parameter_processing, array_initialization_default) {
     }
 
 }
-
-
 
 TEST(parameter_processing, packed_array_initialization_expression_override) {
     std::string test_pattern = R"(

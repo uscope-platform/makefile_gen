@@ -37,9 +37,14 @@ public:
 
 class Parameter_processor_Exception : public std::exception {
 public:
+    Parameter_processor_Exception() = default;
+    explicit Parameter_processor_Exception(std::string v) {
+        str_val = v;
+    };
     char * what () {
         return  (char*) "Internal exception, it should always be handled";
     }
+    std::string str_val;
 };
 
 class array_value_exception  : public std::exception {

@@ -110,7 +110,14 @@ std::map<std::string, HDL_parameter> Parameter_processor::process_parameters_map
                 par.add_initialization_list(param_il);
                 ret[item.first] = process_array_parameter(par);
             } else {
-                ret[item.first] = process_scalar_parameter(par);
+                try{
+                    ret[item.first] = process_scalar_parameter(par);
+                } catch (Parameter_processor_Exception &ex){
+                    HDL_parameter p = item.second;
+                    p.set_value(ex.str_val);
+                    ret[item.first] = p;
+                }
+
             }
         }
 
@@ -377,17 +384,19 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
                 }
             }
         }
-    } else if(compleated_set->contains(param_name)){
-        if(compleated_set->at(param_name).is_array()){
+    } else if(compleated_set->contains(param_name)) {
+        if (compleated_set->at(param_name).is_array()) {
             throw array_value_exception(compleated_set->at(param_name).get_array_value());
         } else {
             val = compleated_set->at(param_name).get_numeric_value();
-            if(result_size != nullptr){
+            if (result_size != nullptr) {
                 *result_size = Expression_component::calculate_binary_size(val);
             }
         }
     } else {
-        throw Parameter_processor_Exception();
+        auto s = ec.get_string_value();
+        s.erase(std::remove( s.begin(), s.end(), '\"' ),s.end());
+        throw Parameter_processor_Exception(s);
     }
 
     return val;
