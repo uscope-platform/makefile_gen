@@ -59,6 +59,11 @@ public:
     int64_t get_value_at(std::vector<uint64_t> idx);
     mdarray get_values();
 
+    void set_packed_dimensions(const std::vector<dimension_t>  &d) {packed_dimensions = d;};
+    void set_unpacked_dimensions(const std::vector<dimension_t>  &d) {unpacked_dimensions = d;};
+    std::vector<dimension_t> get_packed_dimensions(){return  packed_dimensions;};
+    std::vector<dimension_t> get_unpacked_dimensions(){return  unpacked_dimensions;};
+
     mdarray process_default_initialization();
 
     static bool is_repetition(Expression &e){

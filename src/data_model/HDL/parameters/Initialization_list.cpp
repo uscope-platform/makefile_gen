@@ -150,6 +150,7 @@ mdarray  Initialization_list::get_values() {
         return process_default_initialization();
     }
     auto size = unpacked_dimensions.size();
+
     if(size == 0 && !packed_dimensions.empty()){
         return get_packed_1d_list_values();
     } else if(size == 1){

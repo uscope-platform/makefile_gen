@@ -60,7 +60,7 @@ public:
     Parameter_processor(const std::map<std::string, HDL_parameter>& ep,
                         std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> &cs
     );
-    std::map<std::string, HDL_parameter> process_parameters_map(std::map<std::string, HDL_parameter> &map);
+    std::map<std::string, HDL_parameter> process_parameters_map(std::map<std::string, HDL_parameter> &map, HDL_Resource &spec);
     static void convert_parameters(std::vector<HDL_Resource> &v);
     HDL_Resource process_resource(const HDL_Resource &res);
     int64_t process_expression(const std::vector<Expression_component>& expr, int64_t *reslt_size);

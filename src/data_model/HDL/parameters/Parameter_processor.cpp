@@ -94,7 +94,7 @@ HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
     return return_res;
 }
 
-std::map<std::string, HDL_parameter> Parameter_processor::process_parameters_map(std::map<std::string, HDL_parameter> &map) {
+std::map<std::string, HDL_parameter> Parameter_processor::process_parameters_map(std::map<std::string, HDL_parameter> &map, HDL_Resource &spec) {
     std::map<std::string, HDL_parameter> ret;
     for(auto &item:map){
         auto par = item.second;
@@ -103,6 +103,11 @@ std::map<std::string, HDL_parameter> Parameter_processor::process_parameters_map
             ret[item.first] = external_parameters->at(item.first);
         } else {
             if(par.is_array()){
+                auto spec_il = spec.get_parameters()[par.get_name()].get_i_l();
+                auto param_il = par.get_i_l();
+                param_il.set_packed_dimensions(spec_il.get_packed_dimensions());
+                param_il.set_unpacked_dimensions(spec_il.get_unpacked_dimensions());
+                par.add_initialization_list(param_il);
                 ret[item.first] = process_array_parameter(par);
             } else {
                 ret[item.first] = process_scalar_parameter(par);

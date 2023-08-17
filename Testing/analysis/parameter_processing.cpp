@@ -911,14 +911,16 @@ TEST(parameter_processing, array_instance_parameter_override) {
     auto top_res= d_store->get_HDL_resource("test_mod");
     auto parent_parameters = p.process_resource(top_res).get_parameters();
 
+    auto instance_spec = d_store->get_HDL_resource("dependency");
+
     p = Parameter_processor(parent_parameters, d_store);
 
     auto parent_params = top_res.get_dependencies()[0].get_parameters();
-    auto instance_parameters = p.process_parameters_map(parent_params);
+    auto instance_parameters = p.process_parameters_map(parent_params, instance_spec);
 
     p = Parameter_processor(instance_parameters, d_store);
 
-    auto dependency_params = p.process_resource(d_store->get_HDL_resource("dependency")).get_parameters();
+    auto dependency_params = p.process_resource(instance_spec).get_parameters();
 
     std::vector<param_check_t> vect_params = {
             {"param_1", {"4"}, numeric_parameter, 4},
@@ -1076,5 +1078,61 @@ TEST(parameter_processing, array_initialization_default) {
         ASSERT_TRUE(parameters.contains(item.first));
         ASSERT_EQ(item.second, parameters[item.first]);
     }
+
+}
+
+
+
+TEST(parameter_processing, packed_array_initialization_expression_override) {
+    std::string test_pattern = R"(
+
+        module dependency #(
+            N_TRIGGER_REGISTERS = 1,
+            parameter [31:0] TRIGGER_REGISTERS_IDX [N_TRIGGER_REGISTERS-1:0] = '{N_TRIGGER_REGISTERS{0}}
+        )();
+
+            parameter p1_t = TRIGGER_REGISTERS_IDX[0];
+
+
+        endmodule
+
+        module test_mod #(
+        )();
+
+            parameter TAP_ADDR_REG = 5;
+            dependency #(
+                .TRIGGER_REGISTERS_IDX('{TAP_ADDR_REG})
+            ) d ();
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+    Parameter_processor p({}, d_store);
+    auto top_res= d_store->get_HDL_resource("test_mod");
+    auto parent_parameters = p.process_resource(top_res).get_parameters();
+
+    p = Parameter_processor(parent_parameters, d_store);
+
+    auto instance_spec = d_store->get_HDL_resource("dependency");
+
+    auto parent_params = top_res.get_dependencies()[0].get_parameters();
+    auto instance_parameters = p.process_parameters_map(parent_params, instance_spec);
+
+    p = Parameter_processor(instance_parameters, d_store);
+
+    auto dependency_params = p.process_resource(d_store->get_HDL_resource("dependency")).get_parameters();
+
+    std::map<std::string, HDL_parameter> check_params;
+
+    auto array_val = dependency_params["TRIGGER_REGISTERS_IDX"].get_array_value();
+    ASSERT_EQ(array_val.get_value({0,0,0}), 5);
 
 }
