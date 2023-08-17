@@ -91,12 +91,14 @@ void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
 }
 
 void HDL_parameters_factory::stop_replication() {
-    in_replication = false;
-    replication_components.insert(replication_components.begin(), {Expression_component("$repeat_init")});
-    init_list.add_item(replication_components);
-    init_list.close_level();
-    replication_components.clear();
+    if(in_replication){
+        in_replication = false;
+        replication_components.insert(replication_components.begin(), {Expression_component("$repeat_init")});
+        init_list.add_item(replication_components);
+        init_list.close_level();
+        replication_components.clear();
     expression_level++;
+    }
 }
 
 void HDL_parameters_factory::stop_replication_assignment() {

@@ -1017,6 +1017,34 @@ TEST(parameter_extraction, array_initialization_default) {
 
 }
 
+TEST(parameter_extraction, unrelated_wire_dependency_conflict) {
+    std::string test_pattern = R"(
+    module test_mod #(
+        DECIMATE = 1
+    )();
+    assign unrelated_wire = {5{1}};
+
+        dependency #(
+            .DECIMATED(DECIMATE)
+        ) dep();
+    endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    HDL_instance i = resource.get_dependencies()[0];
+
+    auto parameter = i.get_parameters()["DECIMATED"];
+
+    HDL_parameter check_param;
+    check_param.set_name("DECIMATED");
+    check_param.set_type(expression_parameter);
+    check_param.add_component({Expression_component("DECIMATE")});
+
+    ASSERT_EQ(parameter, check_param);
+}
 
 TEST(parameter_extraction, param_ternary_conditional) {
     std::string test_pattern = R"(
