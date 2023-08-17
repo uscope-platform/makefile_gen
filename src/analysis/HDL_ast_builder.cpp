@@ -74,7 +74,11 @@ std::pair<HDL_instance,nlohmann::json> HDL_ast_builder::recursive_build_ast(HDL_
 
     auto type = i.get_type();
 
-    if(dep_file.is_module_excluded(type)){
+    if(
+        dep_file.is_module_excluded(type) ||
+        d_store->is_primitive(type) ||
+        !(i.get_dependency_class() == module || i.get_dependency_class() == interface || i.get_dependency_class() == package)
+    ){
         return {};
     }
 
