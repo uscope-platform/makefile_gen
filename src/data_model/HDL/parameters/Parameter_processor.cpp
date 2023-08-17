@@ -455,8 +455,8 @@ HDL_parameter Parameter_processor::process_packed_parameter(const HDL_parameter 
         il = return_par.get_i_l();
     }
     il.link_processor( external_parameters,  compleated_set);
-    auto val = il.get_values().get_value({0,0,0});
-    return_par.set_value(val);
+    auto val_array = il.get_values();
+    return_par.set_value(val_array.get_value({0,0,0}));
     return return_par;
 }
 

@@ -234,24 +234,40 @@ std::pair<md_1d_array, md_1d_array> Initialization_list::get_sized_1d_list_value
 
 
 mdarray Initialization_list::get_packed_1d_list_values() {
-
+    mdarray ret;
 
     auto p = get_parameter_processor();
     md_1d_array values;
-    for(auto &item:lower_dimension_leaves){
-        bool already_packed = false;
-        auto raw_values = item.get_sized_1d_list_values(already_packed);
-        if(!already_packed){
-            auto val = pack_values(raw_values);
-            values.push_back(val);
-        } else{
-            values.insert(values.end(), raw_values.first.begin(), raw_values.first.end());
+    if(!lower_dimension_leaves.empty()){
+        for(auto &item:lower_dimension_leaves){
+            bool already_packed = false;
+            auto raw_values = item.get_sized_1d_list_values(already_packed);
+            if(!already_packed){
+                auto val = pack_values(raw_values);
+                values.push_back(val);
+            } else{
+                values.insert(values.end(), raw_values.first.begin(), raw_values.first.end());
+            }
         }
 
+    } else{
+
+        md_1d_array sizes;
+        for(auto &item:expression_leaves){
+            if(is_repetition(item)){
+                values = expand_repetition(item, p, &sizes);
+            } else{
+                int64_t s;
+                values.push_back(p.process_expression(Parameter_processor::expr_vector_to_rpn(item), &s));
+                sizes.push_back(s);
+            }
+        }
+        auto val = pack_values({values, sizes});
+        values = {val};
     }
 
+
     std::reverse(values.begin(), values.end());
-    mdarray ret;
     ret.set_1d_slice({0, 0}, values);
     return ret;
 }

@@ -985,3 +985,38 @@ TEST(parameter_processing, string_parameter) {
     ASSERT_EQ(check_param, parameters["string_param"]);
 
 }
+
+
+
+TEST(parameter_processing, packed_replication_init) {
+    std::string test_pattern = R"(
+        module test_mod #(
+             parameter [4:0] test_parameter = {5{1'b1}}
+        )();
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    Parameter_processor p({}, std::make_shared<data_store>(true, "/tmp/test_data_store"));
+    resource =  p.process_resource(resource);
+
+    auto parameters = resource.get_parameters();
+
+    std::map<std::string, HDL_parameter> check_params;
+
+    HDL_parameter check_param;
+    check_param.set_name("test_parameter");
+    check_param.set_value(31);
+
+    Initialization_list i;
+    i.add_dimension({{Expression_component("4")},{Expression_component("0")}, true}, true);
+    i.add_item({Expression_component("$repeat_init"),Expression_component("5"),Expression_component(","),Expression_component("1'b1")});
+
+    check_param.add_initialization_list(i);
+
+
+    ASSERT_EQ(check_param, parameters["test_parameter"]);
+}

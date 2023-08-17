@@ -70,6 +70,7 @@ public:
     void start_packed_dimension();
     void stop_packed_dimension();
 
+    bool in_replication_assignment_context() const {return in_replication_assignment;};
     bool in_packed_context() const {return in_packed_assignment; };
     bool is_component_relevant() const { return in_initialization_list || in_expression_new || in_unpacked_declaration || in_packed_assignment ; };
 
@@ -77,8 +78,10 @@ public:
 
     void clear_expression();
 
-private:
+    void start_ternary_operator();
 
+private:
+    bool in_ternary_operator = true;
     bool in_param_assignment = false;
     bool in_initialization_list = false;
     bool in_expression_new = false;

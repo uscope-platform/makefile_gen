@@ -211,4 +211,8 @@ void HDL_parameters_factory::clear_expression() {
     expression_level = 0;
 }
 
+void HDL_parameters_factory::start_ternary_operator() {
+    in_ternary_operator = true;
+}
+
 

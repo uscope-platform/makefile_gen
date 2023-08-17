@@ -937,3 +937,45 @@ TEST(parameter_extraction, multidimensional_packed_array) {
     }
 
 }
+
+
+TEST(parameter_extraction, packed_replication_init) {
+    std::string test_pattern = R"(
+        module test_mod #(
+             parameter [4:0] test_parameter = {5{1'b1}}
+        )();
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    std::map<std::string, HDL_parameter> check_params;
+
+
+    HDL_parameter p = HDL_parameter();
+    p.set_type(expression_parameter);
+    p.set_name("test_parameter");
+
+    init_list_t init;
+    init.dimensions = {
+            {{Expression_component("4")},{Expression_component("0")}, true}
+    };
+    init.values = {{
+                           {Expression_component("$repeat_init"),Expression_component("5"),Expression_component(","),Expression_component("1'b1")}
+                   }};
+
+    p.add_initialization_list(produce_check_init_list_1d(init));
+
+
+    check_params["test_parameter"] = p;
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item.first));
+        ASSERT_EQ(item.second, parameters[item.first]);
+    }
+}

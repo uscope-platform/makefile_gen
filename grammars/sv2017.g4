@@ -785,7 +785,7 @@ block_item_declaration:
     )
 ;
 param_assignment:
-    identifier ( unpacked_dimension )* ( ASSIGN constant_param_expression )?;
+    identifier ( unpacked_dimension )* ( ASSIGN ( ( LBRACE replication_assignment RBRACE )|constant_param_expression))? ;
 type_assignment: identifier ( ASSIGN data_type )?;
 list_of_type_assignments: type_assignment ( COMMA type_assignment )*;
 list_of_param_assignments: param_assignment ( COMMA param_assignment )*;
@@ -1154,7 +1154,7 @@ param_expression:
     mintypmax_expression
     | data_type
 ;
-constant_param_expression: concatenation | param_expression ;
+constant_param_expression: replication | concatenation | param_expression ;
 
 unpacked_dimension: LSQUARE_BR range_expression RSQUARE_BR;
 packed_dimension: LSQUARE_BR  ( range_expression )? RSQUARE_BR;

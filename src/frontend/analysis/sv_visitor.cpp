@@ -156,9 +156,16 @@ void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext 
 
 void sv_visitor::enterExpression(sv2017::ExpressionContext *ctx) {
     params_factory.start_expression_new();
+    if(ctx->QUESTIONMARK() != nullptr){
+        params_factory.start_ternary_operator();
+    }
 }
 
 void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
+    std::string type;
+    if(ctx->QUESTIONMARK() != nullptr){
+        type = "ternary";
+    }
     params_factory.stop_expression_new();
     if(file_contains_bus_defining_package){
         if(ctx->expression().size()>1){
@@ -314,13 +321,14 @@ void sv_visitor::enterParam_assignment(sv2017::Param_assignmentContext *ctx) {
 void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
     params_factory.stop_param_assignment();
 
-    auto val = ctx->constant_param_expression()->getText();
 
     auto p_n = ctx->identifier()->getText();
-    if(params_factory.in_packed_context()){
+    if(params_factory.in_packed_context()) {
+        params_factory.stop_packed_assignment();
+    }else if(ctx->replication_assignment() != nullptr){
+        params_factory.start_packed_assignment();
         params_factory.stop_packed_assignment();
     } else {
-
         if(!package_prefix.empty()){
             Expression_component ec(package_item);
             ec.set_package_prefix(package_prefix);
@@ -328,6 +336,7 @@ void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
             package_prefix.clear();
             package_item.clear();
         } else{
+            auto val = ctx->constant_param_expression()->getText();
             params_factory.add_component(Expression_component(val));
         }
     }
@@ -418,8 +427,6 @@ void sv_visitor::exitReplication_size(sv2017::Replication_sizeContext *ctx) {
     params_factory.close_replication_size();
 }
 
-
-
 void sv_visitor::exitReplication(sv2017::ReplicationContext *ctx) {
     params_factory.stop_replication();
 }
@@ -434,12 +441,10 @@ void sv_visitor::exitReplication_assignment(sv2017::Replication_assignmentContex
 
 
 void sv_visitor::enterConcatenation(sv2017::ConcatenationContext *ctx) {
-    auto dbg = ctx->getText();
     params_factory.start_concatenation();
 }
 
 void sv_visitor::exitConcatenation(sv2017::ConcatenationContext *ctx) {
-    auto dbg = ctx->getText();
     params_factory.stop_concatenation();
 }
 
@@ -467,7 +472,6 @@ void sv_visitor::exitData_type_or_implicit(sv2017::Data_type_or_implicitContext 
         params_factory.clear_expression();
     }
 }
-
 
 
 

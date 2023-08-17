@@ -4136,6 +4136,9 @@ public:
     Unpacked_dimensionContext* unpacked_dimension(size_t i);
     antlr4::tree::TerminalNode *ASSIGN();
     Constant_param_expressionContext *constant_param_expression();
+    antlr4::tree::TerminalNode *LBRACE();
+    Replication_assignmentContext *replication_assignment();
+    antlr4::tree::TerminalNode *RBRACE();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -5887,6 +5890,7 @@ public:
   public:
     Constant_param_expressionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    ReplicationContext *replication();
     ConcatenationContext *concatenation();
     Param_expressionContext *param_expression();
 
