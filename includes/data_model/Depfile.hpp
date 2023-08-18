@@ -29,7 +29,7 @@ using json = nlohmann::json;
 
 class Depfile {
 public:
-    Depfile() = default;
+    Depfile();
     explicit Depfile(const std::string& filename);
     Depfile ( const Depfile & file);
     std::string get_synth_tl();
@@ -45,6 +45,7 @@ public:
     std::vector<std::string> get_include_directories();
     std::vector<Script> get_scripts();
     bool is_module_excluded(const std::string &s);
+    void add_excluded_module(const std::string &s);
 private:
     json content;
 };

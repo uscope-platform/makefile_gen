@@ -92,3 +92,13 @@ bool Depfile::is_module_excluded(const std::string &s) {
     }
     return ret;
 }
+
+void Depfile::add_excluded_module(const std::string &s) {
+    std::vector<std::string> exm = content["excluded_modules"];
+    exm.insert(exm.end(), s);
+    content["excluded_modules"] = exm;
+}
+
+Depfile::Depfile() {
+    content["excluded_modules"] = std::vector<std::string>();
+}

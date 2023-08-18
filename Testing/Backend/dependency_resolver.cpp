@@ -14,6 +14,7 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
+#include "analysis/HDL_ast_builder.hpp"
 #include "Backend/Dependency_resolver.hpp"
 
 
@@ -44,10 +45,21 @@ protected:
 };
 
 TEST_F(dep_resolver , dependency_resolver) {
-    Dependency_resolver res("test_module", d_store);
-    res.set_excluded_modules({"excluded_module"});
-    res.add_explicit_dependencies({"expl_dep"});
-    res.resolve_dependencies();
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    Depfile df;
+    df.add_excluded_module("excluded_module");
+    HDL_ast_builder b(s_store, d_store, df);
+    auto synth = b.build_ast("test_module", {});
+    std::vector<std::string> add_synyh_mod = {"expl_dep"};
+    auto additional_synth_modules = b.build_ast(add_synyh_mod, {});
+    additional_synth_modules.insert(additional_synth_modules.end(), synth);
+
+    // RESOLVE DEPENDENCIES
+    Dependency_resolver_v2 synth_r(additional_synth_modules, d_store);
+    auto synth_sources = synth_r.get_dependencies();
+
+    Dependency_resolver_v2 res(additional_synth_modules, d_store);
     std::set<std::string> result = res.get_dependencies();
     std::set<std::string> check = {"test/mod.sv", "test/dep.sv", "test/mem_init.mem", "test/explicit/dep.sv"};
     ASSERT_EQ(result, check);
