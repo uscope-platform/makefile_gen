@@ -32,6 +32,9 @@
 #include <cereal/types/array.hpp>
 #include <cereal/types/memory.hpp>
 
+//FORWARD DECLARATIONS
+class HDL_Resource;
+
 class HDL_instance {
 public:
     HDL_instance(std::string dep_name, std::string dep_type, dependency_class d_c);
@@ -63,6 +66,14 @@ public:
 
     void add_child(const HDL_instance &i) {child_instances.push_back(i);};
 
+    void add_data_dependency(const std::string &p){data_dependencies.push_back(p);};
+    std::vector<std::string> get_data_dependencies(){return data_dependencies;};
+
+    void add_package_dependency(const std::string &p){package_dependencies.push_back(p);};
+    std::vector<std::string> get_package_dependencies(){return package_dependencies;};
+
+    std::vector<HDL_instance> get_dependencies() {return child_instances;};
+
     template<class Archive>
     void serialize( Archive & ar ) {
         ar(name, type, dep_class, ports_map, parameters, quantifier, child_instances);
@@ -80,6 +91,9 @@ private:
     std::string name;
     bus_mapping_expression quantifier;
     std::vector<HDL_instance> child_instances;
+
+    std::vector<std::string> data_dependencies;
+    std::vector<std::string> package_dependencies;
 };
 
 

@@ -45,5 +45,21 @@ private:
     std::string top_level;
 };
 
+class Dependency_resolver_v2 {
+public:
+    Dependency_resolver_v2(const std::vector<HDL_instance> &i, std::shared_ptr<data_store> store);
+
+    std::set<std::string> get_dependencies();
+
+private:
+
+    std::set<std::string> solve_dep(HDL_instance &i);
+    std::vector<HDL_instance> AST;
+    std::shared_ptr<data_store> d_store;
+};
+
+
+
+
 
 #endif //MAKEFILEGEN_V2_DEPENDENCY_RESOLVER_HPP

@@ -83,7 +83,7 @@ std::string Expression_component::print_value() {
 void Expression_component::process_number() {
 
     std::regex sv_constant_regex(R"(^\d*'(s)?(h|d|o|b)([0-9a-fA-F]+))");
-    std::regex number_regex("^\\d*$");
+    std::regex number_regex("^\\d+$");
 
     if(test_parameter_type(number_regex, string_value)) {
         numeric_value = std::stoul(string_value);

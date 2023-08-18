@@ -15,6 +15,8 @@
 
 #include "Backend/Dependency_resolver.hpp"
 
+#include <utility>
+
 Dependency_resolver::Dependency_resolver(std::string tl, std::shared_ptr<data_store> store) {
     top_level = std::move(tl);
     d_store = std::move(store);
@@ -92,3 +94,47 @@ void Dependency_resolver::add_explicit_dependencies(const std::vector<std::strin
     }
 }
 
+
+
+
+Dependency_resolver_v2::Dependency_resolver_v2(const std::vector<HDL_instance> &i, std::shared_ptr<data_store> store) {
+    AST = i;
+    d_store = std::move(store);
+}
+
+std::set<std::string> Dependency_resolver_v2::get_dependencies() {
+    std::set<std::string> ret_val;
+    for(auto &a:AST){
+        auto deps = solve_dep(a);
+        auto path = d_store->get_HDL_resource(a.get_type()).get_path();
+        deps.insert(path);
+        ret_val.insert(deps.begin(), deps.end());
+    }
+
+    return ret_val;
+}
+
+std::set<std::string> Dependency_resolver_v2::solve_dep(HDL_instance &i) {
+    std::set<std::string> ret_val;
+
+    auto type = i.get_type();
+
+    for(auto &dep:i.get_dependencies()){
+        if(d_store->contains_hdl_entity(dep.get_type())){
+            auto path = d_store->get_HDL_resource(dep.get_type()).get_path();
+            ret_val.insert(path);
+        }
+        auto dep_set = solve_dep(dep);
+        ret_val.insert(dep_set.begin(), dep_set.end());
+    }
+
+    for(auto &item:i.get_package_dependencies()){
+        ret_val.insert(item);
+    }
+
+    for(auto &item:i.get_data_dependencies()){
+        ret_val.insert(item);
+    }
+
+    return ret_val;
+}

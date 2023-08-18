@@ -54,6 +54,9 @@ int main(int argc, char *argv[]){
     std::string new_app_lang;
     app.add_option("--lang", new_app_lang, "Specify the language for the new app");
 
+    bool measure_runtime;
+    app.add_flag("--measure-runtime", measure_runtime, "Measure the runtime of the current program invocation");
+
     bool no_cache = false;
     app.add_flag("--no-cache", no_cache, "Run the program without touching the repository cache");
 
@@ -61,6 +64,9 @@ int main(int argc, char *argv[]){
     app.add_option("--cache_dir", cache_dir, "Run the program without touching the repository cache");
 
     CLI11_PARSE(app, argc, argv);
+
+
+    auto t1 = std::chrono::high_resolution_clock::now();
 
     // Setup caches
     std::shared_ptr<settings_store>  s_store = std::make_shared<settings_store>(false, cache_dir);
@@ -122,19 +128,24 @@ int main(int argc, char *argv[]){
 
     walker.analyze_dir();
 
+
+    // BUILD ASTs FOR TOP LEVEL AND ADDITIONAL MODULES
     HDL_ast_builder b(s_store, d_store, dep);
     auto synth_ast = b.build_ast(dep.get_synth_tl(), {});
+    auto additional_synth_modules = b.build_ast(dep.get_additional_synth_modules(), {});
+    additional_synth_modules.insert(additional_synth_modules.end(), synth_ast);
 
-    // Resolve top level files dependencies
-    Dependency_resolver synth_resolver(dep.get_synth_tl(), d_store);
-    synth_resolver.set_excluded_modules(dep.get_excluded_modules());
-    synth_resolver.add_explicit_dependencies(dep.get_additional_synth_modules());
-    synth_resolver.resolve_dependencies();
+    auto sim_ast = b.build_ast(dep.get_sim_tl(), {});
+    auto additional_sim_modules = b.build_ast(dep.get_additional_sim_modules(), {});
+    additional_sim_modules.insert(additional_sim_modules.end(), sim_ast);
 
-    Dependency_resolver sim_resolver(dep.get_sim_tl(), d_store);
-    sim_resolver.set_excluded_modules(dep.get_excluded_modules());
-    sim_resolver.add_explicit_dependencies(dep.get_additional_sim_modules());
-    sim_resolver.resolve_dependencies();
+
+    // RESOLVE DEPENDENCIES
+    Dependency_resolver_v2 synth_r(additional_synth_modules, d_store);
+    auto synth_sources = synth_r.get_dependencies();
+
+    Dependency_resolver_v2 sim_r(additional_sim_modules, d_store);
+    auto sim_sources = sim_r.get_dependencies();
 
     //Generate makefile
     if(generate_xilinx){
@@ -142,8 +153,8 @@ int main(int argc, char *argv[]){
         generator.set_project_name(dep.get_project_name());
 
         generator.set_directories(s_store->get_setting("hdl_store"), dep.get_include_directories());
-        generator.set_synth_sources(synth_resolver.get_dependencies());
-        generator.set_sim_sources(sim_resolver.get_dependencies());
+        generator.set_synth_sources(synth_sources);
+        generator.set_sim_sources(sim_sources);
         generator.set_script_sources(script_deps);
         generator.set_constraint_sources(constr_deps);
         generator.set_sim_tl(dep.get_sim_tl());
@@ -160,8 +171,8 @@ int main(int argc, char *argv[]){
         generator.set_project_name(dep.get_project_name());
 
         generator.set_directories(s_store->get_setting("hdl_store"), dep.get_include_directories());
-        generator.set_synth_sources(synth_resolver.get_dependencies());
-        generator.set_sim_sources(sim_resolver.get_dependencies());
+        generator.set_synth_sources(synth_sources);
+        generator.set_sim_sources(sim_sources);
         generator.set_script_sources(script_deps);
         generator.set_constraint_sources(constr_deps);
         generator.set_sim_tl(dep.get_sim_tl());
@@ -178,8 +189,8 @@ int main(int argc, char *argv[]){
         mapper.map_bus(dep.get_bus_section(), "control",dep.get_synth_tl());
         if(generate_app_definition){
             application_definition_generator app_def_gen(mapper.get_leaves());
-            auto cores = synth_resolver.get_processors();
-            app_def_gen.add_cores(cores);
+            //auto cores = synth_resolver.get_processors();
+            //app_def_gen.add_cores(cores);
             app_def_gen.construct_application(dep.get_project_name());
             app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
         }
@@ -190,6 +201,14 @@ int main(int argc, char *argv[]){
         }
     }
 
+    if(measure_runtime){
+
+        auto t2 = std::chrono::high_resolution_clock::now();
+
+        std::chrono::duration<double, std::milli> ms_double = t2 - t1;
+
+        std::cout<< "The Program runtime was : " + std::to_string(ms_double.count()) + " ms";
+    }
 
     return 0;
 }

@@ -462,13 +462,22 @@ HDL_parameter Parameter_processor::process_packed_parameter(const HDL_parameter 
     HDL_parameter return_par = par;
     Initialization_list il;
     if(external_parameters->contains(return_par.get_name())){
-        il = external_parameters->at(return_par.get_name()).get_i_l();
+        if(external_parameters->at(return_par.get_name()).get_type() == numeric_parameter){
+            return_par.set_value(external_parameters->at(return_par.get_name()).get_numeric_value());
+            return return_par;
+        } else if(external_parameters->at(return_par.get_name()).get_type() == string_parameter){
+            return_par.set_value(external_parameters->at(return_par.get_name()).get_string_value());
+            return return_par;
+        } else{
+            il = external_parameters->at(return_par.get_name()).get_i_l();
+        }
     } else {
         il = return_par.get_i_l();
     }
     il.link_processor( external_parameters,  compleated_set, d_store);
     auto val_array = il.get_values();
     return_par.set_value(val_array.get_value({0,0,0}));
+
     return return_par;
 }
 

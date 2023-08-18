@@ -15,7 +15,7 @@
 
 #include "data_model/HDL/HDL_instance.hpp"
 
-#include <utility>
+#include "data_model/HDL/HDL_Resource.hpp"
 
 
 HDL_instance::HDL_instance(const HDL_instance &c) {
@@ -26,6 +26,8 @@ HDL_instance::HDL_instance(const HDL_instance &c) {
     name = c.name;
     quantifier = c.quantifier;
     child_instances = c.child_instances;
+    package_dependencies = c.package_dependencies;
+    data_dependencies = c.data_dependencies;
 }
 
 
@@ -52,6 +54,9 @@ bool operator==(const HDL_instance &lhs, const HDL_instance &rhs) {
     ret &= lhs.ports_map == rhs.ports_map;
     ret &= lhs.parameters == rhs.parameters;
     ret &= lhs.quantifier == rhs.quantifier;
+    ret &= lhs.data_dependencies == rhs.data_dependencies;
+    ret &= lhs.package_dependencies == rhs.package_dependencies;
+    ret &= lhs.child_instances == rhs.child_instances;
     return ret;
 }
 
@@ -60,7 +65,7 @@ void HDL_instance::add_array_quantifier(const bus_mapping_expression &exp) {
 }
 
 void HDL_instance::add_parameters(std::map<std::string, HDL_parameter> p) {
-    parameters = std::move(p);
+    parameters.insert(p.begin(), p.end());
 }
 
 nlohmann::json HDL_instance::dump() {
