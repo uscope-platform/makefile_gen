@@ -144,7 +144,6 @@ private:
 
     HDL_modules_factory modules_factory;
     HDL_interfaces_factory interfaces_factory;
-    HDL_packages_factory packages_factory;
     HDL_instances_factory deps_factory;
     HDL_parameters_factory params_factory;
 

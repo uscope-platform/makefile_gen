@@ -27,7 +27,7 @@ std::vector<HDL_Resource> vhdl_visitor::get_entities() {
 
 void vhdl_visitor::enterEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) {
     std::string module_name = ctx->identifier()[0]->getText();
-    modules_factory.new_module(path);
+    modules_factory.new_module(path,module);
     modules_factory.set_module_name(module_name);
 }
 

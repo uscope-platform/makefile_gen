@@ -27,72 +27,55 @@ TEST( analysis_test , package) {
     sv_analyzer analyzer("check_files/test_package.sv");
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
-    ASSERT_EQ(resource.getName(), "test_package");
 
     std::map<std::string, HDL_parameter> parameters = resource.get_parameters();
 
     std::map<std::string, HDL_parameter> check_map;
+
     HDL_parameter p;
     p.set_name("bus_base");
-    p.set_value(0x43c00000);
+    p.set_expression_components({Expression_component("32'h43c00000")});
+    p.set_type(expression_parameter);
     check_map[p.get_name()] = p;
 
     p.set_name("timebase");
-    p.set_value(0x43c00000);
+    p.set_expression_components({Expression_component("bus_base")});
+    p.set_type(expression_parameter);
     check_map[p.get_name()] = p;
 
     p.set_name("gpio");
-    p.set_value(0x43c01001);
+    p.set_expression_components({
+        Expression_component("timebase"), Expression_component("32'h1000"),
+        Expression_component("2"), Expression_component("*"),
+        Expression_component("2"), Expression_component("/"),
+        Expression_component("+"), Expression_component("1"),
+        Expression_component("+")
+    });
+
+    p.set_type(expression_parameter);
     check_map[p.get_name()] = p;
 
     p.set_name("scope_mux");
-    p.set_value(0x43c01001);
+    p.set_expression_components({Expression_component("gpio")});
+    p.set_type(expression_parameter);
     check_map[p.get_name()] = p;
 
     p.set_name("modulo_parameter");
-    p.set_value(1);
+    p.set_expression_components({
+        Expression_component("3"),Expression_component("2"),Expression_component("%")
+    });
+    p.set_type(expression_parameter);
     check_map[p.get_name()] = p;
 
     p.set_name("subtraction_parameter");
-    p.set_value(2);
+    p.set_expression_components({
+        Expression_component("'o4"),Expression_component("'b10"),Expression_component("-")
+    });
+    p.set_type(expression_parameter);
     check_map[p.get_name()] = p;
 
     ASSERT_EQ(check_map, parameters);
 
-    HDL_Resource check_res(package, "test_package", "check_files/test_package.sv");
-    check_res.set_parameters(check_map);
-
-    std::shared_ptr<bus_crossbar> root = std::make_shared<bus_crossbar>();
-    root->set_parameter("bus_base");
-    root->set_target("test_package");
-    root->set_base_address(0x43c00000);
-
-    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>();
-    xbar->set_parameter("timebase");
-    xbar->set_base_address(1136656384);
-    std::shared_ptr<bus_module> mod = std::make_shared<bus_module>("SicDriveMasterScope","SicDriveMasterScope");
-    mod->set_base_address(0x43c01001);
-    xbar->add_child(mod);
-    root->add_child(xbar);
-
-
-
-    std::shared_ptr<bus_module> mod2 = std::make_shared<bus_module>("general_ctrls", "gpio");
-    mod2->set_base_address(0x43c01001);
-    root->add_child(mod2);
-
-    std::shared_ptr<bus_module> mod3 = std::make_shared<bus_module>("SicDriveMasterScope","SicDriveMasterScope");
-    mod3->set_base_address(1);
-    root->add_child(mod3);
-
-    std::shared_ptr<bus_module> mod4 = std::make_shared<bus_module>("SicDriveMasterScope","SicDriveMasterScope");
-    mod4->set_base_address(2);
-    root->add_child(mod4);
-
-
-    std::vector<std::shared_ptr<bus_crossbar>> bus_roots({root});
-    check_res.add_bus_roots(bus_roots);
-    ASSERT_EQ(resource, check_res);
 }
 
 TEST( analysis_test , sv_module) {

@@ -22,7 +22,7 @@ sv_visitor::sv_visitor(std::string p) {
 
 void sv_visitor::enterModule_declaration(sv2017::Module_declarationContext *ctx) {
     current_declaration_type = "module";
-    modules_factory.new_module(path);
+    modules_factory.new_module(path, module);
 }
 
 
@@ -108,13 +108,14 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
 }
 
 void sv_visitor::enterPackage_declaration(sv2017::Package_declarationContext *ctx) {
-    packages_factory.new_package(path);
+    modules_factory.new_module(path, package);
 }
 
 void sv_visitor::exitPackage_declaration(sv2017::Package_declarationContext *ctx) {
     std::string package_name = ctx->identifier()[0]->getText();
-    packages_factory.set_package_name(package_name);
-    entities.push_back(packages_factory.get_package());
+    auto package = modules_factory.get_module();
+    package.set_name(package_name);
+    entities.push_back(package);
 }
 
 void sv_visitor::exitPackage_or_class_scoped_path(sv2017::Package_or_class_scoped_pathContext *ctx) {
@@ -135,20 +136,10 @@ void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext 
     in_param_declaration = false;
     if(file_contains_bus_defining_package){
         if(string_components.size() == 1){
-            try {
-                uint32_t addr = std::stoul(string_components.front());
-                packages_factory.add_numeric_parameter(current_parameter, addr);
-            } catch (std::invalid_argument const& ex){
-                if(packages_factory.numeric_parameter_exists(string_components.front())){
-                    packages_factory.add_numeric_parameter(current_parameter, packages_factory.get_numeric_parameter(string_components.front()));
-                } else{
-                    bus_mapping_expression par(current_parameter, string_components);
-                    packages_factory.add_unresolved_parameter(par);
-                }
-            }
+            bus_mapping_expression par(current_parameter, string_components);
+
         } else{
             bus_mapping_expression par(current_parameter, string_components);
-            packages_factory.add_unresolved_parameter(par);
         }
         string_components.clear();
     }
@@ -447,7 +438,6 @@ void sv_visitor::enterReplication_assignment(sv2017::Replication_assignmentConte
 void sv_visitor::exitReplication_assignment(sv2017::Replication_assignmentContext *ctx) {
     params_factory.stop_replication_assignment();
 }
-
 
 void sv_visitor::enterConcatenation(sv2017::ConcatenationContext *ctx) {
     params_factory.start_concatenation();

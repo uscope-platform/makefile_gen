@@ -382,7 +382,41 @@ TEST(parameter_processing, packed_array) {
 
 }
 
-TEST(parameter_processing, package_parameters) {
+
+
+TEST(parameter_processing, package_processing) {
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    sv_analyzer analyzer("check_files/test_package.sv");
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+
+    Parameter_processor param_proc({},d_store);
+
+    resource =  param_proc.process_resource(resource);
+
+    auto parameters = resource.get_parameters();
+
+    std::vector<param_check_t> vect_params = {
+            {"bus_base", {"32'h43c00000"}, numeric_parameter, 0x43c00000},
+            {"timebase", {"bus_base"}, numeric_parameter, 0x43c00000},
+            {"gpio", {"timebase", "32'h1000", "2", "*", "2", "/", "+", "1", "+"}, numeric_parameter, 0x43c01001},
+            {"scope_mux", {"gpio"}, numeric_parameter, 0x43c01001},
+            {"modulo_parameter", {"3", "2", "%"}, numeric_parameter, 1},
+            {"subtraction_parameter", {"'o4", "'b10", "-"}, numeric_parameter, 2}
+    };
+
+
+
+    std::map<std::string, HDL_parameter> check_map = produce_check_components(vect_params);
+
+    ASSERT_EQ(check_map, parameters);
+
+
+}
+
+TEST(parameter_processing, package_parameter_usage) {
     std::string test_pattern = R"(
         module test_mod #(
              parameter package_param = test_package::bus_base

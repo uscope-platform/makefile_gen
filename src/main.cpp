@@ -144,8 +144,6 @@ int main(int argc, char *argv[]){
     Dependency_resolver_v2 synth_r(additional_synth_modules, d_store);
     auto synth_sources = synth_r.get_dependencies();
 
-    auto procs = synth_r.get_processors();
-
     Dependency_resolver_v2 sim_r(additional_sim_modules, d_store);
     auto sim_sources = sim_r.get_dependencies();
 

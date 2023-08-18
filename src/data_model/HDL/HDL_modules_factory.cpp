@@ -16,10 +16,10 @@
 #include "data_model/HDL/HDL_modules_factory.hpp"
 
 
-void HDL_modules_factory::new_module(std::string &p) {
+void HDL_modules_factory::new_module(std::string &p, const dependency_class &type) {
     resources_factory_base<HDL_Resource>::new_basic_resource();
     current_resource.set_path(p);
-    current_resource.set_type(module);
+    current_resource.set_type(type);
 }
 
 void HDL_modules_factory::add_instance(const HDL_instance &i) {

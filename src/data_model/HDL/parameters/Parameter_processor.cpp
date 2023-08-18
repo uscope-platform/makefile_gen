@@ -130,14 +130,14 @@ HDL_parameter Parameter_processor::process_scalar_parameter(const HDL_parameter 
     HDL_parameter return_par = par;
     auto components = return_par.get_expression_components();
 
+    if(par.get_type() == numeric_parameter){
+        return return_par;
+    }
 
     if(components.empty()){
         throw std::runtime_error("PARAMETER PROCESSING ERROR:\n Empty parameter");
     }
 
-    if(par.get_type() == numeric_parameter){
-        return return_par;
-    }
 
     try {
         if (external_parameters->contains(return_par.get_name())) {
@@ -347,7 +347,9 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
         auto pkg = ec.get_package_prefix();
         if(d_store->contains_hdl_entity(pkg)){
             auto res = d_store->get_HDL_resource(pkg);
-            auto val = res.get_parameters()[ec.get_string_value()].get_numeric_value();
+            Parameter_processor p({}, d_store);
+            auto pkg_params = p.process_resource(res).get_parameters();
+            auto val = pkg_params[ec.get_string_value()].get_numeric_value();
             if(result_size != nullptr){
                 *result_size = Expression_component::calculate_binary_size(val);
             }
