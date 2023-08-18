@@ -24,34 +24,17 @@
 
 #include "data_model/data_store.hpp"
 
-class Dependency_resolver {
-public:
-    Dependency_resolver(std::string tl, std::shared_ptr<data_store> store);
-    void resolve_dependencies();
-    std::set<std::string> get_dependencies();
-    void set_excluded_modules(std::vector<std::string> exclusion_list);
-    void add_explicit_dependencies(const std::vector<std::string>& dep_list);
-
-    std::vector<processor_instance> get_processors(){return detected_processors;};
-
-private:
-    std::vector<HDL_Resource> hdl_dependencies;
-    std::vector<DataFile> mem_init_dependencies;
-    void resolve_dependencies(const std::string& module_name);
-
-    std::vector<processor_instance> detected_processors;
-    std::vector<std::string> excluded_modules;
-    std::shared_ptr<data_store> d_store;
-    std::string top_level;
-};
-
 class Dependency_resolver_v2 {
 public:
     Dependency_resolver_v2(const std::vector<HDL_instance> &i, std::shared_ptr<data_store> store);
 
     std::set<std::string> get_dependencies();
 
+    std::vector<processor_instance> get_processors(){return detected_processors;};
+
 private:
+
+    std::vector<processor_instance> detected_processors;
 
     std::set<std::string> solve_dep(HDL_instance &i);
     std::vector<HDL_instance> AST;

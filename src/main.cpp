@@ -144,6 +144,8 @@ int main(int argc, char *argv[]){
     Dependency_resolver_v2 synth_r(additional_synth_modules, d_store);
     auto synth_sources = synth_r.get_dependencies();
 
+    auto procs = synth_r.get_processors();
+
     Dependency_resolver_v2 sim_r(additional_sim_modules, d_store);
     auto sim_sources = sim_r.get_dependencies();
 
@@ -189,8 +191,8 @@ int main(int argc, char *argv[]){
         mapper.map_bus(dep.get_bus_section(), "control",dep.get_synth_tl());
         if(generate_app_definition){
             application_definition_generator app_def_gen(mapper.get_leaves());
-            //auto cores = synth_resolver.get_processors();
-            //app_def_gen.add_cores(cores);
+            auto cores = synth_r.get_processors();
+            app_def_gen.add_cores(cores);
             app_def_gen.construct_application(dep.get_project_name());
             app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
         }
