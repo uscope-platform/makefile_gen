@@ -11,7 +11,6 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_instances_factory.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_modules_factory.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_interfaces_factory.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_packages_factory.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_parameters_factory.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/HDL_parameter.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/Expression_component.cpp /

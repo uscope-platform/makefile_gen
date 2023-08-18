@@ -17,39 +17,6 @@
 
 
 
-std::map<std::string, HDL_parameter>
-expression_evaluator::calculate_expressions(std::vector<bus_mapping_expression> exp_vect, std::map<std::string, HDL_parameter> params) {
-    std::vector<bus_mapping_expression> working_set = std::move(exp_vect);
-    std::vector<bus_mapping_expression> remaining_parameters;
-
-    while(!working_set.empty()){
-        remaining_parameters.clear();
-        //update parameters with calculated values
-        for(auto &p:params){
-            for(auto &item:working_set){
-                item.update_expression(p.second.get_name(), p.second.get_numeric_value());
-            }
-        }
-
-        // Calculate available expressions
-        for(auto &item:working_set){
-            try{
-                std::string param_name = item.get_name();
-                uint32_t res = expression_evaluator::calculate_expression(item.get_expression());
-                HDL_parameter p;
-                p.set_name(param_name);
-                p.set_value(res);
-                params[param_name] = p;
-            } catch(std::invalid_argument &ex){
-                remaining_parameters.push_back(item);
-            }
-        }
-
-        working_set = remaining_parameters;
-    }
-    return params;
-}
-
 uint32_t expression_evaluator::calculate_expression(std::vector<std::string> exp) {
     for (int i = 0; i< exp.size(); i++) {
         if(exp[i] == "*"){

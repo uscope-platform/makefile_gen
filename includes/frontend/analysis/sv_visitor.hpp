@@ -22,7 +22,6 @@
 #include "data_model/HDL/HDL_parameters_factory.hpp"
 #include "data_model/HDL/HDL_modules_factory.hpp"
 #include "data_model/HDL/HDL_interfaces_factory.hpp"
-#include "data_model/HDL/HDL_packages_factory.hpp"
 #include "data_model/HDL/HDL_instances_factory.hpp"
 
 #include "data_model/HDL/HDL_instance.hpp"

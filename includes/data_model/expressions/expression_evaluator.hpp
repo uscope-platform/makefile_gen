@@ -31,7 +31,7 @@ class expression_evaluator {
 public:
 
     static uint32_t calculate_expression(std::vector<std::string> exp);
-    static  std::map<std::string, HDL_parameter> calculate_expressions(std::vector<bus_mapping_expression> exp_vect, std::map<std::string, HDL_parameter> params);
+
     static uint32_t calculate_expression(bus_mapping_expression exp, std::unordered_map<std::string, uint32_t> params);
     static std::vector<std::string> get_variable_names(bus_mapping_expression exp);
     static uint32_t calculate_expression(const bus_mapping_expression& exp, HDL_Resource &res, HDL_instance &dep, address_resolver &resolver);
