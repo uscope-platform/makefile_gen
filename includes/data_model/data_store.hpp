@@ -50,6 +50,7 @@ public:
     void evict_hdl_entity(const std::string& name);
     bool contains_hdl_entity(const std::string& name) const;
 
+
     Script get_script(std::string& name);
     void store_script(Script entity);
     void store_script(const std::vector<Script> & vect);

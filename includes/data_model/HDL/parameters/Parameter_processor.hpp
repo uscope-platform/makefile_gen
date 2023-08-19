@@ -40,11 +40,13 @@ public:
     Parameter_processor_Exception() = default;
     explicit Parameter_processor_Exception(std::string v) {
         str_val = v;
+        unknown_parameter = false;
     };
     char * what () {
         return  (char*) "Internal exception, it should always be handled";
     }
     std::string str_val;
+    bool unknown_parameter = true;
 };
 
 class array_value_exception  : public std::exception {
@@ -63,11 +65,10 @@ class Parameter_processor {
 public:
     Parameter_processor(const std::map<std::string, HDL_parameter>& parent_parameters, const std::shared_ptr<data_store> &ds);
     Parameter_processor(const std::map<std::string, HDL_parameter>& ep,
-                        std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> &cs
+                        std::shared_ptr<std::map<std::string, HDL_parameter>> &cs
     );
-    std::map<std::string, HDL_parameter> process_parameters_map(std::map<std::string, HDL_parameter> &map, HDL_Resource &spec);
+    std::map<std::string, HDL_parameter> process_parameters_map(const std::map<std::string, HDL_parameter> &map, HDL_Resource &spec);
     static void convert_parameters(std::vector<HDL_Resource> &v);
-    HDL_Resource process_resource(const HDL_Resource &res);
     int64_t process_expression(const std::vector<Expression_component>& expr, int64_t *reslt_size);
 
     static std::vector<Expression_component> expr_vector_to_rpn(const std::vector<Expression_component>& v);
@@ -84,7 +85,8 @@ private:
     Expression_component process_array_access(Expression_component &e);
     int64_t get_component_value(Expression_component &ec, int64_t *result_size);
 
-    std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> compleated_set;
+    std::shared_ptr<std::map<std::string, HDL_parameter>> compleated_set;
+    std::map<std::string, std::pair<std::string, HDL_parameter>> string_set;
 
     std::shared_ptr<std::map<std::string, HDL_parameter>> external_parameters;
 

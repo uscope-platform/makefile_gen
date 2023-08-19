@@ -19,109 +19,77 @@
 Parameter_processor::Parameter_processor(const std::map<std::string, HDL_parameter> &parent_parameters, const std::shared_ptr<data_store> &ds) {
     d_store = ds;
     external_parameters = std::make_shared<std::map<std::string, HDL_parameter>>(parent_parameters);
-    compleated_set = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    compleated_set = std::make_shared<std::map<std::string, HDL_parameter>>();
 }
 
 Parameter_processor::Parameter_processor(const std::map<std::string, HDL_parameter> &ep,
-                                         std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> &cs) {
+                                         std::shared_ptr<std::map<std::string, HDL_parameter>> &cs) {
     d_store = {};
     external_parameters = std::make_shared<std::map<std::string, HDL_parameter>>(ep);
     compleated_set = cs;
 }
 
+std::map<std::string, HDL_parameter> Parameter_processor::process_parameters_map(const std::map<std::string, HDL_parameter> &map, HDL_Resource &spec) {
 
-HDL_Resource Parameter_processor::process_resource(const HDL_Resource &res) {
 
-
-    HDL_Resource return_res = res;
-
-    std::map<std::basic_string<char>, HDL_parameter> working_set = return_res.get_parameters();
+    std::map<std::basic_string<char>, HDL_parameter> working_set = map;
     std::map<std::basic_string<char>, HDL_parameter> next_working_set;
-
-    int nesting_limit = 1000;
-    bool processing_complete = false;
-    while(!working_set.empty() && !processing_complete){
+    int override_cnt = 50;
+    while (!working_set.empty() && override_cnt != 0){
         for(auto &item:working_set){
             try{
-                HDL_parameter processed_param;
-                if(item.second.is_packed_array()){
-                    processed_param = process_packed_parameter(item.second);
-                }else if(item.second.is_array()){
-                    processed_param = process_array_parameter(item.second);
+                auto par = item.second;
+                if(external_parameters->contains(item.first)){
+                    // The parameter needs to be copied out of external parameters and into the completed set otherwise it will go out of scope
+                    auto param = external_parameters->at(item.first);
+                    param.clear_expression_components();
+                    compleated_set->insert({item.first, param});
                 } else {
-                    processed_param = process_scalar_parameter(item.second);
+                    if(par.is_array()){
+                        auto spec_il = spec.get_parameters()[par.get_name()].get_i_l();
+                        auto param_il = par.get_i_l();
+                        param_il.set_packed_dimensions(spec_il.get_packed_dimensions());
+                        param_il.set_unpacked_dimensions(spec_il.get_unpacked_dimensions());
+                        par.add_initialization_list(param_il);
+                        auto p =  process_array_parameter(par);
+                        compleated_set->insert({item.first, p});
+                    } else {
+                        try{
+                            auto p = process_scalar_parameter(par);
+                            compleated_set->insert({item.first, p});
+                        } catch (Parameter_processor_Exception &ex){
+                            if(!ex.unknown_parameter){
+                                HDL_parameter p = item.second;
+                                p.set_value(ex.str_val);
+                                string_set.insert({ex.str_val, {item.first, p}});
+                                next_working_set.insert(item);
+                            } else{
+                                next_working_set.insert(item);
+                            }
+                        }
+                    }
                 }
-                compleated_set->insert({item.first, processed_param});
-            } catch (Parameter_processor_Exception &ex) {
+            } catch (Parameter_processor_Exception &ex){
                 next_working_set.insert(item);
             }
         }
-
-        if(working_set == next_working_set){
-            processing_complete = true;
+        for(auto &item:string_set){
+            if(!next_working_set.contains(item.first)){
+                compleated_set->insert(item.second);
+                next_working_set.erase(item.second.first);
+            }
         }
         working_set = next_working_set;
+        string_set.clear();
         next_working_set.clear();
-        nesting_limit--;
-
-        if(nesting_limit==0){
-            std::cerr<<"Warning: infinite loop detected while processing the following parameters: \n";
-            for(const auto& item:working_set){
-                std::cerr<< "    - " + item.second.get_name() + "\n";
-            }
-            std::cerr<<return_res.get_path() + "\n";
-            exit(1);
-        }
+        override_cnt--;
     }
-
-
-    std::map<std::basic_string<char>, HDL_parameter> processed_parameters(compleated_set->begin(), compleated_set->end());
 
     for(auto &item:working_set){
-        auto param = item.second;
-        std::string value;
-        for(auto &val : param.get_expression_components()){
-            value += val.get_raw_string_value();
-        }
-
-        value.erase(std::remove( value.begin(), value.end(), '\"' ),value.end());
-        param.set_value(value);
-        processed_parameters[item.first] = param;
+        compleated_set->insert(item);
     }
 
-    return_res.set_parameters(processed_parameters);
-
-    return return_res;
-}
-
-std::map<std::string, HDL_parameter> Parameter_processor::process_parameters_map(std::map<std::string, HDL_parameter> &map, HDL_Resource &spec) {
-    std::map<std::string, HDL_parameter> ret;
-    for(auto &item:map){
-        auto par = item.second;
-        par.set_expression_components(expr_vector_to_rpn(par.get_expression_components()));
-        if(external_parameters->contains(item.first)){
-            ret[item.first] = external_parameters->at(item.first);
-        } else {
-            if(par.is_array()){
-                auto spec_il = spec.get_parameters()[par.get_name()].get_i_l();
-                auto param_il = par.get_i_l();
-                param_il.set_packed_dimensions(spec_il.get_packed_dimensions());
-                param_il.set_unpacked_dimensions(spec_il.get_unpacked_dimensions());
-                par.add_initialization_list(param_il);
-                ret[item.first] = process_array_parameter(par);
-            } else {
-                try{
-                    ret[item.first] = process_scalar_parameter(par);
-                } catch (Parameter_processor_Exception &ex){
-                    HDL_parameter p = item.second;
-                    p.set_value(ex.str_val);
-                    ret[item.first] = p;
-                }
-
-            }
-        }
-    }
-    return ret;
+    return *compleated_set;
 }
 
 
@@ -175,14 +143,29 @@ HDL_parameter Parameter_processor::process_scalar_parameter(const HDL_parameter 
 
 int64_t Parameter_processor::process_expression(const std::vector<Expression_component> &expr, int64_t *result_size) {
 
-    std::vector<Expression_component> processed_rpn;
+    std::vector<Expression_component> rpn_vect;
+    if(!expr[0].is_rpn()){
+        if(expr.size()==1){
+            auto comp = expr[0];
+            return get_component_value(comp, result_size);
+        } else {
+            rpn_vect = expr_vector_to_rpn(expr);
+        }
+    } else {
+        if(expr.size() == 2){
+            auto comp = expr[1];
+            return get_component_value(comp, result_size);
+        } else {
+            rpn_vect = std::move(expr);
+            rpn_vect.erase(rpn_vect.begin());
+        }
 
-    if(expr.size() == 1){
-        auto comp = expr[0];
-        return get_component_value(comp, result_size);
     }
 
-    for(auto i : expr){
+    std::vector<Expression_component> processed_rpn;
+
+
+    for(auto i : rpn_vect){
         if(!i.get_array_index().empty()){
             i = process_array_access(i);
         }
@@ -278,6 +261,13 @@ std::vector<Expression_component> Parameter_processor::expr_vector_to_rpn(const 
     std::vector<Expression_component> rpn_exp;
     std::stack<Expression_component> shunting_stack;
 
+    if(v.size()==0){
+        return {};
+    }
+    if(v[0].is_rpn()){
+        return v;
+    }
+
     for(auto item:v){
         if(item.get_type() == operator_component){ // token is operator
             while (
@@ -315,7 +305,9 @@ std::vector<Expression_component> Parameter_processor::expr_vector_to_rpn(const 
         rpn_exp.push_back(shunting_stack.top());
         shunting_stack.pop();
     }
-
+    Expression_component e("");
+    e.set_rpn_marker();
+    rpn_exp.insert(rpn_exp.begin(), {e});
     return rpn_exp;
 }
 
@@ -323,8 +315,6 @@ void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
     for(auto &res:v){
         std::map<std::string, HDL_parameter> new_params;
         for(auto &item: res.get_parameters()){
-            auto rpn_expr = expr_vector_to_rpn(item.second.get_expression_components());
-            item.second.set_expression_components(rpn_expr);
             new_params[item.first] = item.second;
         }
         res.set_parameters(new_params);
@@ -348,7 +338,7 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
         if(d_store->contains_hdl_entity(pkg)){
             auto res = d_store->get_HDL_resource(pkg);
             Parameter_processor p({}, d_store);
-            auto pkg_params = p.process_resource(res).get_parameters();
+            auto pkg_params = p.process_parameters_map(res.get_parameters(),res);
             auto val = pkg_params[ec.get_string_value()].get_numeric_value();
             if(result_size != nullptr){
                 *result_size = Expression_component::calculate_binary_size(val);
@@ -411,8 +401,7 @@ Expression_component Parameter_processor::process_array_access(Expression_compon
     auto raw_idx = e.get_array_index();
 
     for(uint64_t i = 0; i<raw_idx.size(); i++){
-        auto rpn_expr = expr_vector_to_rpn(raw_idx[i]);
-        auto res = process_expression(rpn_expr, nullptr);
+        auto res = process_expression(raw_idx[i], nullptr);
         array_index_values[raw_idx.size()-1-i] = res;
     }
 
@@ -454,7 +443,12 @@ HDL_parameter Parameter_processor::process_array_parameter(const HDL_parameter &
         il.link_processor( external_parameters, compleated_set, d_store);
         arr_val = il.get_values();
     }
-    return_par.set_array_value(arr_val);
+
+    if(return_par.get_i_l().get_unpacked_dimensions().empty()){
+        return_par.set_value(arr_val.get_value({0,0,0}));
+    } else {
+        return_par.set_array_value(arr_val);
+    }
     return_par.clear_expression_components();
     compleated_set->insert({par.get_name(), return_par});
     return return_par;

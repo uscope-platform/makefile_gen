@@ -34,7 +34,11 @@ TEST(shunting_yard, shunting_yard_priority){
             Expression_component("5")
     };
     auto rpn_expr = p.expr_vector_to_rpn(expr);
+
+    Expression_component e("");
+    e.set_rpn_marker();
     std::vector<Expression_component> expected_result = {
+            e,
             Expression_component("add_expr_p"),
             Expression_component("mul_expr_p"),
             Expression_component("5"),
@@ -62,7 +66,10 @@ TEST(shunting_yard, shunting_yard_parenthesis){
     };
     auto rpn_expr_1 = p.expr_vector_to_rpn(expr_1);
 
+    Expression_component e("");
+    e.set_rpn_marker();
     std::vector<Expression_component> expected_result_1 = {
+            e,
             Expression_component("add_expr_p"),
             Expression_component("mul_expr_p"),
             Expression_component("+"),
@@ -86,6 +93,7 @@ TEST(shunting_yard, shunting_yard_parenthesis){
     auto rpn_expr_2 = p.expr_vector_to_rpn(expr_2);
 
     std::vector<Expression_component> expected_result_2 = {
+            e,
             Expression_component("5"),
             Expression_component("add_expr_p"),
             Expression_component("mul_expr_p"),
@@ -111,7 +119,12 @@ TEST(shunting_yard, shunting_yard_function){
     };
 
     auto rpn_expr = p.expr_vector_to_rpn(expr);
+
+
+    Expression_component e("");
+    e.set_rpn_marker();
     std::vector<Expression_component> expected_result = {
+            e,
             Expression_component("add_expr_p"),
             Expression_component("2"),
             Expression_component("+"),
@@ -121,8 +134,6 @@ TEST(shunting_yard, shunting_yard_function){
 
     ASSERT_EQ(rpn_expr, expected_result);
 }
-
-
 
 TEST(shunting_yard, shunting_yard_parenthesis_complex){
 
@@ -141,7 +152,11 @@ TEST(shunting_yard, shunting_yard_parenthesis_complex){
     };
     auto rpn_expr_1 = p.expr_vector_to_rpn(expr_1);
 
+    Expression_component e("");
+    e.set_rpn_marker();
+
     std::vector<Expression_component> expected_result_1 = {
+            e,
             Expression_component("4"),
             Expression_component("3"),
             Expression_component("*"),
@@ -152,4 +167,24 @@ TEST(shunting_yard, shunting_yard_parenthesis_complex){
     };
 
     ASSERT_EQ(rpn_expr_1, expected_result_1);
+}
+
+TEST(shunting_yard, shunting_yard_test_5){
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    Parameter_processor p({},d_store);
+
+    Expression_component e("");
+    e.set_rpn_marker();
+    std::vector<Expression_component> expr_1 = {
+            e,
+            Expression_component("N_CHANNELS"),
+            Expression_component("8"),
+            Expression_component("/"),
+            Expression_component("1"),
+            Expression_component("+")
+    };
+    auto rpn_expr_1 = p.expr_vector_to_rpn(expr_1);
+
+    ASSERT_EQ(rpn_expr_1, expr_1);
 }

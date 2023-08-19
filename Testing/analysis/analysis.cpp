@@ -39,37 +39,38 @@ TEST( analysis_test , package) {
     check_map[p.get_name()] = p;
 
     p.set_name("timebase");
-    p.set_expression_components({Expression_component("bus_base")});
+    p.set_expression_components({ Expression_component("bus_base")});
     p.set_type(expression_parameter);
     check_map[p.get_name()] = p;
 
     p.set_name("gpio");
     p.set_expression_components({
-        Expression_component("timebase"), Expression_component("32'h1000"),
-        Expression_component("2"), Expression_component("*"),
+        Expression_component("timebase"), Expression_component("+"),
+        Expression_component("32'h1000"), Expression_component("*"),
         Expression_component("2"), Expression_component("/"),
-        Expression_component("+"), Expression_component("1"),
-        Expression_component("+")
+        Expression_component("2"), Expression_component("+"),
+        Expression_component("1"),
+
     });
 
     p.set_type(expression_parameter);
     check_map[p.get_name()] = p;
 
     p.set_name("scope_mux");
-    p.set_expression_components({Expression_component("gpio")});
+    p.set_expression_components({ Expression_component("gpio")});
     p.set_type(expression_parameter);
     check_map[p.get_name()] = p;
 
     p.set_name("modulo_parameter");
     p.set_expression_components({
-        Expression_component("3"),Expression_component("2"),Expression_component("%")
+        Expression_component("3"),Expression_component("%"),Expression_component("2")
     });
     p.set_type(expression_parameter);
     check_map[p.get_name()] = p;
 
     p.set_name("subtraction_parameter");
     p.set_expression_components({
-        Expression_component("'o4"),Expression_component("'b10"),Expression_component("-")
+        Expression_component("'o4"),Expression_component("-"),Expression_component("'b10")
     });
     p.set_type(expression_parameter);
     check_map[p.get_name()] = p;

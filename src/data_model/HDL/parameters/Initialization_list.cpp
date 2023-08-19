@@ -131,7 +131,7 @@ bool Initialization_list::empty() const {
 }
 
 void Initialization_list::link_processor(const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep,
-                                         const std::shared_ptr<std::unordered_map<std::string, HDL_parameter>> &cs,
+                                         const std::shared_ptr<std::map<std::string, HDL_parameter>> &cs,
                                          const std::shared_ptr<data_store> &ds) {
     external_parameters = ep;
     completed_set = cs;
@@ -180,7 +180,7 @@ mdarray Initialization_list::get_1d_list_values() {
             values.insert(values.end(), res.begin(), res.end());
         } else{
             try{
-                auto val = p.process_expression(Parameter_processor::expr_vector_to_rpn(expr), nullptr);
+                auto val = p.process_expression(expr, nullptr);
                 values.push_back(val);
             } catch(array_value_exception &ex ){
                 auto v = ex.array_value.get_1d_slice({0,0});
@@ -215,7 +215,7 @@ std::pair<md_1d_array, md_1d_array> Initialization_list::get_sized_1d_list_value
                     sizes.push_back(expr[0].get_binary_size());
                 } else {
                     int64_t  bin_size;
-                    auto val = p.process_expression(Parameter_processor::expr_vector_to_rpn(expr), &bin_size);
+                    auto val = p.process_expression(expr, &bin_size);
                     sizes.push_back(bin_size);
                     values.push_back(val);
                 }
@@ -266,7 +266,7 @@ mdarray Initialization_list::get_packed_1d_list_values() {
                 values = expand_repetition(item, p, &sizes);
             } else{
                 int64_t s;
-                values.push_back(p.process_expression(Parameter_processor::expr_vector_to_rpn(item), &s));
+                values.push_back(p.process_expression(item, &s));
                 sizes.push_back(s);
             }
         }
@@ -384,9 +384,9 @@ std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Param
     }
 
 
-    auto repetition_size = p.process_expression(Parameter_processor::expr_vector_to_rpn(size_expr), nullptr);
+    auto repetition_size = p.process_expression(size_expr, nullptr);
     int64_t value_bin_size;
-    auto repetition_value = p.process_expression(Parameter_processor::expr_vector_to_rpn(val_expr),&value_bin_size);
+    auto repetition_value = p.process_expression(val_expr,&value_bin_size);
     if(sizes != nullptr){
         for(int i = 0; i<repetition_size; i++){
             sizes->push_back(value_bin_size);
@@ -409,8 +409,8 @@ mdarray Initialization_list::process_default_initialization() {
     }
 
     for(const auto &item : unpacked_dimensions){
-        auto first_dim = p.process_expression(Parameter_processor::expr_vector_to_rpn(item.first_bound), nullptr);
-        auto second_dim = p.process_expression(Parameter_processor::expr_vector_to_rpn(item.second_bound), nullptr);
+        auto first_dim = p.process_expression(item.first_bound, nullptr);
+        auto second_dim = p.process_expression(item.second_bound, nullptr);
         dimensions.push_back(std::max(first_dim, second_dim)+1);
     }
 
@@ -418,7 +418,7 @@ mdarray Initialization_list::process_default_initialization() {
         dimensions.insert(dimensions.begin(), 0);
     }
 
-    auto init_value = p.process_expression(Parameter_processor::expr_vector_to_rpn(expression_leaves[0]), nullptr);
+    auto init_value = p.process_expression(expression_leaves[0], nullptr);
 
     return {dimensions,init_value};
 

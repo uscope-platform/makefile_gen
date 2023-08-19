@@ -23,6 +23,7 @@ Expression_component::Expression_component(const Expression_component &c) {
     array_index = c.array_index;
     package_prefix = c.package_prefix;
     binary_size = c.binary_size;
+    rpn_marker = c.rpn_marker;
 }
 
 
@@ -32,7 +33,7 @@ Expression_component::Expression_component() {
     component_type = string_component;
 }
 
-Expression_component::Expression_component(std::string s) {
+Expression_component::Expression_component(const std::string &s) {
     numeric_value = 0;
     if(operators_set.contains(s)) {
         component_type = operator_component;
@@ -62,10 +63,20 @@ bool operator==(const Expression_component &lhs, const Expression_component &rhs
     return ret_val;
 }
 
+
+void Expression_component::set_rpn_marker() {
+    rpn_marker = true;
+    numeric_value = 0;
+    string_value = "";
+    component_type = marker_component;
+}
+
 std::string Expression_component::print_value() {
     std::string ret_val;
-    if(component_type == array_component) {
-
+    if(component_type== marker_component){
+        ret_val = "$__RPN_MARKER__$";
+    }else if(component_type == array_component) {
+        ret_val = "$__ARRAY__$";
     } else if(component_type == numeric_component){
         ret_val = std::to_string(numeric_value);
     } else {
@@ -205,5 +216,3 @@ int64_t Expression_component::calculate_binary_size(int64_t in) {
         return  std::ceil(n_bits);
     }
 }
-
-

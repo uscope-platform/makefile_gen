@@ -26,6 +26,7 @@ typedef struct {
     std::vector<std::string> components;
     parameter_type type;
     int64_t value;
+    bool is_rpn;
 }param_check_t;
 
 std::map<std::string, HDL_parameter> run_test(std::string & t_p){
@@ -35,10 +36,8 @@ std::map<std::string, HDL_parameter> run_test(std::string & t_p){
     auto resource = analyzer.analyze()[0];
 
     Parameter_processor p({},std::make_shared<data_store>(true, "/tmp/test_data_store"));
-    resource =  p.process_resource(resource);
 
-
-    return resource.get_parameters();
+    return p.process_parameters_map(resource.get_parameters(), resource);
 
 }
 
@@ -48,6 +47,11 @@ std::map<std::string, HDL_parameter> produce_check_components(std::vector<param_
     for(auto & vt : in){
         HDL_parameter par = HDL_parameter();
         par.set_name(vt.name);
+        if(vt.is_rpn){
+            Expression_component e = Expression_component("");
+            e.set_rpn_marker();
+            par.add_component(e);
+        }
         for(auto &cpt:vt.components){
             par.add_component(Expression_component(cpt));
         }
@@ -93,14 +97,14 @@ TEST(parameter_processing, simple_parameters) {
     HDL_parameter p;
     p.set_value("423");
     p.set_name("string_p");
-    p.set_expression_components({Expression_component(R"("423")")});
+    p.add_component({Expression_component(R"("423")")});
 
     check_params["string_p"] = p;
 
     p = HDL_parameter();
     p.set_value("string_p");
     p.set_name("nested_p");
-    p.set_expression_components({Expression_component("string_p")});
+    p.add_component({Expression_component("string_p")});
 
     check_params["nested_p"] = p;
 
@@ -138,15 +142,15 @@ TEST(parameter_processing, simple_expressions) {
     std::vector<param_check_t> vect_params = {
             {"simple_numeric_p", {"32"}, numeric_parameter, 32},
             {"sv_numeric_p", {"5'o10"}, numeric_parameter, 8},
-            {"simple_log_expr_p", {"add_expr_p", "$clog2"}, numeric_parameter, 6},
-            {"add_expr_p", {"simple_numeric_p", "sv_numeric_p", "+"}, numeric_parameter,40},
-            {"sub_expr_p", {"simple_numeric_p", "sv_numeric_p","-"}, numeric_parameter,24},
-            {"mul_expr_p", {"simple_numeric_p", "sv_numeric_p","*"}, numeric_parameter, 256},
-            {"div_expr_p", {"simple_numeric_p", "sv_numeric_p","/"}, numeric_parameter, 4},
-            {"modulo_expr_p", {"simple_numeric_p", "sv_numeric_p","%"}, numeric_parameter, 0},
-            {"chained_expression", {"add_expr_p", "mul_expr_p", "5", "*","+"}, numeric_parameter, 1320},
-            {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}, numeric_parameter, 6},
-            {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}, numeric_parameter, 1480}
+            {"simple_log_expr_p", {"$clog2", "(", "add_expr_p", ")"}, numeric_parameter, 6},
+            {"add_expr_p", {"simple_numeric_p", "+", "sv_numeric_p"}, numeric_parameter,40},
+            {"sub_expr_p", {"simple_numeric_p","-", "sv_numeric_p"}, numeric_parameter,24},
+            {"mul_expr_p", {"simple_numeric_p","*", "sv_numeric_p"}, numeric_parameter, 256},
+            {"div_expr_p", {"simple_numeric_p","/", "sv_numeric_p"}, numeric_parameter, 4},
+            {"modulo_expr_p", {"simple_numeric_p","%", "sv_numeric_p"}, numeric_parameter, 0},
+            {"chained_expression", {"add_expr_p", "+", "mul_expr_p", "*", "5"}, numeric_parameter, 1320},
+            {"complex_log_expr_p", { "$clog2", "(","add_expr_p", "+", "2", ")"}, numeric_parameter, 6},
+            {"parenthesised_expr_p", { "(", "add_expr_p","+", "mul_expr_p",")", "*", "5" }, numeric_parameter, 1480}
     };
 
     std::map<std::string, HDL_parameter> check_params = produce_check_components(vect_params);
@@ -188,10 +192,10 @@ TEST(parameter_processing, array_expression) {
     e.set_array_index(ai);
     par.add_component(e);
     e = Expression_component("array_parameter");
+    par.add_component(Expression_component("+"));
     ai = {{Expression_component("1")}};
     e.set_array_index(ai);
     par.add_component(e);
-    par.add_component(Expression_component("+"));
     check_params["array_parameter_expr_p"] = par;
 
 
@@ -394,25 +398,27 @@ TEST(parameter_processing, package_processing) {
 
     Parameter_processor param_proc({},d_store);
 
-    resource =  param_proc.process_resource(resource);
-
-    auto parameters = resource.get_parameters();
+    auto parameters = param_proc.process_parameters_map(resource.get_parameters(), resource);
 
     std::vector<param_check_t> vect_params = {
             {"bus_base", {"32'h43c00000"}, numeric_parameter, 0x43c00000},
             {"timebase", {"bus_base"}, numeric_parameter, 0x43c00000},
-            {"gpio", {"timebase", "32'h1000", "2", "*", "2", "/", "+", "1", "+"}, numeric_parameter, 0x43c01001},
+            {"gpio", {"timebase", "+","32'h1000", "*","2", "/","2", "+", "1"}, numeric_parameter, 0x43c01001},
             {"scope_mux", {"gpio"}, numeric_parameter, 0x43c01001},
-            {"modulo_parameter", {"3", "2", "%"}, numeric_parameter, 1},
-            {"subtraction_parameter", {"'o4", "'b10", "-"}, numeric_parameter, 2}
+            {"modulo_parameter", {"3", "%", "2"}, numeric_parameter, 1},
+            {"subtraction_parameter", {"'o4", "-", "'b10"}, numeric_parameter, 2}
     };
 
 
 
     std::map<std::string, HDL_parameter> check_map = produce_check_components(vect_params);
 
-    ASSERT_EQ(check_map, parameters);
+    ASSERT_EQ(check_map.size(), parameters.size());
 
+    for(const auto& item:check_map){
+        ASSERT_TRUE(parameters.contains(item.first));
+        ASSERT_EQ(item.second, parameters[item.first]);
+    }
 
 }
 
@@ -440,9 +446,7 @@ TEST(parameter_processing, package_parameter_usage) {
 
     Parameter_processor p({},d_store);
 
-    resource =  p.process_resource(resource);
-
-    auto parameters = resource.get_parameters();
+    auto parameters = p.process_parameters_map(resource.get_parameters(), resource);
 
     std::map<std::string, HDL_parameter> check_params;
 
@@ -476,7 +480,7 @@ TEST(parameter_processing, negative_number_parameters) {
 
 
     std::vector<param_check_t> vect_params = {
-            {"negative_param", {"16'sd32767","-"}, numeric_parameter, -32767}
+            {"negative_param", {"-", "16'sd32767"}, numeric_parameter, -32767}
     };
 
 
@@ -515,11 +519,11 @@ TEST(parameter_processing, negative_number_array_init) {
     std::vector<Expression_component> idx = {Expression_component("1")};
     ec.add_array_index(idx);
     par.add_component(ec);
+    par.add_component(Expression_component("-"));
     ec = Expression_component("negative_array_param");
     idx = {Expression_component("0")};
     ec.add_array_index(idx);
     par.add_component(ec);
-    par.add_component(Expression_component("-"));
 
     check_params["result_param"] = par;
 
@@ -715,10 +719,9 @@ std::map<std::string, HDL_parameter> run_override_test(const std::string & t_p, 
     auto resource = analyzer.analyze()[0];
 
     Parameter_processor p(parent, std::make_shared<data_store>(true, "/tmp/test_data_store"));
-    resource =  p.process_resource(resource);
 
-
-    return resource.get_parameters();
+    auto params = p.process_parameters_map( resource.get_parameters(), resource);
+    return params;
 
 }
 
@@ -761,22 +764,20 @@ TEST(parameter_processing, simple_expressions_override) {
     auto parameters = run_override_test(test_pattern, parent_param);
 
     std::vector<param_check_t> vect_params = {
-            {"simple_numeric_p", {"15"}, numeric_parameter, 15},
-            {"sv_numeric_p", {"2"}, numeric_parameter, 2},
-            {"simple_log_expr_p", {"add_expr_p", "$clog2"}, numeric_parameter, 5},
-            {"add_expr_p", {"simple_numeric_p", "sv_numeric_p", "+"}, numeric_parameter,17},
-            {"sub_expr_p", {"simple_numeric_p", "sv_numeric_p","-"}, numeric_parameter,13},
-            {"mul_expr_p", {"simple_numeric_p", "sv_numeric_p","*"}, numeric_parameter, 30},
-            {"div_expr_p", {"simple_numeric_p", "sv_numeric_p","/"}, numeric_parameter, 7},
-            {"modulo_expr_p", {"simple_numeric_p", "sv_numeric_p","%"}, numeric_parameter, 1},
-            {"chained_expression", {"add_expr_p", "mul_expr_p", "5", "*","+"}, numeric_parameter, 167},
-            {"complex_log_expr_p", { "add_expr_p", "2","+", "$clog2"}, numeric_parameter, 5},
-            {"parenthesised_expr_p", { "add_expr_p", "mul_expr_p", "+", "5", "*"}, numeric_parameter, 235}
+            {"simple_numeric_p", {}, numeric_parameter, 15},
+            {"sv_numeric_p", {}, numeric_parameter, 2},
+            {"simple_log_expr_p", {"$clog2", "(", "add_expr_p", ")"}, numeric_parameter, 5},
+            {"add_expr_p", {"simple_numeric_p", "+", "sv_numeric_p"}, numeric_parameter,17},
+            {"sub_expr_p", {"simple_numeric_p","-", "sv_numeric_p"}, numeric_parameter,13},
+            {"mul_expr_p", {"simple_numeric_p","*", "sv_numeric_p"}, numeric_parameter, 30},
+            {"div_expr_p", {"simple_numeric_p","/", "sv_numeric_p"}, numeric_parameter, 7},
+            {"modulo_expr_p", {"simple_numeric_p","%", "sv_numeric_p"}, numeric_parameter, 1},
+            {"chained_expression", {"add_expr_p", "+", "mul_expr_p", "*", "5"}, numeric_parameter, 167},
+            {"complex_log_expr_p", { "$clog2", "(","add_expr_p", "+", "2", ")"}, numeric_parameter, 5},
+            {"parenthesised_expr_p", { "(", "add_expr_p","+", "mul_expr_p",")", "*", "5" }, numeric_parameter, 235}
     };
 
     std::map<std::string, HDL_parameter> check_params = produce_check_components(vect_params);
-
-
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
@@ -828,15 +829,15 @@ TEST(parameter_processing, array_expression_override) {
     par.set_type(numeric_parameter);
     par.set_value(24);
     par.set_name("array_parameter_expr_p");
-    Expression_component e("array_parameter");
+    Expression_component e =Expression_component("array_parameter");
     std::vector<std::vector<Expression_component>> ai = {{Expression_component("sv_numeric_p"), {Expression_component("*")}, {Expression_component("0")}}};
     e.set_array_index(ai);
     par.add_component(e);
+    par.add_component(Expression_component("+"));
     e = Expression_component("array_parameter");
     ai = {{Expression_component("1")}};
     e.set_array_index(ai);
     par.add_component(e);
-    par.add_component(Expression_component("+"));
     check_params["array_parameter_expr_p"] = par;
 
 
@@ -847,6 +848,7 @@ TEST(parameter_processing, array_expression_override) {
     av = mdarray();
     av.set_1d_slice({0,0}, {2,22});
     par.set_array_value(av);
+    par.add_initialization_list(il);
     check_params["array_parameter"] = par;
 
 
@@ -891,7 +893,7 @@ TEST(parameter_processing, repetition_array_override) {
     par.set_type(numeric_parameter);
     par.set_value(1);
     par.set_name("p1");
-    Expression_component e("repetition_parameter_a");
+    Expression_component e = Expression_component("repetition_parameter_a");
     std::vector<std::vector<Expression_component>> ai = {{Expression_component("2")}};
     e.set_array_index(ai);
     Initialization_list il;
@@ -943,7 +945,7 @@ TEST(parameter_processing, array_instance_parameter_override) {
 
     Parameter_processor p({}, d_store);
     auto top_res= d_store->get_HDL_resource("test_mod");
-    auto parent_parameters = p.process_resource(top_res).get_parameters();
+    auto parent_parameters = p.process_parameters_map(top_res.get_parameters(), top_res);
 
     auto instance_spec = d_store->get_HDL_resource("dependency");
 
@@ -954,13 +956,13 @@ TEST(parameter_processing, array_instance_parameter_override) {
 
     p = Parameter_processor(instance_parameters, d_store);
 
-    auto dependency_params = p.process_resource(instance_spec).get_parameters();
+    auto dependency_params = p.process_parameters_map(instance_spec.get_parameters(), instance_spec);
 
     std::vector<param_check_t> vect_params = {
-            {"param_1", {"4"}, numeric_parameter, 4},
+            {"param_1", {}, numeric_parameter, 4},
             {"p1_t", {"param_2"}, numeric_parameter, 9},
             {"p2_t", {"param_2"}, numeric_parameter, 8},
-            {"param_3", {"11"}, numeric_parameter, 11}
+            {"param_3", {}, numeric_parameter, 11}
     };
 
     std::map<std::string, HDL_parameter> check_params = produce_check_components(vect_params);
@@ -1009,14 +1011,12 @@ TEST(parameter_processing, string_parameter) {
     auto resource = analyzer.analyze()[0];
 
     Parameter_processor p({}, std::make_shared<data_store>(true, "/tmp/test_data_store"));
-    resource =  p.process_resource(resource);
-
-    auto parameters = resource.get_parameters();
+    auto parameters = p.process_parameters_map(resource.get_parameters(), resource);
 
     HDL_parameter check_param;
     check_param.set_value("TEST PARAM");
     check_param.set_name("string_param");
-    check_param.set_expression_components({Expression_component("\"TEST PARAM\"")});
+    check_param.add_component({Expression_component("\"TEST PARAM\"")});
 
     ASSERT_EQ(check_param, parameters["string_param"]);
 
@@ -1046,7 +1046,7 @@ TEST(parameter_processing, string_parameter_map_processing) {
     HDL_parameter check_param;
     check_param.set_value("TEST PARAM");
     check_param.set_name("string_param");
-    check_param.set_expression_components({Expression_component("\"TEST PARAM\"")});
+    check_param.add_component({Expression_component("\"TEST PARAM\"")});
 
     ASSERT_EQ(check_param, parameters["string_param"]);
 
@@ -1067,9 +1067,7 @@ TEST(parameter_processing, packed_replication_init) {
     auto resource = analyzer.analyze()[0];
 
     Parameter_processor p({}, std::make_shared<data_store>(true, "/tmp/test_data_store"));
-    resource =  p.process_resource(resource);
-
-    auto parameters = resource.get_parameters();
+    auto parameters = p.process_parameters_map(resource.get_parameters(), resource);
 
     std::map<std::string, HDL_parameter> check_params;
 
@@ -1102,9 +1100,9 @@ TEST(parameter_processing, array_initialization_default) {
     auto resource = analyzer.analyze()[0];
 
     Parameter_processor proc({}, std::make_shared<data_store>(true, "/tmp/test_data_store"));
-    resource =  proc.process_resource(resource);
 
-    auto parameters = resource.get_parameters();
+    auto parameters = proc.process_parameters_map(resource.get_parameters(), resource);
+
     std::map<std::string, HDL_parameter> check_params;
 
     HDL_parameter p;
@@ -1126,13 +1124,13 @@ TEST(parameter_processing, array_initialization_default) {
     p = HDL_parameter();
     p.set_name("p_1");
     p.set_value(5);
-    p.set_expression_components({Expression_component("5")});
+    p.add_component({Expression_component("5")});
     check_params["p_1"] = p;
 
     p = HDL_parameter();
     p.set_name("p_2");
     p.set_value(4);
-    p.set_expression_components({Expression_component("4")});
+    p.add_component({Expression_component("4")});
     check_params["p_2"] = p;
 
     ASSERT_EQ(check_params.size(), parameters.size());
@@ -1178,7 +1176,7 @@ TEST(parameter_processing, packed_array_initialization_expression_override) {
 
     Parameter_processor p({}, d_store);
     auto top_res= d_store->get_HDL_resource("test_mod");
-    auto parent_parameters = p.process_resource(top_res).get_parameters();
+    auto parent_parameters = p.process_parameters_map(top_res.get_parameters(), top_res);
 
     p = Parameter_processor(parent_parameters, d_store);
 
@@ -1189,7 +1187,8 @@ TEST(parameter_processing, packed_array_initialization_expression_override) {
 
     p = Parameter_processor(instance_parameters, d_store);
 
-    auto dependency_params = p.process_resource(d_store->get_HDL_resource("dependency")).get_parameters();
+    auto res = d_store->get_HDL_resource("dependency");
+    auto dependency_params = p.process_parameters_map(res.get_parameters(), res);
 
     std::map<std::string, HDL_parameter> check_params;
 

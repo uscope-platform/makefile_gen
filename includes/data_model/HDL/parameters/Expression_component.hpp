@@ -31,17 +31,23 @@ enum expression_component_type {
     numeric_component=1,
     operator_component=2,
     function_component=3,
-    array_component = 4
+    array_component = 4,
+    marker_component = 5
 };
 
 
 class Expression_component {
 public:
+
     Expression_component();
     Expression_component( const Expression_component &c );
-    explicit Expression_component(std::string s);
+    explicit Expression_component(const std::string &s);
     explicit Expression_component(int64_t n);
 
+    void set_rpn_marker();
+    bool is_rpn()const{return rpn_marker;};
+
+    void set_string_value(const std::string &s){string_value = s;};
     std::string get_raw_string_value();
     std::string get_string_value(){ return string_value;};
     int64_t  get_numeric_value() {return numeric_value;};
@@ -93,6 +99,8 @@ private:
     int64_t numeric_value;
 
     int64_t binary_size = 0;
+
+    bool rpn_marker = false;
 
     std::vector<std::vector<Expression_component>> array_index;
 

@@ -84,7 +84,7 @@ TEST(Initialization_list, get_values_1d_unpacked)  {
     );
 
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
-    auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    auto cs = std::make_shared<std::map<std::string, HDL_parameter>>();
     auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     HDL_parameter p;
@@ -114,7 +114,7 @@ TEST(Initialization_list, get_values_2d_unpacked) {
     );
 
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
-    auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    auto cs = std::make_shared<std::map<std::string, HDL_parameter>>();
     auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     HDL_parameter p;
@@ -145,7 +145,7 @@ TEST(Initialization_list, get_values_3d_unpacked) {
 
 
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
-    auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    auto cs = std::make_shared<std::map<std::string, HDL_parameter>>();
     auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     HDL_parameter p;
@@ -175,7 +175,7 @@ TEST(Initialization_list, get_values_1d_packed) {
 
 
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
-    auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    auto cs = std::make_shared<std::map<std::string, HDL_parameter>>();
     auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     HDL_parameter p;
@@ -204,7 +204,7 @@ TEST(Initialization_list, get_values_2d_packed) {
     );
 
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
-    auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    auto cs = std::make_shared<std::map<std::string, HDL_parameter>>();
     auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     HDL_parameter p;
@@ -253,7 +253,7 @@ TEST(Initialization_list, get_values_3d_packed) {
             {true, false, false}
     );
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
-    auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    auto cs = std::make_shared<std::map<std::string, HDL_parameter>>();
     auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     HDL_parameter p;
@@ -318,7 +318,7 @@ TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
 
 
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
-    auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    auto cs = std::make_shared<std::map<std::string, HDL_parameter>>();
     auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     HDL_parameter p;
@@ -358,7 +358,7 @@ TEST(Initialization_list, multidimensional_packed_array) {
     );
 
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
-    auto cs = std::make_shared<std::unordered_map<std::string, HDL_parameter>>();
+    auto cs = std::make_shared<std::map<std::string, HDL_parameter>>();
     auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     il.link_processor( external_parameters,cs, d_store);
@@ -401,10 +401,9 @@ TEST(Initialization_list, concatenation_of_packed_arrays) {
     auto resource = analyzer.analyze()[0];
 
     Parameter_processor p({},std::make_shared<data_store>(true, "/tmp/test_data_store"));
-    resource =  p.process_resource(resource);
 
 
-    auto parameters = resource.get_parameters();
+    auto parameters = p.process_parameters_map(resource.get_parameters(), resource);
 
     auto processed_array = parameters["INITIAL_REGISTER_VALUES"].get_array_value().get_1d_slice({0,0});
 
