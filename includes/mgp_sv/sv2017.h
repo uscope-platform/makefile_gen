@@ -284,18 +284,19 @@ public:
     RuleUdp_instantiation = 485, RuleUdp_instance = 486, RuleUdp_instance_body = 487, 
     RuleModule_or_interface_or_program_or_udp_instantiation = 488, RuleHierarchical_instance = 489, 
     RuleList_of_port_connections = 490, RuleOrdered_port_connection = 491, 
-    RuleNamed_port_connection = 492, RuleBind_directive = 493, RuleBind_target_instance = 494, 
-    RuleBind_target_instance_list = 495, RuleBind_instantiation = 496, RuleConfig_declaration = 497, 
-    RuleDesign_statement = 498, RuleConfig_rule_statement = 499, RuleInst_clause = 500, 
-    RuleInst_name = 501, RuleCell_clause = 502, RuleLiblist_clause = 503, 
-    RuleUse_clause = 504, RuleNet_alias = 505, RuleSpecify_block = 506, 
-    RuleGenerate_region = 507, RuleGenvar_expression = 508, RuleLoop_generate_construct = 509, 
-    RuleGenvar_initialization = 510, RuleGenvar_iteration = 511, RuleConditional_generate_construct = 512, 
-    RuleIf_generate_construct = 513, RuleCase_generate_construct = 514, 
-    RuleCase_generate_item = 515, RuleGenerate_begin_end_block = 516, RuleGenerate_item = 517, 
-    RuleProgram_generate_item = 518, RuleModule_or_generate_or_interface_or_checker_item = 519, 
-    RuleModule_or_generate_or_interface_item = 520, RuleModule_or_generate_item = 521, 
-    RuleElaboration_system_task = 522, RuleModule_item_item = 523, RuleModule_item = 524
+    RuleNamed_port_connection = 492, RulePort_expression_connection = 493, 
+    RulePort_concatenation_connection = 494, RuleBind_directive = 495, RuleBind_target_instance = 496, 
+    RuleBind_target_instance_list = 497, RuleBind_instantiation = 498, RuleConfig_declaration = 499, 
+    RuleDesign_statement = 500, RuleConfig_rule_statement = 501, RuleInst_clause = 502, 
+    RuleInst_name = 503, RuleCell_clause = 504, RuleLiblist_clause = 505, 
+    RuleUse_clause = 506, RuleNet_alias = 507, RuleSpecify_block = 508, 
+    RuleGenerate_region = 509, RuleGenvar_expression = 510, RuleLoop_generate_construct = 511, 
+    RuleGenvar_initialization = 512, RuleGenvar_iteration = 513, RuleConditional_generate_construct = 514, 
+    RuleIf_generate_construct = 515, RuleCase_generate_construct = 516, 
+    RuleCase_generate_item = 517, RuleGenerate_begin_end_block = 518, RuleGenerate_item = 519, 
+    RuleProgram_generate_item = 520, RuleModule_or_generate_or_interface_or_checker_item = 521, 
+    RuleModule_or_generate_or_interface_item = 522, RuleModule_or_generate_item = 523, 
+    RuleElaboration_system_task = 524, RuleModule_item_item = 525, RuleModule_item = 526
   };
 
   explicit sv2017(antlr4::TokenStream *input);
@@ -808,6 +809,8 @@ public:
   class List_of_port_connectionsContext;
   class Ordered_port_connectionContext;
   class Named_port_connectionContext;
+  class Port_expression_connectionContext;
+  class Port_concatenation_connectionContext;
   class Bind_directiveContext;
   class Bind_target_instanceContext;
   class Bind_target_instance_listContext;
@@ -10853,7 +10856,8 @@ public:
     Attribute_instanceContext* attribute_instance(size_t i);
     antlr4::tree::TerminalNode *LPAREN();
     antlr4::tree::TerminalNode *RPAREN();
-    ExpressionContext *expression();
+    Port_concatenation_connectionContext *port_concatenation_connection();
+    Port_expression_connectionContext *port_expression_connection();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -10863,6 +10867,41 @@ public:
   };
 
   Named_port_connectionContext* named_port_connection();
+
+  class  Port_expression_connectionContext : public antlr4::ParserRuleContext {
+  public:
+    Port_expression_connectionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    ExpressionContext *expression();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Port_expression_connectionContext* port_expression_connection();
+
+  class  Port_concatenation_connectionContext : public antlr4::ParserRuleContext {
+  public:
+    Port_concatenation_connectionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *APOSTROPHE_LBRACE();
+    antlr4::tree::TerminalNode *RBRACE();
+    std::vector<ExpressionContext *> expression();
+    ExpressionContext* expression(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> COMMA();
+    antlr4::tree::TerminalNode* COMMA(size_t i);
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Port_concatenation_connectionContext* port_concatenation_connection();
 
   class  Bind_directiveContext : public antlr4::ParserRuleContext {
   public:

@@ -26,8 +26,15 @@ public:
     void add_port(const std::string &name, const std::string &value);
     void add_array_quantifier(const bus_mapping_expression &exp);
     HDL_instance get_dependency();
+    void start_concat_port(const std::string &n);
+    void stop_concat_port();
+    void add_port_connection_element(const std::string &s);
     bool is_valid_dependency(){return valid_instance;};
 private:
+    bool in_concat = false;
+    std::string concat_port_name;
+    std::vector<std::string> concat_port_data;
+
     HDL_instance current_instance;
     bool valid_instance;
 };

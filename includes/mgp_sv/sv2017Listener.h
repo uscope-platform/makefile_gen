@@ -1552,6 +1552,12 @@ public:
   virtual void enterNamed_port_connection(sv2017::Named_port_connectionContext *ctx) = 0;
   virtual void exitNamed_port_connection(sv2017::Named_port_connectionContext *ctx) = 0;
 
+  virtual void enterPort_expression_connection(sv2017::Port_expression_connectionContext *ctx) = 0;
+  virtual void exitPort_expression_connection(sv2017::Port_expression_connectionContext *ctx) = 0;
+
+  virtual void enterPort_concatenation_connection(sv2017::Port_concatenation_connectionContext *ctx) = 0;
+  virtual void exitPort_concatenation_connection(sv2017::Port_concatenation_connectionContext *ctx) = 0;
+
   virtual void enterBind_directive(sv2017::Bind_directiveContext *ctx) = 0;
   virtual void exitBind_directive(sv2017::Bind_directiveContext *ctx) = 0;
 

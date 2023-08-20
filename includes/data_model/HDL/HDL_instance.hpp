@@ -47,9 +47,9 @@ public:
     std::string  get_parameter_value(const std::string& parameter_name) {return parameters[parameter_name].get_string_value();};
     bool is_parameter_overridden(const std::string& parameter_name) {return parameters.contains(parameter_name);};
 
-    void add_port_connection(const std::string& port_name, std::string value);
-    void set_ports(const std::unordered_map<std::string, std::string> &p) {ports_map = p;};
-    std::unordered_map<std::string, std::string> get_ports() { return ports_map;};
+    void add_port_connection(const std::string& port_name, std::vector<std::string> value);
+    void set_ports(const std::unordered_map<std::string, std::vector<std::string>> &p) {ports_map = p;};
+    std::unordered_map<std::string, std::vector<std::string>> get_ports() { return ports_map;};
 
     std::string get_name() const {return name;};
     void set_name(const std::string &n) {name = n;};
@@ -85,7 +85,7 @@ public:
 private:
 
     std::map<std::string, HDL_parameter> parameters;
-    std::unordered_map<std::string, std::string> ports_map;
+    std::unordered_map<std::string, std::vector<std::string>> ports_map;
     dependency_class dep_class;
     std::string type;
     std::string name;

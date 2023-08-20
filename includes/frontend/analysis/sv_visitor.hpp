@@ -75,6 +75,7 @@ public:
     void exitPrimaryLit(sv2017::PrimaryLitContext *ctx) override;
     void exitPrimaryPath(sv2017::PrimaryPathContext *ctx) override;
 
+    void enterNamed_port_connection(sv2017::Named_port_connectionContext *ctx) override;
     void exitNamed_port_connection(sv2017::Named_port_connectionContext *ctx) override;
     void enterNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) override;
     void exitNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) override;

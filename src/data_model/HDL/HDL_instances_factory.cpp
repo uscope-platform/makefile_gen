@@ -26,7 +26,7 @@ void HDL_instances_factory::add_parameter(const std::string &name, const HDL_par
 }
 
 void HDL_instances_factory::add_port(const std::string &name, const std::string &value) {
-    current_instance.add_port_connection(name, value);
+    current_instance.add_port_connection(name, {value});
 }
 
 HDL_instance HDL_instances_factory::get_dependency() {
@@ -36,4 +36,21 @@ HDL_instance HDL_instances_factory::get_dependency() {
 
 void HDL_instances_factory::add_array_quantifier(const bus_mapping_expression &exp) {
     current_instance.add_array_quantifier(exp);
+}
+
+void HDL_instances_factory::stop_concat_port() {
+    in_concat = false;
+    current_instance.add_port_connection(concat_port_name, concat_port_data);
+    concat_port_data.clear();
+}
+
+void HDL_instances_factory::start_concat_port(const std::string &n) {
+    in_concat = true;
+    concat_port_name = n;
+}
+
+void HDL_instances_factory::add_port_connection_element(const std::string &s) {
+    if(in_concat){
+        concat_port_data.push_back(s);
+    }
 }

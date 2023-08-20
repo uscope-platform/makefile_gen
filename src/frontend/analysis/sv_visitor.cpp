@@ -181,8 +181,12 @@ void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
 
 
 void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
+    auto p = ctx->getText();
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.add_port_connection_element(p);
+    }
     if(file_contains_bus_defining_package || in_module_array_def){
-        string_components.push_back(ctx->getText());
+        string_components.push_back(p);
     }
     if(params_factory.is_component_relevant()){
         if(!package_prefix.empty()){
@@ -192,7 +196,7 @@ void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
             package_prefix.clear();
             package_item.clear();
         } else {
-            params_factory.add_component(Expression_component(ctx->getText()));
+            params_factory.add_component(Expression_component(p));
         }
 
     }
@@ -277,14 +281,28 @@ void sv_visitor::exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext 
     }
 }
 
+void sv_visitor::enterNamed_port_connection(sv2017::Named_port_connectionContext *ctx) {
+    if(deps_factory.is_valid_dependency()){
+        auto dbg = ctx->getText();
+        if(ctx->port_concatenation_connection() != nullptr){
+            deps_factory.start_concat_port(ctx->identifier()->getText());
+        }
+    }
+}
+
 void sv_visitor::exitNamed_port_connection(sv2017::Named_port_connectionContext *ctx) {
     auto port_name = ctx->identifier()->getText();
     std::string connecting_item;
-    if(ctx->expression() != nullptr){
-       connecting_item = ctx->expression()->getText();
+    if(ctx->port_expression_connection() != nullptr){
+        connecting_item = ctx->port_expression_connection()->expression()->getText();
+        if(deps_factory.is_valid_dependency()){
+            deps_factory.add_port(port_name, connecting_item);
+        }
     }
-    if(deps_factory.is_valid_dependency()){
-        deps_factory.add_port(port_name, connecting_item);
+    if(ctx->port_concatenation_connection() != nullptr){
+        if(deps_factory.is_valid_dependency()){
+            deps_factory.stop_concat_port();
+        }
     }
 }
 
@@ -471,6 +489,7 @@ void sv_visitor::exitData_type_or_implicit(sv2017::Data_type_or_implicitContext 
         params_factory.clear_expression();
     }
 }
+
 
 
 

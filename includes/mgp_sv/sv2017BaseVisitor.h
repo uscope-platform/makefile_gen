@@ -2065,6 +2065,14 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitPort_expression_connection(sv2017::Port_expression_connectionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitPort_concatenation_connection(sv2017::Port_concatenation_connectionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitBind_directive(sv2017::Bind_directiveContext *ctx) override {
     return visitChildren(ctx);
   }

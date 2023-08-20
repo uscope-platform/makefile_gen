@@ -2101,10 +2101,16 @@ list_of_port_connections:
     | named_port_connection ( COMMA named_port_connection )*
 ;
 ordered_port_connection: ( attribute_instance )* ( expression )?;
+
 named_port_connection:
  ( attribute_instance )* DOT ( MUL
-                               | identifier ( LPAREN ( expression )? RPAREN )?
+                               | identifier ( LPAREN (port_concatenation_connection)? RPAREN )?
+                               | identifier ( LPAREN (port_expression_connection)? RPAREN )?
                               );
+
+port_expression_connection: expression;
+port_concatenation_connection: APOSTROPHE_LBRACE (expression COMMA?)* RBRACE;
+
 bind_directive:
  KW_BIND ( identifier ( COLON bind_target_instance_list )?
           | bind_target_instance

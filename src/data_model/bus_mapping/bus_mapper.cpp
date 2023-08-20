@@ -45,7 +45,7 @@ void bus_mapper::map_network( bus_map_node &res, uint32_t base_address, bool par
         if(parametrised) {
             if (dep.get_type() == res.module_name) {
                 for (auto &port: dep.get_ports()) {
-                    if (port.second.substr(0, port.second.find("[")) == res.port_name) {
+                    if (port.second[0].substr(0, port.second[0].find('[')) == res.port_name) {
                         auto module_spec = d_store->get_HDL_resource(dep.get_type());
                         bus_map_node cur_node;
                         cur_node.port_name = port.first;
@@ -65,10 +65,10 @@ void bus_mapper::map_network( bus_map_node &res, uint32_t base_address, bool par
             }
             for(auto &port:dep.get_ports()){
                 std::string port_name;
-                if(port.second.find('[')!=std::string::npos) {
-                    port_name = port.second.substr(0, port.second.find('['));
+                if(port.second[0].find('[')!=std::string::npos) {
+                    port_name = port.second[0].substr(0, port.second[0].find('['));
                 } else{
-                    port_name = port.second;
+                    port_name = port.second[0];
                 }
                 if(port_contains_if(port_name, if_name)){
                     auto module_spec = d_store->get_HDL_resource(dep.get_type());
@@ -124,7 +124,7 @@ void bus_mapper::process_interconnects(HDL_Resource &parent_res, HDL_instance &p
             auto masters_str = item.instance.get_ports()[specs_manager.get_interconnect_source_port(bus_type, item.module_spec.getName())];//use spec manager instead of hardcoded name;
             HDL_instance master_if_decl;
             for(auto &dep:parent_res.get_dependencies()){
-                if(dep.get_name()==masters_str){
+                if(dep.get_name()==masters_str[0]){
                     master_if_decl = dep;
                 }
             }
@@ -143,14 +143,14 @@ void bus_mapper::process_interconnects(HDL_Resource &parent_res, HDL_instance &p
                 auto map = decode_interconnect_map(bus_layout["map"], parent_res, parent_dep);
 
                 for(int i = 0; i<map.size(); i++){
-                    bus_map_node node = {masters_str, parent_res, parent_dep, 0, map[i]};
+                    bus_map_node node = {masters_str[0], parent_res, parent_dep, 0, map[i]};
                     map_network(node, addresses_vect[i], true);
                 }
             }
 
         } else{
             auto masters_str = item.instance.get_ports()[specs_manager.get_interconnect_source_port(bus_type, item.module_spec.getName())];
-            auto masters_ifs = split_if_array(masters_str);
+            auto masters_ifs = split_if_array(masters_str[0]);
 
             auto addresses_vect = get_interconnect_addr_vect(item, parent_res);
 

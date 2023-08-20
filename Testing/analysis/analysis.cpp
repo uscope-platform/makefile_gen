@@ -86,10 +86,10 @@ TEST( analysis_test , sv_module) {
     auto resource = analyzer.analyze()[0];
 
     HDL_instance d3("SC", "SyndromeCalculator", module);
-    d3.add_port_connection("clock", "clock");
-    d3.add_port_connection("reset", "reset");
-    d3.add_port_connection("data_in", "data_in");
-    d3.add_port_connection("syndrome", "data_out");
+    d3.add_port_connection("clock", {"clock"});
+    d3.add_port_connection("reset", {"reset"});
+    d3.add_port_connection("data_in", {"data_in"});
+    d3.add_port_connection("syndrome", {"data_out"});
     HDL_parameter p;
     p.set_name("TEST_PARAM");
     Expression_component e("param");
@@ -149,4 +149,42 @@ TEST( analysis_test , vhdl_module) {
     HDL_Resource check_res (module, "half_adder", "check_files/test_vhdl_module.vhd");
     check_res.add_dependency(dep);
     ASSERT_EQ(resource, check_res);
+}
+
+
+
+
+
+
+TEST(analysis_test, port_concat_assignment) {
+    std::string test_pattern = R"(
+    module test_mod ();
+
+
+        axil_crossbar_interface  axi_xbar (
+            .clock(clock),
+            .slaves('{axi_in}),
+            .masters('{timebase_axi, gpio_axi, fcore_axi})
+        );
+
+
+    endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    auto dep = resource.get_dependencies()[0];
+
+    HDL_instance check_dependency;
+    check_dependency.set_type("axil_crossbar_interface");
+    check_dependency.set_name("axi_xbar");
+    check_dependency.set_dependency_class(module);
+    check_dependency.add_port_connection("clock", {"clock"});
+    check_dependency.add_port_connection("slaves", {"axi_in"});
+    check_dependency.add_port_connection("masters", {"timebase_axi", "gpio_axi", "fcore_axi"});
+
+    ASSERT_EQ(dep, check_dependency);
 }

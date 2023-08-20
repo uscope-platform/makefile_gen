@@ -41,7 +41,7 @@ void HDL_instance::add_parameter(const std::string& parameter_name, const HDL_pa
     parameters[parameter_name] = p;
 }
 
-void HDL_instance::add_port_connection(const std::string& port_name, std::string value) {
+void HDL_instance::add_port_connection(const std::string& port_name, std::vector<std::string> value) {
     ports_map[port_name] = std::move(value);
 }
 
