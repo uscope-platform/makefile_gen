@@ -63,7 +63,15 @@ int main(int argc, char *argv[]){
     std::string cache_dir = std::string(std::getenv("HOME")) + "/.makefilegen_store";
     app.add_option("--cache_dir", cache_dir, "Run the program without touching the repository cache");
 
+    bool wait_profiler = false;
+    app.add_flag("--wait_profiler", wait_profiler, "Wait for the profiler to be ready before executing");
+
     CLI11_PARSE(app, argc, argv);
+
+    if(wait_profiler){
+        std::cout << "Press ANY key to continue\n";
+        getchar();
+    }
 
 
     auto t1 = std::chrono::high_resolution_clock::now();
