@@ -17,12 +17,18 @@
 #define MAKEFILEGEN_V2_BUS_ANALYSIS_HPP
 
 #include "data_model/HDL/HDL_instance.hpp"
+#include "data_model/data_store.hpp"
+#include "data_model/settings_store.hpp"
+#include "data_model/Depfile.hpp"
+
 class bus_analysis {
 public:
-    bus_analysis(const HDL_instance &a);
-
+    explicit bus_analysis(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &ds, const Depfile &df);
+    void analyze_bus(HDL_instance &ast);
 private:
-    HDL_instance AST;
+    std::shared_ptr<settings_store> s_store;
+    std::shared_ptr<data_store> d_store;
+    Depfile dfile;
 };
 
 

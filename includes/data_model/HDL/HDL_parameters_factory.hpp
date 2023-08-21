@@ -81,7 +81,8 @@ public:
     void start_ternary_operator();
 
 private:
-    bool in_ternary_operator = true;
+    bool in_bit_selection = false;
+    bool in_ternary_operator = false;
     bool in_param_assignment = false;
     bool in_initialization_list = false;
     bool in_expression_new = false;

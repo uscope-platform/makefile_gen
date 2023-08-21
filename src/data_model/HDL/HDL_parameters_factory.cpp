@@ -61,6 +61,7 @@ void HDL_parameters_factory::stop_initialization_list(bool default_assignment) {
 
 
 void HDL_parameters_factory::start_bit_selection() {
+    in_bit_selection = true;
     expression_stack.push(new_expression);
     new_expression.clear();
 }
@@ -72,7 +73,10 @@ void HDL_parameters_factory::stop_bit_selection() {
 }
 
 void HDL_parameters_factory::close_array_index() {
-    new_expression.back().add_array_index(bit_selection);
+    if(in_bit_selection){
+        in_bit_selection = false;
+        new_expression.back().add_array_index(bit_selection);
+    }
 }
 
 void HDL_parameters_factory::close_first_range() {

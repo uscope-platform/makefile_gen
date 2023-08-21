@@ -155,6 +155,11 @@ int main(int argc, char *argv[]){
     Dependency_resolver_v2 sim_r(additional_sim_modules, d_store);
     auto sim_sources = sim_r.get_dependencies();
 
+    // BUS MAPPING
+
+    bus_analysis bus_analyzer(s_store, d_store, dep);
+    bus_analyzer.analyze_bus(synth_ast);
+
     //Generate makefile
     if(generate_xilinx){
         xilinx_project_generator generator;

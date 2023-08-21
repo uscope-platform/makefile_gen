@@ -69,7 +69,7 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Release")
 target_link_libraries(makefile_gen PRIVATE mgp_sv_lib)
 target_link_libraries(makefile_gen PRIVATE mgp_vh_lib)
 
-target_link_libraries(makefile_gen PRIVATE Threads::Threads cereal pantor::inja OpenSSL::SSL)
+target_link_libraries(makefile_gen PRIVATE Threads::Threads cereal pantor::inja OpenSSL::SSL CLI11::CLI11)
 
 ## INSTALLATION SECTION
 

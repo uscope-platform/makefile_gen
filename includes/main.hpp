@@ -23,6 +23,7 @@
 
 #include "frontend/Repository_walker.hpp"
 #include "analysis/HDL_ast_builder.hpp"
+#include "analysis/bus_analysis.hpp"
 #include "data_model/data_store.hpp"
 #include "data_model/settings_store.hpp"
 #include "frontend/analysis/sv_analyzer.hpp"
@@ -38,5 +39,6 @@
 #include "Backend/uplatform/application_definition_generator.hpp"
 #include "Backend/uplatform/peripheral_definition_generator.hpp"
 #include "data_model/bus_mapping/bus_mapper.hpp"
+
 
 #endif //MAKEFILEGEN_V2_MAIN_HPP
