@@ -405,6 +405,7 @@ TEST(parameter_processing, package_processing) {
             {"timebase", {"bus_base"}, numeric_parameter, 0x43c00000},
             {"gpio", {"timebase", "+","32'h1000", "*","2", "/","2", "+", "1"}, numeric_parameter, 0x43c01001},
             {"scope_mux", {"gpio"}, numeric_parameter, 0x43c01001},
+            {"out_of_order", {"scope_mux"}, numeric_parameter, 0x43c01001},
             {"modulo_parameter", {"3", "%", "2"}, numeric_parameter, 1},
             {"subtraction_parameter", {"'o4", "-", "'b10"}, numeric_parameter, 2}
     };

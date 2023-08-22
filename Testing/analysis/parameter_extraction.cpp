@@ -438,7 +438,8 @@ TEST(parameter_extraction, packed_array) {
 
 }
 
-TEST(parameter_extraction, package_parameters) {
+
+TEST(parameter_extraction, package_parameters_use) {
     std::string test_pattern = R"(
         module test_mod #(
              parameter package_param = test_package::bus_base

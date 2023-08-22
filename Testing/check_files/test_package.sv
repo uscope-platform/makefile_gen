@@ -27,6 +27,8 @@ package test_package;
 
     parameter scope_mux = gpio;
 
+    parameter out_of_order = scope_mux;
+
     parameter modulo_parameter = 3 % 2;
 
     parameter subtraction_parameter = 'o4 - 'b10;

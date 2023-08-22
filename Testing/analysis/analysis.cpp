@@ -61,6 +61,11 @@ TEST( analysis_test , package) {
     p.set_type(expression_parameter);
     check_map[p.get_name()] = p;
 
+    p.set_name("out_of_order");
+    p.set_expression_components({ Expression_component("scope_mux")});
+    p.set_type(expression_parameter);
+    check_map[p.get_name()] = p;
+
     p.set_name("modulo_parameter");
     p.set_expression_components({
         Expression_component("3"),Expression_component("%"),Expression_component("2")
