@@ -22,9 +22,9 @@ HDL_ast_builder::HDL_ast_builder(const std::shared_ptr<settings_store> &s, const
     log_structure = false;
 }
 
-std::vector<HDL_instance> HDL_ast_builder::build_ast(const std::vector<std::string> &modules,
+std::vector<std::shared_ptr<HDL_instance>> HDL_ast_builder::build_ast(const std::vector<std::string> &modules,
                                                      std::map<std::string, HDL_parameter> external_parameters) {
-    std::vector<HDL_instance> ret;
+    std::vector<std::shared_ptr<HDL_instance>> ret;
     ret.reserve(modules.size());
     for(auto &item:modules){
         ret.push_back(build_ast(item, external_parameters));
@@ -33,25 +33,33 @@ std::vector<HDL_instance> HDL_ast_builder::build_ast(const std::vector<std::stri
 }
 
 
-HDL_instance HDL_ast_builder::build_ast(const std::string& top_level_module, std::map<std::string, HDL_parameter> external_parameters) {
+std::shared_ptr<HDL_instance> HDL_ast_builder::build_ast(const std::string& top_level_module, std::map<std::string, HDL_parameter> external_parameters) {
 
     HDL_instance i;
     i.set_name("TL");
     i.set_type(top_level_module);
     i.set_dependency_class(module);
 
-    auto top_level = recursive_build_ast(i, external_parameters);
-    top_level.set_dependency_class(module);
+    if (auto top_level = recursive_build_ast(i, external_parameters, nullptr)){
+        auto val = *top_level;
+        val->set_dependency_class(module);
+        return  val;
+    } else{
+        return {};
+    }
 
-    return  top_level;
 }
 
 
 
 
-HDL_instance HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::map<std::string, HDL_parameter> &external_parameters) {
+std::optional<std::shared_ptr<HDL_instance>> HDL_ast_builder::recursive_build_ast(
+        HDL_instance &i,
+        const std::map<std::string, HDL_parameter> &external_parameters,
+        const std::shared_ptr<HDL_instance>& parent
+) {
 
-    HDL_instance ret_inst;
+    auto ret_inst = std::make_shared<HDL_instance>();
 
     auto type = i.get_type();
 
@@ -79,12 +87,12 @@ HDL_instance HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::map
         auto new_params = p2.process_parameters_map(pm, res);
 
 
-        ret_inst.set_ports(i.get_ports());
+        ret_inst->set_ports(i.get_ports());
 
-        ret_inst.set_name(i.get_name());
-        ret_inst.set_type(type);
-        ret_inst.set_dependency_class(module);
-        ret_inst.add_parameters(new_params);
+        ret_inst->set_name(i.get_name());
+        ret_inst->set_type(type);
+        ret_inst->set_dependency_class(module);
+        ret_inst->add_parameters(new_params);
 
         if (log_structure) {
             std::cout << "Processing Instance " << i.get_name() << " of module " << type << std::endl;
@@ -93,14 +101,14 @@ HDL_instance HDL_ast_builder::recursive_build_ast(HDL_instance &i,const std::map
         std::vector<nlohmann::json> leaves;
         for(auto &dep: res.get_dependencies()){
             if(dep.get_dependency_class() != package  && dep.get_dependency_class() != memory_init){
-                auto ll_ret = recursive_build_ast(dep,new_params);
-                ret_inst.add_child(ll_ret);
+                if (auto ll_ret = recursive_build_ast(dep,new_params, ret_inst))
+                    ret_inst->add_child(*ll_ret);
             } else if(dep.get_dependency_class() == memory_init){
                 auto path = d_store->get_data_file(dep.get_type()).get_path();
-                ret_inst.add_data_dependency(path);
+                ret_inst->add_data_dependency(path);
             } else{
                 auto path = d_store->get_HDL_resource(dep.get_type()).get_path();
-                ret_inst.add_package_dependency(path);
+                ret_inst->add_package_dependency(path);
             }
         }
 

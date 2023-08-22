@@ -15,9 +15,6 @@
 
 #include "data_model/HDL/HDL_instance.hpp"
 
-#include "data_model/HDL/HDL_Resource.hpp"
-
-
 HDL_instance::HDL_instance(const HDL_instance &c) {
     parameters = c.parameters;
     ports_map = c.ports_map;
@@ -76,8 +73,10 @@ nlohmann::json HDL_instance::dump() {
     ret["ports_map"] = ports_map;
 
     std::vector<nlohmann::json> children;
+    children.reserve(child_instances.size());
+
     for(auto &child:child_instances){
-        children.push_back(child.dump());
+        children.push_back(child->dump());
     }
     ret["children"] = children;
 

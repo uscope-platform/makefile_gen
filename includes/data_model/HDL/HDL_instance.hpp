@@ -64,7 +64,7 @@ public:
     bool is_module_array(){return quantifier != bus_mapping_expression();};
     bus_mapping_expression get_quantifier(){return quantifier;};
 
-    void add_child(const HDL_instance &i) {child_instances.push_back(i);};
+    void add_child(const std::shared_ptr<HDL_instance> &i) {child_instances.push_back(i);};
 
     void add_data_dependency(const std::string &p){data_dependencies.push_back(p);};
     std::vector<std::string> get_data_dependencies(){return data_dependencies;};
@@ -72,7 +72,7 @@ public:
     void add_package_dependency(const std::string &p){package_dependencies.push_back(p);};
     std::vector<std::string> get_package_dependencies(){return package_dependencies;};
 
-    std::vector<HDL_instance> get_dependencies() {return child_instances;};
+    std::vector<std::shared_ptr<HDL_instance>> get_dependencies() {return child_instances;};
 
     template<class Archive>
     void serialize( Archive & ar ) {
@@ -90,7 +90,9 @@ private:
     std::string type;
     std::string name;
     bus_mapping_expression quantifier;
-    std::vector<HDL_instance> child_instances;
+
+    std::shared_ptr<HDL_instance> parent;
+    std::vector<std::shared_ptr<HDL_instance>> child_instances;
 
     std::vector<std::string> data_dependencies;
     std::vector<std::string> package_dependencies;

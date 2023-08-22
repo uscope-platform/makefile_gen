@@ -17,7 +17,7 @@
 
 #include <utility>
 
-Dependency_resolver_v2::Dependency_resolver_v2(const std::vector<HDL_instance> &i, std::shared_ptr<data_store> store) {
+Dependency_resolver_v2::Dependency_resolver_v2(const std::vector<std::shared_ptr<HDL_instance>> &i, std::shared_ptr<data_store> store) {
     AST = i;
     d_store = std::move(store);
 }
@@ -26,7 +26,7 @@ std::set<std::string> Dependency_resolver_v2::get_dependencies() {
     std::set<std::string> ret_val;
     for(auto &a:AST){
         auto deps = solve_dep(a);
-        auto path = d_store->get_HDL_resource(a.get_type()).get_path();
+        auto path = d_store->get_HDL_resource(a->get_type()).get_path();
         deps.insert(path);
         ret_val.insert(deps.begin(), deps.end());
     }
@@ -34,15 +34,15 @@ std::set<std::string> Dependency_resolver_v2::get_dependencies() {
     return ret_val;
 }
 
-std::set<std::string> Dependency_resolver_v2::solve_dep(HDL_instance &i) {
+std::set<std::string> Dependency_resolver_v2::solve_dep(std::shared_ptr<HDL_instance> &i) {
     std::set<std::string> ret_val;
 
-    auto type = i.get_type();
+    auto type = i->get_type();
 
-    for(auto &dep:i.get_dependencies()){
-        if(d_store->contains_hdl_entity(dep.get_type())){
+    for(auto &dep:i->get_dependencies()){
+        if(d_store->contains_hdl_entity(dep->get_type())){
 
-            auto res = d_store->get_HDL_resource(dep.get_type());
+            auto res = d_store->get_HDL_resource(dep->get_type());
             if(res.has_processors()){
                 auto proc = res.get_processor_doc();
                 detected_processors.insert(detected_processors.end(), proc.begin(), proc.end());
@@ -54,11 +54,11 @@ std::set<std::string> Dependency_resolver_v2::solve_dep(HDL_instance &i) {
         ret_val.insert(dep_set.begin(), dep_set.end());
     }
 
-    for(auto &item:i.get_package_dependencies()){
+    for(auto &item:i->get_package_dependencies()){
         ret_val.insert(item);
     }
 
-    for(auto &item:i.get_data_dependencies()){
+    for(auto &item:i->get_data_dependencies()){
         ret_val.insert(item);
     }
 
