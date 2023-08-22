@@ -25,6 +25,7 @@ HDL_instance::HDL_instance(const HDL_instance &c) {
     child_instances = c.child_instances;
     package_dependencies = c.package_dependencies;
     data_dependencies = c.data_dependencies;
+    parent = c.parent;
 }
 
 

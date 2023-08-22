@@ -17,18 +17,39 @@
 #define MAKEFILEGEN_V2_BUS_ANALYSIS_HPP
 
 #include "data_model/HDL/HDL_instance.hpp"
+#include "data_model/bus_mapping/bus_specs_manager.hpp"
 #include "data_model/data_store.hpp"
 #include "data_model/settings_store.hpp"
 #include "data_model/Depfile.hpp"
 
+typedef struct{
+    std::shared_ptr<HDL_instance> node;
+    std::string interface;
+    int64_t address;
+} analysis_context;
+
+
 class bus_analysis {
 public:
     explicit bus_analysis(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &ds, const Depfile &df);
-    void analyze_bus(HDL_instance &ast);
+    void analyze_bus(std::shared_ptr<HDL_instance> &ast);
 private:
+
     std::shared_ptr<settings_store> s_store;
     std::shared_ptr<data_store> d_store;
+    std::vector<analysis_context> process_interconnect(const analysis_context &inst);
+    std::vector<analysis_context> process_nested_module(const analysis_context &inst);
+    void process_leaf_node(const analysis_context &inst);
+    void analize_node(const std::vector<analysis_context> &c);
+
+
+
     Depfile dfile;
+    std::string bus_type;
+
+    bus_specs_manager specs_manager;
+
+
 };
 
 

@@ -72,6 +72,9 @@ public:
     void add_package_dependency(const std::string &p){package_dependencies.push_back(p);};
     std::vector<std::string> get_package_dependencies(){return package_dependencies;};
 
+    void set_parent(const std::shared_ptr<HDL_instance> &p){parent = p;};
+    std::shared_ptr<HDL_instance> get_parent(){return parent;};
+
     std::vector<std::shared_ptr<HDL_instance>> get_dependencies() {return child_instances;};
 
     template<class Archive>

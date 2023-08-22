@@ -48,6 +48,7 @@ std::shared_ptr<HDL_instance> HDL_ast_builder::build_ast(const std::string& top_
         return {};
     }
 
+
 }
 
 
@@ -93,6 +94,7 @@ std::optional<std::shared_ptr<HDL_instance>> HDL_ast_builder::recursive_build_as
         ret_inst->set_type(type);
         ret_inst->set_dependency_class(module);
         ret_inst->add_parameters(new_params);
+        ret_inst->set_parent(parent);
 
         if (log_structure) {
             std::cout << "Processing Instance " << i.get_name() << " of module " << type << std::endl;
