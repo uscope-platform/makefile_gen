@@ -250,7 +250,7 @@ TEST(Initialization_list, get_values_3d_packed) {
                     },
                 },
             {{1,0},{1,0},{1,0},{1,0}},
-            {true, false, false}
+            {true, false, false, false}
     );
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
     auto cs = std::make_shared<std::map<std::string, HDL_parameter>>();
@@ -354,7 +354,7 @@ TEST(Initialization_list, multidimensional_packed_array) {
                     }
             },
             {{7,0},{1,0},{1,0}},
-            {true, false}
+            {true, false, false}
     );
 
     auto external_parameters =  std::make_shared<std::map<std::string, HDL_parameter>>();
