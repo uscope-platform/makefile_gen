@@ -28,17 +28,18 @@ void bus_analysis::analyze_bus(std::shared_ptr<HDL_instance> &ast) {
     std::string starting_module  = bus["starting_module"];
     bus_type = bus["type"];
 
-    analysis_context top = {ast, bus_if, 0};
+    analysis_context top = {ast, bus_if, 0, false};
     analize_node({top});
 }
 
 
 void bus_analysis::analize_node(const std::vector<analysis_context> &n) {
     for(auto &leaf:n){
-        if(specs_manager.is_sink(leaf.node->get_type())){
+        auto type = leaf.node->get_type();
+        if(specs_manager.is_sink(type)){
             //manage_sink
             process_leaf_node(leaf);
-        }else if(specs_manager.is_interconnect(leaf.node->get_type())){
+        }else if(specs_manager.is_interconnect(type)){
             //manage interconnects
             analize_node(process_interconnect(leaf));
         }else {
@@ -51,6 +52,14 @@ void bus_analysis::analize_node(const std::vector<analysis_context> &n) {
 
 
 std::vector<analysis_context> bus_analysis::process_interconnect(const analysis_context &inst) {
+    if(inst.node->get_parent()->get_parameters().contains("PRAGMA_MKFG_PARAMETRIZED_INTERCONNECT")){
+        return process_parametric_interconnect(inst);
+    } else{
+        return process_simple_interconnect(inst);
+    }
+}
+
+std::vector<analysis_context> bus_analysis::process_simple_interconnect(const analysis_context &inst) {
     std::vector<analysis_context> ret_val;
     auto ic = inst.node;
     auto addresses = ic->get_parameters().get("SLAVE_ADDR").get_array_value().get_1d_slice({0,0});
@@ -63,7 +72,7 @@ std::vector<analysis_context> bus_analysis::process_interconnect(const analysis_
             for(auto &port:dep->get_ports()){
                 if(port.second.size()==1){
                     if(port.second.front() == masters_ifs[i]){
-                        analysis_context ctx = {dep, port.first, addresses[i]};
+                        analysis_context ctx = {dep, port.first, addresses[i] , false};
                         ret_val.push_back(ctx);
                     }
                 }
@@ -74,20 +83,82 @@ std::vector<analysis_context> bus_analysis::process_interconnect(const analysis_
     return ret_val;
 }
 
-std::vector<analysis_context> bus_analysis::process_nested_module(const analysis_context &inst) {
+std::vector<analysis_context> bus_analysis::process_parametric_interconnect(const analysis_context &inst) {
+    nlohmann::ordered_json bus_layout;
 
-    std::vector<analysis_context> ret_stack;
-    for(auto &dep:inst.node->get_dependencies()){
-        for(auto &connection:dep->get_ports()){
-            for(auto &item:connection.second){
-                if(item == inst.interface){
-                    analysis_context ctx = {dep, connection.first, inst.address};
-                    ret_stack.push_back(ctx);
-                    goto breakNested;
-                }
+    auto node = inst.node->get_parent();
+
+    auto instance_name = node->get_parameters().get("PRAGMA_MKFG_PARAMETRIZED_INTERCONNECT");
+    auto layout = node->get_parameters().get("PRAGMA_MKFG_BUS_LAYOUT").get_string_value();
+    std::string repl = R"(")";
+    layout = std::regex_replace(layout, std::regex("\\\\"), repl);
+
+    nlohmann::json interconnect_specs = nlohmann::ordered_json::parse(layout);
+
+
+    std::vector<int64_t> addresses;
+    std::vector<std::string> modules;
+    std::vector<std::string> interfaces;
+
+    int64_t base_address = node->get_parameters().get( interconnect_specs["base"]).get_numeric_value();
+    int64_t offset = std::stoll((std::string) interconnect_specs["offset"], nullptr, 0);
+    int64_t segment_base = 0;
+    for(auto &item:interconnect_specs["map"]){
+        int64_t len;
+        if(node->get_parameters().contains(item["len"])){
+            len = node->get_parameters().get(item["len"]).get_numeric_value();
+        } else {
+           len = std::stoll((std::string) item["len"], nullptr, 0);
+        }
+        for(int i = 0; i<len; i++){
+            addresses.push_back(base_address + (segment_base+i)*offset);
+            interfaces.push_back(item["if"]);
+            modules.push_back(item["mod"]);
+        }
+        segment_base = len;
+    }
+
+
+    std::vector<analysis_context> res;
+    for(int i = 0; i<modules.size(); i++){
+        for(auto &d:node->get_dependencies()){
+            if(d->get_name() == modules[i]){
+                analysis_context a = {d, interfaces[i], addresses[i], true};
+                res.push_back(a);
             }
         }
-        breakNested:;
+    }
+    return res;
+}
+
+std::vector<analysis_context> bus_analysis::process_nested_module(const analysis_context &inst) {
+    std::vector<analysis_context> ret_stack;
+    if(inst.parametric){
+        for(auto &dep:inst.node->get_dependencies()){
+            for(auto &connection:dep->get_ports()){
+                for(auto &item:connection.second){
+                    if(item == inst.interface){
+                        analysis_context ctx = {dep, connection.first, inst.address, false};
+                        ret_stack.push_back(ctx);
+                        goto breakNested2;
+                    }
+                }
+            }
+            breakNested2:;
+        }
+    } else{
+        for(auto &dep:inst.node->get_dependencies()){
+            for(auto &connection:dep->get_ports()){
+                for(auto &item:connection.second){
+                    if(item == inst.interface){
+                        analysis_context ctx = {dep, connection.first, inst.address, false};
+                        ret_stack.push_back(ctx);
+                        goto breakNested;
+                    }
+                }
+            }
+            breakNested:;
+        }
     }
 
     return ret_stack;

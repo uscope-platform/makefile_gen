@@ -22,12 +22,12 @@
 #include "data_model/settings_store.hpp"
 #include "data_model/Depfile.hpp"
 
-typedef struct{
+typedef struct {
     std::shared_ptr<HDL_instance> node;
     std::string interface;
     int64_t address;
-} analysis_context;
-
+    bool parametric;
+}analysis_context;
 
 class bus_analysis {
 public:
@@ -38,6 +38,8 @@ private:
     std::shared_ptr<settings_store> s_store;
     std::shared_ptr<data_store> d_store;
     std::vector<analysis_context> process_interconnect(const analysis_context &inst);
+    std::vector<analysis_context> process_simple_interconnect(const analysis_context &inst);
+    std::vector<analysis_context> process_parametric_interconnect(const analysis_context &inst);
     std::vector<analysis_context> process_nested_module(const analysis_context &inst);
     void process_leaf_node(const analysis_context &inst);
     void analize_node(const std::vector<analysis_context> &c);
