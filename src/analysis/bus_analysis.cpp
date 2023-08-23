@@ -55,7 +55,7 @@ std::vector<analysis_context> bus_analysis::process_interconnect(const analysis_
     auto ic = inst.node;
     auto addresses = ic->get_parameters().get("SLAVE_ADDR").get_array_value().get_1d_slice({0,0});
     auto masters_ifs = ic->get_ports()[specs_manager.get_interconnect_source_port(bus_type, ic->get_type())];
-
+    std::reverse(masters_ifs.begin(), masters_ifs.end());
 
     for(int i = 0; i<masters_ifs.size(); i++){
 

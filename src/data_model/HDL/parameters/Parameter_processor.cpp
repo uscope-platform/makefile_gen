@@ -34,7 +34,7 @@ Parameters_map Parameter_processor::process_parameters_map(const Parameters_map 
 
     Parameters_map working_set = map;
     Parameters_map next_working_set;
-    int override_cnt = 50;
+    int override_cnt = 5;
     while (!working_set.empty() && override_cnt != 0){
         for(auto &item:working_set){
             try{
