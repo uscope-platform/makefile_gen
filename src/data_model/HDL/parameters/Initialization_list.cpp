@@ -15,6 +15,7 @@
 
 #include "data_model/HDL/parameters/Initialization_list.hpp"
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
+#include "data_model/HDL/parameters/Parameters_map.hpp"
 
 
 Initialization_list::Initialization_list(const Initialization_list &i) {
@@ -130,8 +131,8 @@ bool Initialization_list::empty() const {
     return expression_leaves.empty() && lower_dimension_leaves.empty();
 }
 
-void Initialization_list::link_processor(const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep,
-                                         const std::shared_ptr<std::map<std::string, HDL_parameter>> &cs,
+void Initialization_list::link_processor(const std::shared_ptr<Parameters_map> &ep,
+                                         const std::shared_ptr<Parameters_map> &cs,
                                          const std::shared_ptr<data_store> &ds) {
     external_parameters = ep;
     completed_set = cs;
@@ -331,7 +332,7 @@ mdarray Initialization_list::get_3d_list_values() {
 
 
 Parameter_processor Initialization_list::get_parameter_processor() {
-    std::map<std::string, HDL_parameter> e_p;
+    Parameters_map e_p;
     for(const auto& item:*external_parameters){
         e_p.insert(item);
     }

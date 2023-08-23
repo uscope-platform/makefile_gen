@@ -36,7 +36,7 @@ HDL_instance::HDL_instance(std::string dep_name, std::string dep_type, dependenc
 }
 
 void HDL_instance::add_parameter(const std::string& parameter_name, const HDL_parameter &p) {
-    parameters[parameter_name] = p;
+    parameters.insert(p);
 }
 
 void HDL_instance::add_port_connection(const std::string& port_name, std::vector<std::string> value) {
@@ -62,7 +62,7 @@ void HDL_instance::add_array_quantifier(const bus_mapping_expression &exp) {
     quantifier = exp;
 }
 
-void HDL_instance::add_parameters(std::map<std::string, HDL_parameter> p) {
+void HDL_instance::add_parameters(Parameters_map &p) {
     parameters.insert(p.begin(), p.end());
 }
 
@@ -83,7 +83,7 @@ nlohmann::json HDL_instance::dump() {
 
     std::map<std::string, nlohmann::json> params_vect;
     for(auto &param:parameters){
-        params_vect.insert({param.first, param.second.dump()});
+        params_vect.insert({param.get_name(), param.dump()});
     }
     ret["parameters"] = params_vect;
 

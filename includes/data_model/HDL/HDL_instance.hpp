@@ -24,7 +24,7 @@
 #include "data_model/HDL/HDL_definitions.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/expressions/bus_mapping_expression.hpp"
-
+#include "data_model/HDL/parameters/Parameters_map.hpp"
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/unordered_map.hpp>
@@ -42,9 +42,9 @@ public:
     HDL_instance(const HDL_instance &c );
 
     void add_parameter(const std::string& parameter_name, const HDL_parameter &p);
-    void add_parameters(std::map<std::string, HDL_parameter> p);
-    std::map<std::string, HDL_parameter> get_parameters() { return parameters;};
-    std::string  get_parameter_value(const std::string& parameter_name) {return parameters[parameter_name].get_string_value();};
+    void add_parameters(Parameters_map &p);
+    Parameters_map get_parameters() { return parameters;};
+    std::string  get_parameter_value(const std::string& parameter_name) {return parameters.get(parameter_name).get_string_value();};
     bool is_parameter_overridden(const std::string& parameter_name) {return parameters.contains(parameter_name);};
 
     void add_port_connection(const std::string& port_name, std::vector<std::string> value);
@@ -87,7 +87,7 @@ public:
     friend bool operator==(const HDL_instance&lhs, const HDL_instance&rhs);
 private:
 
-    std::map<std::string, HDL_parameter> parameters;
+    Parameters_map parameters;
     std::unordered_map<std::string, std::vector<std::string>> ports_map;
     dependency_class dep_class;
     std::string type;

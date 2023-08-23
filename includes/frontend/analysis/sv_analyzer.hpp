@@ -48,7 +48,7 @@ private:
     void process_hdl();
     void search_bus_defining_package(std::string &content);
 
-    std::map<std::string, HDL_parameter> parameters;
+    Parameters_map parameters;
 
     std::shared_ptr<std::istream> input;
     std::string path;

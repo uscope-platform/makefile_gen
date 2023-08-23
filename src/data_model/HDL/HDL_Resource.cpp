@@ -130,20 +130,20 @@ std::pair<std::string, std::string> HDL_Resource::get_if_port_specs(const std::s
     return std::make_pair(if_specs[p_n][0],if_specs[p_n][1]);
 }
 
-void HDL_Resource::set_parameters(std::map<std::string, HDL_parameter> p) {
+void HDL_Resource::set_parameters(Parameters_map p) {
     parameters = std::move(p);
 }
 
 bool HDL_Resource::is_numeric_parameter(const std::string &s) {
     if(parameters.contains(s)) {
-        return parameters[s].get_type()==numeric_parameter;
+        return parameters.get(s).get_type()==numeric_parameter;
     } else
         return false;
 }
 
 bool HDL_Resource::is_string_parameter(const std::string &s) {
     if(parameters.contains(s)) {
-        return parameters[s].get_type()==string_parameter;
+        return parameters.get(s).get_type()==string_parameter;
     } else
         return false;
 }
@@ -154,8 +154,8 @@ void PrintTo(const HDL_Resource &res, std::ostream *os) {
     result += "\nHDL Resource:\n  NAME: " + res.name;
     result += "\n  PATH: " + res.path;
     result += "\n  PARAMETERS: \n";
-    for(auto item:res.parameters){
-        result += item.second.to_string();
+    for(const auto& item:res.parameters){
+        result += item.to_string();
     }
     result += "\n----------------------------------------------------";
 

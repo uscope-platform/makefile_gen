@@ -28,20 +28,20 @@ TEST( analysis_test , package) {
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
 
-    std::map<std::string, HDL_parameter> parameters = resource.get_parameters();
+    Parameters_map parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_map;
+    Parameters_map check_map;
 
     HDL_parameter p;
     p.set_name("bus_base");
     p.set_expression_components({Expression_component("32'h43c00000")});
     p.set_type(expression_parameter);
-    check_map[p.get_name()] = p;
+    check_map.insert(p);
 
     p.set_name("timebase");
     p.set_expression_components({ Expression_component("bus_base")});
     p.set_type(expression_parameter);
-    check_map[p.get_name()] = p;
+    check_map.insert(p);
 
     p.set_name("gpio");
     p.set_expression_components({
@@ -54,31 +54,31 @@ TEST( analysis_test , package) {
     });
 
     p.set_type(expression_parameter);
-    check_map[p.get_name()] = p;
+    check_map.insert(p);
 
     p.set_name("scope_mux");
     p.set_expression_components({ Expression_component("gpio")});
     p.set_type(expression_parameter);
-    check_map[p.get_name()] = p;
+    check_map.insert(p);
 
     p.set_name("out_of_order");
     p.set_expression_components({ Expression_component("scope_mux")});
     p.set_type(expression_parameter);
-    check_map[p.get_name()] = p;
+    check_map.insert(p);
 
     p.set_name("modulo_parameter");
     p.set_expression_components({
         Expression_component("3"),Expression_component("%"),Expression_component("2")
     });
     p.set_type(expression_parameter);
-    check_map[p.get_name()] = p;
+    check_map.insert(p);
 
     p.set_name("subtraction_parameter");
     p.set_expression_components({
         Expression_component("'o4"),Expression_component("-"),Expression_component("'b10")
     });
     p.set_type(expression_parameter);
-    check_map[p.get_name()] = p;
+    check_map.insert(p);
 
     ASSERT_EQ(check_map, parameters);
 

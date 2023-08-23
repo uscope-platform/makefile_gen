@@ -24,10 +24,12 @@
 #include "data_model/HDL/parameters/Expression_component.hpp"
 #include "data_model/mdarray.hpp"
 
+
 // FORWARD DECLARATIONS
 class HDL_parameter;
 class Parameter_processor;
 class data_store;
+class Parameters_map;
 
 typedef  std::vector<Expression_component> Expression;
 
@@ -56,8 +58,8 @@ public:
     bool empty() const;
     bool is_packed() const{return unpacked_dimensions.empty() && !packed_dimensions.empty();};
     void link_processor(
-                        const std::shared_ptr<std::map<std::string, HDL_parameter>> &ep,
-                        const std::shared_ptr<std::map<std::string, HDL_parameter>> &cs,
+                        const std::shared_ptr<Parameters_map> &ep,
+                        const std::shared_ptr<Parameters_map> &cs,
                         const std::shared_ptr<data_store> &ds);
     int64_t get_value_at(std::vector<uint64_t> idx);
     mdarray get_values();
@@ -101,8 +103,8 @@ private:
 
     int64_t pack_values(const std::pair<md_1d_array, md_1d_array> &components);
 
-    std::shared_ptr<std::map<std::string, HDL_parameter>> external_parameters;
-    std::shared_ptr<std::map<std::string, HDL_parameter>> completed_set;
+    std::shared_ptr<Parameters_map> external_parameters;
+    std::shared_ptr<Parameters_map> completed_set;
     std::shared_ptr<data_store> d_store;
 
     std::vector<dimension_t> unpacked_dimensions;

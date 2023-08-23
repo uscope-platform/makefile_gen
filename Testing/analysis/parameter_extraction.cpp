@@ -75,7 +75,7 @@ TEST(parameter_extraction, simple_parameters) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
     std::vector<std::pair<std::string, std::vector<std::string>>> vect_params = {
             {"simple_numeric_p", {"32"}},
@@ -94,14 +94,14 @@ TEST(parameter_extraction, simple_parameters) {
         for(auto &op:item.second){
             p.add_component(Expression_component(op));
         }
-        check_params[item.first] = p;
+        check_params.insert(p);
     }
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 
 }
@@ -131,7 +131,7 @@ TEST(parameter_extraction, simple_expressions) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
     std::vector<std::pair<std::string, std::vector<std::string>>> vect_params = {
             {"simple_numeric_p", {"32"}},
@@ -155,14 +155,14 @@ TEST(parameter_extraction, simple_expressions) {
         for(auto &op:item.second){
             p.add_component(Expression_component(op));
         }
-        check_params[item.first] = p;
+        check_params.insert(p);
     }
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 
 }
@@ -181,7 +181,7 @@ TEST(parameter_extraction, array_expression) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
     HDL_parameter p = HDL_parameter();
     p.set_type(expression_parameter);
@@ -196,7 +196,7 @@ TEST(parameter_extraction, array_expression) {
 
     p.add_initialization_list(il);
 
-    check_params["array_parameter"] = p;
+    check_params.insert(p);
 
 
     p = HDL_parameter();
@@ -211,14 +211,14 @@ TEST(parameter_extraction, array_expression) {
     ai = {{Expression_component("1")}};
     e.set_array_index(ai);
     p.add_component(e);
-    check_params["array_parameter_expr_p"] = p;
+    check_params.insert(p);
 
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 
 }
@@ -238,14 +238,14 @@ TEST(parameter_extraction, multidimensional_array_expression) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
 
     HDL_parameter p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("repetition_size");
     p.add_component(Expression_component("2"));
-    check_params["repetition_size"] = p;
+    check_params.insert(p);
 
     p = HDL_parameter();
     p.set_type(expression_parameter);
@@ -272,7 +272,7 @@ TEST(parameter_extraction, multidimensional_array_expression) {
     p.add_initialization_list(produce_check_init_list(init));
 
 
-    check_params["multidim_array_parameter"] = p;
+    check_params.insert(p);
 
 
 
@@ -283,15 +283,15 @@ TEST(parameter_extraction, multidimensional_array_expression) {
     std::vector<Expression> ai = {{Expression_component("1")},{Expression_component("0")}};
     e.set_array_index(ai);
     p.add_component(e);
-    check_params["multidim_array_access"] = p;
+    check_params.insert(p);
 
 
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 
 }
@@ -314,14 +314,14 @@ TEST(parameter_extraction, repetition_initialization) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
 
     HDL_parameter p = HDL_parameter();
     p.set_type(expression_parameter);
     p.set_name("repetition_size");
     p.add_component(Expression_component("2"));
-    check_params["repetition_size"] = p;
+    check_params.insert(p);
 
 
     p = HDL_parameter();
@@ -336,7 +336,7 @@ TEST(parameter_extraction, repetition_initialization) {
 
     p.add_initialization_list(produce_check_init_list_1d(init));
 
-    check_params["repetition_parameter_1"] = p;
+    check_params.insert(p);
 
     p = HDL_parameter();
     p.set_type(expression_parameter);
@@ -349,7 +349,7 @@ TEST(parameter_extraction, repetition_initialization) {
 
     p.add_initialization_list(produce_check_init_list_1d(init));
 
-    check_params["repetition_parameter_2"] = p;
+    check_params.insert(p);
 
 
     p = HDL_parameter();
@@ -364,7 +364,7 @@ TEST(parameter_extraction, repetition_initialization) {
 
     p.add_initialization_list(produce_check_init_list(init));
 
-    check_params["multi_repetition_parameter"] = p;
+    check_params.insert(p);
 
     p = HDL_parameter();
     p.set_type(expression_parameter);
@@ -377,17 +377,17 @@ TEST(parameter_extraction, repetition_initialization) {
                            {Expression_component("repetition_parameter_2")}
                    }};
 
-    
+
     p.add_initialization_list(produce_check_init_list(init));
 
-    check_params["mixed_repetition_parameter"] = p;
+    check_params.insert(p);
 
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 
 }
@@ -405,7 +405,7 @@ TEST(parameter_extraction, packed_array) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
     HDL_parameter p = HDL_parameter();
     p.set_type(expression_parameter);
@@ -423,17 +423,17 @@ TEST(parameter_extraction, packed_array) {
             {Expression_component("1'b0")},
             {Expression_component("1'b1")}
     }};
-    
+
     p.add_initialization_list(produce_check_init_list(init));
 
-    check_params["packed_param"] = p;
+    check_params.insert(p);
 
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 
 }
@@ -452,7 +452,7 @@ TEST(parameter_extraction, package_parameters_use) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
     HDL_parameter p = HDL_parameter();
     p.set_type(expression_parameter);
@@ -460,14 +460,14 @@ TEST(parameter_extraction, package_parameters_use) {
     Expression_component ec("bus_base");
     ec.set_package_prefix("test_package");
     p.add_component(ec);
-    check_params["package_param"] = p;
+    check_params.insert(p);
 
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 
 }
@@ -485,7 +485,7 @@ TEST(parameter_extraction, negative_number_parameters) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
 
     HDL_parameter p = HDL_parameter();
@@ -494,13 +494,13 @@ TEST(parameter_extraction, negative_number_parameters) {
     for(auto &op:{"-", "16'sd32767"}){
         p.add_component(Expression_component(op));
     }
-    check_params["negative_param"] = p;
+    check_params.insert(p);
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 
 }
@@ -518,7 +518,7 @@ TEST(parameter_extraction, negative_number_array_init) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
 
     HDL_parameter p = HDL_parameter();
@@ -535,15 +535,15 @@ TEST(parameter_extraction, negative_number_array_init) {
     }};
 
     p.add_initialization_list(produce_check_init_list_1d(init));
-    
 
-    check_params["negative_array_param"] = p;
+
+    check_params.insert(p);
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 
 }
@@ -561,7 +561,7 @@ TEST(parameter_extraction, expression_array_init) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
 
     HDL_parameter p = HDL_parameter();
@@ -578,15 +578,15 @@ TEST(parameter_extraction, expression_array_init) {
    }};
 
     p.add_initialization_list(produce_check_init_list_1d(init));
-    
 
-    check_params["expression_array_param"] = p;
+
+    check_params.insert(p);
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 
 }
@@ -605,7 +605,7 @@ TEST(parameter_extraction, combined_packed_unpacked_init) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
 
     HDL_parameter p = HDL_parameter();
@@ -639,10 +639,10 @@ TEST(parameter_extraction, combined_packed_unpacked_init) {
                    }};
 
     p.add_initialization_list(produce_check_init_list(init));
-    
-    
 
-    check_params["param_a"] = p;
+
+
+    check_params.insert(p);
 
 
     p = HDL_parameter();
@@ -666,17 +666,17 @@ TEST(parameter_extraction, combined_packed_unpacked_init) {
                    }};
 
     p.add_initialization_list(produce_check_init_list(init));
-    
-    
 
-    check_params["param_b"] = p;
+
+
+    check_params.insert(p);
 
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 
 }
@@ -707,7 +707,7 @@ TEST(parameter_extraction, instance_parameter) {
             {"test_param", {"4"}}
     };
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
     for(auto &item:  vect_params){
         HDL_parameter p = HDL_parameter();
         p.set_type(expression_parameter);
@@ -715,16 +715,17 @@ TEST(parameter_extraction, instance_parameter) {
         for(auto &op:item.second){
             p.add_component(Expression_component(op));
         }
-        check_params[item.first] = p;
+        check_params.insert(p);
     }
 
 
     ASSERT_EQ(check_params.size(), def_parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(def_parameters.contains(item.first));
-        ASSERT_EQ(item.second, def_parameters[item.first]);
+        ASSERT_TRUE(def_parameters.contains(item.get_name()));
+        ASSERT_EQ(item, def_parameters.get(item.get_name()));
     }
+
 
     vect_params = {
             {"param_1", {"test_param"}},
@@ -741,16 +742,17 @@ TEST(parameter_extraction, instance_parameter) {
         for(auto &op:item.second){
             p.add_component(Expression_component(op));
         }
-        check_params[item.first] = p;
+        check_params.insert(p);
     }
 
 
     ASSERT_EQ(check_params.size(), inst_parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(inst_parameters.contains(item.first));
-        ASSERT_EQ(item.second, inst_parameters[item.first]);
+        ASSERT_TRUE(inst_parameters.contains(item.get_name()));
+        ASSERT_EQ(item, inst_parameters.get(item.get_name()));
     }
+
 
 }
 
@@ -777,7 +779,7 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
     std::vector<std::pair<std::string, std::vector<std::string>>> vect_params = {
             {"", {}}
@@ -789,7 +791,7 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
     p.set_type(expression_parameter);
     p.set_name("SS_POLARITY_DEFAULT");
     p.add_component(Expression_component("0"));
-    check_params["SS_POLARITY_DEFAULT"] = p;
+    check_params.insert(p);
 
 
     p = HDL_parameter();
@@ -827,17 +829,17 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
                    },
                    };
     p.add_initialization_list(produce_check_init_list(init));
-    
-    
 
-    check_params["FIXED_REGISTER_VALUES"] = p;
+
+
+    check_params.insert(p);
 
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 
 }
@@ -865,7 +867,7 @@ TEST(parameter_extraction, multidimensional_packed_array) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
 
     check_params.clear();
@@ -928,13 +930,13 @@ TEST(parameter_extraction, multidimensional_packed_array) {
 
     p.add_initialization_list(il);
 
-    check_params["param_a"] = p;
+    check_params.insert(p);
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 
 }
@@ -953,7 +955,7 @@ TEST(parameter_extraction, packed_replication_init) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
 
     HDL_parameter p = HDL_parameter();
@@ -971,13 +973,13 @@ TEST(parameter_extraction, packed_replication_init) {
     p.add_initialization_list(produce_check_init_list_1d(init));
 
 
-    check_params["test_parameter"] = p;
+    check_params.insert(p);
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 }
 
@@ -995,7 +997,7 @@ TEST(parameter_extraction, array_initialization_default) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
     HDL_parameter p;
     p.set_name("test_parameter");
@@ -1007,13 +1009,13 @@ TEST(parameter_extraction, array_initialization_default) {
     i.add_item({Expression_component("0")});
     i.set_default();
     p.add_initialization_list(i);
-    check_params["test_parameter"] = p;
+    check_params.insert(p);
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 
 }
@@ -1037,7 +1039,7 @@ TEST(parameter_extraction, unrelated_wire_dependency_conflict) {
 
     HDL_instance i = resource.get_dependencies()[0];
 
-    auto parameter = i.get_parameters()["DECIMATED"];
+    auto parameter = i.get_parameters().get("DECIMATED");
 
     HDL_parameter check_param;
     check_param.set_name("DECIMATED");
@@ -1064,15 +1066,15 @@ TEST(parameter_extraction, param_ternary_conditional) {
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
-    std::map<std::string, HDL_parameter> check_params;
+    Parameters_map check_params;
 
 
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.first));
-        ASSERT_EQ(item.second, parameters[item.first]);
+        ASSERT_TRUE(parameters.contains(item.get_name()));
+        ASSERT_EQ(item, parameters.get(item.get_name()));
     }
 }
  **/

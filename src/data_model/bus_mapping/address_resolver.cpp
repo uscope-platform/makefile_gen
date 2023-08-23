@@ -30,7 +30,7 @@ uint32_t address_resolver::get_address(const std::string &str, HDL_Resource &par
         return  bus_defining_package.get_numeric_parameter(param_name);
     }
     if(parameters_stack[parameters_stack.size()-1- stack_level].contains(str)){
-        return get_address(parameters_stack[parameters_stack.size()-1- stack_level][str].get_string_value(), parent, parent_dep,stack_level+1);
+        return get_address(parameters_stack[parameters_stack.size()-1- stack_level].get(str).get_string_value(), parent, parent_dep,stack_level+1);
     } else if(parent.is_string_parameter(str)){
         std::string param_value;
         if(parent_dep.is_parameter_overridden(str)){

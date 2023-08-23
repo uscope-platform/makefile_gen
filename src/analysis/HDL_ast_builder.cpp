@@ -23,7 +23,7 @@ HDL_ast_builder::HDL_ast_builder(const std::shared_ptr<settings_store> &s, const
 }
 
 std::vector<std::shared_ptr<HDL_instance>> HDL_ast_builder::build_ast(const std::vector<std::string> &modules,
-                                                     std::map<std::string, HDL_parameter> external_parameters) {
+                                                                      const Parameters_map &external_parameters) {
     std::vector<std::shared_ptr<HDL_instance>> ret;
     ret.reserve(modules.size());
     for(auto &item:modules){
@@ -33,7 +33,7 @@ std::vector<std::shared_ptr<HDL_instance>> HDL_ast_builder::build_ast(const std:
 }
 
 
-std::shared_ptr<HDL_instance> HDL_ast_builder::build_ast(const std::string& top_level_module, std::map<std::string, HDL_parameter> external_parameters) {
+std::shared_ptr<HDL_instance> HDL_ast_builder::build_ast(const std::string& top_level_module, const Parameters_map &external_parameters) {
 
     HDL_instance i;
     i.set_name("TL");
@@ -56,7 +56,7 @@ std::shared_ptr<HDL_instance> HDL_ast_builder::build_ast(const std::string& top_
 
 std::optional<std::shared_ptr<HDL_instance>> HDL_ast_builder::recursive_build_ast(
         HDL_instance &i,
-        const std::map<std::string, HDL_parameter> &external_parameters,
+        const Parameters_map &external_parameters,
         const std::shared_ptr<HDL_instance>& parent
 ) {
 

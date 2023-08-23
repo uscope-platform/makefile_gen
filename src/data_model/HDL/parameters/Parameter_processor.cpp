@@ -16,52 +16,52 @@
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
 
-Parameter_processor::Parameter_processor(const std::map<std::string, HDL_parameter> &parent_parameters, const std::shared_ptr<data_store> &ds) {
+Parameter_processor::Parameter_processor(const Parameters_map &parent_parameters, const std::shared_ptr<data_store> &ds) {
     d_store = ds;
-    external_parameters = std::make_shared<std::map<std::string, HDL_parameter>>(parent_parameters);
-    compleated_set = std::make_shared<std::map<std::string, HDL_parameter>>();
+    external_parameters = std::make_shared<Parameters_map>(parent_parameters);
+    compleated_set = std::make_shared<Parameters_map>();
 }
 
-Parameter_processor::Parameter_processor(const std::map<std::string, HDL_parameter> &ep,
-                                         std::shared_ptr<std::map<std::string, HDL_parameter>> &cs) {
+Parameter_processor::Parameter_processor(const Parameters_map &ep,
+                                         std::shared_ptr<Parameters_map> &cs) {
     d_store = {};
-    external_parameters = std::make_shared<std::map<std::string, HDL_parameter>>(ep);
+    external_parameters = std::make_shared<Parameters_map>(ep);
     compleated_set = cs;
 }
 
-std::map<std::string, HDL_parameter> Parameter_processor::process_parameters_map(const std::map<std::string, HDL_parameter> &map, HDL_Resource &spec) {
+Parameters_map Parameter_processor::process_parameters_map(const Parameters_map &map, HDL_Resource &spec) {
 
 
-    std::map<std::basic_string<char>, HDL_parameter> working_set = map;
-    std::map<std::basic_string<char>, HDL_parameter> next_working_set;
+    Parameters_map working_set = map;
+    Parameters_map next_working_set;
     int override_cnt = 50;
     while (!working_set.empty() && override_cnt != 0){
         for(auto &item:working_set){
             try{
-                auto par = item.second;
-                if(external_parameters->contains(item.first)){
+                auto par = item;
+                if(external_parameters->contains(item.get_name())){
                     // The parameter needs to be copied out of external parameters and into the completed set otherwise it will go out of scope
-                    auto param = external_parameters->at(item.first);
+                    auto param = external_parameters->get(item.get_name());
                     param.clear_expression_components();
-                    compleated_set->insert({item.first, param});
+                    compleated_set->insert(param);
                 } else {
                     if(par.is_array()){
-                        auto spec_il = spec.get_parameters()[par.get_name()].get_i_l();
+                        auto spec_il = spec.get_parameters().get(par.get_name()).get_i_l();
                         auto param_il = par.get_i_l();
                         param_il.set_packed_dimensions(spec_il.get_packed_dimensions());
                         param_il.set_unpacked_dimensions(spec_il.get_unpacked_dimensions());
                         par.add_initialization_list(param_il);
                         auto p =  process_array_parameter(par);
-                        compleated_set->insert({item.first, p});
+                        compleated_set->insert(p);
                     } else {
                         try{
                             auto p = process_scalar_parameter(par);
-                            compleated_set->insert({item.first, p});
+                            compleated_set->insert(p);
                         } catch (Parameter_processor_Exception &ex){
                             if(!ex.unknown_parameter){
-                                HDL_parameter p = item.second;
+                                HDL_parameter p = item;
                                 p.set_value(ex.str_val);
-                                string_set.insert({ex.str_val, {item.first, p}});
+                                string_set.insert({ex.str_val, p});
                                 next_working_set.insert(item);
                             } else{
                                 next_working_set.insert(item);
@@ -76,7 +76,7 @@ std::map<std::string, HDL_parameter> Parameter_processor::process_parameters_map
         for(auto &item:string_set){
             if(!next_working_set.contains(item.first)){
                 compleated_set->insert(item.second);
-                next_working_set.erase(item.second.first);
+                next_working_set.erase(item.second.get_name());
             }
         }
         working_set = next_working_set;
@@ -109,11 +109,11 @@ HDL_parameter Parameter_processor::process_scalar_parameter(const HDL_parameter 
 
     try {
         if (external_parameters->contains(return_par.get_name())) {
-            if(external_parameters->at(return_par.get_name()).is_array()){
-                auto value = external_parameters->at(return_par.get_name()).get_array_value();
+            if(external_parameters->get(return_par.get_name()).is_array()){
+                auto value = external_parameters->get(return_par.get_name()).get_array_value();
                 return_par.set_array_value(value);
             } else {
-                auto parameter = external_parameters->at(return_par.get_name());
+                auto parameter = external_parameters->get(return_par.get_name());
                 if(parameter.get_type() == numeric_parameter){
                     auto value = parameter.get_numeric_value();
                     return_par.set_expression_components({Expression_component(std::to_string(value))});
@@ -174,10 +174,10 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
             processed_rpn.push_back(i);
         } else if(i.get_type() == string_component) {
             if(external_parameters->contains(i.get_string_value())) {
-                Expression_component e(external_parameters->at(i.get_raw_string_value()).get_numeric_value());
+                Expression_component e(external_parameters->get(i.get_raw_string_value()).get_numeric_value());
                 processed_rpn.emplace_back(e);
             } else if(compleated_set->contains(i.get_raw_string_value())){
-                processed_rpn.emplace_back(compleated_set->at(i.get_raw_string_value()).get_numeric_value());
+                processed_rpn.emplace_back(compleated_set->get(i.get_raw_string_value()).get_numeric_value());
             } else {
                 throw Parameter_processor_Exception();
             }
@@ -313,9 +313,9 @@ std::vector<Expression_component> Parameter_processor::expr_vector_to_rpn(const 
 
 void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
     for(auto &res:v){
-        std::map<std::string, HDL_parameter> new_params;
+        Parameters_map new_params;
         for(auto &item: res.get_parameters()){
-            new_params[item.first] = item.second;
+            new_params.insert(item);
         }
         res.set_parameters(new_params);
     }
@@ -339,7 +339,7 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
             auto res = d_store->get_HDL_resource(pkg);
             Parameter_processor p({}, d_store);
             auto pkg_params = p.process_parameters_map(res.get_parameters(),res);
-            auto val = pkg_params[ec.get_string_value()].get_numeric_value();
+            auto val = pkg_params.get(ec.get_string_value()).get_numeric_value();
             if(result_size != nullptr){
                 *result_size = Expression_component::calculate_binary_size(val);
             }
@@ -360,7 +360,7 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
     int64_t val;
 
     if(external_parameters->contains(param_name)) {
-        auto parameter = external_parameters->at(param_name);
+        auto parameter = external_parameters->get(param_name);
         if (parameter.get_type() == array_parameter) {
             throw array_value_exception(parameter.get_array_value());
         } else if(parameter.get_type() == string_parameter) {
@@ -375,10 +375,10 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
             }
         }
     } else if(compleated_set->contains(param_name)) {
-        if (compleated_set->at(param_name).is_array()) {
-            throw array_value_exception(compleated_set->at(param_name).get_array_value());
+        if (compleated_set->get(param_name).is_array()) {
+            throw array_value_exception(compleated_set->get(param_name).get_array_value());
         } else {
-            val = compleated_set->at(param_name).get_numeric_value();
+            val = compleated_set->get(param_name).get_numeric_value();
             if (result_size != nullptr) {
                 *result_size = Expression_component::calculate_binary_size(val);
             }
@@ -409,9 +409,9 @@ Expression_component Parameter_processor::process_array_access(Expression_compon
 
     HDL_parameter p;
     if(external_parameters->contains(e.get_string_value())){
-        p = external_parameters->at(e.get_string_value());
+        p = external_parameters->get(e.get_string_value());
     }else if(compleated_set->contains(e.get_string_value())){
-        p = compleated_set->at(e.get_string_value());
+        p = compleated_set->get(e.get_string_value());
     } else {
         throw Parameter_processor_Exception();
     }
@@ -429,11 +429,11 @@ HDL_parameter Parameter_processor::process_array_parameter(const HDL_parameter &
     HDL_parameter return_par = par;
     mdarray arr_val;
     if(external_parameters->contains(par.get_name())){
-        if(external_parameters->at(par.get_name()).get_type()==array_parameter){
-            arr_val = external_parameters->at(par.get_name()).get_array_value();
+        if(external_parameters->get(par.get_name()).get_type()==array_parameter){
+            arr_val = external_parameters->get(par.get_name()).get_array_value();
             return_par.add_initialization_list({});
         } else {
-            Initialization_list il = external_parameters->at(par.get_name()).get_i_l();
+            Initialization_list il = external_parameters->get(par.get_name()).get_i_l();
             il.link_processor( external_parameters, compleated_set, d_store);
             arr_val = il.get_values();
         }
@@ -450,7 +450,7 @@ HDL_parameter Parameter_processor::process_array_parameter(const HDL_parameter &
         return_par.set_array_value(arr_val);
     }
     return_par.clear_expression_components();
-    compleated_set->insert({par.get_name(), return_par});
+    compleated_set->insert(return_par);
     return return_par;
 }
 
@@ -458,14 +458,14 @@ HDL_parameter Parameter_processor::process_packed_parameter(const HDL_parameter 
     HDL_parameter return_par = par;
     Initialization_list il;
     if(external_parameters->contains(return_par.get_name())){
-        if(external_parameters->at(return_par.get_name()).get_type() == numeric_parameter){
-            return_par.set_value(external_parameters->at(return_par.get_name()).get_numeric_value());
+        if(external_parameters->get(return_par.get_name()).get_type() == numeric_parameter){
+            return_par.set_value(external_parameters->get(return_par.get_name()).get_numeric_value());
             return return_par;
-        } else if(external_parameters->at(return_par.get_name()).get_type() == string_parameter){
-            return_par.set_value(external_parameters->at(return_par.get_name()).get_string_value());
+        } else if(external_parameters->get(return_par.get_name()).get_type() == string_parameter){
+            return_par.set_value(external_parameters->get(return_par.get_name()).get_string_value());
             return return_par;
         } else{
-            il = external_parameters->at(return_par.get_name()).get_i_l();
+            il = external_parameters->get(return_par.get_name()).get_i_l();
         }
     } else {
         il = return_par.get_i_l();

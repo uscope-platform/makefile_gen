@@ -21,7 +21,7 @@
 
 #include "data_model/HDL/HDL_Resource.hpp"
 #include "data_model/data_store.hpp"
-
+#include "data_model/HDL/parameters/Parameters_map.hpp"
 
 
 class string_parameter_exception : public std::exception {
@@ -63,11 +63,11 @@ public:
 
 class Parameter_processor {
 public:
-    Parameter_processor(const std::map<std::string, HDL_parameter>& parent_parameters, const std::shared_ptr<data_store> &ds);
-    Parameter_processor(const std::map<std::string, HDL_parameter>& ep,
-                        std::shared_ptr<std::map<std::string, HDL_parameter>> &cs
+    Parameter_processor(const Parameters_map& parent_parameters, const std::shared_ptr<data_store> &ds);
+    Parameter_processor(const Parameters_map& ep,
+                        std::shared_ptr<Parameters_map> &cs
     );
-    std::map<std::string, HDL_parameter> process_parameters_map(const std::map<std::string, HDL_parameter> &map, HDL_Resource &spec);
+    Parameters_map process_parameters_map(const Parameters_map &map, HDL_Resource &spec);
     static void convert_parameters(std::vector<HDL_Resource> &v);
     int64_t process_expression(const std::vector<Expression_component>& expr, int64_t *reslt_size);
 
@@ -85,10 +85,10 @@ private:
     Expression_component process_array_access(Expression_component &e);
     int64_t get_component_value(Expression_component &ec, int64_t *result_size);
 
-    std::shared_ptr<std::map<std::string, HDL_parameter>> compleated_set;
-    std::map<std::string, std::pair<std::string, HDL_parameter>> string_set;
+    std::shared_ptr<Parameters_map> compleated_set;
+    std::map<std::string, HDL_parameter> string_set;
 
-    std::shared_ptr<std::map<std::string, HDL_parameter>> external_parameters;
+    std::shared_ptr<Parameters_map> external_parameters;
 
     std::unordered_map<std::string, std::vector<int64_t>> array_parameter_values;
 

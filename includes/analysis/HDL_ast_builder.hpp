@@ -30,15 +30,15 @@
 class HDL_ast_builder {
     public:
         HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d, const Depfile& d_f);
-        std::shared_ptr<HDL_instance> build_ast(const std::string& top_level_module, std::map<std::string, HDL_parameter> external_parameters);
-        std::vector<std::shared_ptr<HDL_instance>> build_ast(const std::vector<std::string>& modules, std::map<std::string, HDL_parameter> external_parameters);
+        std::shared_ptr<HDL_instance> build_ast(const std::string& top_level_module,const Parameters_map &external_parameters);
+        std::vector<std::shared_ptr<HDL_instance>> build_ast(const std::vector<std::string>& modules,const Parameters_map &external_parameters);
 
     private:
         std::shared_ptr<settings_store> s_store;
         std::shared_ptr<data_store> d_store;
         bool log_structure;
         std::optional<std::shared_ptr<HDL_instance>> recursive_build_ast(HDL_instance &i,
-                                                                         const std::map<std::string, HDL_parameter> &external_parameters,
+                                                                         const Parameters_map &external_parameters,
                                                                          const std::shared_ptr<HDL_instance>& parent
                                                                          );
         nlohmann::json log;

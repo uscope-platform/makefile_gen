@@ -210,7 +210,7 @@ std::vector<std::string> bus_mapper::split_if_array(const std::string &array) {
 std::vector<std::string> bus_mapper::get_interconnect_addr_vect(bus_map_node &item, HDL_Resource &parent) {
 
 
-    auto address_param = item.instance.get_parameters()["SLAVE_ADDR"].get_string_value();
+    auto address_param = item.instance.get_parameters().get("SLAVE_ADDR").get_string_value();
     std::vector<std::string> addresses_vect;
     if(is_array_parameter(address_param)){
         addresses_vect = split_if_array(address_param);
