@@ -27,7 +27,7 @@ public:
     bool contains(const std::string &name){
         bool retval = false;
         for(const auto &item:inner_map){
-            retval |= item.get_name() == name;
+            retval |= item->get_name() == name;
         }
         return retval;
     }
@@ -35,25 +35,25 @@ public:
     void erase(const std::string &name){
         int i =-1 ;
         for(i = 0; i<inner_map.size(); i++){
-            if(inner_map[i].get_name()==name) break;
+            if(inner_map[i]->get_name()==name) break;
         }
         if(i !=-1){
             inner_map.erase(inner_map.begin()+i);
         }
     }
 
-    HDL_parameter get(const std::string &name){
+    std::shared_ptr<HDL_parameter> get(const std::string &name){
         bool found = false;
         int item_idx = 0;
         for(int i = 0; i<inner_map.size(); i++){
-            if(inner_map[i].get_name()==name){
+            if(inner_map[i]->get_name()==name){
                 found = true;
                 item_idx = i;
             };
         }
         if(!found){
             inner_map.emplace_back();
-            inner_map.back().set_name(name);
+            inner_map.back()->set_name(name);
             return inner_map.back();
         } else{
             return inner_map[item_idx];
@@ -61,50 +61,56 @@ public:
     }
 
     friend bool operator==(const Parameters_map&lhs, const Parameters_map&rhs){
-        return lhs.inner_map == rhs.inner_map;
+        if(lhs.inner_map.size() != rhs.inner_map.size()) return false;
+        bool ret_val = true;
+        for(int i = 0; i<lhs.inner_map.size(); i++){
+            ret_val &= *lhs.inner_map[i] == *rhs.inner_map[i];
+        }
+        return ret_val;
     };
 
     template<class Archive>
     void serialize( Archive & ar ) {
         ar(inner_map);
     }
-    void insert(const HDL_parameter &p){
+    void insert(const std::shared_ptr<HDL_parameter> &p){
         bool  found = false;
         for(auto & i : inner_map){
-            if(i.get_name()==p.get_name()) {
+            if(i->get_name()==p->get_name()) {
                 i = p;
                 found = true;
             }
         }
         if(!found) inner_map.push_back(p);
     }
-    void insert(std::vector<HDL_parameter>::iterator  begin, std::vector<HDL_parameter>::iterator end){
-        std::for_each(begin, end, [&](HDL_parameter const & p){
+
+    void insert(std::vector<std::shared_ptr<HDL_parameter>>::iterator  begin, std::vector<std::shared_ptr<HDL_parameter>>::iterator end){
+        std::for_each(begin, end, [&](std::shared_ptr<HDL_parameter> const & p){
             this->insert(p);
         });
     };
 
-    std::vector<HDL_parameter>::iterator begin()
+    std::vector<std::shared_ptr<HDL_parameter>>::iterator begin()
     {
         return inner_map.begin();
     };
 
-    std::vector<HDL_parameter>::const_iterator begin() const{
+    std::vector<std::shared_ptr<HDL_parameter>>::const_iterator begin() const{
         return inner_map.begin();
     };
 
-    std::vector<HDL_parameter>::iterator end()
+    std::vector<std::shared_ptr<HDL_parameter>>::iterator end()
     {
         return inner_map.end();
     };
 
-    std::vector<HDL_parameter>::const_iterator end() const{
+    std::vector<std::shared_ptr<HDL_parameter>>::const_iterator end() const{
         return inner_map.end();
     };
 
 private:
 
-    std::vector<HDL_parameter> inner_map;
+    std::vector<std::shared_ptr<HDL_parameter>> inner_map;
 };
 
 

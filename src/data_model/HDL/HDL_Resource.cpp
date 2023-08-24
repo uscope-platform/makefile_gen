@@ -122,7 +122,7 @@ void PrintTo(const HDL_Resource &res, std::ostream *os) {
     result += "\n  PATH: " + res.path;
     result += "\n  PARAMETERS: \n";
     for(const auto& item:res.parameters){
-        result += item.to_string();
+        result += item->to_string();
     }
     result += "\n----------------------------------------------------";
 

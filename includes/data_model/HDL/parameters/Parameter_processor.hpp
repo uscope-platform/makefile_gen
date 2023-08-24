@@ -79,14 +79,14 @@ public:
 
 private:
 
-    HDL_parameter process_scalar_parameter(const HDL_parameter &par);
-    HDL_parameter process_array_parameter(const HDL_parameter &par);
-    HDL_parameter process_packed_parameter(const HDL_parameter &par);
+    std::shared_ptr<HDL_parameter> process_scalar_parameter(const std::shared_ptr<HDL_parameter> &par);
+    std::shared_ptr<HDL_parameter> process_array_parameter(const std::shared_ptr<HDL_parameter> &par);
+    std::shared_ptr<HDL_parameter> process_packed_parameter(const std::shared_ptr<HDL_parameter> &par);
     Expression_component process_array_access(Expression_component &e);
     int64_t get_component_value(Expression_component &ec, int64_t *result_size);
 
     std::shared_ptr<Parameters_map> compleated_set;
-    std::map<std::string, HDL_parameter> string_set;
+    std::map<std::string, std::shared_ptr<HDL_parameter>> string_set;
 
     std::shared_ptr<Parameters_map> external_parameters;
 

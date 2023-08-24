@@ -88,11 +88,11 @@ TEST(parameter_extraction, simple_parameters) {
 
 
     for(auto &item:  vect_params){
-        HDL_parameter p = HDL_parameter();
-        p.set_type(expression_parameter);
-        p.set_name(item.first);
+        auto p = std::make_shared<HDL_parameter>();
+        p->set_type(expression_parameter);
+        p->set_name(item.first);
         for(auto &op:item.second){
-            p.add_component(Expression_component(op));
+            p->add_component(Expression_component(op));
         }
         check_params.insert(p);
     }
@@ -100,8 +100,8 @@ TEST(parameter_extraction, simple_parameters) {
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
 }
@@ -149,11 +149,11 @@ TEST(parameter_extraction, simple_expressions) {
     };
 
     for(auto &item:  vect_params){
-        HDL_parameter p = HDL_parameter();
-        p.set_type(expression_parameter);
-        p.set_name(item.first);
+        auto p = std::make_shared<HDL_parameter>();
+        p->set_type(expression_parameter);
+        p->set_name(item.first);
         for(auto &op:item.second){
-            p.add_component(Expression_component(op));
+            p->add_component(Expression_component(op));
         }
         check_params.insert(p);
     }
@@ -161,8 +161,8 @@ TEST(parameter_extraction, simple_expressions) {
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
 }
@@ -183,9 +183,9 @@ TEST(parameter_extraction, array_expression) {
 
     Parameters_map check_params;
 
-    HDL_parameter p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("array_parameter");
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("array_parameter");
 
 
     Initialization_list il;
@@ -194,31 +194,31 @@ TEST(parameter_extraction, array_expression) {
     il.add_item({Expression_component("32")});
     il.add_item({Expression_component("5")});
 
-    p.add_initialization_list(il);
+    p->add_initialization_list(il);
 
     check_params.insert(p);
 
 
-    p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("array_parameter_expr_p");
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("array_parameter_expr_p");
     Expression_component e = Expression_component("array_parameter");
     std::vector<std::vector<Expression_component>> ai = {{Expression_component("sv_numeric_p"), Expression_component("*"), Expression_component("0")}};
     e.set_array_index(ai);
-    p.add_component(e);
-    p.add_component(Expression_component("+"));
+    p->add_component(e);
+    p->add_component(Expression_component("+"));
     e = Expression_component("array_parameter");
     ai = {{Expression_component("1")}};
     e.set_array_index(ai);
-    p.add_component(e);
+    p->add_component(e);
     check_params.insert(p);
 
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
 }
@@ -241,15 +241,15 @@ TEST(parameter_extraction, multidimensional_array_expression) {
     Parameters_map check_params;
 
 
-    HDL_parameter p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("repetition_size");
-    p.add_component(Expression_component("2"));
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("repetition_size");
+    p->add_component(Expression_component("2"));
     check_params.insert(p);
 
-    p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("multidim_array_parameter");
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("multidim_array_parameter");
 
 
     init_list_t init;
@@ -269,20 +269,20 @@ TEST(parameter_extraction, multidimensional_array_expression) {
         }
     };
 
-    p.add_initialization_list(produce_check_init_list(init));
+    p->add_initialization_list(produce_check_init_list(init));
 
 
     check_params.insert(p);
 
 
 
-    p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("multidim_array_access");
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("multidim_array_access");
     Expression_component e = Expression_component("multidim_array_parameter");
     std::vector<Expression> ai = {{Expression_component("1")},{Expression_component("0")}};
     e.set_array_index(ai);
-    p.add_component(e);
+    p->add_component(e);
     check_params.insert(p);
 
 
@@ -290,8 +290,8 @@ TEST(parameter_extraction, multidimensional_array_expression) {
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
 }
@@ -317,16 +317,16 @@ TEST(parameter_extraction, repetition_initialization) {
     Parameters_map check_params;
 
 
-    HDL_parameter p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("repetition_size");
-    p.add_component(Expression_component("2"));
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("repetition_size");
+    p->add_component(Expression_component("2"));
     check_params.insert(p);
 
 
-    p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("repetition_parameter_1");
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("repetition_parameter_1");
 
     init_list_t init;
     init.dimensions = {{{Expression_component("1")},{Expression_component("0")}, false}};
@@ -334,27 +334,27 @@ TEST(parameter_extraction, repetition_initialization) {
                            {Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("1")}
                    }};
 
-    p.add_initialization_list(produce_check_init_list_1d(init));
+    p->add_initialization_list(produce_check_init_list_1d(init));
 
     check_params.insert(p);
 
-    p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("repetition_parameter_2");
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("repetition_parameter_2");
 
     init.dimensions = {{{Expression_component("1")},{Expression_component("0")}, false}};
     init.values = {{
                            {Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("4")}
                    }};
 
-    p.add_initialization_list(produce_check_init_list_1d(init));
+    p->add_initialization_list(produce_check_init_list_1d(init));
 
     check_params.insert(p);
 
 
-    p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("multi_repetition_parameter");
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("multi_repetition_parameter");
 
     init.dimensions = {{{Expression_component("3")},{Expression_component("0")}}};
     init.values = {{
@@ -362,13 +362,13 @@ TEST(parameter_extraction, repetition_initialization) {
                            {Expression_component("repetition_parameter_2")}
                    }};
 
-    p.add_initialization_list(produce_check_init_list(init));
+    p->add_initialization_list(produce_check_init_list(init));
 
     check_params.insert(p);
 
-    p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("mixed_repetition_parameter");
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("mixed_repetition_parameter");
 
     init.dimensions = {{{Expression_component("3")},{Expression_component("0")}}};
     init.values = {{
@@ -378,7 +378,7 @@ TEST(parameter_extraction, repetition_initialization) {
                    }};
 
 
-    p.add_initialization_list(produce_check_init_list(init));
+    p->add_initialization_list(produce_check_init_list(init));
 
     check_params.insert(p);
 
@@ -386,8 +386,8 @@ TEST(parameter_extraction, repetition_initialization) {
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
 }
@@ -407,9 +407,9 @@ TEST(parameter_extraction, packed_array) {
 
     Parameters_map check_params;
 
-    HDL_parameter p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("packed_param");
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("packed_param");
 
     init_list_t init;
     init.dimensions = {{{Expression_component("7")}, {Expression_component("0")}, true}};
@@ -424,7 +424,7 @@ TEST(parameter_extraction, packed_array) {
             {Expression_component("1'b1")}
     }};
 
-    p.add_initialization_list(produce_check_init_list(init));
+    p->add_initialization_list(produce_check_init_list(init));
 
     check_params.insert(p);
 
@@ -432,8 +432,8 @@ TEST(parameter_extraction, packed_array) {
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
 }
@@ -454,20 +454,20 @@ TEST(parameter_extraction, package_parameters_use) {
 
     Parameters_map check_params;
 
-    HDL_parameter p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("package_param");
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("package_param");
     Expression_component ec("bus_base");
     ec.set_package_prefix("test_package");
-    p.add_component(ec);
+    p->add_component(ec);
     check_params.insert(p);
 
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
 }
@@ -488,19 +488,19 @@ TEST(parameter_extraction, negative_number_parameters) {
     Parameters_map check_params;
 
 
-    HDL_parameter p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("negative_param");
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("negative_param");
     for(auto &op:{"-", "16'sd32767"}){
-        p.add_component(Expression_component(op));
+        p->add_component(Expression_component(op));
     }
     check_params.insert(p);
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
 }
@@ -521,9 +521,9 @@ TEST(parameter_extraction, negative_number_array_init) {
     Parameters_map check_params;
 
 
-    HDL_parameter p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("negative_array_param");
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("negative_array_param");
 
     init_list_t init;
     init.dimensions = {
@@ -534,7 +534,7 @@ TEST(parameter_extraction, negative_number_array_init) {
        {Expression_component("16'sd32767")}
     }};
 
-    p.add_initialization_list(produce_check_init_list_1d(init));
+    p->add_initialization_list(produce_check_init_list_1d(init));
 
 
     check_params.insert(p);
@@ -542,8 +542,8 @@ TEST(parameter_extraction, negative_number_array_init) {
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
 }
@@ -564,9 +564,9 @@ TEST(parameter_extraction, expression_array_init) {
     Parameters_map check_params;
 
 
-    HDL_parameter p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("expression_array_param");
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("expression_array_param");
 
     init_list_t init;
     init.dimensions = {
@@ -577,7 +577,7 @@ TEST(parameter_extraction, expression_array_init) {
         {Expression_component("7"),Expression_component("*"),Expression_component("6")}
    }};
 
-    p.add_initialization_list(produce_check_init_list_1d(init));
+    p->add_initialization_list(produce_check_init_list_1d(init));
 
 
     check_params.insert(p);
@@ -585,8 +585,8 @@ TEST(parameter_extraction, expression_array_init) {
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
 }
@@ -608,9 +608,9 @@ TEST(parameter_extraction, combined_packed_unpacked_init) {
     Parameters_map check_params;
 
 
-    HDL_parameter p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("param_a");
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("param_a");
 
     init_list_t init;
     init.dimensions = {
@@ -638,16 +638,16 @@ TEST(parameter_extraction, combined_packed_unpacked_init) {
                            {Expression_component("1'b1")}
                    }};
 
-    p.add_initialization_list(produce_check_init_list(init));
+    p->add_initialization_list(produce_check_init_list(init));
 
 
 
     check_params.insert(p);
 
 
-    p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("param_b");
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("param_b");
 
     init.dimensions = {
             {{Expression_component("7")}, {Expression_component("0")}, true},
@@ -665,7 +665,7 @@ TEST(parameter_extraction, combined_packed_unpacked_init) {
                             Expression_component("1'b0")}
                    }};
 
-    p.add_initialization_list(produce_check_init_list(init));
+    p->add_initialization_list(produce_check_init_list(init));
 
 
 
@@ -675,8 +675,8 @@ TEST(parameter_extraction, combined_packed_unpacked_init) {
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
 }
@@ -709,11 +709,11 @@ TEST(parameter_extraction, instance_parameter) {
 
     Parameters_map check_params;
     for(auto &item:  vect_params){
-        HDL_parameter p = HDL_parameter();
-        p.set_type(expression_parameter);
-        p.set_name(item.first);
+        auto p = std::make_shared<HDL_parameter>();
+        p->set_type(expression_parameter);
+        p->set_name(item.first);
         for(auto &op:item.second){
-            p.add_component(Expression_component(op));
+            p->add_component(Expression_component(op));
         }
         check_params.insert(p);
     }
@@ -722,8 +722,8 @@ TEST(parameter_extraction, instance_parameter) {
     ASSERT_EQ(check_params.size(), def_parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(def_parameters.contains(item.get_name()));
-        ASSERT_EQ(item, def_parameters.get(item.get_name()));
+        ASSERT_TRUE(def_parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *def_parameters.get(item->get_name()));
     }
 
 
@@ -736,11 +736,11 @@ TEST(parameter_extraction, instance_parameter) {
     check_params.clear();
 
     for(auto &item:  vect_params){
-        HDL_parameter p = HDL_parameter();
-        p.set_type(expression_parameter);
-        p.set_name(item.first);
+        auto p = std::make_shared<HDL_parameter>();
+        p->set_type(expression_parameter);
+        p->set_name(item.first);
         for(auto &op:item.second){
-            p.add_component(Expression_component(op));
+            p->add_component(Expression_component(op));
         }
         check_params.insert(p);
     }
@@ -749,8 +749,8 @@ TEST(parameter_extraction, instance_parameter) {
     ASSERT_EQ(check_params.size(), inst_parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(inst_parameters.contains(item.get_name()));
-        ASSERT_EQ(item, inst_parameters.get(item.get_name()));
+        ASSERT_TRUE(inst_parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *inst_parameters.get(item->get_name()));
     }
 
 
@@ -787,16 +787,16 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
 
     check_params.clear();
 
-    HDL_parameter p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("SS_POLARITY_DEFAULT");
-    p.add_component(Expression_component("0"));
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("SS_POLARITY_DEFAULT");
+    p->add_component(Expression_component("0"));
     check_params.insert(p);
 
 
-    p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("FIXED_REGISTER_VALUES");
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("FIXED_REGISTER_VALUES");
 
     init_list_t init;
     init.dimensions = {
@@ -828,7 +828,7 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
                            {Expression_component("4'b0")},
                    },
                    };
-    p.add_initialization_list(produce_check_init_list(init));
+    p->add_initialization_list(produce_check_init_list(init));
 
 
 
@@ -838,8 +838,8 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
 }
@@ -894,9 +894,9 @@ TEST(parameter_extraction, multidimensional_packed_array) {
             Expression_component("1'b1")
     };
 
-    HDL_parameter p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("param_a");
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("param_a");
 
     Initialization_list il;
     il.add_dimension({{Expression_component("7")}, {Expression_component("0")},true}, true);
@@ -928,15 +928,15 @@ TEST(parameter_extraction, multidimensional_packed_array) {
     il.close_level();
     il.close_level();
 
-    p.add_initialization_list(il);
+    p->add_initialization_list(il);
 
     check_params.insert(p);
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
 }
@@ -958,9 +958,9 @@ TEST(parameter_extraction, packed_replication_init) {
     Parameters_map check_params;
 
 
-    HDL_parameter p = HDL_parameter();
-    p.set_type(expression_parameter);
-    p.set_name("test_parameter");
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(expression_parameter);
+    p->set_name("test_parameter");
 
     init_list_t init;
     init.dimensions = {
@@ -970,7 +970,7 @@ TEST(parameter_extraction, packed_replication_init) {
                            {Expression_component("$repeat_init"),Expression_component("5"),Expression_component(","),Expression_component("1'b1")}
                    }};
 
-    p.add_initialization_list(produce_check_init_list_1d(init));
+    p->add_initialization_list(produce_check_init_list_1d(init));
 
 
     check_params.insert(p);
@@ -978,8 +978,8 @@ TEST(parameter_extraction, packed_replication_init) {
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 }
 
@@ -999,23 +999,23 @@ TEST(parameter_extraction, array_initialization_default) {
 
     Parameters_map check_params;
 
-    HDL_parameter p;
-    p.set_name("test_parameter");
-    p.set_type(expression_parameter);
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_name("test_parameter");
+    p->set_type(expression_parameter);
     Initialization_list i;
     i.add_dimension({{Expression_component("4")}, {Expression_component("0")}, true}, true);
     i.add_dimension({{Expression_component("2")}, {Expression_component("0")}, false}, false);
     i.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false}, false);
     i.add_item({Expression_component("0")});
     i.set_default();
-    p.add_initialization_list(i);
+    p->add_initialization_list(i);
     check_params.insert(p);
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
 }
@@ -1041,12 +1041,12 @@ TEST(parameter_extraction, unrelated_wire_dependency_conflict) {
 
     auto parameter = i.get_parameters().get("DECIMATED");
 
-    HDL_parameter check_param;
-    check_param.set_name("DECIMATED");
-    check_param.set_type(expression_parameter);
-    check_param.add_component({Expression_component("DECIMATE")});
+    auto check_param = std::make_shared<HDL_parameter>();
+    check_param->set_name("DECIMATED");
+    check_param->set_type(expression_parameter);
+    check_param->add_component({Expression_component("DECIMATE")});
 
-    ASSERT_EQ(parameter, check_param);
+    ASSERT_EQ(*parameter, *check_param);
 }
 
 
@@ -1073,8 +1073,8 @@ TEST(parameter_extraction, param_ternary_conditional) {
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item.get_name()));
-        ASSERT_EQ(item, parameters.get(item.get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 }
  **/

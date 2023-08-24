@@ -41,10 +41,10 @@ public:
     HDL_instance() = default;
     HDL_instance(const HDL_instance &c );
 
-    void add_parameter(const std::string& parameter_name, const HDL_parameter &p);
+    void add_parameter(const std::string& parameter_name, const std::shared_ptr<HDL_parameter> &p);
     void add_parameters(Parameters_map &p);
     Parameters_map get_parameters() { return parameters;};
-    std::string  get_parameter_value(const std::string& parameter_name) {return parameters.get(parameter_name).get_string_value();};
+    std::string  get_parameter_value(const std::string& parameter_name) {return parameters.get(parameter_name)->get_string_value();};
     bool is_parameter_overridden(const std::string& parameter_name) {return parameters.contains(parameter_name);};
 
     void add_port_connection(const std::string& port_name, std::vector<std::string> value);

@@ -65,7 +65,7 @@ class HDL_Resource {
         std::vector<processor_instance> get_processor_doc() {return processor_docs;};
         bool  has_processors() {return !processor_docs.empty();};
 
-        void add_parameter(const HDL_parameter &p) { parameters.insert(p);};
+        void add_parameter(const std::shared_ptr<HDL_parameter> &p) { parameters.insert(p);};
         void set_parameters(Parameters_map p);
 
         Parameters_map get_parameters() {return parameters;};

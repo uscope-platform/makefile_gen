@@ -35,7 +35,7 @@ HDL_instance::HDL_instance(std::string dep_name, std::string dep_type, dependenc
     type = std::move(dep_type);
 }
 
-void HDL_instance::add_parameter(const std::string& parameter_name, const HDL_parameter &p) {
+void HDL_instance::add_parameter(const std::string& parameter_name, const std::shared_ptr<HDL_parameter> &p) {
     parameters.insert(p);
 }
 
@@ -83,7 +83,7 @@ nlohmann::json HDL_instance::dump() {
 
     std::map<std::string, nlohmann::json> params_vect;
     for(auto &param:parameters){
-        params_vect.insert({param.get_name(), param.dump()});
+        params_vect.insert({param->get_name(), param->dump()});
     }
     ret["parameters"] = params_vect;
 

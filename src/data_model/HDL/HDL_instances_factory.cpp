@@ -21,7 +21,7 @@ void HDL_instances_factory::new_dependency(const std::string &n, const std::stri
     valid_instance = true;
 }
 
-void HDL_instances_factory::add_parameter(const std::string &name, const HDL_parameter &p) {
+void HDL_instances_factory::add_parameter(const std::string &name, const std::shared_ptr<HDL_parameter> &p) {
     current_instance.add_parameter(name, p);
 }
 

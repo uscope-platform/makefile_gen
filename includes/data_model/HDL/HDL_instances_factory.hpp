@@ -22,7 +22,7 @@
 class HDL_instances_factory {
 public:
     void new_dependency(const std::string &n, const std::string &p, dependency_class dc);
-    void add_parameter(const std::string &name, const HDL_parameter &p);
+    void add_parameter(const std::string &name, const std::shared_ptr<HDL_parameter> &p);
     void add_port(const std::string &name, const std::string &value);
     void add_array_quantifier(const bus_mapping_expression &exp);
     HDL_instance get_dependency();

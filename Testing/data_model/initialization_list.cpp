@@ -86,10 +86,11 @@ TEST(Initialization_list, get_values_1d_unpacked)  {
     auto external_parameters =  std::make_shared<Parameters_map>();
     auto cs = std::make_shared<Parameters_map>();
     auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
-
-    HDL_parameter p;
-    p.set_name("SS_POLARITY_DEFAULT");
-    p.set_value(1);
+   
+    
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_name("SS_POLARITY_DEFAULT");
+    p->set_value(1);
 
     cs->insert(p);
 
@@ -117,9 +118,9 @@ TEST(Initialization_list, get_values_2d_unpacked) {
     auto cs = std::make_shared<Parameters_map>();
     auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
-    HDL_parameter p;
-    p.set_name("SS_POLARITY_DEFAULT");
-    p.set_value(1);
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_name("SS_POLARITY_DEFAULT");
+    p->set_value(1);
 
     cs->insert(p);
 
@@ -148,9 +149,9 @@ TEST(Initialization_list, get_values_3d_unpacked) {
     auto cs = std::make_shared<Parameters_map>();
     auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
-    HDL_parameter p;
-    p.set_name("SS_POLARITY_DEFAULT");
-    p.set_value(1);
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_name("SS_POLARITY_DEFAULT");
+    p->set_value(1);
 
     cs->insert(p);
 
@@ -178,9 +179,9 @@ TEST(Initialization_list, get_values_1d_packed) {
     auto cs = std::make_shared<Parameters_map>();
     auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
-    HDL_parameter p;
-    p.set_name("SS_POLARITY_DEFAULT");
-    p.set_value(1);
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_name("SS_POLARITY_DEFAULT");
+    p->set_value(1);
 
     cs->insert(p);
 
@@ -207,9 +208,9 @@ TEST(Initialization_list, get_values_2d_packed) {
     auto cs = std::make_shared<Parameters_map>();
     auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
-    HDL_parameter p;
-    p.set_name("SS_POLARITY_DEFAULT");
-    p.set_value(1);
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_name("SS_POLARITY_DEFAULT");
+    p->set_value(1);
 
     cs->insert(p);
 
@@ -256,9 +257,9 @@ TEST(Initialization_list, get_values_3d_packed) {
     auto cs = std::make_shared<Parameters_map>();
     auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
-    HDL_parameter p;
-    p.set_name("SS_POLARITY_DEFAULT");
-    p.set_value(1);
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_name("SS_POLARITY_DEFAULT");
+    p->set_value(1);
 
     cs->insert(p);
 
@@ -321,9 +322,9 @@ TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
     auto cs = std::make_shared<Parameters_map>();
     auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
-    HDL_parameter p;
-    p.set_name("SS_POLARITY_DEFAULT");
-    p.set_value(1);
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_name("SS_POLARITY_DEFAULT");
+    p->set_value(1);
 
     cs->insert(p);
 
@@ -405,7 +406,7 @@ TEST(Initialization_list, concatenation_of_packed_arrays) {
 
     auto parameters = p.process_parameters_map(resource.get_parameters(), resource);
 
-    auto processed_array = parameters.get("INITIAL_REGISTER_VALUES").get_array_value().get_1d_slice({0,0});
+    auto processed_array = parameters.get("INITIAL_REGISTER_VALUES")->get_array_value().get_1d_slice({0,0});
 
     md_1d_array check_array = {224,1,0,0,2,2,2};
 

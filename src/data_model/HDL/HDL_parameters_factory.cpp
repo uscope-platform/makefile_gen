@@ -26,8 +26,8 @@ void HDL_parameters_factory::new_parameter() {
 
 }
 
-HDL_parameter HDL_parameters_factory::get_parameter() {
-    return resources_factory_base<HDL_parameter>::get_resource();
+std::shared_ptr<HDL_parameter> HDL_parameters_factory::get_parameter() {
+    return std::make_shared<HDL_parameter>(resources_factory_base<HDL_parameter>::get_resource());
 }
 
 void HDL_parameters_factory::set_value(const std::string &s) {

@@ -28,7 +28,7 @@ class HDL_parameters_factory : protected resources_factory_base<HDL_parameter> {
 public:
     void new_parameter();
 
-    HDL_parameter get_parameter();
+    std::shared_ptr<HDL_parameter> get_parameter();
 
     void set_value(const std::string &s);
 

@@ -32,19 +32,21 @@ TEST( analysis_test , package) {
 
     Parameters_map check_map;
 
-    HDL_parameter p;
-    p.set_name("bus_base");
-    p.set_expression_components({Expression_component("32'h43c00000")});
-    p.set_type(expression_parameter);
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_name("bus_base");
+    p->set_expression_components({Expression_component("32'h43c00000")});
+    p->set_type(expression_parameter);
     check_map.insert(p);
 
-    p.set_name("timebase");
-    p.set_expression_components({ Expression_component("bus_base")});
-    p.set_type(expression_parameter);
+    p = std::make_shared<HDL_parameter>();
+    p->set_name("timebase");
+    p->set_expression_components({ Expression_component("bus_base")});
+    p->set_type(expression_parameter);
     check_map.insert(p);
 
-    p.set_name("gpio");
-    p.set_expression_components({
+    p = std::make_shared<HDL_parameter>();
+    p->set_name("gpio");
+    p->set_expression_components({
         Expression_component("timebase"), Expression_component("+"),
         Expression_component("32'h1000"), Expression_component("*"),
         Expression_component("2"), Expression_component("/"),
@@ -52,32 +54,35 @@ TEST( analysis_test , package) {
         Expression_component("1"),
 
     });
-
-    p.set_type(expression_parameter);
+    p->set_type(expression_parameter);
     check_map.insert(p);
 
-    p.set_name("scope_mux");
-    p.set_expression_components({ Expression_component("gpio")});
-    p.set_type(expression_parameter);
+    p = std::make_shared<HDL_parameter>();
+    p->set_name("scope_mux");
+    p->set_expression_components({ Expression_component("gpio")});
+    p->set_type(expression_parameter);
     check_map.insert(p);
 
-    p.set_name("out_of_order");
-    p.set_expression_components({ Expression_component("scope_mux")});
-    p.set_type(expression_parameter);
+    p = std::make_shared<HDL_parameter>();
+    p->set_name("out_of_order");
+    p->set_expression_components({ Expression_component("scope_mux")});
+    p->set_type(expression_parameter);
     check_map.insert(p);
 
-    p.set_name("modulo_parameter");
-    p.set_expression_components({
+    p = std::make_shared<HDL_parameter>();
+    p->set_name("modulo_parameter");
+    p->set_expression_components({
         Expression_component("3"),Expression_component("%"),Expression_component("2")
     });
-    p.set_type(expression_parameter);
+    p->set_type(expression_parameter);
     check_map.insert(p);
 
-    p.set_name("subtraction_parameter");
-    p.set_expression_components({
+    p = std::make_shared<HDL_parameter>();
+    p->set_name("subtraction_parameter");
+    p->set_expression_components({
         Expression_component("'o4"),Expression_component("-"),Expression_component("'b10")
     });
-    p.set_type(expression_parameter);
+    p->set_type(expression_parameter);
     check_map.insert(p);
 
     ASSERT_EQ(check_map, parameters);
@@ -95,12 +100,12 @@ TEST( analysis_test , sv_module) {
     d3.add_port_connection("reset", {"reset"});
     d3.add_port_connection("data_in", {"data_in"});
     d3.add_port_connection("syndrome", {"data_out"});
-    HDL_parameter p;
-    p.set_name("TEST_PARAM");
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_name("TEST_PARAM");
     Expression_component e("param");
     e.set_package_prefix("test_package");
-    p.set_expression_components({e});
-    p.set_type(expression_parameter);
+    p->set_expression_components({e});
+    p->set_type(expression_parameter);
     d3.add_parameter("TEST_PARAM", p);
 
     HDL_instance d2("param", "test_package", package);
@@ -126,17 +131,17 @@ TEST( analysis_test , sv_module) {
     check_res.add_if_port_specs("data_in", "axi_stream", "slave");
 
 
-    p = HDL_parameter();
-    p.set_name("module_parameter_1");
-    p.add_component(Expression_component("56"));
-    p.set_type(expression_parameter);
+    p = std::make_shared<HDL_parameter>();
+    p->set_name("module_parameter_1");
+    p->add_component(Expression_component("56"));
+    p->set_type(expression_parameter);
     check_res.add_parameter(p);
 
 
-    p = HDL_parameter();
-    p.set_name("module_parameter_2");
-    p.add_component(Expression_component("74"));
-    p.set_type(expression_parameter);
+    p = std::make_shared<HDL_parameter>();
+    p->set_name("module_parameter_2");
+    p->add_component(Expression_component("74"));
+    p->set_type(expression_parameter);
     check_res.add_parameter(p);
 
     ASSERT_EQ(resource, check_res);
