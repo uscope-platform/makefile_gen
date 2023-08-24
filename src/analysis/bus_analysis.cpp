@@ -167,6 +167,7 @@ std::vector<analysis_context> bus_analysis::process_nested_module(const analysis
 void bus_analysis::process_leaf_node(const analysis_context &leaf) {
 
     auto leaf_parent = leaf.node->get_parent();
+    leaf.node->get_parent()->add_address(leaf.address);
     std::cout<< "Found module : " + leaf_parent->get_name() + " of type: " + leaf_parent->get_type() + " at address: " << std::hex << leaf.address << "\n";
 }
 

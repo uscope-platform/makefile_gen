@@ -6,7 +6,7 @@ include(FetchContent)
 FetchContent_Populate(
         test_data
         GIT_REPOSITORY https://github.com/uscope-platform/uscope_hdl.git
-        GIT_TAG        35195634a81b54eb00f738eac8e1211d1dd23338
+        GIT_TAG        a8720b139bbc23ae7712d3232ea54d2fb11389ac
         SOURCE_DIR ${CHECK_FILES_DIR}
 )
 
@@ -25,6 +25,7 @@ set(MAKEFILEGEN_TESTS
         data_model/bus_structure/bus_specs_manager.cpp
         data_model/module_register_documentation.cpp
         analysis/documentation_analyzer.cpp
+        analysis/bus_analyzer.cpp
         analysis/analysis.cpp
         analysis/parameter_extraction.cpp
         analysis/shunting_yard.cpp

@@ -102,3 +102,4 @@ void Depfile::add_excluded_module(const std::string &s) {
 Depfile::Depfile() {
     content["excluded_modules"] = std::vector<std::string>();
 }
+

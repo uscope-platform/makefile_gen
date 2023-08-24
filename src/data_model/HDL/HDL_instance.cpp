@@ -72,7 +72,7 @@ nlohmann::json HDL_instance::dump() {
     ret["instance_name"] = name;
     ret["instance_type"] = type;
     ret["ports_map"] = ports_map;
-
+    if(!bus_address.empty()) ret["address"] = bus_address;
     std::vector<nlohmann::json> children;
     children.reserve(child_instances.size());
 

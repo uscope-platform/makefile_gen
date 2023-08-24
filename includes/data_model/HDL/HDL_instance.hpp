@@ -75,6 +75,9 @@ public:
     void set_parent(const std::shared_ptr<HDL_instance> &p){parent = p;};
     std::shared_ptr<HDL_instance> get_parent(){return parent;};
 
+    void add_address(const int64_t &i) { bus_address.push_back(i);};
+    std::vector<int64_t> get_address(){return bus_address;};
+
     std::vector<std::shared_ptr<HDL_instance>> get_dependencies() {return child_instances;};
 
     template<class Archive>
@@ -93,6 +96,8 @@ private:
     std::string type;
     std::string name;
     bus_mapping_expression quantifier;
+
+    std::vector<int64_t> bus_address;
 
     std::shared_ptr<HDL_instance> parent;
     std::vector<std::shared_ptr<HDL_instance>> child_instances;

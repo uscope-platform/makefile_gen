@@ -31,7 +31,8 @@ class Depfile {
 public:
     Depfile();
     explicit Depfile(const std::string& filename);
-    Depfile ( const Depfile & file);
+    explicit Depfile ( const Depfile & file);
+    void set_content(const nlohmann::json &c){content = c;};
     std::string get_synth_tl();
     [[nodiscard]] json get_content() const {return content;};
     std::string get_sim_tl();
