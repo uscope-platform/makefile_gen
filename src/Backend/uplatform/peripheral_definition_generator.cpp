@@ -15,16 +15,26 @@
 
 #include "Backend/uplatform/peripheral_definition_generator.hpp"
 
-peripheral_definition_generator::peripheral_definition_generator(std::shared_ptr<data_store> &d, const std::vector<bus_map_node> &l) {
+peripheral_definition_generator::peripheral_definition_generator(std::shared_ptr<data_store> &d, const std::shared_ptr<HDL_instance> &l) {
 
     ver = "1.0";
     d_store = d;
 
     std::set<std::string> processed_peripherals;
-    for(auto &item:l){
-        processed_peripherals.insert(item.module_spec.getName());
-        generate_peripheral(item.module_spec);
+    std::stack<std::shared_ptr<HDL_instance>> working_stack;
+    working_stack.push(l);
+
+    while(!working_stack.empty()){
+        auto current_node = working_stack.top();
+        working_stack.pop();
+        if(!current_node->get_address().empty()){
+            processed_peripherals.insert(current_node->get_type());
+            generate_peripheral(d_store->get_HDL_resource(current_node->get_type()));
+        }
+
+        for(const auto& item:current_node->get_dependencies()) working_stack.push(item);
     }
+
 }
 
 void peripheral_definition_generator::generate_peripheral(const HDL_Resource &res) {
@@ -49,13 +59,6 @@ void peripheral_definition_generator::generate_peripheral(const HDL_Resource &re
 
     specs["registers"] = regs;
     peripheral_defs[periph_name] = specs;
-
-
-    for(auto &item:res.get_submodules()){
-        std::string item_test = item.get_module_type();
-        auto resource = d_store->get_HDL_resource(item.get_module_type());
-        submodules_to_generate.push_back(resource);
-    }
 
 }
 

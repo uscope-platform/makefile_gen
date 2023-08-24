@@ -68,17 +68,9 @@ void documentation_analyzer::process_documentation(Parameters_map parameters) {
 }
 
 
-std::vector<std::shared_ptr<bus_crossbar>> documentation_analyzer::get_bus_roots() {
-    return bus_roots;
-}
-
 void documentation_analyzer::analyze_documentation_object(nlohmann::json &obj) {
     std::string type = obj["type"];
-    if(type == "bus_hierarchy") {
-        analyze_bus_hierarchy(obj);
-    } else if(type == "module_hierarchy") {
-        analyze_module_hierarchy(obj);
-    } else if(type == "peripheral") {
+    if(type == "peripheral") {
         analyze_peripheral(obj);
     } else if(type == "processor_instance"){
         analyze_processor_instance(obj);
@@ -110,38 +102,6 @@ void documentation_analyzer::analyze_processor_instance(nlohmann::json &obj) {
 }
 
 
-
-void documentation_analyzer::analyze_bus_hierarchy(nlohmann::json &obj) {
-    bus_crossbar root;
-    root.set_parameter(obj["name"]);
-    std::string target = obj["target"];
-    root.set_target(target);
-
-    std::vector<nlohmann::json> children = obj["children"];
-
-    for (auto &item:children) {
-        std::string type = item["type"];
-        if(type == "module"){
-            root.add_child(analyze_module(item));
-        } else if(type == "crossbar") {
-            root.add_child(analyze_crossbar(item));
-        }
-    }
-    root.set_base_address(parameters_dict.get(obj["name"]).get_numeric_value());
-    bus_roots.push_back(std::make_shared<bus_crossbar>(root));
-}
-
-void documentation_analyzer::analyze_module_hierarchy(nlohmann::json &obj) {
-
-    std::vector<nlohmann::json> children = obj["children"];
-    std::vector<bus_submodule> submodules;
-    for (auto &item:children) {
-        submodules.push_back(analyze_submodule(item));
-    }
-    bus_submodules[obj["name"]] = submodules;
-}
-
-
 void documentation_analyzer::analyze_peripheral(nlohmann::json &obj) {
     module_documentation mod_doc;
     std::string str_n = obj["name"];
@@ -168,53 +128,6 @@ void documentation_analyzer::analyze_peripheral(nlohmann::json &obj) {
     modules_doc[str_n] = mod_doc;
 }
 
-std::shared_ptr<bus_module> documentation_analyzer::analyze_module(nlohmann::json &obj) {
-
-    std::string target_module = obj["target"]["type"];
-    std::string target_instance = obj["target"]["name"];
-    std::string parameter_name =  obj["name"];
-    std::shared_ptr<bus_module> mod = std::make_shared<bus_module>(target_instance, target_module);
-    mod->set_base_address(parameters_dict.get(parameter_name).get_numeric_value());
-    return mod;
-}
-
-bus_submodule documentation_analyzer::analyze_submodule(nlohmann::json &obj) {
-    bus_submodule ret;
-
-    std::string submodule_type = obj["type"];
-    ret.set_module_type(submodule_type);
-    std::string submodule_instance =  obj["instance"];
-    ret.set_name(submodule_instance);
-    std::string off =obj["offset"];
-    uint32_t offset = std::stoul(off, nullptr, 0);
-    ret.set_offset(offset);
-    std::vector<nlohmann::json> children = obj["children"];
-    for (auto &item:children) {
-        ret.add_child(analyze_submodule(item));
-    }
-    return ret;
-}
-
-std::shared_ptr<bus_crossbar> documentation_analyzer::analyze_crossbar(nlohmann::json &obj) {
-
-    std::string parameter_name = obj["name"];
-
-    std::shared_ptr<bus_crossbar> xbar = std::make_shared<bus_crossbar>();
-    xbar->set_parameter(parameter_name);
-
-    std::vector<nlohmann::json> children = obj["children"];
-    for (auto &item:children) {
-        std::string type = item["type"];
-        if(type == "module"){
-            xbar->add_child(analyze_module(item));
-        }  else if(type == "crossbar") {
-            xbar->add_child(analyze_crossbar(item));
-        }
-    }
-
-    xbar->set_base_address(parameters_dict.get(parameter_name).get_numeric_value());
-    return xbar;
-}
 
 
 field_documentation documentation_analyzer::analyze_register_field(nlohmann::json &obj) {
@@ -231,9 +144,6 @@ std::unordered_map<std::string, module_documentation> documentation_analyzer::ge
     return modules_doc;
 }
 
-std::unordered_map<std::string, std::vector<bus_submodule>> documentation_analyzer::get_bus_submodules() {
-    return bus_submodules;
-}
 
 std::unordered_map<std::string, processor_instance> documentation_analyzer::get_processors_documentation() {
     return processors;

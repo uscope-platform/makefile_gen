@@ -22,7 +22,6 @@
 #include <regex>
 #include <nlohmann/json.hpp>
 
-#include "data_model/documentation/bus_structure/bus_structure.hpp"
 #include "data_model/documentation/module_documentation.hpp"
 #include "data_model/documentation/register_documentation.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
@@ -40,19 +39,12 @@ public:
     void parse_documentation(std::istream &stream);
     void set_source_path(std::string &f_path) {path = f_path;};
     void process_documentation(Parameters_map parameters);
-    std::vector<std::shared_ptr<bus_crossbar>> get_bus_roots();
-    std::unordered_map<std::string, std::vector<bus_submodule>> get_bus_submodules();
     std::unordered_map<std::string, module_documentation> get_modules_documentation();
     std::unordered_map<std::string, processor_instance> get_processors_documentation();
 private:
     void analyze_documentation_object(nlohmann::json &obj);
-    void analyze_bus_hierarchy(nlohmann::json &obj);
-    void analyze_module_hierarchy(nlohmann::json &obj);
     // BUS STRUCTURE DOCUMENTATION
-    std::shared_ptr<bus_module> analyze_module(nlohmann::json &obj);
-    bus_submodule analyze_submodule(nlohmann::json &obj);
     field_documentation analyze_register_field(nlohmann::json &obj);
-    std::shared_ptr<bus_crossbar> analyze_crossbar(nlohmann::json &obj);
     // PERIPHERAL DOCUMENTATION
     void analyze_peripheral(nlohmann::json &obj);
     // PROCESSORS DOCUMENTATION
@@ -62,8 +54,6 @@ private:
 
     std::vector<std::string> raw_documentation_comments;
 
-    std::vector<std::shared_ptr<bus_crossbar>> bus_roots;
-    std::unordered_map<std::string, std::vector<bus_submodule>> bus_submodules;
     std::unordered_map<std::string, module_documentation> modules_doc;
     std::unordered_map<std::string, processor_instance> processors;
     std::string path;

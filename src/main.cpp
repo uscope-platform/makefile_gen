@@ -197,21 +197,18 @@ int main(int argc, char *argv[]){
         manager.create_project("makefile.tcl",  true);
     }
 
-    if(generate_app_definition || generate_periph_definition){
-        bus_mapper mapper(s_store, d_store, d_store->get_HDL_resource(dep.get_bus_defining_package()));
-        mapper.map_bus(dep.get_bus_section(), "control",dep.get_synth_tl());
-        if(generate_app_definition){
-            application_definition_generator app_def_gen(mapper.get_leaves());
-            auto cores = synth_r.get_processors();
-            app_def_gen.add_cores(cores);
-            app_def_gen.construct_application(dep.get_project_name());
-            app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
-        }
-        if(generate_periph_definition){
-            std::shared_ptr<bus_crossbar> xbar = std::static_pointer_cast<bus_crossbar>(d_store->get_HDL_resource(dep.get_bus_defining_package()).get_bus_roots()[0]);
-            peripheral_definition_generator periph_def_gen(d_store, mapper.get_leaves());
-            periph_def_gen.write_definition_file(dep.get_project_name() + "_periph_def.json");
-        }
+
+    if(generate_app_definition){
+        application_definition_generator app_def_gen(synth_ast);
+        auto cores = synth_r.get_processors();
+        app_def_gen.add_cores(cores);
+        app_def_gen.construct_application(dep.get_project_name());
+        app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
+    }
+
+    if(generate_periph_definition){
+        peripheral_definition_generator periph_def_gen(d_store, synth_ast);
+        periph_def_gen.write_definition_file(dep.get_project_name() + "_periph_def.json");
     }
 
     if(measure_runtime){

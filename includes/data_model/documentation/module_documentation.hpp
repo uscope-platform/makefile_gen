@@ -25,7 +25,6 @@
 #include <cereal/types/vector.hpp>
 
 #include "data_model/documentation/register_documentation.hpp"
-#include "data_model/documentation/bus_structure/bus_crossbar.hpp"
 #include "data_model/documentation/processor_instance.hpp"
 
 class module_documentation {

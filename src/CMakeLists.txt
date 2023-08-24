@@ -1,11 +1,16 @@
 set(MAKEFILE_GEN_SRCS_I /
-        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/sv_visitor.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/sv_analyzer.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/Repository_walker.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/vhdl_analyzer.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/documentation_analyzer.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/vhdl_visitor.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/cache_manager.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/HDL_ast_builder.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/bus_analysis.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Dependency_resolver.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/uplatform/application_definition_generator.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/uplatform/peripheral_definition_generator.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Xilinx/Vivado_manager.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/new_app_generator.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Auxiliary_resolver.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/project_generator_base.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Lattice/Radiant_manager.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Toolchain_manager.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/python_script_runner.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_Resource.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_instance.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_instances_factory.cpp /
@@ -19,16 +24,10 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/resource_factory_base.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_mapping/bus_specs_manager.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_mapping/mapper_bus_component.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_mapping/bus_mapper.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_mapping/address_resolver.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/settings_store.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/data_store.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/DataFile.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/mdarray.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/bus_structure/bus_component.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/bus_structure/bus_submodule.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/bus_structure/bus_module.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/bus_structure/bus_crossbar.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/module_documentation.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/register_documentation.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/field_documentation.cpp /
@@ -37,19 +36,13 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Script.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Constraints.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/expressions/bus_mapping_expression.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/expressions/expression_evaluator.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/HDL_ast_builder.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/bus_analysis.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Dependency_resolver.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/uplatform/application_definition_generator.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/uplatform/peripheral_definition_generator.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Xilinx/Vivado_manager.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/new_app_generator.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Auxiliary_resolver.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/project_generator_base.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Lattice/Radiant_manager.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Toolchain_manager.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/python_script_runner.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/sv_visitor.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/sv_analyzer.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/Repository_walker.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/vhdl_analyzer.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/documentation_analyzer.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/vhdl_visitor.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/cache_manager.cpp
         )
 
 set(MAKEFILE_GEN_SRCS ${MAKEFILE_GEN_SRCS_I}  PARENT_SCOPE)

@@ -17,37 +17,37 @@
 
 
 
-application_definition_generator::application_definition_generator(const std::vector<bus_map_node> &l) {
-    leaves = l;
+application_definition_generator::application_definition_generator(const std::shared_ptr<HDL_instance> &l) {
+    process_ast(l);
+    deduplicate_peripheral_names();
+    denormalize_addresses();
+}
 
-    std::unordered_map<std::string, uint32_t> app_instance_counters;
-    std::unordered_set<std::string> repeated_app_instances;
-    std::unordered_set<std::string> defined_app_instances;
+void application_definition_generator::process_ast(const std::shared_ptr<HDL_instance> &l) {
+    std::stack<std::shared_ptr<HDL_instance>> working_stack;
+    working_stack.push(l);
 
-    for(auto &item:leaves){
+    while(!working_stack.empty()){
+        auto current_node = working_stack.top();
+        working_stack.pop();
+        if(!current_node->get_address().empty()){
 
-        if(defined_app_instances.contains(item.instance.get_name())){
-            app_instance_counters[item.instance.get_name()] = 1;
-        } else{
-            defined_app_instances.insert(item.instance.get_name());
+            nlohmann::json periph;
+            std::string inst_name = current_node->get_name();
+
+            periph["name"] =inst_name;
+            periph["peripheral_id"] = inst_name;
+            periph["spec_id"] =current_node->get_type();
+            periph["base_address"] = std::vector<std::string>();
+            for(auto a: current_node->get_address()){
+                periph["base_address"].push_back("0x" + uint_to_hex(a));
+            }
+            periph["proxied"] = false;
+            periph["proxy_address"] = std::to_string(0);
+            peripherals.push_back(periph);
         }
-    }
 
-    for(auto &item:leaves){
-        nlohmann::json periph;
-        std::string inst_name = item.instance.get_name();
-        if(app_instance_counters.contains(inst_name)){
-            auto inst_count = app_instance_counters[inst_name];
-            app_instance_counters[inst_name]++;
-            inst_name += "_" + std::to_string(inst_count);
-        }
-        periph["name"] =inst_name;
-        periph["peripheral_id"] = inst_name;
-        periph["spec_id"] =item.instance.get_type();
-        periph["base_address"] = "0x" + uint_to_hex(item.node_address);
-        periph["proxied"] = false;
-        periph["proxy_address"] = std::to_string(0);
-        peripherals.push_back(periph);
+        for(const auto& item:current_node->get_dependencies()) working_stack.push(item);
     }
 }
 
@@ -100,4 +100,49 @@ void application_definition_generator::add_cores(std::vector<processor_instance>
     }
 }
 
+void application_definition_generator::deduplicate_peripheral_names() {
+
+    std::map<std::string, int> duplicate_periph_count;
+
+    for(auto &p : peripherals){
+        if(duplicate_periph_count.contains(p["name"])){
+            duplicate_periph_count[p["name"]]++;
+        } else{
+            duplicate_periph_count[p["name"]] = 1;
+        }
+    }
+    std::map<std::string, int> deduplication_progressive;
+    for(auto &p : peripherals){
+        if(duplicate_periph_count[p["name"]] != 1){
+            if(deduplication_progressive.contains(p["name"])){
+                deduplication_progressive[p["name"]]++;
+                p["name"] = (std::string) p["name"] + "_" +std::to_string(deduplication_progressive[p["name"]]);
+                p["peripheral_id"] = p["name"];
+            } else{
+                deduplication_progressive[p["name"]] = 1;
+                p["name"] = (std::string) p["name"] + "_0";
+                p["peripheral_id"] = p["name"];
+            }
+        }
+    }
+}
+
+void application_definition_generator::denormalize_addresses() {
+    auto current_peripherals = std::move(peripherals);
+    for(auto &p: current_peripherals){
+        if(p["base_address"].size()>1){
+            auto addr_vect = p["base_address"];
+            for(int i = 0; i<addr_vect.size(); i++){
+                p["base_address"] = addr_vect[i];
+                p["name"] =( std::string) p["name"] + "_" + std::to_string(i);
+                p["peripheral_id"] = p["name"];
+                peripherals.push_back(p);
+            }
+        } else{
+            p["base_address"] = p["base_address"][0];
+            peripherals.push_back(p);
+        }
+    }
+
+}
 

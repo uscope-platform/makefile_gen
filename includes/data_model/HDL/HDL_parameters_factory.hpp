@@ -20,7 +20,6 @@
 #include "data_model/HDL/parameters/Initialization_list.hpp"
 #include "data_model/HDL/resource_factory_base.hpp"
 #include "data_model/expressions/bus_mapping_expression.hpp"
-#include "data_model/expressions/expression_evaluator.hpp"
 
 typedef std::vector<Expression_component> Expression;
 

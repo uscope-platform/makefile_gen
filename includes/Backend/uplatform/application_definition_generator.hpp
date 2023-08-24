@@ -21,24 +21,25 @@
 #include <nlohmann/json.hpp>
 
 #include "data_model/Depfile.hpp"
-#include "data_model/documentation/bus_structure/bus_structure.hpp"
 #include "data_model/data_store.hpp"
-#include "data_model/bus_mapping/bus_mapper.hpp"
+
+#include "data_model/HDL/HDL_instance.hpp"
 
 class application_definition_generator {
 public:
-    application_definition_generator(const std::vector<bus_map_node> &l);
+    explicit application_definition_generator(const std::shared_ptr<HDL_instance> &l);
     void add_cores(std::vector<processor_instance> cs);
     void write_definition_file(const std::string &path);
     void construct_application(const std::string &name);
 private:
 
-
+    void process_ast(const std::shared_ptr<HDL_instance> &l);
+    void deduplicate_peripheral_names();
+    void denormalize_addresses();
     static std::string uint_to_hex(uint32_t i);
 
     nlohmann::json application;
     std::vector<nlohmann::json> peripherals;
-    std::vector<bus_map_node> leaves;
 
     std::vector<processor_instance> cores_spec;
     std::vector<nlohmann::json> cores;

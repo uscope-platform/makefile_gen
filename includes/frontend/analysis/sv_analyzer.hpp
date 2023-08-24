@@ -27,8 +27,6 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
-#include "data_model/documentation/bus_structure/bus_crossbar.hpp"
-#include "data_model/documentation/bus_structure/bus_module.hpp"
 #include "frontend/analysis/documentation_analyzer.hpp"
 
 #include "mgp_sv/sv2017Lexer.h"
