@@ -29,7 +29,7 @@ peripheral_definition_generator::peripheral_definition_generator(std::shared_ptr
         working_stack.pop();
         if(!current_node->get_address().empty()){
             processed_peripherals.insert(current_node->get_type());
-            generate_peripheral(d_store->get_HDL_resource(current_node->get_type()));
+            generate_peripheral(d_store->get_HDL_resource(current_node->get_type()), current_node->get_parameters());
         }
 
         for(const auto& item:current_node->get_dependencies()) working_stack.push(item);
@@ -37,7 +37,7 @@ peripheral_definition_generator::peripheral_definition_generator(std::shared_ptr
 
 }
 
-void peripheral_definition_generator::generate_peripheral(const HDL_Resource &res) {
+void peripheral_definition_generator::generate_peripheral(const HDL_Resource &res, const Parameters_map &parameters) {
 
     nlohmann::json specs;
 
@@ -46,54 +46,102 @@ void peripheral_definition_generator::generate_peripheral(const HDL_Resource &re
 
     if(res.get_documentation().is_aliased()){
         periph_name= res.get_documentation().get_alias();
+        alias_map[res.getName()] = periph_name;
     }
     specs["peripheral_name"] = periph_name;
     specs["version"] = ver;
 
+    auto mod_doc = res.get_documentation();
+    specs["parametric"] = mod_doc.is_parametric();
 
-    std::vector<nlohmann::json> regs;
+    if(mod_doc.is_parametric())
+        specs["registers"] = generate_parametric_module_registers(mod_doc.get_registers(), parameters);
+     else
+        specs["registers"] = generate_simple_module_registers(mod_doc.get_registers());
 
-    for(auto &item:res.get_documentation().get_registers()){
-        regs.push_back(generate_register(item));
-    }
-
-    specs["registers"] = regs;
     peripheral_defs[periph_name] = specs;
 
 }
 
+std::vector<nlohmann::json>
+peripheral_definition_generator::generate_simple_module_registers(const std::vector<register_documentation> &r) {
+    std::vector<nlohmann::json> ret;
+    for(auto &doc:r){
+
+        nlohmann::json reg;
+        reg["ID"] = doc.get_name();
+        reg["register_name"] = doc.get_name();
+        reg["description"] = doc.get_description();
+        std::string dir;
+        if(doc.get_read_allowed())
+            dir += "R";
+        if(doc.get_write_allowed())
+            dir += "W";
+        reg["direction"] = dir;
 
 
-nlohmann::json peripheral_definition_generator::generate_register(register_documentation &doc) {
+        std::ostringstream off;
+        off<< "0x" << std::hex << doc.get_offset();
+        reg["offset"] = off.str();
 
-    nlohmann::json ret;
 
-    ret["ID"] = doc.get_name();
-    ret["register_name"] = doc.get_name();
-    ret["description"] = doc.get_description();
-    std::string dir;
-    if(doc.get_read_allowed())
-        dir += "R";
-    if(doc.get_write_allowed())
-        dir += "W";
-    ret["direction"] = dir;
-    std::ostringstream off;
-    off<< "0x" << std::hex << doc.get_offset();
-    ret["offset"] = off.str();
-    std::vector<nlohmann::json> fields = {};
-    for(auto &item:doc.get_fields()){
-        fields.push_back(generate_field(item));
+        std::vector<nlohmann::json> fields = {};
+        for(auto &item:doc.get_fields()){
+            fields.push_back(generate_field(item, {}));
+        }
+        reg["fields"] = fields;
+        ret.push_back(reg);
     }
-    ret["fields"] = fields;
     return ret;
 }
 
-nlohmann::json peripheral_definition_generator::generate_field(field_documentation &doc) {
+std::vector<nlohmann::json>
+peripheral_definition_generator::generate_parametric_module_registers(
+        const std::vector<register_documentation> &r,
+        const Parameters_map &parameters
+) {
+    std::vector<nlohmann::json> ret;
+    for(int i = 0; i<r.size(); i++){
+
+        auto doc = r[i];
+
+        nlohmann::json reg;
+        reg["ID"] = doc.get_name();
+        reg["register_name"] = doc.get_name();
+        reg["description"] = doc.get_description();
+        std::string dir;
+        if(doc.get_read_allowed())
+            dir += "R";
+        if(doc.get_write_allowed())
+            dir += "W";
+        reg["direction"] = dir;
+
+        std::vector<nlohmann::json> fields = {};
+        for(int j = 0; j<doc.get_fields().size(); j++){
+            auto item = doc.get_fields()[j];
+            auto f = generate_field(item, parameters);
+            f["order"] = j;
+            fields.push_back(f);
+        }
+        reg["fields"] = fields;
+        reg["n_registers"] = doc.get_n_regs();
+        reg["order"] = i;
+        ret.push_back(reg);
+
+    }
+    return ret;
+}
+
+
+nlohmann::json peripheral_definition_generator::generate_field(field_documentation &doc, const Parameters_map &parameters) {
     nlohmann::json ret;
     ret["name"] = doc.get_name();
     ret["description"] = doc.get_description();
     ret["offset"] = doc.get_starting_position();
     ret["length"] = doc.get_length();
+    if(!doc.get_n_fields().empty()){
+        ret["n_fields"] = doc.get_n_fields();
+    }
     return ret;
 }
 

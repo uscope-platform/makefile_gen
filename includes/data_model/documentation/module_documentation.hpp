@@ -38,9 +38,12 @@ public:
     std::string get_alias(){return alias;};
     bool is_aliased(){return alias!="";};
 
+    bool is_parametric() {return parametric;};
+    void set_parametric() {parametric = true;};
+
     template<class Archive>
     void serialize(Archive & archive) {
-        archive(name, registers, alias, processor_io);
+        archive(name, registers, alias, processor_io, parametric);
     }
 
     friend bool operator==(const module_documentation&lhs, const module_documentation&rhs);
@@ -48,6 +51,7 @@ private:
     std::string name;
     std::string alias;
     std::vector<register_documentation> registers;
+    bool parametric = false;
     std::vector<io> processor_io;
 
 };

@@ -17,6 +17,7 @@
 #define MAKEFILEGEN_V2_FIELD_DOCUMENTATION_HPP
 
 #include <string>
+#include <vector>
 
 class field_documentation {
 public:
@@ -29,8 +30,11 @@ public:
     uint8_t get_length() const {return length;};
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, description, start_position, length);
+        ar(name, description, start_position, length, n_fields);
     }
+
+    void set_n_fields(const std::vector<std::string> &v){n_fields = v;};
+    std::vector<std::string> get_n_fields(){return n_fields;};
 
     friend bool operator==(const field_documentation&lhs, const field_documentation&rhs);
 private:
@@ -38,6 +42,7 @@ private:
     std::string description;
     uint8_t start_position;
     uint8_t length;
+    std::vector<std::string> n_fields;
 };
 
 

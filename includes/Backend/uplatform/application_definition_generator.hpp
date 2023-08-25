@@ -27,12 +27,16 @@
 
 class application_definition_generator {
 public:
-    explicit application_definition_generator(const std::shared_ptr<HDL_instance> &l);
+    explicit application_definition_generator(
+            const std::shared_ptr<HDL_instance> &l,
+            const nlohmann::json &p,
+            const std::map<std::string, std::string> &a
+    );
     void add_cores(std::vector<processor_instance> cs);
     void write_definition_file(const std::string &path);
     void construct_application(const std::string &name);
 private:
-
+    std::map<std::string, uint32_t> get_parameters(const nlohmann::json &spec, std::shared_ptr<HDL_instance> &node);
     void process_ast(const std::shared_ptr<HDL_instance> &l);
     void deduplicate_peripheral_names();
     void denormalize_addresses();
@@ -43,6 +47,10 @@ private:
 
     std::vector<processor_instance> cores_spec;
     std::vector<nlohmann::json> cores;
+
+    nlohmann::json periph_defs;
+    std::map<std::string, std::string> alias_map;
+
 };
 
 

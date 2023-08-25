@@ -24,7 +24,7 @@ public:
     size_t size(){return inner_map.size();};
     void clear() {inner_map.clear();};
     bool empty(){return inner_map.empty();}
-    bool contains(const std::string &name){
+    bool contains(const std::string &name) const {
         bool retval = false;
         for(const auto &item:inner_map){
             retval |= item->get_name() == name;
@@ -40,6 +40,15 @@ public:
         if(i !=-1){
             inner_map.erase(inner_map.begin()+i);
         }
+    }
+
+    std::shared_ptr<HDL_parameter> const_get(const std::string &name) const{
+        for(int i = 0; i<inner_map.size(); i++){
+            if(inner_map[i]->get_name()==name){
+                return inner_map[i];
+            };
+        }
+        return nullptr;
     }
 
     std::shared_ptr<HDL_parameter> get(const std::string &name){

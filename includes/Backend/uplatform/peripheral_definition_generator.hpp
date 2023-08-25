@@ -26,18 +26,22 @@ class peripheral_definition_generator {
 public:
     peripheral_definition_generator(std::shared_ptr<data_store> &d, const std::shared_ptr<HDL_instance> &l);
 
-
-
-    void generate_peripheral(const HDL_Resource &res);
-    static nlohmann::json generate_register(register_documentation &doc);
-    static nlohmann::json generate_field(field_documentation &doc);
     nlohmann::json get_peripheral_definitions() {return peripheral_defs;};
+    std::map<std::string, std::string> get_alias_map() const{return alias_map;};
     void write_definition_file(const std::string &path);
 private:
 
+    void generate_peripheral(const HDL_Resource &res,const Parameters_map &parameters);
+    nlohmann::json generate_field(field_documentation &doc, const Parameters_map &parameters);
+    std::vector<nlohmann::json> generate_simple_module_registers(const std::vector<register_documentation> &r);
+    std::vector<nlohmann::json> generate_parametric_module_registers(const std::vector<register_documentation> &r, const Parameters_map &parameters);
+
+    uint32_t get_parameter_value(std::vector<std::string> s, const Parameters_map &parameters);
     std::string ver;
     std::shared_ptr<data_store> d_store;
     std::vector<HDL_Resource> submodules_to_generate;
+
+    std::map<std::string, std::string> alias_map;
 
     nlohmann::json peripheral_defs;
 };

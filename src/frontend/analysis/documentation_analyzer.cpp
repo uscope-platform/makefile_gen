@@ -72,6 +72,8 @@ void documentation_analyzer::analyze_documentation_object(nlohmann::json &obj) {
     std::string type = obj["type"];
     if(type == "peripheral") {
         analyze_peripheral(obj);
+    } else if(type == "parametric_peripheral"){
+        analyze_parametric_peripheral(obj);
     } else if(type == "processor_instance"){
         analyze_processor_instance(obj);
     }
@@ -119,7 +121,44 @@ void documentation_analyzer::analyze_peripheral(nlohmann::json &obj) {
 
         if(item.contains("fields")){
             for(auto &f_obj:item["fields"]){
-                auto field_doc = analyze_register_field(f_obj);
+                auto field_doc = analyze_register_field(f_obj, false);
+                reg_doc.add_field(field_doc);
+            }
+        }
+        mod_doc.add_register(reg_doc);
+    }
+    modules_doc[str_n] = mod_doc;
+}
+
+void documentation_analyzer::analyze_parametric_peripheral(nlohmann::json &obj) {
+    module_documentation mod_doc;
+    std::string str_n = obj["name"];
+    if(obj.contains("alias")){
+        mod_doc.set_alias(obj["alias"]);
+    }
+    mod_doc.set_name(str_n);
+    mod_doc.set_parametric();
+
+    for(auto &item : obj["registers"]){
+
+        std::string name = item["name"];
+        std::string description = item["description"];
+        std::string dir = item["direction"];
+        bool read_allowed = dir.find('R') != std::string::npos;
+        bool write_allowed = dir.find('W') != std::string::npos;
+
+        std::vector<std::string> n_regs;
+        if(item.contains("n_regs"))
+            n_regs = item["n_regs"];
+        else
+            n_regs = {};
+
+
+        register_documentation reg_doc(item["name"], item["description"], read_allowed, write_allowed, n_regs);
+
+        if(item.contains("fields")){
+            for(auto &f_obj:item["fields"]){
+                auto field_doc = analyze_register_field(f_obj, true);
                 reg_doc.add_field(field_doc);
             }
         }
@@ -130,15 +169,20 @@ void documentation_analyzer::analyze_peripheral(nlohmann::json &obj) {
 
 
 
-field_documentation documentation_analyzer::analyze_register_field(nlohmann::json &obj) {
+field_documentation documentation_analyzer::analyze_register_field(nlohmann::json &obj, bool parametric) {
     std::string name = obj["name"];
     std::string desc = obj["description"];
     uint8_t start_pos = obj["start_position"];
     uint8_t length = obj["length"];
     field_documentation doc(name, desc, start_pos, length);
+    if(parametric){
+        if(obj.contains("n_fields")){
+            std::vector<std::string> n_fields = obj["n_fields"];
+            doc.set_n_fields(n_fields);
+        }
+    }
     return doc;
 }
-
 
 std::unordered_map<std::string, module_documentation> documentation_analyzer::get_modules_documentation() {
     return modules_doc;
@@ -148,3 +192,4 @@ std::unordered_map<std::string, module_documentation> documentation_analyzer::ge
 std::unordered_map<std::string, processor_instance> documentation_analyzer::get_processors_documentation() {
     return processors;
 }
+

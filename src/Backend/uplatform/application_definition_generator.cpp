@@ -16,8 +16,12 @@
 #include "Backend/uplatform/application_definition_generator.hpp"
 
 
-
-application_definition_generator::application_definition_generator(const std::shared_ptr<HDL_instance> &l) {
+application_definition_generator::application_definition_generator(
+        const std::shared_ptr<HDL_instance> &l,
+        const nlohmann::json &p,
+        const std::map<std::string, std::string> &a) {
+    periph_defs = p;
+    alias_map = a;
     process_ast(l);
     deduplicate_peripheral_names();
     denormalize_addresses();
@@ -42,6 +46,11 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
                 periph["name"] =current_node->get_name();
                 periph["peripheral_id"] = current_node->get_name();
             }
+            std::string type = current_node->get_type();
+            if(alias_map.contains(type)){
+                type = alias_map[type];
+            }
+
             periph["spec_id"] =current_node->get_type();
             periph["base_address"] = std::vector<std::string>();
             for(auto a: current_node->get_address()){
@@ -49,6 +58,11 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
             }
             periph["proxied"] = false;
             periph["proxy_address"] = std::to_string(0);
+
+            auto spec = periph_defs[type];
+            if(spec["parametric"]){
+                    periph["parameters"] = get_parameters(spec, current_node);
+            }
             peripherals.push_back(periph);
         }
 
@@ -150,5 +164,28 @@ void application_definition_generator::denormalize_addresses() {
         }
     }
 
+}
+
+std::map<std::string, uint32_t>
+application_definition_generator::get_parameters(const json &spec, std::shared_ptr<HDL_instance> &node) {
+    std::map<std::string, uint32_t> ret_map;
+
+    for(auto &item:spec["registers"]){
+        if(item.contains("n_registers")){
+            std::vector<std::string> parameters = item["n_registers"];
+            if(node->get_parameters().contains(parameters[0])){
+                ret_map[parameters[0]] = node->get_parameters().get(parameters[0])->get_numeric_value();
+            }
+        }
+        for(auto &f:item["fields"]){
+            if(f.contains("n_fields")){
+                std::vector<std::string> parameters = f["n_fields"];
+                if(node->get_parameters().contains(parameters[0])){
+                    ret_map[parameters[0]] = node->get_parameters().get(parameters[0])->get_numeric_value();
+                }
+            }
+        }
+    }
+    return ret_map;
 }
 

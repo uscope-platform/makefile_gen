@@ -26,20 +26,25 @@ class register_documentation {
 public:
     register_documentation() = default;
     register_documentation(const std::string& n, uint32_t off, const std::string& desc, bool read, bool write);
+    register_documentation(const std::string& n, const std::string& desc, bool read, bool write, const std::vector<std::string> &n_r);
 
-    std::string get_name() {return name;};
-    uint32_t get_offset() {return offset;};
-    std::string get_description() {return description;};
-    bool get_read_allowed() {return read_allowed;};
-    bool get_write_allowed() {return write_allowed;};
+    std::string get_name() const {return name;};
+    uint32_t get_offset() const {return offset;};
+    std::string get_description() const {return description;};
+    bool get_read_allowed() const {return read_allowed;};
+    bool get_write_allowed() const {return write_allowed;};
+
+    bool is_parametric(){return parametric;};
+
+    std::vector<std::string> get_n_regs() const{ return n_regs;};
 
     void add_field(field_documentation &doc);
-    std::vector<field_documentation> get_fields() {return fields;};
+    std::vector<field_documentation> get_fields() const {return fields;};
     friend bool operator==(const register_documentation&lhs, const register_documentation&rhs);
 
     template<class Archive>
     void serialize(Archive & archive) {
-        archive(name, offset, description, read_allowed, write_allowed, fields);
+        archive(name, offset, description, read_allowed, write_allowed, fields, parametric, n_regs);
     }
 
 private:
@@ -49,6 +54,8 @@ private:
     bool read_allowed;
     bool write_allowed;
     std::vector<field_documentation> fields;
+    bool parametric;
+    std::vector<std::string> n_regs;
 };
 
 

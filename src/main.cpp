@@ -19,56 +19,48 @@ int main(int argc, char *argv[]){
 
     // Command line interface
 
+
+    typedef struct __CLI_opt{
+        std::string target;
+        bool generate_xilinx = false;
+        bool generate_app_definition = false;
+        bool generate_periph_definition = false;
+        bool generate_lattice = false;
+        bool synth_design = false;
+        bool keep_makefile = false;
+        std::string get_setting;
+        std::string set_setting;
+        std::string new_app_name;
+        std::string new_app_lang;
+        bool measure_runtime;
+        bool no_cache = false;
+        std::string cache_dir = std::string(std::getenv("HOME")) + "/.makefilegen_store";
+        bool wait_profiler = false;
+    } CLI_opt;
+
+    CLI_opt opts;
+
     CLI::App app("Makefile_gen FPGA build system version 2.0");
 
-    std::string target;
-    app.add_option("-D,--depfile", target, "Target Depfile")->check(CLI::ExistingFile);
-
-    bool generate_xilinx = false;
-    app.add_flag("--X",generate_xilinx,"Generate Xilinx Makefile");
-
-    bool generate_app_definition = false;
-    app.add_flag("--A",generate_app_definition,"Generate application definition file");
-
-    bool generate_periph_definition = false;
-    app.add_flag("--P",generate_periph_definition,"Generate Peripherals definition file");
-
-    bool generate_lattice = false;
-    app.add_flag("--L",generate_lattice,"Generate Lattice Makefile");
-
-    bool synth_design = false;
-    app.add_flag("--S", synth_design,"synthetize design");
-
-    bool keep_makefile = false;
-    app.add_flag("--k", keep_makefile, "if set to true does not remove the makefile after use");
-
-    std::string get_setting;
-    app.add_option("--get_setting", get_setting, "Print the value of a cached user setting");
-
-    std::string set_setting;
-    app.add_option("--set_setting", set_setting, "Modify the value of a cached user setting");
-
-    std::string new_app_name;
-    app.add_option("--new_app", new_app_name, "Setup a new blank application");
-
-    std::string new_app_lang;
-    app.add_option("--lang", new_app_lang, "Specify the language for the new app");
-
-    bool measure_runtime;
-    app.add_flag("--measure-runtime", measure_runtime, "Measure the runtime of the current program invocation");
-
-    bool no_cache = false;
-    app.add_flag("--no-cache", no_cache, "Run the program without touching the repository cache");
-
-    std::string cache_dir = std::string(std::getenv("HOME")) + "/.makefilegen_store";
-    app.add_option("--cache_dir", cache_dir, "Run the program without touching the repository cache");
-
-    bool wait_profiler = false;
-    app.add_flag("--wait_profiler", wait_profiler, "Wait for the profiler to be ready before executing");
+    app.add_option("-D,--depfile", opts.target, "Target Depfile")->check(CLI::ExistingFile);
+    app.add_flag("--X",opts.generate_xilinx,"Generate Xilinx Makefile");
+    app.add_flag("--A",opts.generate_app_definition,"Generate application definition file");
+    app.add_flag("--P",opts.generate_periph_definition,"Generate Peripherals definition file");
+    app.add_flag("--L",opts.generate_lattice,"Generate Lattice Makefile");
+    app.add_flag("--S",opts.synth_design,"synthetize design");
+    app.add_flag("--k",opts.keep_makefile, "if set to true does not remove the makefile after use");
+    app.add_option("--get_setting",opts.get_setting, "Print the value of a cached user setting");
+    app.add_option("--set_setting",opts.set_setting, "Modify the value of a cached user setting");
+    app.add_option("--new_app",opts.new_app_name, "Setup a new blank application");
+    app.add_option("--lang",opts.new_app_lang, "Specify the language for the new app");
+    app.add_flag("--measure-runtime",opts.measure_runtime, "Measure the runtime of the current program invocation");
+    app.add_flag("--no-cache",opts.no_cache, "Run the program without touching the repository cache");
+    app.add_flag("--wait_profiler", opts.wait_profiler, "Wait for the profiler to be ready before executing");
+    app.add_option("--cache_dir", opts.cache_dir, "Run the program without touching the repository cache");
 
     CLI11_PARSE(app, argc, argv);
 
-    if(wait_profiler){
+    if(opts.wait_profiler){
         std::cout << "Press ANY key to continue\n";
         getchar();
     }
@@ -77,48 +69,48 @@ int main(int argc, char *argv[]){
     auto t1 = std::chrono::high_resolution_clock::now();
 
     // Setup caches
-    std::shared_ptr<settings_store>  s_store = std::make_shared<settings_store>(false, cache_dir);
-    if(!get_setting.empty()){
-        std::cout << s_store->get_setting(get_setting)<<std::endl;
+    std::shared_ptr<settings_store>  s_store = std::make_shared<settings_store>(false, opts.cache_dir);
+    if(!opts.get_setting.empty()){
+        std::cout << s_store->get_setting(opts.get_setting)<<std::endl;
     }
 
-    if(!set_setting.empty()){
+    if(!opts.set_setting.empty()){
         std::string line;
-        std::istringstream ss(set_setting);
+        std::istringstream ss(opts.set_setting);
         std::vector<std::string> setting;
         while(std::getline(ss,line,'=')) setting.push_back(line);
         s_store->set_setting(setting[0], setting[1]);
     }
 
-    if(!new_app_name.empty()){
+    if(!opts.new_app_name.empty()){
         std::string lang = "sv";
-        if(!new_app_lang.empty()){
-            if(new_app_lang == "vlog")
+        if(!opts.new_app_lang.empty()){
+            if(opts.new_app_lang == "vlog")
                 lang = "v";
-            else if(new_app_lang == "sv"|| new_app_lang == "vhdl")
-                lang = new_app_lang;
+            else if(opts.new_app_lang == "sv"|| opts.new_app_lang == "vhdl")
+                lang = opts.new_app_lang;
             else{
-                std::cout<< "ERROR: Unknown language option: " + new_app_lang << std::endl;
+                std::cout<< "ERROR: Unknown language option: " + opts.new_app_lang << std::endl;
                 exit(1);
             }
         }
-        new_app_generator gen(new_app_name, lang);
+        new_app_generator gen(opts.new_app_name, lang);
         return 0;
     }
 
 
-    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(no_cache, cache_dir);
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(opts.no_cache, opts.cache_dir);
 
     // analyze repository content and update cache
-    Repository_walker walker(s_store, d_store, no_cache);
+    Repository_walker walker(s_store, d_store, opts.no_cache);
 
     // Parse depfile
-    if(target.empty()) target = std::filesystem::current_path().string() + "/Depfile";
-    if(!std::filesystem::exists(target)){
-        std::cout << "ERROR: Depfile " + target + " does not exist" << std::endl;
+    if(opts.target.empty()) opts.target = std::filesystem::current_path().string() + "/Depfile";
+    if(!std::filesystem::exists(opts.target)){
+        std::cout << "ERROR: Depfile " + opts.target + " does not exist" << std::endl;
         exit(1);
     }
-    Depfile dep(target);
+    Depfile dep(opts.target);
 
     // Resolve auxiliary files (scripts and constraints)
     Auxiliary_resolver aux_resolver(d_store);
@@ -161,7 +153,7 @@ int main(int argc, char *argv[]){
     bus_analyzer.analyze_bus(synth_ast);
 
     //Generate makefile
-    if(generate_xilinx){
+    if(opts.generate_xilinx){
         xilinx_project_generator generator;
         generator.set_project_name(dep.get_project_name());
 
@@ -175,11 +167,11 @@ int main(int argc, char *argv[]){
         std::ofstream makefile("makefile.tcl");
         generator.write_makefile(makefile);
 
-        Vivado_manager manager(s_store, !keep_makefile, dep.get_project_name());
+        Vivado_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
         manager.create_project("makefile.tcl",  true);
     }
 
-    if(generate_lattice){
+    if(opts.generate_lattice){
         lattice_project_generator generator;
         generator.set_project_name(dep.get_project_name());
 
@@ -193,30 +185,29 @@ int main(int argc, char *argv[]){
         std::ofstream makefile("makefile.tcl");
         generator.write_makefile(makefile);
 
-        Radiant_manager manager(s_store, !keep_makefile, dep.get_project_name());
+        Radiant_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
         manager.create_project("makefile.tcl",  true);
     }
+    peripheral_definition_generator periph_def_gen(d_store, synth_ast);
+    application_definition_generator app_def_gen(synth_ast, periph_def_gen.get_peripheral_definitions(), periph_def_gen.get_alias_map());
+    auto cores = synth_r.get_processors();
+    app_def_gen.add_cores(cores);
+    app_def_gen.construct_application(dep.get_project_name());
 
 
-    if(generate_app_definition){
-        application_definition_generator app_def_gen(synth_ast);
-        auto cores = synth_r.get_processors();
-        app_def_gen.add_cores(cores);
-        app_def_gen.construct_application(dep.get_project_name());
-        app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
-    }
-
-    if(generate_periph_definition){
-        peripheral_definition_generator periph_def_gen(d_store, synth_ast);
+    if(opts.generate_periph_definition){
         periph_def_gen.write_definition_file(dep.get_project_name() + "_periph_def.json");
     }
 
-    if(measure_runtime){
+    if(opts.generate_app_definition){
+        app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
+    }
 
+
+
+    if(opts.measure_runtime){
         auto t2 = std::chrono::high_resolution_clock::now();
-
         std::chrono::duration<double, std::milli> ms_double = t2 - t1;
-
         std::cout<< "The Program runtime was : " + std::to_string(ms_double.count()) + " ms";
     }
 

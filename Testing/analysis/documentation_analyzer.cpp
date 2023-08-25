@@ -19,7 +19,7 @@
 #include "frontend/analysis/documentation_analyzer.hpp"
 
 
-TEST( documentation_analyzer , peripheral) {
+TEST( documentation_analyzer , simple_peripheral) {
 
     std::ifstream is("check_files/documentation_analyzer/test_peripheral_definition.sv");
 
@@ -47,6 +47,55 @@ TEST( documentation_analyzer , peripheral) {
 
     ASSERT_EQ(check_map, results);
 }
+
+
+
+TEST( documentation_analyzer , parametric_peripheral) {
+
+    std::ifstream is("check_files/test_data/Components/controls/PwmGenerator/rtl/ChainControlUnit.sv");
+    Parameters_map params;
+
+    documentation_analyzer doc(is);
+    doc.process_documentation(params);
+    std::unordered_map<std::string, module_documentation> results = doc.get_modules_documentation();
+
+    module_documentation check_doc;
+    check_doc.set_name("ChainControlUnit");
+    check_doc.set_parametric();
+
+    check_doc.add_register(register_documentation("tresh_$L", "Comparator $ treshold low", true, true, {"N_CHANNELS"}));
+    check_doc.add_register(register_documentation("tresh_$H", "Comparator $ treshold high", true, true, {"N_CHANNELS"}));
+    check_doc.add_register(register_documentation("deadtime_$", "Length of deadtime automatically inserted in pair A (if enabled)", true, true, {"N_CHANNELS"}));
+    check_doc.add_register(register_documentation("counter_start", "Start Value for the PWM generator", true, true, {"1"}));
+    check_doc.add_register(register_documentation("counter_stop", "Stop Value for the PWM generator", true, true, {"1"}));
+    check_doc.add_register(register_documentation("tb_shift", "Carrier phase shift", true, true, {"1"}));
+
+    register_documentation reg("out_en", "Output enable register", true, true, {"1"});
+    field_documentation f("out_$", "enable output pair $",0,2);
+    f.set_n_fields({"N_CHANNELS"});
+    reg.add_field(f);
+    check_doc.add_register(reg);
+
+    reg = register_documentation("dt_en", "Deadtime insertion enable register", true, true, {"1"});
+    f = field_documentation("pair_$", "Enable deadtime insertion pair $",0,1);
+    f.set_n_fields({"N_CHANNELS"});
+    reg.add_field(f);
+    check_doc.add_register(reg);
+
+    reg = register_documentation("ctrl", "Chain control register", true, true, {"1"});
+    f = field_documentation("mode", "Chain counter mode",0,3);
+    reg.add_field(f);
+    check_doc.add_register(reg);
+
+
+    std::unordered_map<std::string, module_documentation> check_map;
+    check_map["ChainControlUnit"] = check_doc;
+
+    ASSERT_EQ(check_map, results);
+}
+
+
+
 
 
 TEST( documentation_analyzer , processor_doc) {

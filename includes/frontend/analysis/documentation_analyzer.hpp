@@ -44,9 +44,10 @@ public:
 private:
     void analyze_documentation_object(nlohmann::json &obj);
     // BUS STRUCTURE DOCUMENTATION
-    field_documentation analyze_register_field(nlohmann::json &obj);
+    field_documentation analyze_register_field(nlohmann::json &obj, bool parametric);
     // PERIPHERAL DOCUMENTATION
     void analyze_peripheral(nlohmann::json &obj);
+    void analyze_parametric_peripheral(nlohmann::json &obj);
     // PROCESSORS DOCUMENTATION
     void analyze_processor_instance(nlohmann::json &obj);
 

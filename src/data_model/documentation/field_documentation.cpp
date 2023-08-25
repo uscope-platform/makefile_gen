@@ -39,6 +39,7 @@ bool operator==(const field_documentation &lhs, const field_documentation &rhs) 
     ret &= lhs.description == rhs.description;
     ret &= lhs.start_position == rhs.start_position;
     ret &= lhs.length == rhs.length;
+    ret &= lhs.n_fields == rhs.n_fields;
 
     return ret;
 }

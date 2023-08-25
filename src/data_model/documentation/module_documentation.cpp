@@ -28,7 +28,7 @@ bool operator==(const module_documentation &lhs, const module_documentation &rhs
 
     ret &= lhs.name == rhs.name;
     ret &= lhs.registers.size() == rhs.registers.size();
-
+    ret &= lhs.parametric == rhs.parametric;
     if(ret){
         for(int i = 0; i<lhs.registers.size(); i++){
             ret &= lhs.registers[i] == rhs.registers[i];

@@ -21,6 +21,18 @@ register_documentation::register_documentation(const std::string& n, uint32_t of
     description = desc;
     read_allowed = read;
     write_allowed = write;
+    parametric = false;
+}
+
+register_documentation::register_documentation(const std::string &n, const std::string &desc, bool read, bool write,
+                                               const std::vector<std::string> &n_r) {
+    name = n;
+    offset = 0;
+    description = desc;
+    read_allowed = read;
+    write_allowed = write;
+    n_regs = n_r;
+    parametric = true;
 }
 
 bool operator==(const register_documentation &lhs, const register_documentation &rhs) {
@@ -31,6 +43,8 @@ bool operator==(const register_documentation &lhs, const register_documentation 
     ret &= lhs.description == rhs.description;
     ret &= lhs.read_allowed == rhs.read_allowed;
     ret &= lhs.write_allowed == rhs.write_allowed;
+    ret &= lhs.parametric == rhs.parametric;
+    ret &= lhs.n_regs == rhs.n_regs;
 
     ret &= lhs.fields.size() == rhs.fields.size();
 
