@@ -27,6 +27,7 @@ typedef struct {
     std::string interface;
     int64_t address;
     bool parametric;
+    std::string current_module_top;
 }analysis_context;
 
 class bus_analysis {

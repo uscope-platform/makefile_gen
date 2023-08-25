@@ -26,6 +26,8 @@ HDL_instance::HDL_instance(const HDL_instance &c) {
     package_dependencies = c.package_dependencies;
     data_dependencies = c.data_dependencies;
     parent = c.parent;
+    leaf_module_top = c.leaf_module_top;
+    bus_address = c.bus_address;
 }
 
 
@@ -55,6 +57,8 @@ bool operator==(const HDL_instance &lhs, const HDL_instance &rhs) {
     ret &= lhs.data_dependencies == rhs.data_dependencies;
     ret &= lhs.package_dependencies == rhs.package_dependencies;
     ret &= lhs.child_instances == rhs.child_instances;
+    ret &= lhs.bus_address == rhs.bus_address;
+    ret &= lhs.leaf_module_top == rhs.leaf_module_top;
     return ret;
 }
 

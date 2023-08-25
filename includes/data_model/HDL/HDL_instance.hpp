@@ -80,6 +80,8 @@ public:
 
     std::vector<std::shared_ptr<HDL_instance>> get_dependencies() {return child_instances;};
 
+    void set_leaf_module_top(const std::string &s){leaf_module_top = s;};
+    std::string get_leaf_module_top(){return leaf_module_top;};
     template<class Archive>
     void serialize( Archive & ar ) {
         ar(name, type, dep_class, ports_map, parameters, quantifier, child_instances);
@@ -104,6 +106,8 @@ private:
 
     std::vector<std::string> data_dependencies;
     std::vector<std::string> package_dependencies;
+
+    std::string leaf_module_top;
 };
 
 

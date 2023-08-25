@@ -33,10 +33,15 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
         if(!current_node->get_address().empty()){
 
             nlohmann::json periph;
-            std::string inst_name = current_node->get_name();
+            if(!current_node->get_leaf_module_top().empty()){
 
-            periph["name"] =inst_name;
-            periph["peripheral_id"] = inst_name;
+                periph["name"] =current_node->get_leaf_module_top();
+                periph["peripheral_id"] = current_node->get_leaf_module_top();;
+            } else{
+
+                periph["name"] =current_node->get_name();
+                periph["peripheral_id"] = current_node->get_name();
+            }
             periph["spec_id"] =current_node->get_type();
             periph["base_address"] = std::vector<std::string>();
             for(auto a: current_node->get_address()){
@@ -131,10 +136,11 @@ void application_definition_generator::denormalize_addresses() {
     auto current_peripherals = std::move(peripherals);
     for(auto &p: current_peripherals){
         if(p["base_address"].size()>1){
+            std::string base_name = p["name"];
             auto addr_vect = p["base_address"];
             for(int i = 0; i<addr_vect.size(); i++){
                 p["base_address"] = addr_vect[i];
-                p["name"] =( std::string) p["name"] + "_" + std::to_string(i);
+                p["name"] =( std::string) base_name + "_" + std::to_string(i);
                 p["peripheral_id"] = p["name"];
                 peripherals.push_back(p);
             }

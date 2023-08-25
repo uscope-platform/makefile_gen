@@ -28,7 +28,7 @@ void bus_analysis::analyze_bus(std::shared_ptr<HDL_instance> &ast) {
     std::string starting_module  = bus["starting_module"];
     bus_type = bus["type"];
 
-    analysis_context top = {ast, bus_if, 0, false};
+    analysis_context top = {ast, bus_if, 0, false, ""};
     analize_node({top});
 }
 
@@ -72,7 +72,7 @@ std::vector<analysis_context> bus_analysis::process_simple_interconnect(const an
             for(auto &port:dep->get_ports()){
                 if(port.second.size()==1){
                     if(port.second.front() == masters_ifs[i]){
-                        analysis_context ctx = {dep, port.first, addresses[i] , false};
+                        analysis_context ctx = {dep, port.first, addresses[i] , false, inst.current_module_top};
                         ret_val.push_back(ctx);
                     }
                 }
@@ -123,7 +123,7 @@ std::vector<analysis_context> bus_analysis::process_parametric_interconnect(cons
     for(int i = 0; i<modules.size(); i++){
         for(auto &d:node->get_dependencies()){
             if(d->get_name() == modules[i]){
-                analysis_context a = {d, interfaces[i], addresses[i], true};
+                analysis_context a = {d, interfaces[i], addresses[i], true, inst.current_module_top};
                 res.push_back(a);
             }
         }
@@ -133,12 +133,13 @@ std::vector<analysis_context> bus_analysis::process_parametric_interconnect(cons
 
 std::vector<analysis_context> bus_analysis::process_nested_module(const analysis_context &inst) {
     std::vector<analysis_context> ret_stack;
+    auto dbg = inst.node->get_type();
     if(inst.parametric){
         for(auto &dep:inst.node->get_dependencies()){
             for(auto &connection:dep->get_ports()){
                 for(auto &item:connection.second){
                     if(item == inst.interface){
-                        analysis_context ctx = {dep, connection.first, inst.address, false};
+                        analysis_context ctx = {dep, connection.first, inst.address, inst.parametric, inst.current_module_top};
                         ret_stack.push_back(ctx);
                         goto breakNested2;
                     }
@@ -150,14 +151,23 @@ std::vector<analysis_context> bus_analysis::process_nested_module(const analysis
         for(auto &dep:inst.node->get_dependencies()){
             for(auto &connection:dep->get_ports()){
                 for(auto &item:connection.second){
-                    if(item == inst.interface){
-                        analysis_context ctx = {dep, connection.first, inst.address, false};
+                    auto pn = item.substr(0, item.find('[')); // TODO: This is a bodge to support array of instances, proper suppoty should be implemented
+                    if(pn == inst.interface){
+                        analysis_context ctx = {dep, connection.first, inst.address, inst.parametric, inst.current_module_top};
                         ret_stack.push_back(ctx);
                         goto breakNested;
                     }
                 }
             }
             breakNested:;
+        }
+    }
+
+    for(auto &item:inst.node->get_parameters()){
+        if(item->get_name() == "PRAGMA_MKFG_MODULE_TOP"){
+            for(auto &node:ret_stack){
+                node.current_module_top = inst.node->get_parameters().get("PRAGMA_MKFG_MODULE_TOP")->get_string_value();
+            }
         }
     }
 
@@ -168,6 +178,9 @@ void bus_analysis::process_leaf_node(const analysis_context &leaf) {
 
     auto leaf_parent = leaf.node->get_parent();
     leaf.node->get_parent()->add_address(leaf.address);
+    if(!leaf.current_module_top.empty()){
+        leaf.node->get_parent()->set_leaf_module_top(leaf.current_module_top);
+    }
     std::cout<< "Found module : " + leaf_parent->get_name() + " of type: " + leaf_parent->get_type() + " at address: " << std::hex << leaf.address << "\n";
 }
 
