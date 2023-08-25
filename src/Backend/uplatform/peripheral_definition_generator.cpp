@@ -151,3 +151,7 @@ void peripheral_definition_generator::write_definition_file(const std::string &p
     ss<<str;
     ss.close();
 }
+
+std::string peripheral_definition_generator::get_definition_string() {
+    return peripheral_defs.dump();
+}

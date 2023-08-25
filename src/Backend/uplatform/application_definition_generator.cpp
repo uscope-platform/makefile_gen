@@ -189,3 +189,7 @@ application_definition_generator::get_parameters(const json &spec, std::shared_p
     return ret_map;
 }
 
+std::string application_definition_generator::get_definition_string() {
+    return application.dump();
+}
+

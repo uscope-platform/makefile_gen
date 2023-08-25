@@ -188,6 +188,7 @@ int main(int argc, char *argv[]){
         Radiant_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
         manager.create_project("makefile.tcl",  true);
     }
+
     peripheral_definition_generator periph_def_gen(d_store, synth_ast);
     application_definition_generator app_def_gen(synth_ast, periph_def_gen.get_peripheral_definitions(), periph_def_gen.get_alias_map());
     auto cores = synth_r.get_processors();

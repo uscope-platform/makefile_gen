@@ -13,6 +13,7 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/python_script_runner.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_Resource.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_instance.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_instance_AST.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_instances_factory.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_modules_factory.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_interfaces_factory.cpp /

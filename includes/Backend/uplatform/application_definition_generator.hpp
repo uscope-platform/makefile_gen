@@ -35,6 +35,8 @@ public:
     void add_cores(std::vector<processor_instance> cs);
     void write_definition_file(const std::string &path);
     void construct_application(const std::string &name);
+    std::string get_definition_string();
+
 private:
     std::map<std::string, uint32_t> get_parameters(const nlohmann::json &spec, std::shared_ptr<HDL_instance> &node);
     void process_ast(const std::shared_ptr<HDL_instance> &l);

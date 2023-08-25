@@ -29,6 +29,8 @@ public:
     nlohmann::json get_peripheral_definitions() {return peripheral_defs;};
     std::map<std::string, std::string> get_alias_map() const{return alias_map;};
     void write_definition_file(const std::string &path);
+    std::string get_definition_string();
+
 private:
 
     void generate_peripheral(const HDL_Resource &res,const Parameters_map &parameters);
