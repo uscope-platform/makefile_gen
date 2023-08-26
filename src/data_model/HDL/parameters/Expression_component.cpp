@@ -216,3 +216,7 @@ int64_t Expression_component::calculate_binary_size(int64_t in) {
         return  std::ceil(n_bits);
     }
 }
+
+void Expression_component::add_array_index(const std::vector<Expression_component> &c) {
+    array_index.push_back(c);
+}

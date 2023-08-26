@@ -72,7 +72,7 @@ public:
 
 
     void set_array_index(const std::vector<std::vector<Expression_component>> &v) {array_index = v;};
-    void add_array_index(std::vector<Expression_component> &c) {array_index.push_back(c);};
+    void add_array_index(const std::vector<Expression_component> &c);
     std::vector<std::vector<Expression_component>> get_array_index() {return array_index;};
 
     static const std::string print_expression(const std::vector<Expression_component> &exp);
