@@ -22,12 +22,6 @@ HDL_instance::HDL_instance(const HDL_instance &c) {
     type = c.type;
     name = c.name;
     quantifier = c.quantifier;
-    child_instances = c.child_instances;
-    package_dependencies = c.package_dependencies;
-    data_dependencies = c.data_dependencies;
-    parent = c.parent;
-    leaf_module_top = c.leaf_module_top;
-    bus_address = c.bus_address;
 }
 
 
@@ -54,11 +48,6 @@ bool operator==(const HDL_instance &lhs, const HDL_instance &rhs) {
     ret &= lhs.ports_map == rhs.ports_map;
     ret &= lhs.parameters == rhs.parameters;
     ret &= lhs.quantifier == rhs.quantifier;
-    ret &= lhs.data_dependencies == rhs.data_dependencies;
-    ret &= lhs.package_dependencies == rhs.package_dependencies;
-    ret &= lhs.child_instances == rhs.child_instances;
-    ret &= lhs.bus_address == rhs.bus_address;
-    ret &= lhs.leaf_module_top == rhs.leaf_module_top;
     return ret;
 }
 
@@ -76,14 +65,7 @@ nlohmann::json HDL_instance::dump() {
     ret["instance_name"] = name;
     ret["instance_type"] = type;
     ret["ports_map"] = ports_map;
-    if(!bus_address.empty()) ret["address"] = bus_address;
-    std::vector<nlohmann::json> children;
-    children.reserve(child_instances.size());
 
-    for(auto &child:child_instances){
-        children.push_back(child->dump());
-    }
-    ret["children"] = children;
 
     std::map<std::string, nlohmann::json> params_vect;
     for(auto &param:parameters){

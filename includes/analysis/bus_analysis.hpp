@@ -16,14 +16,14 @@
 #ifndef MAKEFILEGEN_V2_BUS_ANALYSIS_HPP
 #define MAKEFILEGEN_V2_BUS_ANALYSIS_HPP
 
-#include "data_model/HDL/HDL_instance.hpp"
+#include "data_model/HDL/HDL_instance_AST.hpp"
 #include "data_model/bus_mapping/bus_specs_manager.hpp"
 #include "data_model/data_store.hpp"
 #include "data_model/settings_store.hpp"
 #include "data_model/Depfile.hpp"
 
 typedef struct {
-    std::shared_ptr<HDL_instance> node;
+    std::shared_ptr<HDL_instance_AST> node;
     std::string interface;
     int64_t address;
     bool parametric;
@@ -33,7 +33,7 @@ typedef struct {
 class bus_analysis {
 public:
     explicit bus_analysis(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &ds, const Depfile &df);
-    void analyze_bus(std::shared_ptr<HDL_instance> &ast);
+    void analyze_bus(std::shared_ptr<HDL_instance_AST> &ast);
 private:
 
     std::shared_ptr<settings_store> s_store;

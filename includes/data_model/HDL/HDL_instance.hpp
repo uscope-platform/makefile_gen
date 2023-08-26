@@ -64,33 +64,17 @@ public:
     bool is_module_array(){return quantifier != bus_mapping_expression();};
     bus_mapping_expression get_quantifier(){return quantifier;};
 
-    void add_child(const std::shared_ptr<HDL_instance> &i) {child_instances.push_back(i);};
 
-    void add_data_dependency(const std::string &p){data_dependencies.push_back(p);};
-    std::vector<std::string> get_data_dependencies(){return data_dependencies;};
-
-    void add_package_dependency(const std::string &p){package_dependencies.push_back(p);};
-    std::vector<std::string> get_package_dependencies(){return package_dependencies;};
-
-    void set_parent(const std::shared_ptr<HDL_instance> &p){parent = p;};
-    std::shared_ptr<HDL_instance> get_parent(){return parent;};
-
-    void add_address(const int64_t &i) { bus_address.push_back(i);};
-    std::vector<int64_t> get_address(){return bus_address;};
-
-    std::vector<std::shared_ptr<HDL_instance>> get_dependencies() {return child_instances;};
-
-    void set_leaf_module_top(const std::string &s){leaf_module_top = s;};
-    std::string get_leaf_module_top(){return leaf_module_top;};
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, type, dep_class, ports_map, parameters, quantifier, child_instances);
+        ar(name, type, dep_class, ports_map, parameters, quantifier);
     }
 
-    nlohmann::json dump();
+    virtual nlohmann::json dump();
 
     friend bool operator==(const HDL_instance&lhs, const HDL_instance&rhs);
-private:
+
+protected:
 
     Parameters_map parameters;
     std::unordered_map<std::string, std::vector<std::string>> ports_map;
@@ -99,15 +83,6 @@ private:
     std::string name;
     bus_mapping_expression quantifier;
 
-    std::vector<int64_t> bus_address;
-
-    std::shared_ptr<HDL_instance> parent;
-    std::vector<std::shared_ptr<HDL_instance>> child_instances;
-
-    std::vector<std::string> data_dependencies;
-    std::vector<std::string> package_dependencies;
-
-    std::string leaf_module_top;
 };
 
 

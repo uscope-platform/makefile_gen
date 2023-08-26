@@ -7,7 +7,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 option(USE_LLD_LINKER "Use LLD to link the project" OFF)
 
 
-
 if(${USE_LLD_LINKER})
     add_link_options("-fuse-ld=lld")
 endif(${USE_LLD_LINKER})

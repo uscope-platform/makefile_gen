@@ -23,12 +23,12 @@
 #include "data_model/Depfile.hpp"
 #include "data_model/data_store.hpp"
 
-#include "data_model/HDL/HDL_instance.hpp"
+#include "data_model/HDL/HDL_instance_AST.hpp"
 
 class application_definition_generator {
 public:
     explicit application_definition_generator(
-            const std::shared_ptr<HDL_instance> &l,
+            const std::shared_ptr<HDL_instance_AST> &l,
             const nlohmann::json &p,
             const std::map<std::string, std::string> &a
     );
@@ -38,8 +38,8 @@ public:
     std::string get_definition_string();
 
 private:
-    std::map<std::string, uint32_t> get_parameters(const nlohmann::json &spec, std::shared_ptr<HDL_instance> &node);
-    void process_ast(const std::shared_ptr<HDL_instance> &l);
+    std::map<std::string, uint32_t> get_parameters(const nlohmann::json &spec, std::shared_ptr<HDL_instance_AST> &node);
+    void process_ast(const std::shared_ptr<HDL_instance_AST> &l);
     void deduplicate_peripheral_names();
     void denormalize_addresses();
     static std::string uint_to_hex(uint32_t i);

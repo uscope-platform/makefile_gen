@@ -15,9 +15,9 @@
 
 #include "Backend/Dependency_resolver.hpp"
 
-#include <utility>
 
-Dependency_resolver_v2::Dependency_resolver_v2(const std::vector<std::shared_ptr<HDL_instance>> &i, std::shared_ptr<data_store> store) {
+
+Dependency_resolver_v2::Dependency_resolver_v2(const std::vector<std::shared_ptr<HDL_instance_AST>> &i, std::shared_ptr<data_store> store) {
     AST = i;
     d_store = std::move(store);
 }
@@ -34,7 +34,7 @@ std::set<std::string> Dependency_resolver_v2::get_dependencies() {
     return ret_val;
 }
 
-std::set<std::string> Dependency_resolver_v2::solve_dep(std::shared_ptr<HDL_instance> &i) {
+std::set<std::string> Dependency_resolver_v2::solve_dep(std::shared_ptr<HDL_instance_AST> &i) {
     std::set<std::string> ret_val;
 
     auto type = i->get_type();

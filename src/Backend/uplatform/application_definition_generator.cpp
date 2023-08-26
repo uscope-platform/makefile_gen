@@ -17,7 +17,7 @@
 
 
 application_definition_generator::application_definition_generator(
-        const std::shared_ptr<HDL_instance> &l,
+        const std::shared_ptr<HDL_instance_AST> &l,
         const nlohmann::json &p,
         const std::map<std::string, std::string> &a) {
     periph_defs = p;
@@ -27,8 +27,8 @@ application_definition_generator::application_definition_generator(
     denormalize_addresses();
 }
 
-void application_definition_generator::process_ast(const std::shared_ptr<HDL_instance> &l) {
-    std::stack<std::shared_ptr<HDL_instance>> working_stack;
+void application_definition_generator::process_ast(const std::shared_ptr<HDL_instance_AST> &l) {
+    std::stack<std::shared_ptr<HDL_instance_AST>> working_stack;
     working_stack.push(l);
 
     while(!working_stack.empty()){
@@ -167,7 +167,7 @@ void application_definition_generator::denormalize_addresses() {
 }
 
 std::map<std::string, uint32_t>
-application_definition_generator::get_parameters(const json &spec, std::shared_ptr<HDL_instance> &node) {
+application_definition_generator::get_parameters(const json &spec, std::shared_ptr<HDL_instance_AST> &node) {
     std::map<std::string, uint32_t> ret_map;
 
     for(auto &item:spec["registers"]){

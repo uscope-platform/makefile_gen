@@ -25,21 +25,22 @@
 #include "data_model/Depfile.hpp"
 #include "data_model/settings_store.hpp"
 #include "data_model/HDL/HDL_instance.hpp"
+#include "data_model/HDL/HDL_instance_AST.hpp"
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
 class HDL_ast_builder {
     public:
         HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d, const Depfile& d_f);
-        std::shared_ptr<HDL_instance> build_ast(const std::string& top_level_module,const Parameters_map &external_parameters);
-        std::vector<std::shared_ptr<HDL_instance>> build_ast(const std::vector<std::string>& modules,const Parameters_map &external_parameters);
+        std::shared_ptr<HDL_instance_AST> build_ast(const std::string& top_level_module,const Parameters_map &external_parameters);
+        std::vector<std::shared_ptr<HDL_instance_AST>> build_ast(const std::vector<std::string>& modules,const Parameters_map &external_parameters);
 
     private:
         std::shared_ptr<settings_store> s_store;
         std::shared_ptr<data_store> d_store;
         bool log_structure;
-        std::optional<std::shared_ptr<HDL_instance>> recursive_build_ast(HDL_instance &i,
+        std::optional<std::shared_ptr<HDL_instance_AST>> recursive_build_ast(HDL_instance_AST &i,
                                                                          const Parameters_map &external_parameters,
-                                                                         const std::shared_ptr<HDL_instance>& parent
+                                                                         const std::shared_ptr<HDL_instance_AST>& parent
                                                                          );
         nlohmann::json log;
         Depfile dep_file;

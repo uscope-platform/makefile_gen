@@ -15,13 +15,13 @@
 
 #include "Backend/uplatform/peripheral_definition_generator.hpp"
 
-peripheral_definition_generator::peripheral_definition_generator(std::shared_ptr<data_store> &d, const std::shared_ptr<HDL_instance> &l) {
+peripheral_definition_generator::peripheral_definition_generator(std::shared_ptr<data_store> &d, const std::shared_ptr<HDL_instance_AST> &l) {
 
     ver = "1.0";
     d_store = d;
 
     std::set<std::string> processed_peripherals;
-    std::stack<std::shared_ptr<HDL_instance>> working_stack;
+    std::stack<std::shared_ptr<HDL_instance_AST>> working_stack;
     working_stack.push(l);
 
     while(!working_stack.empty()){

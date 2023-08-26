@@ -21,7 +21,7 @@ bus_analysis::bus_analysis(const std::shared_ptr<settings_store> &s, const std::
     s_store = s;
 }
 
-void bus_analysis::analyze_bus(std::shared_ptr<HDL_instance> &ast) {
+void bus_analysis::analyze_bus(std::shared_ptr<HDL_instance_AST> &ast) {
     auto bus = dfile.get_bus_section()["control"];
 
     std::string bus_if = bus["bus_interface"];

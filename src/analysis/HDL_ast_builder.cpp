@@ -22,9 +22,9 @@ HDL_ast_builder::HDL_ast_builder(const std::shared_ptr<settings_store> &s, const
     log_structure = false;
 }
 
-std::vector<std::shared_ptr<HDL_instance>> HDL_ast_builder::build_ast(const std::vector<std::string> &modules,
+std::vector<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::build_ast(const std::vector<std::string> &modules,
                                                                       const Parameters_map &external_parameters) {
-    std::vector<std::shared_ptr<HDL_instance>> ret;
+    std::vector<std::shared_ptr<HDL_instance_AST>> ret;
     ret.reserve(modules.size());
     for(auto &item:modules){
         ret.push_back(build_ast(item, external_parameters));
@@ -33,9 +33,9 @@ std::vector<std::shared_ptr<HDL_instance>> HDL_ast_builder::build_ast(const std:
 }
 
 
-std::shared_ptr<HDL_instance> HDL_ast_builder::build_ast(const std::string& top_level_module, const Parameters_map &external_parameters) {
+std::shared_ptr<HDL_instance_AST> HDL_ast_builder::build_ast(const std::string& top_level_module, const Parameters_map &external_parameters) {
 
-    HDL_instance i;
+    HDL_instance_AST i;
     i.set_name("TL");
     i.set_type(top_level_module);
     i.set_dependency_class(module);
@@ -48,19 +48,18 @@ std::shared_ptr<HDL_instance> HDL_ast_builder::build_ast(const std::string& top_
         return {};
     }
 
-
 }
 
 
 
 
-std::optional<std::shared_ptr<HDL_instance>> HDL_ast_builder::recursive_build_ast(
-        HDL_instance &i,
+std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_build_ast(
+        HDL_instance_AST &i,
         const Parameters_map &external_parameters,
-        const std::shared_ptr<HDL_instance>& parent
+        const std::shared_ptr<HDL_instance_AST>& parent
 ) {
 
-    auto ret_inst = std::make_shared<HDL_instance>();
+    auto ret_inst = std::make_shared<HDL_instance_AST>();
 
     auto type = i.get_type();
 
@@ -103,7 +102,8 @@ std::optional<std::shared_ptr<HDL_instance>> HDL_ast_builder::recursive_build_as
         std::vector<nlohmann::json> leaves;
         for(auto &dep: res.get_dependencies()){
             if(dep.get_dependency_class() != package  && dep.get_dependency_class() != memory_init){
-                if (auto ll_ret = recursive_build_ast(dep,new_params, ret_inst))
+                HDL_instance_AST d = dep;
+                if (auto ll_ret = recursive_build_ast(d,new_params, ret_inst))
                     ret_inst->add_child(*ll_ret);
             } else if(dep.get_dependency_class() == memory_init){
                 auto path = d_store->get_data_file(dep.get_type()).get_path();

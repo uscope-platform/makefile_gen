@@ -21,12 +21,14 @@
 #include <utility>
 #include <algorithm>
 #include <iostream>
+#include <utility>
 
+#include "data_model/HDL/HDL_instance_AST.hpp"
 #include "data_model/data_store.hpp"
 
 class Dependency_resolver_v2 {
 public:
-    Dependency_resolver_v2(const std::vector<std::shared_ptr<HDL_instance>> &i, std::shared_ptr<data_store> store);
+    Dependency_resolver_v2(const std::vector<std::shared_ptr<HDL_instance_AST>> &i, std::shared_ptr<data_store> store);
 
     std::set<std::string> get_dependencies();
 
@@ -36,8 +38,8 @@ private:
 
     std::vector<processor_instance> detected_processors;
 
-    std::set<std::string> solve_dep(std::shared_ptr<HDL_instance> &i);
-    std::vector<std::shared_ptr<HDL_instance>> AST;
+    std::set<std::string> solve_dep(std::shared_ptr<HDL_instance_AST> &i);
+    std::vector<std::shared_ptr<HDL_instance_AST>> AST;
     std::shared_ptr<data_store> d_store;
 };
 

@@ -6,7 +6,7 @@ include(FetchContent)
 FetchContent_Populate(
         test_data
         GIT_REPOSITORY https://github.com/uscope-platform/uscope_hdl.git
-        GIT_TAG        a8720b139bbc23ae7712d3232ea54d2fb11389ac
+        GIT_TAG        65a4bfbafa4b2b3b40ea2faf121eca5a0fc9ddd3
         SOURCE_DIR ${CHECK_FILES_DIR}
 )
 
