@@ -24,6 +24,7 @@ project_generator_base::project_generator_base(const std::string& template_f) {
 void project_generator_base::write_makefile(std::ostream &output) {
     std::string result = env.render(tpl, data);
     output<<result;
+    output.flush();
 }
 
 void project_generator_base::set_project_name(const std::string &name) {

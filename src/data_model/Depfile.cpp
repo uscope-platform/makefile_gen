@@ -103,3 +103,7 @@ Depfile::Depfile() {
     content["excluded_modules"] = std::vector<std::string>();
 }
 
+bool Depfile::has_mappable_bus() {
+    return content.contains("bus");
+}
+

@@ -22,8 +22,11 @@ bus_analysis::bus_analysis(const std::shared_ptr<settings_store> &s, const std::
 }
 
 void bus_analysis::analyze_bus(std::shared_ptr<HDL_instance_AST> &ast) {
-    auto bus = dfile.get_bus_section()["control"];
+    if(!dfile.has_mappable_bus()){
+        return;
+    }
 
+    auto bus = dfile.get_bus_section()["control"];
     std::string bus_if = bus["bus_interface"];
     std::string starting_module  = bus["starting_module"];
     bus_type = bus["type"];

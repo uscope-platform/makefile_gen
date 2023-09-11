@@ -45,6 +45,7 @@ public:
     std::vector<Constraints> get_constraints();
     std::vector<std::string> get_include_directories();
     std::vector<Script> get_scripts();
+    bool has_mappable_bus();
     bool is_module_excluded(const std::string &s);
     void add_excluded_module(const std::string &s);
 private:
