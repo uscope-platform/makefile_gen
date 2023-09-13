@@ -134,15 +134,6 @@ void sv_visitor::enterParameter_declaration(sv2017::Parameter_declarationContext
 
 void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext *ctx) {
     in_param_declaration = false;
-    if(file_contains_bus_defining_package){
-        if(string_components.size() == 1){
-            bus_mapping_expression par(current_parameter, string_components);
-
-        } else{
-            bus_mapping_expression par(current_parameter, string_components);
-        }
-        string_components.clear();
-    }
 }
 
 void sv_visitor::enterExpression(sv2017::ExpressionContext *ctx) {
@@ -158,18 +149,11 @@ void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
         type = "ternary";
     }
     params_factory.stop_expression_new();
-    if(file_contains_bus_defining_package){
-        if(ctx->expression().size()>1){
-            if(ctx->operator_plus_minus()== nullptr && ctx->operator_mul_div_mod()== nullptr){
-                std::cerr<< "Warning: unsupported operation detected in parameter assignment expression" << std::endl;
-            }
-        }
-    }
 
 }
 
 void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
-    if(file_contains_bus_defining_package || in_module_array_def){
+    if(in_module_array_def){
         uint32_t numeric_val = parse_number(ctx->getText());
         string_components.push_back(std::to_string(numeric_val));
     }
@@ -185,7 +169,7 @@ void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
     if(deps_factory.is_valid_dependency()){
         deps_factory.add_port_connection_element(p);
     }
-    if(file_contains_bus_defining_package || in_module_array_def){
+    if(in_module_array_def){
         string_components.push_back(p);
     }
     if(params_factory.is_component_relevant()){
@@ -203,7 +187,7 @@ void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
 }
 
 void sv_visitor::exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx) {
-    if(file_contains_bus_defining_package || in_module_array_def){
+    if(in_module_array_def){
         string_components.push_back(ctx->getText());
     }
     if(params_factory.is_component_relevant()){
@@ -212,7 +196,7 @@ void sv_visitor::exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx
 }
 
 void sv_visitor::exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *ctx) {
-    if(file_contains_bus_defining_package || in_module_array_def){
+    if(in_module_array_def){
         string_components.push_back(ctx->getText());
     }
     if(params_factory.is_component_relevant()){
@@ -361,11 +345,7 @@ void sv_visitor::enterName_of_instance(sv2017::Name_of_instanceContext *ctx) {
 }
 
 void sv_visitor::exitName_of_instance(sv2017::Name_of_instanceContext *ctx) {
-    if(in_module_array_def){
-        bus_mapping_expression q(ctx->identifier()->getText(), string_components);
-        deps_factory.add_array_quantifier(q);
-        string_components.clear();
-    }
+
     in_module_array_def = false;
 }
 

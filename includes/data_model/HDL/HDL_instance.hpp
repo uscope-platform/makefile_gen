@@ -23,7 +23,6 @@
 
 #include "data_model/HDL/HDL_definitions.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
-#include "data_model/expressions/bus_mapping_expression.hpp"
 #include "data_model/HDL/parameters/Parameters_map.hpp"
 
 #include <cereal/archives/binary.hpp>
@@ -60,14 +59,10 @@ public:
     dependency_class get_dependency_class() const {return dep_class;};
     void set_dependency_class(dependency_class dc){dep_class = dc;};
 
-    void add_array_quantifier(const bus_mapping_expression &exp);
-    bool is_module_array(){return quantifier != bus_mapping_expression();};
-    bus_mapping_expression get_quantifier(){return quantifier;};
-
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, type, dep_class, ports_map, parameters, quantifier);
+        ar(name, type, dep_class, ports_map, parameters);
     }
 
     virtual nlohmann::json dump();
@@ -81,7 +76,6 @@ protected:
     dependency_class dep_class;
     std::string type;
     std::string name;
-    bus_mapping_expression quantifier;
 
 };
 

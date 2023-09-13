@@ -27,7 +27,7 @@
 #include "data_model/HDL/HDL_instance.hpp"
 #include "data_model/HDL/HDL_Resource.hpp"
 
-#include "data_model/expressions/bus_mapping_expression.hpp"
+
 
 #include <regex>
 #include <utility>
@@ -44,7 +44,6 @@ class sv_visitor : public sv2017BaseListener {
 
 public:
     explicit sv_visitor(std::string p);
-    void set_contains_bus_defining_package(bool b) { file_contains_bus_defining_package = b;};
 
     void enterModule_declaration(sv2017::Module_declarationContext *ctx) override;
     void exitModule_declaration(sv2017::Module_declarationContext *ctx) override;
@@ -133,7 +132,6 @@ private:
     std::vector<HDL_Resource> entities;
 
     std::string current_parameter;
-    bool file_contains_bus_defining_package;
     std::vector<std::string> current_operands;
     std::vector<std::string> current_operators;
     std::string current_declaration_type;

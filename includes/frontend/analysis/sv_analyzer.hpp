@@ -44,7 +44,6 @@ public:
 private:
 
     void process_hdl();
-    void search_bus_defining_package(std::string &content);
 
     Parameters_map parameters;
 
@@ -52,8 +51,6 @@ private:
     std::string path;
     std::string processed_content;
     sv_visitor sv_modules_explorer;
-    bool is_bus_defining_package;
-
 };
 
 

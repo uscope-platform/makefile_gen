@@ -21,7 +21,6 @@ HDL_instance::HDL_instance(const HDL_instance &c) {
     dep_class = c.dep_class;
     type = c.type;
     name = c.name;
-    quantifier = c.quantifier;
 }
 
 
@@ -47,12 +46,7 @@ bool operator==(const HDL_instance &lhs, const HDL_instance &rhs) {
     ret &= lhs.dep_class == rhs.dep_class;
     ret &= lhs.ports_map == rhs.ports_map;
     ret &= lhs.parameters == rhs.parameters;
-    ret &= lhs.quantifier == rhs.quantifier;
     return ret;
-}
-
-void HDL_instance::add_array_quantifier(const bus_mapping_expression &exp) {
-    quantifier = exp;
 }
 
 void HDL_instance::add_parameters(Parameters_map &p) {

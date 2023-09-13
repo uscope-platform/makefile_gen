@@ -36,7 +36,6 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Depfile.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Script.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Constraints.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/expressions/bus_mapping_expression.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/sv_visitor.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/sv_analyzer.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/Repository_walker.cpp /

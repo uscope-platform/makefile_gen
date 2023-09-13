@@ -38,8 +38,6 @@ void sv_analyzer::cleanup_content(const std::string& regex) {
                        std::istreambuf_iterator<char>());
 
     std::regex e (regex);
-    search_bus_defining_package(raw_content);
-    sv_modules_explorer.set_contains_bus_defining_package(is_bus_defining_package);
     processed_content = std::regex_replace(raw_content,e,"");
 
 }
@@ -53,14 +51,6 @@ std::vector<HDL_Resource> sv_analyzer::analyze() {
 
     documentation_analyzer doc(processed_content);
     doc.set_source_path(path);
-
-    if(is_bus_defining_package){
-        for(auto &e:entities){
-            if(e.get_type() == package){
-                parameters = e.get_parameters();
-            }
-        }
-    }
 
     doc.process_documentation(parameters);
 
@@ -78,7 +68,7 @@ std::vector<HDL_Resource> sv_analyzer::analyze() {
                 e.add_processor_doc(item.second);
             }
         }
-    };
+    }
 
     return  entities;
 }
@@ -108,13 +98,6 @@ void sv_analyzer::process_hdl() {
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&sv_modules_explorer, Tree);
 
 }
-
-void sv_analyzer::search_bus_defining_package(std::string &content) {
-    std::regex definition(R"(`define MKF_GEN_ANALYZE_BUS)");
-    is_bus_defining_package = std::regex_search(content,definition);
-}
-
-
 
 
 void SvParserErrorListener::syntaxError(antlr4::Recognizer *recognizer, antlr4::Token *offendingSymbol, size_t line,
