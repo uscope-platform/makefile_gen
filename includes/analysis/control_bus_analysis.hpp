@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_BUS_ANALYSIS_HPP
-#define MAKEFILEGEN_V2_BUS_ANALYSIS_HPP
+#ifndef MAKEFILEGEN_V2_CONTROL_BUS_ANALYSIS_HPP
+#define MAKEFILEGEN_V2_CONTROL_BUS_ANALYSIS_HPP
 
 #include "data_model/HDL/HDL_instance_AST.hpp"
 #include "data_model/bus_mapping/bus_specs_manager.hpp"
@@ -30,14 +30,12 @@ typedef struct {
     std::string current_module_top;
 }analysis_context;
 
-class bus_analysis {
+class control_bus_analysis {
 public:
-    explicit bus_analysis(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &ds, const Depfile &df);
+    explicit control_bus_analysis(const Depfile &df);
     void analyze_bus(std::shared_ptr<HDL_instance_AST> &ast);
 private:
 
-    std::shared_ptr<settings_store> s_store;
-    std::shared_ptr<data_store> d_store;
     std::vector<analysis_context> process_interconnect(const analysis_context &inst);
     std::vector<analysis_context> process_simple_interconnect(const analysis_context &inst);
     std::vector<analysis_context> process_parametric_interconnect(const analysis_context &inst);
@@ -49,11 +47,9 @@ private:
 
     Depfile dfile;
     std::string bus_type;
-
     bus_specs_manager specs_manager;
-
 
 };
 
 
-#endif //MAKEFILEGEN_V2_BUS_ANALYSIS_HPP
+#endif //MAKEFILEGEN_V2_CONTROL_BUS_ANALYSIS_HPP

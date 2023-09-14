@@ -149,10 +149,16 @@ int main(int argc, char *argv[]){
 
     // BUS MAPPING
 
-    bus_analysis bus_analyzer(s_store, d_store, dep);
+    control_bus_analysis bus_analyzer(dep);
     bus_analyzer.analyze_bus(synth_ast);
 
-    //Generate makefile
+    if(opts.generate_app_definition){
+        data_acquisition_analysis daq_analyzer;
+        daq_analyzer.analyze(synth_ast);
+    }
+
+
+        //Generate makefile
     if(opts.generate_xilinx){
         xilinx_project_generator generator;
         generator.set_project_name(dep.get_project_name());

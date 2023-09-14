@@ -13,15 +13,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "analysis/bus_analysis.hpp"
+#include "analysis/control_bus_analysis.hpp"
 
-bus_analysis::bus_analysis(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &ds, const Depfile &df) {
+control_bus_analysis::control_bus_analysis(const Depfile &df) {
     dfile = df;
-    d_store = ds;
-    s_store = s;
 }
 
-void bus_analysis::analyze_bus(std::shared_ptr<HDL_instance_AST> &ast) {
+void control_bus_analysis::analyze_bus(std::shared_ptr<HDL_instance_AST> &ast) {
     if(!dfile.has_mappable_bus()){
         return;
     }
@@ -36,13 +34,13 @@ void bus_analysis::analyze_bus(std::shared_ptr<HDL_instance_AST> &ast) {
 }
 
 
-void bus_analysis::analize_node(const std::vector<analysis_context> &n) {
+void control_bus_analysis::analize_node(const std::vector<analysis_context> &n) {
     for(auto &leaf:n){
         auto type = leaf.node->get_type();
-        if(specs_manager.is_sink(type)){
+        if(specs_manager.is_sink(bus_type, type)){
             //manage_sink
             process_leaf_node(leaf);
-        }else if(specs_manager.is_interconnect(type)){
+        }else if(specs_manager.is_interconnect(bus_type, type)){
             //manage interconnects
             analize_node(process_interconnect(leaf));
         }else {
@@ -54,7 +52,7 @@ void bus_analysis::analize_node(const std::vector<analysis_context> &n) {
 
 
 
-std::vector<analysis_context> bus_analysis::process_interconnect(const analysis_context &inst) {
+std::vector<analysis_context> control_bus_analysis::process_interconnect(const analysis_context &inst) {
     if(inst.node->get_parent()->get_parameters().contains("PRAGMA_MKFG_PARAMETRIZED_INTERCONNECT")){
         return process_parametric_interconnect(inst);
     } else{
@@ -62,7 +60,7 @@ std::vector<analysis_context> bus_analysis::process_interconnect(const analysis_
     }
 }
 
-std::vector<analysis_context> bus_analysis::process_simple_interconnect(const analysis_context &inst) {
+std::vector<analysis_context> control_bus_analysis::process_simple_interconnect(const analysis_context &inst) {
     std::vector<analysis_context> ret_val;
     auto ic = inst.node;
     auto addresses = ic->get_parameters().get("SLAVE_ADDR")->get_array_value().get_1d_slice({0,0});
@@ -86,7 +84,7 @@ std::vector<analysis_context> bus_analysis::process_simple_interconnect(const an
     return ret_val;
 }
 
-std::vector<analysis_context> bus_analysis::process_parametric_interconnect(const analysis_context &inst) {
+std::vector<analysis_context> control_bus_analysis::process_parametric_interconnect(const analysis_context &inst) {
     nlohmann::ordered_json bus_layout;
 
     auto node = inst.node->get_parent();
@@ -134,7 +132,7 @@ std::vector<analysis_context> bus_analysis::process_parametric_interconnect(cons
     return res;
 }
 
-std::vector<analysis_context> bus_analysis::process_nested_module(const analysis_context &inst) {
+std::vector<analysis_context> control_bus_analysis::process_nested_module(const analysis_context &inst) {
     std::vector<analysis_context> ret_stack;
     auto dbg = inst.node->get_type();
     if(inst.parametric){
@@ -177,7 +175,7 @@ std::vector<analysis_context> bus_analysis::process_nested_module(const analysis
     return ret_stack;
 }
 
-void bus_analysis::process_leaf_node(const analysis_context &leaf) {
+void control_bus_analysis::process_leaf_node(const analysis_context &leaf) {
 
     auto leaf_parent = leaf.node->get_parent();
     leaf.node->get_parent()->add_address(leaf.address);

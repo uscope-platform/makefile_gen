@@ -23,7 +23,8 @@
 
 #include "frontend/Repository_walker.hpp"
 #include "analysis/HDL_ast_builder.hpp"
-#include "analysis/bus_analysis.hpp"
+#include "analysis/control_bus_analysis.hpp"
+#include "analysis/data_acquisition_analysis.hpp"
 #include "data_model/data_store.hpp"
 #include "data_model/settings_store.hpp"
 #include "frontend/analysis/sv_analyzer.hpp"

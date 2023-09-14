@@ -21,7 +21,7 @@
 #include "data_model/settings_store.hpp"
 #include "frontend/analysis/sv_analyzer.hpp"
 #include "analysis/HDL_ast_builder.hpp"
-#include "analysis/bus_analysis.hpp"
+#include "analysis/control_bus_analysis.hpp"
 #include "Backend/uplatform/peripheral_definition_generator.hpp"
 
 TEST( periph_def_generation , generate_periph_def) {
@@ -66,7 +66,7 @@ TEST( periph_def_generation , generate_periph_def) {
     auto synth_ast = b.build_ast("PID", {});
 
 
-    bus_analysis bus_analyzer(s_store, d_store, df);
+    control_bus_analysis bus_analyzer(df);
     bus_analyzer.analyze_bus(synth_ast);
 
 

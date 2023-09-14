@@ -22,7 +22,7 @@
 #include "frontend/analysis/sv_analyzer.hpp"
 #include "analysis/HDL_ast_builder.hpp"
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
-#include "analysis/bus_analysis.hpp"
+#include "analysis/control_bus_analysis.hpp"
 
 TEST( bus_analysis, simple_bus_analysis) {
 
@@ -69,7 +69,7 @@ TEST( bus_analysis, simple_bus_analysis) {
     auto synth_ast = b.build_ast("ad2s1210", {});
 
 
-    bus_analysis bus_analyzer(s_store, d_store, df);
+    control_bus_analysis bus_analyzer(df);
     bus_analyzer.analyze_bus(synth_ast);
 
     auto ast_dump = synth_ast->dump();
@@ -120,7 +120,7 @@ TEST( bus_analysis, parametric_interconnect) {
     auto synth_ast = b.build_ast("PwmGenerator", {});
 
 
-    bus_analysis bus_analyzer(s_store, d_store, df);
+    control_bus_analysis bus_analyzer(df);
     bus_analyzer.analyze_bus(synth_ast);
 
     auto ast_dump = synth_ast->dump();

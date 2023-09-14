@@ -1,6 +1,7 @@
 set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/analysis/HDL_ast_builder.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/bus_analysis.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/data_acquisition_analysis.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/control_bus_analysis.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Dependency_resolver.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/uplatform/application_definition_generator.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/uplatform/peripheral_definition_generator.cpp /

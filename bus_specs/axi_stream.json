@@ -1,0 +1,39 @@
+{
+
+  "name": "axi_stream",
+  "modports":{
+    "in": "slave",
+    "out": "master"
+  },
+  "default_specs":{
+    "in_port":"stream_in",
+    "out_port":"stream_out"
+  },
+  "components": {
+    "uScope_stream":{
+      "class":"sink",
+      "type": "scope",
+      "in_port":"data_in"
+    },
+
+    "axis_decoupler":{
+      "class":"interconnect",
+      "type": "passthrough",
+      "in_port":"in",
+      "out_port":"out"
+    },
+
+    "axis_duplicator": {
+      "class":"interconnect",
+      "type":"1To2",
+      "in_port":"in",
+      "out_port_template": "out_*"
+    },
+
+    "axi_stream_combiner": {
+      "class":"interconnect",
+      "type":"nTo1",
+      "n_sources":"N_STREAMS"
+    }
+  }
+}
