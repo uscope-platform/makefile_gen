@@ -27,9 +27,14 @@ public:
     void start_concat_port(const std::string &n);
     void stop_concat_port();
     void add_port_connection_element(const std::string &s);
-    bool is_valid_dependency(){return valid_instance;};
+    bool is_valid_dependency() const{return valid_instance;};
+
+    void start_concat_partials_exclusion();
+    void stop_concat_partials_exclusion();
+
 private:
     bool in_concat = false;
+    int exclusion_level = 0;
     std::string concat_port_name;
     std::vector<std::string> concat_port_data;
 

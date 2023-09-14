@@ -79,16 +79,23 @@ public:
     void enterNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) override;
     void exitNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) override;
 
-    void enterName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
-    void exitName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
-
     void enterPrimaryPar(sv2017::PrimaryParContext *ctx) override;
     void exitPrimaryPar(sv2017::PrimaryParContext *ctx) override;
 
     void enterAssignment_pattern(sv2017::Assignment_patternContext *ctx) override;
     void exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) override;
 
+    void enterPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) override;
     void exitPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) override;
+
+    void enterPrimaryIndex(sv2017::PrimaryIndexContext *ctx) override;
+    void exitPrimaryIndex(sv2017::PrimaryIndexContext *ctx) override;
+
+    void enterPrimaryDot(sv2017::PrimaryDotContext *ctx) override;
+    void exitPrimaryDot(sv2017::PrimaryDotContext *ctx) override;
+
+    void enterPrimaryRepl(sv2017::PrimaryReplContext *ctx) override;
+    void exitPrimaryRepl(sv2017::PrimaryReplContext *ctx) override;
 
     void enterBit_select(sv2017::Bit_selectContext *ctx) override;
     void exitBit_select(sv2017::Bit_selectContext *ctx) override;
@@ -135,10 +142,6 @@ private:
     std::vector<std::string> current_operands;
     std::vector<std::string> current_operators;
     std::string current_declaration_type;
-
-    bool in_module_array_def = false;
-
-    std::vector<std::string> string_components;
 
     HDL_modules_factory modules_factory;
     HDL_interfaces_factory interfaces_factory;

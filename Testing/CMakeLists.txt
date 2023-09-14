@@ -29,6 +29,7 @@ set(MAKEFILEGEN_TESTS
         analysis/parameter_extraction.cpp
         analysis/shunting_yard.cpp
         analysis/parameter_processing.cpp
+        analysis/port_extraction.cpp
         analysis/hdl_ast_builder.cpp
         Backend/Application_management_test.cpp
         Backend/Application_definition_generator.cpp

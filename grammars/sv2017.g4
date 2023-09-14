@@ -2109,7 +2109,7 @@ named_port_connection:
                               );
 
 port_expression_connection: expression;
-port_concatenation_connection: APOSTROPHE_LBRACE (expression COMMA?)* RBRACE;
+port_concatenation_connection: (APOSTROPHE_LBRACE|LBRACE) (expression COMMA?)* RBRACE;
 
 bind_directive:
  KW_BIND ( identifier ( COLON bind_target_instance_list )?

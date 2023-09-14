@@ -10887,8 +10887,9 @@ public:
   public:
     Port_concatenation_connectionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *APOSTROPHE_LBRACE();
     antlr4::tree::TerminalNode *RBRACE();
+    antlr4::tree::TerminalNode *APOSTROPHE_LBRACE();
+    antlr4::tree::TerminalNode *LBRACE();
     std::vector<ExpressionContext *> expression();
     ExpressionContext* expression(size_t i);
     std::vector<antlr4::tree::TerminalNode *> COMMA();

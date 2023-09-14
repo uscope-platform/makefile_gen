@@ -153,12 +153,11 @@ void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
 }
 
 void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
-    if(in_module_array_def){
-        uint32_t numeric_val = parse_number(ctx->getText());
-        string_components.push_back(std::to_string(numeric_val));
-    }
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
+    }
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.add_port_connection_element(ctx->getText());
     }
 }
 
@@ -168,9 +167,6 @@ void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
     auto p = ctx->getText();
     if(deps_factory.is_valid_dependency()){
         deps_factory.add_port_connection_element(p);
-    }
-    if(in_module_array_def){
-        string_components.push_back(p);
     }
     if(params_factory.is_component_relevant()){
         if(!package_prefix.empty()){
@@ -187,18 +183,12 @@ void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
 }
 
 void sv_visitor::exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx) {
-    if(in_module_array_def){
-        string_components.push_back(ctx->getText());
-    }
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
 }
 
 void sv_visitor::exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *ctx) {
-    if(in_module_array_def){
-        string_components.push_back(ctx->getText());
-    }
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
@@ -267,7 +257,6 @@ void sv_visitor::exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext 
 
 void sv_visitor::enterNamed_port_connection(sv2017::Named_port_connectionContext *ctx) {
     if(deps_factory.is_valid_dependency()){
-        auto dbg = ctx->getText();
         if(ctx->port_concatenation_connection() != nullptr){
             deps_factory.start_concat_port(ctx->identifier()->getText());
         }
@@ -291,12 +280,10 @@ void sv_visitor::exitNamed_port_connection(sv2017::Named_port_connectionContext 
 }
 
 void sv_visitor::enterNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) {
-    auto dbg = ctx->getText();
     params_factory.start_instance_parameter_assignment(ctx->identifier()->getText());
 }
 
 void sv_visitor::exitNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) {
-    auto dbg = ctx->getText();
     auto param = params_factory.get_parameter();
     if(deps_factory.is_valid_dependency()){
         deps_factory.add_parameter(ctx->identifier()->getText(), param);
@@ -338,17 +325,6 @@ void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
     modules_factory.add_parameter(params_factory.get_parameter());
 }
 
-void sv_visitor::enterName_of_instance(sv2017::Name_of_instanceContext *ctx) {
-    if(!ctx->unpacked_dimension().empty()){
-        in_module_array_def = true;
-    }
-}
-
-void sv_visitor::exitName_of_instance(sv2017::Name_of_instanceContext *ctx) {
-
-    in_module_array_def = false;
-}
-
 
 void sv_visitor::enterPrimaryPar(sv2017::PrimaryParContext *ctx) {
     params_factory.add_component(Expression_component("("));
@@ -376,12 +352,62 @@ void sv_visitor::exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) 
     params_factory.stop_initialization_list(default_assignment);
 }
 
+void sv_visitor::enterPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.start_concat_partials_exclusion();
+    }
+}
 
 void sv_visitor::exitPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
     params_factory.close_array_index();
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.stop_concat_partials_exclusion();
+        auto p = ctx->getText();
+        deps_factory.add_port_connection_element(p);
+    }
 }
 
+void sv_visitor::enterPrimaryIndex(sv2017::PrimaryIndexContext *ctx) {
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.start_concat_partials_exclusion();
+    }
+}
 
+void sv_visitor::exitPrimaryIndex(sv2017::PrimaryIndexContext *ctx) {
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.stop_concat_partials_exclusion();
+        auto p = ctx->getText();
+        deps_factory.add_port_connection_element(p);
+    }
+}
+
+void sv_visitor::enterPrimaryDot(sv2017::PrimaryDotContext *ctx) {
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.start_concat_partials_exclusion();
+    }
+}
+
+void sv_visitor::exitPrimaryDot(sv2017::PrimaryDotContext *ctx) {
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.stop_concat_partials_exclusion();
+        auto p = ctx->getText();
+        deps_factory.add_port_connection_element(p);
+    }
+}
+
+void sv_visitor::enterPrimaryRepl(sv2017::PrimaryReplContext *ctx) {
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.start_concat_partials_exclusion();
+    }
+}
+
+void sv_visitor::exitPrimaryRepl(sv2017::PrimaryReplContext *ctx) {
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.stop_concat_partials_exclusion();
+        auto p = ctx->getText();
+        deps_factory.add_port_connection_element(p);
+    }
+}
 
 void sv_visitor::enterConstant_param_expression(sv2017::Constant_param_expressionContext *ctx) {
     if(ctx->concatenation() != nullptr){
@@ -405,8 +431,6 @@ void sv_visitor::enterUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx)
 }
 
 void sv_visitor::exitUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) {
-    auto dbg = ctx->getText();
-    auto dbg2 = ctx->parent->getText();
     params_factory.stop_unpacked_dimension_declaration();
 }
 

@@ -34,6 +34,10 @@ HDL_instance HDL_instances_factory::get_dependency() {
     return current_instance;
 }
 
+void HDL_instances_factory::start_concat_port(const std::string &n) {
+    in_concat = true;
+    concat_port_name = n;
+}
 
 void HDL_instances_factory::stop_concat_port() {
     in_concat = false;
@@ -41,13 +45,16 @@ void HDL_instances_factory::stop_concat_port() {
     concat_port_data.clear();
 }
 
-void HDL_instances_factory::start_concat_port(const std::string &n) {
-    in_concat = true;
-    concat_port_name = n;
-}
-
 void HDL_instances_factory::add_port_connection_element(const std::string &s) {
-    if(in_concat){
+    if(in_concat && exclusion_level == 0){
         concat_port_data.push_back(s);
     }
+}
+
+void HDL_instances_factory::start_concat_partials_exclusion() {
+    exclusion_level++;
+}
+
+void HDL_instances_factory::stop_concat_partials_exclusion() {
+    exclusion_level--;
 }
