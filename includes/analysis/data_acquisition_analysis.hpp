@@ -22,17 +22,21 @@
 
 class data_acquisition_analysis {
 public:
+    explicit data_acquisition_analysis(bool logging) {log = logging;};
     void analyze(std::shared_ptr<HDL_instance_AST> &ast);
 private:
     void backtrace_scope_inputs(const std::shared_ptr<HDL_instance_AST> &node, std::string intf);
 
-    std::vector<std::string> process_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port);
+    std::optional<std::vector<std::string>> process_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port);
     std::vector<std::string> process_n_to_1_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port);
     std::vector<std::string> process_1_to_n_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port);
     std::vector<std::string> process_1_to_1_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port);
+    void process_source(const std::shared_ptr<HDL_instance_AST> &node, std::string port);
+    std::set<std::pair<std::string, std::string>> explored_nodes;
     std::vector<std::shared_ptr<HDL_instance_AST>> find_sinks(std::shared_ptr<HDL_instance_AST> &ast);
     bus_specs_manager specs_manager;
     std::string bus_type = "axi_stream";
+    bool log = false;
 };
 
 

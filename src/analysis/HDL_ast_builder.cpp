@@ -88,6 +88,7 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
 
 
         ret_inst->set_ports(i.get_ports());
+        ret_inst->set_if_specs(res.get_if_port_specs());
 
         ret_inst->set_name(i.get_name());
         ret_inst->set_type(type);

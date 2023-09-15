@@ -36,6 +36,8 @@ bus_specs_manager::bus_specs_manager() {
                 interconnect_modules[name].insert(new_comp.get_name());
             } else if(new_comp.get_class()==sink){
                 sink_modules[name].insert(new_comp.get_name());
+            } else if(new_comp.get_class()==source){
+                source_modules[name].insert(new_comp.get_name());
             }
             components.push_back(new_comp);
         }
@@ -52,6 +54,10 @@ bool bus_specs_manager::is_sink(const std::string &type, const std::string &s) {
 
 bool bus_specs_manager::is_interconnect(const std::string &type, const std::string &s) {
     return interconnect_modules[type].contains(s);
+}
+
+bool bus_specs_manager::is_source(const std::string &type, const std::string &s) {
+    return source_modules[type].contains(s);
 }
 
 std::string bus_specs_manager::get_interconnect_source_port(const std::string &bus_name, const std::string &module_n) {
@@ -73,20 +79,8 @@ bus_specs_manager::get_component_spec(const std::string &b, const std::string &c
     return "";
 }
 
-bool bus_specs_manager::is_output_port(const std::string &bt, const std::string &cn, const std::string &pn) {
-    auto out_name = get_output_port(bt, cn);
-
-    if(out_name.second){
-        std::string prefix = out_name.first.substr(0, out_name.first.find("*"));
-        std::string suffix = out_name.first.substr(out_name.first.find("*")+1, out_name.first.size());
-        std::string working_string = pn;
-        auto remaing_s = working_string.erase(0, prefix.size());
-        remaing_s = working_string.erase(working_string.size()-suffix.size(), working_string.size());
-        if(remaing_s.empty()) return false;
-        return std::all_of(remaing_s.begin(), remaing_s.end(), ::isdigit);
-    } else {
-        return pn == out_name.first;
-    }
+bool bus_specs_manager::is_output_port(const std::string &bt, const std::string &type) {
+    return port_dir_specs[bt][if_port_output] == type;
 }
 
 std::pair<std::string, bool> bus_specs_manager::get_input_port(const std::string &b, const std::string &c) {

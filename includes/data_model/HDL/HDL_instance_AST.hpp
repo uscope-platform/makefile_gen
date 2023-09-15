@@ -47,6 +47,9 @@ public:
     void set_leaf_module_top(const std::string &s){leaf_module_top = s;};
     std::string get_leaf_module_top(){return leaf_module_top;};
 
+    void set_if_specs(const std::unordered_map<std::string, std::array<std::string, 2>> &if_s){if_specs = if_s;};
+    std::unordered_map<std::string, std::array<std::string, 2>> get_if_specs(){return if_specs;};
+
      nlohmann::json dump() override;
 
     friend bool operator==(const HDL_instance_AST&lhs, const HDL_instance_AST&rhs);
@@ -59,6 +62,8 @@ private:
 
     std::vector<std::string> data_dependencies;
     std::vector<std::string> package_dependencies;
+
+    std::unordered_map<std::string, std::array<std::string, 2>> if_specs;
 
     std::string leaf_module_top;
 };

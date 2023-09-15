@@ -16,7 +16,7 @@
       "in_port":"data_in"
     },
 
-    "axis_decoupler":{
+    "axis_remapper":{
       "class":"interconnect",
       "type": "passthrough",
       "in_port":"in",
@@ -27,13 +27,21 @@
       "class":"interconnect",
       "type":"1To2",
       "in_port":"in",
-      "out_port_template": "out_*"
+      "out_port":"out"
     },
 
     "axi_stream_combiner": {
       "class":"interconnect",
       "type":"nTo1",
       "n_sources":"N_STREAMS"
+    },
+    "AdcProcessing": {
+      "class": "source",
+      "type": "analog"
+    },
+    "axis_data_mover": {
+      "class": "source",
+      "type": "core"
     }
   }
 }

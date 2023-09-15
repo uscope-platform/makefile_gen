@@ -58,7 +58,8 @@ void data_acquisition_analysis::backtrace_scope_inputs(const std::shared_ptr<HDL
         for(auto &p:dep->get_ports()){
             for(std::string &e:p.second){
                 if(e == intf){
-                    if(specs_manager.is_output_port("axi_stream", dep->get_type(), p.first)){
+                    auto spec = dep->get_if_specs()[p.first];
+                    if(specs_manager.is_output_port("axi_stream", spec[1])){
                         if_source = dep;
                         if_port = p.first;
                         goto source_found;
@@ -69,33 +70,55 @@ void data_acquisition_analysis::backtrace_scope_inputs(const std::shared_ptr<HDL
     }
     source_found:
     if(!if_port.empty()){
-        auto follow_on_ifs = process_node(if_source, if_port);
-        int i = 0;
-        for(std::string &ifs:follow_on_ifs){
-            backtrace_scope_inputs(node, ifs);
+        if(auto follow_on_ifs = process_node(if_source, if_port)){
+            for(std::string &ifs:*follow_on_ifs){
+                backtrace_scope_inputs(node, ifs);
+            }
+        } else{
+            if(!explored_nodes.contains({if_source->get_name(), if_port})){
+                backtrace_scope_inputs(if_source, if_port);
+                explored_nodes.insert({if_source->get_name(), if_port});
+            }
         }
     } else {
         for(auto &item:node->get_ports()) {
             if(item.first == intf){
-                backtrace_scope_inputs(node->get_parent(), item.second[0]);
+                if(!explored_nodes.contains({node->get_parent()->get_name(), item.second[0]})){
+                    explored_nodes.insert({node->get_parent()->get_name(), item.second[0]});
+                    backtrace_scope_inputs(node->get_parent(), item.second[0]);
+                }
+
             }
         }
     }
 
 }
 
-std::vector<std::string> data_acquisition_analysis::process_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port) {
-    std::vector<std::string> ret;
+std::optional<std::vector<std::string>> data_acquisition_analysis::process_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port) {
     auto node_type = specs_manager.get_component_spec("axi_stream", node->get_type(), "type");
 
-    if(node_type == "passthrough"){
-        return process_1_to_1_node(node,port);
-    } else if (node_type == "1To2"){
-        return process_1_to_n_node(node, port);
-    } else if (node_type == "nTo1"){
-        return process_n_to_1_node(node, port);
+    if(specs_manager.is_interconnect("axi_stream", node->get_type())){
+        if(node_type == "passthrough"){
+            return process_1_to_1_node(node,port);
+        } else if (node_type == "1To2"){
+            return process_1_to_n_node(node, port);
+        } else if (node_type == "nTo1"){
+            return process_n_to_1_node(node, port);
+        } else{
+            throw std::runtime_error("Error: unknown axi stream insterconnect type found");
+        }
+    } else if(specs_manager.is_source("axi_stream", node->get_type())){
+        process_source(node, port);
+        return std::vector<std::string>();
+    } else{
+        return std::nullopt;
     }
-    return ret;
+}
+
+void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instance_AST> &node, std::string port) {
+    if(log) {
+        std::cout << "FOUND DATA SOURCE AT NODE: " + node->get_name() + "\n";
+    }
 }
 
 std::vector<std::string>
@@ -107,6 +130,15 @@ data_acquisition_analysis::process_n_to_1_node(const std::shared_ptr<HDL_instanc
             ret.insert(ret.end(), item.second.begin(), item.second.end());
         }
     }
+    if(log){
+        std::cout<< "ANALYZING N-TO-1 DATA NODE: "+ port + " of Instance " + node->get_name() + " found sources : [";
+        for(int i =0 ; i<ret.size(); i++ ){
+            std::cout<< ret[i];
+            if(i<ret.size()-1) std::cout << ", ";
+        }
+        std::cout << "]\n";
+    }
+
     return ret;
 }
 
@@ -119,17 +151,20 @@ data_acquisition_analysis::process_1_to_n_node(const std::shared_ptr<HDL_instanc
             ret = item.second[0];
         }
     }
+    if(log) std::cout<< "ANALYZING 1-TO-N DATA NODE: "+ port + " of Instance " + node->get_name() + " found sources : "+ ret + "\n";
     return {ret};
 }
 
 std::vector<std::string>
 data_acquisition_analysis::process_1_to_1_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port) {
     std::string ret;
+
     auto in_port = specs_manager.get_input_port("axi_stream", node->get_type());
     for(auto &item:node->get_ports()){
         if(item.first == in_port.first){
             ret = item.second[0];
         }
     }
+    if(log) std::cout<< "ANALYZING 1-TO-1 DATA NODE: "+ port + " of Instance " + node->get_name() + " found sources : "+ ret + "\n";
     return {ret};
 }

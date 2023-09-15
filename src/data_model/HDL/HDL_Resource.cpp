@@ -106,8 +106,8 @@ void HDL_Resource::add_if_port_specs(const std::string &p_n, const std::string &
     if_specs[p_n] = {if_name, modport};
 }
 
-std::pair<std::string, std::string> HDL_Resource::get_if_port_specs(const std::string &p_n) {
-    return std::make_pair(if_specs[p_n][0],if_specs[p_n][1]);
+std::unordered_map<std::string, std::array<std::string, 2>> HDL_Resource::get_if_port_specs() {
+    return if_specs;
 }
 
 void HDL_Resource::set_parameters(Parameters_map p) {

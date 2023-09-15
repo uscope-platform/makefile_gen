@@ -58,7 +58,7 @@ class HDL_Resource {
         void add_ports(const std::string &p_n, port_direction_t dir) {ports[p_n] = dir;};
 
         void add_if_port_specs(const std::string &p_n, const std::string &if_name, const std::string &modport);
-        std::pair<std::string, std::string> get_if_port_specs(const std::string &p_n);
+        std::unordered_map<std::string, std::array<std::string, 2>> get_if_port_specs();
 
 
         void add_processor_doc(processor_instance &p) {processor_docs.push_back(p);};

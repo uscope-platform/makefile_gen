@@ -153,7 +153,7 @@ int main(int argc, char *argv[]){
     bus_analyzer.analyze_bus(synth_ast);
 
     if(opts.generate_app_definition){
-        data_acquisition_analysis daq_analyzer;
+        data_acquisition_analysis daq_analyzer(true);
         daq_analyzer.analyze(synth_ast);
     }
 
