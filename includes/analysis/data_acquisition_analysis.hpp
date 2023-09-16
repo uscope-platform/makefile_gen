@@ -34,8 +34,25 @@ private:
     void process_source(const std::shared_ptr<HDL_instance_AST> &node, std::string port);
     std::set<std::pair<std::string, std::string>> explored_nodes;
     std::vector<std::shared_ptr<HDL_instance_AST>> find_sinks(std::shared_ptr<HDL_instance_AST> &ast);
+
+
+    std::vector<std::string> parse_datapoint_names(std::string &s){
+        std::stringstream ss(s);
+        std::vector<std::string> result;
+
+        while( ss.good() )
+        {
+            std::string substr;
+            getline( ss, substr, ',' );
+            result.push_back( substr );
+        }
+        return result;
+    }
+
+
     bus_specs_manager specs_manager;
     std::string bus_type = "axi_stream";
+    std::vector<nlohmann::json> data_points;
     bool log = false;
 };
 

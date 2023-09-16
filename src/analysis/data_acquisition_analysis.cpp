@@ -119,6 +119,34 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
     if(log) {
         std::cout << "FOUND DATA SOURCE AT NODE: " + node->get_name() + "\n";
     }
+
+
+    std::string node_names = node->get_parameters().get("PRAGMA_MKFG_DATAPOINT_NAMES")->get_string_value();
+
+    auto n_points_params = specs_manager.get_component_spec("axi_stream", node->get_type(), "n_points");
+    auto n_params = node->get_parameters().get(n_points_params)->get_numeric_value();
+
+    std::string port_suffix = specs_manager.get_component_spec("axi_stream", node->get_type(), port);
+    auto names = parse_datapoint_names(node_names);
+
+    for(std::string &n:names) {
+        nlohmann::json dp;
+        if (!port_suffix.empty()) {
+            dp["name"] = n + "_" +port_suffix;
+            dp["id"] =   n + "_" +port_suffix;
+        }else{
+            dp["name"] = n;
+            dp["id"] = n;
+        }
+        dp["phis_width"] = 10;
+        dp["number"] = 0;
+        dp["mux_setting"] = 0;
+        dp["enabled"]= false;
+        dp["max_value"] = 1000;
+        dp["max_value"] = 0;
+        dp["scaling_factor"] = 1;
+        data_points.push_back(dp);
+    }
 }
 
 std::vector<std::string>
@@ -165,6 +193,13 @@ data_acquisition_analysis::process_1_to_1_node(const std::shared_ptr<HDL_instanc
             ret = item.second[0];
         }
     }
+
+    if(specs_manager.get_component_spec("axi_stream", node->get_type(), "remapping") == "true"){
+        auto remapping_type = node->get_parameters().get("REMAP_TYPE")->get_string_value();
+        auto remapping_addr = node->get_parameters().get("REMAP_OFFSET")->get_numeric_value();
+        int i = 0;
+    }
+
     if(log) std::cout<< "ANALYZING 1-TO-1 DATA NODE: "+ port + " of Instance " + node->get_name() + " found sources : "+ ret + "\n";
     return {ret};
 }

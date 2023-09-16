@@ -19,6 +19,7 @@
     "axis_remapper":{
       "class":"interconnect",
       "type": "passthrough",
+      "remapping": "true",
       "in_port":"in",
       "out_port":"out"
     },
@@ -35,13 +36,20 @@
       "type":"nTo1",
       "n_sources":"N_STREAMS"
     },
+
     "AdcProcessing": {
       "class": "source",
-      "type": "analog"
+      "type": "analog",
+      "n_points": "N_CHANNELS",
+      "fast_data_out": "fast",
+      "filtered_data_out": ""
     },
+
     "axis_data_mover": {
       "class": "source",
-      "type": "core"
+      "type": "core",
+      "n_points": "CHANNEL_NUMBER",
+      "data_out": ""
     }
   }
 }
