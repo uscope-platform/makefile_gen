@@ -28,7 +28,7 @@ typedef struct {
 
 class data_acquisition_analysis {
 public:
-    explicit data_acquisition_analysis(bool logging) {log = logging;};
+    explicit data_acquisition_analysis(bool logging);
     void analyze(std::shared_ptr<HDL_instance_AST> &ast);
 private:
     void backtrace_scope_inputs(const std::shared_ptr<HDL_instance_AST> &node,const data_stream &intf);
@@ -57,7 +57,6 @@ private:
 
 
     bus_specs_manager specs_manager;
-    std::string bus_type = "axi_stream";
     std::vector<nlohmann::json> data_points;
     bool log = false;
 };

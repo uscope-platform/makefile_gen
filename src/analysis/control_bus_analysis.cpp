@@ -15,7 +15,7 @@
 
 #include "analysis/control_bus_analysis.hpp"
 
-control_bus_analysis::control_bus_analysis(const Depfile &df) {
+control_bus_analysis::control_bus_analysis(const Depfile &df) : specs_manager("axi_lite"){
     dfile = df;
 }
 
@@ -27,7 +27,6 @@ void control_bus_analysis::analyze_bus(std::shared_ptr<HDL_instance_AST> &ast) {
     auto bus = dfile.get_bus_section()["control"];
     std::string bus_if = bus["bus_interface"];
     std::string starting_module  = bus["starting_module"];
-    bus_type = bus["type"];
 
     analysis_context top = {ast, bus_if, 0, false, ""};
     analize_node({top});
@@ -37,10 +36,10 @@ void control_bus_analysis::analyze_bus(std::shared_ptr<HDL_instance_AST> &ast) {
 void control_bus_analysis::analize_node(const std::vector<analysis_context> &n) {
     for(auto &leaf:n){
         auto type = leaf.node->get_type();
-        if(specs_manager.is_sink(bus_type, type)){
+        if(specs_manager.is_sink(type)){
             //manage_sink
             process_leaf_node(leaf);
-        }else if(specs_manager.is_interconnect(bus_type, type)){
+        }else if(specs_manager.is_interconnect(type)){
             //manage interconnects
             analize_node(process_interconnect(leaf));
         }else {
@@ -64,7 +63,7 @@ std::vector<analysis_context> control_bus_analysis::process_simple_interconnect(
     std::vector<analysis_context> ret_val;
     auto ic = inst.node;
     auto addresses = ic->get_parameters().get("SLAVE_ADDR")->get_array_value().get_1d_slice({0,0});
-    auto masters_ifs = ic->get_ports()[specs_manager.get_interconnect_source_port(bus_type, ic->get_type())];
+    auto masters_ifs = ic->get_ports()[specs_manager.get_interconnect_source_port(ic->get_type())];
     std::reverse(masters_ifs.begin(), masters_ifs.end());
 
     for(int i = 0; i<masters_ifs.size(); i++){

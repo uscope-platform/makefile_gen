@@ -15,6 +15,11 @@
 
 #include "analysis/data_acquisition_analysis.hpp"
 
+data_acquisition_analysis::data_acquisition_analysis(bool logging) : specs_manager("axi_stream"){
+    log = logging;
+}
+
+
 void data_acquisition_analysis::analyze(std::shared_ptr<HDL_instance_AST> &ast) {
     auto sinks = find_sinks(ast);
     if(sinks.size()>1){
@@ -22,7 +27,7 @@ void data_acquisition_analysis::analyze(std::shared_ptr<HDL_instance_AST> &ast) 
         return;
     }
 
-    auto scope_in_pn = specs_manager.get_component_spec("axi_stream", sinks[0]->get_type(), "in_port");
+    auto scope_in_pn = specs_manager.get_component_spec(sinks[0]->get_type(), "in_port");
     std::string data_interface;
 
     for(auto &item:sinks[0]->get_ports()){
@@ -41,7 +46,7 @@ data_acquisition_analysis::find_sinks(std::shared_ptr<HDL_instance_AST> &ast) {
     std::vector<std::shared_ptr<HDL_instance_AST>> ret;
 
     for(auto &item:ast->get_dependencies()){
-        if(specs_manager.is_sink(bus_type, item->get_type())){
+        if(specs_manager.is_sink(item->get_type())){
            ret.push_back(item);
         } else {
             auto ll_res = find_sinks(item);
@@ -61,7 +66,7 @@ void data_acquisition_analysis::backtrace_scope_inputs(const std::shared_ptr<HDL
             for(std::string &e:p.second){
                 if(e == intf.if_name){
                     auto spec = dep->get_if_specs()[p.first];
-                    if(specs_manager.is_output_port("axi_stream", spec[1])){
+                    if(specs_manager.is_output_port(spec[1])){
                         if_source = dep;
                         if_port = p.first;
                         goto source_found;
@@ -99,9 +104,9 @@ void data_acquisition_analysis::backtrace_scope_inputs(const std::shared_ptr<HDL
 }
 
 std::optional<std::vector<data_stream>> data_acquisition_analysis::process_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream) {
-    auto node_type = specs_manager.get_component_spec("axi_stream", node->get_type(), "type");
+    auto node_type = specs_manager.get_component_spec(node->get_type(), "type");
 
-    if(specs_manager.is_interconnect("axi_stream", node->get_type())){
+    if(specs_manager.is_interconnect(node->get_type())){
         if(node_type == "passthrough"){
             return process_1_to_1_node(node,in_stream);
         } else if (node_type == "1To2"){
@@ -111,7 +116,7 @@ std::optional<std::vector<data_stream>> data_acquisition_analysis::process_node(
         } else{
             throw std::runtime_error("Error: unknown axi stream insterconnect type found");
         }
-    } else if(specs_manager.is_source("axi_stream", node->get_type())){
+    } else if(specs_manager.is_source(node->get_type())){
         process_source(node, in_stream);
         return std::vector<data_stream>();
     } else{
@@ -126,15 +131,15 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
 
     std::string node_names = node->get_parameters().get("PRAGMA_MKFG_DATAPOINT_NAMES")->get_string_value();
 
-    auto n_points_params = specs_manager.get_component_spec("axi_stream", node->get_type(), "n_points");
+    auto n_points_params = specs_manager.get_component_spec(node->get_type(), "n_points");
     auto n_params = node->get_parameters().get(n_points_params)->get_numeric_value();
 
-    std::string port_suffix = specs_manager.get_component_spec("axi_stream", node->get_type(), in_stream.if_name);
+    std::string port_suffix = specs_manager.get_component_spec(node->get_type(), in_stream.if_name);
     auto names = parse_datapoint_names(node_names);
 
     std::vector<int64_t> addresses;
-    if(specs_manager.has_component_spec("axi_stream",  node->get_type(),"initial_addresses")){
-        auto addr_param_name = specs_manager.get_component_spec("axi_stream",  node->get_type(),"initial_addresses");
+    if(specs_manager.has_component_spec(node->get_type(), "initial_addresses")){
+        auto addr_param_name = specs_manager.get_component_spec(node->get_type(), "initial_addresses");
         addresses = node->get_parameters().get(addr_param_name)->get_array_value().get_1d_slice({0,0});
     } else{
         for(int i =0; i<n_params; i++){
@@ -176,7 +181,7 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
 std::vector<data_stream>
 data_acquisition_analysis::process_n_to_1_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream) {
     std::vector<data_stream> ret;
-    auto in_port = specs_manager.get_input_port("axi_stream", node->get_type());
+    auto in_port = specs_manager.get_input_port(node->get_type());
     for(auto &item:node->get_ports()){
         if(item.first == in_port.first){
             for(auto &port:item.second){
@@ -200,7 +205,7 @@ data_acquisition_analysis::process_n_to_1_node(const std::shared_ptr<HDL_instanc
 std::vector<data_stream>
 data_acquisition_analysis::process_1_to_n_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream) {
     data_stream ret;
-    auto in_port = specs_manager.get_input_port("axi_stream", node->get_type());
+    auto in_port = specs_manager.get_input_port(node->get_type());
     for(auto &item:node->get_ports()){
         if(item.first == in_port.first){
             ret.if_name = item.second[0];
@@ -216,10 +221,10 @@ std::vector<data_stream>
 data_acquisition_analysis::process_1_to_1_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream) {
     data_stream ret;
 
-    auto in_port = specs_manager.get_input_port("axi_stream", node->get_type());
+    auto in_port = specs_manager.get_input_port(node->get_type());
     int64_t remapping_addr = 0;
     std::string remapping_type;
-    if(specs_manager.get_component_spec("axi_stream", node->get_type(), "remapping") == "true"){
+    if(specs_manager.get_component_spec(node->get_type(), "remapping") == "true"){
         remapping_type = node->get_parameters().get("REMAP_TYPE")->get_string_value();
         remapping_addr = node->get_parameters().get("REMAP_OFFSET")->get_numeric_value();
     }

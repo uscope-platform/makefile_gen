@@ -20,48 +20,51 @@ bus_specs_manager::bus_specs_manager(const bus_specs_manager &b) {
     port_dir_specs = b.port_dir_specs;
 }
 
-bus_specs_manager::bus_specs_manager() {
-    std::string specs_dir = SPECS_FOLDER;
+bus_specs_manager::bus_specs_manager(const std::string &bus_type) {
+    std::string spec_file = SPECS_FOLDER;
+    spec_file += "/" + bus_type + ".json";
+    load_specs(spec_file);
+}
 
-    for(auto &item:std::filesystem::directory_iterator(specs_dir)){
-        std::ifstream ifs(item.path());
-        nlohmann::json bus_spec_obj = nlohmann::json::parse(ifs);
-        std::string name = bus_spec_obj["name"];
 
-        std::vector<mapper_bus_component> components;
-        for(auto &comp: bus_spec_obj["components"].items()){
-            mapper_bus_component new_comp(comp.key(), comp.value());
-            new_comp.set_defaults(bus_spec_obj["default_specs"]);
-            if(new_comp.get_class()==interconnect){
-                interconnect_modules[name].insert(new_comp.get_name());
-            } else if(new_comp.get_class()==sink){
-                sink_modules[name].insert(new_comp.get_name());
-            } else if(new_comp.get_class()==source){
-                source_modules[name].insert(new_comp.get_name());
-            }
-            components.push_back(new_comp);
+void bus_specs_manager::load_specs(std::string &b) {
+    std::ifstream ifs(b);
+    nlohmann::json bus_spec_obj = nlohmann::json::parse(ifs);
+    std::string name = bus_spec_obj["name"];
+
+    std::vector<mapper_bus_component> components;
+    for(auto &comp: bus_spec_obj["components"].items()){
+        mapper_bus_component new_comp(comp.key(), comp.value());
+        new_comp.set_defaults(bus_spec_obj["default_specs"]);
+        if(new_comp.get_class()==interconnect){
+            interconnect_modules.insert(new_comp.get_name());
+        } else if(new_comp.get_class()==sink){
+            sink_modules.insert(new_comp.get_name());
+        } else if(new_comp.get_class()==source){
+            source_modules.insert(new_comp.get_name());
         }
-        std::unordered_map<if_port_dir, std::string> dir_map = {{if_port_input, bus_spec_obj["modports"]["in"]}, {if_port_output, bus_spec_obj["modports"]["out"]}};
-        port_dir_specs[name] = dir_map;
-        bus_specs[name] = components;
+        components.push_back(new_comp);
     }
-
+    std::unordered_map<if_port_dir, std::string> dir_map = {{if_port_input, bus_spec_obj["modports"]["in"]}, {if_port_output, bus_spec_obj["modports"]["out"]}};
+    port_dir_specs = dir_map;
+    bus_specs = components;
 }
 
-bool bus_specs_manager::is_sink(const std::string &type, const std::string &s) {
-    return sink_modules[type].contains(s);
+
+bool bus_specs_manager::is_sink(const std::string &s) {
+    return sink_modules.contains(s);
 }
 
-bool bus_specs_manager::is_interconnect(const std::string &type, const std::string &s) {
-    return interconnect_modules[type].contains(s);
+bool bus_specs_manager::is_interconnect(const std::string &s) {
+    return interconnect_modules.contains(s);
 }
 
-bool bus_specs_manager::is_source(const std::string &type, const std::string &s) {
-    return source_modules[type].contains(s);
+bool bus_specs_manager::is_source(const std::string &s) {
+    return source_modules.contains(s);
 }
 
-std::string bus_specs_manager::get_interconnect_source_port(const std::string &bus_name, const std::string &module_n) {
-    for(auto &item:bus_specs[bus_name]){
+std::string bus_specs_manager::get_interconnect_source_port(const std::string &module_n) {
+    for(auto &item:bus_specs){
         if(item.get_name()==module_n){
             return item.get_spec("out_port");
         }
@@ -70,8 +73,8 @@ std::string bus_specs_manager::get_interconnect_source_port(const std::string &b
 }
 
 std::string
-bus_specs_manager::get_component_spec(const std::string &b, const std::string &c, const std::string &s) {
-    for(auto &item:bus_specs[b]){
+bus_specs_manager::get_component_spec(const std::string &c, const std::string &s) {
+    for(auto &item:bus_specs){
         if(item.get_name() == c){
             return item.get_spec(s);
         }
@@ -79,28 +82,37 @@ bus_specs_manager::get_component_spec(const std::string &b, const std::string &c
     return "";
 }
 
-bool bus_specs_manager::is_output_port(const std::string &bt, const std::string &type) {
-    return port_dir_specs[bt][if_port_output] == type;
+bool bus_specs_manager::has_component_spec(const std::string &c, const std::string &s) {
+    for(auto &item:bus_specs){
+        if(item.get_name() == c){
+            return item.has_spec(s);
+        }
+    }
+    return false;
 }
 
-std::pair<std::string, bool> bus_specs_manager::get_input_port(const std::string &b, const std::string &c) {
+bool bus_specs_manager::is_output_port(const std::string &type) {
+    return port_dir_specs[if_port_output] == type;
+}
+
+std::pair<std::string, bool> bus_specs_manager::get_input_port(const std::string &c) {
     std::string in_name;
-    for(auto &comp:bus_specs[b]){
+    for(auto &comp:bus_specs){
         if(comp.get_name() == c){
             if(comp.has_spec("in_port")){
                 in_name = comp.get_spec("in_port");
             } else {
-                in_name = port_dir_specs[c][if_port_input];
+                in_name = port_dir_specs[if_port_input];
             }
         }
     }
     return {in_name, false};
 }
 
-std::pair<std::string, bool> bus_specs_manager::get_output_port(const std::string &b, const std::string &c) {
+std::pair<std::string, bool> bus_specs_manager::get_output_port(const std::string &c) {
     std::string out_name;
     bool templated =false;
-    for(auto &comp:bus_specs[b]){
+    for(auto &comp:bus_specs){
         if(comp.get_name() == c){
             if(comp.has_spec("out_port_template")){
                 out_name = comp.get_spec("out_port_template");
@@ -108,18 +120,10 @@ std::pair<std::string, bool> bus_specs_manager::get_output_port(const std::strin
             } else if(comp.has_spec("out_port")){
                 out_name = comp.get_spec("out_port");
             } else {
-                out_name = port_dir_specs[b][if_port_input];
+                out_name = port_dir_specs[if_port_input];
             }
         }
     }
     return {out_name, templated};
 }
 
-bool bus_specs_manager::has_component_spec(const std::string &b, const std::string &c, const std::string &s) {
-    for(auto &item:bus_specs[b]){
-        if(item.get_name() == c){
-            return item.has_spec(s);
-        }
-    }
-    return false;
-}
