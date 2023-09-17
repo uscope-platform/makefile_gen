@@ -37,6 +37,7 @@ public:
     bus_specs_manager(const bus_specs_manager &b);
     std::vector<mapper_bus_component> get_bus_specs(const std::string &s){return bus_specs[s];};
     std::string get_component_spec(const std::string &b, const std::string &c, const std::string &s);
+    bool has_component_spec(const std::string &b, const std::string &c, const std::string &s);
     std::string get_port_dir_specs(const std::string &s, if_port_dir dir){return port_dir_specs[s][dir];};
     std::string get_interconnect_source_port(const std::string &bus_name, const std::string &module_n);
     bool is_output_port(const std::string &bt, const std::string  &type);

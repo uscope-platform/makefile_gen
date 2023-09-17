@@ -132,6 +132,16 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
     std::string port_suffix = specs_manager.get_component_spec("axi_stream", node->get_type(), in_stream.if_name);
     auto names = parse_datapoint_names(node_names);
 
+    std::vector<int64_t> addresses;
+    if(specs_manager.has_component_spec("axi_stream",  node->get_type(),"initial_addresses")){
+        auto addr_param_name = specs_manager.get_component_spec("axi_stream",  node->get_type(),"initial_addresses");
+        addresses = node->get_parameters().get(addr_param_name)->get_array_value().get_1d_slice({0,0});
+    } else{
+        for(int i =0; i<n_params; i++){
+            addresses.push_back(i);
+        }
+    }
+
     for(int i = 0; i<n_params; i++){
         nlohmann::json dp;
         std::string channel_name;
@@ -152,7 +162,7 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
         if(in_stream.static_remap){
             dp["mux_setting"] = in_stream.address_offset;
         } else{
-            dp["mux_setting"] = in_stream.address_offset + i;
+            dp["mux_setting"] = in_stream.address_offset + addresses[i];
         }
         dp["enabled"]= false;
         dp["max_value"] = 1000;

@@ -49,6 +49,7 @@
       "class": "source",
       "type": "core",
       "n_points": "CHANNEL_NUMBER",
+      "initial_addresses": "TARGET_ADDR",
       "data_out": ""
     }
   }

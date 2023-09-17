@@ -114,3 +114,12 @@ std::pair<std::string, bool> bus_specs_manager::get_output_port(const std::strin
     }
     return {out_name, templated};
 }
+
+bool bus_specs_manager::has_component_spec(const std::string &b, const std::string &c, const std::string &s) {
+    for(auto &item:bus_specs[b]){
+        if(item.get_name() == c){
+            return item.has_spec(s);
+        }
+    }
+    return false;
+}
