@@ -30,8 +30,10 @@ void data_acquisition_analysis::analyze(std::shared_ptr<HDL_instance_AST> &ast) 
             data_interface = item.second[0];
         }
     }
-
-    backtrace_scope_inputs(sinks[0]->get_parent(), data_interface);
+    data_stream ds = {data_interface, 0};
+    backtrace_scope_inputs(sinks[0]->get_parent(), ds);
+    std::string dump = nlohmann::to_string(nlohmann::json(data_points));
+    auto j = 24;
 }
 
 std::vector<std::shared_ptr<HDL_instance_AST>>
@@ -50,14 +52,14 @@ data_acquisition_analysis::find_sinks(std::shared_ptr<HDL_instance_AST> &ast) {
     return ret;
 }
 
-void data_acquisition_analysis::backtrace_scope_inputs(const std::shared_ptr<HDL_instance_AST> &node, std::string intf) {
+void data_acquisition_analysis::backtrace_scope_inputs(const std::shared_ptr<HDL_instance_AST> &node,const data_stream &intf) {
 
     std::shared_ptr<HDL_instance_AST> if_source;
     std::string if_port;
     for(auto &dep:node->get_dependencies()){
         for(auto &p:dep->get_ports()){
             for(std::string &e:p.second){
-                if(e == intf){
+                if(e == intf.if_name){
                     auto spec = dep->get_if_specs()[p.first];
                     if(specs_manager.is_output_port("axi_stream", spec[1])){
                         if_source = dep;
@@ -70,22 +72,24 @@ void data_acquisition_analysis::backtrace_scope_inputs(const std::shared_ptr<HDL
     }
     source_found:
     if(!if_port.empty()){
-        if(auto follow_on_ifs = process_node(if_source, if_port)){
-            for(std::string &ifs:*follow_on_ifs){
+        data_stream ds = {if_port, intf.address_offset, intf.static_remap};
+        if(auto follow_on_ifs = process_node(if_source, ds)){
+            for(auto &ifs:*follow_on_ifs){
                 backtrace_scope_inputs(node, ifs);
             }
         } else{
             if(!explored_nodes.contains({if_source->get_name(), if_port})){
-                backtrace_scope_inputs(if_source, if_port);
+                backtrace_scope_inputs(if_source, ds);
                 explored_nodes.insert({if_source->get_name(), if_port});
             }
         }
     } else {
         for(auto &item:node->get_ports()) {
-            if(item.first == intf){
+            if(item.first == intf.if_name){
                 if(!explored_nodes.contains({node->get_parent()->get_name(), item.second[0]})){
                     explored_nodes.insert({node->get_parent()->get_name(), item.second[0]});
-                    backtrace_scope_inputs(node->get_parent(), item.second[0]);
+                    data_stream ds = {item.second[0], intf.address_offset, intf.static_remap};
+                    backtrace_scope_inputs(node->get_parent(), ds);
                 }
 
             }
@@ -94,74 +98,87 @@ void data_acquisition_analysis::backtrace_scope_inputs(const std::shared_ptr<HDL
 
 }
 
-std::optional<std::vector<std::string>> data_acquisition_analysis::process_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port) {
+std::optional<std::vector<data_stream>> data_acquisition_analysis::process_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream) {
     auto node_type = specs_manager.get_component_spec("axi_stream", node->get_type(), "type");
 
     if(specs_manager.is_interconnect("axi_stream", node->get_type())){
         if(node_type == "passthrough"){
-            return process_1_to_1_node(node,port);
+            return process_1_to_1_node(node,in_stream);
         } else if (node_type == "1To2"){
-            return process_1_to_n_node(node, port);
+            return process_1_to_n_node(node, in_stream);
         } else if (node_type == "nTo1"){
-            return process_n_to_1_node(node, port);
+            return process_n_to_1_node(node, in_stream);
         } else{
             throw std::runtime_error("Error: unknown axi stream insterconnect type found");
         }
     } else if(specs_manager.is_source("axi_stream", node->get_type())){
-        process_source(node, port);
-        return std::vector<std::string>();
+        process_source(node, in_stream);
+        return std::vector<data_stream>();
     } else{
         return std::nullopt;
     }
 }
 
-void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instance_AST> &node, std::string port) {
+void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream) {
     if(log) {
         std::cout << "FOUND DATA SOURCE AT NODE: " + node->get_name() + "\n";
     }
-
 
     std::string node_names = node->get_parameters().get("PRAGMA_MKFG_DATAPOINT_NAMES")->get_string_value();
 
     auto n_points_params = specs_manager.get_component_spec("axi_stream", node->get_type(), "n_points");
     auto n_params = node->get_parameters().get(n_points_params)->get_numeric_value();
 
-    std::string port_suffix = specs_manager.get_component_spec("axi_stream", node->get_type(), port);
+    std::string port_suffix = specs_manager.get_component_spec("axi_stream", node->get_type(), in_stream.if_name);
     auto names = parse_datapoint_names(node_names);
 
-    for(std::string &n:names) {
+    for(int i = 0; i<n_params; i++){
         nlohmann::json dp;
+        std::string channel_name;
+        if(names.size() == 1 & n_params>1){
+            channel_name = names[0] + "_" + std::to_string(i);
+        } else{
+            channel_name = names[i];
+        }
         if (!port_suffix.empty()) {
-            dp["name"] = n + "_" +port_suffix;
-            dp["id"] =   n + "_" +port_suffix;
+            dp["name"] = channel_name + "_" +port_suffix;
+            dp["id"] =   channel_name + "_" +port_suffix;
         }else{
-            dp["name"] = n;
-            dp["id"] = n;
+            dp["name"] = channel_name;
+            dp["id"] = channel_name;
         }
         dp["phis_width"] = 10;
         dp["number"] = 0;
-        dp["mux_setting"] = 0;
+        if(in_stream.static_remap){
+            dp["mux_setting"] = in_stream.address_offset;
+        } else{
+            dp["mux_setting"] = in_stream.address_offset + i;
+        }
         dp["enabled"]= false;
         dp["max_value"] = 1000;
         dp["max_value"] = 0;
         dp["scaling_factor"] = 1;
         data_points.push_back(dp);
     }
+
 }
 
-std::vector<std::string>
-data_acquisition_analysis::process_n_to_1_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port) {
-    std::vector<std::string> ret;
+std::vector<data_stream>
+data_acquisition_analysis::process_n_to_1_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream) {
+    std::vector<data_stream> ret;
     auto in_port = specs_manager.get_input_port("axi_stream", node->get_type());
     for(auto &item:node->get_ports()){
         if(item.first == in_port.first){
-            ret.insert(ret.end(), item.second.begin(), item.second.end());
+            for(auto &port:item.second){
+                data_stream ds = {port, in_stream.address_offset, in_stream.static_remap};
+                ret.push_back(ds);
+            }
         }
     }
     if(log){
-        std::cout<< "ANALYZING N-TO-1 DATA NODE: "+ port + " of Instance " + node->get_name() + " found sources : [";
+        std::cout<< "ANALYZING N-TO-1 DATA NODE: "+ in_stream.if_name + " of Instance " + node->get_name() + " found sources : [";
         for(int i =0 ; i<ret.size(); i++ ){
-            std::cout<< ret[i];
+            std::cout<< ret[i].if_name;
             if(i<ret.size()-1) std::cout << ", ";
         }
         std::cout << "]\n";
@@ -170,36 +187,49 @@ data_acquisition_analysis::process_n_to_1_node(const std::shared_ptr<HDL_instanc
     return ret;
 }
 
-std::vector<std::string>
-data_acquisition_analysis::process_1_to_n_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port) {
-    std::string ret;
+std::vector<data_stream>
+data_acquisition_analysis::process_1_to_n_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream) {
+    data_stream ret;
     auto in_port = specs_manager.get_input_port("axi_stream", node->get_type());
     for(auto &item:node->get_ports()){
         if(item.first == in_port.first){
-            ret = item.second[0];
+            ret.if_name = item.second[0];
+            ret.address_offset = in_stream.address_offset;
+            ret.static_remap = in_stream.static_remap;
         }
     }
-    if(log) std::cout<< "ANALYZING 1-TO-N DATA NODE: "+ port + " of Instance " + node->get_name() + " found sources : "+ ret + "\n";
+    if(log) std::cout<< "ANALYZING 1-TO-N DATA NODE: "+ in_stream.if_name + " of Instance " + node->get_name() + " found sources : "+ ret.if_name + "\n";
     return {ret};
 }
 
-std::vector<std::string>
-data_acquisition_analysis::process_1_to_1_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port) {
-    std::string ret;
+std::vector<data_stream>
+data_acquisition_analysis::process_1_to_1_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream) {
+    data_stream ret;
 
     auto in_port = specs_manager.get_input_port("axi_stream", node->get_type());
+    int64_t remapping_addr = 0;
+    std::string remapping_type;
+    if(specs_manager.get_component_spec("axi_stream", node->get_type(), "remapping") == "true"){
+        remapping_type = node->get_parameters().get("REMAP_TYPE")->get_string_value();
+        remapping_addr = node->get_parameters().get("REMAP_OFFSET")->get_numeric_value();
+    }
+
     for(auto &item:node->get_ports()){
         if(item.first == in_port.first){
-            ret = item.second[0];
+            ret.if_name = item.second[0];
+            if(remapping_type == "STATIC"){
+                ret.address_offset = remapping_addr;
+                ret.static_remap = true;
+            } else if(remapping_type == "DYNAMIC"){
+                ret.static_remap = false;
+                ret.address_offset = in_stream.address_offset+remapping_addr;
+            }
+
         }
     }
 
-    if(specs_manager.get_component_spec("axi_stream", node->get_type(), "remapping") == "true"){
-        auto remapping_type = node->get_parameters().get("REMAP_TYPE")->get_string_value();
-        auto remapping_addr = node->get_parameters().get("REMAP_OFFSET")->get_numeric_value();
-        int i = 0;
-    }
 
-    if(log) std::cout<< "ANALYZING 1-TO-1 DATA NODE: "+ port + " of Instance " + node->get_name() + " found sources : "+ ret + "\n";
+
+    if(log) std::cout<< "ANALYZING 1-TO-1 DATA NODE: "+ in_stream.if_name + " of Instance " + node->get_name() + " found sources : "+ ret.if_name + "\n";
     return {ret};
 }

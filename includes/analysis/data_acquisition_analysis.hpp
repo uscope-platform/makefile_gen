@@ -20,18 +20,24 @@
 #include "data_model/HDL/HDL_instance_AST.hpp"
 #include "data_model/bus_mapping/bus_specs_manager.hpp"
 
+typedef struct {
+    std::string if_name;
+    int64_t address_offset;
+    bool static_remap;
+} data_stream;
+
 class data_acquisition_analysis {
 public:
     explicit data_acquisition_analysis(bool logging) {log = logging;};
     void analyze(std::shared_ptr<HDL_instance_AST> &ast);
 private:
-    void backtrace_scope_inputs(const std::shared_ptr<HDL_instance_AST> &node, std::string intf);
+    void backtrace_scope_inputs(const std::shared_ptr<HDL_instance_AST> &node,const data_stream &intf);
 
-    std::optional<std::vector<std::string>> process_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port);
-    std::vector<std::string> process_n_to_1_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port);
-    std::vector<std::string> process_1_to_n_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port);
-    std::vector<std::string> process_1_to_1_node(const std::shared_ptr<HDL_instance_AST> &node, std::string port);
-    void process_source(const std::shared_ptr<HDL_instance_AST> &node, std::string port);
+    std::optional<std::vector<data_stream>> process_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream);
+    std::vector<data_stream> process_n_to_1_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream);
+    std::vector<data_stream> process_1_to_n_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream);
+    std::vector<data_stream> process_1_to_1_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream);
+    void process_source(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream);
     std::set<std::pair<std::string, std::string>> explored_nodes;
     std::vector<std::shared_ptr<HDL_instance_AST>> find_sinks(std::shared_ptr<HDL_instance_AST> &ast);
 
