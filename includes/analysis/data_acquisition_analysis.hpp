@@ -41,6 +41,7 @@ private:
     std::set<std::pair<std::string, std::string>> explored_nodes;
     std::vector<std::shared_ptr<HDL_instance_AST>> find_sinks(std::shared_ptr<HDL_instance_AST> &ast);
 
+    uint64_t find_datapoint_width(const std::shared_ptr<HDL_instance_AST> &node,std::string name);
 
     std::vector<std::string> parse_datapoint_names(std::string &s){
         std::stringstream ss(s);

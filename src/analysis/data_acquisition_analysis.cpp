@@ -147,6 +147,9 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
         }
     }
 
+    auto port_name = node->get_ports()[in_stream.if_name];
+    auto width = find_datapoint_width(node->get_parent(),  port_name[0]);
+
     for(int i = 0; i<n_params; i++){
         nlohmann::json dp;
         std::string channel_name;
@@ -162,7 +165,7 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
             dp["name"] = channel_name;
             dp["id"] = channel_name;
         }
-        dp["phis_width"] = 10;
+        dp["phis_width"] = width;
         dp["number"] = 0;
         if(in_stream.static_remap){
             dp["mux_setting"] = in_stream.address_offset;
@@ -247,4 +250,14 @@ data_acquisition_analysis::process_1_to_1_node(const std::shared_ptr<HDL_instanc
 
     if(log) std::cout<< "ANALYZING 1-TO-1 DATA NODE: "+ in_stream.if_name + " of Instance " + node->get_name() + " found sources : "+ ret.if_name + "\n";
     return {ret};
+}
+
+uint64_t
+data_acquisition_analysis::find_datapoint_width(const std::shared_ptr<HDL_instance_AST> &node, std::string name) {
+    for(auto &item:node->get_dependencies()){
+        if(item->get_name() == name){
+            return item->get_parameters().get("DATA_WIDTH")->get_numeric_value();
+        }
+    }
+    return 32;
 }
