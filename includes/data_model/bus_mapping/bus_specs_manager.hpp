@@ -37,7 +37,7 @@ public:
     explicit bus_specs_manager(const std::string &bus_type);
     bus_specs_manager(const bus_specs_manager &b);
     void load_specs(std::string &b);
-    std::vector<mapper_bus_component> get_bus_specs(const std::string &s){return bus_specs;};
+    std::vector<mapper_bus_component> get_bus_specs(){return bus_specs;};
     std::string get_component_spec(const std::string &c, const std::string &s);
     bool has_component_spec(const std::string &c, const std::string &s);
     std::string get_port_dir_specs(if_port_dir dir){return port_dir_specs[dir];};

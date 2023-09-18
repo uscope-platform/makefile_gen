@@ -18,8 +18,8 @@
 #include "data_model/bus_mapping/bus_specs_manager.hpp"
 
 TEST( bus_specs_manager, parsing) {
-    bus_specs_manager manager;
-    auto res = manager.get_bus_specs("axi_lite");
+    bus_specs_manager manager("axi_lite");
+    auto res = manager.get_bus_specs();
 
     std::vector<mapper_bus_component> check_vect;
     auto spec = nlohmann::json::parse(R"({"class":"interconnect","type":"n2m","n_sources":"NM","n_sinks":"NS","in_port":"slaves","out_port":"masters"})");

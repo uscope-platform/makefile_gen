@@ -1050,6 +1050,40 @@ TEST(parameter_extraction, unrelated_wire_dependency_conflict) {
 }
 
 
+TEST(parameter_extraction, interface_parameters) {
+    std::string test_pattern = R"(
+        interface axi_stream #(DATA_WIDTH = 32, USER_WIDTH = 32, DEST_WIDTH = 32);
+        endinterface
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_name("DATA_WIDTH");
+    p->set_type(expression_parameter);
+    p->add_component(Expression_component("32"));
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>();
+    p->set_name("USER_WIDTH");
+    p->set_type(expression_parameter);
+    p->add_component(Expression_component("32"));
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>();
+    p->set_name("DEST_WIDTH");
+    p->set_type(expression_parameter);
+    p->add_component(Expression_component("32"));
+    check_params.insert(p);
+
+    ASSERT_EQ(check_params, parameters);
+}
+
 /**
 TEST(parameter_extraction, param_ternary_conditional) {
     std::string test_pattern = R"(

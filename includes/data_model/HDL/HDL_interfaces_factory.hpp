@@ -27,6 +27,8 @@ public:
     void new_interface(std::string &p);
     HDL_Resource get_interface();
     void set_interface_name(const std::string &n) { set_name(n);};
+    bool is_current_valid(){return valid_resource;}
+    void add_parameter(const std::shared_ptr<HDL_parameter> &p);
 
 };
 

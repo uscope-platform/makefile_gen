@@ -26,3 +26,7 @@ HDL_Resource HDL_interfaces_factory::get_interface() {
     return resources_factory_base<HDL_Resource>::get_resource();
 }
 
+void HDL_interfaces_factory::add_parameter(const std::shared_ptr<HDL_parameter> &p) {
+    current_resource.add_parameter(p);
+}
+
