@@ -165,7 +165,7 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
             dp["name"] = channel_name;
             dp["id"] = channel_name;
         }
-        dp["phis_width"] = width;
+        dp["phys_width"] = width;
         dp["number"] = 0;
         if(in_stream.static_remap){
             dp["mux_setting"] = in_stream.address_offset;
@@ -174,7 +174,7 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
         }
         dp["enabled"]= false;
         dp["max_value"] = 1000;
-        dp["max_value"] = 0;
+        dp["min_value"] = 0;
         dp["scaling_factor"] = 1;
         data_points.push_back(dp);
     }

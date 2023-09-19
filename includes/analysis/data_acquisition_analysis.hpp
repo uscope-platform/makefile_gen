@@ -30,6 +30,7 @@ class data_acquisition_analysis {
 public:
     explicit data_acquisition_analysis(bool logging);
     void analyze(std::shared_ptr<HDL_instance_AST> &ast);
+    std::vector<nlohmann::json> get_datapoints(){return data_points;}
 private:
     void backtrace_scope_inputs(const std::shared_ptr<HDL_instance_AST> &node,const data_stream &intf);
 

@@ -61,7 +61,9 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
 
             auto spec = periph_defs[type];
             if(spec["parametric"]){
-                    periph["parameters"] = get_parameters(spec, current_node);
+                    periph["hdl_parameters"] = get_parameters(spec, current_node);
+            } else{
+                periph["hdl_parameters"] =  std::vector<std::string>();
             }
             peripherals.push_back(periph);
         }
@@ -90,9 +92,10 @@ void application_definition_generator::construct_application(const std::string &
     application["peripherals"] = peripherals;
     application["soft_cores"] = cores;
     application["timebase_address"] = "";
+    application["filters"] = std::vector<nlohmann::json>();
+    application["programs"] = std::vector<std::string>();
+    application["scripts"] = std::vector<std::string>();
 }
-
-
 
 std::string application_definition_generator::uint_to_hex(uint32_t i) {
     std::ostringstream out;
@@ -191,5 +194,9 @@ application_definition_generator::get_parameters(const json &spec, std::shared_p
 
 std::string application_definition_generator::get_definition_string() {
     return application.dump();
+}
+
+void application_definition_generator::add_datapoints(const std::vector<nlohmann::json>& dp) {
+    application["channels"] = dp;
 }
 

@@ -33,6 +33,7 @@ public:
             const std::map<std::string, std::string> &a
     );
     void add_cores(std::vector<processor_instance> cs);
+    void add_datapoints(const std::vector<nlohmann::json>& dp);
     void write_definition_file(const std::string &path);
     void construct_application(const std::string &name);
     std::string get_definition_string();

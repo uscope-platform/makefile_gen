@@ -152,11 +152,6 @@ int main(int argc, char *argv[]){
     control_bus_analysis bus_analyzer(dep);
     bus_analyzer.analyze_bus(synth_ast);
 
-    if(opts.generate_app_definition){
-        data_acquisition_analysis daq_analyzer(true);
-        daq_analyzer.analyze(synth_ast);
-    }
-
 
         //Generate makefile
     if(opts.generate_xilinx){
@@ -200,6 +195,10 @@ int main(int argc, char *argv[]){
     auto cores = synth_r.get_processors();
     app_def_gen.add_cores(cores);
     app_def_gen.construct_application(dep.get_project_name());
+
+    data_acquisition_analysis daq_analyzer(true);
+    daq_analyzer.analyze(synth_ast);
+    app_def_gen.add_datapoints(daq_analyzer.get_datapoints());
 
 
     if(opts.generate_periph_definition){
