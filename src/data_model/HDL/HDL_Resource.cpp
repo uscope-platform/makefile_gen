@@ -68,11 +68,6 @@ bool HDL_Resource::is_empty() {
     return ret;
 }
 
-std::vector<HDL_instance> HDL_Resource::get_dependencies() {
-
-    return dependencies;
-}
-
 void HDL_Resource::add_dependency(const HDL_instance &dep) {
     dependencies.push_back(dep);
 }
@@ -130,5 +125,4 @@ void PrintTo(const HDL_Resource &res, std::ostream *os) {
 
 
 }
-
 

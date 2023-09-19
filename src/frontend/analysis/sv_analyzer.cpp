@@ -70,6 +70,23 @@ std::vector<HDL_Resource> sv_analyzer::analyze() {
         }
     }
 
+    auto ch_groups =  doc.get_channel_groups();
+    for(auto &item: ch_groups){
+        std::string entity = item.first.substr(0, item.first.find("."));
+        std::string scope_instance = item.first.substr(item.first.find(".")+1, item.first.size());
+        for(auto &e:entities){
+            if(e.getName() == entity){
+                auto dependencies = e.get_dependencies();
+                for(auto &dep:dependencies){
+                    if(dep.get_name() == scope_instance){
+                        dep.set_channel_groups(item.second);
+                    }
+                }
+                e.set_dependencies(dependencies);
+            }
+        }
+    }
+
     return  entities;
 }
 

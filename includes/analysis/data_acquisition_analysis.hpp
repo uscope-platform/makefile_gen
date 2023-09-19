@@ -19,6 +19,7 @@
 #include <memory>
 #include "data_model/HDL/HDL_instance_AST.hpp"
 #include "data_model/bus_mapping/bus_specs_manager.hpp"
+#include "data_model/documentation/channel_group.hpp"
 
 typedef struct {
     std::string if_name;
@@ -31,6 +32,7 @@ public:
     explicit data_acquisition_analysis(bool logging);
     void analyze(std::shared_ptr<HDL_instance_AST> &ast);
     std::vector<nlohmann::json> get_datapoints(){return data_points;}
+    std::vector<channel_group> get_channel_groups(){return groups;};
 private:
     void backtrace_scope_inputs(const std::shared_ptr<HDL_instance_AST> &node,const data_stream &intf);
 
@@ -60,6 +62,7 @@ private:
 
     bus_specs_manager specs_manager;
     std::vector<nlohmann::json> data_points;
+    std::vector<channel_group> groups;
     bool log = false;
 };
 

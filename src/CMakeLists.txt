@@ -34,6 +34,7 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/register_documentation.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/field_documentation.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/processor_instance.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/channel_group.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Depfile.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Script.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Constraints.cpp /

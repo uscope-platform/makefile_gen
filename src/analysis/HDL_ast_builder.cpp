@@ -86,7 +86,7 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
         auto pm = res.get_parameters();
         auto new_params = p2.process_parameters_map(pm, res);
 
-
+        ret_inst->set_channel_groups(i.get_channel_groups());
         ret_inst->set_ports(i.get_ports());
         ret_inst->set_if_specs(res.get_if_port_specs());
 

@@ -24,6 +24,7 @@
 #include "data_model/HDL/HDL_definitions.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/parameters/Parameters_map.hpp"
+#include "data_model/documentation/channel_group.hpp"
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/unordered_map.hpp>
@@ -60,9 +61,12 @@ public:
     void set_dependency_class(dependency_class dc){dep_class = dc;};
 
 
+    void set_channel_groups(const std::vector<channel_group> &g){groups = g;};
+    std::vector<channel_group> get_channel_groups(){ return groups;};
+
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, type, dep_class, ports_map, parameters);
+        ar(name, type, dep_class, ports_map, parameters, groups);
     }
 
     virtual nlohmann::json dump();
@@ -77,6 +81,7 @@ protected:
     std::string type;
     std::string name;
 
+    std::vector<channel_group> groups;
 };
 
 

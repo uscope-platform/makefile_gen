@@ -24,13 +24,13 @@
 
 #include "data_model/documentation/module_documentation.hpp"
 #include "data_model/documentation/register_documentation.hpp"
-#include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/documentation/processor_instance.hpp"
+#include "data_model/documentation/channel_group.hpp"
+
+#include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/parameters/Parameters_map.hpp"
 #include "mgp_sv/sv2017Lexer.h"
 #include "mgp_sv/sv2017.h"
-
-
 
 class documentation_analyzer {
 public:
@@ -41,8 +41,10 @@ public:
     void process_documentation(Parameters_map parameters);
     std::unordered_map<std::string, module_documentation> get_modules_documentation();
     std::unordered_map<std::string, processor_instance> get_processors_documentation();
+    std::unordered_map<std::string, std::vector<channel_group>> get_channel_groups() const{return groups;};
 private:
     void analyze_documentation_object(nlohmann::json &obj);
+    void analyze_channel_groups(nlohmann::json &obj);
     // BUS STRUCTURE DOCUMENTATION
     field_documentation analyze_register_field(nlohmann::json &obj, bool parametric);
     // PERIPHERAL DOCUMENTATION
@@ -57,6 +59,8 @@ private:
 
     std::unordered_map<std::string, module_documentation> modules_doc;
     std::unordered_map<std::string, processor_instance> processors;
+    std::unordered_map<std::string, std::vector<channel_group>> groups;
+
     std::string path;
 };
 

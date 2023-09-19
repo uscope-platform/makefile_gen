@@ -40,7 +40,8 @@ class HDL_Resource {
         HDL_Resource();
         HDL_Resource(dependency_class type, std::string n, std::string p);
 
-        std::vector<HDL_instance> get_dependencies();
+        std::vector<HDL_instance> get_dependencies(){return dependencies;};
+        void set_dependencies(std::vector<HDL_instance> &d) {dependencies = d;};
 
         void add_dependencies(std::vector<HDL_instance> deps);
         void add_dependency(const HDL_instance &dep);

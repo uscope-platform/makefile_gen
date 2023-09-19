@@ -199,7 +199,7 @@ int main(int argc, char *argv[]){
     data_acquisition_analysis daq_analyzer(true);
     daq_analyzer.analyze(synth_ast);
     app_def_gen.add_datapoints(daq_analyzer.get_datapoints());
-
+    app_def_gen.add_channel_groups(daq_analyzer.get_channel_groups());
 
     if(opts.generate_periph_definition){
         periph_def_gen.write_definition_file(dep.get_project_name() + "_periph_def.json");

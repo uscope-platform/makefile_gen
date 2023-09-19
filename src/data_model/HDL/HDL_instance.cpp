@@ -21,6 +21,7 @@ HDL_instance::HDL_instance(const HDL_instance &c) {
     dep_class = c.dep_class;
     type = c.type;
     name = c.name;
+    groups = c.groups;
 }
 
 
@@ -46,6 +47,8 @@ bool operator==(const HDL_instance &lhs, const HDL_instance &rhs) {
     ret &= lhs.dep_class == rhs.dep_class;
     ret &= lhs.ports_map == rhs.ports_map;
     ret &= lhs.parameters == rhs.parameters;
+    ret &= lhs.groups == rhs.groups;
+
     return ret;
 }
 

@@ -200,3 +200,23 @@ void application_definition_generator::add_datapoints(const std::vector<nlohmann
     application["channels"] = dp;
 }
 
+void application_definition_generator::add_channel_groups(const std::vector<channel_group> &cgs) {
+    std::vector<nlohmann::json> groups_obj;
+    for(auto &g:cgs){
+        nlohmann::json  group;
+        group["group_name"] = g.get_name();
+        group["group_id"] = g.get_name();
+        group["default"] = g.get_default();
+        std::vector<nlohmann::json> ch_v;
+        for(auto &item:g.get_channels()){
+            nlohmann::json i;
+            i["label"] = item;
+            i["value"] = item;
+            ch_v.push_back(i);
+        }
+        group["channels"] = ch_v;
+
+        groups_obj.push_back(group);
+    }
+    application["channel_groups"] = groups_obj;
+}

@@ -76,6 +76,8 @@ void documentation_analyzer::analyze_documentation_object(nlohmann::json &obj) {
         analyze_parametric_peripheral(obj);
     } else if(type == "processor_instance"){
         analyze_processor_instance(obj);
+    } else if(type == "channel_groups"){
+        analyze_channel_groups(obj);
     }
 }
 
@@ -193,3 +195,15 @@ std::unordered_map<std::string, processor_instance> documentation_analyzer::get_
     return processors;
 }
 
+void documentation_analyzer::analyze_channel_groups(nlohmann::json &obj) {
+    std::vector<channel_group> g_vect;
+    for(auto &item:obj["groups"]){
+        channel_group g;
+        g.set_name(item["name"]);
+        g.set_default(item["default"]);
+        g.set_channels(item["channels"]);
+        g_vect.push_back(g);
+    }
+    std::string target = obj["target"];
+    groups.insert({target,g_vect});
+}

@@ -48,6 +48,10 @@ data_acquisition_analysis::find_sinks(std::shared_ptr<HDL_instance_AST> &ast) {
     for(auto &item:ast->get_dependencies()){
         if(specs_manager.is_sink(item->get_type())){
            ret.push_back(item);
+           if(!item->get_channel_groups().empty()){
+               auto tmp_g = item->get_channel_groups();
+               groups.insert(groups.end(), tmp_g.begin(), tmp_g.end());
+           }
         } else {
             auto ll_res = find_sinks(item);
             ret.insert(ret.end(), ll_res.begin(), ll_res.end());
