@@ -17,9 +17,11 @@
 #define MAKEFILEGEN_V2_DATA_ACQUISITION_ANALYSIS_HPP
 
 #include <memory>
+
 #include "data_model/HDL/HDL_instance_AST.hpp"
 #include "data_model/bus_mapping/bus_specs_manager.hpp"
 #include "data_model/documentation/channel_group.hpp"
+#include "data_model/documentation/channel.hpp"
 
 typedef struct {
     std::string if_name;
@@ -31,10 +33,11 @@ class data_acquisition_analysis {
 public:
     explicit data_acquisition_analysis(bool logging);
     void analyze(std::shared_ptr<HDL_instance_AST> &ast);
-    std::vector<nlohmann::json> get_datapoints(){return data_points;}
+    std::vector<channel> get_datapoints(){return data_points;}
     std::vector<channel_group> get_channel_groups(){return groups;};
 private:
     void backtrace_scope_inputs(const std::shared_ptr<HDL_instance_AST> &node,const data_stream &intf);
+    void channelize_groups();
 
     std::optional<std::vector<data_stream>> process_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream);
     std::vector<data_stream> process_n_to_1_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream);
@@ -61,7 +64,7 @@ private:
 
 
     bus_specs_manager specs_manager;
-    std::vector<nlohmann::json> data_points;
+    std::vector<channel> data_points;
     std::vector<channel_group> groups;
     bool log = false;
 };

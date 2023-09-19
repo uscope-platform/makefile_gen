@@ -37,8 +37,8 @@ void data_acquisition_analysis::analyze(std::shared_ptr<HDL_instance_AST> &ast) 
     }
     data_stream ds = {data_interface, 0};
     backtrace_scope_inputs(sinks[0]->get_parent(), ds);
-    std::string dump = nlohmann::to_string(nlohmann::json(data_points));
-    auto j = 24;
+
+    channelize_groups();
 }
 
 std::vector<std::shared_ptr<HDL_instance_AST>>
@@ -48,9 +48,14 @@ data_acquisition_analysis::find_sinks(std::shared_ptr<HDL_instance_AST> &ast) {
     for(auto &item:ast->get_dependencies()){
         if(specs_manager.is_sink(item->get_type())){
            ret.push_back(item);
-           if(!item->get_channel_groups().empty()){
-               auto tmp_g = item->get_channel_groups();
-               groups.insert(groups.end(), tmp_g.begin(), tmp_g.end());
+           if(!item->get_channel_groups().empty()) {
+               for (auto &g: item->get_channel_groups()) {
+                   if (g.get_channels().size() > 6) {
+                       std::cout << "WARNING: The channel group named: " + g.get_name() +
+                                    " contains more than 6 channels, this is not supported on the platform\n";
+                   }
+                   groups.push_back(g);
+               }
            }
         } else {
             auto ll_res = find_sinks(item);
@@ -155,32 +160,28 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
     auto width = find_datapoint_width(node->get_parent(),  port_name[0]);
 
     for(int i = 0; i<n_params; i++){
-        nlohmann::json dp;
         std::string channel_name;
         if(names.size() == 1 & n_params>1){
             channel_name = names[0] + "_" + std::to_string(i);
         } else{
             channel_name = names[i];
         }
+        channel c;
+
         if (!port_suffix.empty()) {
-            dp["name"] = channel_name + "_" +port_suffix;
-            dp["id"] =   channel_name + "_" +port_suffix;
+            c.set_name(channel_name + "_" +port_suffix);
         }else{
-            dp["name"] = channel_name;
-            dp["id"] = channel_name;
+            c.set_name(channel_name);
         }
-        dp["phys_width"] = width;
-        dp["number"] = 0;
+        c.set_phys_width(width);
+        c.set_channel_number(0);
         if(in_stream.static_remap){
-            dp["mux_setting"] = in_stream.address_offset;
+            c.set_mux_setting(in_stream.address_offset);
         } else{
-            dp["mux_setting"] = in_stream.address_offset + addresses[i];
+            c.set_mux_setting(in_stream.address_offset + addresses[i]);
         }
-        dp["enabled"]= false;
-        dp["max_value"] = 1000;
-        dp["min_value"] = 0;
-        dp["scaling_factor"] = 1;
-        data_points.push_back(dp);
+        c.set_enabled(false);
+        data_points.push_back(c);
     }
 
 }
@@ -264,4 +265,19 @@ data_acquisition_analysis::find_datapoint_width(const std::shared_ptr<HDL_instan
         }
     }
     return 32;
+}
+
+void data_acquisition_analysis::channelize_groups() {
+    for(auto &g:groups){
+        int channel_progressive = 0;
+        for(std::string &c_n:g.get_channels()){
+            for(auto &c:data_points){
+                std::string data_point_name = c.get_name();
+                if(data_point_name==c_n){
+                    c.set_channel_number(channel_progressive);
+                    channel_progressive++;
+                }
+            }
+        }
+    }
 }

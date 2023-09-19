@@ -197,8 +197,22 @@ std::string application_definition_generator::get_definition_string() {
     return application.dump();
 }
 
-void application_definition_generator::add_datapoints(const std::vector<nlohmann::json>& dp) {
-    application["channels"] = dp;
+void application_definition_generator::add_datapoints(const std::vector<channel>& dp) {
+    std::vector<nlohmann::json> channels_vect;
+    for(auto &item:dp){
+        nlohmann::json obj;
+        obj["name"] = item.get_name();
+        obj["id"] = item.get_name();
+        obj["phys_width"] = item.get_phys_width();
+        obj["number"] = item.get_channel_number();
+        obj["mux_setting"] = item.get_mux_setting();
+        obj["enabled"] = item.get_enabled();
+        obj["max_value"] = item.get_max();
+        obj["min_value"] = item.get_min();
+        obj["scaling_factor"] = item.get_scaling_factor();
+        channels_vect.push_back(obj);
+    }
+    application["channels"] = channels_vect;
 }
 
 void application_definition_generator::add_channel_groups(const std::vector<channel_group> &cgs) {

@@ -21,6 +21,7 @@
 #include <nlohmann/json.hpp>
 
 #include "data_model/documentation/channel_group.hpp"
+#include "data_model/documentation/channel.hpp"
 #include "data_model/Depfile.hpp"
 #include "data_model/data_store.hpp"
 
@@ -34,7 +35,7 @@ public:
             const std::map<std::string, std::string> &a
     );
     void add_cores(std::vector<processor_instance> cs);
-    void add_datapoints(const std::vector<nlohmann::json>& dp);
+    void add_datapoints(const std::vector<channel>& dp);
     void add_channel_groups(const std::vector<channel_group> &cgs);
     void write_definition_file(const std::string &path);
     void construct_application(const std::string &name);
