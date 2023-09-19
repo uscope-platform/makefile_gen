@@ -38,20 +38,21 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
 
             nlohmann::json periph;
             if(!current_node->get_leaf_module_top().empty()){
-
                 periph["name"] =current_node->get_leaf_module_top();
                 periph["peripheral_id"] = current_node->get_leaf_module_top();;
             } else{
-
                 periph["name"] =current_node->get_name();
                 periph["peripheral_id"] = current_node->get_name();
             }
             std::string type = current_node->get_type();
             if(alias_map.contains(type)){
                 type = alias_map[type];
+            } else{
+                type = current_node->get_type();
             }
 
-            periph["spec_id"] =current_node->get_type();
+
+            periph["spec_id"] = type;
             periph["base_address"] = std::vector<std::string>();
             for(auto a: current_node->get_address()){
                 periph["base_address"].push_back("0x" + uint_to_hex(a));
