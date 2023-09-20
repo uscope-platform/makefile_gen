@@ -24,6 +24,7 @@ channel::channel(const channel &c) {
     min = c.min;
     max = c.max;
     scaling_factor = c.scaling_factor;
+    signed_data = c.signed_data;
 }
 
 bool operator==(const channel &lhs, const channel &rhs) {
@@ -37,6 +38,7 @@ bool operator==(const channel &lhs, const channel &rhs) {
     ret &= lhs.min == rhs.min;
     ret &= lhs.max == rhs.max;
     ret &= lhs.scaling_factor == rhs.scaling_factor;
+    ret &= lhs.signed_data == rhs.signed_data;
 
     return ret;
 }

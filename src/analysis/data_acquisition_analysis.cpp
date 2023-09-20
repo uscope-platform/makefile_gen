@@ -175,7 +175,9 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
         }
         channel c;
 
-        c.set_signed(output_signs[i]);
+        bool data_sign = output_signs[i];
+        c.set_signed(data_sign);
+
         if (!port_suffix.empty()) {
             c.set_name(channel_name + "_" +port_suffix);
         }else{
