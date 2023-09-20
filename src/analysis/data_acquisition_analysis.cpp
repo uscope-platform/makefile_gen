@@ -138,10 +138,10 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
         std::cout << "FOUND DATA SOURCE AT NODE: " + node->get_name() + "\n";
     }
 
-    std::string node_names = node->get_parameters().get("PRAGMA_MKFG_DATAPOINT_NAMES")->get_string_value();
+    std::string node_names = node->get_parameter_value("PRAGMA_MKFG_DATAPOINT_NAMES")->get_string_value();
 
     auto n_points_params = specs_manager.get_component_spec(node->get_type(), "n_points");
-    auto n_params = node->get_parameters().get(n_points_params)->get_numeric_value();
+    auto n_params = node->get_parameter_value(n_points_params)->get_numeric_value();
 
     std::string port_suffix = specs_manager.get_component_spec(node->get_type(), in_stream.if_name);
     auto names = parse_datapoint_names(node_names);
@@ -149,7 +149,7 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
     std::vector<int64_t> addresses;
     if(specs_manager.has_component_spec(node->get_type(), "initial_addresses")){
         auto addr_param_name = specs_manager.get_component_spec(node->get_type(), "initial_addresses");
-        addresses = node->get_parameters().get(addr_param_name)->get_array_value().get_1d_slice({0,0});
+        addresses = node->get_parameter_value(addr_param_name)->get_array_value().get_1d_slice({0,0});
     } else{
         for(int i =0; i<n_params; i++){
             addresses.push_back(i);
@@ -158,6 +158,13 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
 
     auto port_name = node->get_ports()[in_stream.if_name];
     auto width = find_datapoint_width(node->get_parent(),  port_name[0]);
+
+    std::bitset<1024> output_signs;
+    if(node->has_parameter("OUTPUT_SIGNED")){
+        output_signs = std::bitset<1024>(node->get_parameter_value("OUTPUT_SIGNED")->get_numeric_value());
+    } else {
+        output_signs.set();
+    }
 
     for(int i = 0; i<n_params; i++){
         std::string channel_name;
@@ -168,6 +175,7 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
         }
         channel c;
 
+        c.set_signed(output_signs[i]);
         if (!port_suffix.empty()) {
             c.set_name(channel_name + "_" +port_suffix);
         }else{
@@ -233,8 +241,8 @@ data_acquisition_analysis::process_1_to_1_node(const std::shared_ptr<HDL_instanc
     int64_t remapping_addr = 0;
     std::string remapping_type;
     if(specs_manager.get_component_spec(node->get_type(), "remapping") == "true"){
-        remapping_type = node->get_parameters().get("REMAP_TYPE")->get_string_value();
-        remapping_addr = node->get_parameters().get("REMAP_OFFSET")->get_numeric_value();
+        remapping_type = node->get_parameter_value("REMAP_TYPE")->get_string_value();
+        remapping_addr = node->get_parameter_value("REMAP_OFFSET")->get_numeric_value();
     }
 
     for(auto &item:node->get_ports()){
@@ -261,7 +269,7 @@ uint64_t
 data_acquisition_analysis::find_datapoint_width(const std::shared_ptr<HDL_instance_AST> &node, std::string name) {
     for(auto &item:node->get_dependencies()){
         if(item->get_name() == name){
-            return item->get_parameters().get("DATA_WIDTH")->get_numeric_value();
+            return item->get_parameter_value("DATA_WIDTH")->get_numeric_value();
         }
     }
     return 32;

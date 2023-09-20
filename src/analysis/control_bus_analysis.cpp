@@ -62,7 +62,7 @@ std::vector<analysis_context> control_bus_analysis::process_interconnect(const a
 std::vector<analysis_context> control_bus_analysis::process_simple_interconnect(const analysis_context &inst) {
     std::vector<analysis_context> ret_val;
     auto ic = inst.node;
-    auto addresses = ic->get_parameters().get("SLAVE_ADDR")->get_array_value().get_1d_slice({0,0});
+    auto addresses = ic->get_parameter_value("SLAVE_ADDR")->get_array_value().get_1d_slice({0,0});
     auto masters_ifs = ic->get_ports()[specs_manager.get_interconnect_source_port(ic->get_type())];
     std::reverse(masters_ifs.begin(), masters_ifs.end());
 
@@ -88,8 +88,8 @@ std::vector<analysis_context> control_bus_analysis::process_parametric_interconn
 
     auto node = inst.node->get_parent();
 
-    auto instance_name = node->get_parameters().get("PRAGMA_MKFG_PARAMETRIZED_INTERCONNECT");
-    auto layout = node->get_parameters().get("PRAGMA_MKFG_BUS_LAYOUT")->get_string_value();
+    auto instance_name = node->get_parameter_value("PRAGMA_MKFG_PARAMETRIZED_INTERCONNECT");
+    auto layout = node->get_parameter_value("PRAGMA_MKFG_BUS_LAYOUT")->get_string_value();
     std::string repl = R"(")";
     layout = std::regex_replace(layout, std::regex("\\\\"), repl);
 
@@ -100,13 +100,13 @@ std::vector<analysis_context> control_bus_analysis::process_parametric_interconn
     std::vector<std::string> modules;
     std::vector<std::string> interfaces;
 
-    int64_t base_address = node->get_parameters().get( interconnect_specs["base"])->get_numeric_value();
+    int64_t base_address = node->get_parameter_value(interconnect_specs["base"])->get_numeric_value();
     int64_t offset = std::stoll((std::string) interconnect_specs["offset"], nullptr, 0);
     int64_t segment_base = 0;
     for(auto &item:interconnect_specs["map"]){
         int64_t len;
         if(node->get_parameters().contains(item["len"])){
-            len = node->get_parameters().get(item["len"])->get_numeric_value();
+            len = node->get_parameter_value(item["len"])->get_numeric_value();
         } else {
            len = std::stoll((std::string) item["len"], nullptr, 0);
         }
@@ -166,7 +166,7 @@ std::vector<analysis_context> control_bus_analysis::process_nested_module(const 
     for(auto &item:inst.node->get_parameters()){
         if(item->get_name() == "PRAGMA_MKFG_MODULE_TOP"){
             for(auto &node:ret_stack){
-                node.current_module_top = inst.node->get_parameters().get("PRAGMA_MKFG_MODULE_TOP")->get_string_value();
+                node.current_module_top = inst.node->get_parameter_value("PRAGMA_MKFG_MODULE_TOP")->get_string_value();
             }
         }
     }

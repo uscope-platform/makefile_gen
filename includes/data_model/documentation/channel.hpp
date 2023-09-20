@@ -40,6 +40,9 @@ public:
     void set_channel_number(unsigned int cn){channel_number = cn;};
     unsigned int get_channel_number() const {return channel_number;};
 
+    void set_signed(bool s){signed_data = s;};
+    bool get_signed() const {return signed_data;};
+
     int get_min()const{return min;};
     int get_max()const{return max;};
     double get_scaling_factor()const{return scaling_factor;};
@@ -52,6 +55,7 @@ private:
     unsigned int phys_width = 32;
     uint64_t mux_setting = 0;
     unsigned int channel_number = 0;
+    bool signed_data = true;
 
     int min = 0;
     int max = 1000;

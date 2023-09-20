@@ -183,14 +183,14 @@ application_definition_generator::get_parameters(const json &spec, std::shared_p
         if(item.contains("n_registers")){
             std::vector<std::string> parameters = item["n_registers"];
             if(node->get_parameters().contains(parameters[0])){
-                ret_map[parameters[0]] = node->get_parameters().get(parameters[0])->get_numeric_value();
+                ret_map[parameters[0]] = node->get_parameter_value(parameters[0])->get_numeric_value();
             }
         }
         for(auto &f:item["fields"]){
             if(f.contains("n_fields")){
                 std::vector<std::string> parameters = f["n_fields"];
                 if(node->get_parameters().contains(parameters[0])){
-                    ret_map[parameters[0]] = node->get_parameters().get(parameters[0])->get_numeric_value();
+                    ret_map[parameters[0]] = node->get_parameter_value(parameters[0])->get_numeric_value();
                 }
             }
         }
@@ -212,6 +212,7 @@ void application_definition_generator::add_datapoints(const std::vector<channel>
         obj["number"] = item.get_channel_number();
         obj["mux_setting"] = item.get_mux_setting();
         obj["enabled"] = item.get_enabled();
+        obj["signed"] = item.get_signed();
         obj["max_value"] = item.get_max();
         obj["min_value"] = item.get_min();
         obj["scaling_factor"] = item.get_scaling_factor();
