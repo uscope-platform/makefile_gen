@@ -44,6 +44,7 @@ public:
 private:
     std::map<std::string, uint32_t> get_parameters(const nlohmann::json &spec, std::shared_ptr<HDL_instance_AST> &node);
     void process_ast(const std::shared_ptr<HDL_instance_AST> &l);
+    void detect_scope(const std::string &s, std::vector<int64_t> addr);
     void deduplicate_peripheral_names();
     void denormalize_addresses();
     static std::string uint_to_hex(uint32_t i);
@@ -56,7 +57,7 @@ private:
 
     nlohmann::json periph_defs;
     std::map<std::string, std::string> alias_map;
-
+    uint32_t scope_address = 0;
 };
 
 
