@@ -191,7 +191,12 @@ int main(int argc, char *argv[]){
     }
 
     peripheral_definition_generator periph_def_gen(d_store, synth_ast);
-    application_definition_generator app_def_gen(synth_ast, periph_def_gen.get_peripheral_definitions(), periph_def_gen.get_alias_map());
+    application_definition_generator app_def_gen(
+            synth_ast,
+            periph_def_gen.get_peripheral_definitions(),
+            periph_def_gen.get_alias_map(),
+            periph_def_gen.get_variant_paripherals()
+            );
     auto cores = synth_r.get_processors();
     app_def_gen.add_cores(cores);
     app_def_gen.construct_application(dep.get_project_name());

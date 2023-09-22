@@ -19,9 +19,12 @@
 application_definition_generator::application_definition_generator(
         const std::shared_ptr<HDL_instance_AST> &l,
         const nlohmann::json &p,
-        const std::map<std::string, std::string> &a) {
+        const std::map<std::string, std::string> &a,
+        const std::unordered_map<std::string, std::string> &vm
+        ) {
     periph_defs = p;
     alias_map = a;
+    variants = vm;
     process_ast(l);
     deduplicate_peripheral_names();
     denormalize_addresses();
@@ -52,16 +55,23 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
             }
 
 
-            periph["spec_id"] = type;
+
             periph["base_address"] = std::vector<std::string>();
             for(auto a: current_node->get_address()){
                 periph["base_address"].push_back("0x" + uint_to_hex(a));
             }
             detect_scope(type, current_node->get_address());
+
             periph["proxied"] = false;
             periph["proxy_address"] = std::to_string(0);
 
+
+            if(variants.contains(current_node->get_name())){
+                type = variants[current_node->get_name()];
+            }
+            periph["spec_id"] = type;
             auto spec = periph_defs[type];
+
             if(spec["parametric"]){
                     periph["hdl_parameters"] = get_parameters(spec, current_node);
             } else{

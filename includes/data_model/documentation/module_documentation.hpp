@@ -41,9 +41,15 @@ public:
     bool is_parametric() {return parametric;};
     void set_parametric() {parametric = true;};
 
+    bool is_variant() {return variant;};
+    void set_variant() {variant = true;};
+
+    void set_variant_parameter(const std::string &vp){variant_parameter = vp;}
+    std::string get_variant_parameter()const{return variant_parameter;};
+
     template<class Archive>
     void serialize(Archive & archive) {
-        archive(name, registers, alias, processor_io, parametric);
+        archive(name, registers, alias, processor_io, parametric, variant, variant_parameter);
     }
 
     friend bool operator==(const module_documentation&lhs, const module_documentation&rhs);
@@ -52,6 +58,8 @@ private:
     std::string alias;
     std::vector<register_documentation> registers;
     bool parametric = false;
+    bool variant = false;
+    std::string variant_parameter;
     std::vector<io> processor_io;
 
 };

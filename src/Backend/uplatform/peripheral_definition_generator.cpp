@@ -29,7 +29,8 @@ peripheral_definition_generator::peripheral_definition_generator(std::shared_ptr
         working_stack.pop();
         if(!current_node->get_address().empty()){
             processed_peripherals.insert(current_node->get_type());
-            generate_peripheral(d_store->get_HDL_resource(current_node->get_type()), current_node->get_parameters());
+            auto parameters = current_node->get_parameters();
+            generate_peripheral(d_store->get_HDL_resource(current_node->get_type()), parameters, current_node->get_name());
         }
 
         for(const auto& item:current_node->get_dependencies()) working_stack.push(item);
@@ -37,7 +38,7 @@ peripheral_definition_generator::peripheral_definition_generator(std::shared_ptr
 
 }
 
-void peripheral_definition_generator::generate_peripheral(const HDL_Resource &res, const Parameters_map &parameters) {
+void peripheral_definition_generator::generate_peripheral(const HDL_Resource &res, Parameters_map &parameters, const std::string& inst_name) {
 
     nlohmann::json specs;
 
@@ -48,17 +49,25 @@ void peripheral_definition_generator::generate_peripheral(const HDL_Resource &re
         periph_name= res.get_documentation().get_alias();
         alias_map[res.getName()] = periph_name;
     }
-    specs["peripheral_name"] = periph_name;
+
     specs["version"] = ver;
 
     auto mod_doc = res.get_documentation();
-    specs["parametric"] = mod_doc.is_parametric();
+    specs["parametric"] = true;
 
-    if(mod_doc.is_parametric())
+    if(mod_doc.is_variant()){
+        std::string variant = parameters.get(mod_doc.get_variant_parameter())->get_string_value();
+        periph_name += "_" + variant;
+        variant_paripherals[inst_name] = periph_name;
+        specs["registers"] = generate_variant_module_registers(mod_doc.get_registers(), parameters, variant);
+    }else if(mod_doc.is_parametric()) {
         specs["registers"] = generate_parametric_module_registers(mod_doc.get_registers(), parameters);
-     else
+    } else{
+        specs["parametric"] = false;
         specs["registers"] = generate_simple_module_registers(mod_doc.get_registers());
+    }
 
+    specs["peripheral_name"] = periph_name;
     peripheral_defs[periph_name] = specs;
 
 }
@@ -127,6 +136,50 @@ peripheral_definition_generator::generate_parametric_module_registers(
         reg["n_registers"] = doc.get_n_regs();
         reg["order"] = i;
         ret.push_back(reg);
+
+    }
+    return ret;
+}
+
+
+
+std::vector<nlohmann::json>
+peripheral_definition_generator::generate_variant_module_registers(const std::vector<register_documentation> &r,
+                                                                   const Parameters_map &parameters,
+                                                                   const std::string &variant) {
+    std::vector<nlohmann::json> ret;
+
+    int order = 0;
+    for(int i = 0; i<r.size(); i++){
+
+        auto doc = r[i];
+
+        if(doc.get_variants().contains(variant)){
+            nlohmann::json reg;
+            reg["ID"] = doc.get_name();
+            reg["register_name"] = doc.get_name();
+            reg["description"] = doc.get_description();
+            std::string dir;
+            if(doc.get_read_allowed())
+                dir += "R";
+            if(doc.get_write_allowed())
+                dir += "W";
+            reg["direction"] = dir;
+
+            std::vector<nlohmann::json> fields = {};
+            for(int j = 0; j<doc.get_fields().size(); j++){
+                auto item = doc.get_fields()[j];
+                auto f = generate_field(item, parameters);
+                f["order"] = j;
+                fields.push_back(f);
+            }
+            reg["fields"] = fields;
+            reg["n_registers"] = doc.get_n_regs();
+            reg["order"] = order;
+            ret.push_back(reg);
+            order++;
+        }
+
 
     }
     return ret;

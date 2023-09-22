@@ -74,6 +74,8 @@ void documentation_analyzer::analyze_documentation_object(nlohmann::json &obj) {
         analyze_peripheral(obj);
     } else if(type == "parametric_peripheral"){
         analyze_parametric_peripheral(obj);
+    } else if(type == "variant_peripheral"){
+        analyze_variant_peripheral(obj);
     } else if(type == "processor_instance"){
         analyze_processor_instance(obj);
     } else if(type == "channel_groups"){
@@ -141,6 +143,7 @@ void documentation_analyzer::analyze_parametric_peripheral(nlohmann::json &obj) 
     mod_doc.set_name(str_n);
     mod_doc.set_parametric();
 
+
     for(auto &item : obj["registers"]){
 
         std::string name = item["name"];
@@ -206,4 +209,46 @@ void documentation_analyzer::analyze_channel_groups(nlohmann::json &obj) {
     }
     std::string target = obj["target"];
     groups.insert({target,g_vect});
+}
+
+void documentation_analyzer::analyze_variant_peripheral(nlohmann::json &obj) {
+    module_documentation mod_doc;
+    std::string str_n = obj["name"];
+    if(obj.contains("alias")){
+        mod_doc.set_alias(obj["alias"]);
+    }
+    mod_doc.set_name(str_n);
+    mod_doc.set_variant();
+
+    mod_doc.set_variant_parameter(obj["variant_parameter"]);
+
+    for(auto &item : obj["registers"]){
+
+        std::string name = item["name"];
+        std::string description = item["description"];
+        std::string dir = item["direction"];
+        bool read_allowed = dir.find('R') != std::string::npos;
+        bool write_allowed = dir.find('W') != std::string::npos;
+
+        std::vector<std::string> n_regs;
+        if(item.contains("n_regs"))
+            n_regs = item["n_regs"];
+        else
+            n_regs = {};
+
+
+        register_documentation reg_doc(item["name"], item["description"], read_allowed, write_allowed, n_regs);
+
+        std::unordered_set<std::string> variants = item["variants"];
+        reg_doc.set_variant(variants);
+
+        if(item.contains("fields")){
+            for(auto &f_obj:item["fields"]){
+                auto field_doc = analyze_register_field(f_obj, true);
+                reg_doc.add_field(field_doc);
+            }
+        }
+        mod_doc.add_register(reg_doc);
+    }
+    modules_doc[str_n] = mod_doc;
 }

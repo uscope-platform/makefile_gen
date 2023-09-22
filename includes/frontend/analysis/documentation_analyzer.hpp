@@ -50,6 +50,7 @@ private:
     // PERIPHERAL DOCUMENTATION
     void analyze_peripheral(nlohmann::json &obj);
     void analyze_parametric_peripheral(nlohmann::json &obj);
+    void analyze_variant_peripheral(nlohmann::json &obj);
     // PROCESSORS DOCUMENTATION
     void analyze_processor_instance(nlohmann::json &obj);
 

@@ -19,6 +19,8 @@
 #include <string>
 #include <cereal/types/vector.hpp>
 #include <cereal/types/string.hpp>
+#include <cereal/types/unordered_set.hpp>
+
 
 #include "data_model/documentation/field_documentation.hpp"
 
@@ -38,13 +40,16 @@ public:
 
     std::vector<std::string> get_n_regs() const{ return n_regs;};
 
+    void set_variant(std::unordered_set<std::string> &v){variants = v;};
+    std::unordered_set<std::string> get_variants() const { return variants;};
+
     void add_field(field_documentation &doc);
     std::vector<field_documentation> get_fields() const {return fields;};
     friend bool operator==(const register_documentation&lhs, const register_documentation&rhs);
 
     template<class Archive>
     void serialize(Archive & archive) {
-        archive(name, offset, description, read_allowed, write_allowed, fields, parametric, n_regs);
+        archive(name, offset, description, read_allowed, write_allowed, fields, parametric, n_regs, variants);
     }
 
 private:
@@ -56,6 +61,8 @@ private:
     std::vector<field_documentation> fields;
     bool parametric;
     std::vector<std::string> n_regs;
+
+    std::unordered_set<std::string> variants;
 };
 
 

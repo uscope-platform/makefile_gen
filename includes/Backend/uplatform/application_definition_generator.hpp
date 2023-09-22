@@ -32,7 +32,8 @@ public:
     explicit application_definition_generator(
             const std::shared_ptr<HDL_instance_AST> &l,
             const nlohmann::json &p,
-            const std::map<std::string, std::string> &a
+            const std::map<std::string, std::string> &a,
+            const std::unordered_map<std::string, std::string> &vm
     );
     void add_cores(std::vector<processor_instance> cs);
     void add_datapoints(const std::vector<channel>& dp);
@@ -54,6 +55,8 @@ private:
 
     std::vector<processor_instance> cores_spec;
     std::vector<nlohmann::json> cores;
+
+    std::unordered_map<std::string, std::string> variants;
 
     nlohmann::json periph_defs;
     std::map<std::string, std::string> alias_map;
