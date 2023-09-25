@@ -20,7 +20,7 @@
 #include <memory>
 
 #include "data_model/HDL/HDL_instance.hpp"
-
+#include "data_model/documentation/processor_instance.hpp"
 
 
 class HDL_instance_AST : public HDL_instance {
@@ -50,6 +50,9 @@ public:
     void set_if_specs(const std::unordered_map<std::string, std::array<std::string, 2>> &if_s){if_specs = if_s;};
     std::unordered_map<std::string, std::array<std::string, 2>> get_if_specs(){return if_specs;};
 
+    void set_processors(std::vector<processor_instance> &p){processors = p;};
+    std::vector<processor_instance> get_processors() const{return processors;};
+
      nlohmann::json dump() override;
 
     friend bool operator==(const HDL_instance_AST&lhs, const HDL_instance_AST&rhs);
@@ -62,6 +65,8 @@ private:
 
     std::vector<std::string> data_dependencies;
     std::vector<std::string> package_dependencies;
+
+    std::vector<processor_instance> processors;
 
     std::unordered_map<std::string, std::array<std::string, 2>> if_specs;
 

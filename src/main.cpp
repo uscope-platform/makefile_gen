@@ -197,8 +197,7 @@ int main(int argc, char *argv[]){
             periph_def_gen.get_alias_map(),
             periph_def_gen.get_variant_paripherals()
             );
-    auto cores = synth_r.get_processors();
-    app_def_gen.add_cores(cores);
+
     app_def_gen.construct_application(dep.get_project_name());
 
     data_acquisition_analysis daq_analyzer(true);

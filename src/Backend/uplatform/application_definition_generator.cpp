@@ -34,9 +34,32 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
     std::stack<std::shared_ptr<HDL_instance_AST>> working_stack;
     working_stack.push(l);
 
+
     while(!working_stack.empty()){
         auto current_node = working_stack.top();
         working_stack.pop();
+
+        auto processors = current_node->get_processors();
+        if(!processors.empty()){
+            for(auto &core:processors){
+                nlohmann::json c;
+                c["id"] = core.get_name();
+                c["default_program"] = "";
+                std::vector<nlohmann::json> io_array;
+                for(auto &i:core.get_dma_io()){
+                    nlohmann::json io;
+                    io["name"] = i.name;
+                    io["address"] = i.address;
+                    io["type"] = i.get_type();
+                    io_array.push_back(io);
+                }
+                c["io"] = io_array;
+                c["address"] = core.get_address_value();
+                cores.push_back(c);
+            }
+        }
+
+
         if(!current_node->get_address().empty()){
 
             nlohmann::json periph;
@@ -119,24 +142,7 @@ std::string application_definition_generator::uint_to_hex(uint32_t i) {
     return out.str();
 }
 
-void application_definition_generator::add_cores(std::vector<processor_instance> cs) {
-    for(auto &core:cs){
-        nlohmann::json c;
-        c["id"] = core.get_name();
-        c["default_program"] = "";
-        std::vector<nlohmann::json> io_array;
-        for(auto &i:core.get_dma_io()){
-            nlohmann::json io;
-            io["name"] = i.name;
-            io["address"] = i.address;
-            io["type"] = i.get_type();
-            io_array.push_back(io);
-        }
-        c["io"] = io_array;
-        c["address"] = core.get_address();
-        cores.push_back(c);
-    }
-}
+
 
 void application_definition_generator::deduplicate_peripheral_names() {
 

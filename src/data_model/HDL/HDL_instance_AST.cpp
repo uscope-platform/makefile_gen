@@ -31,6 +31,7 @@ HDL_instance_AST::HDL_instance_AST(const HDL_instance_AST &c) {
     data_dependencies = c.data_dependencies;
     leaf_module_top = c.leaf_module_top;
     bus_address = c.bus_address;
+    processors = c.processors;
 }
 
 bool operator==(const HDL_instance_AST &lhs, const HDL_instance_AST &rhs) {
@@ -49,7 +50,7 @@ bool operator==(const HDL_instance_AST &lhs, const HDL_instance_AST &rhs) {
     ret &= lhs.package_dependencies == rhs.package_dependencies;
     ret &= lhs.leaf_module_top == rhs.leaf_module_top;
     ret &= lhs.bus_address == rhs.bus_address;
-
+    ret &= lhs.processors == rhs.processors;
     return ret;
 }
 

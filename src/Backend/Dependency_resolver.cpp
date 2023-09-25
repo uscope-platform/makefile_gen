@@ -43,10 +43,6 @@ std::set<std::string> Dependency_resolver_v2::solve_dep(std::shared_ptr<HDL_inst
         if(d_store->contains_hdl_entity(dep->get_type())){
 
             auto res = d_store->get_HDL_resource(dep->get_type());
-            if(res.has_processors()){
-                auto proc = res.get_processor_doc();
-                detected_processors.insert(detected_processors.end(), proc.begin(), proc.end());
-            }
 
             ret_val.insert(res.get_path());
         }

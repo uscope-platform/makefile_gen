@@ -86,6 +86,25 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
         auto pm = res.get_parameters();
         auto new_params = p2.process_parameters_map(pm, res);
 
+        std::vector<processor_instance> processors;
+        if(res.has_processors()){
+            processors = res.get_processor_doc();
+
+            for(auto &proc:processors){
+                auto addr_s = proc.get_address();
+                auto addr_vals = new_params.get(addr_s);
+                int address;
+
+                if(addr_vals->is_array()){
+                    auto addr_idx = proc.get_address_idx();
+                    address = addr_vals->get_array_value().get_value({0,0,addr_idx});
+                } else {
+                    address = addr_vals->get_numeric_value();
+                }
+                proc.set_address_value(address);
+            }
+        }
+
         ret_inst->set_channel_groups(i.get_channel_groups());
         ret_inst->set_ports(i.get_ports());
         ret_inst->set_if_specs(res.get_if_port_specs());
@@ -95,6 +114,8 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
         ret_inst->set_dependency_class(module);
         ret_inst->add_parameters(new_params);
         ret_inst->set_parent(parent);
+
+        ret_inst->set_processors(processors);
 
         if (log_structure) {
             std::cout << "Processing Instance " << i.get_name() << " of module " << type << std::endl;

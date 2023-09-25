@@ -32,11 +32,9 @@ public:
 
     std::set<std::string> get_dependencies();
 
-    std::vector<processor_instance> get_processors(){return detected_processors;};
 
 private:
 
-    std::vector<processor_instance> detected_processors;
 
     std::set<std::string> solve_dep(std::shared_ptr<HDL_instance_AST> &i);
     std::vector<std::shared_ptr<HDL_instance_AST>> AST;

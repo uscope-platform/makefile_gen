@@ -29,14 +29,18 @@ processor_instance::processor_instance(const processor_instance &old) {
     name = old.name;
     dma_io = old.dma_io;
     target = old.target;
-    address = old.address;
+    address_param = old.address_param;
+    address_index = old.address_index;
+    address_value = old.address_value;
 }
 
 bool operator==(const processor_instance &lhs, const processor_instance &rhs) {
     bool res = true;
     res &= lhs.name == rhs.name;
     res &= lhs.target == rhs.target;
-    res &= lhs.address == rhs.address;
+    res &= lhs.address_param == rhs.address_param;
+    res &= lhs.address_index == rhs.address_index;
+    res &= lhs.address_value == rhs.address_value;
 
     if(lhs.dma_io.size() != rhs.dma_io.size()){
         return false;
