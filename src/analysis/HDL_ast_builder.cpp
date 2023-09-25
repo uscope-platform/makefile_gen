@@ -93,7 +93,7 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
             for(auto &proc:processors){
                 auto addr_s = proc.get_address();
                 auto addr_vals = new_params.get(addr_s);
-                int address;
+                int64_t address;
 
                 if(addr_vals->is_array()){
                     auto addr_idx = proc.get_address_idx();

@@ -62,8 +62,8 @@ public:
     void set_address_idx(int i) {address_index = i;};
     int get_address_idx() const {return address_index;};
 
-    void set_address_value(int i) {address_value = i;};
-    int get_address_value() const {return address_value;};
+    void set_address_value(int64_t i) {address_value = i;};
+    int64_t get_address_value() const {return address_value;};
 
 
     template<class Archive>
