@@ -77,8 +77,6 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
                 type = current_node->get_type();
             }
 
-
-
             periph["base_address"] = std::vector<std::string>();
             for(auto a: current_node->get_address()){
                 periph["base_address"].push_back("0x" + uint_to_hex(a));
@@ -101,6 +99,22 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
                 periph["hdl_parameters"] =  std::vector<std::string>();
             }
             peripherals.push_back(periph);
+        }
+
+        if(current_node->get_proxy_ast() != nullptr){
+
+            auto tl = current_node->get_proxy_ast();
+            tl->clear_address();
+            application_definition_generator proxy_gen(tl,periph_defs,alias_map, variants);
+            auto proxy_periphs = proxy_gen.get_peripherals();
+            for(auto &item:proxy_periphs){
+                item["proxied"] = true;
+                item["proxy_address"] = "0x" + uint_to_hex(current_node->get_parent()->get_address()[0]);
+                item["proxy_type"] = current_node->get_parent()->get_type();
+                item["base_address"] = {item["base_address"]};
+                peripherals.push_back(item);
+            }
+
         }
 
         for(const auto& item:current_node->get_dependencies()) working_stack.push(item);

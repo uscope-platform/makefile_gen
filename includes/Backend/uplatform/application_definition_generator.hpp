@@ -35,12 +35,13 @@ public:
             const std::map<std::string, std::string> &a,
             const std::unordered_map<std::string, std::string> &vm
     );
-    void add_cores(std::vector<processor_instance> cs);
     void add_datapoints(const std::vector<channel>& dp);
     void add_channel_groups(const std::vector<channel_group> &cgs);
     void write_definition_file(const std::string &path);
     void construct_application(const std::string &name);
     std::string get_definition_string();
+
+    std::vector<nlohmann::json> get_peripherals(){return peripherals;};
 
 private:
     std::map<std::string, uint32_t> get_parameters(const nlohmann::json &spec, std::shared_ptr<HDL_instance_AST> &node);

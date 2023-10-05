@@ -22,18 +22,24 @@
 #include "data_model/settings_store.hpp"
 #include "data_model/Depfile.hpp"
 
+
+
 typedef struct {
     std::shared_ptr<HDL_instance_AST> node;
     std::string interface;
     int64_t address;
     bool parametric;
     std::string current_module_top;
+    proxy_target proxy;
 }analysis_context;
+
+
 
 class control_bus_analysis {
 public:
     explicit control_bus_analysis(const Depfile &df);
     void analyze_bus(std::shared_ptr<HDL_instance_AST> &ast);
+    void analyze_bus(std::shared_ptr<HDL_instance_AST> &ast, const std::string &intf);
 private:
 
     std::vector<analysis_context> process_interconnect(const analysis_context &inst);

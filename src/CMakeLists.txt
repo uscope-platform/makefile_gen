@@ -2,6 +2,7 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/analysis/HDL_ast_builder.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/analysis/data_acquisition_analysis.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/analysis/control_bus_analysis.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/proxy_bus_analysis.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Dependency_resolver.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/uplatform/application_definition_generator.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/Backend/uplatform/peripheral_definition_generator.cpp /
@@ -65,7 +66,7 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Release")
 target_link_libraries(makefile_gen PRIVATE mgp_sv_lib)
 target_link_libraries(makefile_gen PRIVATE mgp_vh_lib)
 
-target_link_libraries(makefile_gen PRIVATE Threads::Threads cereal pantor::inja OpenSSL::SSL CLI11::CLI11)
+target_link_libraries(makefile_gen PRIVATE Threads::Threads cereal pantor::inja OpenSSL::SSL CLI11::CLI11 gtest::gtest)
 
 ## INSTALLATION SECTION
 

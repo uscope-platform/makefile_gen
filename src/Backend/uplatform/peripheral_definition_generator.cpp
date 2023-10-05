@@ -32,10 +32,34 @@ peripheral_definition_generator::peripheral_definition_generator(std::shared_ptr
             auto parameters = current_node->get_parameters();
             generate_peripheral(d_store->get_HDL_resource(current_node->get_type()), parameters, current_node->get_name());
         }
+        if(current_node->get_proxy_ast() != nullptr){
+            peripheral_definition_generator proxy_gen(d, current_node->get_proxy_ast());
+            auto p = proxy_gen.get_peripheral_definitions();
+            auto a_map = proxy_gen.get_alias_map();
+            auto v_map = proxy_gen.get_variant_peripherals();
+            a_map.erase(current_node->get_proxy_ast()->get_type());
+            v_map.erase(current_node->get_proxy_ast()->get_type());
+            p.erase(current_node->get_proxy_ast()->get_type());
+            proxy_defs.push_back({p, a_map, v_map});
+        }
 
         for(const auto& item:current_node->get_dependencies()) working_stack.push(item);
     }
 
+
+    for(auto &def:proxy_defs){
+        for(auto &p:def.definitions.items()){
+            if(!peripheral_defs.contains(p.key())){
+                peripheral_defs[p.key()] = p.value();
+                if(def.alias_map.contains(p.key())){
+                    alias_map[p.key()] = def.alias_map[p.key()];
+                }
+                if(def.variant_peripherals.contains(p.key())){
+                    variant_peripherals[p.key()] = def.variant_peripherals[p.key()];
+                }
+            }
+        }
+    }
 }
 
 void peripheral_definition_generator::generate_peripheral(const HDL_Resource &res, Parameters_map &parameters, const std::string& inst_name) {
@@ -58,7 +82,7 @@ void peripheral_definition_generator::generate_peripheral(const HDL_Resource &re
     if(mod_doc.is_variant()){
         std::string variant = parameters.get(mod_doc.get_variant_parameter())->get_string_value();
         periph_name += "_" + variant;
-        variant_paripherals[inst_name] = periph_name;
+        variant_peripherals[inst_name] = periph_name;
         specs["registers"] = generate_variant_module_registers(mod_doc.get_registers(), parameters, variant);
     }else if(mod_doc.is_parametric()) {
         specs["registers"] = generate_parametric_module_registers(mod_doc.get_registers(), parameters);

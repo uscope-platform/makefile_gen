@@ -22,6 +22,8 @@ find_package(CLI11 REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(cereal)
 find_package(inja)
+find_package(GTest REQUIRED)
+
 include_directories(includes)
 
 include_directories(${inja_INCLUDE_DIRS})

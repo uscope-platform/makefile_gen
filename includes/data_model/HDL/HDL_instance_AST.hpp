@@ -22,6 +22,15 @@
 #include "data_model/HDL/HDL_instance.hpp"
 #include "data_model/documentation/processor_instance.hpp"
 
+struct proxy_target {
+    std::string module;
+    std::string interface;
+    bool operator==(const proxy_target& a) const
+    {
+        return (module == a.interface && interface == a.interface);
+    }
+} ;
+
 
 class HDL_instance_AST : public HDL_instance {
 public:
@@ -37,6 +46,7 @@ public:
 
     void add_address(const int64_t &i) { bus_address.push_back(i);};
     std::vector<int64_t> get_address(){return bus_address;};
+    void clear_address() {bus_address.clear();};
 
     void add_data_dependency(const std::string &p){data_dependencies.push_back(p);};
     std::vector<std::string> get_data_dependencies(){return data_dependencies;};
@@ -53,6 +63,11 @@ public:
     void set_processors(std::vector<processor_instance> &p){processors = p;};
     std::vector<processor_instance> get_processors() const{return processors;};
 
+    void set_proxy_specs(const proxy_target &p){ proxy_specs = p;};
+    proxy_target get_proxy_specs()const{return proxy_specs;};
+
+    void set_proxy_ast(const std::shared_ptr<HDL_instance_AST> &p){proxy_ast = p;};
+    std::shared_ptr<HDL_instance_AST> get_proxy_ast() const {return proxy_ast;}
      nlohmann::json dump() override;
 
     friend bool operator==(const HDL_instance_AST&lhs, const HDL_instance_AST&rhs);
@@ -71,6 +86,10 @@ private:
     std::unordered_map<std::string, std::array<std::string, 2>> if_specs;
 
     std::string leaf_module_top;
+    proxy_target proxy_specs;
+
+    std::shared_ptr<HDL_instance_AST> proxy_ast = nullptr;
+
 };
 
 

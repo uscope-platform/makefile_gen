@@ -31,7 +31,7 @@ public:
     std::map<std::string, std::string> get_alias_map() const{return alias_map;};
     void write_definition_file(const std::string &path);
     std::string get_definition_string();
-    std::unordered_map<std::string, std::string>  get_variant_paripherals() {return variant_paripherals;};
+    std::unordered_map<std::string, std::string>  get_variant_peripherals() {return variant_peripherals;};
 private:
 
     void generate_peripheral(const HDL_Resource &res,Parameters_map &parameters, const std::string& inst_name);
@@ -43,12 +43,19 @@ private:
             const Parameters_map &parameters,
             const std::string &variant);
 
-    uint32_t get_parameter_value(std::vector<std::string> s, const Parameters_map &parameters);
     std::string ver;
     std::shared_ptr<data_store> d_store;
     std::vector<HDL_Resource> submodules_to_generate;
 
-    std::unordered_map<std::string, std::string> variant_paripherals;
+    std::unordered_map<std::string, std::string> variant_peripherals;
+
+    struct proxy_periph_t{
+        nlohmann::json definitions;
+        std::map<std::string, std::string> alias_map;
+        std::unordered_map<std::string, std::string> variant_peripherals;
+    };
+
+    std::vector<proxy_periph_t> proxy_defs;
 
     std::map<std::string, std::string> alias_map;
 

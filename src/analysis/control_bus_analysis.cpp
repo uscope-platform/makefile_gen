@@ -26,9 +26,16 @@ void control_bus_analysis::analyze_bus(std::shared_ptr<HDL_instance_AST> &ast) {
 
     auto bus = dfile.get_bus_section()["control"];
     std::string bus_if = bus["bus_interface"];
-    std::string starting_module  = bus["starting_module"];
 
-    analysis_context top = {ast, bus_if, 0, false, ""};
+    analysis_context top = {ast, bus_if, 0, false, "", {}};
+    analize_node({top});
+}
+
+void control_bus_analysis::analyze_bus(std::shared_ptr<HDL_instance_AST> &ast,const std::string &intf) {
+
+    std::string bus_if = intf;
+
+    analysis_context top = {ast, bus_if, 0, false, "", {}};
     analize_node({top});
 }
 
@@ -72,7 +79,8 @@ std::vector<analysis_context> control_bus_analysis::process_simple_interconnect(
             for(auto &port:dep->get_ports()){
                 if(port.second.size()==1){
                     if(port.second.front() == masters_ifs[i]){
-                        analysis_context ctx = {dep, port.first, addresses[i] , false, inst.current_module_top};
+                        analysis_context ctx = {dep, port.first, addresses[i] , false,
+                                                inst.current_module_top, inst.proxy};
                         ret_val.push_back(ctx);
                     }
                 }
@@ -123,7 +131,8 @@ std::vector<analysis_context> control_bus_analysis::process_parametric_interconn
     for(int i = 0; i<modules.size(); i++){
         for(auto &d:node->get_dependencies()){
             if(d->get_name() == modules[i]){
-                analysis_context a = {d, interfaces[i], addresses[i], true, inst.current_module_top};
+                analysis_context a = {d, interfaces[i], addresses[i], true,
+                                      inst.current_module_top, inst.proxy};
                 res.push_back(a);
             }
         }
@@ -133,13 +142,23 @@ std::vector<analysis_context> control_bus_analysis::process_parametric_interconn
 
 std::vector<analysis_context> control_bus_analysis::process_nested_module(const analysis_context &inst) {
     std::vector<analysis_context> ret_stack;
-    auto dbg = inst.node->get_type();
+
+    proxy_target tgt;
+    if(inst.node->has_parameter("PRAGMA_MKFG_PROXY")){
+        if(inst.node->get_parameter_value("PRAGMA_MKFG_PROXY")->get_string_value()=="TRUE") {
+            tgt.module = inst.node->get_parameter_value("PRAGMA_MKFG_PROXY_TL")->get_string_value();
+            tgt.interface = inst.node->get_parameter_value("PRAGMA_MKFG_PROXY_IF")->get_string_value();
+
+        }
+    }
+
     if(inst.parametric){
         for(auto &dep:inst.node->get_dependencies()){
             for(auto &connection:dep->get_ports()){
                 for(auto &item:connection.second){
                     if(item == inst.interface){
-                        analysis_context ctx = {dep, connection.first, inst.address, inst.parametric, inst.current_module_top};
+                        analysis_context ctx = {dep, connection.first, inst.address,
+                                                inst.parametric, inst.current_module_top, tgt};
                         ret_stack.push_back(ctx);
                         goto breakNested2;
                     }
@@ -153,7 +172,8 @@ std::vector<analysis_context> control_bus_analysis::process_nested_module(const 
                 for(auto &item:connection.second){
                     auto pn = item.substr(0, item.find('[')); // TODO: This is a bodge to support array of instances, proper suppoty should be implemented
                     if(pn == inst.interface){
-                        analysis_context ctx = {dep, connection.first, inst.address, inst.parametric, inst.current_module_top};
+                        analysis_context ctx = {dep, connection.first,
+                                                inst.address, inst.parametric, inst.current_module_top, tgt};
                         ret_stack.push_back(ctx);
                         goto breakNested;
                     }
@@ -181,6 +201,7 @@ void control_bus_analysis::process_leaf_node(const analysis_context &leaf) {
     if(!leaf.current_module_top.empty()){
         leaf.node->get_parent()->set_leaf_module_top(leaf.current_module_top);
     }
+    leaf.node->set_proxy_specs(leaf.proxy);
     std::cout<< "Found module : " + leaf_parent->get_name() + " of type: " + leaf_parent->get_type() + " at address: " << std::hex << leaf.address << "\n";
 }
 

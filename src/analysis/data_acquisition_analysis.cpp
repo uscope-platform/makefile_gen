@@ -22,6 +22,7 @@ data_acquisition_analysis::data_acquisition_analysis(bool logging) : specs_manag
 
 void data_acquisition_analysis::analyze(std::shared_ptr<HDL_instance_AST> &ast) {
     auto sinks = find_sinks(ast);
+    if(sinks.empty()) return;
     if(sinks.size()>1){
         std::cout<<"ERROR: Multiple  sinks are not supported for data acquisition analysis";
         return;

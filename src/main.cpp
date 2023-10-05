@@ -152,6 +152,8 @@ int main(int argc, char *argv[]){
     control_bus_analysis bus_analyzer(dep);
     bus_analyzer.analyze_bus(synth_ast);
 
+    proxy_bus_analysis proxy_analyzer(s_store, d_store, dep);
+    proxy_analyzer.analyze(synth_ast);
 
         //Generate makefile
     if(opts.generate_xilinx){
@@ -195,7 +197,7 @@ int main(int argc, char *argv[]){
             synth_ast,
             periph_def_gen.get_peripheral_definitions(),
             periph_def_gen.get_alias_map(),
-            periph_def_gen.get_variant_paripherals()
+            periph_def_gen.get_variant_peripherals()
             );
 
     app_def_gen.construct_application(dep.get_project_name());
