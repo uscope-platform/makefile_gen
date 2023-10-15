@@ -223,7 +223,15 @@ nlohmann::json peripheral_definition_generator::generate_field(field_documentati
 }
 
 void peripheral_definition_generator::write_definition_file(const std::string &path) {
-    std::string str = peripheral_defs.dump();
+
+    std::vector<nlohmann::json> periph_buffer;
+    int i = 1;
+    for(auto &item:peripheral_defs){
+        item["id"] = i;
+        periph_buffer.push_back(item);
+        i++;
+    }
+    std::string str = nlohmann::json(periph_buffer).dump();
     std::ofstream ss(path);
     ss<<str;
     ss.close();
