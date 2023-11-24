@@ -1,5 +1,5 @@
 
-// Generated from /home/fils/git/makefilegen_v2/grammars/vhdlParser.g4 by ANTLR 4.11.1
+// Generated from /home/filssavi/git/makefile_gen/grammars/vhdlParser.g4 by ANTLR 4.13.1
 
 
 #include "vhdlParserListener.h"
@@ -39,10 +39,19 @@ struct VhdlParserStaticData final {
 };
 
 ::antlr4::internal::OnceFlag vhdlparserParserOnceFlag;
+#if ANTLR4_USE_THREAD_LOCAL_CACHE
+static thread_local
+#endif
 VhdlParserStaticData *vhdlparserParserStaticData = nullptr;
 
 void vhdlparserParserInitialize() {
+#if ANTLR4_USE_THREAD_LOCAL_CACHE
+  if (vhdlparserParserStaticData != nullptr) {
+    return;
+  }
+#else
   assert(vhdlparserParserStaticData == nullptr);
+#endif
   auto staticData = std::make_unique<VhdlParserStaticData>(
     std::vector<std::string>{
       "any_keyword", "name_literal", "name", "name_slice_part", "name_attribute_part", 
@@ -1698,9 +1707,9 @@ vhdlParser::Any_keywordContext* vhdlParser::any_keyword() {
     enterOuterAlt(_localctx, 1);
     setState(514);
     _la = _input->LA(1);
-    if (!(((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & -2) != 0 || (((_la - 64) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 64)) & 8796093022207) != 0)) {
+    if (!((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & -2) != 0) || ((((_la - 64) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 64)) & 8796093022207) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -2576,9 +2585,9 @@ vhdlParser::Entity_declarationContext* vhdlParser::entity_declaration() {
     setState(580);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 4653567294472192) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 65)) & 2147680257) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 4653567294472192) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 65)) & 2147680257) != 0)) {
       setState(577);
       entity_declarative_item();
       setState(582);
@@ -2597,8 +2606,8 @@ vhdlParser::Entity_declarationContext* vhdlParser::entity_declaration() {
       _la = _input->LA(1);
       while (_la == vhdlParser::KW_PROCESS
 
-      || _la == vhdlParser::KW_POSTPONED || (((_la - 84) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 84)) & 140738318827521) != 0) {
+      || _la == vhdlParser::KW_POSTPONED || ((((_la - 84) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 84)) & 140738318827521) != 0)) {
         setState(584);
         entity_statement();
         setState(589);
@@ -2974,9 +2983,9 @@ vhdlParser::Architecture_bodyContext* vhdlParser::architecture_body() {
     setState(624);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 4653567294472224) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 65)) & 2156068865) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 4653567294472224) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 65)) & 2156068865) != 0)) {
       setState(621);
       block_declarative_item();
       setState(626);
@@ -2990,8 +2999,8 @@ vhdlParser::Architecture_bodyContext* vhdlParser::architecture_body() {
     _la = _input->LA(1);
     while (_la == vhdlParser::KW_PROCESS
 
-    || _la == vhdlParser::KW_POSTPONED || (((_la - 72) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 72)) & 594478552427008001) != 0) {
+    || _la == vhdlParser::KW_POSTPONED || ((((_la - 72) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 72)) & 594478552427008001) != 0)) {
       setState(628);
       concurrent_statement();
       setState(633);
@@ -4751,9 +4760,9 @@ vhdlParser::Subprogram_bodyContext* vhdlParser::subprogram_body() {
     setState(799);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 4653562731069440) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 65)) & 2147680257) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 4653562731069440) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 65)) & 2147680257) != 0)) {
       setState(796);
       process_declarative_item();
       setState(801);
@@ -4765,9 +4774,9 @@ vhdlParser::Subprogram_bodyContext* vhdlParser::subprogram_body() {
     setState(806);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 70368811290624) != 0 || (((_la - 70) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 70)) & 2377914278563038279) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 70368811290624) != 0) || ((((_la - 70) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 70)) & 2377914278563038279) != 0)) {
       setState(803);
       sequential_statement();
       setState(808);
@@ -4790,8 +4799,8 @@ vhdlParser::Subprogram_bodyContext* vhdlParser::subprogram_body() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 107) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 107)) & 67) != 0) {
+    if (((((_la - 107) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 107)) & 67) != 0)) {
       setState(813);
       designator();
     }
@@ -5078,8 +5087,8 @@ vhdlParser::SignatureContext* vhdlParser::signature() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 107) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 107)) & 16777315) != 0) {
+    if (((((_la - 107) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 107)) & 16777315) != 0)) {
       setState(834);
       type_mark();
       setState(839);
@@ -5238,9 +5247,9 @@ vhdlParser::Package_declarationContext* vhdlParser::package_declaration() {
     setState(864);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 4653567294472224) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 65)) & 2147680257) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 4653567294472224) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 65)) & 2147680257) != 0)) {
       setState(861);
       package_declarative_item();
       setState(866);
@@ -5498,9 +5507,9 @@ vhdlParser::Package_bodyContext* vhdlParser::package_body() {
     setState(889);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 4653562731069440) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 65)) & 2147680257) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 4653562731069440) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 65)) & 2147680257) != 0)) {
       setState(886);
       process_declarative_item();
       setState(891);
@@ -8208,8 +8217,8 @@ vhdlParser::Protected_type_declarationContext* vhdlParser::protected_type_declar
     setState(1087);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while ((((_la - 18) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 18)) & -9223372019674316767) != 0) {
+    while (((((_la - 18) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 18)) & -9223372019674316767) != 0)) {
       setState(1084);
       protected_type_declarative_item();
       setState(1089);
@@ -8429,9 +8438,9 @@ vhdlParser::Protected_type_bodyContext* vhdlParser::protected_type_body() {
     setState(1106);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 4653562731069440) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 65)) & 2147680257) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 4653562731069440) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 65)) & 2147680257) != 0)) {
       setState(1103);
       process_declarative_item();
       setState(1108);
@@ -10763,8 +10772,8 @@ vhdlParser::Interface_signal_declarationContext* vhdlParser::interface_signal_de
     _la = _input->LA(1);
     if (_la == vhdlParser::KW_LINKAGE
 
-    || _la == vhdlParser::KW_BUFFER || (((_la - 68) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 68)) & 8388737) != 0) {
+    || _la == vhdlParser::KW_BUFFER || ((((_la - 68) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 68)) & 8388737) != 0)) {
       setState(1272);
       signal_mode();
     }
@@ -10884,8 +10893,8 @@ vhdlParser::Interface_variable_declarationContext* vhdlParser::interface_variabl
     _la = _input->LA(1);
     if (_la == vhdlParser::KW_LINKAGE
 
-    || _la == vhdlParser::KW_BUFFER || (((_la - 68) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 68)) & 8388737) != 0) {
+    || _la == vhdlParser::KW_BUFFER || ((((_la - 68) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 68)) & 8388737) != 0)) {
       setState(1286);
       signal_mode();
     }
@@ -11060,8 +11069,8 @@ vhdlParser::Signal_modeContext* vhdlParser::signal_mode() {
     _la = _input->LA(1);
     if (!(_la == vhdlParser::KW_LINKAGE
 
-    || _la == vhdlParser::KW_BUFFER || (((_la - 68) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 68)) & 8388737) != 0)) {
+    || _la == vhdlParser::KW_BUFFER || ((((_la - 68) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 68)) & 8388737) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -14210,9 +14219,9 @@ vhdlParser::Entity_classContext* vhdlParser::entity_class() {
     enterOuterAlt(_localctx, 1);
     setState(1535);
     _la = _input->LA(1);
-    if (!(((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & -9218718061563830240) != 0 || (((_la - 82) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 82)) & 675875) != 0)) {
+    if (!((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & -9218718061563830240) != 0) || ((((_la - 82) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 82)) & 675875) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -15947,8 +15956,8 @@ vhdlParser::External_nameContext* vhdlParser::external_name() {
     match(vhdlParser::SHIFT_LEFT);
     setState(1664);
     _la = _input->LA(1);
-    if (!(((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 141012634697728) != 0)) {
+    if (!((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 141012634697728) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -17142,8 +17151,8 @@ vhdlParser::Logical_operatorContext* vhdlParser::logical_operator() {
     enterOuterAlt(_localctx, 1);
     setState(1778);
     _la = _input->LA(1);
-    if (!((((_la - 16) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 16)) & 2596325734968459265) != 0)) {
+    if (!(((((_la - 16) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 16)) & 2596325734968459265) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -17256,8 +17265,8 @@ vhdlParser::Relational_operatorContext* vhdlParser::relational_operator() {
     enterOuterAlt(_localctx, 1);
     setState(1780);
     _la = _input->LA(1);
-    if (!((((_la - 139) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 139)) & 526335) != 0)) {
+    if (!(((((_la - 139) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 139)) & 526335) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -17346,8 +17355,8 @@ vhdlParser::Shift_operatorContext* vhdlParser::shift_operator() {
     enterOuterAlt(_localctx, 1);
     setState(1782);
     _la = _input->LA(1);
-    if (!((((_la - 31) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 31)) & 2594073386036494353) != 0)) {
+    if (!(((((_la - 31) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 31)) & 2594073386036494353) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -17424,8 +17433,8 @@ vhdlParser::Adding_operatorContext* vhdlParser::adding_operator() {
     enterOuterAlt(_localctx, 1);
     setState(1784);
     _la = _input->LA(1);
-    if (!((((_la - 150) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 150)) & 7) != 0)) {
+    if (!(((((_la - 150) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 150)) & 7) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -19679,8 +19688,8 @@ vhdlParser::Simple_waveform_assignmentContext* vhdlParser::simple_waveform_assig
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2251800350558208) != 0) {
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 2251800350558208) != 0)) {
       setState(1938);
       delay_mechanism();
     }
@@ -20550,8 +20559,8 @@ vhdlParser::Conditional_waveform_assignmentContext* vhdlParser::conditional_wave
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2251800350558208) != 0) {
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 2251800350558208) != 0)) {
       setState(2004);
       delay_mechanism();
     }
@@ -21121,8 +21130,8 @@ vhdlParser::Selected_waveform_assignmentContext* vhdlParser::selected_waveform_a
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2251800350558208) != 0) {
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 2251800350558208) != 0)) {
       setState(2067);
       delay_mechanism();
     }
@@ -22931,10 +22940,10 @@ vhdlParser::Return_statementContext* vhdlParser::return_statement() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 36066180414373952) != 0 || (((_la - 67) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 67)) & 576732883578782849) != 0 || (((_la - 131) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 131)) & 8591507457) != 0) {
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 36066180414373952) != 0) || ((((_la - 67) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 67)) & 576732883578782849) != 0) || ((((_la - 131) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 131)) & 8591507457) != 0)) {
       setState(2241);
       expression(0);
     }
@@ -23384,9 +23393,9 @@ vhdlParser::Block_statementContext* vhdlParser::block_statement() {
     setState(2280);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 4653567294472224) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 65)) & 2156068865) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 4653567294472224) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 65)) & 2156068865) != 0)) {
       setState(2277);
       block_declarative_item();
       setState(2282);
@@ -23400,8 +23409,8 @@ vhdlParser::Block_statementContext* vhdlParser::block_statement() {
     _la = _input->LA(1);
     while (_la == vhdlParser::KW_PROCESS
 
-    || _la == vhdlParser::KW_POSTPONED || (((_la - 72) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 72)) & 594478552427008001) != 0) {
+    || _la == vhdlParser::KW_POSTPONED || ((((_la - 72) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 72)) & 594478552427008001) != 0)) {
       setState(2284);
       concurrent_statement();
       setState(2289);
@@ -23693,9 +23702,9 @@ vhdlParser::Process_statementContext* vhdlParser::process_statement() {
     setState(2329);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 4653562731069440) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 65)) & 2147680257) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 4653562731069440) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 65)) & 2147680257) != 0)) {
       setState(2326);
       process_declarative_item();
       setState(2331);
@@ -23707,9 +23716,9 @@ vhdlParser::Process_statementContext* vhdlParser::process_statement() {
     setState(2336);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 70368811290624) != 0 || (((_la - 70) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 70)) & 2377914278563038279) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 70368811290624) != 0) || ((((_la - 70) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 70)) & 2377914278563038279) != 0)) {
       setState(2333);
       sequential_statement();
       setState(2338);
@@ -24491,8 +24500,8 @@ vhdlParser::Concurrent_signal_assignment_anyContext* vhdlParser::concurrent_sign
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2251800350558208) != 0) {
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 2251800350558208) != 0)) {
       setState(2397);
       delay_mechanism();
     }
@@ -24642,8 +24651,8 @@ vhdlParser::Concurrent_selected_signal_assignmentContext* vhdlParser::concurrent
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2251800350558208) != 0) {
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 2251800350558208) != 0)) {
       setState(2417);
       delay_mechanism();
     }
@@ -25655,9 +25664,9 @@ vhdlParser::Generate_statement_body_with_begin_endContext* vhdlParser::generate_
         setState(2534);
         _errHandler->sync(this);
         _la = _input->LA(1);
-        while (((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 4653567294472224) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 65)) & 2156068865) != 0) {
+        while ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 4653567294472224) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 65)) & 2156068865) != 0)) {
           setState(2531);
           block_declarative_item();
           setState(2536);
@@ -25671,8 +25680,8 @@ vhdlParser::Generate_statement_body_with_begin_endContext* vhdlParser::generate_
         _la = _input->LA(1);
         while (_la == vhdlParser::KW_PROCESS
 
-        || _la == vhdlParser::KW_POSTPONED || (((_la - 72) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 72)) & 594478552427008001) != 0) {
+        || _la == vhdlParser::KW_POSTPONED || ((((_la - 72) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 72)) & 594478552427008001) != 0)) {
           setState(2538);
           concurrent_statement();
           setState(2543);
@@ -25714,8 +25723,8 @@ vhdlParser::Generate_statement_body_with_begin_endContext* vhdlParser::generate_
         _la = _input->LA(1);
         while (_la == vhdlParser::KW_PROCESS
 
-        || _la == vhdlParser::KW_POSTPONED || (((_la - 72) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 72)) & 594478552427008001) != 0) {
+        || _la == vhdlParser::KW_POSTPONED || ((((_la - 72) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 72)) & 594478552427008001) != 0)) {
           setState(2549);
           concurrent_statement();
           setState(2554);
@@ -25812,9 +25821,9 @@ vhdlParser::Generate_statement_bodyContext* vhdlParser::generate_statement_body(
       setState(2560);
       _errHandler->sync(this);
       _la = _input->LA(1);
-      while (((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 4653567294472224) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 65)) & 2156068865) != 0) {
+      while ((((_la & ~ 0x3fULL) == 0) &&
+        ((1ULL << _la) & 4653567294472224) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 65)) & 2156068865) != 0)) {
         setState(2557);
         block_declarative_item();
         setState(2562);
@@ -26088,9 +26097,9 @@ vhdlParser::Design_fileContext* vhdlParser::design_file() {
     setState(2594);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 72057594046324740) != 0 || (((_la - 82) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 82)) & 655361) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 72057594046324740) != 0) || ((((_la - 82) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 82)) & 655361) != 0)) {
       setState(2591);
       design_unit();
       setState(2596);
@@ -27140,5 +27149,9 @@ bool vhdlParser::if_generate_statementSempred(If_generate_statementContext *_loc
 }
 
 void vhdlParser::initialize() {
+#if ANTLR4_USE_THREAD_LOCAL_CACHE
+  vhdlparserParserInitialize();
+#else
   ::antlr4::internal::call_once(vhdlparserParserOnceFlag, vhdlparserParserInitialize);
+#endif
 }

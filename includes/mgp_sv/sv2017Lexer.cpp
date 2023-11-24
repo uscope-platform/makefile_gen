@@ -1,5 +1,5 @@
 
-// Generated from /home/fils/git/makefilegen_v2/grammars/sv2017Lexer.g4 by ANTLR 4.11.1
+// Generated from /home/filssavi/git/makefile_gen/grammars/sv2017Lexer.g4 by ANTLR 4.13.1
 
 
 #include "sv2017Lexer.h"
@@ -43,10 +43,19 @@ struct Sv2017LexerStaticData final {
 };
 
 ::antlr4::internal::OnceFlag sv2017lexerLexerOnceFlag;
+#if ANTLR4_USE_THREAD_LOCAL_CACHE
+static thread_local
+#endif
 Sv2017LexerStaticData *sv2017lexerLexerStaticData = nullptr;
 
 void sv2017lexerLexerInitialize() {
+#if ANTLR4_USE_THREAD_LOCAL_CACHE
+  if (sv2017lexerLexerStaticData != nullptr) {
+    return;
+  }
+#else
   assert(sv2017lexerLexerStaticData == nullptr);
+#endif
   auto staticData = std::make_unique<Sv2017LexerStaticData>(
     std::vector<std::string>{
       "KW_DOLAR_ERROR", "KW_DOLAR_FATAL", "KW_DOLAR_FULLSKEW", "KW_DOLAR_HOLD", 
@@ -1628,5 +1637,9 @@ const atn::ATN& sv2017Lexer::getATN() const {
 
 
 void sv2017Lexer::initialize() {
+#if ANTLR4_USE_THREAD_LOCAL_CACHE
+  sv2017lexerLexerInitialize();
+#else
   ::antlr4::internal::call_once(sv2017lexerLexerOnceFlag, sv2017lexerLexerInitialize);
+#endif
 }

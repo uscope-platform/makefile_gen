@@ -72,7 +72,12 @@ TEST( app_def_generation , generate_app_def) {
 
 
     peripheral_definition_generator periph_def_gen(d_store, synth_ast);
-    application_definition_generator app_def_gen(synth_ast, periph_def_gen.get_peripheral_definitions(), periph_def_gen.get_alias_map());
+    application_definition_generator app_def_gen(
+            synth_ast,
+            periph_def_gen.get_peripheral_definitions(),
+            periph_def_gen.get_alias_map(),
+            std::unordered_map<std::string, std::string>()
+    );
 
     app_def_gen.construct_application("test_app");
 

@@ -1,5 +1,5 @@
 
-// Generated from /home/fils/git/makefilegen_v2/grammars/vhdlLexer.g4 by ANTLR 4.11.1
+// Generated from /home/filssavi/git/makefile_gen/grammars/vhdlLexer.g4 by ANTLR 4.13.1
 
 
 #include "vhdlLexer.h"
@@ -43,10 +43,19 @@ struct VhdlLexerStaticData final {
 };
 
 ::antlr4::internal::OnceFlag vhdllexerLexerOnceFlag;
+#if ANTLR4_USE_THREAD_LOCAL_CACHE
+static thread_local
+#endif
 VhdlLexerStaticData *vhdllexerLexerStaticData = nullptr;
 
 void vhdllexerLexerInitialize() {
+#if ANTLR4_USE_THREAD_LOCAL_CACHE
+  if (vhdllexerLexerStaticData != nullptr) {
+    return;
+  }
+#else
   assert(vhdllexerLexerStaticData == nullptr);
+#endif
   auto staticData = std::make_unique<VhdlLexerStaticData>(
     std::vector<std::string>{
       "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", 
@@ -886,5 +895,9 @@ bool vhdlLexer::CHARACTER_LITERALSempred(antlr4::RuleContext *_localctx, size_t 
 
 
 void vhdlLexer::initialize() {
+#if ANTLR4_USE_THREAD_LOCAL_CACHE
+  vhdllexerLexerInitialize();
+#else
   ::antlr4::internal::call_once(vhdllexerLexerOnceFlag, vhdllexerLexerInitialize);
+#endif
 }

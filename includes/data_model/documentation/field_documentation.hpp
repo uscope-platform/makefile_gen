@@ -18,6 +18,8 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
+
 
 class field_documentation {
 public:

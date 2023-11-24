@@ -1,5 +1,5 @@
 
-// Generated from /home/fils/git/makefilegen_v2/grammars/sv2017.g4 by ANTLR 4.11.1
+// Generated from /home/filssavi/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.1
 
 
 #include "sv2017Listener.h"
@@ -39,10 +39,19 @@ struct Sv2017StaticData final {
 };
 
 ::antlr4::internal::OnceFlag sv2017ParserOnceFlag;
+#if ANTLR4_USE_THREAD_LOCAL_CACHE
+static thread_local
+#endif
 Sv2017StaticData *sv2017ParserStaticData = nullptr;
 
 void sv2017ParserInitialize() {
+#if ANTLR4_USE_THREAD_LOCAL_CACHE
+  if (sv2017ParserStaticData != nullptr) {
+    return;
+  }
+#else
   assert(sv2017ParserStaticData == nullptr);
+#endif
   auto staticData = std::make_unique<Sv2017StaticData>(
     std::vector<std::string>{
       "source_text", "description", "assignment_operator", "edge_identifier", 
@@ -3393,12 +3402,12 @@ sv2017::Source_textContext* sv2017::source_text() {
     setState(1060);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 320745290774677504) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 89)) & 657280286052089939) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & -8211293572972933847) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 222)) & -2305208496179700345) != 0 || (((_la - 287) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 287)) & 11) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 320745290774677504) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 89)) & 657280286052089939) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & -8211293572972933847) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 222)) & -2305208496179700345) != 0) || ((((_la - 287) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 287)) & 11) != 0)) {
       setState(1057);
       description();
       setState(1062);
@@ -3765,8 +3774,8 @@ sv2017::Assignment_operatorContext* sv2017::assignment_operator() {
     enterOuterAlt(_localctx, 1);
     setState(1083);
     _la = _input->LA(1);
-    if (!((((_la - 320) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 320)) & 131041) != 0)) {
+    if (!(((((_la - 320) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 320)) & 131041) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -3942,9 +3951,9 @@ sv2017::IdentifierContext* sv2017::identifier() {
     enterOuterAlt(_localctx, 1);
     setState(1087);
     _la = _input->LA(1);
-    if (!((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
+    if (!(((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -4122,8 +4131,8 @@ sv2017::Integer_atom_typeContext* sv2017::integer_atom_type() {
     enterOuterAlt(_localctx, 1);
     setState(1093);
     _la = _input->LA(1);
-    if (!(_la == sv2017::KW_BYTE || (((_la - 125) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 125)) & 32771) != 0 || _la == sv2017::KW_SHORTINT
+    if (!(_la == sv2017::KW_BYTE || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 125)) & 32771) != 0) || _la == sv2017::KW_SHORTINT
 
     || _la == sv2017::KW_TIME)) {
     _errHandler->recoverInline(this);
@@ -4281,8 +4290,8 @@ sv2017::Non_integer_typeContext* sv2017::non_integer_type() {
     enterOuterAlt(_localctx, 1);
     setState(1097);
     _la = _input->LA(1);
-    if (!((((_la - 184) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 184)) & 8388611) != 0)) {
+    if (!(((((_la - 184) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 184)) & 8388611) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -4395,8 +4404,8 @@ sv2017::Net_typeContext* sv2017::net_type() {
     enterOuterAlt(_localctx, 1);
     setState(1099);
     _la = _input->LA(1);
-    if (!((((_la - 223) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 223)) & 317213401645059) != 0)) {
+    if (!(((((_la - 223) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 223)) & 317213401645059) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -4497,8 +4506,8 @@ sv2017::Unary_module_path_operatorContext* sv2017::unary_module_path_operator() 
     enterOuterAlt(_localctx, 1);
     setState(1101);
     _la = _input->LA(1);
-    if (!((((_la - 302) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 302)) & 687194767487) != 0)) {
+    if (!(((((_la - 302) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 302)) & 687194767487) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -5093,8 +5102,8 @@ sv2017::Any_system_tf_identifierContext* sv2017::any_system_tf_identifier() {
     enterOuterAlt(_localctx, 1);
     setState(1128);
     _la = _input->LA(1);
-    if (!(((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 524286) != 0 || _la == sv2017::SYSTEM_TF_IDENTIFIER)) {
+    if (!((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 524286) != 0) || _la == sv2017::SYSTEM_TF_IDENTIFIER)) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -5568,8 +5577,8 @@ sv2017::Port_directionContext* sv2017::port_direction() {
     enterOuterAlt(_localctx, 1);
     setState(1159);
     _la = _input->LA(1);
-    if (!((((_la - 121) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 121)) & 549755813891) != 0 || _la == sv2017::KW_REF)) {
+    if (!(((((_la - 121) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 121)) & 549755813891) != 0) || _la == sv2017::KW_REF)) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -5650,8 +5659,8 @@ sv2017::Always_keywordContext* sv2017::always_keyword() {
     enterOuterAlt(_localctx, 1);
     setState(1161);
     _la = _input->LA(1);
-    if (!(((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 125829120) != 0)) {
+    if (!((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 125829120) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -5728,8 +5737,8 @@ sv2017::Join_keywordContext* sv2017::join_keyword() {
     enterOuterAlt(_localctx, 1);
     setState(1163);
     _la = _input->LA(1);
-    if (!((((_la - 130) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 130)) & 7) != 0)) {
+    if (!(((((_la - 130) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 130)) & 7) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -6066,8 +6075,8 @@ sv2017::Strength0Context* sv2017::strength0() {
     enterOuterAlt(_localctx, 1);
     setState(1190);
     _la = _input->LA(1);
-    if (!((((_la - 171) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 171)) & 4785074604081153) != 0 || _la == sv2017::KW_WEAK0)) {
+    if (!(((((_la - 171) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 171)) & 4785074604081153) != 0) || _la == sv2017::KW_WEAK0)) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -6148,8 +6157,8 @@ sv2017::Strength1Context* sv2017::strength1() {
     enterOuterAlt(_localctx, 1);
     setState(1192);
     _la = _input->LA(1);
-    if (!((((_la - 172) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 172)) & 4785074604081153) != 0 || _la == sv2017::KW_WEAK1)) {
+    if (!(((((_la - 172) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 172)) & 4785074604081153) != 0) || _la == sv2017::KW_WEAK1)) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -6317,8 +6326,8 @@ sv2017::Sequence_lvar_port_directionContext* sv2017::sequence_lvar_port_directio
     enterOuterAlt(_localctx, 1);
     setState(1198);
     _la = _input->LA(1);
-    if (!((((_la - 121) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 121)) & 549755813891) != 0)) {
+    if (!(((((_la - 121) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 121)) & 549755813891) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -7046,8 +7055,8 @@ sv2017::Mos_switchtypeContext* sv2017::mos_switchtype() {
     enterOuterAlt(_localctx, 1);
     setState(1223);
     _la = _input->LA(1);
-    if (!((((_la - 151) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 151)) & 13194139541505) != 0)) {
+    if (!(((((_la - 151) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 151)) & 13194139541505) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -7136,8 +7145,8 @@ sv2017::N_input_gatetypeContext* sv2017::n_input_gatetype() {
     enterOuterAlt(_localctx, 1);
     setState(1225);
     _la = _input->LA(1);
-    if (!(_la == sv2017::KW_AND || (((_la - 146) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 146)) & 8257) != 0 || _la == sv2017::KW_XNOR
+    if (!(_la == sv2017::KW_AND || ((((_la - 146) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 146)) & 8257) != 0) || _la == sv2017::KW_XNOR
 
     || _la == sv2017::KW_XOR)) {
     _errHandler->recoverInline(this);
@@ -7293,8 +7302,8 @@ sv2017::Pass_en_switchtypeContext* sv2017::pass_en_switchtype() {
     enterOuterAlt(_localctx, 1);
     setState(1229);
     _la = _input->LA(1);
-    if (!((((_la - 196) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 196)) & 3298534883331) != 0)) {
+    if (!(((((_la - 196) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 196)) & 3298534883331) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -7446,8 +7455,8 @@ sv2017::Any_implicationContext* sv2017::any_implication() {
     enterOuterAlt(_localctx, 1);
     setState(1233);
     _la = _input->LA(1);
-    if (!((((_la - 355) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 355)) & 7) != 0)) {
+    if (!(((((_la - 355) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 355)) & 7) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -7804,8 +7813,8 @@ sv2017::Operator_mul_div_modContext* sv2017::operator_mul_div_mod() {
     enterOuterAlt(_localctx, 1);
     setState(1246);
     _la = _input->LA(1);
-    if (!((((_la - 301) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 301)) & 26388279066625) != 0)) {
+    if (!(((((_la - 301) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 301)) & 26388279066625) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -7961,8 +7970,8 @@ sv2017::Operator_shiftContext* sv2017::operator_shift() {
     enterOuterAlt(_localctx, 1);
     setState(1250);
     _la = _input->LA(1);
-    if (!((((_la - 296) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 296)) & 15) != 0)) {
+    if (!(((((_la - 296) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 296)) & 15) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -8043,8 +8052,8 @@ sv2017::Operator_cmpContext* sv2017::operator_cmp() {
     enterOuterAlt(_localctx, 1);
     setState(1252);
     _la = _input->LA(1);
-    if (!((((_la - 321) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 321)) & 15) != 0)) {
+    if (!(((((_la - 321) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 321)) & 15) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -8133,8 +8142,8 @@ sv2017::Operator_eq_neqContext* sv2017::operator_eq_neq() {
     enterOuterAlt(_localctx, 1);
     setState(1254);
     _la = _input->LA(1);
-    if (!((((_la - 314) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 314)) & 63) != 0)) {
+    if (!(((((_la - 314) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 314)) & 63) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -8211,8 +8220,8 @@ sv2017::Operator_xorContext* sv2017::operator_xor() {
     enterOuterAlt(_localctx, 1);
     setState(1256);
     _la = _input->LA(1);
-    if (!((((_la - 306) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 306)) & 7) != 0)) {
+    if (!(((((_la - 306) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 306)) & 7) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -10464,12 +10473,12 @@ sv2017::Interface_declarationContext* sv2017::interface_declaration() {
         setState(1475);
         _errHandler->sync(this);
         _la = _input->LA(1);
-        while (((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 5073177595659618342) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 89)) & 616747904440697555) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 158)) & -8211293564114564059) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 222)) & -2305208496179700345) != 0 || (((_la - 287) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 287)) & 8388619) != 0) {
+        while ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 5073177595659618342) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 89)) & 616747904440697555) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 158)) & -8211293564114564059) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 222)) & -2305208496179700345) != 0) || ((((_la - 287) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 287)) & 8388619) != 0)) {
           setState(1472);
           interface_item();
           setState(1477);
@@ -14463,13 +14472,13 @@ sv2017::Seq_blockContext* sv2017::seq_block() {
     setState(1810);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2531089384066252798) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 65)) & 3458799964614819845) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 137)) & 69163680510509069) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & -8718715990243254183) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & 34750463) != 0 || (((_la - 348) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 348)) & 106511) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 2531089384066252798) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 65)) & 3458799964614819845) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 137)) & 69163680510509069) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & -8718715990243254183) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & 34750463) != 0) || ((((_la - 348) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 348)) & 106511) != 0)) {
       setState(1807);
       statement_or_null();
       setState(1812);
@@ -14634,13 +14643,13 @@ sv2017::Par_blockContext* sv2017::par_block() {
     setState(1834);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2531089384066252798) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 65)) & 3458799964614819845) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 137)) & 69163680510509069) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & -8718715990243254183) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & 34750463) != 0 || (((_la - 348) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 348)) & 106511) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 2531089384066252798) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 65)) & 3458799964614819845) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 137)) & 69163680510509069) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & -8718715990243254183) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & 34750463) != 0) || ((((_la - 348) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 348)) & 106511) != 0)) {
       setState(1831);
       statement_or_null();
       setState(1836);
@@ -14819,12 +14828,12 @@ sv2017::Case_statementContext* sv2017::case_statement() {
         setState(1854); 
         _errHandler->sync(this);
         _la = _input->LA(1);
-      } while (((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 4620697753168117758) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 275)) & -4611686001346957313) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 339)) & 6149) != 0);
+      } while ((((_la & ~ 0x3fULL) == 0) &&
+        ((1ULL << _la) & 4620697753168117758) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 275)) & -4611686001346957313) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 339)) & 6149) != 0));
       break;
     }
 
@@ -14852,12 +14861,12 @@ sv2017::Case_statementContext* sv2017::case_statement() {
             setState(1864); 
             _errHandler->sync(this);
             _la = _input->LA(1);
-          } while (((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 4620697753168117758) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 275)) & -4611685966987251713) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 339)) & 6149) != 0);
+          } while ((((_la & ~ 0x3fULL) == 0) &&
+            ((1ULL << _la) & 4620697753168117758) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 275)) & -4611685966987251713) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 339)) & 6149) != 0));
           break;
         }
 
@@ -14945,12 +14954,12 @@ sv2017::Case_statementContext* sv2017::case_statement() {
             setState(1869); 
             _errHandler->sync(this);
             _la = _input->LA(1);
-          } while (((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 4620697753168117758) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 339)) & 6149) != 0);
+          } while ((((_la & ~ 0x3fULL) == 0) &&
+            ((1ULL << _la) & 4620697753168117758) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 339)) & 6149) != 0));
           break;
         }
 
@@ -15035,8 +15044,8 @@ sv2017::Case_keywordContext* sv2017::case_keyword() {
     enterOuterAlt(_localctx, 1);
     setState(1877);
     _la = _input->LA(1);
-    if (!(((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 61572651155456) != 0)) {
+    if (!((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 61572651155456) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -15695,12 +15704,12 @@ sv2017::Randcase_statementContext* sv2017::randcase_statement() {
       setState(1927); 
       _errHandler->sync(this);
       _la = _input->LA(1);
-    } while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 339)) & 6149) != 0);
+    } while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 339)) & 6149) != 0));
     setState(1929);
     match(sv2017::KW_ENDCASE);
    
@@ -16508,11 +16517,11 @@ sv2017::Loop_statementContext* sv2017::loop_statement() {
                 _errHandler->sync(this);
 
                 _la = _input->LA(1);
-                if (((_la & ~ 0x3fULL) == 0) &&
-                  ((1ULL << _la) & 145272973887488) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 89)) & 3659380855668739) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 158)) & -8357801298350833663) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 222)) & -2305842923268209407) != 0 || _la == sv2017::LBRACE
+                if ((((_la & ~ 0x3fULL) == 0) &&
+                  ((1ULL << _la) & 145272973887488) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 89)) & 3659380855668739) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 158)) & -8357801298350833663) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 222)) & -2305842923268209407) != 0) || _la == sv2017::LBRACE
 
                 || _la == sv2017::APOSTROPHE_LBRACE) {
                   setState(1995);
@@ -16524,12 +16533,12 @@ sv2017::Loop_statementContext* sv2017::loop_statement() {
                 _errHandler->sync(this);
 
                 _la = _input->LA(1);
-                if (((_la & ~ 0x3fULL) == 0) &&
-                  ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 339)) & 6149) != 0) {
+                if ((((_la & ~ 0x3fULL) == 0) &&
+                  ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 339)) & 6149) != 0)) {
                   setState(1999);
                   expression(0);
                 }
@@ -16539,12 +16548,12 @@ sv2017::Loop_statementContext* sv2017::loop_statement() {
                 _errHandler->sync(this);
 
                 _la = _input->LA(1);
-                if (((_la & ~ 0x3fULL) == 0) &&
-                  ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 339)) & 6149) != 0) {
+                if ((((_la & ~ 0x3fULL) == 0) &&
+                  ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 339)) & 6149) != 0)) {
                   setState(2003);
                   for_step();
                 }
@@ -17145,9 +17154,9 @@ sv2017::Loop_variablesContext* sv2017::loop_variables() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(2074);
       identifier();
     }
@@ -17161,9 +17170,9 @@ sv2017::Loop_variablesContext* sv2017::loop_variables() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(2078);
         identifier();
       }
@@ -17257,12 +17266,12 @@ sv2017::Jump_statementContext* sv2017::jump_statement() {
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 339)) & 6149) != 0) {
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 339)) & 6149) != 0)) {
           setState(2087);
           expression(0);
         }
@@ -17838,13 +17847,13 @@ sv2017::Ordered_checker_port_connectionContext* sv2017::ordered_checker_port_con
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 9020530844237822) != 0 || (((_la - 68) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 68)) & 432349962819338241) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 137)) & -2302025504570334195) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & 1153068839882776665) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 339)) & 37754885) != 0) {
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 9020530844237822) != 0) || ((((_la - 68) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 68)) & 432349962819338241) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 137)) & -2302025504570334195) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & 1153068839882776665) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 339)) & 37754885) != 0)) {
       setState(2159);
       property_actual_arg();
     }
@@ -17978,13 +17987,13 @@ sv2017::Named_checker_port_connectionContext* sv2017::named_checker_port_connect
           _errHandler->sync(this);
 
           _la = _input->LA(1);
-          if (((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 9020530844237822) != 0 || (((_la - 68) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 68)) & 432349962819338241) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 137)) & -2302025504570334195) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 203)) & 1153068839882776665) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 339)) & 37754885) != 0) {
+          if ((((_la & ~ 0x3fULL) == 0) &&
+            ((1ULL << _la) & 9020530844237822) != 0) || ((((_la - 68) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 68)) & 432349962819338241) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 137)) & -2302025504570334195) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 203)) & 1153068839882776665) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 339)) & 37754885) != 0)) {
             setState(2172);
             property_actual_arg();
           }
@@ -18424,9 +18433,9 @@ sv2017::Assertion_itemContext* sv2017::assertion_item() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(2225);
         identifier();
         setState(2226);
@@ -18520,9 +18529,9 @@ sv2017::Concurrent_assertion_itemContext* sv2017::concurrent_assertion_item() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(2233);
         identifier();
         setState(2234);
@@ -19666,12 +19675,12 @@ sv2017::Production_itemContext* sv2017::production_item() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 275)) & -4611685949807382529) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 339)) & 6149) != 0) {
+      if ((((_la & ~ 0x3fULL) == 0) &&
+        ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 275)) & -4611685949807382529) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 339)) & 6149) != 0)) {
         setState(2317);
         list_of_arguments();
       }
@@ -19781,13 +19790,13 @@ sv2017::Rs_code_blockContext* sv2017::rs_code_block() {
     setState(2333);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2531089384066252798) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 65)) & 3458799964614819845) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 137)) & 69163680510509069) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & -8718715990243254183) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & 34750463) != 0 || (((_la - 348) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 348)) & 106511) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 2531089384066252798) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 65)) & 3458799964614819845) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 137)) & 69163680510509069) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & -8718715990243254183) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & 34750463) != 0) || ((((_la - 348) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 348)) & 106511) != 0)) {
       setState(2330);
       statement_or_null();
       setState(2335);
@@ -19888,9 +19897,9 @@ sv2017::Randsequence_statementContext* sv2017::randsequence_statement() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(2340);
       identifier();
     }
@@ -19905,11 +19914,11 @@ sv2017::Randsequence_statementContext* sv2017::randsequence_statement() {
       setState(2347); 
       _errHandler->sync(this);
       _la = _input->LA(1);
-    } while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 145272973887488) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 89)) & 3659380855668739) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & -8357801298350833663) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 222)) & -2305842803009125119) != 0);
+    } while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 145272973887488) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 89)) & 3659380855668739) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & -8357801298350833663) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 222)) & -2305842803009125119) != 0));
     setState(2349);
     match(sv2017::KW_ENDSEQUENCE);
    
@@ -20334,12 +20343,12 @@ sv2017::Rs_caseContext* sv2017::rs_case() {
       setState(2381); 
       _errHandler->sync(this);
       _la = _input->LA(1);
-    } while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 4620697753168117758) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 339)) & 6149) != 0);
+    } while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 4620697753168117758) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 339)) & 6149) != 0));
     setState(2383);
     match(sv2017::KW_ENDCASE);
    
@@ -20762,9 +20771,9 @@ sv2017::Rs_production_listContext* sv2017::rs_production_list() {
           setState(2424); 
           _errHandler->sync(this);
           _la = _input->LA(1);
-        } while ((((_la - 158) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 245)) & 1924145348609) != 0);
+        } while (((((_la - 158) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 245)) & 1924145348609) != 0));
         break;
       }
 
@@ -20792,9 +20801,9 @@ sv2017::Rs_production_listContext* sv2017::rs_production_list() {
           _la = _input->LA(1);
         } while (_la == sv2017::KW_CASE || _la == sv2017::KW_IF
 
-        || _la == sv2017::KW_OPTION || (((_la - 181) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 181)) & 34363933185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 245)) & 142661633703937) != 0);
+        || _la == sv2017::KW_OPTION || ((((_la - 181) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 181)) & 34363933185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 245)) & 142661633703937) != 0));
         break;
       }
 
@@ -21224,8 +21233,8 @@ sv2017::Tf_port_itemContext* sv2017::tf_port_item() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == sv2017::KW_CONST || (((_la - 121) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 121)) & 549755813891) != 0 || _la == sv2017::KW_REF) {
+    if (_la == sv2017::KW_CONST || ((((_la - 121) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 121)) & 549755813891) != 0) || _la == sv2017::KW_REF) {
       setState(2472);
       tf_port_direction();
     }
@@ -21254,9 +21263,9 @@ sv2017::Tf_port_itemContext* sv2017::tf_port_item() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(2481);
       identifier();
       setState(2485);
@@ -22943,11 +22952,11 @@ sv2017::Let_declarationContext* sv2017::let_declaration() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 145272973887488) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 89)) & 3659380855668739) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & -8355549498537148415) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 222)) & -2305842938032159487) != 0 || _la == sv2017::LPAREN
+      if ((((_la & ~ 0x3fULL) == 0) &&
+        ((1ULL << _la) & 145272973887488) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 89)) & 3659380855668739) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & -8355549498537148415) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 222)) & -2305842938032159487) != 0) || _la == sv2017::LPAREN
 
       || _la == sv2017::LSQUARE_BR) {
         setState(2651);
@@ -23616,13 +23625,13 @@ sv2017::Property_list_of_argumentsContext* sv2017::property_list_of_arguments() 
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 9020530844237822) != 0 || (((_la - 68) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 68)) & 432349962819338241) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 137)) & -2302025504570334195) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 203)) & 1153068839882776665) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 339)) & 37754885) != 0) {
+      if ((((_la & ~ 0x3fULL) == 0) &&
+        ((1ULL << _la) & 9020530844237822) != 0) || ((((_la - 68) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 68)) & 432349962819338241) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 137)) & -2302025504570334195) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 203)) & 1153068839882776665) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 339)) & 37754885) != 0)) {
         setState(2713);
         property_actual_arg();
       }
@@ -23645,13 +23654,13 @@ sv2017::Property_list_of_argumentsContext* sv2017::property_list_of_arguments() 
           _errHandler->sync(this);
 
           _la = _input->LA(1);
-          if (((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 9020530844237822) != 0 || (((_la - 68) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 68)) & 432349962819338241) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 137)) & -2302025504570334195) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 203)) & 1153068839882776665) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 339)) & 37754885) != 0) {
+          if ((((_la & ~ 0x3fULL) == 0) &&
+            ((1ULL << _la) & 9020530844237822) != 0) || ((((_la - 68) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 68)) & 432349962819338241) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 137)) & -2302025504570334195) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 203)) & 1153068839882776665) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 339)) & 37754885) != 0)) {
             setState(2720);
             property_actual_arg();
           } 
@@ -23676,13 +23685,13 @@ sv2017::Property_list_of_argumentsContext* sv2017::property_list_of_arguments() 
                 _errHandler->sync(this);
 
                 _la = _input->LA(1);
-                if (((_la & ~ 0x3fULL) == 0) &&
-                  ((1ULL << _la) & 9020530844237822) != 0 || (((_la - 68) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 68)) & 432349962819338241) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 137)) & -2302025504570334195) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 203)) & 1153068839882776665) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 339)) & 37754885) != 0) {
+                if ((((_la & ~ 0x3fULL) == 0) &&
+                  ((1ULL << _la) & 9020530844237822) != 0) || ((((_la - 68) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 68)) & 432349962819338241) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 137)) & -2302025504570334195) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 203)) & 1153068839882776665) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 339)) & 37754885) != 0)) {
                   setState(2729);
                   property_actual_arg();
                 }
@@ -23718,13 +23727,13 @@ sv2017::Property_list_of_argumentsContext* sv2017::property_list_of_arguments() 
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 9020530844237822) != 0 || (((_la - 68) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 68)) & 432349962819338241) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 137)) & -2302025504570334195) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 203)) & 1153068839882776665) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 339)) & 37754885) != 0) {
+      if ((((_la & ~ 0x3fULL) == 0) &&
+        ((1ULL << _la) & 9020530844237822) != 0) || ((((_la - 68) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 68)) & 432349962819338241) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 137)) & -2302025504570334195) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 203)) & 1153068839882776665) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 339)) & 37754885) != 0)) {
         setState(2742);
         property_actual_arg();
       }
@@ -24597,12 +24606,12 @@ sv2017::Property_exprContext* sv2017::property_expr(int precedence) {
         setState(2810); 
         _errHandler->sync(this);
         _la = _input->LA(1);
-      } while (((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 4620697753168117758) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 339)) & 6149) != 0);
+      } while ((((_la & ~ 0x3fULL) == 0) &&
+        ((1ULL << _la) & 4620697753168117758) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 339)) & 6149) != 0));
       setState(2812);
       match(sv2017::KW_ENDCASE);
       break;
@@ -24618,8 +24627,8 @@ sv2017::Property_exprContext* sv2017::property_expr(int precedence) {
       case 1: {
         setState(2815);
         _la = _input->LA(1);
-        if (!((((_la - 353) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 353)) & 195) != 0)) {
+        if (!(((((_la - 353) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 353)) & 195) != 0))) {
         _errHandler->recoverInline(this);
         }
         else {
@@ -24673,8 +24682,8 @@ sv2017::Property_exprContext* sv2017::property_expr(int precedence) {
         case sv2017::KW_SYNC_REJECT_ON: {
           setState(2825);
           _la = _input->LA(1);
-          if (!(_la == sv2017::KW_ACCEPT_ON || (((_la - 188) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 188)) & 412316860417) != 0)) {
+          if (!(_la == sv2017::KW_ACCEPT_ON || ((((_la - 188) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 188)) & 412316860417) != 0))) {
           _errHandler->recoverInline(this);
           }
           else {
@@ -24783,9 +24792,9 @@ sv2017::Property_exprContext* sv2017::property_expr(int precedence) {
         if (!(precpred(_ctx, 2))) throw FailedPredicateException(this, "precpred(_ctx, 2)");
         setState(2852);
         _la = _input->LA(1);
-        if (!(_la == sv2017::KW_AND || (((_la - 111) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 111)) & 281474976710689) != 0 || (((_la - 201) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 201)) & 3377699720527875) != 0)) {
+        if (!(_la == sv2017::KW_AND || ((((_la - 111) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 111)) & 281474976710689) != 0) || ((((_la - 201) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 201)) & 3377699720527875) != 0))) {
         _errHandler->recoverInline(this);
         }
         else {
@@ -26384,12 +26393,12 @@ sv2017::Consecutive_repetitionContext* sv2017::consecutive_repetition() {
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 339)) & 6149) != 0) {
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 339)) & 6149) != 0)) {
           setState(3005);
           const_or_range_expression();
         }
@@ -26743,13 +26752,13 @@ sv2017::Sequence_instanceContext* sv2017::sequence_instance() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 68) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 68)) & 432345564764438529) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 137)) & 1565704829535245) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 275)) & -4611685949807382529) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 339)) & 37754885) != 0) {
+      if ((((_la & ~ 0x3fULL) == 0) &&
+        ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 68) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 68)) & 432345564764438529) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 137)) & 1565704829535245) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 275)) & -4611685949807382529) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 339)) & 37754885) != 0)) {
         setState(3031);
         sequence_list_of_arguments();
       }
@@ -27574,9 +27583,9 @@ sv2017::Clocking_declarationContext* sv2017::clocking_declaration() {
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+        if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
           setState(3123);
           identifier();
         }
@@ -27603,9 +27612,9 @@ sv2017::Clocking_declarationContext* sv2017::clocking_declaration() {
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+        if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
           setState(3133);
           identifier();
         }
@@ -27616,8 +27625,8 @@ sv2017::Clocking_declarationContext* sv2017::clocking_declaration() {
         setState(3141);
         _errHandler->sync(this);
         _la = _input->LA(1);
-        while (_la == sv2017::KW_DEFAULT || (((_la - 121) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 121)) & 282024732532739) != 0 || _la == sv2017::KW_SEQUENCE || _la == sv2017::LPAREN) {
+        while (_la == sv2017::KW_DEFAULT || ((((_la - 121) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 121)) & 282024732532739) != 0) || _la == sv2017::KW_SEQUENCE || _la == sv2017::LPAREN) {
           setState(3138);
           clocking_item();
           setState(3143);
@@ -28865,11 +28874,11 @@ sv2017::Covergroup_declarationContext* sv2017::covergroup_declaration() {
     setState(3267);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 1729527529884157952) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 89)) & 3659380855668739) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & -8355549498537148415) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 222)) & -2305842940179643135) != 0 || _la == sv2017::LPAREN
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 1729527529884157952) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 89)) & 3659380855668739) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & -8355549498537148415) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 222)) & -2305842940179643135) != 0) || _la == sv2017::LPAREN
 
     || _la == sv2017::LSQUARE_BR) {
       setState(3264);
@@ -28997,9 +29006,9 @@ sv2017::Cover_crossContext* sv2017::cover_cross() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(3276);
       identifier();
       setState(3277);
@@ -29196,8 +29205,8 @@ sv2017::Cross_bodyContext* sv2017::cross_body() {
         setState(3303);
         _errHandler->sync(this);
         _la = _input->LA(1);
-        while (_la == sv2017::KW_BINS || (((_la - 104) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 104)) & 18014398509483521) != 0 || _la == sv2017::KW_TYPE_OPTION
+        while (_la == sv2017::KW_BINS || ((((_la - 104) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 104)) & 18014398509483521) != 0) || _la == sv2017::KW_TYPE_OPTION
 
         || _la == sv2017::LPAREN) {
           setState(3300);
@@ -30688,11 +30697,11 @@ sv2017::Cover_pointContext* sv2017::cover_point() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 145272973887488) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 89)) & 3659380855668739) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & -8355549498537148415) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 222)) & -2305842940179643135) != 0 || _la == sv2017::LSQUARE_BR) {
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 145272973887488) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 89)) & 3659380855668739) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & -8355549498537148415) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 222)) & -2305842940179643135) != 0) || _la == sv2017::LSQUARE_BR) {
       setState(3436);
       _errHandler->sync(this);
 
@@ -30838,8 +30847,8 @@ sv2017::Bins_or_emptyContext* sv2017::bins_or_empty() {
         setState(3466);
         _errHandler->sync(this);
         _la = _input->LA(1);
-        while (_la == sv2017::KW_BINS || (((_la - 113) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 113)) & 35184372088835) != 0 || _la == sv2017::KW_TYPE_OPTION
+        while (_la == sv2017::KW_BINS || ((((_la - 113) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 113)) & 35184372088835) != 0) || _la == sv2017::KW_TYPE_OPTION
 
         || _la == sv2017::KW_WILDCARD) {
           setState(3461);
@@ -31059,12 +31068,12 @@ sv2017::Bins_or_optionsContext* sv2017::bins_or_options() {
               _errHandler->sync(this);
 
               _la = _input->LA(1);
-              if (((_la & ~ 0x3fULL) == 0) &&
-                ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-                ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-                ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-                ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-                ((1ULL << (_la - 339)) & 6149) != 0) {
+              if ((((_la & ~ 0x3fULL) == 0) &&
+                ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+                ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+                ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+                ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+                ((1ULL << (_la - 339)) & 6149) != 0)) {
                 setState(3480);
                 covergroup_expression();
               }
@@ -31180,12 +31189,12 @@ sv2017::Bins_or_optionsContext* sv2017::bins_or_options() {
               _errHandler->sync(this);
 
               _la = _input->LA(1);
-              if (((_la & ~ 0x3fULL) == 0) &&
-                ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-                ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-                ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-                ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-                ((1ULL << (_la - 339)) & 6149) != 0) {
+              if ((((_la & ~ 0x3fULL) == 0) &&
+                ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+                ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+                ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+                ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+                ((1ULL << (_la - 339)) & 6149) != 0)) {
                 setState(3520);
                 covergroup_expression();
               }
@@ -31519,8 +31528,8 @@ sv2017::Trans_range_listContext* sv2017::trans_range_list() {
       match(sv2017::LSQUARE_BR);
       setState(3564);
       _la = _input->LA(1);
-      if (!((((_la - 320) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 320)) & 285212673) != 0)) {
+      if (!(((((_la - 320) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 320)) & 285212673) != 0))) {
       _errHandler->recoverInline(this);
       }
       else {
@@ -32604,9 +32613,9 @@ sv2017::Class_newContext* sv2017::class_new() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (_la == sv2017::KW_DOLAR_UNIT || (((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (_la == sv2017::KW_DOLAR_UNIT || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(3649);
         class_scope();
       }
@@ -32623,12 +32632,12 @@ sv2017::Class_newContext* sv2017::class_new() {
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 275)) & -4611685949807382529) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 339)) & 6149) != 0) {
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 275)) & -4611685949807382529) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 339)) & 6149) != 0)) {
           setState(3654);
           list_of_arguments();
         }
@@ -32963,12 +32972,12 @@ sv2017::Packed_dimensionContext* sv2017::packed_dimension() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 339)) & 6149) != 0) {
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 339)) & 6149) != 0)) {
       setState(3676);
       range_expression();
     }
@@ -33739,11 +33748,11 @@ sv2017::Data_typeContext* sv2017::data_type() {
             _errHandler->sync(this);
 
             _la = _input->LA(1);
-            if (((_la & ~ 0x3fULL) == 0) &&
-              ((1ULL << _la) & 4535485530112) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-              ((1ULL << (_la - 125)) & 4683743621055299587) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-              ((1ULL << (_la - 203)) & 4398583390217) != 0 || (((_la - 283) & ~ 0x3fULL) == 0) &&
-              ((1ULL << (_la - 283)) & 135) != 0) {
+            if ((((_la & ~ 0x3fULL) == 0) &&
+              ((1ULL << _la) & 4535485530112) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+              ((1ULL << (_la - 125)) & 4683743621055299587) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+              ((1ULL << (_la - 203)) & 4398583390217) != 0) || ((((_la - 283) & ~ 0x3fULL) == 0) &&
+              ((1ULL << (_la - 283)) & 135) != 0)) {
               setState(3737);
               enum_base_type();
             }
@@ -33801,11 +33810,11 @@ sv2017::Data_typeContext* sv2017::data_type() {
               setState(3762); 
               _errHandler->sync(this);
               _la = _input->LA(1);
-            } while (((_la & ~ 0x3fULL) == 0) &&
-              ((1ULL << _la) & 145272973887488) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-              ((1ULL << (_la - 89)) & 3659380855668739) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-              ((1ULL << (_la - 158)) & -8357801298347687935) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-              ((1ULL << (_la - 222)) & -2305842803009125119) != 0 || _la == sv2017::LPAREN);
+            } while ((((_la & ~ 0x3fULL) == 0) &&
+              ((1ULL << _la) & 145272973887488) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+              ((1ULL << (_la - 89)) & 3659380855668739) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+              ((1ULL << (_la - 158)) & -8357801298347687935) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+              ((1ULL << (_la - 222)) & -2305842803009125119) != 0) || _la == sv2017::LPAREN);
             setState(3764);
             match(sv2017::RBRACE);
             break;
@@ -34163,13 +34172,13 @@ sv2017::Sequence_list_of_arguments_named_itemContext* sv2017::sequence_list_of_a
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 68) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 68)) & 432345564764438529) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 137)) & 1565704829535245) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 339)) & 37754885) != 0) {
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 68) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 68)) & 432345564764438529) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 137)) & 1565704829535245) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 339)) & 37754885) != 0)) {
       setState(3799);
       sequence_actual_arg();
     }
@@ -34287,13 +34296,13 @@ sv2017::Sequence_list_of_argumentsContext* sv2017::sequence_list_of_arguments() 
           _errHandler->sync(this);
 
           _la = _input->LA(1);
-          if (((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 68) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 68)) & 432345564764438529) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 137)) & 1565704829535245) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 339)) & 37754885) != 0) {
+          if ((((_la & ~ 0x3fULL) == 0) &&
+            ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 68) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 68)) & 432345564764438529) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 137)) & 1565704829535245) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 339)) & 37754885) != 0)) {
             setState(3809);
             sequence_actual_arg();
           } 
@@ -34318,13 +34327,13 @@ sv2017::Sequence_list_of_argumentsContext* sv2017::sequence_list_of_arguments() 
                 _errHandler->sync(this);
 
                 _la = _input->LA(1);
-                if (((_la & ~ 0x3fULL) == 0) &&
-                  ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 68) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 68)) & 432345564764438529) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 137)) & 1565704829535245) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 339)) & 37754885) != 0) {
+                if ((((_la & ~ 0x3fULL) == 0) &&
+                  ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 68) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 68)) & 432345564764438529) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 137)) & 1565704829535245) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 339)) & 37754885) != 0)) {
                   setState(3818);
                   sequence_actual_arg();
                 }
@@ -34442,12 +34451,12 @@ sv2017::List_of_arguments_named_itemContext* sv2017::list_of_arguments_named_ite
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 339)) & 6149) != 0) {
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 339)) & 6149) != 0)) {
       setState(3837);
       expression(0);
     }
@@ -34565,12 +34574,12 @@ sv2017::List_of_argumentsContext* sv2017::list_of_arguments() {
           _errHandler->sync(this);
 
           _la = _input->LA(1);
-          if (((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 339)) & 6149) != 0) {
+          if ((((_la & ~ 0x3fULL) == 0) &&
+            ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 339)) & 6149) != 0)) {
             setState(3847);
             expression(0);
           } 
@@ -34595,12 +34604,12 @@ sv2017::List_of_argumentsContext* sv2017::list_of_arguments() {
                 _errHandler->sync(this);
 
                 _la = _input->LA(1);
-                if (((_la & ~ 0x3fULL) == 0) &&
-                  ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-                  ((1ULL << (_la - 339)) & 6149) != 0) {
+                if ((((_la & ~ 0x3fULL) == 0) &&
+                  ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+                  ((1ULL << (_la - 339)) & 6149) != 0)) {
                   setState(3856);
                   expression(0);
                 }
@@ -35328,12 +35337,12 @@ sv2017::Parameter_value_assignmentContext* sv2017::parameter_value_assignment() 
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 9152472229085182) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 89)) & 3659380855668739) != 0 || (((_la - 157) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 157)) & 1735645076635254787) != 0 || (((_la - 221) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 221)) & -18014260441380221) != 0 || (((_la - 285) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 285)) & 103582791479755915) != 0 || _la == sv2017::INCR
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 9152472229085182) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 89)) & 3659380855668739) != 0) || ((((_la - 157) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 157)) & 1735645076635254787) != 0) || ((((_la - 221) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 221)) & -18014260441380221) != 0) || ((((_la - 285) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 285)) & 103582791479755915) != 0) || _la == sv2017::INCR
 
     || _la == sv2017::DECR) {
       setState(3920);
@@ -36023,12 +36032,12 @@ sv2017::Named_parameter_assignmentContext* sv2017::named_parameter_assignment() 
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 9152472229085182) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 89)) & 3659380855668739) != 0 || (((_la - 157) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 157)) & 1735645076635254787) != 0 || (((_la - 221) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 221)) & -18014260441380221) != 0 || (((_la - 285) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 285)) & 103582791446201483) != 0 || _la == sv2017::INCR
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 9152472229085182) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 89)) & 3659380855668739) != 0) || ((((_la - 157) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 157)) & 1735645076635254787) != 0) || ((((_la - 221) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 221)) & -18014260441380221) != 0) || ((((_la - 285) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 285)) & 103582791446201483) != 0) || _la == sv2017::INCR
 
     || _la == sv2017::DECR) {
       setState(3966);
@@ -37127,12 +37136,12 @@ sv2017::PrimaryContext* sv2017::primary(int precedence) {
           _errHandler->sync(this);
 
           _la = _input->LA(1);
-          if (((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 275)) & -4611685949807382529) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 339)) & 6149) != 0) {
+          if ((((_la & ~ 0x3fULL) == 0) &&
+            ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 275)) & -4611685949807382529) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 339)) & 6149) != 0)) {
             setState(4056);
             list_of_arguments();
           }
@@ -38452,12 +38461,12 @@ sv2017::ConcatenationContext* sv2017::concatenation() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 339)) & 6149) != 0) {
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 339)) & 6149) != 0)) {
       setState(4301);
       expression(0);
       setState(4309);
@@ -39574,8 +39583,8 @@ sv2017::Array_range_expressionContext* sv2017::array_range_expression() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 312) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 312)) & 100663297) != 0) {
+    if (((((_la - 312) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 312)) & 100663297) != 0)) {
       setState(4401);
       _errHandler->sync(this);
 
@@ -40917,11 +40926,11 @@ sv2017::Assignment_pattern_expressionContext* sv2017::assignment_pattern_express
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 4398046578688) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 125)) & 72057602627899395) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & 6597741387785) != 0 || (((_la - 283) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 283)) & 7) != 0) {
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 4398046578688) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 125)) & 72057602627899395) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & 6597741387785) != 0) || ((((_la - 283) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 283)) & 7) != 0)) {
       setState(4552);
       assignment_pattern_expression_type();
     }
@@ -41232,11 +41241,11 @@ sv2017::Variable_lvalueContext* sv2017::variable_lvalue() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 4398046578688) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 125)) & 72057602627899395) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 203)) & 6597741387785) != 0 || (((_la - 283) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 283)) & 7) != 0) {
+      if ((((_la & ~ 0x3fULL) == 0) &&
+        ((1ULL << _la) & 4398046578688) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 125)) & 72057602627899395) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 203)) & 6597741387785) != 0) || ((((_la - 283) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 283)) & 7) != 0)) {
         setState(4576);
         assignment_pattern_expression_type();
       }
@@ -42083,13 +42092,13 @@ sv2017::Constraint_setContext* sv2017::constraint_set() {
       setState(4648);
       _errHandler->sync(this);
       _la = _input->LA(1);
-      while (((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 65)) & 3458799732552368129) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 137)) & 1565704561098765) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 203)) & 182519635403097) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 339)) & 6149) != 0) {
+      while ((((_la & ~ 0x3fULL) == 0) &&
+        ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 65)) & 3458799732552368129) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 137)) & 1565704561098765) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 203)) & 182519635403097) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 339)) & 6149) != 0)) {
         setState(4645);
         constraint_expression();
         setState(4650);
@@ -42294,12 +42303,12 @@ sv2017::Randomize_callContext* sv2017::randomize_call() {
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 275)) & -4611685949807382529) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 339)) & 6149) != 0) {
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 275)) & -4611685949807382529) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 339)) & 6149) != 0)) {
           setState(4672);
           list_of_arguments();
         }
@@ -42311,13 +42320,13 @@ sv2017::Randomize_callContext* sv2017::randomize_call() {
       setState(4682);
       _errHandler->sync(this);
       _la = _input->LA(1);
-      while (((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 65)) & 3458799732552368129) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 137)) & 1565704561098765) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 203)) & 182519635403609) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 339)) & 6149) != 0) {
+      while ((((_la & ~ 0x3fULL) == 0) &&
+        ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 65)) & 3458799732552368129) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 137)) & 1565704561098765) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 203)) & 182519635403609) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 339)) & 6149) != 0)) {
         setState(4679);
         constraint_block_item();
         setState(4684);
@@ -42642,12 +42651,12 @@ sv2017::Module_declarationContext* sv2017::module_declaration() {
         setState(4730);
         _errHandler->sync(this);
         _la = _input->LA(1);
-        while (((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & -4147938792956557274) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 89)) & -3810290529264500013) != 0 || (((_la - 154) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 154)) & -524089209987217801) != 0 || (((_la - 221) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 221)) & -4603661592918230257) != 0 || (((_la - 285) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 285)) & 45) != 0) {
+        while ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & -4147938792956557274) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 89)) & -3810290529264500013) != 0) || ((((_la - 154) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 154)) & -524089209987217801) != 0) || ((((_la - 221) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 221)) & -4603661592918230257) != 0) || ((((_la - 285) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 285)) & 45) != 0)) {
           setState(4727);
           module_item();
           setState(4732);
@@ -44314,9 +44323,9 @@ sv2017::Pulse_control_specparamContext* sv2017::pulse_control_specparam() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(4852);
       specify_input_terminal_descriptor();
       setState(4853);
@@ -48511,11 +48520,11 @@ sv2017::Parameter_port_listContext* sv2017::parameter_port_list() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 145272973887488) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 89)) & 4222330809090051) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & -8357801298350833631) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 222)) & -2305842940448078591) != 0) {
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 145272973887488) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 89)) & 4222330809090051) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & -8357801298350833631) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 222)) & -2305842940448078591) != 0)) {
       setState(5190);
       _errHandler->sync(this);
       switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 618, _ctx)) {
@@ -48852,9 +48861,9 @@ sv2017::List_of_port_declarationsContext* sv2017::list_of_port_declarations() {
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 245)) & 142661633703937) != 0 || _la == sv2017::DOT) {
+        if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 245)) & 142661633703937) != 0) || _la == sv2017::DOT) {
           setState(5223);
           nonansi_port();
         }
@@ -48876,9 +48885,9 @@ sv2017::List_of_port_declarationsContext* sv2017::list_of_port_declarations() {
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 245)) & 142661633703937) != 0 || _la == sv2017::DOT) {
+        if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 245)) & 142661633703937) != 0) || _la == sv2017::DOT) {
           setState(5232);
           nonansi_port();
         }
@@ -49254,9 +49263,9 @@ sv2017::Nonansi_portContext* sv2017::nonansi_port() {
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 245)) & 142661633703937) != 0) {
+        if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 245)) & 142661633703937) != 0)) {
           setState(5290);
           nonansi_port__expr();
         }
@@ -49669,8 +49678,8 @@ sv2017::Ansi_port_declarationContext* sv2017::ansi_port_declaration() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 121) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 121)) & 549755813891) != 0 || _la == sv2017::KW_REF) {
+      if (((((_la - 121) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 121)) & 549755813891) != 0) || _la == sv2017::KW_REF) {
         setState(5339);
         port_direction();
       }
@@ -49684,12 +49693,12 @@ sv2017::Ansi_port_declarationContext* sv2017::ansi_port_declaration() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 339)) & 6149) != 0) {
+      if ((((_la & ~ 0x3fULL) == 0) &&
+        ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 339)) & 6149) != 0)) {
         setState(5345);
         expression(0);
       }
@@ -50014,9 +50023,9 @@ sv2017::Dolar_setup_timing_checkContext* sv2017::dolar_setup_timing_check() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(5374);
         notifier();
       }
@@ -50146,9 +50155,9 @@ sv2017::Dolar_hold_timing_checkContext* sv2017::dolar_hold_timing_check() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(5390);
         notifier();
       }
@@ -50302,9 +50311,9 @@ sv2017::Dolar_setuphold_timing_checkContext* sv2017::dolar_setuphold_timing_chec
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(5408);
         notifier();
       }
@@ -50319,12 +50328,12 @@ sv2017::Dolar_setuphold_timing_checkContext* sv2017::dolar_setuphold_timing_chec
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 339)) & 6149) != 0) {
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 339)) & 6149) != 0)) {
           setState(5412);
           timestamp_condition();
         }
@@ -50339,12 +50348,12 @@ sv2017::Dolar_setuphold_timing_checkContext* sv2017::dolar_setuphold_timing_chec
           _errHandler->sync(this);
 
           _la = _input->LA(1);
-          if (((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 339)) & 6149) != 0) {
+          if ((((_la & ~ 0x3fULL) == 0) &&
+            ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 339)) & 6149) != 0)) {
             setState(5416);
             timecheck_condition();
           }
@@ -50359,9 +50368,9 @@ sv2017::Dolar_setuphold_timing_checkContext* sv2017::dolar_setuphold_timing_chec
             _errHandler->sync(this);
 
             _la = _input->LA(1);
-            if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-              ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-              ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+            if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+              ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+              ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
               setState(5420);
               delayed_reference();
             }
@@ -50376,9 +50385,9 @@ sv2017::Dolar_setuphold_timing_checkContext* sv2017::dolar_setuphold_timing_chec
               _errHandler->sync(this);
 
               _la = _input->LA(1);
-              if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-                ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-                ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+              if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+                ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+                ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
                 setState(5424);
                 delayed_reference();
               }
@@ -50512,9 +50521,9 @@ sv2017::Dolar_recovery_timing_checkContext* sv2017::dolar_recovery_timing_check(
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(5448);
         notifier();
       }
@@ -50644,9 +50653,9 @@ sv2017::Dolar_removal_timing_checkContext* sv2017::dolar_removal_timing_check() 
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(5464);
         notifier();
       }
@@ -50800,9 +50809,9 @@ sv2017::Dolar_recrem_timing_checkContext* sv2017::dolar_recrem_timing_check() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(5482);
         notifier();
       }
@@ -50817,12 +50826,12 @@ sv2017::Dolar_recrem_timing_checkContext* sv2017::dolar_recrem_timing_check() {
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 339)) & 6149) != 0) {
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 339)) & 6149) != 0)) {
           setState(5486);
           timestamp_condition();
         }
@@ -50837,12 +50846,12 @@ sv2017::Dolar_recrem_timing_checkContext* sv2017::dolar_recrem_timing_check() {
           _errHandler->sync(this);
 
           _la = _input->LA(1);
-          if (((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 339)) & 6149) != 0) {
+          if ((((_la & ~ 0x3fULL) == 0) &&
+            ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 339)) & 6149) != 0)) {
             setState(5490);
             timecheck_condition();
           }
@@ -50857,9 +50866,9 @@ sv2017::Dolar_recrem_timing_checkContext* sv2017::dolar_recrem_timing_check() {
             _errHandler->sync(this);
 
             _la = _input->LA(1);
-            if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-              ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-              ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+            if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+              ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+              ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
               setState(5494);
               delayed_reference();
             }
@@ -50874,9 +50883,9 @@ sv2017::Dolar_recrem_timing_checkContext* sv2017::dolar_recrem_timing_check() {
               _errHandler->sync(this);
 
               _la = _input->LA(1);
-              if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-                ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-                ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+              if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+                ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+                ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
                 setState(5498);
                 delayed_reference();
               }
@@ -51010,9 +51019,9 @@ sv2017::Dolar_skew_timing_checkContext* sv2017::dolar_skew_timing_check() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(5522);
         notifier();
       }
@@ -51150,9 +51159,9 @@ sv2017::Dolar_timeskew_timing_checkContext* sv2017::dolar_timeskew_timing_check(
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(5538);
         notifier();
       }
@@ -51167,12 +51176,12 @@ sv2017::Dolar_timeskew_timing_checkContext* sv2017::dolar_timeskew_timing_check(
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 339)) & 6149) != 0) {
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 339)) & 6149) != 0)) {
           setState(5542);
           event_based_flag();
         }
@@ -51187,12 +51196,12 @@ sv2017::Dolar_timeskew_timing_checkContext* sv2017::dolar_timeskew_timing_check(
           _errHandler->sync(this);
 
           _la = _input->LA(1);
-          if (((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 339)) & 6149) != 0) {
+          if ((((_la & ~ 0x3fULL) == 0) &&
+            ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 339)) & 6149) != 0)) {
             setState(5546);
             remain_active_flag();
           }
@@ -51340,9 +51349,9 @@ sv2017::Dolar_fullskew_timing_checkContext* sv2017::dolar_fullskew_timing_check(
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(5568);
         notifier();
       }
@@ -51357,12 +51366,12 @@ sv2017::Dolar_fullskew_timing_checkContext* sv2017::dolar_fullskew_timing_check(
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 339)) & 6149) != 0) {
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 339)) & 6149) != 0)) {
           setState(5572);
           event_based_flag();
         }
@@ -51377,12 +51386,12 @@ sv2017::Dolar_fullskew_timing_checkContext* sv2017::dolar_fullskew_timing_check(
           _errHandler->sync(this);
 
           _la = _input->LA(1);
-          if (((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 339)) & 6149) != 0) {
+          if ((((_la & ~ 0x3fULL) == 0) &&
+            ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 339)) & 6149) != 0)) {
             setState(5576);
             remain_active_flag();
           }
@@ -51506,9 +51515,9 @@ sv2017::Dolar_period_timing_checkContext* sv2017::dolar_period_timing_check() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(5594);
         notifier();
       }
@@ -51638,9 +51647,9 @@ sv2017::Dolar_width_timing_checkContext* sv2017::dolar_width_timing_check() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(5610);
         notifier();
       }
@@ -51778,9 +51787,9 @@ sv2017::Dolar_nochange_timing_checkContext* sv2017::dolar_nochange_timing_check(
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(5628);
         notifier();
       }
@@ -53920,13 +53929,13 @@ sv2017::Task_and_function_declaration_commonContext* sv2017::task_and_function_d
     setState(5794);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2531089384066252798) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 65)) & 3458799964614819845) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 137)) & 69163680510509069) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & -8718715990243254183) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & 34750463) != 0 || (((_la - 348) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 348)) & 106511) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 2531089384066252798) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 65)) & 3458799964614819845) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 137)) & 69163680510509069) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & -8718715990243254183) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & 34750463) != 0) || ((((_la - 348) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 348)) & 106511) != 0)) {
       setState(5791);
       statement_or_null();
       setState(5796);
@@ -54299,13 +54308,13 @@ sv2017::Constraint_blockContext* sv2017::constraint_block() {
     setState(5824);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 65)) & 3458799732552368129) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 137)) & 1565704561098765) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & 182519635403609) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 339)) & 6149) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 65)) & 3458799732552368129) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 137)) & 1565704561098765) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & 182519635403609) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 339)) & 6149) != 0)) {
       setState(5821);
       constraint_block_item();
       setState(5826);
@@ -54745,11 +54754,11 @@ sv2017::Checker_declarationContext* sv2017::checker_declaration() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 145272973887488) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 89)) & 3659389445603331) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & -8355408761048791035) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 222)) & -2305842938032159487) != 0 || _la == sv2017::LPAREN
+      if ((((_la & ~ 0x3fULL) == 0) &&
+        ((1ULL << _la) & 145272973887488) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 89)) & 3659389445603331) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & -8355408761048791035) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 222)) & -2305842938032159487) != 0) || _la == sv2017::LPAREN
 
       || _la == sv2017::LSQUARE_BR) {
         setState(5865);
@@ -54763,12 +54772,12 @@ sv2017::Checker_declarationContext* sv2017::checker_declaration() {
     setState(5881);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 5054600230012651558) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 89)) & 580155319949689475) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & -8211293564381951999) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 222)) & -2305842922982996735) != 0 || (((_la - 287) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 287)) & 11) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 5054600230012651558) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 89)) & 580155319949689475) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & -8211293564381951999) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 222)) & -2305842922982996735) != 0) || ((((_la - 287) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 287)) & 11) != 0)) {
       setState(5875);
       _errHandler->sync(this);
       _la = _input->LA(1);
@@ -54996,12 +55005,12 @@ sv2017::Class_declarationContext* sv2017::class_declaration() {
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 275)) & -4611685949807382529) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 339)) & 6149) != 0) {
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 275)) & -4611685949807382529) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 339)) & 6149) != 0)) {
           setState(5904);
           list_of_arguments();
         }
@@ -55036,12 +55045,12 @@ sv2017::Class_declarationContext* sv2017::class_declaration() {
     setState(5927);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 315960198990727168) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 89)) & 580683083380981827) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & -8211434310457618399) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 222)) & -2305842922982996607) != 0 || (((_la - 287) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 287)) & 11) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 315960198990727168) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 89)) & 580683083380981827) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & -8211434310457618399) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 222)) & -2305842922982996607) != 0) || ((((_la - 287) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 287)) & 11) != 0)) {
       setState(5924);
       class_item();
       setState(5929);
@@ -55369,9 +55378,9 @@ sv2017::Interface_class_declarationContext* sv2017::interface_class_declaration(
     setState(5964);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while ((((_la - 138) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 138)) & 549789368321) != 0 || (((_la - 246) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 246)) & 6597069766657) != 0) {
+    while (((((_la - 138) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 138)) & 549789368321) != 0) || ((((_la - 246) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 246)) & 6597069766657) != 0)) {
       setState(5961);
       interface_class_item();
       setState(5966);
@@ -55769,12 +55778,12 @@ sv2017::Package_declarationContext* sv2017::package_declaration() {
     setState(6017);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 316241673967437824) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 89)) & 580719092386791443) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & -8211293572972934111) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 222)) & -2305208496179700345) != 0 || (((_la - 287) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 287)) & 11) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 316241673967437824) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 89)) & 580719092386791443) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & -8211293572972934111) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 222)) & -2305208496179700345) != 0) || ((((_la - 287) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 287)) & 11) != 0)) {
       setState(6011);
       _errHandler->sync(this);
       _la = _input->LA(1);
@@ -56296,12 +56305,12 @@ sv2017::Program_declarationContext* sv2017::program_declaration() {
         setState(6075);
         _errHandler->sync(this);
         _la = _input->LA(1);
-        while (((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 5073177578349725734) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 89)) & 580719107421733523) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 158)) & -8211293564114565083) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 222)) & -2305208496179700345) != 0 || (((_la - 287) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 287)) & 11) != 0) {
+        while ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 5073177578349725734) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 89)) & 580719107421733523) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 158)) & -8211293564114565083) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 222)) & -2305208496179700345) != 0) || ((((_la - 287) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 287)) & 11) != 0)) {
           setState(6072);
           program_item();
           setState(6077);
@@ -57109,8 +57118,8 @@ sv2017::Anonymous_programContext* sv2017::anonymous_program() {
 
     || _la == sv2017::KW_COVERGROUP || _la == sv2017::KW_FUNCTION
 
-    || _la == sv2017::KW_INTERFACE || (((_la - 229) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 229)) & 288230376688582657) != 0) {
+    || _la == sv2017::KW_INTERFACE || ((((_la - 229) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 229)) & 288230376688582657) != 0)) {
       setState(6157);
       anonymous_program_item();
       setState(6162);
@@ -57380,11 +57389,11 @@ sv2017::Sequence_declarationContext* sv2017::sequence_declaration() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 145272973887488) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 89)) & 3659380855668739) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & -8355408761048793087) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 222)) & -2305842938032159487) != 0 || _la == sv2017::LPAREN
+      if ((((_la & ~ 0x3fULL) == 0) &&
+        ((1ULL << _la) & 145272973887488) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 89)) & 3659380855668739) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & -8355408761048793087) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 222)) & -2305842938032159487) != 0) || _la == sv2017::LPAREN
 
       || _la == sv2017::LSQUARE_BR) {
         setState(6177);
@@ -57643,8 +57652,8 @@ sv2017::Sequence_port_itemContext* sv2017::sequence_port_item() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 121) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 121)) & 549755813891) != 0) {
+      if (((((_la - 121) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 121)) & 549755813891) != 0)) {
         setState(6215);
         sequence_lvar_port_direction();
       }
@@ -57813,11 +57822,11 @@ sv2017::Property_declarationContext* sv2017::property_declaration() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 145272973887488) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 89)) & 3659380855668739) != 0 || (((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & -8355408761048791039) != 0 || (((_la - 222) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 222)) & -2305842938032159487) != 0 || _la == sv2017::LPAREN
+      if ((((_la & ~ 0x3fULL) == 0) &&
+        ((1ULL << _la) & 145272973887488) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 89)) & 3659380855668739) != 0) || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & -8355408761048791039) != 0) || ((((_la - 222) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 222)) & -2305842938032159487) != 0) || _la == sv2017::LPAREN
 
       || _la == sv2017::LSQUARE_BR) {
         setState(6237);
@@ -58779,9 +58788,9 @@ sv2017::Class_constructor_declarationContext* sv2017::class_constructor_declarat
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == sv2017::KW_DOLAR_UNIT || (((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    if (_la == sv2017::KW_DOLAR_UNIT || ((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(6343);
       class_scope();
     }
@@ -58835,12 +58844,12 @@ sv2017::Class_constructor_declarationContext* sv2017::class_constructor_declarat
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 275)) & -4611685949807382529) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 339)) & 6149) != 0) {
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 275)) & -4611685949807382529) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 339)) & 6149) != 0)) {
           setState(6364);
           list_of_arguments();
         }
@@ -58858,13 +58867,13 @@ sv2017::Class_constructor_declarationContext* sv2017::class_constructor_declarat
     setState(6376);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2531089384066252798) != 0 || (((_la - 65) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 65)) & 3458799964614819845) != 0 || (((_la - 137) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 137)) & 69163680510509069) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & -8718715990243254183) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & 34750463) != 0 || (((_la - 348) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 348)) & 106511) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 2531089384066252798) != 0) || ((((_la - 65) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 65)) & 3458799964614819845) != 0) || ((((_la - 137) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 137)) & 69163680510509069) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & -8718715990243254183) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & 34750463) != 0) || ((((_la - 348) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 348)) & 106511) != 0)) {
       setState(6373);
       statement_or_null();
       setState(6378);
@@ -59190,8 +59199,8 @@ sv2017::Class_methodContext* sv2017::class_method() {
       setState(6423);
       _errHandler->sync(this);
       _la = _input->LA(1);
-      while ((((_la - 137) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 137)) & 1108101562369) != 0 || _la == sv2017::KW_STATIC
+      while (((((_la - 137) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 137)) & 1108101562369) != 0) || _la == sv2017::KW_STATIC
 
       || _la == sv2017::KW_VIRTUAL) {
         setState(6420);
@@ -59228,8 +59237,8 @@ sv2017::Class_methodContext* sv2017::class_method() {
       setState(6435);
       _errHandler->sync(this);
       _la = _input->LA(1);
-      while ((((_la - 137) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 137)) & 1108101562369) != 0 || _la == sv2017::KW_STATIC
+      while (((((_la - 137) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 137)) & 1108101562369) != 0) || _la == sv2017::KW_STATIC
 
       || _la == sv2017::KW_VIRTUAL) {
         setState(6432);
@@ -60251,9 +60260,9 @@ sv2017::Enable_gate_or_mos_switch_or_cmos_switch_instanceContext* sv2017::enable
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(6582);
       name_of_instance();
     }
@@ -60373,9 +60382,9 @@ sv2017::N_input_gate_instanceContext* sv2017::n_input_gate_instance() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(6597);
       name_of_instance();
     }
@@ -60490,9 +60499,9 @@ sv2017::N_output_gate_instanceContext* sv2017::n_output_gate_instance() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(6610);
       name_of_instance();
     }
@@ -60604,9 +60613,9 @@ sv2017::Pass_switch_instanceContext* sv2017::pass_switch_instance() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(6626);
       name_of_instance();
     }
@@ -60712,9 +60721,9 @@ sv2017::Pass_enable_switch_instanceContext* sv2017::pass_enable_switch_instance(
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(6635);
       name_of_instance();
     }
@@ -60808,9 +60817,9 @@ sv2017::Pull_gate_instanceContext* sv2017::pull_gate_instance() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(6646);
       name_of_instance();
     }
@@ -61417,9 +61426,9 @@ sv2017::Udp_instantiationContext* sv2017::udp_instantiation() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(6694);
         name_of_instance();
       }
@@ -61433,9 +61442,9 @@ sv2017::Udp_instantiationContext* sv2017::udp_instantiation() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-        ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+      if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+        ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
         setState(6698);
         name_of_instance();
       }
@@ -61529,9 +61538,9 @@ sv2017::Udp_instanceContext* sv2017::udp_instance() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(6713);
       name_of_instance();
     }
@@ -62036,12 +62045,12 @@ sv2017::Ordered_port_connectionContext* sv2017::ordered_port_connection() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 339)) & 6149) != 0) {
+    if ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 339)) & 6149) != 0)) {
       setState(6771);
       expression(0);
     }
@@ -62198,12 +62207,12 @@ sv2017::Named_port_connectionContext* sv2017::named_port_connection() {
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-          ((1ULL << (_la - 339)) & 6149) != 0) {
+        if ((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+          ((1ULL << (_la - 339)) & 6149) != 0)) {
           setState(6792);
           port_expression_connection();
         }
@@ -62375,12 +62384,12 @@ sv2017::Port_concatenation_connectionContext* sv2017::port_concatenation_connect
     setState(6809);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 339)) & 6149) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 339)) & 6149) != 0)) {
       setState(6803);
       expression(0);
       setState(6805);
@@ -63001,9 +63010,9 @@ sv2017::Design_statementContext* sv2017::design_statement() {
     setState(6877);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while ((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    while (((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(6872);
       _errHandler->sync(this);
 
@@ -63479,9 +63488,9 @@ sv2017::Liblist_clauseContext* sv2017::liblist_clause() {
     setState(6919);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while ((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    while (((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(6916);
       identifier();
       setState(6921);
@@ -63843,10 +63852,10 @@ sv2017::Specify_blockContext* sv2017::specify_block() {
     setState(6967);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 325592) != 0 || (((_la - 110) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 110)) & 8796093022213) != 0 || (((_la - 175) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 175)) & 558345748483) != 0 || _la == sv2017::LPAREN) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 325592) != 0) || ((((_la - 110) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 110)) & 8796093022213) != 0) || ((((_la - 175) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 175)) & 558345748483) != 0) || _la == sv2017::LPAREN) {
       setState(6964);
       specify_item();
       setState(6969);
@@ -63932,12 +63941,12 @@ sv2017::Generate_regionContext* sv2017::generate_region() {
     setState(6976);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & -4147938784366622682) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 89)) & -3886851735814700333) != 0 || (((_la - 154) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 154)) & -2253471471175694793) != 0 || (((_la - 221) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 221)) & -4603661592918242545) != 0 || (((_la - 285) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 285)) & 45) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & -4147938784366622682) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 89)) & -3886851735814700333) != 0) || ((((_la - 154) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 154)) & -2253471471175694793) != 0) || ((((_la - 221) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 221)) & -4603661592918242545) != 0) || ((((_la - 285) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 285)) & 45) != 0)) {
       setState(6973);
       generate_item();
       setState(6978);
@@ -64632,12 +64641,12 @@ sv2017::Case_generate_constructContext* sv2017::case_generate_construct() {
       setState(7033); 
       _errHandler->sync(this);
       _la = _input->LA(1);
-    } while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 4620697753168117758) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 275)) & -4611686001346990081) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 339)) & 6149) != 0);
+    } while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 4620697753168117758) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 275)) & -4611686001346990081) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 339)) & 6149) != 0));
     setState(7035);
     match(sv2017::KW_ENDCASE);
    
@@ -64931,9 +64940,9 @@ sv2017::Generate_begin_end_blockContext* sv2017::generate_begin_end_block() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if ((((_la - 158) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 158)) & 288265560532189185) != 0 || (((_la - 245) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 245)) & 1924145348609) != 0) {
+    if (((((_la - 158) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 158)) & 288265560532189185) != 0) || ((((_la - 245) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 245)) & 1924145348609) != 0)) {
       setState(7055);
       identifier();
       setState(7056);
@@ -64965,12 +64974,12 @@ sv2017::Generate_begin_end_blockContext* sv2017::generate_begin_end_block() {
     setState(7069);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & -4147938784366622682) != 0 || (((_la - 89) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 89)) & -3886851735814700333) != 0 || (((_la - 154) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 154)) & -2253471471175694793) != 0 || (((_la - 221) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 221)) & -4603661592918242545) != 0 || (((_la - 285) & ~ 0x3fULL) == 0) &&
-      ((1ULL << (_la - 285)) & 45) != 0) {
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & -4147938784366622682) != 0) || ((((_la - 89) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 89)) & -3886851735814700333) != 0) || ((((_la - 154) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 154)) & -2253471471175694793) != 0) || ((((_la - 221) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 221)) & -4603661592918242545) != 0) || ((((_la - 285) & ~ 0x3fULL) == 0) &&
+      ((1ULL << (_la - 285)) & 45) != 0)) {
       setState(7066);
       generate_item();
       setState(7071);
@@ -66099,12 +66108,12 @@ sv2017::Elaboration_system_taskContext* sv2017::elaboration_system_task() {
             _errHandler->sync(this);
 
             _la = _input->LA(1);
-            if (((_la & ~ 0x3fULL) == 0) &&
-              ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-              ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-              ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-              ((1ULL << (_la - 275)) & -4611685949807382529) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-              ((1ULL << (_la - 339)) & 6149) != 0) {
+            if ((((_la & ~ 0x3fULL) == 0) &&
+              ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+              ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+              ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+              ((1ULL << (_la - 275)) & -4611685949807382529) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+              ((1ULL << (_la - 339)) & 6149) != 0)) {
               setState(7148);
               list_of_arguments();
             }
@@ -66120,8 +66129,8 @@ sv2017::Elaboration_system_taskContext* sv2017::elaboration_system_task() {
       case sv2017::KW_DOLAR_WARNING: {
         setState(7156);
         _la = _input->LA(1);
-        if (!(((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 131106) != 0)) {
+        if (!((((_la & ~ 0x3fULL) == 0) &&
+          ((1ULL << _la) & 131106) != 0))) {
         _errHandler->recoverInline(this);
         }
         else {
@@ -66139,12 +66148,12 @@ sv2017::Elaboration_system_taskContext* sv2017::elaboration_system_task() {
           _errHandler->sync(this);
 
           _la = _input->LA(1);
-          if (((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 9011734740729854) != 0 || (((_la - 125) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 125)) & 6413125882260541443) != 0 || (((_la - 203) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 203)) & 147335263314009) != 0 || (((_la - 275) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 275)) & -4611685949807382529) != 0 || (((_la - 339) & ~ 0x3fULL) == 0) &&
-            ((1ULL << (_la - 339)) & 6149) != 0) {
+          if ((((_la & ~ 0x3fULL) == 0) &&
+            ((1ULL << _la) & 9011734740729854) != 0) || ((((_la - 125) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 125)) & 6413125882260541443) != 0) || ((((_la - 203) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 203)) & 147335263314009) != 0) || ((((_la - 275) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 275)) & -4611685949807382529) != 0) || ((((_la - 339) & ~ 0x3fULL) == 0) &&
+            ((1ULL << (_la - 339)) & 6149) != 0)) {
             setState(7158);
             list_of_arguments();
           }
@@ -66900,5 +66909,9 @@ bool sv2017::generate_begin_end_blockSempred(Generate_begin_end_blockContext *_l
 }
 
 void sv2017::initialize() {
+#if ANTLR4_USE_THREAD_LOCAL_CACHE
+  sv2017ParserInitialize();
+#else
   ::antlr4::internal::call_once(sv2017ParserOnceFlag, sv2017ParserInitialize);
+#endif
 }

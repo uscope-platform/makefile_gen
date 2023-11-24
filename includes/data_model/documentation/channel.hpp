@@ -17,7 +17,7 @@
 #define MAKEFILEGEN_V2_CHANNEL_HPP
 
 #include <string>
-
+#include <cstdint>
 
 class channel {
 public:

@@ -50,8 +50,7 @@ add_executable(tests ${MAKEFILEGEN_TESTS} ${MAKEFILE_GEN_SRCS})
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
-# Link runTests with what we want to test and the GTest and pthread library
-target_link_libraries(tests PRIVATE ${GTEST_LIBRARIES} pthread mgp_sv_lib mgp_vh_lib cereal OpenSSL::SSL)
+target_link_libraries(tests PRIVATE ${GTEST_LIBRARIES} pthread mgp_sv_lib mgp_vh_lib cereal OpenSSL::SSL gtest::gtest)
 set(CHECK_FILES_DIR ${CMAKE_CURRENT_BINARY_DIR}/check_files)
 file(MAKE_DIRECTORY ${CHECK_FILES_DIR})
 
