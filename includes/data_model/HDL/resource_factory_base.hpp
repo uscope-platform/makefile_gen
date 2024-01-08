@@ -33,7 +33,7 @@ protected:
     void pop_resource();
     std::stack<T> resource_stack;
 
-    bool valid_resource;
+    bool valid_resource = false;
 };
 
 
