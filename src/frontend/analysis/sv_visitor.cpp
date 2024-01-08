@@ -55,7 +55,13 @@ void sv_visitor::enterModule_or_interface_or_program_or_udp_instantiation(sv2017
 
 
 void sv_visitor::exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) {
-    modules_factory.add_instance(deps_factory.get_dependency());
+    if(loops_factory.in_loop()){
+        auto dep = deps_factory.get_dependency();
+         loops_factory.add_instance(dep);
+    } else {
+        modules_factory.add_instance(deps_factory.get_dependency());
+    }
+
 }
 
 
@@ -206,6 +212,18 @@ void sv_visitor::exitUnary_operator(sv2017::Unary_operatorContext *ctx) {
         if(params_factory.is_component_relevant()){
             params_factory.add_component(Expression_component(ctx->getText()));
         }
+    }
+}
+
+void sv_visitor::exitOperator_cmp(sv2017::Operator_cmpContext *ctx) {
+    if(params_factory.is_component_relevant()){
+        params_factory.add_component(Expression_component(ctx->getText()));
+    }
+}
+
+void sv_visitor::exitOperator_eq_neq(sv2017::Operator_eq_neqContext *ctx) {
+    if(params_factory.is_component_relevant()){
+        params_factory.add_component(Expression_component(ctx->getText()));
     }
 }
 
@@ -496,6 +514,42 @@ void sv_visitor::exitData_type_or_implicit(sv2017::Data_type_or_implicitContext 
     } else{
         params_factory.clear_expression();
     }
+}
+
+void sv_visitor::enterLoop_generate_construct(sv2017::Loop_generate_constructContext *) {
+    loops_factory.new_loop();
+}
+
+void sv_visitor::exitLoop_generate_construct(sv2017::Loop_generate_constructContext *) {
+    auto inst = loops_factory.get_instances();
+    for(auto &i:loops_factory.get_instances()){
+        modules_factory.add_instance(i);
+    }
+}
+
+void sv_visitor::enterGenvar_initialization(sv2017::Genvar_initializationContext *ctx) {
+    std::string id = ctx->identifier()->getText();
+    params_factory.start_param_assignment();
+    params_factory.new_parameter();
+    params_factory.set_parmeter_name(id);
+}
+
+void sv_visitor::exitGenvar_initialization(sv2017::Genvar_initializationContext *ctx) {
+    auto param = params_factory.get_parameter();
+    params_factory.stop_param_assignment();
+    loops_factory.set_identifier(param);
+}
+
+void sv_visitor::enterGenvar_expression(sv2017::Genvar_expressionContext *ctx) {
+    params_factory.start_param_assignment();
+    params_factory.new_parameter();
+    params_factory.set_parmeter_name("genvar_expr");
+}
+
+void sv_visitor::exitGenvar_expression(sv2017::Genvar_expressionContext *ctx) {
+    auto param = params_factory.get_parameter();
+    auto ex = param->get_expression_components();
+    loops_factory.add_expression (ex);
 }
 
 

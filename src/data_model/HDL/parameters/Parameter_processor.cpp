@@ -233,8 +233,18 @@ int64_t Parameter_processor::evaluate_binary_expression(int64_t op_a, int64_t op
         return op_a % op_b;
     } else if(operation ==  "<<"){
         return op_a << op_b;
-    } else if(operation ==  ">>"){
-        return op_a >> op_b;
+    } else if(operation ==  ">"){
+        return op_a > op_b;
+    } else if(operation ==  ">="){
+        return op_a >= op_b;
+    } else if(operation ==  "<"){
+        return op_a < op_b;
+    } else if(operation ==  "<="){
+        return op_a <= op_b;
+    } else if(operation ==  "=="){
+        return op_a == op_b;
+    } else if(operation ==  "!="){
+        return op_a != op_b;
     } else{
         throw std::runtime_error("Error: Attempted evaluation of an unsupported binary expression expression " + operation);
     }

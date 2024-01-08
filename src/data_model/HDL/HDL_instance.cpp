@@ -22,6 +22,7 @@ HDL_instance::HDL_instance(const HDL_instance &c) {
     type = c.type;
     name = c.name;
     groups = c.groups;
+    loop_specs = c.loop_specs;
 }
 
 
@@ -48,6 +49,7 @@ bool operator==(const HDL_instance &lhs, const HDL_instance &rhs) {
     ret &= lhs.ports_map == rhs.ports_map;
     ret &= lhs.parameters == rhs.parameters;
     ret &= lhs.groups == rhs.groups;
+    ret &= lhs.loop_specs == rhs.loop_specs;
 
     return ret;
 }
@@ -70,5 +72,13 @@ nlohmann::json HDL_instance::dump() {
     }
     ret["parameters"] = params_vect;
 
+    return ret;
+}
+
+bool operator==(const generate_loop& lhs, const generate_loop& rhs) {
+    bool ret = true;
+    ret &= *lhs.init == *rhs.init;
+    ret &= lhs.end_c == rhs.end_c;
+    ret &= lhs.iter == rhs.iter;
     return ret;
 }

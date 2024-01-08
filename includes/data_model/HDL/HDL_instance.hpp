@@ -32,6 +32,15 @@
 #include <cereal/types/array.hpp>
 #include <cereal/types/memory.hpp>
 
+
+struct generate_loop {
+    std::shared_ptr<HDL_parameter> init;
+    Expression end_c;
+    Expression iter;
+};
+
+bool operator==(const generate_loop& lhs, const generate_loop& rhs);
+
 //FORWARD DECLARATIONS
 class HDL_Resource;
 
@@ -61,6 +70,9 @@ public:
     dependency_class get_dependency_class() const {return dep_class;};
     void set_dependency_class(dependency_class dc){dep_class = dc;};
 
+    void add_loop(const generate_loop &l) {loop_specs.push_back(l);};
+    generate_loop get_inner_loop() {return loop_specs[0];};
+    unsigned int get_n_loops() {return loop_specs.size();};
 
     void set_channel_groups(const std::vector<channel_group> &g){groups = g;};
     std::vector<channel_group> get_channel_groups(){ return groups;};
@@ -81,6 +93,7 @@ protected:
     dependency_class dep_class;
     std::string type;
     std::string name;
+    std::vector<generate_loop> loop_specs;
 
     std::vector<channel_group> groups;
 };

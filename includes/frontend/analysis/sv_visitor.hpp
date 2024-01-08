@@ -23,6 +23,7 @@
 #include "data_model/HDL/HDL_modules_factory.hpp"
 #include "data_model/HDL/HDL_interfaces_factory.hpp"
 #include "data_model/HDL/HDL_instances_factory.hpp"
+#include "data_model/HDL/HDL_loops_factory.h"
 
 #include "data_model/HDL/HDL_instance.hpp"
 #include "data_model/HDL/HDL_Resource.hpp"
@@ -70,6 +71,8 @@ public:
     void exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx) override;
     void exitOperator_shift(sv2017::Operator_shiftContext *ctx) override;
     void exitUnary_operator(sv2017::Unary_operatorContext *ctx) override;
+    void exitOperator_cmp(sv2017::Operator_cmpContext *ctx) override;
+    void exitOperator_eq_neq(sv2017::Operator_eq_neqContext *ctx) override;
 
     void exitPrimaryLit(sv2017::PrimaryLitContext *ctx) override;
     void exitPrimaryPath(sv2017::PrimaryPathContext *ctx) override;
@@ -132,6 +135,16 @@ public:
     void enterLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) override { in_param_declaration = true;};
     void exitLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) override { in_param_declaration = false;};
 
+    void enterLoop_generate_construct(sv2017::Loop_generate_constructContext *ctx) override;
+    void exitLoop_generate_construct(sv2017::Loop_generate_constructContext *ctx) override;
+
+    void enterGenvar_initialization(sv2017::Genvar_initializationContext *ctx) override;
+    void exitGenvar_initialization(sv2017::Genvar_initializationContext *ctx) override;
+
+    void enterGenvar_expression(sv2017::Genvar_expressionContext *ctx) override;
+    void exitGenvar_expression(sv2017::Genvar_expressionContext *ctx) override;
+
+
 private:
 
     bool in_param_declaration = false;
@@ -147,6 +160,7 @@ private:
     HDL_interfaces_factory interfaces_factory;
     HDL_instances_factory deps_factory;
     HDL_parameters_factory params_factory;
+    HDL_loops_factory loops_factory;
 
     std::string package_prefix;
     std::string package_item;

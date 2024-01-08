@@ -106,7 +106,7 @@ private:
 
 
     std::set<std::string> operators_set = {
-            "!", "~", "*", "/", "%","+","-","<<",">>"
+            "!", "~", "*", "/", "%","+","-","<<",">>", ">", ">=", "<", "<=", "==", "!="
     };
 
     std::set<std::string> functions_set = {
@@ -128,23 +128,35 @@ private:
             {"-", binary_operator},
             {"<<", binary_operator},
             {">>", binary_operator},
+            {">", binary_operator},
+            {">=", binary_operator},
+            {"<", binary_operator},
+            {"<=", binary_operator},
+            {"==",  binary_operator},
+            {"!=", binary_operator}
     };
 
 
     std::unordered_map<std::string, int64_t> operators_precedence = {
             {"$clog2", 0},
-            {"$ceil", 0},
+            {"$ceil",  0},
             {"$floor", 0},
-            {"$pow", 0},
-            {"!", 1},
-            {"~", 1},
-            {"*", 2},
-            {"/", 2},
-            {"%", 2},
-            {"+", 3},
-            {"-", 3},
-            {"<<", 4},
-            {">>", 4},
+            {"$pow",   0},
+            {"!",      1},
+            {"~",      1},
+            {"*",      2},
+            {"/",      2},
+            {"%",      2},
+            {"+",      3},
+            {"-",      3},
+            {"<<",     4},
+            {">>",     4},
+            {">",      5},
+            {">=",     5},
+            {"<",      5},
+            {"<=",     5},
+            {"==",     5},
+            {"!=",     5}
     };
 
     std::set<std::string> right_associative_set = {

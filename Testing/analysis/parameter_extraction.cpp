@@ -1084,7 +1084,55 @@ TEST(parameter_extraction, interface_parameters) {
     ASSERT_EQ(check_params, parameters);
 }
 
+
+TEST(parameter_extraction, generate_for) {
+    std::string test_pattern = R"(
+    module test_mod #(
+        N_REPETITION = 2
+    )();
+
+        parameter [31:0] ARRAY_PARAM [1:0] = '{10, 440};
+
+        genvar n;
+
+        generate
+            for(n = 0; n<N_REPETITIONS; n=n+1)begin
+                dependency #(
+                    .DEP_PARAM(ARRAY_PARAM[n])
+                ) dep();
+            end
+        endgenerate
+
+    endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    auto dep = resource.get_dependencies()[0];
+
+    ASSERT_EQ(dep.get_n_loops(), 1);
+
+    auto loop = dep.get_inner_loop();
+
+    generate_loop check_loop;
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_name("n");
+    p->set_type(expression_parameter);
+    p->add_component(Expression_component("0"));
+
+    check_loop.init = p;
+    check_loop.end_c = {Expression_component("n"), Expression_component("<"), Expression_component("N_REPETITIONS")};
+    check_loop.iter = {Expression_component("n"), Expression_component("+"), Expression_component("1")};
+
+    ASSERT_EQ(loop, check_loop);
+}
+
 /**
+
+
 TEST(parameter_extraction, param_ternary_conditional) {
     std::string test_pattern = R"(
         module test_mod #(

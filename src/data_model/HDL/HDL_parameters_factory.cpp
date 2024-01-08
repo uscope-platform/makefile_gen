@@ -42,7 +42,7 @@ void HDL_parameters_factory::add_component(const Expression_component &c) {
 
 void HDL_parameters_factory::start_initialization_list() {
     in_initialization_list = true;
-    expression_level--; // This is needed because in the grammar there is an expressionb before the list initialization;
+    expression_level--; // This is needed because in the grammar there is an expression before the list initialization;
 }
 
 
@@ -222,5 +222,3 @@ void HDL_parameters_factory::clear_expression() {
 void HDL_parameters_factory::start_ternary_operator() {
     //in_ternary_operator = true;
 }
-
-
