@@ -18,6 +18,7 @@ module SicDriveMasterCurrentControl (
     input wire reset
 );
 
+    localparam PROCESSOR_BASE_ADDRESS = 'h83c00000;
 
     fCore processor (
         .clock(clock),
@@ -31,7 +32,9 @@ endmodule
             "name": "current_controller",
             "type": "processor_instance",
             "target": "processor",
-            "address": "0x83c00000",
+            "address": {
+                "parameter":"PROCESSOR_BASE_ADDRESS"
+            },
             "parent": "SicDriveMasterCurrentControl",
             "dma_io": [
                 {

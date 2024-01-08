@@ -82,6 +82,6 @@ TEST( app_def_generation , generate_app_def) {
     app_def_gen.construct_application("test_app");
 
     auto res = app_def_gen.get_definition_string();
-    std::string check_string = "{\"application_name\":\"test_app\",\"bitstream\":\"\",\"channel_groups\":[],\"channels\":[],\"clock_frequency\":100000000,\"initial_registers_values\":[],\"macro\":[],\"n_enables\":0,\"parameters\":[],\"peripherals\":[{\"base_address\":\"0x0\",\"name\":\"TL\",\"peripheral_id\":\"TL\",\"proxied\":false,\"proxy_address\":\"0\",\"spec_id\":\"PID\"}],\"soft_cores\":[],\"timebase_address\":\"\"}";
+    std::string check_string = R"({"application_name":"test_app","bitstream":"","channel_groups":[],"channels":[],"clock_frequency":100000000,"filters":[],"initial_registers_values":[],"macro":[],"n_enables":0,"parameters":[],"peripherals":[{"base_address":"0x0","hdl_parameters":[],"name":"TL","peripheral_id":"TL","proxied":false,"proxy_address":"0","spec_id":"PID"}],"programs":[],"scripts":[],"soft_cores":[],"timebase_address":""})";
     ASSERT_EQ(res, check_string);
 }

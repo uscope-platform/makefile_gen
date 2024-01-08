@@ -111,7 +111,7 @@ TEST( documentation_analyzer , processor_doc) {
     processor_instance check_doc;
     check_doc.set_name("current_controller");
     check_doc.set_target("processor");
-    check_doc.set_address("0x83c00000");
+    check_doc.set_address("PROCESSOR_BASE_ADDRESS");
     io a;
     a.name = "Current";
     a.type = input;
