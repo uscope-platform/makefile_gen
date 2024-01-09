@@ -103,7 +103,8 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
     }
 
     if(components.empty()){
-        throw std::runtime_error("PARAMETER PROCESSING ERROR:\n Empty parameter");
+        std::string error_s = "PARAMETER PROCESSING ERROR: Encountered Empty parameter (" + par->get_name() + ")";
+        throw std::runtime_error(error_s);
     }
 
 

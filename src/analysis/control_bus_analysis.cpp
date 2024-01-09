@@ -73,21 +73,24 @@ std::vector<analysis_context> control_bus_analysis::process_simple_interconnect(
     auto masters_ifs = ic->get_ports()[specs_manager.get_interconnect_source_port(ic->get_type())];
     std::reverse(masters_ifs.begin(), masters_ifs.end());
 
-    for(int i = 0; i<masters_ifs.size(); i++){
+    auto masters = expand_bus_array(masters_ifs, ic->get_parent(), addresses);
 
+    for(int i = 0; i<masters.size(); i++){
         for(auto &dep:inst.node->get_parent()->get_dependencies()){
-            bool check = dep->get_name() == "core_c_0";
             for(auto &port:dep->get_ports()){
                 if(port.second.size()==1){
-                    if(port.second.front() == masters_ifs[i]){
-                        analysis_context ctx = {dep, port.first, addresses[i] , false,
+                    if(port.second.front() == masters[i].name){
+                        analysis_context ctx = {dep, port.first, masters[i].address , false,
                                                 inst.current_module_top, inst.proxy};
                         ret_val.push_back(ctx);
+                        if(masters[i].in_array) goto break2;
                     }
                 }
 
             }
         }
+        break2:
+        continue;
     }
     return ret_val;
 }
@@ -204,5 +207,41 @@ void control_bus_analysis::process_leaf_node(const analysis_context &leaf) {
     }
     leaf.node->set_proxy_specs(leaf.proxy);
     std::cout<< "Found module : " + leaf_parent->get_name() + " of type: " + leaf_parent->get_type() + " at address: " << std::hex << leaf.address << "\n";
+}
+
+std::vector<bus_context>
+control_bus_analysis::expand_bus_array( const std::vector<std::string> &s, const std::shared_ptr<HDL_instance_AST> &parent,
+                                        const std::vector<int64_t> &a ) {
+    std::vector<bus_context> ret;
+    int address_idx = 0;
+    for(auto  &m: s){
+        for(auto &dep:parent->get_dependencies()){
+            if(m == dep->get_name()){
+                auto q = dep->get_array_quantifier();
+
+                if(q != nullptr){
+                    for(int i = 0; i<q->get_numeric_value(); i++){
+                        bus_context b;
+                        b.address = a[address_idx];
+                        address_idx++;
+                        b.name = m;
+                        b.in_array = true;
+                        b.idx = i;
+                        ret.push_back(b);
+                    }
+
+                } else{
+                    bus_context b;
+                    b.address = a[address_idx];
+                    address_idx++;
+                    b.name = m;
+                    b.in_array = false;
+                    b.idx = 0;
+                    ret.push_back(b);
+                }
+            }
+        }
+    }
+    return ret;
 }
 

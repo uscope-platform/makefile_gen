@@ -115,7 +115,11 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
         ret_inst->add_parameters(new_params);
         ret_inst->set_parent(parent);
 
-        ret_inst->add_array_quantifier(i.get_array_quantifier());
+        if(i.get_array_quantifier()!= nullptr){
+            Parameter_processor p3(parent->get_parameters(), d_store);
+            auto new_quantifier = p3.process_parameter(i.get_array_quantifier(), res);
+            ret_inst->add_array_quantifier(new_quantifier);
+        }
         ret_inst->set_processors(processors);
 
         if (log_structure) {

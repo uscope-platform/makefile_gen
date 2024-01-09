@@ -33,6 +33,12 @@ typedef struct {
     proxy_target proxy;
 }analysis_context;
 
+struct bus_context{
+    std::string name;
+    int64_t address;
+    int idx;
+    bool in_array;
+};
 
 
 class control_bus_analysis {
@@ -48,7 +54,11 @@ private:
     std::vector<analysis_context> process_nested_module(const analysis_context &inst);
     void process_leaf_node(const analysis_context &inst);
     void analize_node(const std::vector<analysis_context> &c);
-
+    std::vector<bus_context> expand_bus_array(
+            const std::vector<std::string> &s,
+            const std::shared_ptr<HDL_instance_AST> &parent,
+            const std::vector<int64_t> &a
+            );
 
 
     Depfile dfile;
