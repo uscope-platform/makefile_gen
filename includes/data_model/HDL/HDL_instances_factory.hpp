@@ -32,6 +32,8 @@ public:
     void start_concat_partials_exclusion();
     void stop_concat_partials_exclusion();
 
+    void add_array_quantifier(const std::shared_ptr<HDL_parameter> &p);
+
 private:
     bool in_concat = false;
     int exclusion_level = 0;

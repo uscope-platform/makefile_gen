@@ -134,7 +134,7 @@ void HDL_parameters_factory::stop_expression_new() {
     expression_level--;
     if(expression_level == 0){
         if(!new_expression.empty()){
-            if(in_replication||in_replication_assignment) {
+            if(in_replication || in_replication_assignment) {
                 replication_components.insert(replication_components.end(), new_expression.begin(), new_expression.end());
             } else if(in_unpacked_declaration || in_packed_dimension){
                 expression_stack.push(new_expression);
@@ -187,7 +187,7 @@ void HDL_parameters_factory::start_replication() {
 }
 
 void HDL_parameters_factory::start_unpacked_dimension_declaration() {
-    if(in_param_assignment){
+    if(in_param_assignment & !in_bus_array_quantifier){
         in_unpacked_declaration = true;
     }
 }
@@ -221,4 +221,12 @@ void HDL_parameters_factory::clear_expression() {
 
 void HDL_parameters_factory::start_ternary_operator() {
     //in_ternary_operator = true;
+}
+
+void HDL_parameters_factory::start_array_quantifier() {
+    in_bus_array_quantifier = true;
+}
+
+void HDL_parameters_factory::stop_array_quantifier() {
+    in_bus_array_quantifier = false;
 }

@@ -23,6 +23,7 @@ HDL_instance::HDL_instance(const HDL_instance &c) {
     name = c.name;
     groups = c.groups;
     loop_specs = c.loop_specs;
+    array_quantifier = c.array_quantifier;
 }
 
 
@@ -50,6 +51,7 @@ bool operator==(const HDL_instance &lhs, const HDL_instance &rhs) {
     ret &= lhs.parameters == rhs.parameters;
     ret &= lhs.groups == rhs.groups;
     ret &= lhs.loop_specs == rhs.loop_specs;
+    ret &= *lhs.array_quantifier == *rhs.array_quantifier;
 
     return ret;
 }

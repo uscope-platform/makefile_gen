@@ -69,7 +69,7 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
     ){
         return {};
     }
-
+    bool stop = type == "hil_base_logic";
     if(i.get_dependency_class() == module || i.get_dependency_class() == interface ) {
 
         if (!d_store->contains_hdl_entity(type)) {
@@ -115,6 +115,7 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
         ret_inst->add_parameters(new_params);
         ret_inst->set_parent(parent);
 
+        ret_inst->add_array_quantifier(i.get_array_quantifier());
         ret_inst->set_processors(processors);
 
         if (log_structure) {
@@ -125,8 +126,8 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
         for(auto &dep: res.get_dependencies()){
             if(dep.get_dependency_class() != package  && dep.get_dependency_class() != memory_init){
                 HDL_instance_AST d = dep;
-
-                if(i.get_n_loops()>1){
+                auto dbg = d.get_name();
+                bool do_break = dbg == "core_c";
                 if(d.get_n_loops()>1){
                     std::cout << "WARNING: Nested loops are not supported by parameter analysis\n In HDL instance: " + i.get_name() + " of type: " + type + " is in a nested loop" << std::endl;
                 } else if(d.get_n_loops() == 1){

@@ -86,9 +86,12 @@ public:
     void set_channel_groups(const std::vector<channel_group> &g){groups = g;};
     std::vector<channel_group> get_channel_groups(){ return groups;};
 
+    void add_array_quantifier(const std::shared_ptr<HDL_parameter> &p){array_quantifier = p;};
+    std::shared_ptr<HDL_parameter> get_array_quantifier() {return array_quantifier;};
+
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, type, dep_class, ports_map, parameters, groups, loop_specs);
+        ar(name, type, dep_class, ports_map, parameters, groups, loop_specs, array_quantifier);
     }
 
     virtual nlohmann::json dump();
@@ -105,6 +108,7 @@ protected:
     std::vector<generate_loop> loop_specs;
 
     std::vector<channel_group> groups;
+    std::shared_ptr<HDL_parameter> array_quantifier;
 };
 
 

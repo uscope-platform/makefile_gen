@@ -68,6 +68,9 @@ public:
     void start_packed_dimension();
     void stop_packed_dimension();
 
+    void start_array_quantifier();
+    void stop_array_quantifier();
+
     bool in_replication_assignment_context() const {return in_replication_assignment;};
     bool in_packed_context() const {return in_packed_assignment; };
     bool is_component_relevant() const { return in_initialization_list || in_expression_new || in_unpacked_declaration || in_packed_assignment ; };
@@ -90,6 +93,7 @@ private:
     bool in_concatenation = false;
     bool in_packed_dimension = false;
     bool in_replication_assignment = false;
+    bool in_bus_array_quantifier = false;
 
     std::stack<Expression> expression_stack;
 

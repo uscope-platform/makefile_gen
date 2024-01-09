@@ -25,6 +25,7 @@ HDL_instance_AST::HDL_instance_AST(const HDL_instance_AST &c) {
     type = c.type;
     name = c.name;
     loop_specs = c.loop_specs;
+    array_quantifier = c.array_quantifier;
 
     parent = c.parent;
     child_instances = c.child_instances;
@@ -48,6 +49,7 @@ bool operator==(const HDL_instance_AST &lhs, const HDL_instance_AST &rhs) {
     ret &= lhs.ports_map == rhs.ports_map;
     ret &= lhs.parameters == rhs.parameters;
     ret &= lhs.loop_specs == rhs.loop_specs;
+    ret &= *lhs.array_quantifier == *rhs.array_quantifier;
 
     //compare child class properties
     ret &= lhs.child_instances == rhs.child_instances;

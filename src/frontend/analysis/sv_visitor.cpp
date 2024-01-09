@@ -64,6 +64,21 @@ void sv_visitor::exitModule_or_interface_or_program_or_udp_instantiation(sv2017:
 
 }
 
+void sv_visitor::enterName_of_instance(sv2017::Name_of_instanceContext *ctx) {
+    if(!ctx->unpacked_dimension().empty()){
+        params_factory.start_param_assignment();
+        params_factory.new_parameter();
+        params_factory.set_parmeter_name("instance_array_qualifier");
+        params_factory.start_array_quantifier();
+    }
+}
+
+void sv_visitor::exitName_of_instance(sv2017::Name_of_instanceContext *ctx) {
+    if(!ctx->unpacked_dimension().empty()){
+        params_factory.stop_array_quantifier();
+        deps_factory.add_array_quantifier(params_factory.get_parameter());
+    }
+    }
 
 void sv_visitor::exitInterface_header(sv2017::Interface_headerContext *ctx) {
     std::string interface_name = ctx->identifier()->getText();
@@ -570,7 +585,6 @@ void sv_visitor::exitGenvar_iteration(sv2017::Genvar_iterationContext *ctx) {
        loops_factory.add_expression(e);
    }
 }
-
 
 
 

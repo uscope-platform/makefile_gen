@@ -76,6 +76,7 @@ std::vector<analysis_context> control_bus_analysis::process_simple_interconnect(
     for(int i = 0; i<masters_ifs.size(); i++){
 
         for(auto &dep:inst.node->get_parent()->get_dependencies()){
+            bool check = dep->get_name() == "core_c_0";
             for(auto &port:dep->get_ports()){
                 if(port.second.size()==1){
                     if(port.second.front() == masters_ifs[i]){

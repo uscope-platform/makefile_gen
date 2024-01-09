@@ -160,10 +160,6 @@ TEST( analysis_test , vhdl_module) {
 }
 
 
-
-
-
-
 TEST(analysis_test, port_concat_assignment) {
     std::string test_pattern = R"(
     module test_mod ();
@@ -194,5 +190,34 @@ TEST(analysis_test, port_concat_assignment) {
     check_dependency.add_port_connection("slaves", {"axi_in"});
     check_dependency.add_port_connection("masters", {"timebase_axi", "gpio_axi", "fcore_axi"});
 
+    ASSERT_EQ(dep, check_dependency);
+}
+
+
+TEST(analysis_test, interfaces_array) {
+    std::string test_pattern = R"(
+    module test_mod ();
+
+        axi_lite  cores_control[3]();
+
+    endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    auto dep = resource.get_dependencies()[0];
+
+    HDL_instance check_dependency;
+    check_dependency.set_type("axi_lite");
+    check_dependency.set_name("cores_control");
+    check_dependency.set_dependency_class(module);
+    auto array_qual = std::make_shared<HDL_parameter>();
+    array_qual->set_name("instance_array_qualifier");
+    array_qual->set_type(expression_parameter);
+    array_qual->add_component(Expression_component("3"));
+    check_dependency.add_array_quantifier(array_qual);
     ASSERT_EQ(dep, check_dependency);
 }

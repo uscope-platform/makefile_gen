@@ -148,6 +148,8 @@ public:
     void enterGenvar_iteration(sv2017::Genvar_iterationContext *ctx) override;
     void exitGenvar_iteration(sv2017::Genvar_iterationContext *ctx) override;
 
+    void enterName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
+    void exitName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
 private:
 
     bool in_param_declaration = false;

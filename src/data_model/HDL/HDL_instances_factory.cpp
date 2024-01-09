@@ -58,3 +58,7 @@ void HDL_instances_factory::start_concat_partials_exclusion() {
 void HDL_instances_factory::stop_concat_partials_exclusion() {
     exclusion_level--;
 }
+
+void HDL_instances_factory::add_array_quantifier(const std::shared_ptr<HDL_parameter> &p) {
+    current_instance.add_array_quantifier(p);
+}
