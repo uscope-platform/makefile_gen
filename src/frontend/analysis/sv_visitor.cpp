@@ -537,7 +537,7 @@ void sv_visitor::enterGenvar_initialization(sv2017::Genvar_initializationContext
 void sv_visitor::exitGenvar_initialization(sv2017::Genvar_initializationContext *ctx) {
     auto param = params_factory.get_parameter();
     params_factory.stop_param_assignment();
-    loops_factory.set_identifier(param);
+    loops_factory.set_identifier(*param);
 }
 
 void sv_visitor::enterGenvar_expression(sv2017::Genvar_expressionContext *ctx) {

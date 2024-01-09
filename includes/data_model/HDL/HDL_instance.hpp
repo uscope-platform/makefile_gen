@@ -34,9 +34,17 @@
 
 
 struct generate_loop {
-    std::shared_ptr<HDL_parameter> init;
+    HDL_parameter init;
     Expression end_c;
     Expression iter;
+
+
+    template<class Archive>
+    void serialize(Archive & archive)
+    {
+        archive( init, end_c, iter);
+    }
+
 };
 
 bool operator==(const generate_loop& lhs, const generate_loop& rhs);
@@ -52,7 +60,8 @@ public:
 
     void add_parameter(const std::string& parameter_name, const std::shared_ptr<HDL_parameter> &p);
     void add_parameters(Parameters_map &p);
-    Parameters_map get_parameters() { return parameters;};
+    Parameters_map get_parameters();
+    Parameters_map get_parameters_copy();
     bool has_parameter(const std::string &s){return parameters.contains(s);};
     std::shared_ptr<HDL_parameter> get_parameter_value(const std::string& parameter_name) {return parameters.get(parameter_name);};
 
@@ -79,7 +88,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, type, dep_class, ports_map, parameters, groups);
+        ar(name, type, dep_class, ports_map, parameters, groups, loop_specs);
     }
 
     virtual nlohmann::json dump();

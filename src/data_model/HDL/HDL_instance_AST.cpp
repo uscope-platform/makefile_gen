@@ -35,6 +35,8 @@ HDL_instance_AST::HDL_instance_AST(const HDL_instance_AST &c) {
     processors = c.processors;
     proxy_specs = c.proxy_specs;
     proxy_ast = c.proxy_ast;
+    repeated_instance = c.repeated_instance;
+    repetition_idx = c.repetition_idx;
 }
 
 bool operator==(const HDL_instance_AST &lhs, const HDL_instance_AST &rhs) {
@@ -56,6 +58,9 @@ bool operator==(const HDL_instance_AST &lhs, const HDL_instance_AST &rhs) {
     ret &= lhs.bus_address == rhs.bus_address;
     ret &= lhs.processors == rhs.processors;
     ret &= lhs.proxy_specs == rhs.proxy_specs;
+    ret &= lhs.repeated_instance == rhs.repeated_instance;
+    ret &= lhs.repetition_idx == rhs.repetition_idx;
+
     return ret;
 }
 

@@ -78,7 +78,7 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
         auto res = d_store->get_HDL_resource(type);
 
         Parameter_processor p(external_parameters, d_store);
-        auto parent_parameters = i.get_parameters();
+        auto parent_parameters = i.get_parameters_copy();
         auto instance_parameters = p.process_parameters_map(parent_parameters, res);
 
 
@@ -127,18 +127,24 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
                 HDL_instance_AST d = dep;
 
                 if(i.get_n_loops()>1){
+                if(d.get_n_loops()>1){
                     std::cout << "WARNING: Nested loops are not supported by parameter analysis\n In HDL instance: " + i.get_name() + " of type: " + type + " is in a nested loop" << std::endl;
-                } else if(i.get_n_loops() == 1){
-                    HDL_loop_solver solver(external_parameters, d_store);
-                    auto loop = i.get_inner_loop();
-                    for(auto &index:solver.solve_loop(loop, res)){
-                        int i = 0;
+                } else if(d.get_n_loops() == 1){
+                    HDL_loop_solver solver(new_params, d_store);
+                    auto loop = d.get_inner_loop();
+                    auto indices =solver.solve_loop(loop, res);
+                    for(auto index:indices){
+                        auto specialized_params = specialize_parameters(index, new_params, loop.init.get_name());
+                        auto specialized_d = specialize_instance(d, index,specialized_params, loop.init.get_name());
+                        if (auto ll_ret = recursive_build_ast(specialized_d,specialized_params, ret_inst))
+                            ret_inst->add_child(*ll_ret);
                     }
-                    //TODO: duplicate instances as needed
+                } else {
+                    if (auto ll_ret = recursive_build_ast(d,new_params, ret_inst))
+                        ret_inst->add_child(*ll_ret);
                 }
 
-                if (auto ll_ret = recursive_build_ast(d,new_params, ret_inst))
-                    ret_inst->add_child(*ll_ret);
+
             } else if(dep.get_dependency_class() == memory_init){
                 auto path = d_store->get_data_file(dep.get_type()).get_path();
                 ret_inst->add_data_dependency(path);
@@ -152,5 +158,41 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
 
 
     return ret_inst;
+}
+
+HDL_instance_AST HDL_ast_builder::specialize_instance(HDL_instance_AST &i, int64_t idx,  const Parameters_map &specialized_params, std::string idx_name) {
+    HDL_instance_AST specialized_d = i;
+    specialized_d.set_repeated(true);
+    specialized_d.set_repetition_idx(idx);
+
+    std::unordered_map<std::string, std::vector<std::string>> new_ports;
+
+    std::string accessor = "[" + idx_name + "]";
+
+    for(auto &p:specialized_d.get_ports()){
+        std::vector<std::string> port_content;
+        for(auto &conn:p.second){
+            if(conn.length()>accessor.length() && conn.compare(conn.length()-accessor.length(), accessor.length(), accessor) == 0){
+                auto base = conn.substr(0, conn.length()-accessor.length());
+                port_content.push_back(base);
+            } else {
+                port_content.push_back(conn);
+            }
+        }
+        new_ports[p.first] = port_content;
+    }
+    specialized_d.set_ports(new_ports);
+    return specialized_d;
+}
+
+Parameters_map
+HDL_ast_builder::specialize_parameters(int64_t idx, const Parameters_map &params,
+                                       std::string idx_name) {
+    Parameters_map specialized_params = params;
+    std::shared_ptr<HDL_parameter> idx_param = std::make_shared<HDL_parameter>();
+    idx_param->set_name(idx_name);
+    idx_param->set_value(idx);
+    specialized_params.insert(idx_param);
+    return specialized_params;
 }
 

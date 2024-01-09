@@ -117,6 +117,15 @@ public:
         return inner_map.end();
     };
 
+    static Parameters_map deep_copy(const Parameters_map &p){
+        Parameters_map ret;
+        for(auto &item:p){
+            HDL_parameter n_p = *item;
+            ret.insert(std::make_shared<HDL_parameter>(n_p));
+        }
+        return ret;
+    }
+
 private:
 
     std::vector<std::shared_ptr<HDL_parameter>> inner_map;

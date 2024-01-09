@@ -1118,10 +1118,10 @@ TEST(parameter_extraction, generate_for) {
 
     generate_loop check_loop;
 
-    auto p = std::make_shared<HDL_parameter>();
-    p->set_name("n");
-    p->set_type(expression_parameter);
-    p->add_component(Expression_component("0"));
+    HDL_parameter p;
+    p.set_name("n");
+    p.set_type(expression_parameter);
+    p.add_component(Expression_component("0"));
 
     check_loop.init = p;
     check_loop.end_c = {Expression_component("n"), Expression_component("<"), Expression_component("N_REPETITIONS")};
@@ -1129,6 +1129,7 @@ TEST(parameter_extraction, generate_for) {
 
     ASSERT_EQ(loop, check_loop);
 }
+
 
 /**
 

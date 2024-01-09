@@ -68,7 +68,13 @@ public:
 
     void set_proxy_ast(const std::shared_ptr<HDL_instance_AST> &p){proxy_ast = p;};
     std::shared_ptr<HDL_instance_AST> get_proxy_ast() const {return proxy_ast;}
-     nlohmann::json dump() override;
+    nlohmann::json dump() override;
+
+    void set_repeated(const bool &b){repeated_instance = b;};
+    bool get_repeated() const {return repeated_instance;};
+
+    void set_repetition_idx(int64_t b){repetition_idx = b;};
+    int64_t get_repetition_idx() const {return repetition_idx;};
 
     friend bool operator==(const HDL_instance_AST&lhs, const HDL_instance_AST&rhs);
 
@@ -90,6 +96,8 @@ private:
 
     std::shared_ptr<HDL_instance_AST> proxy_ast = nullptr;
 
+    bool repeated_instance;
+    int64_t repetition_idx;
 };
 
 

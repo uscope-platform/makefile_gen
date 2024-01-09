@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 
 #include "frontend/analysis/sv_analyzer.hpp"
+#include "analysis/HDL_ast_builder.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
@@ -1155,10 +1156,7 @@ TEST(parameter_processing, packed_array_initialization_expression_override) {
             N_TRIGGER_REGISTERS = 1,
             parameter [31:0] TRIGGER_REGISTERS_IDX [N_TRIGGER_REGISTERS-1:0] = '{N_TRIGGER_REGISTERS{0}}
         )();
-
             parameter p1_t = TRIGGER_REGISTERS_IDX[0];
-
-
         endmodule
 
         module test_mod #(
@@ -1200,5 +1198,98 @@ TEST(parameter_processing, packed_array_initialization_expression_override) {
 
     auto array_val = dependency_params.get("TRIGGER_REGISTERS_IDX")->get_array_value();
     ASSERT_EQ(array_val.get_value({0,0,0}), 5);
+
+}
+
+
+TEST(parameter_processing, simple_for_array_parameter) {
+    std::string test_pattern = R"(
+
+        module dependency #(
+            N_TRIGGER_REGISTERS = 1
+        )();
+        endmodule
+
+        module test_mod #(
+        )();
+
+            parameter  [31:0] TAP_ADDR_REG [2:0] = '{6,2,4};
+            generate
+                for(n = 0; n<3; n=n+1)begin
+                    dependency #(
+                        .N_TRIGGER_REGISTERS(TAP_ADDR_REG[n])
+                    ) d ();
+                end
+            endgenerate
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+
+    Depfile df;
+    HDL_ast_builder b(s_store, d_store, df);
+    auto ast = b.build_ast("test_mod", {});
+    auto deps = ast->get_dependencies();
+    ASSERT_EQ(deps[0]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 4);
+    ASSERT_EQ(deps[1]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 2);
+    ASSERT_EQ(deps[2]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 6);
+
+}
+
+
+TEST(parameter_processing, complex_for_array_parameter) {
+    std::string test_pattern = R"(
+
+        module dependency #(
+            N_TRIGGER_REGISTERS = 1
+        )();
+        endmodule
+
+        module test_mod #(
+        )();
+
+            parameter  [31:0] TAP_ADDR_REG [2:0] = '{6,2,4};
+
+            parameter  TEST_PARAM = 1;
+
+            generate
+                for(n = 0; n<3; n=n+1)begin
+                    dependency #(
+                        .N_TRIGGER_REGISTERS(TAP_ADDR_REG[(TEST_PARAM+1)-n])
+                    ) d ();
+                end
+            endgenerate
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+
+    Depfile df;
+    HDL_ast_builder b(s_store, d_store, df);
+    auto ast = b.build_ast("test_mod", {});
+    auto deps = ast->get_dependencies();
+    ASSERT_EQ(deps[0]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 6);
+    ASSERT_EQ(deps[1]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 2);
+    ASSERT_EQ(deps[2]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 4);
 
 }

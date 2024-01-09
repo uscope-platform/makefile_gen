@@ -36,6 +36,8 @@ class HDL_ast_builder {
         std::vector<std::shared_ptr<HDL_instance_AST>> build_ast(const std::vector<std::string>& modules,const Parameters_map &external_parameters);
 
     private:
+        Parameters_map specialize_parameters(int64_t idx, const Parameters_map &params, std::string idx_name);
+        HDL_instance_AST specialize_instance(HDL_instance_AST &i, int64_t idx, const Parameters_map &specialized_params, std::string idx_name);
         std::shared_ptr<settings_store> s_store;
         std::shared_ptr<data_store> d_store;
         bool log_structure;

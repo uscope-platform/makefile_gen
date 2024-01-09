@@ -21,10 +21,10 @@ HDL_loop_solver::HDL_loop_solver(const Parameters_map &pm, const std::shared_ptr
     d_store = ds;
 }
 
-std::vector<uint64_t> HDL_loop_solver::solve_loop(generate_loop &l, HDL_Resource &spec) {
-    std::vector<uint64_t> ret;
+std::vector<int64_t> HDL_loop_solver::solve_loop(generate_loop &l, HDL_Resource &spec) {
+    std::vector<int64_t> ret;
     Parameter_processor init_processor(parent_parameters,d_store);
-    auto loop_variable = init_processor.process_parameter(l.init, spec);
+    auto loop_variable = init_processor.process_parameter(std::make_shared<HDL_parameter>(l.init), spec);
 
     while(!is_loop_done(loop_variable, l.end_c)){
         ret.push_back(loop_variable->get_numeric_value());
@@ -47,5 +47,6 @@ int64_t HDL_loop_solver::process_expression(Expression &e, std::shared_ptr<HDL_p
     Parameters_map end_condition_map = parent_parameters;
     end_condition_map.insert(loop_var);
     Parameter_processor processor(end_condition_map,d_store);
+
     return processor.process_expression(e, nullptr);
 }

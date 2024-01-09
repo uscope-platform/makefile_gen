@@ -26,7 +26,7 @@ public:
 
     void add_instance(HDL_instance &i);
     void add_expression(const Expression &e);
-    void set_identifier(std::shared_ptr<HDL_parameter> &id) {loop_specs.init  = id;}
+    void set_identifier(HDL_parameter &id) {loop_specs.init  = id;}
 
     std::vector<HDL_instance> get_instances();
     bool in_loop(){return active;}
