@@ -17,6 +17,7 @@
 
 void HDL_loops_factory::new_loop() {
     repeated_instances.clear();
+    end_cond_valid = false;
     active = true;
 }
 

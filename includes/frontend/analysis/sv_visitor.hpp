@@ -145,6 +145,9 @@ public:
     void exitGenvar_expression(sv2017::Genvar_expressionContext *ctx) override;
 
 
+    void enterGenvar_iteration(sv2017::Genvar_iterationContext *ctx) override;
+    void exitGenvar_iteration(sv2017::Genvar_iterationContext *ctx) override;
+
 private:
 
     bool in_param_declaration = false;

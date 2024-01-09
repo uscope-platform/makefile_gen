@@ -552,6 +552,25 @@ void sv_visitor::exitGenvar_expression(sv2017::Genvar_expressionContext *ctx) {
     loops_factory.add_expression (ex);
 }
 
+void sv_visitor::enterGenvar_iteration(sv2017::Genvar_iterationContext *ctx) {
+    sv2017BaseListener::enterGenvar_iteration(ctx);
+}
+
+void sv_visitor::exitGenvar_iteration(sv2017::Genvar_iterationContext *ctx) {
+   if(ctx->inc_or_dec_operator() != nullptr) {
+
+       Expression e;
+       e.emplace_back(ctx->identifier()->getText());
+       if(ctx->inc_or_dec_operator()->INCR() != nullptr){
+           e.emplace_back("+");
+       } else if(ctx->inc_or_dec_operator()->DECR() != nullptr){
+           e.emplace_back("-");
+       }
+       e.emplace_back(1);
+       loops_factory.add_expression(e);
+   }
+}
+
 
 
 
