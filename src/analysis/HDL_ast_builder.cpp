@@ -73,7 +73,7 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
     if(i.get_dependency_class() == module || i.get_dependency_class() == interface ) {
 
         if (!d_store->contains_hdl_entity(type)) {
-            std::cerr << "ERROR:\n HDL entity :" + type + " Not found\n";
+            std::cerr << "ERROR:\n HDL entity: " + type + " Not found\n";
         }
         auto res = d_store->get_HDL_resource(type);
 
@@ -125,6 +125,18 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
         for(auto &dep: res.get_dependencies()){
             if(dep.get_dependency_class() != package  && dep.get_dependency_class() != memory_init){
                 HDL_instance_AST d = dep;
+
+                if(i.get_n_loops()>1){
+                    std::cout << "WARNING: Nested loops are not supported by parameter analysis\n In HDL instance: " + i.get_name() + " of type: " + type + " is in a nested loop" << std::endl;
+                } else if(i.get_n_loops() == 1){
+                    HDL_loop_solver solver(external_parameters, d_store);
+                    auto loop = i.get_inner_loop();
+                    for(auto &index:solver.solve_loop(loop, res)){
+                        int i = 0;
+                    }
+                    //TODO: duplicate instances as needed
+                }
+
                 if (auto ll_ret = recursive_build_ast(d,new_params, ret_inst))
                     ret_inst->add_child(*ll_ret);
             } else if(dep.get_dependency_class() == memory_init){

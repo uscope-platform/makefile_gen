@@ -27,6 +27,7 @@
 #include "data_model/HDL/HDL_instance.hpp"
 #include "data_model/HDL/HDL_instance_AST.hpp"
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
+#include "analysis/HDL_loop_solver.hpp"
 
 class HDL_ast_builder {
     public:
