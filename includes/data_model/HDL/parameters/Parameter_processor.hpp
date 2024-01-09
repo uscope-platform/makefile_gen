@@ -77,8 +77,8 @@ public:
     static int64_t evaluate_unary_expression(int64_t operand, const std::string& operation);
     void set_data_store(std::shared_ptr<data_store> &ds){d_store = ds;};
 
+    std::shared_ptr<HDL_parameter> process_parameter(const std::shared_ptr<HDL_parameter> &par, HDL_Resource &spec);
 private:
-
     std::shared_ptr<HDL_parameter> process_scalar_parameter(const std::shared_ptr<HDL_parameter> &par);
     std::shared_ptr<HDL_parameter> process_array_parameter(const std::shared_ptr<HDL_parameter> &par);
     std::shared_ptr<HDL_parameter> process_packed_parameter(const std::shared_ptr<HDL_parameter> &par);

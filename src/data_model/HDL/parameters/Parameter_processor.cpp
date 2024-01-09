@@ -45,34 +45,18 @@ Parameters_map Parameter_processor::process_parameters_map(const Parameters_map 
                     auto param = external_parameters->get(item->get_name());
                     compleated_set->insert(param);
                 } else {
-                    if(par->is_array()){
-                        auto spec_il = spec.get_parameters().get(par->get_name())->get_i_l();
-                        auto param_il = par->get_i_l();
-                        param_il.set_packed_dimensions(spec_il.get_packed_dimensions());
-                        param_il.set_unpacked_dimensions(spec_il.get_unpacked_dimensions());
-                        par->add_initialization_list(param_il);
-                        auto p =  process_array_parameter(par);
-                        compleated_set->insert(p);
-                    } else {
-                        try{
-                            auto p = process_scalar_parameter(par);
-                            compleated_set->insert(p);
-                        } catch (Parameter_processor_Exception &ex){
-                            if(!ex.unknown_parameter){
-                                auto p = item;
-                                p->set_value(ex.str_val);
-                                string_set.insert({ex.str_val, p});
-                                next_working_set.insert(item);
-                            } else{
-                                next_working_set.insert(item);
-                            }
-                        }
-                    }
+                    compleated_set->insert(process_parameter(par, spec));
                 }
             } catch (Parameter_processor_Exception &ex){
+                if(!ex.unknown_parameter){
+                    auto p = item;
+                    p->set_value(ex.str_val);
+                    string_set.insert({ex.str_val, p});
+                }
                 next_working_set.insert(item);
             }
         }
+
         for(auto &item:string_set){
             if(!next_working_set.contains(item.first)){
                 compleated_set->insert(item.second);
@@ -90,6 +74,22 @@ Parameters_map Parameter_processor::process_parameters_map(const Parameters_map 
     }
 
     return *compleated_set;
+}
+
+
+std::shared_ptr<HDL_parameter> Parameter_processor::process_parameter(const std::shared_ptr<HDL_parameter> &par, HDL_Resource &spec) {
+    std::shared_ptr<HDL_parameter> p;
+    if(par->is_array()){
+        auto spec_il = spec.get_parameters().get(par->get_name())->get_i_l();
+        auto param_il = par->get_i_l();
+        param_il.set_packed_dimensions(spec_il.get_packed_dimensions());
+        param_il.set_unpacked_dimensions(spec_il.get_unpacked_dimensions());
+        par->add_initialization_list(param_il);
+        p =  process_array_parameter(par);
+    } else {
+        p = process_scalar_parameter(par);
+    }
+    return p;
 }
 
 
