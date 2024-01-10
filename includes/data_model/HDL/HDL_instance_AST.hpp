@@ -96,8 +96,8 @@ private:
 
     std::shared_ptr<HDL_instance_AST> proxy_ast = nullptr;
 
-    bool repeated_instance;
-    int64_t repetition_idx;
+    bool repeated_instance = false;
+    int64_t repetition_idx = 0;
 };
 
 

@@ -71,6 +71,7 @@ std::vector<analysis_context> control_bus_analysis::process_simple_interconnect(
     auto ic = inst.node;
     auto addresses = ic->get_parameter_value("SLAVE_ADDR")->get_array_value().get_1d_slice({0,0});
     auto masters_ifs = ic->get_ports()[specs_manager.get_interconnect_source_port(ic->get_type())];
+
     std::reverse(masters_ifs.begin(), masters_ifs.end());
 
     auto masters = expand_bus_array(masters_ifs, ic->get_parent(), addresses);
@@ -79,7 +80,7 @@ std::vector<analysis_context> control_bus_analysis::process_simple_interconnect(
         for(auto &dep:inst.node->get_parent()->get_dependencies()){
             for(auto &port:dep->get_ports()){
                 if(port.second.size()==1){
-                    if(port.second.front() == masters[i].name){
+                    if(port.second.front() == masters[i].name && dep->get_repetition_idx() == masters[i].idx){
                         analysis_context ctx = {dep, port.first, masters[i].address , false,
                                                 inst.current_module_top, inst.proxy};
                         ret_val.push_back(ctx);

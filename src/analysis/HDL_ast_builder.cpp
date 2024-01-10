@@ -114,6 +114,8 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
         ret_inst->set_dependency_class(module);
         ret_inst->add_parameters(new_params);
         ret_inst->set_parent(parent);
+        ret_inst->set_repeated(i.get_repeated());
+        ret_inst->set_repetition_idx(i.get_repetition_idx());
 
         if(i.get_array_quantifier()!= nullptr){
             Parameter_processor p3(parent->get_parameters(), d_store);
