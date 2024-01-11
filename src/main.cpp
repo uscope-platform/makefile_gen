@@ -166,6 +166,9 @@ int main(int argc, char *argv[]){
         generator.set_script_sources(script_deps);
         generator.set_constraint_sources(constr_deps);
         generator.set_sim_tl(dep.get_sim_tl());
+        if(dep.has_board_def()){
+            generator.set_board_part(dep.get_board_def());
+        }
         generator.set_synth_tl(dep.get_synth_tl());
         std::ofstream makefile("makefile.tcl");
         generator.write_makefile(makefile);

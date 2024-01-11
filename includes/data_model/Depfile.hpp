@@ -38,6 +38,7 @@ public:
     std::string get_sim_tl();
     std::string get_bus_defining_package();
     std::string get_project_name();
+    std::string get_board_def();
     json get_bus_section();
     std::vector<std::string> get_additional_synth_modules();
     std::vector<std::string> get_additional_sim_modules();
@@ -46,6 +47,7 @@ public:
     std::vector<std::string> get_include_directories();
     std::vector<Script> get_scripts();
     bool has_mappable_bus();
+    bool has_board_def();
     bool is_module_excluded(const std::string &s);
     void add_excluded_module(const std::string &s);
 private:

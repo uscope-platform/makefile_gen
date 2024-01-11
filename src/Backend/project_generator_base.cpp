@@ -62,10 +62,14 @@ void project_generator_base::set_sim_sources(const std::set<std::string> &paths)
 void project_generator_base::set_synth_tl(const std::string &tl) {
     data["synth_tl"] = tl;
 }
+void project_generator_base::set_board_part(const std::string &bp) {
+    data["board_part"] = bp;
+}
 
 void project_generator_base::set_sim_tl(const std::string &tl) {
     data["tb_tl"] = tl;
 }
+
 
 void project_generator_base::set_constraint_sources(const std::unordered_set<std::string> &paths) {
     data["constraints_sources"] = paths;

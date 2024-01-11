@@ -40,6 +40,7 @@ public:
     void set_sim_sources(const std::set<std::string>& paths);
     void set_synth_tl(const std::string& tl);
     void set_sim_tl(const std::string& tl);
+    void set_board_part(const std::string & bp);
     void set_constraint_sources(const std::unordered_set<std::string>& paths);
     void set_script_sources(const std::unordered_set<std::string>& paths);
 
