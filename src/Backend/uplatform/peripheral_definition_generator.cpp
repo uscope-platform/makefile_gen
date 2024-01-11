@@ -60,6 +60,15 @@ peripheral_definition_generator::peripheral_definition_generator(std::shared_ptr
             }
         }
     }
+
+    std::vector<nlohmann::json> periph_buffer;
+    int i = 1;
+    for(auto &item:peripheral_defs){
+        item["id"] = i;
+        periph_buffer.push_back(item);
+        i++;
+    }
+    peripheral_defs = periph_buffer;
 }
 
 void peripheral_definition_generator::generate_peripheral(const HDL_Resource &res, Parameters_map &parameters, const std::string& inst_name) {
@@ -224,14 +233,9 @@ nlohmann::json peripheral_definition_generator::generate_field(field_documentati
 
 void peripheral_definition_generator::write_definition_file(const std::string &path) {
 
-    std::vector<nlohmann::json> periph_buffer;
-    int i = 1;
-    for(auto &item:peripheral_defs){
-        item["id"] = i;
-        periph_buffer.push_back(item);
-        i++;
-    }
-    std::string str = nlohmann::json(periph_buffer).dump();
+    nlohmann::json periph_obj;
+    periph_obj["peripherals"] = peripheral_defs;
+    std::string str = periph_obj.dump();
     std::ofstream ss(path);
     ss<<str;
     ss.close();

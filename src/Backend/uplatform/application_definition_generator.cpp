@@ -90,8 +90,16 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
             if(variants.contains(current_node->get_name())){
                 type = variants[current_node->get_name()];
             }
-            periph["spec_id"] = type;
-            auto spec = periph_defs[type];
+
+            nlohmann::json spec;
+            for(auto &p:periph_defs){
+                if(p["peripheral_name"] == type){
+                    spec = p;
+                }
+
+            }
+
+            periph["spec_id"] = spec["id"];
 
             if(spec["parametric"]){
                     periph["hdl_parameters"] = get_parameters(spec, current_node);
