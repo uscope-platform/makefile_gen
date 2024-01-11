@@ -158,7 +158,7 @@ void application_definition_generator::construct_application(const std::string &
 
 }
 
-std::string application_definition_generator::uint_to_hex(uint32_t i) {
+std::string application_definition_generator::uint_to_hex(uint64_t i) {
     std::ostringstream out;
     out << std::hex << i;
     return out.str();

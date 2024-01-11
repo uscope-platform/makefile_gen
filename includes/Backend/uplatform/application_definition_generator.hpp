@@ -49,7 +49,7 @@ private:
     void detect_scope(const std::string &s, std::vector<int64_t> addr);
     void deduplicate_peripheral_names();
     void denormalize_addresses();
-    static std::string uint_to_hex(uint32_t i);
+    static std::string uint_to_hex(uint64_t i);
 
     nlohmann::json application;
     std::vector<nlohmann::json> peripherals;
