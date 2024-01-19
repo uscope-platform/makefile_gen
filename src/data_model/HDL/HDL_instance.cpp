@@ -51,7 +51,15 @@ bool operator==(const HDL_instance &lhs, const HDL_instance &rhs) {
     ret &= lhs.parameters == rhs.parameters;
     ret &= lhs.groups == rhs.groups;
     ret &= lhs.loop_specs == rhs.loop_specs;
-    ret &= *lhs.array_quantifier == *rhs.array_quantifier;
+
+    if(lhs.array_quantifier != nullptr && lhs.array_quantifier != nullptr){
+        ret &= *lhs.array_quantifier == *rhs.array_quantifier;
+    } else if(lhs.array_quantifier == nullptr && lhs.array_quantifier == nullptr){
+        ret &= true;
+    } else {
+        ret = false;
+    }
+
 
     return ret;
 }

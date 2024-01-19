@@ -111,6 +111,11 @@ TEST( analysis_test , sv_module) {
     HDL_instance d2("param", "test_package", package);
     HDL_instance d1("__init_file__", "file", memory_init);
     HDL_instance d0("if_array", "axi_lite", module);
+    p = std::make_shared<HDL_parameter>();
+    p->set_name("instance_array_qualifier");
+    p->set_expression_components({Expression_component("module_parameter_2"),Expression_component("+"),Expression_component("1")});
+    p->set_type(expression_parameter);
+    d0.add_array_quantifier(p);
     std::vector<HDL_instance> deps = {d0, d1, d2, d3};
 
 
