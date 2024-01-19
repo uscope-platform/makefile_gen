@@ -19,6 +19,7 @@ project_generator_base::project_generator_base(const std::string& template_f) {
     std::string templates_dir = TEMPLATES_FOLDER;
     template_file = templates_dir + "/" + template_f;
     tpl = env.parse_template(template_file);
+    data["board_part"] = "";
 }
 
 void project_generator_base::write_makefile(std::ostream &output) {
