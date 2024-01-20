@@ -27,8 +27,21 @@ void data_acquisition_analysis::analyze(std::shared_ptr<HDL_instance_AST> &ast) 
         std::cout<<"ERROR: Multiple  sinks are not supported for data acquisition analysis";
         return;
     }
+    auto scope_address = sinks[0]->get_address()[0];
+
+     scope.mux_address = scope_address;
+
+    scope.data_length_address = scope_address + std::stoi(
+            specs_manager.get_component_spec(sinks[0]->get_type(), "data_length_offset"));
+
+    scope.buffer_address = scope_address + std::stoi(
+            specs_manager.get_component_spec(sinks[0]->get_type(), "dma_buffer_offset"));
+
+    scope.enable_address = scope_address + std::stoi(
+            specs_manager.get_component_spec(sinks[0]->get_type(), "enable_offset"));
 
     auto scope_in_pn = specs_manager.get_component_spec(sinks[0]->get_type(), "in_port");
+
     std::string data_interface;
 
     for(auto &item:sinks[0]->get_ports()){

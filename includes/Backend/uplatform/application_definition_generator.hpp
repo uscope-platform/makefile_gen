@@ -24,6 +24,7 @@
 #include "data_model/documentation/channel.hpp"
 #include "data_model/Depfile.hpp"
 #include "data_model/data_store.hpp"
+#include "data_model/scope.hpp"
 
 #include "data_model/HDL/HDL_instance_AST.hpp"
 
@@ -37,6 +38,8 @@ public:
     );
     void add_datapoints(const std::vector<channel>& dp);
     void add_channel_groups(const std::vector<channel_group> &cgs);
+    void add_scope(const scope_data &sd);
+
     void write_definition_file(const std::string &path);
     void construct_application(const std::string &name);
     std::string get_definition_string();
@@ -61,7 +64,7 @@ private:
 
     nlohmann::json periph_defs;
     std::map<std::string, std::string> alias_map;
-    uint32_t scope_address = 0;
+    scope_data scope;
 };
 
 

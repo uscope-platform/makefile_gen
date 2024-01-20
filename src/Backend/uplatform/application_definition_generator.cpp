@@ -81,7 +81,6 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
             for(auto a: current_node->get_address()){
                 periph["base_address"].push_back("0x" + uint_to_hex(a));
             }
-            detect_scope(type, current_node->get_address());
 
             periph["proxied"] = false;
             periph["proxy_address"] = std::to_string(0);
@@ -152,8 +151,11 @@ void application_definition_generator::construct_application(const std::string &
     application["filters"] = std::vector<nlohmann::json>();
     application["programs"] = std::vector<std::string>();
     application["scripts"] = std::vector<std::string>();
-    if(scope_address != 0){
-        application["scope_mux_address"] = "0x" + uint_to_hex(scope_address);
+    if(scope.mux_address != 0){
+        application["scope_mux_address"] = "0x" + uint_to_hex(scope.mux_address);
+        application["scope_buffer_address"] = "0x" + uint_to_hex(scope.buffer_address);
+        application["scope_enable_address"] = "0x" + uint_to_hex(scope.enable_address);
+        application["scope_data_length_address"] = "0x" + uint_to_hex(scope.data_length_address);
     }
 
 }
@@ -280,8 +282,6 @@ void application_definition_generator::add_channel_groups(const std::vector<chan
     application["channel_groups"] = groups_obj;
 }
 
-void application_definition_generator::detect_scope(const std::string &s, std::vector<int64_t> addr) {
-    if(s == "uScope_stream"){
-        scope_address = addr[0];
-    }
+void application_definition_generator::add_scope(const scope_data &sd) {
+    scope = sd;
 }

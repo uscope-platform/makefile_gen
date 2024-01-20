@@ -203,12 +203,14 @@ int main(int argc, char *argv[]){
             periph_def_gen.get_variant_peripherals()
             );
 
-    app_def_gen.construct_application(dep.get_project_name());
-
     data_acquisition_analysis daq_analyzer(true);
     daq_analyzer.analyze(synth_ast);
     app_def_gen.add_datapoints(daq_analyzer.get_datapoints());
     app_def_gen.add_channel_groups(daq_analyzer.get_channel_groups());
+    app_def_gen.add_scope(daq_analyzer.get_scope_data());
+
+    app_def_gen.construct_application(dep.get_project_name());
+
 
     if(opts.generate_periph_definition){
         periph_def_gen.write_definition_file(dep.get_project_name() + "_periph_def.json");

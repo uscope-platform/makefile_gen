@@ -42,6 +42,8 @@ mapper_bus_component::mapper_bus_component(const std::string &n, nlohmann::json 
     }
 
     for(auto &item:spec.items()){
+        auto k = item.key();
+        auto v = item.value();
         if(item.key() != "class"){
             component_specs[item.key()]= item.value();
         }

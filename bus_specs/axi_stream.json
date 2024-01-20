@@ -13,9 +13,21 @@
     "uScope_stream":{
       "class":"sink",
       "type": "scope",
-      "in_port":"data_in"
+      "in_port":"data_in",
+      "dma_buffer_offset": "516",
+      "enable_offset": "520",
+      "data_length_offset": "512",
+      "mux_offset": "0"
     },
-
+    "uScope_stream_dma":{
+      "class":"sink",
+      "type": "scope",
+      "in_port":"data_in",
+      "dma_buffer_offset": "520",
+      "enable_offset": "516",
+      "data_length_offset": "512",
+      "mux_offset": "0"
+    },
     "axis_remapper":{
       "class":"interconnect",
       "type": "passthrough",
