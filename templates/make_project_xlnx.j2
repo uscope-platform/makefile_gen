@@ -28,10 +28,12 @@ set constraints_sources [list {% for source in constraints_sources %}{{source}} 
 set board_part "{{board_part}}"
 
 # Create project
-create_project ${project_name} ./${project_name} -part xc7z020clg400-1
+create_project ${project_name} ./${project_name}
 
 if {$board_part ne ""} {
     set_property board_part $board_part [current_project]
+} else {
+    set_property part xc7z020clg400-1 [current_project]
 }
 
 # Set the directory path for the new project
