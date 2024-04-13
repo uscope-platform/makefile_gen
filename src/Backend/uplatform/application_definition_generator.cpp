@@ -143,19 +143,21 @@ void application_definition_generator::construct_application(const std::string &
     application["clock_frequency"] = 100000000;
     application["initial_registers_values"] = std::vector<nlohmann::json>();
     application["macro"] = std::vector<nlohmann::json>();
-    application["n_enables"] = 0;
     application["parameters"] = std::vector<nlohmann::json>();
     application["peripherals"] = peripherals;
     application["soft_cores"] = cores;
-    application["timebase_address"] = "";
     application["filters"] = std::vector<nlohmann::json>();
     application["programs"] = std::vector<std::string>();
     application["scripts"] = std::vector<std::string>();
+    application["miscellaneous"] = nlohmann::json();
+
+    application["miscellaneous"]["n_enables"] = 0;
+    application["miscellaneous"]["timebase_address"] = "";
     if(scope.mux_address != 0){
-        application["scope_mux_address"] = "0x" + uint_to_hex(scope.mux_address);
-        application["scope_buffer_address"] = "0x" + uint_to_hex(scope.buffer_address);
-        application["scope_enable_address"] = "0x" + uint_to_hex(scope.enable_address);
-        application["scope_data_length_address"] = "0x" + uint_to_hex(scope.data_length_address);
+        application["miscellaneous"]["scope_mux_address"] = "0x" + uint_to_hex(scope.mux_address);
+        application["miscellaneous"]["scope_buffer_address"] = "0x" + uint_to_hex(scope.buffer_address);
+        application["miscellaneous"]["scope_enable_address"] = "0x" + uint_to_hex(scope.enable_address);
+        application["miscellaneous"]["scope_data_length_address"] = "0x" + uint_to_hex(scope.data_length_address);
     }
 
 }
