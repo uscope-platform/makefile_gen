@@ -18,15 +18,84 @@
 project_generator_base::project_generator_base(const std::string& template_f) {
     std::string templates_dir = TEMPLATES_FOLDER;
     template_file = templates_dir + "/" + template_f;
-    tpl = env.parse_template(template_file);
     data["board_part"] = "";
 }
 
 void project_generator_base::write_makefile(std::ostream &output) {
-    std::string result = env.render(tpl, data);
-    output<<result;
-    output.flush();
+
+
+    output << "set project_name " <<  data["name"] <<std::endl;
+    output << "set origin_dir \".\""<<std::endl;
+    std::string bd = data["base_dir"];
+    output << bd << std::endl;
+
+    output << "set commons_dir [list ";
+    for(std::string str:data["commons_dir"]){
+        output << "\""<< str << "\" ";
+    }
+    output << "]"<< std::endl;
+
+    output << "set synth_sources [list ";
+    for(std::string str:data["synth_sources"]){
+        output << "\""<< str << "\" ";
+    }
+    output << "]"<< std::endl;
+
+    output << "set sim_sources [list ";
+    for(std::string str:data["sim_sources"]){
+        output << "\""<< str << "\" ";
+    }
+    output << "]"<< std::endl;
+
+    output << "set constraints_sources [list ";
+    for(std::string str:data["constraints_sources"]){
+        output << "\""<< str << "\" ";
+    }
+    output << "]"<< std::endl;
+
+    std::string board_part = data["board_part"];
+
+    if(!board_part.empty()){
+
+        output << "set board_part " << board_part << std::endl;
+        output << "# Create project\ncreate_project ${project_name} ./${project_name}\n";
+        output << "set_property board_part $board_part [current_project]\n";
+    } else {
+        output << "# Create project\ncreate_project ${project_name} ./${project_name}\n";
+        output << "set_property part xc7z020clg400-1 [current_project]\n";
+    }
+
+    output<<"# Set the directory path for the new project\nset proj_dir [get_property directory [current_project]]\n";
+    output << "set obj [current_project]\n";
+    for(std::string scr:data["scripts"]){
+        output << "source " << scr << std::endl;
+    }
+
+    output << "add_files -norecurse $synth_sources\n";
+
+    std::string tl = data["synth_tl"];
+    if(!tl.empty()){
+        output<< "set_property top " <<tl<<" [get_filesets sources_1]"<< std::endl;
+    }
+
+    output << "set_property include_dirs {$commons_dir} [get_filesets sources_1]\n";
+    output << "set_property SOURCE_SET sources_1 [get_filesets sim_1]\n";
+
+    output << "add_files -fileset sim_1 -norecurse $sim_sources\n";
+    tl = data["tb_tl"];
+    if(!tl.empty()){
+        output<< "set_property top " <<tl<<" [get_filesets sim_1]"<< std::endl;
+    }
+
+    std::unordered_set<std::string> constr = data["constraints_sources"];
+    if(!constr.empty()){
+        output << "add_files -fileset constrs_1 -norecurse  $constraints_sources\n";
+    }
+
+    output << "update_compile_order\n";
 }
+
+
 
 void project_generator_base::set_project_name(const std::string &name) {
     data["name"] = name;

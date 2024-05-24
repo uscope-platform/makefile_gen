@@ -1,3 +1,6 @@
+# This file is managed by Conan, contents will be overwritten.
+# To keep your changes, remove these comment lines, but the plugin won't be able to modify your requirements
+
 # The MIT License (MIT)
 #
 # Copyright (c) 2024 JFrog
