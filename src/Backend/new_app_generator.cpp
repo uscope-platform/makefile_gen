@@ -30,19 +30,50 @@ new_app_generator::new_app_generator(std::string &app_name, std::string &app_lan
 }
 
 void new_app_generator::write_depfile() {
+    nlohmann::json depfile;
+    depfile["general"] = nlohmann::json();
+    depfile["general"]["project_name"] = name;
+    depfile["general"]["target_part"] = "xc7z020clg400";
+    depfile["general"]["synth_modules"] = std::vector<std::string>();
+    depfile["general"]["synth_tl"] = name;
+    depfile["general"]["sim_modules"] = std::vector<std::string>();
+    depfile["general"]["sim_tl"] = name + "_tb";
+
+    depfile["general"]["include_paths"] = {"Components/Common"};
+    std::vector<nlohmann::json> scripts;
+    nlohmann::json sc;
+    sc["name"] = "set_properties.tcl";
+    sc["type"] = "tcl";
+    sc["arguments"] = std::vector<std::string>();
+    scripts.push_back(sc);
+    depfile["scripts"] = scripts;
+
+    depfile["excluded_modules"] = std::vector<std::string>();
+    std::vector<std::string> constraints = {name + ".xdc"};
+    depfile["constraints"] = constraints;
+
+    std::ofstream stream(name+"/Depfile");
+    stream<<depfile;
 
 }
 
 void new_app_generator::write_synth_hdl() {
+    std::string file_content = "`timescale 10ns / 1ns\n`include \"interfaces.svh\"\n\nmodule " + name + " (\n);\n\nendmodule";
 
+    std::ofstream stream(name+"/rtl/"+name+"."+lang);
+    stream<<file_content;
 }
 
 void new_app_generator::write_sim_hdl() {
+    std::string file_content = "`timescale 10ns / 1ns\n`include \"interfaces.svh\"\n\nmodule " + name + "_tb ();\n\n\nendmodule";
 
+    std::ofstream stream(name+"/tb/"+name+"_tb."+lang);
+    stream<<file_content;
 }
 
 
 void new_app_generator::write_constraints() {
-
+    std::ofstream ofs(name+"/"+name+".xdc");
+    ofs.close();
 }
 

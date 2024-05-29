@@ -19,6 +19,7 @@
 #include <string>
 #include <filesystem>
 #include <format>
+#include <fstream>
 #include <nlohmann/json.hpp>
 
 class new_app_generator {
