@@ -14,6 +14,7 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
+#include <fstream>
 
 #include "../includes/Backend/new_app_generator.hpp"
 
