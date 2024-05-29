@@ -18,7 +18,7 @@
 
 #include <string>
 #include <filesystem>
-#include <inja/inja.hpp>
+#include <format>
 #include <nlohmann/json.hpp>
 
 class new_app_generator {
@@ -32,7 +32,6 @@ private:
     std::string name;
     std::string lang;
 
-    inja::Environment env;
     std::string base_dir;
     nlohmann::json data;
 };

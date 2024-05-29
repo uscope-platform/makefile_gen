@@ -23,7 +23,6 @@
 #include <set>
 #include <utility>
 #include <regex>
-#include <inja/inja.hpp>
 #include <nlohmann/json.hpp>
 
 
@@ -47,8 +46,6 @@ public:
 protected:
     std::vector<std::string> process_sources_set(const std::set<std::string>& paths);
 private:
-    inja::Environment env;
-    inja::Template tpl;
     std::string base_dir;
     std::string template_file;
     json data;

@@ -30,46 +30,19 @@ new_app_generator::new_app_generator(std::string &app_name, std::string &app_lan
 }
 
 void new_app_generator::write_depfile() {
-    std::string templates_dir = TEMPLATES_FOLDER;
-    std::string template_file = templates_dir + "/Depfile.j2";
-    inja::Template tpl = env.parse_template(template_file);
 
-
-    data["app_name"] = name;
-    std::string result = env.render(tpl, data);
-
-    std::ofstream stream(name+"/Depfile");
-    stream<<result;
 }
 
 void new_app_generator::write_synth_hdl() {
-    std::string templates_dir = TEMPLATES_FOLDER;
-    std::string template_file = templates_dir + "/top_synth_" + lang + ".j2";;
 
-    inja::Template tpl = env.parse_template(template_file);
-
-    data["top_module_name"] = name;
-    std::string result = env.render(tpl, data);
-
-    std::ofstream stream(name+"/rtl/"+name+"."+lang);
-    stream<<result;
 }
 
 void new_app_generator::write_sim_hdl() {
-    std::string templates_dir = TEMPLATES_FOLDER;
-    std::string template_file = templates_dir + "/top_tb_" + lang + ".j2";;
 
-    inja::Template tpl = env.parse_template(template_file);
-
-    data["top_module_name"] = name+"_tb";
-    std::string result = env.render(tpl, data);
-    std::ofstream stream(name+"/tb/"+name+"_tb."+lang);
-    stream<<result;
 }
 
 
 void new_app_generator::write_constraints() {
-    std::ofstream ofs(name+"/"+name+".xdc");
-    ofs.close();
+
 }
 

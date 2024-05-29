@@ -21,7 +21,6 @@ find_package(antlr4-runtime CONFIG REQUIRED)
 find_package(CLI11 REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(cereal)
-find_package(inja)
 find_package(GTest REQUIRED)
 
 include_directories(includes)
