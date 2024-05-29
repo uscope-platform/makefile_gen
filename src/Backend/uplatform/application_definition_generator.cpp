@@ -140,7 +140,11 @@ void application_definition_generator::construct_application(const std::string &
     application["bitstream"] = "";
     application["channels"] = std::vector<nlohmann::json>();
     application["channel_groups"] = std::vector<nlohmann::json>();
-    application["clock_frequency"] = 100000000;
+    application["pl_clocks"] = nlohmann::json();
+    application["pl_clocks"]["0"] = 100e6;
+    application["pl_clocks"]["1"] = 100e6;
+    application["pl_clocks"]["2"] = 100e6;
+    application["pl_clocks"]["3"] = 100e6;
     application["initial_registers_values"] = std::vector<nlohmann::json>();
     application["macro"] = std::vector<nlohmann::json>();
     application["parameters"] = std::vector<nlohmann::json>();

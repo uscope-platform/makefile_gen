@@ -223,10 +223,6 @@ std::pair<md_1d_array, md_1d_array> Initialization_list::get_sized_1d_list_value
 
             } catch(array_value_exception &ex ){
                 auto v = ex.array_value.get_1d_slice({0,0});
-                for(ssize_t i; i<v.size(); i++){
-                    values.push_back(v[i]);
-                    sizes.push_back(Expression_component::calculate_binary_size(v[i]));
-                }
                 already_packed = true;
                 values.insert(values.end(), v.rbegin(), v.rend());
             }

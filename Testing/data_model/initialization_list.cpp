@@ -381,6 +381,7 @@ TEST(Initialization_list, concatenation_of_packed_arrays) {
             parameter SS_POLARITY_DEFAULT = 0,
             N_CHANNELS=3
         )();
+            localparam  N_REGISTERS = 4 + N_CHANNELS;
 
             localparam [31:0] FIXED_REGISTER_VALUES [3:0]= '{
             0,
@@ -389,8 +390,8 @@ TEST(Initialization_list, concatenation_of_packed_arrays) {
             {SS_POLARITY_DEFAULT,3'b0,SS_POLARITY_DEFAULT,5'b0,4'hE,4'b0}
             };
 
-            localparam [31:0] A_VARIABLE_INITIAL_VALUES [2:0] = '{3{2'h2}};
-            parameter [31:0] INITIAL_REGISTER_VALUES [6:0] = {A_VARIABLE_INITIAL_VALUES, FIXED_REGISTER_VALUES};
+            localparam [31:0] VARIABLE_INITIAL_VALUES [2:0] = '{3{2'h2}};
+            parameter [31:0] INITIAL_REGISTER_VALUES [N_REGISTERS-1:0] = {VARIABLE_INITIAL_VALUES, FIXED_REGISTER_VALUES};
 
         endmodule
 
