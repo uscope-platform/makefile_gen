@@ -55,6 +55,9 @@ private:
     static std::string uint_to_hex(uint64_t i);
 
     nlohmann::json application;
+    std::vector<nlohmann::json> channel_groups;
+    std::vector<nlohmann::json> channels;
+
     std::vector<nlohmann::json> peripherals;
 
     std::vector<processor_instance> cores_spec;

@@ -36,11 +36,24 @@
       "out_port":"out"
     },
 
+    "multichannel_axis_sync_repeater":{
+      "class":"interconnect",
+      "type": "passthrough",
+      "remapping": "true",
+      "in_port":"in",
+      "out_port":"out"
+    },
     "axis_duplicator": {
       "class":"interconnect",
       "type":"1To2",
       "in_port":"in",
       "out_port":"out"
+    },
+
+    "axi_stream_watching_combiner": {
+      "class":"interconnect",
+      "type":"nTo1",
+      "n_sources":"N_STREAMS"
     },
 
     "axi_stream_combiner": {
@@ -54,6 +67,14 @@
       "type": "analog",
       "n_points": "N_CHANNELS",
       "fast_data_out": "fast",
+      "filtered_data_out": ""
+    },
+
+    "sigma_delta_processor": {
+      "class": "source",
+      "type": "analog",
+      "n_points": "N_CHANNELS",
+      "fast_data_out": "data_out",
       "filtered_data_out": ""
     },
 

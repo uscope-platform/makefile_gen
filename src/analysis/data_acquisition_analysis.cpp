@@ -81,7 +81,8 @@ data_acquisition_analysis::find_sinks(std::shared_ptr<HDL_instance_AST> &ast) {
 }
 
 void data_acquisition_analysis::backtrace_scope_inputs(const std::shared_ptr<HDL_instance_AST> &node,const data_stream &intf) {
-
+    auto dbg_n= node->get_name();
+    auto dbg_t= node->get_type();
     std::shared_ptr<HDL_instance_AST> if_source;
     std::string if_port;
     for(auto &dep:node->get_dependencies()){
@@ -199,10 +200,14 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
         }
         c.set_phys_width(width);
         c.set_channel_number(0);
+
+       uint32_t addr_base = 0;
+       if(node->has_parameter("OUTPUT_DESTINATION_BASE")) addr_base = node->get_parameter_value("OUTPUT_DESTINATION_BASE")->get_numeric_value();
+
         if(in_stream.static_remap){
-            c.set_mux_setting(in_stream.address_offset);
+            c.set_mux_setting(in_stream.address_offset + addr_base);
         } else{
-            c.set_mux_setting(in_stream.address_offset + addresses[i]);
+            c.set_mux_setting(in_stream.address_offset + addresses[i] + addr_base);
         }
         c.set_enabled(false);
         data_points.push_back(c);

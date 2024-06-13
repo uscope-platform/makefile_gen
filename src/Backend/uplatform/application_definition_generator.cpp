@@ -138,8 +138,8 @@ void application_definition_generator::write_definition_file(const std::string &
 void application_definition_generator::construct_application(const std::string &name) {
     application["application_name"] = name;
     application["bitstream"] = "";
-    application["channels"] = std::vector<nlohmann::json>();
-    application["channel_groups"] = std::vector<nlohmann::json>();
+    application["channels"] = channels;
+    application["channel_groups"] = channel_groups;
     application["pl_clocks"] = nlohmann::json();
     application["pl_clocks"]["0"] = 100e6;
     application["pl_clocks"]["1"] = 100e6;
@@ -249,7 +249,6 @@ std::string application_definition_generator::get_definition_string() {
 }
 
 void application_definition_generator::add_datapoints(const std::vector<channel>& dp) {
-    std::vector<nlohmann::json> channels_vect;
     for(auto &item:dp){
         nlohmann::json obj;
         obj["name"] = item.get_name();
@@ -262,13 +261,12 @@ void application_definition_generator::add_datapoints(const std::vector<channel>
         obj["max_value"] = item.get_max();
         obj["min_value"] = item.get_min();
         obj["scaling_factor"] = item.get_scaling_factor();
-        channels_vect.push_back(obj);
+        channels.push_back(obj);
     }
-    application["channels"] = channels_vect;
 }
 
 void application_definition_generator::add_channel_groups(const std::vector<channel_group> &cgs) {
-    std::vector<nlohmann::json> groups_obj;
+
     for(auto &g:cgs){
         nlohmann::json  group;
         group["group_name"] = g.get_name();
@@ -282,10 +280,8 @@ void application_definition_generator::add_channel_groups(const std::vector<chan
             ch_v.push_back(i);
         }
         group["channels"] = ch_v;
-
-        groups_obj.push_back(group);
+        channel_groups.push_back(group);
     }
-    application["channel_groups"] = groups_obj;
 }
 
 void application_definition_generator::add_scope(const scope_data &sd) {
