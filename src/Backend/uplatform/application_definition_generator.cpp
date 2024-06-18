@@ -194,8 +194,9 @@ void application_definition_generator::deduplicate_peripheral_names() {
     for(auto &p : peripherals){
         if(duplicate_periph_count[p["name"]] != 1){
             if(deduplication_progressive.contains(p["name"])){
-                p["name"] = (std::string) p["name"] + "_" +std::to_string(deduplication_progressive[p["name"]]);
-                deduplication_progressive[p["name"]]++;
+                std::string name = p["name"];
+                p["name"] = (std::string) p["name"] + "_" +std::to_string(deduplication_progressive[name]);
+                deduplication_progressive[name]++;
                 p["peripheral_id"] = p["name"];
             } else{
                 deduplication_progressive[p["name"]] = 1;
