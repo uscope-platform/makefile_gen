@@ -82,7 +82,7 @@ std::vector<analysis_context> control_bus_analysis::process_simple_interconnect(
                 if(port.second.size()==1){
                     if(port.second.front() == masters[i].name && dep->get_repetition_idx() == masters[i].idx){
                         analysis_context ctx = {dep, port.first, masters[i].address , false,
-                                                inst.current_module_top, inst.proxy};
+                                                inst.current_module_top, inst.current_module_prefix, inst.proxy};
                         ret_val.push_back(ctx);
                         if(masters[i].in_array) goto break2;
                     }
@@ -137,7 +137,7 @@ std::vector<analysis_context> control_bus_analysis::process_parametric_interconn
         for(auto &d:node->get_dependencies()){
             if(d->get_name() == modules[i]){
                 analysis_context a = {d, interfaces[i], addresses[i], true,
-                                      inst.current_module_top, inst.proxy};
+                                      inst.current_module_top, inst.current_module_prefix, inst.proxy};
                 res.push_back(a);
             }
         }
@@ -163,7 +163,7 @@ std::vector<analysis_context> control_bus_analysis::process_nested_module(const 
                 for(auto &item:connection.second){
                     if(item == inst.interface){
                         analysis_context ctx = {dep, connection.first, inst.address,
-                                                inst.parametric, inst.current_module_top, tgt};
+                                                inst.parametric, inst.current_module_top,  inst.current_module_prefix, tgt};
                         ret_stack.push_back(ctx);
                         goto breakNested2;
                     }
@@ -178,7 +178,7 @@ std::vector<analysis_context> control_bus_analysis::process_nested_module(const 
                     auto pn = item.substr(0, item.find('[')); // TODO: This is a bodge to support array of instances, proper suppoty should be implemented
                     if(pn == inst.interface){
                         analysis_context ctx = {dep, connection.first,
-                                                inst.address, inst.parametric, inst.current_module_top, tgt};
+                                                inst.address, inst.parametric, inst.current_module_top, inst.current_module_prefix, tgt};
                         ret_stack.push_back(ctx);
                         goto breakNested;
                     }
@@ -190,8 +190,15 @@ std::vector<analysis_context> control_bus_analysis::process_nested_module(const 
 
     for(auto &item:inst.node->get_parameters()){
         if(item->get_name() == "PRAGMA_MKFG_MODULE_TOP"){
+            auto top = inst.node->get_parameter_value("PRAGMA_MKFG_MODULE_TOP")->get_string_value();
             for(auto &node:ret_stack){
-                node.current_module_top = inst.node->get_parameter_value("PRAGMA_MKFG_MODULE_TOP")->get_string_value();
+                node.current_module_top = top;
+            }
+        }
+        if(item->get_name() == "PRAGMA_MKFG_CHILD_PREFIX"){
+            auto prefix = inst.node->get_parameter_value("PRAGMA_MKFG_CHILD_PREFIX")->get_string_value();
+            for(auto &node:ret_stack){
+                node.current_module_prefix = prefix;
             }
         }
     }
@@ -205,6 +212,9 @@ void control_bus_analysis::process_leaf_node(const analysis_context &leaf) {
     leaf.node->get_parent()->add_address(leaf.address);
     if(!leaf.current_module_top.empty()){
         leaf.node->get_parent()->set_leaf_module_top(leaf.current_module_top);
+    }
+    if(!leaf.current_module_prefix.empty()){
+        leaf.node->get_parent()->set_leaf_module_prefix(leaf.current_module_prefix);
     }
     leaf.node->set_proxy_specs(leaf.proxy);
     std::cout<< "Found module : " + leaf_parent->get_name() + " of type: " + leaf_parent->get_type() + " at address: " << std::hex << leaf.address << "\n";

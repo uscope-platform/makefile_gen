@@ -30,6 +30,7 @@ typedef struct {
     int64_t address;
     bool parametric;
     std::string current_module_top;
+    std::string current_module_prefix;
     proxy_target proxy;
 }analysis_context;
 

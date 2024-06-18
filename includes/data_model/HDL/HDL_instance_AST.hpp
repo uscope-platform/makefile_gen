@@ -57,6 +57,9 @@ public:
     void set_leaf_module_top(const std::string &s){leaf_module_top = s;};
     std::string get_leaf_module_top(){return leaf_module_top;};
 
+    void set_leaf_module_prefix(const std::string &s){leaf_module_prefix = s;};
+    std::string get_leaf_module_prefix(){return leaf_module_prefix;};
+
     void set_if_specs(const std::unordered_map<std::string, std::array<std::string, 2>> &if_s){if_specs = if_s;};
     std::unordered_map<std::string, std::array<std::string, 2>> get_if_specs(){return if_specs;};
 
@@ -92,6 +95,7 @@ private:
     std::unordered_map<std::string, std::array<std::string, 2>> if_specs;
 
     std::string leaf_module_top;
+    std::string leaf_module_prefix;
     proxy_target proxy_specs;
 
     std::shared_ptr<HDL_instance_AST> proxy_ast = nullptr;

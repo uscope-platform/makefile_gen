@@ -28,6 +28,7 @@
       "data_length_offset": "512",
       "mux_offset": "0"
     },
+
     "axis_remapper":{
       "class":"interconnect",
       "type": "passthrough",
@@ -35,7 +36,6 @@
       "in_port":"in",
       "out_port":"out"
     },
-
     "multichannel_axis_sync_repeater":{
       "class":"interconnect",
       "type": "passthrough",
@@ -49,13 +49,11 @@
       "in_port":"in",
       "out_port":"out"
     },
-
     "axi_stream_watching_combiner": {
       "class":"interconnect",
       "type":"nTo1",
       "n_sources":"N_STREAMS"
     },
-
     "axi_stream_combiner": {
       "class":"interconnect",
       "type":"nTo1",
@@ -69,7 +67,6 @@
       "fast_data_out": "fast",
       "filtered_data_out": ""
     },
-
     "sigma_delta_processor": {
       "class": "source",
       "type": "analog",
@@ -83,6 +80,13 @@
       "type": "core",
       "n_points": "CHANNEL_NUMBER",
       "initial_addresses": "TARGET_ADDR",
+      "data_out": ""
+    },
+    "axis_dynamic_data_mover": {
+      "class": "source",
+      "type": "core",
+      "n_points": "MAX_CHANNELS",
+      "initial_addresses": "MKFG_DESTINATIONS",
       "data_out": ""
     }
   }

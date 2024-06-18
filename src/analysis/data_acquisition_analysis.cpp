@@ -152,10 +152,19 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
     if(log) {
         std::cout << "FOUND DATA SOURCE AT NODE: " + node->get_name() + "\n";
     }
-
-    std::string node_names = node->get_parameter_value("PRAGMA_MKFG_DATAPOINT_NAMES")->get_string_value();
+    std::string node_names;
+    if(node->has_parameter("PRAGMA_MKFG_DATAPOINT_NAMES")){
+        node_names = node->get_parameter_value("PRAGMA_MKFG_DATAPOINT_NAMES")->get_string_value();
+    } else {
+        node_names = node->get_name() + "data_out";
+    }
 
     auto n_points_params = specs_manager.get_component_spec(node->get_type(), "n_points");
+
+    if(!node->has_parameter(n_points_params)){
+        std::cerr << "WARNING: parameter named" + n_points_params + " not found on module :" + node->get_type() + "." + node->get_name() << std::endl;
+        return;
+    }
     auto n_params = node->get_parameter_value(n_points_params)->get_numeric_value();
 
     std::string port_suffix = specs_manager.get_component_spec(node->get_type(), in_stream.if_name);
@@ -164,6 +173,10 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
     std::vector<int64_t> addresses;
     if(specs_manager.has_component_spec(node->get_type(), "initial_addresses")){
         auto addr_param_name = specs_manager.get_component_spec(node->get_type(), "initial_addresses");
+        if(!node->has_parameter(addr_param_name)){
+            std::cerr << "WARNING: parameter named " + addr_param_name + " not found on module :" + node->get_type() + "." + node->get_name() << std::endl;
+            return;
+        }
         addresses = node->get_parameter_value(addr_param_name)->get_array_value().get_1d_slice({0,0});
     } else{
         for(int i =0; i<n_params; i++){

@@ -49,6 +49,7 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
                 for(auto &i:core.get_dma_io()){
                     nlohmann::json io;
                     io["name"] = i.name;
+                    io["associated_io"] = i.name;
                     io["address"] = i.address;
                     io["type"] = i.get_type();
                     io_array.push_back(io);
@@ -63,12 +64,15 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
         if(!current_node->get_address().empty()){
 
             nlohmann::json periph;
+            std::string prefix = current_node->get_leaf_module_prefix();
+            if(!prefix.empty()) prefix += "_";
+
             if(!current_node->get_leaf_module_top().empty()){
-                periph["name"] =current_node->get_leaf_module_top();
-                periph["peripheral_id"] = current_node->get_leaf_module_top();;
+                periph["name"] = prefix + current_node->get_leaf_module_top();
+                periph["peripheral_id"] = prefix + current_node->get_leaf_module_top();
             } else{
-                periph["name"] =current_node->get_name();
-                periph["peripheral_id"] = current_node->get_name();
+                periph["name"] = prefix + current_node->get_name();
+                periph["peripheral_id"] = prefix + current_node->get_name();
             }
             std::string type = current_node->get_type();
             if(alias_map.contains(type)){
@@ -105,6 +109,7 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
             } else{
                 periph["hdl_parameters"] =  std::vector<std::string>();
             }
+
             peripherals.push_back(periph);
         }
 
@@ -189,8 +194,8 @@ void application_definition_generator::deduplicate_peripheral_names() {
     for(auto &p : peripherals){
         if(duplicate_periph_count[p["name"]] != 1){
             if(deduplication_progressive.contains(p["name"])){
-                deduplication_progressive[p["name"]]++;
                 p["name"] = (std::string) p["name"] + "_" +std::to_string(deduplication_progressive[p["name"]]);
+                deduplication_progressive[p["name"]]++;
                 p["peripheral_id"] = p["name"];
             } else{
                 deduplication_progressive[p["name"]] = 1;
