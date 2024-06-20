@@ -222,7 +222,7 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
         } else{
             c.set_mux_setting(in_stream.address_offset + addresses[i] + addr_base);
         }
-        c.set_enabled(false);
+        c.set_enabled(true);
         data_points.push_back(c);
     }
 
