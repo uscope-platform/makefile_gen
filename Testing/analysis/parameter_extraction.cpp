@@ -1131,6 +1131,33 @@ TEST(parameter_extraction, generate_for) {
 }
 
 
+TEST(parameter_extraction, simple_function_parameter) {
+    std::string test_pattern = R"(
+
+
+        module test_mod #(
+        )();
+
+            parameter [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
+
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    auto param = resource.get_parameters().get("AXI_ADDRESSES");
+
+    HDL_parameter p;
+    p.set_name("AXI_ADDRESSES");
+    p.set_type(function_parameter);
+    p.add_component(Expression_component("CTRL_ADDR_CALC"));
+
+    ASSERT_EQ(p, *param);
+}
+
 /**
 
 

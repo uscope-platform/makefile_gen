@@ -446,6 +446,10 @@ void sv_visitor::exitPrimaryRepl(sv2017::PrimaryReplContext *ctx) {
     }
 }
 
+void sv_visitor::exitPrimaryCall(sv2017::PrimaryCallContext *ctx) {
+    params_factory.start_function_assignment();
+}
+
 void sv_visitor::enterConstant_param_expression(sv2017::Constant_param_expressionContext *ctx) {
     if(ctx->concatenation() != nullptr){
         params_factory.start_packed_assignment();

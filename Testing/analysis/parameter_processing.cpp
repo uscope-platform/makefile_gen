@@ -1293,3 +1293,50 @@ TEST(parameter_processing, complex_for_array_parameter) {
     ASSERT_EQ(deps[2]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 4);
 
 }
+
+
+TEST(parameter_processing, simple_function_parameter) {
+    std::string test_pattern = R"(
+
+
+        module test_mod #(
+        )();
+
+            parameter  [31:0] TAP_ADDR_REG [2:0] = '{6,2,4};
+
+            parameter ADDR_WIDTH = 32;
+            parameter N_AXI_LITE = 3;
+
+
+            typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE];
+            function ctrl_addr_init_t CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = 100;
+                CTRL_ADDR_CALC[1] = 200;
+                CTRL_ADDR_CALC[2] = 300;
+            endfunction
+
+            parameter [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
+
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+
+
+    Depfile df;
+    HDL_ast_builder b(s_store, d_store, df);
+    auto ast = b.build_ast("test_mod", {});
+    auto deps = ast->get_dependencies();
+    ASSERT_EQ(deps[0]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 6);
+    ASSERT_EQ(deps[1]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 2);
+    ASSERT_EQ(deps[2]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 4);
+
+}

@@ -31,6 +31,7 @@ set(MAKEFILEGEN_TESTS
         analysis/parameter_processing.cpp
         analysis/port_extraction.cpp
         analysis/hdl_ast_builder.cpp
+        analysis/function_processing.cpp
         Backend/Application_management_test.cpp
         Backend/Application_definition_generator.cpp
         Backend/Peripheral_definition_generator.cpp
@@ -40,7 +41,8 @@ set(MAKEFILEGEN_TESTS
         Backend/python_script_runner.cpp
         Backend/auxiliary_resolver.cpp
         Backend/project_generator.cpp
-        Backend/dependency_resolver.cpp)
+        Backend/dependency_resolver.cpp
+)
 
 
 add_executable(tests ${MAKEFILEGEN_TESTS} ${MAKEFILE_GEN_SRCS})

@@ -30,7 +30,8 @@ enum parameter_type {
     string_parameter=0,
     numeric_parameter=1,
     array_parameter = 2,
-    expression_parameter = 4
+    expression_parameter = 4,
+    function_parameter = 5
 };
 
 
@@ -40,6 +41,7 @@ constexpr std::string parameter_type_to_string(parameter_type in){
         case numeric_parameter: return "numeric_parameter";
         case array_parameter: return "array_parameter";
         case expression_parameter: return "expression_parameter";
+        case function_parameter: return "function_parameter";
         default: return "unknown parameter type";
     }
 }

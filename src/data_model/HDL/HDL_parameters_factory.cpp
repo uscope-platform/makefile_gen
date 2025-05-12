@@ -145,6 +145,10 @@ void HDL_parameters_factory::stop_expression_new() {
                 init_list.add_item(new_expression);
             } else {
                 current_resource.set_expression_components(new_expression);
+                if(in_function_assignment) {
+                    in_function_assignment = false;
+                    current_resource.set_type(function_parameter);
+                }
             }
         }
         new_expression.clear();
@@ -197,7 +201,7 @@ void HDL_parameters_factory::start_packed_dimension() {
 }
 
 void HDL_parameters_factory::stop_packed_dimension() {
-    if(in_packed_dimension){
+    if( in_packed_dimension){
         in_packed_dimension = false;
         auto second_expr = expression_stack.top();
         expression_stack.pop();
