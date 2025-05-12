@@ -153,6 +153,9 @@ public:
     void enterLoop_statement(sv2017::Loop_statementContext *ctx) override;
     void exitLoop_statement(sv2017::Loop_statementContext *ctx) override;
 
+    void exitStatement_item(sv2017::Statement_itemContext *ctx) override;
+    void exitAssignment_operator(sv2017::Assignment_operatorContext *ctx) override;
+
     void enterFor_initialization(sv2017::For_initializationContext *ctx) override;
     void exitFor_initialization(sv2017::For_initializationContext *ctx) override;
 

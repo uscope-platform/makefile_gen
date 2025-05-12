@@ -78,7 +78,28 @@ TEST(function_processing, simple_loop_function) {
     EXPECT_EQ(functions.size(), 1);
     EXPECT_TRUE(functions.contains("CTRL_ADDR_CALC"));
     auto result = functions["CTRL_ADDR_CALC"];
+
     HDL_function check_f;
+    check_f.set_name("CTRL_ADDR_CALC");
+    auto metadata = HDL_loop_metadata();
+    metadata.init.set_name("i");
+    metadata.init.add_component(Expression_component("0"));
+    metadata.init.set_type(expression_parameter);
+    metadata.end_c.emplace_back("i");
+    metadata.end_c.emplace_back("<");
+    metadata.end_c.emplace_back("N_CORES");
+
+    metadata.iter.emplace_back("i");
+    metadata.iter.emplace_back("+");
+    metadata.iter.emplace_back(1);
+    assignment a = {
+        "CTRL_ADDR_CALC",
+        {Expression_component("i")},
+        {Expression_component("100"), Expression_component("*"), Expression_component("i")}
+    };
+
+    metadata.assignments.push_back(a);
+    check_f.add_loop_metadata(metadata);
     EXPECT_EQ(check_f,result);
 }
 
@@ -87,12 +108,15 @@ TEST(function_processing, simple_loop_function) {
 TEST(function_processing, complex_loop_function) {
     std::string test_pattern = R"(
         module test_mod #(
+            N_CORES = 3
         )();
 
             function logic [31:0] CTRL_ADDR_CALC();
-                CTRL_ADDR_CALC[0] = 100;
-                CTRL_ADDR_CALC[1] = 200;
-                CTRL_ADDR_CALC[2] = 300;
+                CTRL_ADDR_CALC[0] = 44;
+                for(int i = 1; i<N_CORES+1; i++)begin
+                    CTRL_ADDR_CALC[i] = 100*i;
+                end
+                CTRL_ADDR_CALC[4] = 667;
             endfunction
         endmodule
     )";
@@ -101,4 +125,34 @@ TEST(function_processing, complex_loop_function) {
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
 
+    auto functions = resource.get_functions();
+
+    EXPECT_EQ(functions.size(), 1);
+    EXPECT_TRUE(functions.contains("CTRL_ADDR_CALC"));
+    auto result = functions["CTRL_ADDR_CALC"];
+
+    HDL_function check_f;
+    check_f.set_name("CTRL_ADDR_CALC");
+    auto metadata = HDL_loop_metadata();
+    metadata.init.set_name("i");
+    metadata.init.add_component(Expression_component("0"));
+    metadata.init.set_type(expression_parameter);
+    metadata.end_c.emplace_back("i");
+    metadata.end_c.emplace_back("<");
+    metadata.end_c.emplace_back("N_CORES");
+    metadata.end_c.emplace_back("+");
+    metadata.end_c.emplace_back("1");
+
+    metadata.iter.emplace_back("i");
+    metadata.iter.emplace_back("+");
+    metadata.iter.emplace_back(1);
+    assignment a = {
+        "CTRL_ADDR_CALC",
+        {Expression_component("i")},
+        {Expression_component("100"), Expression_component("*"), Expression_component("i")}
+    };
+
+    metadata.assignments.push_back(a);
+    check_f.add_loop_metadata(metadata);
+    EXPECT_EQ(check_f,result);
 }

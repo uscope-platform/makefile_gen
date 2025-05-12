@@ -30,7 +30,7 @@ public:
     void add_instance(HDL_instance &i);
     void add_expression(const Expression &e);
     void set_identifier(HDL_parameter &id) {loop_specs.init  = id;}
-
+    void start_assignment(const std::string &name);
     std::vector<HDL_instance> get_instances();
     HDL_loop_metadata get_loop_specs() {return loop_specs;}
     bool in_loop(){return active;}
@@ -44,7 +44,8 @@ public:
     void add_component(const Expression_component &c);
     void add_loop_variable(const std::string &p);
     void set_phase(loop_phase_t p);
-
+    void advance_expression();
+    void close_expression();
 private:
     std::vector<HDL_instance> repeated_instances;
     HDL_loop_metadata loop_specs;
@@ -52,6 +53,7 @@ private:
     Expression current_expression;
 
     loop_phase_t loop_phase = init;
+    bool expression_valid = false;
 
     bool end_cond_valid = false;
     bool active = false;

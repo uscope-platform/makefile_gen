@@ -25,5 +25,5 @@ void HDL_function::close_assignment(Expression val) {
 }
 
 bool HDL_function::operator==(const HDL_function &rhs) const {
-    return name == rhs.name && assignments == rhs.assignments;
+    return name == rhs.name && assignments == rhs.assignments && loop_metadata == rhs.loop_metadata;
 }

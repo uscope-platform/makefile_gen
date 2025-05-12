@@ -18,10 +18,31 @@
 
 #include "parameters/HDL_parameter.hpp"
 
+struct assignment {
+    friend bool operator==(const assignment &lhs, const assignment &rhs) {
+        return lhs.name == rhs.name
+               && lhs.index == rhs.index
+               && lhs.value == rhs.value;
+    }
+
+    friend bool operator!=(const assignment &lhs, const assignment &rhs) {
+        return !(lhs == rhs);
+    }
+
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(name, index, value);
+    }
+    std::string name;
+    Expression index;
+    Expression value;
+};
+
 struct HDL_loop_metadata {
     HDL_parameter init;
     Expression end_c;
     Expression iter;
+    std::vector<assignment> assignments;
 
 
     template<class Archive>
@@ -39,6 +60,7 @@ inline bool operator==(const HDL_loop_metadata &lhs, const HDL_loop_metadata &rh
     ret &= lhs.init == rhs.init;
     ret &= lhs.end_c == rhs.end_c;
     ret &= lhs.iter == rhs.iter;
+    ret &= lhs.assignments == rhs.assignments;
     return ret;
 }
 

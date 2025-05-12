@@ -31,6 +31,13 @@ void HDL_loops_factory::clear() {
 }
 
 
+void HDL_loops_factory::start_assignment(const std::string &name) {
+    if(loop_phase == body) {
+        expression_valid = true;
+        loop_specs.assignments.push_back({name, {}});
+    }
+}
+
 std::vector<HDL_instance> HDL_loops_factory::get_instances() {
     active = false;
     return repeated_instances;
@@ -62,16 +69,34 @@ void HDL_loops_factory::set_phase(loop_phase_t p) {
     }
 }
 
+void HDL_loops_factory::advance_expression() {
+    if(expression_valid) {
+        auto assignment = loop_specs.assignments.back();
+        loop_specs.assignments.back().index = current_expression;
+        current_expression.clear();
+    }
+}
+
+void HDL_loops_factory::close_expression() {
+    if(expression_valid) {
+        loop_specs.assignments.back().value = current_expression;
+        expression_valid = false;
+        current_expression.clear();
+    }
+}
+
 void HDL_loops_factory::add_expression(const Expression &e) {
     if(loop_phase == step) {
         current_expression = e;
-    }
-    if(end_cond_valid){
-        loop_specs.iter = e;
     } else {
-        loop_specs.end_c = e;
-        end_cond_valid = true;
+        if(end_cond_valid){
+            loop_specs.iter = e;
+        } else {
+            loop_specs.end_c = e;
+            end_cond_valid = true;
+        }
     }
+
 }
 
 void HDL_loops_factory::add_instance(HDL_instance &i) {

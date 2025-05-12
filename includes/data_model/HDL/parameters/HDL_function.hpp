@@ -23,29 +23,6 @@
 #include "data_model/HDL/parameters/Expression_component.hpp"
 #include "data_model/HDL/HDL_loop.hpp"
 
-typedef std::vector<Expression_component> Expression;
-
-struct assignment {
-    friend bool operator==(const assignment &lhs, const assignment &rhs) {
-        return lhs.name == rhs.name
-               && lhs.index == rhs.index
-               && lhs.value == rhs.value;
-    }
-
-    friend bool operator!=(const assignment &lhs, const assignment &rhs) {
-        return !(lhs == rhs);
-    }
-
-    template<class Archive>
-    void serialize( Archive & ar ) {
-        ar(name, index, value);
-    }
-    std::string name;
-    Expression index;
-    Expression value;
-};
-
-
 class HDL_function {
 public:
 
