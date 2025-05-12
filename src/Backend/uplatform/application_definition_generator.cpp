@@ -96,7 +96,7 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
 
             nlohmann::json spec;
             for(auto &p:periph_defs){
-                if(p["peripheral_name"] == type){
+                if(p["name"] == type){
                     spec = p;
                 }
 
@@ -141,10 +141,11 @@ void application_definition_generator::write_definition_file(const std::string &
 }
 
 void application_definition_generator::construct_application(const std::string &name) {
-    application["application_name"] = name;
+    application["application_name"] = name + "_new";
     application["bitstream"] = "";
     application["channels"] = channels;
     application["channel_groups"] = channel_groups;
+    application["clock_frequency"] = 100e6;
     application["pl_clocks"] = nlohmann::json();
     application["pl_clocks"]["0"] = 100e6;
     application["pl_clocks"]["1"] = 100e6;

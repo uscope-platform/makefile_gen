@@ -100,7 +100,7 @@ void peripheral_definition_generator::generate_peripheral(const HDL_Resource &re
         specs["registers"] = generate_simple_module_registers(mod_doc.get_registers());
     }
 
-    specs["peripheral_name"] = periph_name;
+    specs["name"] = periph_name;
     peripheral_defs[periph_name] = specs;
 
 }

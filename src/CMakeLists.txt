@@ -73,7 +73,6 @@ target_link_libraries(makefile_gen PRIVATE Threads::Threads cereal nlohmann_json
 ## INSTALLATION SECTION
 
 install(TARGETS makefile_gen DESTINATION /usr/local/bin)
-install(DIRECTORY ../templates/ DESTINATION /usr/local/etc/makefile_gen/templates)
 install(DIRECTORY ../bus_specs/ DESTINATION /usr/local/etc/makefile_gen/specs)
 
 ## PACKAGING SECTION
