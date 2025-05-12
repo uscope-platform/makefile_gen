@@ -34,6 +34,7 @@ int main(int argc, char *argv[]){
         std::string new_app_lang;
         bool measure_runtime;
         bool no_cache = false;
+        bool refresh_cache = false;
         std::string cache_dir = std::string(std::getenv("HOME")) + "/.makefilegen_store";
         bool wait_profiler = false;
     } CLI_opt;
@@ -55,8 +56,9 @@ int main(int argc, char *argv[]){
     app.add_option("--lang",opts.new_app_lang, "Specify the language for the new app");
     app.add_flag("--measure-runtime",opts.measure_runtime, "Measure the runtime of the current program invocation");
     app.add_flag("--no-cache",opts.no_cache, "Run the program without touching the repository cache");
+    app.add_flag("--refresh-cache",opts.refresh_cache, "Refresh the repository cache and exit");
     app.add_flag("--wait_profiler", opts.wait_profiler, "Wait for the profiler to be ready before executing");
-    app.add_option("--cache_dir", opts.cache_dir, "Run the program without touching the repository cache");
+    app.add_option("--cache_dir", opts.cache_dir, "Specify a non-default repository cache file");
 
     CLI11_PARSE(app, argc, argv);
 
@@ -98,6 +100,9 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
+    if(opts.refresh_cache) {
+        exit(0);
+    }
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(opts.no_cache, opts.cache_dir);
 
