@@ -19,20 +19,49 @@
 #include <vector>
 #include <cstdint>
 
-enum function_output_type {
-    function_output_string,
-    function_output_number,
-    function_output_array
+
+#include "data_model/HDL/parameters/Expression_component.hpp"
+
+typedef std::vector<Expression_component> Expression;
+
+struct assignment {
+    friend bool operator==(const assignment &lhs, const assignment &rhs) {
+        return lhs.name == rhs.name
+               && lhs.index == rhs.index
+               && lhs.value == rhs.value;
+    }
+
+    friend bool operator!=(const assignment &lhs, const assignment &rhs) {
+        return !(lhs == rhs);
+    }
+
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(name, index, value);
+    }
+    std::string name;
+    Expression index;
+    Expression value;
 };
+
 
 class HDL_function {
 public:
-    void set_name(const std::string &s) { name = s;}
 
-private:
+    void set_name(const std::string &s) { name = s;}
+    void start_assignment(const std::string &n, Expression idx);
+    void close_assignment(Expression val);
+    void add_assignment(const assignment &a){assignments.push_back(a);};
+
+    bool operator==(const HDL_function &rhs) const;
+
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(name, assignments);
+    }
     std::string name;
-    function_output_type type = function_output_number;
-    std::vector<uint32_t> output_dimensions;
+private:
+    std::vector<assignment> assignments;
 };
 
 

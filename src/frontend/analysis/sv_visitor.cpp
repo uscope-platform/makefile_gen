@@ -158,22 +158,35 @@ void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext 
 }
 
 void sv_visitor::enterExpression(sv2017::ExpressionContext *ctx) {
-    params_factory.start_expression_new();
-    if(ctx->QUESTIONMARK() != nullptr){
-        params_factory.start_ternary_operator();
+    if(in_function_declaration) {
+
+    } else {
+        params_factory.start_expression_new();
+        if(ctx->QUESTIONMARK() != nullptr){
+            params_factory.start_ternary_operator();
+        }
     }
+
 }
 
 void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
-    std::string type;
-    if(ctx->QUESTIONMARK() != nullptr){
-        type = "ternary";
+    if(in_function_declaration) {
+
+    } else {
+        std::string type;
+        if(ctx->QUESTIONMARK() != nullptr){
+            type = "ternary";
+        }
+        params_factory.stop_expression_new();
     }
-    params_factory.stop_expression_new();
+
 
 }
 
 void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
+    if(in_function_declaration) {
+        functions_factory.add_component(Expression_component(ctx->getText()));
+    }
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
@@ -207,11 +220,17 @@ void sv_visitor::exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
+    if(in_function_declaration) {
+        functions_factory.add_component(Expression_component(ctx->getText()));
+    }
 }
 
 void sv_visitor::exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *ctx) {
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
+    }
+    if(in_function_declaration) {
+        functions_factory.add_component(Expression_component(ctx->getText()));
     }
 }
 
@@ -220,12 +239,18 @@ void sv_visitor::exitOperator_shift(sv2017::Operator_shiftContext *ctx) {
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
+    if(in_function_declaration) {
+        functions_factory.add_component(Expression_component(ctx->getText()));
+    }
 }
 
 void sv_visitor::exitUnary_operator(sv2017::Unary_operatorContext *ctx) {
     if(ctx->PLUS() != nullptr || ctx->MINUS() != nullptr){
         if(params_factory.is_component_relevant()){
             params_factory.add_component(Expression_component(ctx->getText()));
+        }
+        if(in_function_declaration) {
+            functions_factory.add_component(Expression_component(ctx->getText()));
         }
     }
 }
@@ -234,11 +259,17 @@ void sv_visitor::exitOperator_cmp(sv2017::Operator_cmpContext *ctx) {
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
+    if(in_function_declaration) {
+        functions_factory.add_component(Expression_component(ctx->getText()));
+    }
 }
 
 void sv_visitor::exitOperator_eq_neq(sv2017::Operator_eq_neqContext *ctx) {
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
+    }
+    if(in_function_declaration) {
+        functions_factory.add_component(Expression_component(ctx->getText()));
     }
 }
 
@@ -528,7 +559,7 @@ void sv_visitor::enterData_type_or_implicit(sv2017::Data_type_or_implicitContext
 }
 
 void sv_visitor::exitData_type_or_implicit(sv2017::Data_type_or_implicitContext *ctx) {
-    if(in_param_declaration){
+    if(in_param_declaration) {
         params_factory.stop_packed_dimension();
     } else{
         params_factory.clear_expression();
@@ -569,6 +600,38 @@ void sv_visitor::exitGenvar_expression(sv2017::Genvar_expressionContext *ctx) {
     auto param = params_factory.get_parameter();
     auto ex = param->get_expression_components();
     loops_factory.add_expression (ex);
+}
+
+void sv_visitor::enterFunction_declaration(sv2017::Function_declarationContext *ctx) {
+    auto name = ctx->task_and_function_declaration_common()->identifier()[0]->getText();
+    in_function_declaration = true;
+    functions_factory.set_name(name);
+}
+
+void sv_visitor::exitFunction_declaration(sv2017::Function_declarationContext *ctx) {
+    in_function_declaration = false;
+    modules_factory.add_function(functions_factory.get_function());
+}
+
+
+void sv_visitor::exitBlocking_assignment(sv2017::Blocking_assignmentContext *ctx) {
+    if(in_function_declaration) {
+        functions_factory.close_assignment();
+    }
+}
+
+void sv_visitor::enterVariable_lvalue(sv2017::Variable_lvalueContext *ctx) {
+    if(in_function_declaration) {
+        functions_factory.start_assignment(
+            ctx->package_or_class_scoped_hier_id_with_select()->package_or_class_scoped_path()->getText()
+        );
+    }
+}
+
+void sv_visitor::exitVariable_lvalue(sv2017::Variable_lvalueContext *ctx) {
+    if(in_function_declaration) {
+        functions_factory.close_lvalue();
+    }
 }
 
 void sv_visitor::enterGenvar_iteration(sv2017::Genvar_iterationContext *ctx) {

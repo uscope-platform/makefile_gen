@@ -33,6 +33,7 @@
 #include <cereal/types/memory.hpp>
 
 #include "data_model/HDL/HDL_definitions.hpp"
+#include "parameters/HDL_function.hpp"
 
 class HDL_Resource {
     public:
@@ -68,15 +69,20 @@ class HDL_Resource {
 
         void add_parameter(const std::shared_ptr<HDL_parameter> &p) { parameters.insert(p);};
         void set_parameters(Parameters_map p);
-
         Parameters_map get_parameters() {return parameters;};
+
+        void add_function(const HDL_function &f) {
+            functions[f.name] = f;
+        }
+        std::unordered_map<std::string, HDL_function> get_functions() {return functions;};
+
 
         void set_documentation(module_documentation &d) {doc= d;};
         module_documentation get_documentation() const { return doc;};
 
         template<class Archive>
         void serialize( Archive & ar ) {
-            ar(name, path, hdl_type, dependencies, if_specs, parameters, ports, doc, processor_docs);
+            ar(name, path, hdl_type, dependencies, if_specs, parameters, ports, doc, processor_docs, functions);
         }
 
         bool is_empty();
@@ -94,6 +100,7 @@ private:
         std::unordered_map<std::string, std::array<std::string, 2>> if_specs;
 
         Parameters_map parameters;
+        std::unordered_map<std::string, HDL_function> functions;
 
         std::vector<processor_instance> processor_docs;
 

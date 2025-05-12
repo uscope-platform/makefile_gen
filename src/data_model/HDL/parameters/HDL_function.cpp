@@ -15,3 +15,15 @@
 
 
 #include "data_model/HDL/parameters/HDL_function.hpp"
+
+void HDL_function::start_assignment(const std::string &n, Expression idx) {
+    assignments.push_back({name, idx, {}});
+}
+
+void HDL_function::close_assignment(Expression val) {
+    assignments.back().value = val;
+}
+
+bool HDL_function::operator==(const HDL_function &rhs) const {
+    return name == rhs.name && assignments == rhs.assignments;
+}

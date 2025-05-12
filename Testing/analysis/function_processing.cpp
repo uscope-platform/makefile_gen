@@ -27,7 +27,61 @@ TEST(function_processing, simple_function) {
         module test_mod #(
         )();
 
-            function ctrl_addr_init_t CTRL_ADDR_CALC();
+            function integer CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = 100;
+                CTRL_ADDR_CALC[1] = 200;
+                CTRL_ADDR_CALC[2] = 300;
+                IGNORED_ASSIGNMENT[2] = 1;
+            endfunction
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto functions = resource.get_functions();
+
+    EXPECT_EQ(functions.size(), 1);
+    EXPECT_TRUE(functions.contains("CTRL_ADDR_CALC"));
+    auto result = functions["CTRL_ADDR_CALC"];
+    HDL_function check_f;
+    check_f.set_name("CTRL_ADDR_CALC");
+    check_f.add_assignment({"CTRL_ADDR_CALC", {Expression_component("0")}, {Expression_component("100")}});
+    check_f.add_assignment({"CTRL_ADDR_CALC", {Expression_component("1")}, {Expression_component("200")}});
+    check_f.add_assignment({"CTRL_ADDR_CALC", {Expression_component("2")}, {Expression_component("300")}});
+    EXPECT_EQ(check_f,result);
+
+}
+
+
+
+TEST(function_processing, simple_loop_function) {
+    std::string test_pattern = R"(
+        module test_mod #(
+        )();
+
+            function logic [31:0] CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = 100;
+                CTRL_ADDR_CALC[1] = 200;
+                CTRL_ADDR_CALC[2] = 300;
+            endfunction
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+}
+
+
+
+TEST(function_processing, complex_loop_function) {
+    std::string test_pattern = R"(
+        module test_mod #(
+        )();
+
+            function logic [31:0] CTRL_ADDR_CALC();
                 CTRL_ADDR_CALC[0] = 100;
                 CTRL_ADDR_CALC[1] = 200;
                 CTRL_ADDR_CALC[2] = 300;

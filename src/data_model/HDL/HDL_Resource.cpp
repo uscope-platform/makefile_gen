@@ -39,6 +39,7 @@ HDL_Resource::HDL_Resource(const HDL_Resource &c) {
     path = c.path;
     hdl_type = c.hdl_type;
     dependencies = c.dependencies;
+    functions = c.functions;
 
     parameters = c.parameters;
     doc = c.doc;
@@ -64,6 +65,7 @@ bool HDL_Resource::is_empty() {
     ret &= ports.empty();
     ret &= if_specs.empty();
     ret &= parameters.empty();
+    ret &= functions.empty();
 
     return ret;
 }
@@ -89,6 +91,7 @@ bool operator==(const HDL_Resource &lhs, const HDL_Resource &rhs) {
     ret &= lhs.ports == rhs.ports;
     ret &= lhs.if_specs == rhs.if_specs;
     ret &= lhs.parameters == rhs.parameters;
+    ret &= lhs.functions == rhs.functions;
 
     return ret;
 }

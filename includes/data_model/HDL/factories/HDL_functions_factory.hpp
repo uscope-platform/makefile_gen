@@ -22,9 +22,21 @@
 
 class HDL_functions_factory {
 public:
-    void set_name(const std::string  &s) { f.set_name(s);}
+    HDL_functions_factory() = default;
+    void set_name(const std::string  &s) {
+        f.set_name(s);
+    }
+    void start_assignment(const std::string &n) {current_assigned_variable = n;}
+    void add_component(const Expression_component &c);
+    void close_lvalue();
+    void close_assignment();
+    HDL_function get_function();
 private:
+
     HDL_function f;
+    bool ignore_assignment = false;
+    Expression new_expression;
+    std::string current_assigned_variable;
 };
 
 

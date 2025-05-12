@@ -19,11 +19,12 @@
 #include "mgp_sv/sv2017BaseListener.h"
 #include "mgp_sv/sv2017.h"
 
-#include "../../data_model/HDL/factories/HDL_parameters_factory.hpp"
-#include "../../data_model/HDL/factories/HDL_modules_factory.hpp"
-#include "../../data_model/HDL/factories/HDL_interfaces_factory.hpp"
-#include "../../data_model/HDL/factories/HDL_instances_factory.hpp"
-#include "../../data_model/HDL/factories/HDL_loops_factory.h"
+#include "data_model/HDL/factories/HDL_parameters_factory.hpp"
+#include "data_model/HDL/factories/HDL_modules_factory.hpp"
+#include "data_model/HDL/factories/HDL_interfaces_factory.hpp"
+#include "data_model/HDL/factories/HDL_instances_factory.hpp"
+#include "data_model/HDL/factories/HDL_functions_factory.hpp"
+#include "data_model/HDL/factories/HDL_loops_factory.h"
 
 #include "data_model/HDL/HDL_instance.hpp"
 #include "data_model/HDL/HDL_Resource.hpp"
@@ -146,6 +147,13 @@ public:
     void enterGenvar_expression(sv2017::Genvar_expressionContext *ctx) override;
     void exitGenvar_expression(sv2017::Genvar_expressionContext *ctx) override;
 
+    void enterFunction_declaration(sv2017::Function_declarationContext *ctx) override;
+    void exitFunction_declaration(sv2017::Function_declarationContext *ctx) override;
+
+    void exitBlocking_assignment(sv2017::Blocking_assignmentContext *ctx) override;
+
+    void enterVariable_lvalue(sv2017::Variable_lvalueContext *ctx) override;
+    void exitVariable_lvalue(sv2017::Variable_lvalueContext *ctx) override;
 
     void enterGenvar_iteration(sv2017::Genvar_iterationContext *ctx) override;
     void exitGenvar_iteration(sv2017::Genvar_iterationContext *ctx) override;
@@ -155,6 +163,7 @@ public:
 private:
 
     bool in_param_declaration = false;
+    bool in_function_declaration = false;
     std::string path;
     std::vector<HDL_Resource> entities;
 
@@ -168,6 +177,7 @@ private:
     HDL_instances_factory deps_factory;
     HDL_parameters_factory params_factory;
     HDL_loops_factory loops_factory;
+    HDL_functions_factory functions_factory;
 
     std::string package_prefix;
     std::string package_item;
