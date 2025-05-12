@@ -1,5 +1,5 @@
 
-// Generated from /home/filssavi/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.1
+// Generated from /home/filssavi/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -387,6 +387,9 @@ public:
 
   virtual void enterFor_initialization(sv2017::For_initializationContext *ctx) = 0;
   virtual void exitFor_initialization(sv2017::For_initializationContext *ctx) = 0;
+
+  virtual void enterFor_end_expression(sv2017::For_end_expressionContext *ctx) = 0;
+  virtual void exitFor_end_expression(sv2017::For_end_expressionContext *ctx) = 0;
 
   virtual void enterFor_variable_declaration_var_assign(sv2017::For_variable_declaration_var_assignContext *ctx) = 0;
   virtual void exitFor_variable_declaration_var_assign(sv2017::For_variable_declaration_var_assignContext *ctx) = 0;

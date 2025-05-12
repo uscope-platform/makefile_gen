@@ -12,7 +12,8 @@ set(MGP_SV_PARSER_LIB_INCL /
         sv2017BaseListener.h /
         sv2017BaseVisitor.h /
         sv2017Listener.h /
-        sv2017Visitor.h )
+        sv2017Visitor.h
+        ../data_model/HDL/HDL_loop.hpp)
 
 add_library(mgp_sv_lib STATIC ${MGP_SV_PARSER_LIB_SRCS} ${MGP_SV_PARSER_LIB_INCL})
 

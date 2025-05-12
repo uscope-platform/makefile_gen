@@ -1116,7 +1116,7 @@ TEST(parameter_extraction, generate_for) {
 
     auto loop = dep.get_inner_loop();
 
-    generate_loop check_loop;
+    HDL_loop_metadata check_loop;
 
     HDL_parameter p;
     p.set_name("n");

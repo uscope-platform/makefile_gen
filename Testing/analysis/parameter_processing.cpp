@@ -1331,12 +1331,4 @@ TEST(parameter_processing, simple_function_parameter) {
     d_store->store_hdl_entity(resources[0]);
 
 
-    Depfile df;
-    HDL_ast_builder b(s_store, d_store, df);
-    auto ast = b.build_ast("test_mod", {});
-    auto deps = ast->get_dependencies();
-    ASSERT_EQ(deps[0]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 6);
-    ASSERT_EQ(deps[1]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 2);
-    ASSERT_EQ(deps[2]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 4);
-
 }

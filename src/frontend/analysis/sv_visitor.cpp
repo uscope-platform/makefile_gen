@@ -184,6 +184,9 @@ void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
 }
 
 void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
+    if(loops_factory.in_definition()) {
+        loops_factory.add_component(Expression_component(ctx->getText()));
+    }
     if(in_function_declaration) {
         functions_factory.add_component(Expression_component(ctx->getText()));
     }
@@ -202,6 +205,9 @@ void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
     if(deps_factory.is_valid_dependency()){
         deps_factory.add_port_connection_element(p);
     }
+    if(loops_factory.in_definition()) {
+        loops_factory.add_component(Expression_component(p));
+    }
     if(params_factory.is_component_relevant()){
         if(!package_prefix.empty()){
             Expression_component ec(package_item);
@@ -217,6 +223,9 @@ void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
 }
 
 void sv_visitor::exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx) {
+    if(loops_factory.in_definition()) {
+        loops_factory.add_component(Expression_component(ctx->getText()));
+    }
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
@@ -226,6 +235,9 @@ void sv_visitor::exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx
 }
 
 void sv_visitor::exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *ctx) {
+    if(loops_factory.in_definition()) {
+        loops_factory.add_component(Expression_component(ctx->getText()));
+    }
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
@@ -236,6 +248,9 @@ void sv_visitor::exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *c
 
 
 void sv_visitor::exitOperator_shift(sv2017::Operator_shiftContext *ctx) {
+    if(loops_factory.in_definition()) {
+        loops_factory.add_component(Expression_component(ctx->getText()));
+    }
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
@@ -245,7 +260,11 @@ void sv_visitor::exitOperator_shift(sv2017::Operator_shiftContext *ctx) {
 }
 
 void sv_visitor::exitUnary_operator(sv2017::Unary_operatorContext *ctx) {
+
     if(ctx->PLUS() != nullptr || ctx->MINUS() != nullptr){
+        if(loops_factory.in_definition()) {
+            loops_factory.add_component(Expression_component(ctx->getText()));
+        }
         if(params_factory.is_component_relevant()){
             params_factory.add_component(Expression_component(ctx->getText()));
         }
@@ -256,6 +275,9 @@ void sv_visitor::exitUnary_operator(sv2017::Unary_operatorContext *ctx) {
 }
 
 void sv_visitor::exitOperator_cmp(sv2017::Operator_cmpContext *ctx) {
+    if(loops_factory.in_definition()) {
+        loops_factory.add_component(Expression_component(ctx->getText()));
+    }
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
@@ -265,6 +287,9 @@ void sv_visitor::exitOperator_cmp(sv2017::Operator_cmpContext *ctx) {
 }
 
 void sv_visitor::exitOperator_eq_neq(sv2017::Operator_eq_neqContext *ctx) {
+    if(loops_factory.in_definition()) {
+        loops_factory.add_component(Expression_component(ctx->getText()));
+    }
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
@@ -613,6 +638,73 @@ void sv_visitor::exitFunction_declaration(sv2017::Function_declarationContext *c
     modules_factory.add_function(functions_factory.get_function());
 }
 
+void sv_visitor::enterLoop_statement(sv2017::Loop_statementContext *ctx) {
+    if(in_function_declaration) {
+        loops_factory.new_loop();
+    }
+}
+
+
+void sv_visitor::exitLoop_statement(sv2017::Loop_statementContext *ctx) {
+    if(in_function_declaration) {
+        auto spec = loops_factory.get_loop_specs();
+        functions_factory.add_loop(spec);
+    }
+    loops_factory.clear();
+}
+
+void sv_visitor::enterFor_initialization(sv2017::For_initializationContext *ctx) {
+    if(in_function_declaration) {
+        loops_factory.set_phase(HDL_loops_factory::init);
+        if(!ctx->for_variable_declaration().empty()) {
+            auto decl = ctx->for_variable_declaration()[0]->for_variable_declaration_var_assign();
+            loops_factory.add_loop_variable(decl[0]->identifier()->getText());
+        }
+    }
+}
+
+void sv_visitor::exitFor_initialization(sv2017::For_initializationContext *ctx) {
+    sv2017BaseListener::exitFor_initialization(ctx);
+}
+
+void sv_visitor::enterFor_end_expression(sv2017::For_end_expressionContext *ctx) {
+    if(in_function_declaration) {
+        loops_factory.set_phase(HDL_loops_factory::end);
+    }
+}
+
+void sv_visitor::exitFor_end_expression(sv2017::For_end_expressionContext *ctx) {
+    sv2017BaseListener::exitFor_end_expression(ctx);
+}
+
+void sv_visitor::enterFor_step(sv2017::For_stepContext *ctx) {
+    if(in_function_declaration) {
+        loops_factory.set_phase(HDL_loops_factory::step);
+    }
+}
+
+void sv_visitor::exitFor_step(sv2017::For_stepContext *ctx) {
+    if(in_function_declaration) {
+        loops_factory.set_phase(HDL_loops_factory::body);
+    }
+}
+
+void sv_visitor::enterInc_or_dec_expressionPost(sv2017::Inc_or_dec_expressionPostContext *ctx) {
+    if(in_function_declaration) {
+        if(loops_factory.in_definition()) {
+            auto name = ctx->variable_lvalue()->getText();
+            Expression e;
+            e.emplace_back(name);
+            if(ctx->inc_or_dec_operator()->INCR() != nullptr){
+                e.emplace_back("+");
+            } else if(ctx->inc_or_dec_operator()->DECR() != nullptr){
+                e.emplace_back("-");
+            }
+            e.emplace_back(1);
+            loops_factory.add_expression(e);
+        }
+    }
+}
 
 void sv_visitor::exitBlocking_assignment(sv2017::Blocking_assignmentContext *ctx) {
     if(in_function_declaration) {

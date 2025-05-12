@@ -241,6 +241,3 @@ TEST( hdl_ast_builder, interface_parameter) {
 
     ASSERT_EQ(ast_dump, check_obj);
 }
-
-
-

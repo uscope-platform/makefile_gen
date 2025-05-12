@@ -1,5 +1,5 @@
 
-// Generated from /home/filssavi/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.1
+// Generated from /home/filssavi/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -267,6 +267,8 @@ public:
     virtual std::any visitList_of_variable_assignments(sv2017::List_of_variable_assignmentsContext *context) = 0;
 
     virtual std::any visitFor_initialization(sv2017::For_initializationContext *context) = 0;
+
+    virtual std::any visitFor_end_expression(sv2017::For_end_expressionContext *context) = 0;
 
     virtual std::any visitFor_variable_declaration_var_assign(sv2017::For_variable_declaration_var_assignContext *context) = 0;
 

@@ -21,7 +21,7 @@ HDL_loop_solver::HDL_loop_solver(const Parameters_map &pm, const std::shared_ptr
     d_store = ds;
 }
 
-std::vector<int64_t> HDL_loop_solver::solve_loop(generate_loop &l, HDL_Resource &spec) {
+std::vector<int64_t> HDL_loop_solver::solve_loop(HDL_loop_metadata &l, HDL_Resource &spec) {
     std::vector<int64_t> ret;
     Parameter_processor init_processor(parent_parameters,d_store);
     auto loop_variable = init_processor.process_parameter(std::make_shared<HDL_parameter>(l.init), spec);

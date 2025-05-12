@@ -607,7 +607,7 @@ loop_statement:
       | ( ( KW_REPEAT
               | KW_WHILE
               ) LPAREN expression
-          | KW_FOR LPAREN ( for_initialization )? SEMI ( expression )? SEMI ( for_step )?
+          | KW_FOR LPAREN ( for_initialization )? SEMI ( for_end_expression )? SEMI ( for_step )?
           ) RPAREN
       ) statement_or_null
   | KW_DO statement_or_null KW_WHILE LPAREN expression RPAREN SEMI
@@ -619,6 +619,10 @@ for_initialization:
     list_of_variable_assignments
     | for_variable_declaration ( COMMA for_variable_declaration )*
 ;
+for_end_expression:
+    expression
+    ;
+
 for_variable_declaration_var_assign: identifier ASSIGN expression;
 for_variable_declaration:
     ( KW_VAR )? data_type for_variable_declaration_var_assign

@@ -1,5 +1,5 @@
 
-// Generated from /home/filssavi/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.1
+// Generated from /home/filssavi/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -510,6 +510,10 @@ public:
   }
 
   virtual std::any visitFor_initialization(sv2017::For_initializationContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitFor_end_expression(sv2017::For_end_expressionContext *ctx) override {
     return visitChildren(ctx);
   }
 

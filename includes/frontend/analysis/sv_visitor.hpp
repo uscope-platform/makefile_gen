@@ -150,6 +150,20 @@ public:
     void enterFunction_declaration(sv2017::Function_declarationContext *ctx) override;
     void exitFunction_declaration(sv2017::Function_declarationContext *ctx) override;
 
+    void enterLoop_statement(sv2017::Loop_statementContext *ctx) override;
+    void exitLoop_statement(sv2017::Loop_statementContext *ctx) override;
+
+    void enterFor_initialization(sv2017::For_initializationContext *ctx) override;
+    void exitFor_initialization(sv2017::For_initializationContext *ctx) override;
+
+    void enterFor_end_expression(sv2017::For_end_expressionContext *ctx) override;
+    void exitFor_end_expression(sv2017::For_end_expressionContext *ctx) override;
+
+    void enterFor_step(sv2017::For_stepContext *ctx) override;
+    void exitFor_step(sv2017::For_stepContext *ctx) override;
+
+    void enterInc_or_dec_expressionPost(sv2017::Inc_or_dec_expressionPostContext *ctx) override;
+
     void exitBlocking_assignment(sv2017::Blocking_assignmentContext *ctx) override;
 
     void enterVariable_lvalue(sv2017::Variable_lvalueContext *ctx) override;

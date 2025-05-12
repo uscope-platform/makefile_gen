@@ -21,6 +21,7 @@
 
 
 #include "data_model/HDL/parameters/Expression_component.hpp"
+#include "data_model/HDL/HDL_loop.hpp"
 
 typedef std::vector<Expression_component> Expression;
 
@@ -51,8 +52,8 @@ public:
     void set_name(const std::string &s) { name = s;}
     void start_assignment(const std::string &n, Expression idx);
     void close_assignment(Expression val);
-    void add_assignment(const assignment &a){assignments.push_back(a);};
-
+    void add_assignment(const assignment &a){assignments.push_back(a);}
+    void add_loop_metadata(const HDL_loop_metadata &l){loop_metadata = l;}
     bool operator==(const HDL_function &rhs) const;
 
     template<class Archive>
@@ -62,6 +63,7 @@ public:
     std::string name;
 private:
     std::vector<assignment> assignments;
+    HDL_loop_metadata loop_metadata;
 };
 
 

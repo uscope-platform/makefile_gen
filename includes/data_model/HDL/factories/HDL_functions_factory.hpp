@@ -18,6 +18,7 @@
 #define HDL_FUNCTIONS_FACTORY_HPP
 #include <string>
 
+#include "data_model/HDL/HDL_loop.hpp"
 #include "data_model/HDL/parameters/HDL_function.hpp"
 
 class HDL_functions_factory {
@@ -30,6 +31,7 @@ public:
     void add_component(const Expression_component &c);
     void close_lvalue();
     void close_assignment();
+    void add_loop(const HDL_loop_metadata &md){f.add_loop_metadata(md);}
     HDL_function get_function();
 private:
 

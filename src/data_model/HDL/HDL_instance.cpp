@@ -93,10 +93,3 @@ Parameters_map HDL_instance::get_parameters_copy() {
     return Parameters_map::deep_copy(parameters);
 }
 
-bool operator==(const generate_loop& lhs, const generate_loop& rhs) {
-    bool ret = true;
-    ret &= lhs.init == rhs.init;
-    ret &= lhs.end_c == rhs.end_c;
-    ret &= lhs.iter == rhs.iter;
-    return ret;
-}

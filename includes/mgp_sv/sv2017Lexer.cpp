@@ -1,5 +1,5 @@
 
-// Generated from /home/filssavi/git/makefile_gen/grammars/sv2017Lexer.g4 by ANTLR 4.13.1
+// Generated from /home/filssavi/git/makefile_gen/grammars/sv2017Lexer.g4 by ANTLR 4.13.2
 
 
 #include "sv2017Lexer.h"
@@ -46,7 +46,7 @@ struct Sv2017LexerStaticData final {
 #if ANTLR4_USE_THREAD_LOCAL_CACHE
 static thread_local
 #endif
-Sv2017LexerStaticData *sv2017lexerLexerStaticData = nullptr;
+std::unique_ptr<Sv2017LexerStaticData> sv2017lexerLexerStaticData = nullptr;
 
 void sv2017lexerLexerInitialize() {
 #if ANTLR4_USE_THREAD_LOCAL_CACHE
@@ -1591,7 +1591,7 @@ void sv2017lexerLexerInitialize() {
   for (size_t i = 0; i < count; i++) { 
     staticData->decisionToDFA.emplace_back(staticData->atn->getDecisionState(i), i);
   }
-  sv2017lexerLexerStaticData = staticData.release();
+  sv2017lexerLexerStaticData = std::move(staticData);
 }
 
 }

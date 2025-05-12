@@ -58,12 +58,13 @@ TEST(function_processing, simple_function) {
 TEST(function_processing, simple_loop_function) {
     std::string test_pattern = R"(
         module test_mod #(
+            N_CORES = 3
         )();
 
             function logic [31:0] CTRL_ADDR_CALC();
-                CTRL_ADDR_CALC[0] = 100;
-                CTRL_ADDR_CALC[1] = 200;
-                CTRL_ADDR_CALC[2] = 300;
+                for(int i = 0; i<N_CORES; i++)begin
+                    CTRL_ADDR_CALC[i] = 100*i;
+                end
             endfunction
         endmodule
     )";
@@ -72,6 +73,13 @@ TEST(function_processing, simple_loop_function) {
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
 
+    auto functions = resource.get_functions();
+
+    EXPECT_EQ(functions.size(), 1);
+    EXPECT_TRUE(functions.contains("CTRL_ADDR_CALC"));
+    auto result = functions["CTRL_ADDR_CALC"];
+    HDL_function check_f;
+    EXPECT_EQ(check_f,result);
 }
 
 
