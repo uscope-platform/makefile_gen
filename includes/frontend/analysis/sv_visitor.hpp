@@ -19,11 +19,11 @@
 #include "mgp_sv/sv2017BaseListener.h"
 #include "mgp_sv/sv2017.h"
 
-#include "data_model/HDL/HDL_parameters_factory.hpp"
-#include "data_model/HDL/HDL_modules_factory.hpp"
-#include "data_model/HDL/HDL_interfaces_factory.hpp"
-#include "data_model/HDL/HDL_instances_factory.hpp"
-#include "data_model/HDL/HDL_loops_factory.h"
+#include "../../data_model/HDL/factories/HDL_parameters_factory.hpp"
+#include "../../data_model/HDL/factories/HDL_modules_factory.hpp"
+#include "../../data_model/HDL/factories/HDL_interfaces_factory.hpp"
+#include "../../data_model/HDL/factories/HDL_instances_factory.hpp"
+#include "../../data_model/HDL/factories/HDL_loops_factory.h"
 
 #include "data_model/HDL/HDL_instance.hpp"
 #include "data_model/HDL/HDL_Resource.hpp"

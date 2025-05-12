@@ -1,4 +1,4 @@
-//  Copyright 2024 Filippo Savi
+//  Copyright 2025 Filippo Savi
 //  Author: Filippo Savi <filssavi@gmail.com>
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "data_model/HDL/HDL_loops_factory.h"
+#include "data_model/HDL/factories/HDL_loops_factory.h"
 
 void HDL_loops_factory::new_loop() {
     repeated_instances.clear();

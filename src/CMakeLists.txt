@@ -17,16 +17,17 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_Resource.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_instance.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_instance_AST.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_instances_factory.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_modules_factory.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_interfaces_factory.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_loops_factory.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_parameters_factory.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/factories/HDL_instances_factory.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/factories/HDL_modules_factory.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/factories/HDL_interfaces_factory.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/factories/HDL_loops_factory.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/factories/HDL_parameters_factory.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/factories/resource_factory_base.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/HDL_parameter.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/Expression_component.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/Parameter_processor.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/Initialization_list.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/resource_factory_base.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/HDL_function.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_mapping/bus_specs_manager.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_mapping/mapper_bus_component.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/settings_store.cpp /
@@ -48,8 +49,9 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/vhdl_analyzer.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/documentation_analyzer.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/vhdl_visitor.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/cache_manager.cpp
-        )
+        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/cache_manager.cpp /
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/factories/HDL_functions_factory.cpp
+)
 
 set(MAKEFILE_GEN_SRCS ${MAKEFILE_GEN_SRCS_I}  PARENT_SCOPE)
 
