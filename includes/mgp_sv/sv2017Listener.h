@@ -1357,6 +1357,9 @@ public:
   virtual void enterFunction_declaration(sv2017::Function_declarationContext *ctx) = 0;
   virtual void exitFunction_declaration(sv2017::Function_declarationContext *ctx) = 0;
 
+  virtual void enterUntyped_function_declaration(sv2017::Untyped_function_declarationContext *ctx) = 0;
+  virtual void exitUntyped_function_declaration(sv2017::Untyped_function_declarationContext *ctx) = 0;
+
   virtual void enterTask_prototype(sv2017::Task_prototypeContext *ctx) = 0;
   virtual void exitTask_prototype(sv2017::Task_prototypeContext *ctx) = 0;
 

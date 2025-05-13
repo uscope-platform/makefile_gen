@@ -1817,9 +1817,14 @@ extern_tf_declaration:
 function_declaration:
     KW_FUNCTION ( lifetime )?
     ( function_data_type_or_implicit )?
-    task_and_function_declaration_common
+    untyped_function_declaration
     KW_ENDFUNCTION ( COLON identifier | {_input->LA(1) != COLON}? )
 ;
+
+untyped_function_declaration:
+    task_and_function_declaration_common
+    ;
+
 task_prototype: KW_TASK identifier ( LPAREN tf_port_list RPAREN )?;
 function_prototype: KW_FUNCTION data_type_or_void identifier ( LPAREN tf_port_list RPAREN )?;
 dpi_import_export:

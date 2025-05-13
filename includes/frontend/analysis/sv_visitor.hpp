@@ -147,7 +147,8 @@ public:
     void enterGenvar_expression(sv2017::Genvar_expressionContext *ctx) override;
     void exitGenvar_expression(sv2017::Genvar_expressionContext *ctx) override;
 
-    void enterFunction_declaration(sv2017::Function_declarationContext *ctx) override;
+    void enterUntyped_function_declaration(sv2017::Untyped_function_declarationContext *ctx) override;
+
     void exitFunction_declaration(sv2017::Function_declarationContext *ctx) override;
 
     void enterLoop_statement(sv2017::Loop_statementContext *ctx) override;

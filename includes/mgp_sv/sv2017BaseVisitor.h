@@ -1805,6 +1805,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitUntyped_function_declaration(sv2017::Untyped_function_declarationContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitTask_prototype(sv2017::Task_prototypeContext *ctx) override {
     return visitChildren(ctx);
   }

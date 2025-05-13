@@ -135,7 +135,7 @@ TEST(function_processing, complex_loop_function) {
     check_f.set_name("CTRL_ADDR_CALC");
     auto metadata = HDL_loop_metadata();
     metadata.init.set_name("i");
-    metadata.init.add_component(Expression_component("0"));
+    metadata.init.add_component(Expression_component("1"));
     metadata.init.set_type(expression_parameter);
     metadata.end_c.emplace_back("i");
     metadata.end_c.emplace_back("<");
@@ -154,5 +154,17 @@ TEST(function_processing, complex_loop_function) {
 
     metadata.assignments.push_back(a);
     check_f.add_loop_metadata(metadata);
+    a = {
+        "CTRL_ADDR_CALC",
+        {Expression_component("0")},
+        {Expression_component("44")}
+    };
+    check_f.add_assignment(a);
+    a = {
+        "CTRL_ADDR_CALC",
+        {Expression_component("4")},
+        {Expression_component("667")}
+    };
+    check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
 }

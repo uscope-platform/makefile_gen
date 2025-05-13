@@ -914,6 +914,8 @@ public:
 
     virtual std::any visitFunction_declaration(sv2017::Function_declarationContext *context) = 0;
 
+    virtual std::any visitUntyped_function_declaration(sv2017::Untyped_function_declarationContext *context) = 0;
+
     virtual std::any visitTask_prototype(sv2017::Task_prototypeContext *context) = 0;
 
     virtual std::any visitFunction_prototype(sv2017::Function_prototypeContext *context) = 0;

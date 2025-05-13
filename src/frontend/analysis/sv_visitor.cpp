@@ -626,7 +626,7 @@ void sv_visitor::exitGenvar_expression(sv2017::Genvar_expressionContext *ctx) {
     loops_factory.add_expression (ex);
 }
 
-void sv_visitor::enterFunction_declaration(sv2017::Function_declarationContext *ctx) {
+void sv_visitor::enterUntyped_function_declaration(sv2017::Untyped_function_declarationContext *ctx) {
     auto name = ctx->task_and_function_declaration_common()->identifier()[0]->getText();
     in_function_declaration = true;
     functions_factory.set_name(name);
