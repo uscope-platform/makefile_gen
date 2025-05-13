@@ -117,7 +117,22 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_function_para
 
 std::shared_ptr<HDL_parameter> Parameter_processor::process_vector_function_parameter(
     const std::shared_ptr<HDL_parameter> &par, const HDL_function &fcn) {
-    int i = 0;
+
+    std::shared_ptr<HDL_parameter> return_par = par;
+    std::unordered_map<uint64_t, uint64_t> values;
+    for(auto &item:fcn.get_assignments()) {
+        auto index = process_expression(item.index, nullptr);
+        auto value = process_expression(item.value, nullptr);
+        values.insert({index, value});
+    }
+    md_1d_array parameter_value(values.size());
+    for(auto &[idx, value]:values) {
+        parameter_value[idx] = value;
+    }
+    mdarray md_values;
+    md_values.set_1d_slice({0, 0}, parameter_value);
+    return_par->set_array_value(md_values);
+    return return_par;
 }
 
 

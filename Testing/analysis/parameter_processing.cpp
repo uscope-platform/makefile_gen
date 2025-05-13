@@ -1357,14 +1357,15 @@ TEST(parameter_processing, simple_vector_function_parameter) {
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
 
-    auto param = resource.get_parameters().get("AXI_ADDRESSES");
+
     Parameter_processor proc({}, std::make_shared<data_store>(true, "/tmp/test_data_store"));
 
     auto parameters = proc.process_parameters_map(resource.get_parameters(), resource);
 
-    auto param12 = parameters.get("AXI_ADDRESSES");
-    ASSERT_EQ(3, 6);
-
+    auto param = parameters.get("AXI_ADDRESSES");
+    auto param_value = param->get_array_value().get_1d_slice({0, 0});
+    md_1d_array reference = {100, 200, 300};
+    ASSERT_EQ(param_value, reference);
 }
 
 
