@@ -59,11 +59,7 @@ void control_bus_analysis::analize_node(const std::vector<analysis_context> &n) 
 
 
 std::vector<analysis_context> control_bus_analysis::process_interconnect(const analysis_context &inst) {
-    if(inst.node->get_parent()->get_parameters().contains("PRAGMA_MKFG_PARAMETRIZED_INTERCONNECT")){
-        return process_parametric_interconnect(inst);
-    } else{
-        return process_simple_interconnect(inst);
-    }
+    return process_simple_interconnect(inst);
 }
 
 std::vector<analysis_context> control_bus_analysis::process_simple_interconnect(const analysis_context &inst) {
@@ -77,7 +73,8 @@ std::vector<analysis_context> control_bus_analysis::process_simple_interconnect(
     auto masters = expand_bus_array(masters_ifs, ic->get_parent(), addresses);
 
     for(int i = 0; i<masters.size(); i++){
-        for(auto &dep:inst.node->get_parent()->get_dependencies()){
+        auto dependencies=  inst.node->get_parent()->get_dependencies();
+        for(auto &dep:dependencies){
             for(auto &port:dep->get_ports()){
                 if(port.second.size()==1){
                     if(port.second.front() == masters[i].name && dep->get_repetition_idx() == masters[i].idx){
