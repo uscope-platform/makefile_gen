@@ -168,3 +168,45 @@ TEST(function_processing, complex_loop_function) {
     check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
 }
+
+
+TEST(function_processing, parametrized_loop_function) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            N_CORES = 1
+        )();
+
+            function logic [31:0] CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = 44;
+                CTRL_ADDR_CALC[N_CORES] = 33;
+            endfunction
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    auto functions = resource.get_functions();
+
+    EXPECT_EQ(functions.size(), 1);
+    EXPECT_TRUE(functions.contains("CTRL_ADDR_CALC"));
+    auto result = functions["CTRL_ADDR_CALC"];
+
+    HDL_function check_f;
+    check_f.set_name("CTRL_ADDR_CALC");
+
+    assignment a = {
+        "CTRL_ADDR_CALC",
+        {Expression_component("0")},
+        {Expression_component("44")}
+    };
+    check_f.add_assignment(a);
+    a = {
+        "CTRL_ADDR_CALC",
+        {Expression_component("N_CORES")},
+        {Expression_component("33")}
+    };
+    check_f.add_assignment(a);
+    EXPECT_EQ(check_f,result);
+}

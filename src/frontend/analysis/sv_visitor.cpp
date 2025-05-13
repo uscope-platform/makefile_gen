@@ -206,7 +206,10 @@ void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
     }
     if(loops_factory.in_loop()) {
         loops_factory.add_component(Expression_component(p));
+    } else if(in_function_declaration) {
+        functions_factory.add_component(Expression_component(ctx->getText()));
     }
+
     if(params_factory.is_component_relevant()){
         if(!package_prefix.empty()){
             Expression_component ec(package_item);
