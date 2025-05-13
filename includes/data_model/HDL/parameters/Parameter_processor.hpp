@@ -77,21 +77,29 @@ public:
 
     std::shared_ptr<HDL_parameter> process_parameter(const std::shared_ptr<HDL_parameter> &par, HDL_Resource &spec);
 private:
-    std::shared_ptr<HDL_parameter> process_scalar_function_parameter(const std::shared_ptr<HDL_parameter> &par, const HDL_function &fcn);
-    std::shared_ptr<HDL_parameter> process_vector_function_parameter(const std::shared_ptr<HDL_parameter> &par, const HDL_function &fcn);
+    std::shared_ptr<HDL_parameter> process_scalar_function_parameter(const std::shared_ptr<HDL_parameter> &par,
+        const HDL_function &fcn);
+    std::shared_ptr<HDL_parameter> process_vector_function_parameter(const std::shared_ptr<HDL_parameter> &par,
+        const HDL_function &fcn, HDL_Resource &spec);
     std::shared_ptr<HDL_parameter> process_scalar_parameter(const std::shared_ptr<HDL_parameter> &par);
     std::shared_ptr<HDL_parameter> process_array_parameter(const std::shared_ptr<HDL_parameter> &par);
     std::shared_ptr<HDL_parameter> process_packed_parameter(const std::shared_ptr<HDL_parameter> &par);
     Expression_component process_array_access(Expression_component &e);
     int64_t get_component_value(Expression_component &ec, int64_t *result_size);
+    std::unordered_map<uint64_t, uint64_t> evaluate_loop(HDL_loop_metadata &loop, HDL_Resource &spec);
+    int64_t evaluate_loop_expression(Expression &e, std::shared_ptr<HDL_parameter> loop_var);
+    mdarray merge_function_contributions(
+        std::unordered_map<uint64_t, uint64_t> &explicit_values,
+        std::unordered_map<uint64_t, uint64_t> &loop_values
+    );
 
-    std::shared_ptr<Parameters_map> compleated_set;
+
+    std::shared_ptr<Parameters_map> completed_set;
     std::map<std::string, std::shared_ptr<HDL_parameter>> string_set;
 
     std::shared_ptr<Parameters_map> external_parameters;
 
     std::unordered_map<std::string, std::vector<int64_t>> array_parameter_values;
-
     std::shared_ptr<data_store> d_store;
 };
 

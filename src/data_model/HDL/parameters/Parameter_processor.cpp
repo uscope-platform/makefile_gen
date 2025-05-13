@@ -15,18 +15,20 @@
 
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
+#include "analysis/HDL_loop_solver.hpp"
+
 
 Parameter_processor::Parameter_processor(const Parameters_map &parent_parameters, const std::shared_ptr<data_store> &ds) {
     d_store = ds;
     external_parameters = std::make_shared<Parameters_map>(parent_parameters);
-    compleated_set = std::make_shared<Parameters_map>();
+    completed_set = std::make_shared<Parameters_map>();
 }
 
 Parameter_processor::Parameter_processor(const Parameters_map &ep,
                                          std::shared_ptr<Parameters_map> &cs) {
     d_store = {};
     external_parameters = std::make_shared<Parameters_map>(ep);
-    compleated_set = cs;
+    completed_set = cs;
 }
 
 Parameters_map Parameter_processor::process_parameters_map(const Parameters_map &map, HDL_Resource &spec) {
@@ -43,9 +45,9 @@ Parameters_map Parameter_processor::process_parameters_map(const Parameters_map 
                 if(external_parameters->contains(item->get_name())){
                     // The parameter needs to be copied out of external parameters and into the completed set otherwise it will go out of scope
                     auto param = external_parameters->get(item->get_name());
-                    compleated_set->insert(param);
+                    completed_set->insert(param);
                 } else {
-                    compleated_set->insert(process_parameter(par, spec));
+                    completed_set->insert(process_parameter(par, spec));
                 }
             } catch (Parameter_processor_Exception &ex){
                 if(!ex.unknown_parameter){
@@ -59,7 +61,7 @@ Parameters_map Parameter_processor::process_parameters_map(const Parameters_map 
 
         for(auto &item:string_set){
             if(!next_working_set.contains(item.first)){
-                compleated_set->insert(item.second);
+                completed_set->insert(item.second);
                 next_working_set.erase(item.second->get_name());
             }
         }
@@ -70,10 +72,10 @@ Parameters_map Parameter_processor::process_parameters_map(const Parameters_map 
     }
 
     for(auto &item:working_set){
-        compleated_set->insert(item);
+        completed_set->insert(item);
     }
 
-    return *compleated_set;
+    return *completed_set;
 }
 
 
@@ -89,7 +91,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_parameter(const std:
         if(function.is_scalar()) {
             p = process_scalar_function_parameter(par, function);
         } else {
-            p = process_vector_function_parameter(par, function);
+            p = process_vector_function_parameter(par, function, spec);
         }
     } else if(par->is_array()){
         auto spec_il = spec.get_parameters().get(par->get_name())->get_i_l();
@@ -116,23 +118,20 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_function_para
 }
 
 std::shared_ptr<HDL_parameter> Parameter_processor::process_vector_function_parameter(
-    const std::shared_ptr<HDL_parameter> &par, const HDL_function &fcn) {
+    const std::shared_ptr<HDL_parameter> &par, const HDL_function &fcn, HDL_Resource &spec) {
 
     std::shared_ptr<HDL_parameter> return_par = par;
-    std::unordered_map<uint64_t, uint64_t> values;
+    std::unordered_map<uint64_t, uint64_t> explicit_values;
     for(auto &item:fcn.get_assignments()) {
         auto index = process_expression(item.index, nullptr);
         auto value = process_expression(item.value, nullptr);
-        values.insert({index, value});
+        explicit_values.insert({index, value});
     }
+    auto loop = fcn.get_loop();
+    auto loop_values = evaluate_loop(loop, spec);
 
-    md_1d_array parameter_value(values.size());
-    for(auto &[idx, value]:values) {
-        parameter_value[idx] = value;
-    }
-    mdarray md_values;
-    md_values.set_1d_slice({0, 0}, parameter_value);
-    return_par->set_array_value(md_values);
+
+    return_par->set_array_value(merge_function_contributions(explicit_values, loop_values));
     return return_par;
 }
 
@@ -221,8 +220,8 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
             if(external_parameters->contains(i.get_string_value())) {
                 Expression_component e(external_parameters->get(i.get_raw_string_value())->get_numeric_value());
                 processed_rpn.emplace_back(e);
-            } else if(compleated_set->contains(i.get_raw_string_value())){
-                processed_rpn.emplace_back(compleated_set->get(i.get_raw_string_value())->get_numeric_value());
+            } else if(completed_set->contains(i.get_raw_string_value())){
+                processed_rpn.emplace_back(completed_set->get(i.get_raw_string_value())->get_numeric_value());
             } else {
                 throw Parameter_processor_Exception();
             }
@@ -328,11 +327,11 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
                 }
             }
         }
-    } else if(compleated_set->contains(param_name)) {
-        if (compleated_set->get(param_name)->is_array()) {
-            throw array_value_exception(compleated_set->get(param_name)->get_array_value());
+    } else if(completed_set->contains(param_name)) {
+        if (completed_set->get(param_name)->is_array()) {
+            throw array_value_exception(completed_set->get(param_name)->get_array_value());
         } else {
-            val = compleated_set->get(param_name)->get_numeric_value();
+            val = completed_set->get(param_name)->get_numeric_value();
             if (result_size != nullptr) {
                 *result_size = Expression_component::calculate_binary_size(val);
             }
@@ -344,6 +343,63 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
     }
 
     return val;
+}
+
+std::unordered_map<uint64_t, uint64_t> Parameter_processor::evaluate_loop(HDL_loop_metadata &loop, HDL_Resource &spec) {
+    std::unordered_map<uint64_t, uint64_t> retval;
+
+    if(loop.init.get_name().empty() && loop.init.get_type() == string_parameter) return retval;
+    auto loop_variable = process_parameter(std::make_shared<HDL_parameter>(loop.init), spec);
+
+    while(evaluate_loop_expression(loop.end_c,loop_variable) != 0){
+        for(auto a:loop.assignments) {
+            auto idx = evaluate_loop_expression(a.index, loop_variable);
+            auto value = evaluate_loop_expression(a.value, loop_variable);
+            retval.insert({idx, value});
+        }
+
+        auto new_loop_var = evaluate_loop_expression(loop.iter, loop_variable);
+        loop_variable->set_value(new_loop_var);
+    }
+
+    return retval;
+
+}
+
+
+int64_t Parameter_processor::evaluate_loop_expression(Expression &e, std::shared_ptr<HDL_parameter> loop_var) {
+
+    std::shared_ptr<HDL_parameter> shadowed_var= nullptr;
+    if(external_parameters->contains(loop_var->get_name())) {
+        shadowed_var = external_parameters->get(loop_var->get_name());
+        external_parameters->erase(loop_var->get_name());
+    }
+    external_parameters->insert(loop_var);
+    auto val = process_expression(e, nullptr);
+    external_parameters->erase(loop_var->get_name());
+    if(shadowed_var != nullptr) {
+        external_parameters->insert(shadowed_var);
+    }
+    return val;
+}
+
+mdarray Parameter_processor::merge_function_contributions(std::unordered_map<uint64_t, uint64_t> &explicit_values,
+    std::unordered_map<uint64_t, uint64_t> &loop_values) {
+    auto output_size = explicit_values.size() + loop_values.size();
+    md_1d_array parameter_value(output_size);
+
+    for(auto &[idx, value]:explicit_values) {
+        parameter_value[idx] = value;
+    }
+    for(auto &[idx, value]:loop_values) {
+        if(explicit_values.contains(idx)) {
+            throw std::runtime_error("ERROR: addressing conflicts in parameter initializing function are not supported");
+        }
+        parameter_value[idx] = value;
+    }
+    mdarray md_values;
+    md_values.set_1d_slice({0, 0}, parameter_value);
+    return md_values;
 }
 
 Expression_component Parameter_processor::process_array_access(Expression_component &e) {
@@ -364,8 +420,8 @@ Expression_component Parameter_processor::process_array_access(Expression_compon
     std::shared_ptr<HDL_parameter> p;
     if(external_parameters->contains(e.get_string_value())){
         p = external_parameters->get(e.get_string_value());
-    }else if(compleated_set->contains(e.get_string_value())){
-        p = compleated_set->get(e.get_string_value());
+    }else if(completed_set->contains(e.get_string_value())){
+        p = completed_set->get(e.get_string_value());
     } else {
         throw Parameter_processor_Exception();
     }
@@ -388,13 +444,13 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_array_parameter(cons
             return_par->add_initialization_list({});
         } else {
             Initialization_list il = external_parameters->get(par->get_name())->get_i_l();
-            il.link_processor( external_parameters, compleated_set, d_store);
+            il.link_processor( external_parameters, completed_set, d_store);
             arr_val = il.get_values();
         }
 
     } else {
         Initialization_list il = return_par->get_i_l();
-        il.link_processor( external_parameters, compleated_set, d_store);
+        il.link_processor( external_parameters, completed_set, d_store);
         arr_val = il.get_values();
     }
 
@@ -404,7 +460,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_array_parameter(cons
         return_par->set_array_value(arr_val);
     }
     return_par->clear_expression_components();
-    compleated_set->insert(return_par);
+    completed_set->insert(return_par);
     return return_par;
 }
 
@@ -424,7 +480,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_packed_parameter(con
     } else {
         il = return_par->get_i_l();
     }
-    il.link_processor( external_parameters,  compleated_set, d_store);
+    il.link_processor( external_parameters,  completed_set, d_store);
     auto val_array = il.get_values();
     return_par->set_value(val_array.get_value({0,0,0}));
 

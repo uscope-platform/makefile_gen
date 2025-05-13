@@ -1374,6 +1374,7 @@ TEST(parameter_processing, loop_vector_function_parameter) {
 
 
         module test_mod #(
+            N_CORES = 3
         )();
 
             parameter ADDR_WIDTH = 32;
@@ -1383,7 +1384,7 @@ TEST(parameter_processing, loop_vector_function_parameter) {
             typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE];
             function ctrl_addr_init_t CTRL_ADDR_CALC();
                 for(int i = 0; i<N_CORES; i++)begin
-                    CTRL_ADDR_CALC[i] = 100*i;
+                    CTRL_ADDR_CALC[N_CORES-1-i] = 100*i;
                 end
             endfunction
 
@@ -1397,22 +1398,21 @@ TEST(parameter_processing, loop_vector_function_parameter) {
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
 
-    auto param = resource.get_parameters().get("AXI_ADDRESSES");
     Parameter_processor proc({}, std::make_shared<data_store>(true, "/tmp/test_data_store"));
 
     auto parameters = proc.process_parameters_map(resource.get_parameters(), resource);
 
-    auto param12 = parameters.get("AXI_ADDRESSES");
-    ASSERT_EQ(3, 6);
-
+    auto param = parameters.get("AXI_ADDRESSES");
+    auto param_value = param->get_array_value().get_1d_slice({0, 0});
+    md_1d_array reference = {200, 100, 0};
+    ASSERT_EQ(param_value, reference);
 }
 
 
 TEST(parameter_processing, complex_vector_function_parameter) {
     std::string test_pattern = R"(
-
-
         module test_mod #(
+            N_CORES = 3
         )();
 
             parameter ADDR_WIDTH = 32;
@@ -1438,12 +1438,13 @@ TEST(parameter_processing, complex_vector_function_parameter) {
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
 
-    auto param = resource.get_parameters().get("AXI_ADDRESSES");
     Parameter_processor proc({}, std::make_shared<data_store>(true, "/tmp/test_data_store"));
 
     auto parameters = proc.process_parameters_map(resource.get_parameters(), resource);
 
-    auto param12 = parameters.get("AXI_ADDRESSES");
-    ASSERT_EQ(3, 6);
+    auto param = parameters.get("AXI_ADDRESSES");
+    auto param_value = param->get_array_value().get_1d_slice({0, 0});
+    md_1d_array reference = {44, 100, 200, 300, 667};
+    ASSERT_EQ(param_value, reference);
 
 }
