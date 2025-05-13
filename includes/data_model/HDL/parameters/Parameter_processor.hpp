@@ -22,6 +22,7 @@
 #include "data_model/HDL/HDL_Resource.hpp"
 #include "data_model/data_store.hpp"
 #include "data_model/HDL/parameters/Parameters_map.hpp"
+#include "data_model/HDL/parameters/Expression_evaluator.hpp"
 
 
 class string_parameter_exception : public std::exception {
@@ -71,10 +72,7 @@ public:
     static void convert_parameters(std::vector<HDL_Resource> &v);
     int64_t process_expression(const std::vector<Expression_component>& expr, int64_t *reslt_size);
 
-    static std::vector<Expression_component> expr_vector_to_rpn(const std::vector<Expression_component>& v);
 
-    static int64_t evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string& operation);
-    static int64_t evaluate_unary_expression(int64_t operand, const std::string& operation);
     void set_data_store(std::shared_ptr<data_store> &ds){d_store = ds;};
 
     std::shared_ptr<HDL_parameter> process_parameter(const std::shared_ptr<HDL_parameter> &par, HDL_Resource &spec);

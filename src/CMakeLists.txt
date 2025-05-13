@@ -51,6 +51,7 @@ set(MAKEFILE_GEN_SRCS_I /
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/vhdl_visitor.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/frontend/cache_manager.cpp /
         ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/factories/HDL_functions_factory.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/Expression_evaluator.cpp
 )
 
 set(MAKEFILE_GEN_SRCS ${MAKEFILE_GEN_SRCS_I}  PARENT_SCOPE)

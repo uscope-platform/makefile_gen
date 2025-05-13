@@ -164,5 +164,6 @@ private:
     };
 };
 
+typedef  std::vector<Expression_component> Expression;
 
 #endif //MAKEFILEGEN_V2_EXPRESSION_COMPONENT_HPP

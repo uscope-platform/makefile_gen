@@ -16,6 +16,8 @@
 
 #include "data_model/HDL/parameters/HDL_function.hpp"
 
+#include "data_model/HDL/parameters/Parameter_processor.hpp"
+
 void HDL_function::start_assignment(const std::string &n, Expression idx) {
     assignments.push_back({name, idx, {}});
 }

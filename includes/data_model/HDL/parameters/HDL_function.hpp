@@ -32,6 +32,8 @@ public:
     void add_assignment(const assignment &a){assignments.push_back(a);}
     void add_loop_metadata(const HDL_loop_metadata &l){loop_metadata = l;}
     bool is_scalar() const;
+    uint64_t evaluate_scalar();
+    std::vector<uint64_t> evaluate_vector();
     std::vector<assignment> get_assignments()const{ return assignments;};
     HDL_loop_metadata get_loop()const{ return loop_metadata;};
     bool operator==(const HDL_function &rhs) const;

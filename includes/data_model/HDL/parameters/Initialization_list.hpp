@@ -31,8 +31,6 @@ class Parameter_processor;
 class data_store;
 class Parameters_map;
 
-typedef  std::vector<Expression_component> Expression;
-
 typedef struct dims_struct{
     Expression first_bound;
     Expression second_bound;

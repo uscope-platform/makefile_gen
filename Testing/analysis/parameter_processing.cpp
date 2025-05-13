@@ -1382,9 +1382,9 @@ TEST(parameter_processing, loop_vector_function_parameter) {
 
             typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE];
             function ctrl_addr_init_t CTRL_ADDR_CALC();
-                CTRL_ADDR_CALC[0] = 100;
-                CTRL_ADDR_CALC[1] = 200;
-                CTRL_ADDR_CALC[2] = 300;
+                for(int i = 0; i<N_CORES; i++)begin
+                    CTRL_ADDR_CALC[i] = 100*i;
+                end
             endfunction
 
             parameter [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
@@ -1421,9 +1421,11 @@ TEST(parameter_processing, complex_vector_function_parameter) {
 
             typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE];
             function ctrl_addr_init_t CTRL_ADDR_CALC();
-                CTRL_ADDR_CALC[0] = 100;
-                CTRL_ADDR_CALC[1] = 200;
-                CTRL_ADDR_CALC[2] = 300;
+                CTRL_ADDR_CALC[0] = 44;
+                for(int i = 1; i<N_CORES+1; i++)begin
+                    CTRL_ADDR_CALC[i] = 100*i;
+                end
+                CTRL_ADDR_CALC[4] = 667;
             endfunction
 
             parameter [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();

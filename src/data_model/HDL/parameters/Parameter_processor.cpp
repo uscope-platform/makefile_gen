@@ -125,6 +125,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_vector_function_para
         auto value = process_expression(item.value, nullptr);
         values.insert({index, value});
     }
+
     md_1d_array parameter_value(values.size());
     for(auto &[idx, value]:values) {
         parameter_value[idx] = value;
@@ -193,7 +194,7 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
             auto comp = expr[0];
             return get_component_value(comp, result_size);
         } else {
-            rpn_vect = expr_vector_to_rpn(expr);
+            rpn_vect = Expression_evaluator::expr_vector_to_rpn(expr);
         }
     } else {
         if(expr.size() == 2){
@@ -238,7 +239,7 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
             int64_t result;
             if(i.get_operator_type() == Expression_component::unary_operator){
                 auto op = get_component_value(evaluator_stack.top(), nullptr);
-                result = evaluate_unary_expression(op, i.get_string_value());
+                result = Expression_evaluator::evaluate_unary_expression(op, i.get_string_value());
                 evaluator_stack.pop();
             } else if(i.get_operator_type() == Expression_component::binary_operator){
                 int64_t op_a;
@@ -251,7 +252,7 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
                     evaluator_stack.pop();
                 }
 
-                result = evaluate_binary_expression(op_a, op_b, i.get_raw_string_value());
+                result = Expression_evaluator::evaluate_binary_expression(op_a, op_b, i.get_raw_string_value());
             }
             evaluator_stack.emplace(result);
         }
@@ -263,107 +264,6 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
     return evaluator_stack.top().get_numeric_value();
 }
 
-
-int64_t Parameter_processor::evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string& operation) {
-    if(operation == "+"){
-        return op_a + op_b;
-    } else if(operation ==  "-"){
-        return op_a - op_b;
-    } else if(operation ==  "*"){
-        return op_a * op_b;
-    } else if(operation ==  "/"){
-        return op_a / op_b;
-    } else if(operation ==  "%"){
-        return op_a % op_b;
-    } else if(operation ==  "<<"){
-        return op_a << op_b;
-    } else if(operation ==  ">"){
-        return op_a > op_b;
-    } else if(operation ==  ">="){
-        return op_a >= op_b;
-    } else if(operation ==  "<"){
-        return op_a < op_b;
-    } else if(operation ==  "<="){
-        return op_a <= op_b;
-    } else if(operation ==  "=="){
-        return op_a == op_b;
-    } else if(operation ==  "!="){
-        return op_a != op_b;
-    } else{
-        throw std::runtime_error("Error: Attempted evaluation of an unsupported binary expression expression " + operation);
-    }
-}
-
-int64_t Parameter_processor::evaluate_unary_expression(int64_t operand, const std::string& operation) {
-    if(operation == "!"){
-        return !operand;
-    } else if(operation ==  "~"){
-        return ~operand;
-    } else if(operation ==  "$clog2"){
-        return (int64_t) ceil(log2((double) operand));
-    } else if(operation ==  "$ceil"){
-        return (int64_t) ceil((double) operand);
-    } else if(operation ==  "$floor"){
-        return (int64_t) floor((double) operand);
-    } else{
-        throw std::runtime_error("Error: Attempted evaluation of an unsupported unary expression expression " + operation);
-    }
-}
-
-std::vector<Expression_component> Parameter_processor::expr_vector_to_rpn(const std::vector<Expression_component>& v) {
-    // IMPLEMENTATION OF THE SHUNTING YARD ALGORITHM
-    std::vector<Expression_component> rpn_exp;
-    std::stack<Expression_component> shunting_stack;
-
-    if(v.size()==0){
-        return {};
-    }
-    if(v[0].is_rpn()){
-        return v;
-    }
-
-    for(auto item:v){
-        if(item.get_type() == operator_component){ // token is operator
-            while (
-                    !shunting_stack.empty() &&
-                    shunting_stack.top().get_raw_string_value()!="(" &&
-                    (
-                        shunting_stack.top().get_type() == function_component ||
-                        shunting_stack.top().get_operator_precedence()<item.get_operator_precedence() ||
-                        shunting_stack.top().get_operator_precedence()==item.get_operator_precedence() &&
-                        !shunting_stack.top().is_right_associative()
-                    )
-            ){
-                rpn_exp.push_back(shunting_stack.top());
-                shunting_stack.pop();
-            }
-            shunting_stack.push(item);
-        } else if(item.get_raw_string_value() == "(" || item.get_type() == function_component){
-            shunting_stack.push(item);
-        } else if(item.get_raw_string_value() == ")"){
-            while (shunting_stack.top().get_raw_string_value() != "(") {
-                rpn_exp.push_back(shunting_stack.top());
-                shunting_stack.pop();
-                if(shunting_stack.top().get_type()==function_component){
-                    rpn_exp.push_back(shunting_stack.top());
-                    shunting_stack.pop();
-                }
-            }
-            shunting_stack.pop();
-        } else{ // token is number
-            rpn_exp.push_back(item);
-        }
-    }
-
-    while(!shunting_stack.empty()){
-        rpn_exp.push_back(shunting_stack.top());
-        shunting_stack.pop();
-    }
-    Expression_component e("");
-    e.set_rpn_marker();
-    rpn_exp.insert(rpn_exp.begin(), {e});
-    return rpn_exp;
-}
 
 void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
     for(auto &res:v){

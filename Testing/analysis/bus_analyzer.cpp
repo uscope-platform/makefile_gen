@@ -81,6 +81,10 @@ TEST( bus_analysis, simple_bus_analysis) {
 TEST( bus_analysis, parametric_interconnect) {
 
 
+
+    EXPECT_TRUE(false);
+    return;
+
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
 
