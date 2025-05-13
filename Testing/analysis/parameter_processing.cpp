@@ -1294,15 +1294,47 @@ TEST(parameter_processing, complex_for_array_parameter) {
 
 }
 
-
-TEST(parameter_processing, simple_function_parameter) {
+TEST(parameter_processing, scalar_function_parameter) {
     std::string test_pattern = R"(
 
 
         module test_mod #(
         )();
 
-            parameter  [31:0] TAP_ADDR_REG [2:0] = '{6,2,4};
+            parameter ADDR_WIDTH = 32;
+            parameter N_AXI_LITE = 3;
+
+
+            function logic [ADDR_WIDTH-1:0] CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC = 100;
+            endfunction
+
+            parameter [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
+
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    Parameter_processor proc({}, std::make_shared<data_store>(true, "/tmp/test_data_store"));
+
+    auto parameters = proc.process_parameters_map(resource.get_parameters(), resource);
+
+    auto param = parameters.get("AXI_ADDRESSES");
+    ASSERT_EQ(param->get_type(), numeric_parameter);
+    ASSERT_EQ(param->get_numeric_value(), 100);
+
+}
+
+TEST(parameter_processing, simple_vector_function_parameter) {
+    std::string test_pattern = R"(
+
+
+        module test_mod #(
+        )();
 
             parameter ADDR_WIDTH = 32;
             parameter N_AXI_LITE = 3;
@@ -1322,13 +1354,93 @@ TEST(parameter_processing, simple_function_parameter) {
 
 
     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-
     analyzer.cleanup_content("`(.*)");
-    auto resources = analyzer.analyze();
-    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+    auto resource = analyzer.analyze()[0];
 
-    d_store->store_hdl_entity(resources[0]);
+    auto param = resource.get_parameters().get("AXI_ADDRESSES");
+    Parameter_processor proc({}, std::make_shared<data_store>(true, "/tmp/test_data_store"));
 
+    auto parameters = proc.process_parameters_map(resource.get_parameters(), resource);
+
+    auto param12 = parameters.get("AXI_ADDRESSES");
+    ASSERT_EQ(3, 6);
+
+}
+
+
+TEST(parameter_processing, loop_vector_function_parameter) {
+    std::string test_pattern = R"(
+
+
+        module test_mod #(
+        )();
+
+            parameter ADDR_WIDTH = 32;
+            parameter N_AXI_LITE = 3;
+
+
+            typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE];
+            function ctrl_addr_init_t CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = 100;
+                CTRL_ADDR_CALC[1] = 200;
+                CTRL_ADDR_CALC[2] = 300;
+            endfunction
+
+            parameter [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
+
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    auto param = resource.get_parameters().get("AXI_ADDRESSES");
+    Parameter_processor proc({}, std::make_shared<data_store>(true, "/tmp/test_data_store"));
+
+    auto parameters = proc.process_parameters_map(resource.get_parameters(), resource);
+
+    auto param12 = parameters.get("AXI_ADDRESSES");
+    ASSERT_EQ(3, 6);
+
+}
+
+
+TEST(parameter_processing, complex_vector_function_parameter) {
+    std::string test_pattern = R"(
+
+
+        module test_mod #(
+        )();
+
+            parameter ADDR_WIDTH = 32;
+            parameter N_AXI_LITE = 3;
+
+
+            typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE];
+            function ctrl_addr_init_t CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = 100;
+                CTRL_ADDR_CALC[1] = 200;
+                CTRL_ADDR_CALC[2] = 300;
+            endfunction
+
+            parameter [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
+
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    auto param = resource.get_parameters().get("AXI_ADDRESSES");
+    Parameter_processor proc({}, std::make_shared<data_store>(true, "/tmp/test_data_store"));
+
+    auto parameters = proc.process_parameters_map(resource.get_parameters(), resource);
+
+    auto param12 = parameters.get("AXI_ADDRESSES");
+    ASSERT_EQ(3, 6);
 
 }

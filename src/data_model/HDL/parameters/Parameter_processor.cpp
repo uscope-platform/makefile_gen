@@ -79,7 +79,19 @@ Parameters_map Parameter_processor::process_parameters_map(const Parameters_map 
 
 std::shared_ptr<HDL_parameter> Parameter_processor::process_parameter(const std::shared_ptr<HDL_parameter> &par, HDL_Resource &spec) {
     std::shared_ptr<HDL_parameter> p;
-    if(par->is_array()){
+    if(par->get_type()== function_parameter) {
+        auto fs = spec.get_functions();
+        auto components = par->get_expression_components();
+        if(components.size() != 1) {
+            throw std::runtime_error("ERROR: Function initialized parameters with arguments are not supported");
+        }
+        auto function = spec.get_functions().at(components[0].get_string_value());
+        if(function.is_scalar()) {
+            p = process_scalar_function_parameter(par, function);
+        } else {
+            p = process_vector_function_parameter(par, function);
+        }
+    } else if(par->is_array()){
         auto spec_il = spec.get_parameters().get(par->get_name())->get_i_l();
         auto param_il = par->get_i_l();
         param_il.set_packed_dimensions(spec_il.get_packed_dimensions());
@@ -90,6 +102,22 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_parameter(const std:
         p = process_scalar_parameter(par);
     }
     return p;
+}
+
+std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_function_parameter(
+    const std::shared_ptr<HDL_parameter> &par,
+    const HDL_function &fcn
+) {
+    std::shared_ptr<HDL_parameter> return_par = par;
+    auto expr = fcn.get_assignments()[0].value;
+    auto res = process_expression(expr, nullptr);
+    return_par->set_value(res);
+    return return_par;
+}
+
+std::shared_ptr<HDL_parameter> Parameter_processor::process_vector_function_parameter(
+    const std::shared_ptr<HDL_parameter> &par, const HDL_function &fcn) {
+    int i = 0;
 }
 
 

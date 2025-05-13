@@ -24,6 +24,10 @@ void HDL_function::close_assignment(Expression val) {
     assignments.back().value = val;
 }
 
+bool HDL_function::is_scalar() const {
+    return  loop_metadata.assignments.empty() && assignments.size() == 1;
+}
+
 bool HDL_function::operator==(const HDL_function &rhs) const {
     bool retval = true;
     retval &= name == rhs.name;
