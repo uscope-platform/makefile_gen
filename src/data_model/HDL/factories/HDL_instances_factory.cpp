@@ -26,8 +26,9 @@ void HDL_instances_factory::add_parameter(const std::string &name, const std::sh
 }
 
 void HDL_instances_factory::add_port(const std::string &name, const HDL_net &value) {
-    if(in_array_range == 3) {
+    if(in_array_range == 3 || in_array == 2) {
         current_instance.add_port_connection(name, net_factory.get_nets());
+        in_array = 0;
     } else {
         current_instance.add_port_connection(name, {value});
     }
@@ -49,14 +50,15 @@ void HDL_instances_factory::stop_concat_port() {
 }
 
 void HDL_instances_factory::add_port_connection_element(const std::string &s) {
-    if(in_bit_selection) {
+     if(in_bit_selection) {
         net_factory.add_accessor_component(s);
-    } else if(in_concat && in_array_range == 0) {
+    } else if(in_concat && in_array_range == 0 || in_array == 1) {
         net_factory.new_net(s);
+        if(in_array == 1) in_array++;
     } else if(in_array_range==1) {
         net_factory.new_net(s);
         in_array_range++;
-    }else if(in_array_range==2) {
+    } else if(in_array_range==2) {
         net_factory.add_accessor_component(s);
     } else if(in_array_range==3) {
         net_factory.add_range_component(s);
@@ -70,6 +72,14 @@ void HDL_instances_factory::start_bit_selection() {
 
 void HDL_instances_factory::stop_bit_selection() {
     in_bit_selection = false;
+}
+
+void HDL_instances_factory::start_interface() {
+    in_interface = true;
+}
+
+void HDL_instances_factory::stop_interface() {
+    in_interface = true;
 }
 
 void HDL_instances_factory::advance_array_range_phase(const std::string &op) {

@@ -236,6 +236,29 @@ TEST(port_extraction, concat_interface_component) {
 }
 
 
+TEST(port_extraction, nested_concat) {
+    std::string test_pattern = R"(
+        module test_mod #()();
+
+            axi_stream_combiner #(
+            ) scope_combinator (
+                .clock(clock),
+                .stream_in({5{1'b1}})
+            );
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto inst = analyzer.analyze()[0].get_dependencies()[0];
+    auto ports = inst.get_ports();
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["stream_in"] = {HDL_net("axil.WDATA"), HDL_net("axil.WSTRB")};
+    ASSERT_EQ(ports, check_ports);
+}
+
+
 TEST(port_extraction, nested_concat_port) {
     std::string test_pattern = R"(
         module test_mod #()();
@@ -304,7 +327,8 @@ TEST(port_extraction, array_port) {
     auto ports = inst.get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
     check_ports["clock"] = {HDL_net("clock")};
-    check_ports["stream_in"] = {HDL_net("1'b0"), HDL_net("test")};
-
+    check_ports["stream_in"] = {HDL_net("stream")};
+    check_ports["stream_in"][0].array_accessor.set_type(expression_parameter);
+    check_ports["stream_in"][0].array_accessor.add_component(Expression_component("5"));
     ASSERT_EQ(ports, check_ports);
 }

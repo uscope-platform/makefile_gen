@@ -29,10 +29,15 @@ public:
     void stop_concat_port();
 
     void add_port_connection_element(const std::string &s);
-    bool is_valid_dependency() const{return valid_instance;};
+    bool is_valid_dependency() const{return valid_instance;}
     bool is_in_array_range() const { return in_array_range != 0;}
+    bool is_interface() const {return in_interface;}
     void start_bit_selection();
     void stop_bit_selection();
+
+    void start_interface();
+    void stop_interface();
+    void start_array() {in_array = 1;}
 
     void start_array_range() {in_array_range = 1;}
     void advance_array_range_phase(const std::string &op);
@@ -44,6 +49,8 @@ private:
     bool in_bit_selection = false;
     bool in_concat = false;
     int in_array_range = 0;
+    bool in_interface = false;
+    int in_array = 0;
     HDL_net_factory net_factory;
     std::string concat_port_name;
 

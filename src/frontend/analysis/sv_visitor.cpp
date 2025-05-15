@@ -199,7 +199,9 @@ void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
 
 void sv_visitor::enterPrimaryPath(sv2017::PrimaryPathContext *ctx) {
     if(deps_factory.is_valid_dependency()){
-        deps_factory.add_port_connection_element(ctx->getText());
+        if(!deps_factory.is_interface()) {
+            deps_factory.add_port_connection_element(ctx->getText());
+        }
     }
 }
 
@@ -466,7 +468,7 @@ void sv_visitor::exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) 
 }
 
 void sv_visitor::enterPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
-
+    deps_factory.start_array();
 }
 
 void sv_visitor::exitPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
@@ -486,11 +488,15 @@ void sv_visitor::exitPrimaryIndex(sv2017::PrimaryIndexContext *ctx) {
 }
 
 void sv_visitor::enterPrimaryDot(sv2017::PrimaryDotContext *ctx) {
+    if(deps_factory.is_valid_dependency()) {
+        deps_factory.start_interface();
+    }
 }
 
 void sv_visitor::exitPrimaryDot(sv2017::PrimaryDotContext *ctx) {
     if(deps_factory.is_valid_dependency()){
         deps_factory.add_port_connection_element(ctx->getText());
+        deps_factory.stop_interface();
     }
 }
 
