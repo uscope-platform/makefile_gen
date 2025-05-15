@@ -135,9 +135,7 @@ TEST(port_extraction, concat_range) {
     });
 
     check_ports["stream_in"][1].array_range.set_type(expression_parameter);
-    check_ports["stream_in"][1].array_range.set_expression_components({
-    Expression_component("1"),
-    });
+    check_ports["stream_in"][1].array_range.set_expression_components({Expression_component("1")});
     check_ports["stream_in"][1].range_type = HDL_net::decreasing_range;
     ASSERT_EQ(ports, check_ports);
 }
@@ -195,19 +193,22 @@ TEST(port_extraction, concat_complex_slicing) {
         Expression_component("N"),
         Expression_component("*"),
         Expression_component("ADDR_WIDTH"),
-        Expression_component("+"),
-        Expression_component(":"),
-        Expression_component("ADDR_WIDTH"),
     });
+
+    check_ports["stream_in"][0].array_range.set_type(expression_parameter);
+    check_ports["stream_in"][0].array_range.set_expression_components({Expression_component("ADDR_WIDTH")});
+    check_ports["stream_in"][0].range_type = HDL_net::increasing_range;
+
     check_ports["stream_in"][1].array_accessor.set_type(expression_parameter);
     check_ports["stream_in"][1].array_accessor.set_expression_components({
         Expression_component("N"),
         Expression_component("*"),
-        Expression_component("3"),
-        Expression_component("+"),
-        Expression_component(":"),
-        Expression_component("3"),
+        Expression_component("3")
     });
+
+    check_ports["stream_in"][1].array_range.set_type(expression_parameter);
+    check_ports["stream_in"][1].array_range.set_expression_components({Expression_component("3")});
+    check_ports["stream_in"][1].range_type = HDL_net::increasing_range;
     ASSERT_EQ(ports, check_ports);
 }
 

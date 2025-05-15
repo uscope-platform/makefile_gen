@@ -1360,7 +1360,8 @@ stream_expression:
 array_range_expression:
  expression ( range_separator expression )?;
 range_separator:
-( operator_plus_minus )? COLON;
+(PLUS| MINUS )? COLON;
+
 open_range_list: value_range ( COMMA value_range )*;
 pattern:
  DOT ( MUL | identifier )

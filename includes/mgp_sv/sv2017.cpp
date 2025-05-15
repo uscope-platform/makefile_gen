@@ -2297,8 +2297,8 @@ void sv2017ParserInitialize() {
   	0,4403,4404,5,291,0,0,4404,4406,1,0,0,0,4405,4400,1,0,0,0,4405,4406,1,
   	0,0,0,4406,607,1,0,0,0,4407,4411,3,580,290,0,4408,4409,3,610,305,0,4409,
   	4410,3,580,290,0,4410,4412,1,0,0,0,4411,4408,1,0,0,0,4411,4412,1,0,0,
-  	0,4412,609,1,0,0,0,4413,4415,3,96,48,0,4414,4413,1,0,0,0,4414,4415,1,
-  	0,0,0,4415,4416,1,0,0,0,4416,4417,5,312,0,0,4417,611,1,0,0,0,4418,4423,
+  	0,4412,609,1,0,0,0,4413,4415,7,36,0,0,4414,4413,1,0,0,0,4414,4415,1,0,
+  	0,0,4415,4416,1,0,0,0,4416,4417,5,312,0,0,4417,611,1,0,0,0,4418,4423,
   	3,506,253,0,4419,4420,5,309,0,0,4420,4422,3,506,253,0,4421,4419,1,0,0,
   	0,4422,4425,1,0,0,0,4423,4421,1,0,0,0,4423,4424,1,0,0,0,4424,613,1,0,
   	0,0,4425,4423,1,0,0,0,4426,4429,5,310,0,0,4427,4430,5,344,0,0,4428,4430,
@@ -39677,8 +39677,12 @@ tree::TerminalNode* sv2017::Range_separatorContext::COLON() {
   return getToken(sv2017::COLON, 0);
 }
 
-sv2017::Operator_plus_minusContext* sv2017::Range_separatorContext::operator_plus_minus() {
-  return getRuleContext<sv2017::Operator_plus_minusContext>(0);
+tree::TerminalNode* sv2017::Range_separatorContext::PLUS() {
+  return getToken(sv2017::PLUS, 0);
+}
+
+tree::TerminalNode* sv2017::Range_separatorContext::MINUS() {
+  return getToken(sv2017::MINUS, 0);
 }
 
 
@@ -39728,7 +39732,16 @@ sv2017::Range_separatorContext* sv2017::range_separator() {
 
     || _la == sv2017::MINUS) {
       setState(4413);
-      operator_plus_minus();
+      _la = _input->LA(1);
+      if (!(_la == sv2017::PLUS
+
+      || _la == sv2017::MINUS)) {
+      _errHandler->recoverInline(this);
+      }
+      else {
+        _errHandler->reportMatch(this);
+        consume();
+      }
     }
     setState(4416);
     match(sv2017::COLON);

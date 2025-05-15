@@ -235,6 +235,9 @@ void sv_visitor::exitOperator_plus_minus(sv2017::Operator_plus_minusContext *ctx
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
     }
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.add_port_connection_element(ctx->getText());
+    }
 
 }
 
@@ -248,6 +251,9 @@ void sv_visitor::exitOperator_mul_div_mod(sv2017::Operator_mul_div_modContext *c
         params_factory.add_component(Expression_component(ctx->getText()));
     }
 
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.add_port_connection_element(ctx->getText());
+    }
 }
 
 
@@ -261,6 +267,9 @@ void sv_visitor::exitOperator_shift(sv2017::Operator_shiftContext *ctx) {
         params_factory.add_component(Expression_component(ctx->getText()));
     }
 
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.add_port_connection_element(ctx->getText());
+    }
 }
 
 void sv_visitor::exitUnary_operator(sv2017::Unary_operatorContext *ctx) {
@@ -275,6 +284,9 @@ void sv_visitor::exitUnary_operator(sv2017::Unary_operatorContext *ctx) {
             params_factory.add_component(Expression_component(ctx->getText()));
         }
 
+        if(deps_factory.is_valid_dependency()){
+            deps_factory.add_port_connection_element(ctx->getText());
+        }
     }
 }
 
@@ -288,6 +300,9 @@ void sv_visitor::exitOperator_cmp(sv2017::Operator_cmpContext *ctx) {
         params_factory.add_component(Expression_component(ctx->getText()));
     }
 
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.add_port_connection_element(ctx->getText());
+    }
 }
 
 void sv_visitor::exitOperator_eq_neq(sv2017::Operator_eq_neqContext *ctx) {
@@ -300,6 +315,9 @@ void sv_visitor::exitOperator_eq_neq(sv2017::Operator_eq_neqContext *ctx) {
         params_factory.add_component(Expression_component(ctx->getText()));
     }
 
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.add_port_connection_element(ctx->getText());
+    }
 }
 
 
@@ -508,8 +526,10 @@ void sv_visitor::exitBit_select(sv2017::Bit_selectContext *ctx) {
 
 
 void sv_visitor::exitRange_separator(sv2017::Range_separatorContext *ctx) {
-    if(ctx->operator_plus_minus()!= nullptr) {
-        deps_factory.advance_array_range_phase(ctx->operator_plus_minus()->getText());
+    if(ctx->PLUS()!= nullptr) {
+        deps_factory.advance_array_range_phase( "+");
+    } else if(ctx->MINUS()!= nullptr) {
+        deps_factory.advance_array_range_phase( "-");
     } else {
         deps_factory.advance_array_range_phase("");
     }
