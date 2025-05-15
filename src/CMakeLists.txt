@@ -32,6 +32,10 @@ target_sources(makefile_gen_lib
     data_model/HDL/parameters/Parameter_processor.cpp /
     data_model/HDL/parameters/Initialization_list.cpp /
     data_model/HDL/parameters/HDL_function.cpp /
+    data_model/HDL/factories/HDL_functions_factory.cpp /
+    data_model/HDL/parameters/Expression_evaluator.cpp /
+    data_model/HDL/factories/HDL_net_factory.cpp /
+    data_model/HDL/HDL_net.cpp /
     data_model/bus_mapping/bus_specs_manager.cpp /
     data_model/bus_mapping/mapper_bus_component.cpp /
     data_model/settings_store.cpp /
@@ -53,10 +57,7 @@ target_sources(makefile_gen_lib
     frontend/analysis/vhdl_analyzer.cpp /
     frontend/analysis/documentation_analyzer.cpp /
     frontend/analysis/vhdl_visitor.cpp /
-    frontend/cache_manager.cpp /
-    data_model/HDL/factories/HDL_functions_factory.cpp
-    data_model/HDL/parameters/Expression_evaluator.cpp
-    data_model/HDL/HDL_net.cpp
+    frontend/cache_manager.cpp
 )
 
 target_link_libraries(makefile_gen_lib PUBLIC mgp_sv_lib)

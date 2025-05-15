@@ -18,6 +18,28 @@
 
 #include "frontend/analysis/sv_analyzer.hpp"
 
+TEST(port_extraction, regular_port) {
+    std::string test_pattern = R"(
+        module test_mod #()();
+
+            axi_stream_combiner #(
+            ) scope_combinator (
+                .clock(clock),
+                .stream_in(buck_merged)
+            );
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto inst = analyzer.analyze()[0].get_dependencies()[0];
+    auto ports = inst.get_ports();
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["stream_in"] = {HDL_net("buck_merged")};
+
+    ASSERT_EQ(ports, check_ports);
+}
 
 TEST(port_extraction, concat_port) {
 std::string test_pattern = R"(
@@ -43,6 +65,38 @@ std::string test_pattern = R"(
 }
 
 
+
+TEST(port_extraction, array_range_port) {
+    std::string test_pattern = R"(
+        module test_mod #()();
+
+            axi_stream_combiner #(
+            ) scope_combinator (
+                .clock(clock),
+                .stream_in(S_AXI_AWADDR[3+:1])
+            );
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto inst = analyzer.analyze()[0].get_dependencies()[0];
+    auto ports = inst.get_ports();
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["stream_in"] = {HDL_net("S_AXI_AWADDR")};
+    check_ports["stream_in"][0].array_accessor.set_type(expression_parameter);
+    check_ports["stream_in"][0].array_accessor.set_expression_components({
+        Expression_component("3"),
+    });
+    check_ports["stream_in"][0].array_range.set_type(expression_parameter);
+    check_ports["stream_in"][0].array_range.set_expression_components({
+    Expression_component("1"),
+    });
+    check_ports["stream_in"][0].range_type = HDL_net::increasing_range;
+    ASSERT_EQ(ports, check_ports);
+}
+
 TEST(port_extraction, concat_simple_slicing) {
     std::string test_pattern = R"(
         module test_mod #()();
@@ -61,7 +115,11 @@ TEST(port_extraction, concat_simple_slicing) {
     auto ports = inst.get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
     check_ports["clock"] = {HDL_net("clock")};
-    check_ports["stream_in"] = {HDL_net("m_wdata[N]"), HDL_net("m_wstrb[N]")};
+    check_ports["stream_in"] = {HDL_net("m_wdata"), HDL_net("m_wstrb")};
+    check_ports["stream_in"][0].array_accessor.set_type(expression_parameter);
+    check_ports["stream_in"][0].array_accessor.add_component(Expression_component("N"));
+    check_ports["stream_in"][1].array_accessor.set_type(expression_parameter);
+    check_ports["stream_in"][1].array_accessor.add_component(Expression_component("N"));
     ASSERT_EQ(ports, check_ports);
 }
 
@@ -85,7 +143,25 @@ TEST(port_extraction, concat_complex_slicing) {
     auto ports = inst.get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
     check_ports["clock"] = {HDL_net("clock")};
-    check_ports["stream_in"] = {HDL_net("S_AXI_AWADDR[N*ADDR_WIDTH+:ADDR_WIDTH]"), HDL_net("S_AXI_AWPROT[N*3+:3]")};
+    check_ports["stream_in"] = {HDL_net("S_AXI_AWADDR"), HDL_net("S_AXI_AWPROT")};
+    check_ports["stream_in"][0].array_accessor.set_type(expression_parameter);
+    check_ports["stream_in"][0].array_accessor.set_expression_components({
+        Expression_component("N"),
+        Expression_component("*"),
+        Expression_component("ADDR_WIDTH"),
+        Expression_component("+"),
+        Expression_component(":"),
+        Expression_component("ADDR_WIDTH"),
+    });
+    check_ports["stream_in"][1].array_accessor.set_type(expression_parameter);
+    check_ports["stream_in"][1].array_accessor.set_expression_components({
+        Expression_component("N"),
+        Expression_component("*"),
+        Expression_component("3"),
+        Expression_component("+"),
+        Expression_component(":"),
+        Expression_component("3"),
+    });
     ASSERT_EQ(ports, check_ports);
 }
 
@@ -163,3 +239,25 @@ TEST(port_extraction, concat_literal) {
 
 
 
+TEST(port_extraction, array_port) {
+    std::string test_pattern = R"(
+        module test_mod #()();
+
+            axi_stream_combiner #(
+            ) scope_combinator (
+                .clock(clock),
+                .stream_in(stream[5])
+            );
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto inst = analyzer.analyze()[0].get_dependencies()[0];
+    auto ports = inst.get_ports();
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["stream_in"] = {HDL_net("1'b0"), HDL_net("test")};
+
+    ASSERT_EQ(ports, check_ports);
+}

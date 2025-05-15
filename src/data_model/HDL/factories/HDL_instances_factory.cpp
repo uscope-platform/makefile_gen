@@ -26,7 +26,11 @@ void HDL_instances_factory::add_parameter(const std::string &name, const std::sh
 }
 
 void HDL_instances_factory::add_port(const std::string &name, const HDL_net &value) {
-    current_instance.add_port_connection(name, {value});
+    if(in_array_range == 3) {
+        current_instance.add_port_connection(name, net_factory.get_nets());
+    } else {
+        current_instance.add_port_connection(name, {value});
+    }
 }
 
 HDL_instance HDL_instances_factory::get_dependency() {
@@ -41,23 +45,43 @@ void HDL_instances_factory::start_concat_port(const std::string &n) {
 
 void HDL_instances_factory::stop_concat_port() {
     in_concat = false;
-    current_instance.add_port_connection(concat_port_name, concat_port_data);
-    concat_port_data.clear();
+    current_instance.add_port_connection(concat_port_name, net_factory.get_nets());
 }
 
-void HDL_instances_factory::add_port_connection_element(const HDL_net &s) {
-    if(in_concat && exclusion_level == 0){
-        concat_port_data.push_back(s);
+void HDL_instances_factory::add_port_connection_element(const std::string &s) {
+    if(in_concat) {
+        if(!in_bit_selection){
+            net_factory.new_net(s);
+        } else {
+            net_factory.add_accessor_component(s);
+        }
     }
+    if(in_array_range==1) {
+        net_factory.new_net(s);
+        in_array_range++;
+    }else if(in_array_range==2) {
+        net_factory.add_accessor_component(s);
+    } else if(in_array_range==3) {
+        net_factory.add_range_component(s);
+    }
+
 }
 
-void HDL_instances_factory::start_concat_partials_exclusion() {
-    exclusion_level++;
+void HDL_instances_factory::start_bit_selection() {
+    in_bit_selection =  true;
 }
 
-void HDL_instances_factory::stop_concat_partials_exclusion() {
-    exclusion_level--;
+void HDL_instances_factory::stop_bit_selection() {
+    in_bit_selection = false;
 }
+
+void HDL_instances_factory::advance_array_range_phase(const std::string &op) {
+    if(op == "+") net_factory.set_range_type(HDL_net::increasing_range);
+    else if(op == "-") net_factory.set_range_type(HDL_net::decreasing_range);
+    else net_factory.set_range_type(HDL_net::explicit_range);
+    in_array_range = 3;
+}
+
 
 void HDL_instances_factory::add_array_quantifier(const std::shared_ptr<HDL_parameter> &p) {
     current_instance.add_array_quantifier(p);

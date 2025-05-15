@@ -668,6 +668,8 @@ public:
 
     virtual std::any visitArray_range_expression(sv2017::Array_range_expressionContext *context) = 0;
 
+    virtual std::any visitRange_separator(sv2017::Range_separatorContext *context) = 0;
+
     virtual std::any visitOpen_range_list(sv2017::Open_range_listContext *context) = 0;
 
     virtual std::any visitPattern(sv2017::PatternContext *context) = 0;

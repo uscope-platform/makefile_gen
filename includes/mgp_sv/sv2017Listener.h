@@ -988,6 +988,9 @@ public:
   virtual void enterArray_range_expression(sv2017::Array_range_expressionContext *ctx) = 0;
   virtual void exitArray_range_expression(sv2017::Array_range_expressionContext *ctx) = 0;
 
+  virtual void enterRange_separator(sv2017::Range_separatorContext *ctx) = 0;
+  virtual void exitRange_separator(sv2017::Range_separatorContext *ctx) = 0;
+
   virtual void enterOpen_range_list(sv2017::Open_range_listContext *ctx) = 0;
   virtual void exitOpen_range_list(sv2017::Open_range_listContext *ctx) = 0;
 

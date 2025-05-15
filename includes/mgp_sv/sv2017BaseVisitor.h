@@ -1313,6 +1313,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitRange_separator(sv2017::Range_separatorContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitOpen_range_list(sv2017::Open_range_listContext *ctx) override {
     return visitChildren(ctx);
   }

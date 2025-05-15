@@ -17,6 +17,7 @@
 #define MAKEFILEGEN_V2_HDL_INSTANCES_FACTORY_HPP
 
 #include "data_model/HDL/HDL_instance.hpp"
+#include "data_model/HDL/factories/HDL_net_factory.hpp"
 
 class HDL_instances_factory {
 public:
@@ -26,19 +27,25 @@ public:
     HDL_instance get_dependency();
     void start_concat_port(const std::string &n);
     void stop_concat_port();
-    void add_port_connection_element(const HDL_net &s);
-    bool is_valid_dependency() const{return valid_instance;};
 
-    void start_concat_partials_exclusion();
-    void stop_concat_partials_exclusion();
+    void add_port_connection_element(const std::string &s);
+    bool is_valid_dependency() const{return valid_instance;};
+    bool is_in_array_range() const { return in_array_range != 0;}
+    void start_bit_selection();
+    void stop_bit_selection();
+
+    void start_array_range() {in_array_range = 1;}
+    void advance_array_range_phase(const std::string &op);
+
 
     void add_array_quantifier(const std::shared_ptr<HDL_parameter> &p);
 
 private:
+    bool in_bit_selection = false;
     bool in_concat = false;
-    int exclusion_level = 0;
+    int in_array_range = 0;
+    HDL_net_factory net_factory;
     std::string concat_port_name;
-    std::vector<HDL_net> concat_port_data;
 
     HDL_instance current_instance;
     bool valid_instance;

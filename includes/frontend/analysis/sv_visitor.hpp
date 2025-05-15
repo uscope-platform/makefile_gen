@@ -76,6 +76,7 @@ public:
     void exitOperator_eq_neq(sv2017::Operator_eq_neqContext *ctx) override;
 
     void exitPrimaryLit(sv2017::PrimaryLitContext *ctx) override;
+    void enterPrimaryPath(sv2017::PrimaryPathContext *ctx) override;
     void exitPrimaryPath(sv2017::PrimaryPathContext *ctx) override;
 
     void enterNamed_port_connection(sv2017::Named_port_connectionContext *ctx) override;
@@ -105,6 +106,8 @@ public:
 
     void enterBit_select(sv2017::Bit_selectContext *ctx) override;
     void exitBit_select(sv2017::Bit_selectContext *ctx) override;
+
+    void exitRange_separator(sv2017::Range_separatorContext *ctx) override;
 
     void exitRange_expression(sv2017::Range_expressionContext *ctx) override;
 

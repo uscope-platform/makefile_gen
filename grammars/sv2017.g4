@@ -1358,7 +1358,9 @@ stream_concatenation:
 stream_expression:
  expression ( KW_WITH LSQUARE_BR array_range_expression RSQUARE_BR )?;
 array_range_expression:
- expression ( ( operator_plus_minus )? COLON expression )?;
+ expression ( range_separator expression )?;
+range_separator:
+( operator_plus_minus )? COLON;
 open_range_list: value_range ( COMMA value_range )*;
 pattern:
  DOT ( MUL | identifier )

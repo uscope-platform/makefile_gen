@@ -193,20 +193,21 @@ void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
         params_factory.add_component(Expression_component(ctx->getText()));
     }
     if(deps_factory.is_valid_dependency()){
-        deps_factory.add_port_connection_element(HDL_net(ctx->getText()));
+        deps_factory.add_port_connection_element(ctx->getText());
+    }
+}
+
+void sv_visitor::enterPrimaryPath(sv2017::PrimaryPathContext *ctx) {
+    if(deps_factory.is_valid_dependency()){
+        deps_factory.add_port_connection_element(ctx->getText());
     }
 }
 
 
-
 void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
-    HDL_net p;
-    p.name= ctx->getText();
-    if(deps_factory.is_valid_dependency()){
-        deps_factory.add_port_connection_element(p);
-    }
+
     if(loops_factory.in_loop()) {
-        loops_factory.add_component(Expression_component(p.name));
+        loops_factory.add_component(Expression_component(ctx->getText()));
     } else if(in_function_declaration) {
         functions_factory.add_component(Expression_component(ctx->getText()));
     }
@@ -219,7 +220,7 @@ void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
             package_prefix.clear();
             package_item.clear();
         } else {
-            params_factory.add_component(Expression_component(p.name));
+            params_factory.add_component(Expression_component(ctx->getText()));
         }
 
     }
@@ -447,55 +448,40 @@ void sv_visitor::exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) 
 }
 
 void sv_visitor::enterPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
-    if(deps_factory.is_valid_dependency()){
-        deps_factory.start_concat_partials_exclusion();
-    }
+
 }
 
 void sv_visitor::exitPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
     params_factory.close_array_index();
-    if(deps_factory.is_valid_dependency()){
-        deps_factory.stop_concat_partials_exclusion();
-        deps_factory.add_port_connection_element(HDL_net(ctx->getText()));
-    }
 }
 
 void sv_visitor::enterPrimaryIndex(sv2017::PrimaryIndexContext *ctx) {
-    if(deps_factory.is_valid_dependency()){
-        deps_factory.start_concat_partials_exclusion();
+    if(ctx->array_range_expression() != nullptr) {
+        deps_factory.start_array_range();
     }
 }
 
 void sv_visitor::exitPrimaryIndex(sv2017::PrimaryIndexContext *ctx) {
-    if(deps_factory.is_valid_dependency()){
-        deps_factory.stop_concat_partials_exclusion();
-        deps_factory.add_port_connection_element(HDL_net(ctx->getText()));
+    if(deps_factory.is_valid_dependency() && !deps_factory.is_in_array_range()){
+        deps_factory.add_port_connection_element(ctx->getText());
     }
 }
 
 void sv_visitor::enterPrimaryDot(sv2017::PrimaryDotContext *ctx) {
-    if(deps_factory.is_valid_dependency()){
-        deps_factory.start_concat_partials_exclusion();
-    }
 }
 
 void sv_visitor::exitPrimaryDot(sv2017::PrimaryDotContext *ctx) {
     if(deps_factory.is_valid_dependency()){
-        deps_factory.stop_concat_partials_exclusion();
-        deps_factory.add_port_connection_element(HDL_net(ctx->getText()));
+        deps_factory.add_port_connection_element(ctx->getText());
     }
 }
 
 void sv_visitor::enterPrimaryRepl(sv2017::PrimaryReplContext *ctx) {
-    if(deps_factory.is_valid_dependency()){
-        deps_factory.start_concat_partials_exclusion();
-    }
 }
 
 void sv_visitor::exitPrimaryRepl(sv2017::PrimaryReplContext *ctx) {
     if(deps_factory.is_valid_dependency()){
-        deps_factory.stop_concat_partials_exclusion();
-        deps_factory.add_port_connection_element(HDL_net(ctx->getText()));
+        deps_factory.add_port_connection_element(ctx->getText());
     }
 }
 
@@ -511,10 +497,23 @@ void sv_visitor::enterConstant_param_expression(sv2017::Constant_param_expressio
 
 void sv_visitor::enterBit_select(sv2017::Bit_selectContext *ctx) {
     params_factory.start_bit_selection();
+    deps_factory.start_bit_selection();
 }
 
 void sv_visitor::exitBit_select(sv2017::Bit_selectContext *ctx) {
     params_factory.stop_bit_selection();
+    deps_factory.stop_bit_selection();
+}
+
+
+
+void sv_visitor::exitRange_separator(sv2017::Range_separatorContext *ctx) {
+    if(ctx->operator_plus_minus()!= nullptr) {
+        deps_factory.advance_array_range_phase(ctx->operator_plus_minus()->getText());
+    } else {
+        deps_factory.advance_array_range_phase("");
+    }
+
 }
 
 void sv_visitor::exitRange_expression(sv2017::Range_expressionContext *ctx) {

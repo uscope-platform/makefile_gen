@@ -28,16 +28,23 @@ public:
     explicit HDL_net(const std::string &s) {name = s;}
     std::string name;
     HDL_parameter array_accessor;
+    HDL_parameter array_range;
+    enum range_type_t{ explicit_range, increasing_range, decreasing_range};
+    range_type_t range_type = explicit_range;
     std::string get_full_name() const;
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, array_accessor);
+        ar(name, array_accessor, array_range);
     }
 
     friend bool operator==(const HDL_net &lhs, const HDL_net &rhs) {
-        return lhs.name == rhs.name
-               && lhs.array_accessor == rhs.array_accessor;
+        bool retval =true;
+        retval &= lhs.name == rhs.name;
+        retval &= lhs.array_accessor == rhs.array_accessor;
+        retval &= lhs.range_type == rhs.range_type;
+        retval &= lhs.array_range == rhs.array_range;
+        return retval;
     }
 
     friend bool operator!=(const HDL_net &lhs, const HDL_net &rhs) {

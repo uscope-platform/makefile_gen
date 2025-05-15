@@ -990,6 +990,9 @@ public:
   virtual void enterArray_range_expression(sv2017::Array_range_expressionContext * /*ctx*/) override { }
   virtual void exitArray_range_expression(sv2017::Array_range_expressionContext * /*ctx*/) override { }
 
+  virtual void enterRange_separator(sv2017::Range_separatorContext * /*ctx*/) override { }
+  virtual void exitRange_separator(sv2017::Range_separatorContext * /*ctx*/) override { }
+
   virtual void enterOpen_range_list(sv2017::Open_range_listContext * /*ctx*/) override { }
   virtual void exitOpen_range_list(sv2017::Open_range_listContext * /*ctx*/) override { }
 
