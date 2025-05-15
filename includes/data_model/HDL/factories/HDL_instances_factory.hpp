@@ -22,11 +22,11 @@ class HDL_instances_factory {
 public:
     void new_dependency(const std::string &n, const std::string &p, dependency_class dc);
     void add_parameter(const std::string &name, const std::shared_ptr<HDL_parameter> &p);
-    void add_port(const std::string &name, const std::string &value);
+    void add_port(const std::string &name, const HDL_net &value);
     HDL_instance get_dependency();
     void start_concat_port(const std::string &n);
     void stop_concat_port();
-    void add_port_connection_element(const std::string &s);
+    void add_port_connection_element(const HDL_net &s);
     bool is_valid_dependency() const{return valid_instance;};
 
     void start_concat_partials_exclusion();
@@ -38,7 +38,7 @@ private:
     bool in_concat = false;
     int exclusion_level = 0;
     std::string concat_port_name;
-    std::vector<std::string> concat_port_data;
+    std::vector<HDL_net> concat_port_data;
 
     HDL_instance current_instance;
     bool valid_instance;

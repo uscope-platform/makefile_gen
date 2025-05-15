@@ -193,19 +193,20 @@ void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
         params_factory.add_component(Expression_component(ctx->getText()));
     }
     if(deps_factory.is_valid_dependency()){
-        deps_factory.add_port_connection_element(ctx->getText());
+        deps_factory.add_port_connection_element(HDL_net(ctx->getText()));
     }
 }
 
 
 
 void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
-    auto p = ctx->getText();
+    HDL_net p;
+    p.name= ctx->getText();
     if(deps_factory.is_valid_dependency()){
         deps_factory.add_port_connection_element(p);
     }
     if(loops_factory.in_loop()) {
-        loops_factory.add_component(Expression_component(p));
+        loops_factory.add_component(Expression_component(p.name));
     } else if(in_function_declaration) {
         functions_factory.add_component(Expression_component(ctx->getText()));
     }
@@ -218,7 +219,7 @@ void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
             package_prefix.clear();
             package_item.clear();
         } else {
-            params_factory.add_component(Expression_component(p));
+            params_factory.add_component(Expression_component(p.name));
         }
 
     }
@@ -356,11 +357,9 @@ void sv_visitor::enterNamed_port_connection(sv2017::Named_port_connectionContext
 
 void sv_visitor::exitNamed_port_connection(sv2017::Named_port_connectionContext *ctx) {
     auto port_name = ctx->identifier()->getText();
-    std::string connecting_item;
     if(ctx->port_expression_connection() != nullptr){
-        connecting_item = ctx->port_expression_connection()->expression()->getText();
         if(deps_factory.is_valid_dependency()){
-            deps_factory.add_port(port_name, connecting_item);
+            deps_factory.add_port(port_name, HDL_net(ctx->port_expression_connection()->expression()->getText()));
         }
     }
     if(ctx->port_concatenation_connection() != nullptr){
@@ -457,8 +456,7 @@ void sv_visitor::exitPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
     params_factory.close_array_index();
     if(deps_factory.is_valid_dependency()){
         deps_factory.stop_concat_partials_exclusion();
-        auto p = ctx->getText();
-        deps_factory.add_port_connection_element(p);
+        deps_factory.add_port_connection_element(HDL_net(ctx->getText()));
     }
 }
 
@@ -471,8 +469,7 @@ void sv_visitor::enterPrimaryIndex(sv2017::PrimaryIndexContext *ctx) {
 void sv_visitor::exitPrimaryIndex(sv2017::PrimaryIndexContext *ctx) {
     if(deps_factory.is_valid_dependency()){
         deps_factory.stop_concat_partials_exclusion();
-        auto p = ctx->getText();
-        deps_factory.add_port_connection_element(p);
+        deps_factory.add_port_connection_element(HDL_net(ctx->getText()));
     }
 }
 
@@ -485,8 +482,7 @@ void sv_visitor::enterPrimaryDot(sv2017::PrimaryDotContext *ctx) {
 void sv_visitor::exitPrimaryDot(sv2017::PrimaryDotContext *ctx) {
     if(deps_factory.is_valid_dependency()){
         deps_factory.stop_concat_partials_exclusion();
-        auto p = ctx->getText();
-        deps_factory.add_port_connection_element(p);
+        deps_factory.add_port_connection_element(HDL_net(ctx->getText()));
     }
 }
 
@@ -499,8 +495,7 @@ void sv_visitor::enterPrimaryRepl(sv2017::PrimaryReplContext *ctx) {
 void sv_visitor::exitPrimaryRepl(sv2017::PrimaryReplContext *ctx) {
     if(deps_factory.is_valid_dependency()){
         deps_factory.stop_concat_partials_exclusion();
-        auto p = ctx->getText();
-        deps_factory.add_port_connection_element(p);
+        deps_factory.add_port_connection_element(HDL_net(ctx->getText()));
     }
 }
 

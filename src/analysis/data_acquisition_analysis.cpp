@@ -44,9 +44,9 @@ void data_acquisition_analysis::analyze(std::shared_ptr<HDL_instance_AST> &ast) 
 
     std::string data_interface;
 
-    for(auto &item:sinks[0]->get_ports()){
-        if(item.first == scope_in_pn){
-            data_interface = item.second[0];
+    for(auto &[port_name, nets]:sinks[0]->get_ports()){
+        if(port_name == scope_in_pn){
+            data_interface = nets[0].get_full_name();
         }
     }
     data_stream ds = {data_interface, 0};
@@ -86,13 +86,13 @@ void data_acquisition_analysis::backtrace_scope_inputs(const std::shared_ptr<HDL
     std::shared_ptr<HDL_instance_AST> if_source;
     std::string if_port;
     for(auto &dep:node->get_dependencies()){
-        for(auto &p:dep->get_ports()){
-            for(std::string &e:p.second){
-                if(e == intf.if_name){
-                    auto spec = dep->get_if_specs()[p.first];
+        for(auto [port_name, nets]:dep->get_ports()){
+            for(auto &e:nets){
+                if(e.get_full_name() == intf.if_name){
+                    auto spec = dep->get_if_specs()[port_name];
                     if(specs_manager.is_output_port(spec[1])){
                         if_source = dep;
-                        if_port = p.first;
+                        if_port = port_name;
                         goto source_found;
                     }
                 }
@@ -113,11 +113,11 @@ void data_acquisition_analysis::backtrace_scope_inputs(const std::shared_ptr<HDL
             }
         }
     } else {
-        for(auto &item:node->get_ports()) {
-            if(item.first == intf.if_name){
-                if(!explored_nodes.contains({node->get_parent()->get_name(), item.second[0]})){
-                    explored_nodes.insert({node->get_parent()->get_name(), item.second[0]});
-                    data_stream ds = {item.second[0], intf.address_offset, intf.static_remap};
+        for(auto &[port_name, nets]:node->get_ports()) {
+            if(port_name == intf.if_name){
+                if(!explored_nodes.contains({node->get_parent()->get_name(), nets[0].get_full_name()})){
+                    explored_nodes.insert({node->get_parent()->get_name(), nets[0].get_full_name()});
+                    data_stream ds = {nets[0].get_full_name(), intf.address_offset, intf.static_remap};
                     backtrace_scope_inputs(node->get_parent(), ds);
                 }
 
@@ -184,8 +184,8 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
         }
     }
 
-    auto port_name = node->get_ports()[in_stream.if_name];
-    auto width = find_datapoint_width(node->get_parent(),  port_name[0]);
+    auto nets = node->get_ports()[in_stream.if_name];
+    auto width = find_datapoint_width(node->get_parent(),  nets[0].get_full_name());
 
     std::bitset<1024> output_signs;
     if(node->has_parameter("OUTPUT_SIGNED")){
@@ -232,10 +232,10 @@ std::vector<data_stream>
 data_acquisition_analysis::process_n_to_1_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream) {
     std::vector<data_stream> ret;
     auto in_port = specs_manager.get_input_port(node->get_type());
-    for(auto &item:node->get_ports()){
-        if(item.first == in_port.first){
-            for(auto &port:item.second){
-                data_stream ds = {port, in_stream.address_offset, in_stream.static_remap};
+    for(auto &[port_name, nets]:node->get_ports()){
+        if(port_name== in_port.first){
+            for(auto &n:nets){
+                data_stream ds = {n.get_full_name(), in_stream.address_offset, in_stream.static_remap};
                 ret.push_back(ds);
             }
         }
@@ -256,9 +256,9 @@ std::vector<data_stream>
 data_acquisition_analysis::process_1_to_n_node(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream) {
     data_stream ret;
     auto in_port = specs_manager.get_input_port(node->get_type());
-    for(auto &item:node->get_ports()){
-        if(item.first == in_port.first){
-            ret.if_name = item.second[0];
+    for(auto &[port_name, nets]:node->get_ports()){
+        if( port_name == in_port.first){
+            ret.if_name = nets[0].get_full_name();
             ret.address_offset = in_stream.address_offset;
             ret.static_remap = in_stream.static_remap;
         }
@@ -279,9 +279,9 @@ data_acquisition_analysis::process_1_to_1_node(const std::shared_ptr<HDL_instanc
         remapping_addr = node->get_parameter_value("REMAP_OFFSET")->get_numeric_value();
     }
 
-    for(auto &item:node->get_ports()){
-        if(item.first == in_port.first){
-            ret.if_name = item.second[0];
+    for(auto &[port_name, nets]:node->get_ports()){
+        if(port_name == in_port.first){
+            ret.if_name = nets[0].get_full_name();
             if(remapping_type == "STATIC"){
                 ret.address_offset = remapping_addr;
                 ret.static_remap = true;

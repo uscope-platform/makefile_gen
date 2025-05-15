@@ -26,6 +26,7 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/parameters/Parameters_map.hpp"
 #include "data_model/documentation/channel_group.hpp"
+#include "data_model/HDL/HDL_net.hpp"
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/unordered_map.hpp>
@@ -51,9 +52,9 @@ public:
     std::shared_ptr<HDL_parameter> get_parameter_value(const std::string& parameter_name) {return parameters.get(parameter_name);};
 
 
-    void add_port_connection(const std::string& port_name, std::vector<std::string> value);
-    void set_ports(const std::unordered_map<std::string, std::vector<std::string>> &p) {ports_map = p;};
-    std::unordered_map<std::string, std::vector<std::string>> get_ports() { return ports_map;};
+    void add_port_connection(const std::string& port_name, std::vector<HDL_net> value);
+    void set_ports(const std::unordered_map<std::string, std::vector<HDL_net>> &p) {ports_map = p;};
+    std::unordered_map<std::string, std::vector<HDL_net>> get_ports() { return ports_map;};
 
     std::string get_name() const {return name;};
     void set_name(const std::string &n) {name = n;};
@@ -86,7 +87,7 @@ public:
 protected:
 
     Parameters_map parameters;
-    std::unordered_map<std::string, std::vector<std::string>> ports_map;
+    std::unordered_map<std::string, std::vector<HDL_net>> ports_map;
     dependency_class dep_class;
     std::string type;
     std::string name;

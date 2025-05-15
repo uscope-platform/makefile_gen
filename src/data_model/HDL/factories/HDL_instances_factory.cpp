@@ -25,7 +25,7 @@ void HDL_instances_factory::add_parameter(const std::string &name, const std::sh
     current_instance.add_parameter(name, p);
 }
 
-void HDL_instances_factory::add_port(const std::string &name, const std::string &value) {
+void HDL_instances_factory::add_port(const std::string &name, const HDL_net &value) {
     current_instance.add_port_connection(name, {value});
 }
 
@@ -45,7 +45,7 @@ void HDL_instances_factory::stop_concat_port() {
     concat_port_data.clear();
 }
 
-void HDL_instances_factory::add_port_connection_element(const std::string &s) {
+void HDL_instances_factory::add_port_connection_element(const HDL_net &s) {
     if(in_concat && exclusion_level == 0){
         concat_port_data.push_back(s);
     }

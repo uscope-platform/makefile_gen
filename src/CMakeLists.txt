@@ -1,60 +1,67 @@
-set(MAKEFILE_GEN_SRCS_I /
-        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/HDL_ast_builder.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/data_acquisition_analysis.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/control_bus_analysis.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/HDL_loop_solver.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/analysis/proxy_bus_analysis.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Dependency_resolver.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/uplatform/application_definition_generator.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/uplatform/peripheral_definition_generator.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Xilinx/Vivado_manager.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/new_app_generator.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Auxiliary_resolver.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/project_generator_base.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Lattice/Radiant_manager.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/Toolchain_manager.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/Backend/python_script_runner.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_Resource.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_instance.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/HDL_instance_AST.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/factories/HDL_instances_factory.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/factories/HDL_modules_factory.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/factories/HDL_interfaces_factory.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/factories/HDL_loops_factory.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/factories/HDL_parameters_factory.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/factories/resource_factory_base.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/HDL_parameter.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/Expression_component.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/Parameter_processor.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/Initialization_list.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/HDL_function.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_mapping/bus_specs_manager.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/bus_mapping/mapper_bus_component.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/settings_store.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/data_store.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/DataFile.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/mdarray.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/module_documentation.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/register_documentation.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/field_documentation.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/processor_instance.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/channel_group.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/documentation/channel.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Depfile.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Script.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/Constraints.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/sv_visitor.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/sv_analyzer.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/Repository_walker.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/vhdl_analyzer.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/documentation_analyzer.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/analysis/vhdl_visitor.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/frontend/cache_manager.cpp /
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/factories/HDL_functions_factory.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/data_model/HDL/parameters/Expression_evaluator.cpp
+
+
+add_library(makefile_gen_lib STATIC)
+target_sources(makefile_gen_lib
+    PRIVATE
+    analysis/HDL_ast_builder.cpp /
+    analysis/data_acquisition_analysis.cpp /
+    analysis/control_bus_analysis.cpp /
+    analysis/HDL_loop_solver.cpp /
+    analysis/proxy_bus_analysis.cpp /
+    Backend/Dependency_resolver.cpp /
+    Backend/uplatform/application_definition_generator.cpp /
+    Backend/uplatform/peripheral_definition_generator.cpp /
+    Backend/Xilinx/Vivado_manager.cpp /
+    Backend/new_app_generator.cpp /
+    Backend/Auxiliary_resolver.cpp /
+    Backend/project_generator_base.cpp /
+    Backend/Lattice/Radiant_manager.cpp /
+    Backend/Toolchain_manager.cpp /
+    Backend/python_script_runner.cpp /
+    data_model/HDL/HDL_Resource.cpp /
+    data_model/HDL/HDL_instance.cpp /
+    data_model/HDL/HDL_instance_AST.cpp /
+    data_model/HDL/factories/HDL_instances_factory.cpp /
+    data_model/HDL/factories/HDL_modules_factory.cpp /
+    data_model/HDL/factories/HDL_interfaces_factory.cpp /
+    data_model/HDL/factories/HDL_loops_factory.cpp /
+    data_model/HDL/factories/HDL_parameters_factory.cpp /
+    data_model/HDL/factories/resource_factory_base.cpp /
+    data_model/HDL/parameters/HDL_parameter.cpp /
+    data_model/HDL/parameters/Expression_component.cpp /
+    data_model/HDL/parameters/Parameter_processor.cpp /
+    data_model/HDL/parameters/Initialization_list.cpp /
+    data_model/HDL/parameters/HDL_function.cpp /
+    data_model/bus_mapping/bus_specs_manager.cpp /
+    data_model/bus_mapping/mapper_bus_component.cpp /
+    data_model/settings_store.cpp /
+    data_model/data_store.cpp /
+    data_model/DataFile.cpp /
+    data_model/mdarray.cpp /
+    data_model/documentation/module_documentation.cpp /
+    data_model/documentation/register_documentation.cpp /
+    data_model/documentation/field_documentation.cpp /
+    data_model/documentation/processor_instance.cpp /
+    data_model/documentation/channel_group.cpp /
+    data_model/documentation/channel.cpp /
+    data_model/Depfile.cpp /
+    data_model/Script.cpp /
+    data_model/Constraints.cpp /
+    frontend/analysis/sv_visitor.cpp /
+    frontend/analysis/sv_analyzer.cpp /
+    frontend/Repository_walker.cpp /
+    frontend/analysis/vhdl_analyzer.cpp /
+    frontend/analysis/documentation_analyzer.cpp /
+    frontend/analysis/vhdl_visitor.cpp /
+    frontend/cache_manager.cpp /
+    data_model/HDL/factories/HDL_functions_factory.cpp
+    data_model/HDL/parameters/Expression_evaluator.cpp
+    data_model/HDL/HDL_net.cpp
 )
 
-set(MAKEFILE_GEN_SRCS ${MAKEFILE_GEN_SRCS_I}  PARENT_SCOPE)
+target_link_libraries(makefile_gen_lib PUBLIC mgp_sv_lib)
+target_link_libraries(makefile_gen_lib PUBLIC mgp_vh_lib)
+target_link_libraries(makefile_gen_lib PUBLIC Threads::Threads cereal nlohmann_json::nlohmann_json OpenSSL::SSL gtest::gtest)
 
 set(TEMPLATE_FILES /
         ../templates/make_project_xlnx.j2 /
@@ -62,16 +69,13 @@ set(TEMPLATE_FILES /
         ../templates/make_bitstream_xlnx.j2)
 
 
-add_executable(makefile_gen ${MAKEFILE_GEN_SRCS_I} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+add_executable(makefile_gen ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set_property(TARGET makefile_gen PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
 endif(CMAKE_BUILD_TYPE STREQUAL "Release")
 
-target_link_libraries(makefile_gen PRIVATE mgp_sv_lib)
-target_link_libraries(makefile_gen PRIVATE mgp_vh_lib)
-
-target_link_libraries(makefile_gen PRIVATE Threads::Threads cereal nlohmann_json::nlohmann_json OpenSSL::SSL CLI11::CLI11 gtest::gtest)
+target_link_libraries(makefile_gen PRIVATE makefile_gen_lib  CLI11::CLI11 )
 
 ## INSTALLATION SECTION
 

@@ -57,8 +57,13 @@ bool HDL_parameter::is_empty() {
     bool ret = true;
 
     ret &= name.empty();
-    ret &= string_value_array.empty();
-    ret &= numeric_value_array.empty();
+    if(type == string_parameter) {
+        ret &= string_value_array.empty() || string_value_array.size() == 1 && string_value_array[0].empty();
+    } else if(type == numeric_parameter) {
+        ret &= numeric_value_array.empty();
+    }
+
+
     ret &= expression_components.empty();
     return ret;
 }

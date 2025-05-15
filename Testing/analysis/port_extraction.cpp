@@ -35,9 +35,9 @@ std::string test_pattern = R"(
     analyzer.cleanup_content("`(.*)");
     auto inst = analyzer.analyze()[0].get_dependencies()[0];
     auto ports = inst.get_ports();
-    std::unordered_map<std::string, std::vector<std::string>> check_ports;
-    check_ports["clock"] = {"clock"};
-    check_ports["stream_in"] = {"buck_merged", "dab_merged"};
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["stream_in"] = {HDL_net("buck_merged"), HDL_net("dab_merged")};
 
     ASSERT_EQ(ports, check_ports);
 }
@@ -59,10 +59,9 @@ TEST(port_extraction, concat_simple_slicing) {
     analyzer.cleanup_content("`(.*)");
     auto inst = analyzer.analyze()[0].get_dependencies()[0];
     auto ports = inst.get_ports();
-    std::unordered_map<std::string, std::vector<std::string>> check_ports;
-    check_ports["clock"] = {"clock"};
-    check_ports["stream_in"] = {"m_wdata[N]", "m_wstrb[N]"};
-
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["stream_in"] = {HDL_net("m_wdata[N]"), HDL_net("m_wstrb[N]")};
     ASSERT_EQ(ports, check_ports);
 }
 
@@ -84,10 +83,9 @@ TEST(port_extraction, concat_complex_slicing) {
     analyzer.cleanup_content("`(.*)");
     auto inst = analyzer.analyze()[0].get_dependencies()[0];
     auto ports = inst.get_ports();
-    std::unordered_map<std::string, std::vector<std::string>> check_ports;
-    check_ports["clock"] = {"clock"};
-    check_ports["stream_in"] = {"S_AXI_AWADDR[N*ADDR_WIDTH+:ADDR_WIDTH]", "S_AXI_AWPROT[N*3+:3]"};
-
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["stream_in"] = {HDL_net("S_AXI_AWADDR[N*ADDR_WIDTH+:ADDR_WIDTH]"), HDL_net("S_AXI_AWPROT[N*3+:3]")};
     ASSERT_EQ(ports, check_ports);
 }
 
@@ -108,10 +106,9 @@ TEST(port_extraction, concat_interface_component) {
     analyzer.cleanup_content("`(.*)");
     auto inst = analyzer.analyze()[0].get_dependencies()[0];
     auto ports = inst.get_ports();
-    std::unordered_map<std::string, std::vector<std::string>> check_ports;
-    check_ports["clock"] = {"clock"};
-    check_ports["stream_in"] = {"axil.WDATA", "axil.WSTRB"};
-
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["stream_in"] = {HDL_net("axil.WDATA"), HDL_net("axil.WSTRB")};
     ASSERT_EQ(ports, check_ports);
 }
 
@@ -132,9 +129,9 @@ TEST(port_extraction, nested_concat_port) {
     analyzer.cleanup_content("`(.*)");
     auto inst = analyzer.analyze()[0].get_dependencies()[0];
     auto ports = inst.get_ports();
-    std::unordered_map<std::string, std::vector<std::string>> check_ports;
-    check_ports["clock"] = {"clock"};
-    check_ports["stream_in"] = {"OUTPUT_SIGNED[data_in.dest]", "{DATA_PATH_WIDTH-1{1'b0}}"};
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["stream_in"] = {HDL_net("OUTPUT_SIGNED[data_in.dest]"), HDL_net("{DATA_PATH_WIDTH-1{1'b0}}")};
 
     ASSERT_EQ(ports, check_ports);
 }
@@ -156,9 +153,9 @@ TEST(port_extraction, concat_literal) {
     analyzer.cleanup_content("`(.*)");
     auto inst = analyzer.analyze()[0].get_dependencies()[0];
     auto ports = inst.get_ports();
-    std::unordered_map<std::string, std::vector<std::string>> check_ports;
-    check_ports["clock"] = {"clock"};
-    check_ports["stream_in"] = {"1'b0", "test"};
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["stream_in"] = {HDL_net("1'b0"), HDL_net("test")};
 
     ASSERT_EQ(ports, check_ports);
 }

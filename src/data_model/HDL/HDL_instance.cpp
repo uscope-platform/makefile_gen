@@ -37,7 +37,7 @@ void HDL_instance::add_parameter(const std::string& parameter_name, const std::s
     parameters.insert(p);
 }
 
-void HDL_instance::add_port_connection(const std::string& port_name, std::vector<std::string> value) {
+void HDL_instance::add_port_connection(const std::string& port_name, std::vector<HDL_net> value) {
     ports_map[port_name] = std::move(value);
 }
 
@@ -73,8 +73,14 @@ nlohmann::json HDL_instance::dump() {
 
     ret["instance_name"] = name;
     ret["instance_type"] = type;
-    ret["ports_map"] = ports_map;
 
+    std::unordered_map<std::string, std::vector<std::string>> port_map_dump = {};
+    for(auto &[name, nets] :ports_map) {
+        for(auto &n:nets) {
+            port_map_dump[name].push_back(n.get_full_name());
+        }
+    }
+    ret["ports_map"] = port_map_dump;
 
     std::map<std::string, nlohmann::json> params_vect;
     for(auto &param:parameters){

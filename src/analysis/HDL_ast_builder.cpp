@@ -172,21 +172,21 @@ HDL_instance_AST HDL_ast_builder::specialize_instance(HDL_instance_AST &i, int64
     specialized_d.set_repeated(true);
     specialized_d.set_repetition_idx(idx);
 
-    std::unordered_map<std::string, std::vector<std::string>> new_ports;
+    std::unordered_map<std::string, std::vector<HDL_net>> new_ports;
 
     std::string accessor = "[" + idx_name + "]";
 
-    for(auto &p:specialized_d.get_ports()){
-        std::vector<std::string> port_content;
-        for(auto &conn:p.second){
-            if(conn.length()>accessor.length() && conn.compare(conn.length()-accessor.length(), accessor.length(), accessor) == 0){
-                auto base = conn.substr(0, conn.length()-accessor.length());
-                port_content.push_back(base);
+    for(auto &[port_name, nets]:specialized_d.get_ports()){
+        std::vector<HDL_net> port_content;
+        for(auto &n:nets){
+            if(n.get_full_name().length()>accessor.length() && n.get_full_name().compare(n.get_full_name().length()-accessor.length(), accessor.length(), accessor) == 0){
+                auto base = n.get_full_name().substr(0, n.get_full_name().length()-accessor.length());
+                port_content.emplace_back(base);
             } else {
-                port_content.push_back(conn);
+                port_content.push_back(n);
             }
         }
-        new_ports[p.first] = port_content;
+        new_ports[port_name] = port_content;
     }
     specialized_d.set_ports(new_ports);
     return specialized_d;

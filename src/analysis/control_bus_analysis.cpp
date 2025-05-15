@@ -72,16 +72,24 @@ std::vector<analysis_context> control_bus_analysis::process_simple_interconnect(
 
     auto masters = expand_bus_array(masters_ifs, ic->get_parent(), addresses);
 
-    for(int i = 0; i<masters.size(); i++){
+    for(auto & master : masters){
         auto dependencies=  inst.node->get_parent()->get_dependencies();
         for(auto &dep:dependencies){
-            for(auto &port:dep->get_ports()){
-                if(port.second.size()==1){
-                    if(port.second.front() == masters[i].name && dep->get_repetition_idx() == masters[i].idx){
-                        analysis_context ctx = {dep, port.first, masters[i].address , false,
+            for(auto &[port_name, nets]:dep->get_ports()){
+                bool stop = dep->get_name() == "chain";
+                if(nets.size()==1){
+                    auto net_name = nets.front().get_full_name().substr(0, nets.front().get_full_name().find('['));
+                    if(net_name == master.name && dep->get_repetition_idx() == master.idx){
+
+                        if(specs_manager.is_interconnect(dep->get_type())) {
+                            if(specs_manager.get_interconnect_source_port(dep->get_type()) == port_name) {
+                                continue;
+                            }
+                        }
+                        analysis_context ctx = {dep, port_name, master.address , false,
                                                 inst.current_module_top, inst.current_module_prefix, inst.proxy};
                         ret_val.push_back(ctx);
-                        if(masters[i].in_array) goto break2;
+                        if(master.in_array) goto break2;
                     }
                 }
 
@@ -93,54 +101,6 @@ std::vector<analysis_context> control_bus_analysis::process_simple_interconnect(
     return ret_val;
 }
 
-std::vector<analysis_context> control_bus_analysis::process_parametric_interconnect(const analysis_context &inst) {
-    nlohmann::ordered_json bus_layout;
-
-    auto node = inst.node->get_parent();
-
-    auto instance_name = node->get_parameter_value("PRAGMA_MKFG_PARAMETRIZED_INTERCONNECT");
-    auto layout = node->get_parameter_value("PRAGMA_MKFG_BUS_LAYOUT")->get_string_value();
-    std::string repl = R"(")";
-    layout = std::regex_replace(layout, std::regex("\\\\"), repl);
-
-    nlohmann::json interconnect_specs = nlohmann::ordered_json::parse(layout);
-
-
-    std::vector<int64_t> addresses;
-    std::vector<std::string> modules;
-    std::vector<std::string> interfaces;
-
-    int64_t base_address = node->get_parameter_value(interconnect_specs["base"])->get_numeric_value();
-    int64_t offset = std::stoll((std::string) interconnect_specs["offset"], nullptr, 0);
-    int64_t segment_base = 0;
-    for(auto &item:interconnect_specs["map"]){
-        int64_t len;
-        if(node->get_parameters().contains(item["len"])){
-            len = node->get_parameter_value(item["len"])->get_numeric_value();
-        } else {
-           len = std::stoll((std::string) item["len"], nullptr, 0);
-        }
-        for(int i = 0; i<len; i++){
-            addresses.push_back(base_address + (segment_base+i)*offset);
-            interfaces.push_back(item["if"]);
-            modules.push_back(item["mod"]);
-        }
-        segment_base = len;
-    }
-
-
-    std::vector<analysis_context> res;
-    for(int i = 0; i<modules.size(); i++){
-        for(auto &d:node->get_dependencies()){
-            if(d->get_name() == modules[i]){
-                analysis_context a = {d, interfaces[i], addresses[i], true,
-                                      inst.current_module_top, inst.current_module_prefix, inst.proxy};
-                res.push_back(a);
-            }
-        }
-    }
-    return res;
-}
 
 std::vector<analysis_context> control_bus_analysis::process_nested_module(const analysis_context &inst) {
     std::vector<analysis_context> ret_stack;
@@ -156,10 +116,10 @@ std::vector<analysis_context> control_bus_analysis::process_nested_module(const 
 
     if(inst.parametric){
         for(auto &dep:inst.node->get_dependencies()){
-            for(auto &connection:dep->get_ports()){
-                for(auto &item:connection.second){
-                    if(item == inst.interface){
-                        analysis_context ctx = {dep, connection.first, inst.address,
+            for(auto &[port_name, nets]:dep->get_ports()){
+                for(auto &item:nets){
+                    if(item.get_full_name() == inst.interface){
+                        analysis_context ctx = {dep, port_name, inst.address,
                                                 inst.parametric, inst.current_module_top,  inst.current_module_prefix, tgt};
                         ret_stack.push_back(ctx);
                         goto breakNested2;
@@ -170,11 +130,11 @@ std::vector<analysis_context> control_bus_analysis::process_nested_module(const 
         }
     } else{
         for(auto &dep:inst.node->get_dependencies()){
-            for(auto &connection:dep->get_ports()){
-                for(auto &item:connection.second){
-                    auto pn = item.substr(0, item.find('[')); // TODO: This is a bodge to support array of instances, proper suppoty should be implemented
+            for(auto &[port_name, nets]:dep->get_ports()){
+                for(auto &item:nets){
+                    auto pn = item.get_full_name().substr(0, item.get_full_name().find('[')); // TODO: This is a bodge to support array of instances, proper suppoty should be implemented
                     if(pn == inst.interface){
-                        analysis_context ctx = {dep, connection.first,
+                        analysis_context ctx = {dep, port_name,
                                                 inst.address, inst.parametric, inst.current_module_top, inst.current_module_prefix, tgt};
                         ret_stack.push_back(ctx);
                         goto breakNested;
@@ -218,13 +178,13 @@ void control_bus_analysis::process_leaf_node(const analysis_context &leaf) {
 }
 
 std::vector<bus_context>
-control_bus_analysis::expand_bus_array( const std::vector<std::string> &s, const std::shared_ptr<HDL_instance_AST> &parent,
+control_bus_analysis::expand_bus_array( const std::vector<HDL_net> &s, const std::shared_ptr<HDL_instance_AST> &parent,
                                         const std::vector<int64_t> &a ) {
     std::vector<bus_context> ret;
     int address_idx = 0;
     for(auto  &m: s){
         for(auto &dep:parent->get_dependencies()){
-            if(m == dep->get_name()){
+            if(m.get_full_name() == dep->get_name()){
                 auto q = dep->get_array_quantifier();
 
                 if(q != nullptr){
@@ -232,7 +192,7 @@ control_bus_analysis::expand_bus_array( const std::vector<std::string> &s, const
                         bus_context b;
                         b.address = a[address_idx];
                         address_idx++;
-                        b.name = m;
+                        b.name = m.get_full_name();
                         b.in_array = true;
                         b.idx = i;
                         ret.push_back(b);
@@ -242,7 +202,7 @@ control_bus_analysis::expand_bus_array( const std::vector<std::string> &s, const
                     bus_context b;
                     b.address = a[address_idx];
                     address_idx++;
-                    b.name = m;
+                    b.name = m.get_full_name();
                     b.in_array = false;
                     b.idx = 0;
                     ret.push_back(b);

@@ -96,10 +96,10 @@ TEST( analysis_test , sv_module) {
     auto resource = analyzer.analyze()[0];
 
     HDL_instance d3("SC", "SyndromeCalculator", module);
-    d3.add_port_connection("clock", {"clock"});
-    d3.add_port_connection("reset", {"reset"});
-    d3.add_port_connection("data_in", {"data_in"});
-    d3.add_port_connection("syndrome", {"data_out"});
+    d3.add_port_connection("clock", {HDL_net("clock")});
+    d3.add_port_connection("reset", {HDL_net("reset")});
+    d3.add_port_connection("data_in", {HDL_net("data_in")});
+    d3.add_port_connection("syndrome", {HDL_net("data_out")});
     auto p = std::make_shared<HDL_parameter>();
     p->set_name("TEST_PARAM");
     Expression_component e("param");
@@ -191,9 +191,9 @@ TEST(analysis_test, port_concat_assignment) {
     check_dependency.set_type("axil_crossbar_interface");
     check_dependency.set_name("axi_xbar");
     check_dependency.set_dependency_class(module);
-    check_dependency.add_port_connection("clock", {"clock"});
-    check_dependency.add_port_connection("slaves", {"axi_in"});
-    check_dependency.add_port_connection("masters", {"timebase_axi", "gpio_axi", "fcore_axi"});
+    check_dependency.add_port_connection("clock", {HDL_net("clock")});
+    check_dependency.add_port_connection("slaves", {HDL_net("axi_in")});
+    check_dependency.add_port_connection("masters", {HDL_net("timebase_axi"), HDL_net("gpio_axi"), HDL_net("fcore_axi")});
 
     ASSERT_EQ(dep, check_dependency);
 }
