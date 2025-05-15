@@ -97,6 +97,52 @@ TEST(port_extraction, array_range_port) {
     ASSERT_EQ(ports, check_ports);
 }
 
+
+
+TEST(port_extraction, concat_range) {
+    std::string test_pattern = R"(
+        module test_mod #()();
+
+            axi_stream_combiner #(
+            ) scope_combinator (
+                .clock(clock),
+                .stream_in({S_AXI_AWADDR[N+:3],S_AXI_AWPROT[C-:1]})
+            );
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto inst = analyzer.analyze()[0].get_dependencies()[0];
+    auto ports = inst.get_ports();
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["stream_in"] = {HDL_net("S_AXI_AWADDR"), HDL_net("S_AXI_AWPROT")};
+    check_ports["stream_in"][0].array_accessor.set_type(expression_parameter);
+    check_ports["stream_in"][0].array_accessor.set_expression_components({
+        Expression_component("N")
+    });
+
+    check_ports["stream_in"][0].array_range.set_type(expression_parameter);
+    check_ports["stream_in"][0].array_range.set_expression_components({
+    Expression_component("3")
+    });
+    check_ports["stream_in"][0].range_type = HDL_net::increasing_range;
+
+    check_ports["stream_in"][1].array_accessor.set_type(expression_parameter);
+    check_ports["stream_in"][1].array_accessor.set_expression_components({
+        Expression_component("C")
+    });
+
+    check_ports["stream_in"][1].array_range.set_type(expression_parameter);
+    check_ports["stream_in"][1].array_range.set_expression_components({
+    Expression_component("1"),
+    });
+    check_ports["stream_in"][1].range_type = HDL_net::decreasing_range;
+    ASSERT_EQ(ports, check_ports);
+}
+
+
 TEST(port_extraction, concat_simple_slicing) {
     std::string test_pattern = R"(
         module test_mod #()();

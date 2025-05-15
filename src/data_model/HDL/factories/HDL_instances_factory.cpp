@@ -49,14 +49,11 @@ void HDL_instances_factory::stop_concat_port() {
 }
 
 void HDL_instances_factory::add_port_connection_element(const std::string &s) {
-    if(in_concat) {
-        if(!in_bit_selection){
-            net_factory.new_net(s);
-        } else {
-            net_factory.add_accessor_component(s);
-        }
-    }
-    if(in_array_range==1) {
+    if(in_bit_selection) {
+        net_factory.add_accessor_component(s);
+    } else if(in_concat && in_array_range == 0) {
+        net_factory.new_net(s);
+    } else if(in_array_range==1) {
         net_factory.new_net(s);
         in_array_range++;
     }else if(in_array_range==2) {
