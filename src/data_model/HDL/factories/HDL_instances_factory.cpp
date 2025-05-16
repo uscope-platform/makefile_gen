@@ -92,7 +92,7 @@ void HDL_instances_factory::start_replication() {
 
 void HDL_instances_factory::stop_replication() {
     in_replication = 0;
-    current_instance.add_port_connection(port_name, net_factory.get_nets());
+    if (!in_concatenation()) current_instance.add_port_connection(port_name, net_factory.get_nets());
 }
 
 void HDL_instances_factory::start_interface() {

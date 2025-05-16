@@ -35,6 +35,14 @@ public:
     range_type_t range_type = explicit_range;
     std::string get_full_name() const;
 
+    bool is_replication() {
+        return !replication_size.is_empty();
+    }
+    bool is_array() {
+        return !array_accessor.is_empty();
+    }
+
+
     template<class Archive>
     void serialize( Archive & ar ) {
         ar(name, array_accessor, array_range,replication_size, replication_target, range_type);

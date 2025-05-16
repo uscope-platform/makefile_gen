@@ -16,13 +16,16 @@
 #include "data_model/HDL/factories/HDL_net_factory.hpp"
 
 void HDL_net_factory::new_net(const std::string &name) {
-    if(!current_net.name.empty()) nets.push_back(current_net);
+    if(!current_net.name.empty() || current_net.is_array() || current_net.is_replication()) nets.push_back(current_net);
     current_net = HDL_net(name);
 }
 
 std::vector<HDL_net> HDL_net_factory::get_nets() {
-    nets.push_back(current_net);
-    return nets;
+    auto ret = nets;
+    ret.push_back(current_net);
+    nets.clear();
+    current_net = HDL_net();
+    return ret;
 }
 
 void HDL_net_factory::add_accessor_component(const std::string &c) {

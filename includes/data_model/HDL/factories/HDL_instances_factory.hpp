@@ -31,6 +31,7 @@ public:
 
     void add_port_connection_element(const std::string &s);
     bool is_valid_dependency() const{return valid_instance;}
+    bool in_concatenation() const {return in_concat;}
     bool is_in_array_range() const { return in_array_range != 0;}
     bool is_interface() const {return in_interface;}
     void start_bit_selection();
