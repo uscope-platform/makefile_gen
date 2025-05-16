@@ -391,11 +391,6 @@ void sv_visitor::exitNamed_port_connection(sv2017::Named_port_connectionContext 
             deps_factory.stop_concat_port();
         }
     }
-    if(ctx->port_replication_connection() != nullptr){
-        if(deps_factory.is_valid_dependency()){
-            deps_factory.stop_replication_port();
-        }
-    }
 }
 
 void sv_visitor::enterNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) {
@@ -519,7 +514,7 @@ void sv_visitor::enterPrimaryRepl(sv2017::PrimaryReplContext *ctx) {
 
 void sv_visitor::exitPrimaryRepl(sv2017::PrimaryReplContext *ctx) {
     if(deps_factory.is_valid_dependency()){
-        deps_factory.add_port_connection_element(ctx->getText());
+        //deps_factory.add_port_connection_element(ctx->getText());
     }
 }
 
@@ -574,6 +569,9 @@ void sv_visitor::exitFirst_range_identifier(sv2017::First_range_identifierContex
 
 void sv_visitor::enterReplication(sv2017::ReplicationContext *ctx) {
     params_factory.start_replication();
+    if(deps_factory.is_valid_dependency()) {
+        deps_factory.start_replication();
+    }
 }
 
 
@@ -584,6 +582,9 @@ void sv_visitor::exitReplication_size(sv2017::Replication_sizeContext *ctx) {
 
 void sv_visitor::exitReplication(sv2017::ReplicationContext *ctx) {
     params_factory.stop_replication();
+    if(deps_factory.is_valid_dependency()) {
+        deps_factory.stop_replication();
+    }
 }
 
 void sv_visitor::enterReplication_assignment(sv2017::Replication_assignmentContext *ctx) {
@@ -602,9 +603,6 @@ void sv_visitor::exitConcatenation(sv2017::ConcatenationContext *ctx) {
     params_factory.stop_concatenation();
 }
 
-void sv_visitor::exitPort_replication_connection(sv2017::Port_replication_connectionContext *ctx) {
-    deps_factory.stop_replication();
-}
 
 
 void sv_visitor::enterData_type_or_implicit(sv2017::Data_type_or_implicitContext *ctx) {

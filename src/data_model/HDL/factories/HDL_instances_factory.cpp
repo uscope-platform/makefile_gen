@@ -54,10 +54,6 @@ void HDL_instances_factory::start_replication_port(const std::string &n) {
     port_name = n;
 }
 
-void HDL_instances_factory::stop_replication_port() {
-    in_replication = 0;
-    current_instance.add_port_connection(port_name, net_factory.get_nets());
-}
 
 void HDL_instances_factory::add_port_connection_element(const std::string &s) {
     if(in_replication==1) {
@@ -88,12 +84,22 @@ void HDL_instances_factory::stop_bit_selection() {
     in_bit_selection = false;
 }
 
+void HDL_instances_factory::start_replication() {
+    net_factory.new_net("");
+    in_replication = 1;
+}
+
+void HDL_instances_factory::stop_replication() {
+    in_replication = 0;
+    current_instance.add_port_connection(port_name, net_factory.get_nets());
+}
+
 void HDL_instances_factory::start_interface() {
     in_interface = true;
 }
 
 void HDL_instances_factory::stop_interface() {
-    in_interface = true;
+    in_interface = false;
 }
 
 void HDL_instances_factory::advance_array_range_phase(const std::string &op) {

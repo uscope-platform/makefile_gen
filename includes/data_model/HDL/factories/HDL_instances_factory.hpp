@@ -28,7 +28,6 @@ public:
     void start_concat_port(const std::string &n);
     void stop_concat_port();
     void start_replication_port(const std::string &n);
-    void stop_replication_port();
 
     void add_port_connection_element(const std::string &s);
     bool is_valid_dependency() const{return valid_instance;}
@@ -37,8 +36,8 @@ public:
     void start_bit_selection();
     void stop_bit_selection();
 
-    void start_replication() {in_replication = 1;}
-    void stop_replication() {in_replication = 0;}
+    void start_replication();
+    void stop_replication();
     void advance_replication() {in_replication = 2;}
 
     void start_interface();

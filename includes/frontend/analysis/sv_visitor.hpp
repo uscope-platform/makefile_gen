@@ -129,7 +129,6 @@ public:
     void enterConcatenation(sv2017::ConcatenationContext *ctx) override;
     void exitConcatenation(sv2017::ConcatenationContext *ctx) override;
 
-    void exitPort_replication_connection(sv2017::Port_replication_connectionContext *ctx) override;
 
     void enterReplication(sv2017::ReplicationContext *ctx) override;
     void exitReplication(sv2017::ReplicationContext *ctx) override;
