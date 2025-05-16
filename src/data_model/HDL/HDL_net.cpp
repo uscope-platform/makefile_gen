@@ -16,17 +16,14 @@
 #include "data_model/HDL/HDL_net.hpp"
 
 std::string HDL_net::get_full_name() const {
-    if(array_accessor.get_type() == numeric_parameter) {
-        return name + std::to_string(array_accessor.get_numeric_value());
-    } else {
-        return name + array_accessor.get_string_value();
-    }
+
+
+    return name + Expression_component::print_expression(selection.accessor);
 
 }
 
 nlohmann::json HDL_net::dump() {
     nlohmann::json ret;
     ret["name"] = name;
-    if(!array_accessor.is_empty()) ret["index"] = array_accessor.dump();
     return ret;
 }

@@ -25,7 +25,7 @@ public:
     std::vector<HDL_net> get_nets();
     void add_accessor_component(const std::string &c);
     void add_range_component(const std::string &c);
-    void set_range_type(HDL_net::range_type_t t);
+    void set_range_type(HDL_selection::range_type_t t);
     void add_replication_size(const std::string &c);
     void add_replication_target(const std::string &c);
 private:

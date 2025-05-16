@@ -22,38 +22,58 @@
 
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
+
+struct HDL_selection {
+    Expression accessor;
+    Expression range;
+    enum range_type_t{ explicit_range, increasing_range, decreasing_range};
+    range_type_t type = explicit_range;
+
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(accessor, range,type);
+    }
+
+
+    friend bool operator==(const HDL_selection &lhs, const HDL_selection &rhs) {
+        bool retval =true;
+        retval &= lhs.accessor == rhs.accessor;
+        retval &= lhs.range == rhs.range;
+        retval &= lhs.type == rhs.type;
+        return retval;
+    }
+
+};
+
+
 class HDL_net {
 public:
     HDL_net() = default;
     explicit HDL_net(const std::string &s) {name = s;}
     std::string name;
-    HDL_parameter array_accessor;
-    HDL_parameter array_range;
-    HDL_parameter replication_size;
+
+    HDL_selection selection;
     HDL_parameter replication_target;
-    enum range_type_t{ explicit_range, increasing_range, decreasing_range};
-    range_type_t range_type = explicit_range;
+    HDL_parameter replication_size;
     std::string get_full_name() const;
 
     bool is_replication() {
         return !replication_size.is_empty();
     }
     bool is_array() {
-        return !array_accessor.is_empty();
+        return !selection.accessor.empty();
     }
 
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, array_accessor, array_range,replication_size, replication_target, range_type);
+        ar(name, selection,replication_size, replication_target);
     }
 
     friend bool operator==(const HDL_net &lhs, const HDL_net &rhs) {
         bool retval =true;
         retval &= lhs.name == rhs.name;
-        retval &= lhs.array_accessor == rhs.array_accessor;
-        retval &= lhs.range_type == rhs.range_type;
-        retval &= lhs.array_range == rhs.array_range;
+        retval &= lhs.selection == rhs.selection;
         retval &= lhs.replication_size == rhs.replication_size;
         retval &= lhs.replication_target == rhs.replication_target;
         return retval;

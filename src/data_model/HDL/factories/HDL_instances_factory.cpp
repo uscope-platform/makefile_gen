@@ -123,9 +123,9 @@ void HDL_instances_factory::start_array_range() {
 }
 
 void HDL_instances_factory::advance_array_range_phase(const std::string &op) {
-    if(op == "+") net_factory.set_range_type(HDL_net::increasing_range);
-    else if(op == "-") net_factory.set_range_type(HDL_net::decreasing_range);
-    else net_factory.set_range_type(HDL_net::explicit_range);
+    if(op == "+") net_factory.set_range_type(HDL_selection::increasing_range);
+    else if(op == "-") net_factory.set_range_type(HDL_selection::decreasing_range);
+    else net_factory.set_range_type(HDL_selection::explicit_range);
     in_array_range = 3;
 }
 

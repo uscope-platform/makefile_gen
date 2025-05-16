@@ -85,15 +85,9 @@ TEST(port_extraction, array_range_port) {
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
     check_ports["clock"] = {HDL_net("clock")};
     check_ports["stream_in"] = {HDL_net("S_AXI_AWADDR")};
-    check_ports["stream_in"][0].array_accessor.set_type(expression_parameter);
-    check_ports["stream_in"][0].array_accessor.set_expression_components({
-        Expression_component("3"),
-    });
-    check_ports["stream_in"][0].array_range.set_type(expression_parameter);
-    check_ports["stream_in"][0].array_range.set_expression_components({
-    Expression_component("1"),
-    });
-    check_ports["stream_in"][0].range_type = HDL_net::increasing_range;
+    check_ports["stream_in"][0].selection.accessor = {Expression_component("3")};
+    check_ports["stream_in"][0].selection.range = {Expression_component("1")};
+    check_ports["stream_in"][0].selection.type = HDL_selection::increasing_range;
     ASSERT_EQ(ports, check_ports);
 }
 
@@ -118,25 +112,15 @@ TEST(port_extraction, concat_range) {
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
     check_ports["clock"] = {HDL_net("clock")};
     check_ports["stream_in"] = {HDL_net("S_AXI_AWADDR"), HDL_net("S_AXI_AWPROT")};
-    check_ports["stream_in"][0].array_accessor.set_type(expression_parameter);
-    check_ports["stream_in"][0].array_accessor.set_expression_components({
-        Expression_component("N")
-    });
 
-    check_ports["stream_in"][0].array_range.set_type(expression_parameter);
-    check_ports["stream_in"][0].array_range.set_expression_components({
-    Expression_component("3")
-    });
-    check_ports["stream_in"][0].range_type = HDL_net::increasing_range;
+    check_ports["stream_in"][0].selection.accessor = {Expression_component("N")};
+    check_ports["stream_in"][0].selection.range = {Expression_component("3")};
+    check_ports["stream_in"][0].selection.type = HDL_selection::increasing_range;
 
-    check_ports["stream_in"][1].array_accessor.set_type(expression_parameter);
-    check_ports["stream_in"][1].array_accessor.set_expression_components({
-        Expression_component("C")
-    });
+    check_ports["stream_in"][1].selection.accessor = {Expression_component("C")};
+    check_ports["stream_in"][1].selection.range = {Expression_component("1")};
+    check_ports["stream_in"][1].selection.type = HDL_selection::decreasing_range;
 
-    check_ports["stream_in"][1].array_range.set_type(expression_parameter);
-    check_ports["stream_in"][1].array_range.set_expression_components({Expression_component("1")});
-    check_ports["stream_in"][1].range_type = HDL_net::decreasing_range;
     ASSERT_EQ(ports, check_ports);
 }
 
@@ -160,10 +144,10 @@ TEST(port_extraction, concat_simple_slicing) {
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
     check_ports["clock"] = {HDL_net("clock")};
     check_ports["stream_in"] = {HDL_net("m_wdata"), HDL_net("m_wstrb")};
-    check_ports["stream_in"][0].array_accessor.set_type(expression_parameter);
-    check_ports["stream_in"][0].array_accessor.add_component(Expression_component("N"));
-    check_ports["stream_in"][1].array_accessor.set_type(expression_parameter);
-    check_ports["stream_in"][1].array_accessor.add_component(Expression_component("N"));
+
+
+    check_ports["stream_in"][0].selection.accessor = {Expression_component("N")};
+    check_ports["stream_in"][1].selection.accessor = {Expression_component("N")};
     ASSERT_EQ(ports, check_ports);
 }
 
@@ -188,27 +172,16 @@ TEST(port_extraction, concat_complex_slicing) {
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
     check_ports["clock"] = {HDL_net("clock")};
     check_ports["stream_in"] = {HDL_net("S_AXI_AWADDR"), HDL_net("S_AXI_AWPROT")};
-    check_ports["stream_in"][0].array_accessor.set_type(expression_parameter);
-    check_ports["stream_in"][0].array_accessor.set_expression_components({
-        Expression_component("N"),
-        Expression_component("*"),
-        Expression_component("ADDR_WIDTH"),
-    });
 
-    check_ports["stream_in"][0].array_range.set_type(expression_parameter);
-    check_ports["stream_in"][0].array_range.set_expression_components({Expression_component("ADDR_WIDTH")});
-    check_ports["stream_in"][0].range_type = HDL_net::increasing_range;
+    check_ports["stream_in"][0].selection.accessor = {Expression_component("N"), Expression_component("*"), Expression_component("ADDR_WIDTH")};
+    check_ports["stream_in"][0].selection.range = {Expression_component("ADDR_WIDTH")};
+    check_ports["stream_in"][0].selection.type = HDL_selection::increasing_range;
 
-    check_ports["stream_in"][1].array_accessor.set_type(expression_parameter);
-    check_ports["stream_in"][1].array_accessor.set_expression_components({
-        Expression_component("N"),
-        Expression_component("*"),
-        Expression_component("3")
-    });
 
-    check_ports["stream_in"][1].array_range.set_type(expression_parameter);
-    check_ports["stream_in"][1].array_range.set_expression_components({Expression_component("3")});
-    check_ports["stream_in"][1].range_type = HDL_net::increasing_range;
+    check_ports["stream_in"][1].selection.accessor = {Expression_component("N"), Expression_component("*"), Expression_component("3")};
+    check_ports["stream_in"][1].selection.range = {Expression_component("3")};
+    check_ports["stream_in"][1].selection.type = HDL_selection::increasing_range;
+
     ASSERT_EQ(ports, check_ports);
 }
 
@@ -287,8 +260,7 @@ TEST(port_extraction, complex_nested_concat_port) {
     check_ports["clock"] = {HDL_net("clock")};
     check_ports["stream_in"] = {HDL_net("OUTPUT_SIGNED"), HDL_net(""), HDL_net("test")};
 
-    check_ports["stream_in"][0].array_accessor.set_type(expression_parameter);
-    check_ports["stream_in"][0].array_accessor.set_expression_components({Expression_component("data_in.dest")});
+    check_ports["stream_in"][0].selection.accessor = {Expression_component("data_in.dest")};
 
     check_ports["stream_in"][1].replication_size.set_type(expression_parameter);
     check_ports["stream_in"][1].replication_size.set_expression_components({
@@ -349,8 +321,9 @@ TEST(port_extraction, array_port) {
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
     check_ports["clock"] = {HDL_net("clock")};
     check_ports["stream_in"] = {HDL_net("stream")};
-    check_ports["stream_in"][0].array_accessor.set_type(expression_parameter);
-    check_ports["stream_in"][0].array_accessor.add_component(Expression_component("5"));
+
+    check_ports["stream_in"][0].selection.accessor = {Expression_component("5")};
+
     ASSERT_EQ(ports, check_ports);
 }
 
