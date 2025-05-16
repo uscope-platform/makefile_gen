@@ -110,9 +110,8 @@ public:
     void exitBit_select(sv2017::Bit_selectContext *ctx) override;
 
     void exitRange_separator(sv2017::Range_separatorContext *ctx) override;
-
     void exitRange_expression(sv2017::Range_expressionContext *ctx) override;
-
+    void exitArray_range_expression(sv2017::Array_range_expressionContext *ctx) override;
     void enterUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) override;
     void exitUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) override;
 

@@ -444,3 +444,24 @@ TEST(port_extraction, replication_with_parameter) {
     ASSERT_EQ(ports, check_ports);
 }
 
+
+TEST(port_extraction,array_range_replication) {
+    std::string test_pattern = R"(
+        module test_mod #()();
+
+        address_decoder wraddr(
+            .in_data({ S_AXI_AWADDR[N*ADDR_WIDTH +: ADDR_WIDTH], S_AXI_AWPROT[N*3 +: 3] }),
+            .clock(clock)
+        );
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto inst = analyzer.analyze()[0].get_dependencies()[0];
+    auto ports = inst.get_ports();
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["in_data"] = {HDL_net("S_AXI_AWADDR"), HDL_net("S_AXI_AWPROT")};
+    ASSERT_EQ(ports, check_ports);
+}
