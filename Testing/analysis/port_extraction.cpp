@@ -228,14 +228,8 @@ TEST(port_extraction, repetition_port) {
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
     check_ports["clock"] = {HDL_net("clock")};
     check_ports["stream_in"] = {HDL_net("")};
-    check_ports["stream_in"][0].replication_size.set_type(expression_parameter);
-    check_ports["stream_in"][0].replication_size.set_expression_components({
-        Expression_component("5")
-    });
-    check_ports["stream_in"][0].replication_target.set_type(expression_parameter);
-    check_ports["stream_in"][0].replication_target.set_expression_components({
-        Expression_component("1'b1")
-    });
+    check_ports["stream_in"][0].replication.size = {Expression_component("5")};
+    check_ports["stream_in"][0].replication.target = {Expression_component("1'b1")};
     ASSERT_EQ(ports, check_ports);
 }
 
@@ -262,16 +256,10 @@ TEST(port_extraction, complex_nested_concat_port) {
 
     check_ports["stream_in"][0].selection.accessor = {Expression_component("data_in.dest")};
 
-    check_ports["stream_in"][1].replication_size.set_type(expression_parameter);
-    check_ports["stream_in"][1].replication_size.set_expression_components({
-        Expression_component("DATA_PATH_WIDTH"),
-        Expression_component("-"),
-        Expression_component("1")
-    });
-    check_ports["stream_in"][1].replication_target.set_type(expression_parameter);
-    check_ports["stream_in"][1].replication_target.set_expression_components({
-        Expression_component("1'b0")
-    });
+
+    check_ports["stream_in"][1].replication.size = {Expression_component("DATA_PATH_WIDTH"),Expression_component("-"),Expression_component("1")};
+    check_ports["stream_in"][1].replication.target = {Expression_component("1'b0")};
+
     ASSERT_EQ(ports, check_ports);
 }
 

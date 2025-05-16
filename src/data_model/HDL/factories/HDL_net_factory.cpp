@@ -41,11 +41,9 @@ void HDL_net_factory::set_range_type(HDL_selection::range_type_t t) {
 }
 
 void HDL_net_factory::add_replication_target(const std::string &c) {
-    current_net.replication_target.set_type(expression_parameter);
-    current_net.replication_target.add_component(Expression_component(c));
+    current_net.replication.target.emplace_back(c);
 }
 
 void HDL_net_factory::add_replication_size(const std::string &c) {
-    current_net.replication_size.set_type(expression_parameter);
-    current_net.replication_size.add_component(Expression_component(c));
+    current_net.replication.size.emplace_back(c);
 }

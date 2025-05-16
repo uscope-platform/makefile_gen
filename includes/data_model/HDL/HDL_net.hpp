@@ -23,6 +23,27 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
 
+
+struct HDL_replication {
+    Expression target;
+    Expression size;
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(size, target);
+    }
+
+
+    friend bool operator==(const HDL_replication &lhs, const HDL_replication &rhs) {
+        bool retval =true;
+        retval &= lhs.target == rhs.target;
+        retval &= lhs.size == rhs.size;
+        return retval;
+    }
+
+};
+
+
+
 struct HDL_selection {
     Expression accessor;
     Expression range;
@@ -53,12 +74,11 @@ public:
     std::string name;
 
     HDL_selection selection;
-    HDL_parameter replication_target;
-    HDL_parameter replication_size;
+    HDL_replication replication;
     std::string get_full_name() const;
 
     bool is_replication() {
-        return !replication_size.is_empty();
+        return !replication.size.empty();
     }
     bool is_array() {
         return !selection.accessor.empty();
@@ -67,15 +87,14 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, selection,replication_size, replication_target);
+        ar(name, selection,replication);
     }
 
     friend bool operator==(const HDL_net &lhs, const HDL_net &rhs) {
         bool retval =true;
         retval &= lhs.name == rhs.name;
         retval &= lhs.selection == rhs.selection;
-        retval &= lhs.replication_size == rhs.replication_size;
-        retval &= lhs.replication_target == rhs.replication_target;
+        retval &= lhs.replication == rhs.replication;
         return retval;
     }
 
