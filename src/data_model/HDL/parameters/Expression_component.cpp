@@ -15,6 +15,9 @@
 
 #include "data_model/HDL/parameters/Expression_component.hpp"
 
+const std::regex Expression_component::sv_constant_regex(R"(^\d*'(s)?(h|d|o|b)([0-9a-fA-F]+))");
+const std::regex Expression_component::number_regex("^\\d+$");
+const std::regex Expression_component::size_regex(R"(^(\d*)'[0-9a-zA-Z]+)");
 
 Expression_component::Expression_component(const Expression_component &c) {
     component_type = c.component_type;
@@ -28,6 +31,8 @@ Expression_component::Expression_component(const Expression_component &c) {
 
 
 Expression_component::Expression_component() {
+
+
     string_value = "";
     numeric_value = 0;
     component_type = string_component;
@@ -93,8 +98,6 @@ std::string Expression_component::print_value() {
 
 void Expression_component::process_number() {
 
-    std::regex sv_constant_regex(R"(^\d*'(s)?(h|d|o|b)([0-9a-fA-F]+))");
-    std::regex number_regex("^\\d+$");
 
     if(test_parameter_type(number_regex, string_value)) {
         numeric_value = std::stoul(string_value);
@@ -126,9 +129,8 @@ void Expression_component::process_number() {
                 numeric_value = std::stoul(value, nullptr, 2);
             }
             // Process size
-            std::regex r(R"(^(\d*)'[0-9a-zA-Z]+)");
 
-            if(std::regex_search(string_value, base_match, r)){
+            if(std::regex_search(string_value, base_match, size_regex)){
                 if(!base_match[1].str().empty()) {
                     binary_size = std::stoll(base_match[1].str());
                 } else {

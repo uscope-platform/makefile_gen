@@ -102,6 +102,10 @@ private:
 
     bool rpn_marker = false;
 
+    static const std::regex sv_constant_regex;
+    static const std::regex number_regex;
+    static const std::regex size_regex;
+
     std::vector<std::vector<Expression_component>> array_index;
 
 

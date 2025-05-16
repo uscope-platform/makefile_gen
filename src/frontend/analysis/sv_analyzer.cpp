@@ -97,7 +97,7 @@ void sv_analyzer::process_hdl() {
 
 
     antlr4::ANTLRInputStream antlr_istream(istream);
-    mgp_sv::sv2017Lexer lexer(&antlr_istream);
+    sv2017Lexer lexer(&antlr_istream);
     antlr4::CommonTokenStream tok_stream(&lexer);
 
     tok_stream.fill();
@@ -105,7 +105,7 @@ void sv_analyzer::process_hdl() {
     SvParserErrorListener error_listener;
     error_listener.file_path = path;
 
-    mgp_sv::sv2017 parser(&tok_stream);
+    sv2017 parser(&tok_stream);
 
     parser.removeErrorListeners();
     parser.addErrorListener(&error_listener);
