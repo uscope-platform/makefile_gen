@@ -541,14 +541,15 @@ void sv_visitor::exitBit_select(sv2017::Bit_selectContext *ctx) {
 
 
 void sv_visitor::exitRange_separator(sv2017::Range_separatorContext *ctx) {
-    if(ctx->PLUS()!= nullptr) {
-        deps_factory.advance_array_range_phase( "+");
-    } else if(ctx->MINUS()!= nullptr) {
-        deps_factory.advance_array_range_phase( "-");
-    } else {
-        deps_factory.advance_array_range_phase("");
+    if(deps_factory.is_valid_dependency()) {
+        if(ctx->PLUS()!= nullptr) {
+            deps_factory.advance_array_range_phase( "+");
+        } else if(ctx->MINUS()!= nullptr) {
+            deps_factory.advance_array_range_phase( "-");
+        } else {
+            deps_factory.advance_array_range_phase("");
+        }
     }
-
 }
 
 void sv_visitor::exitRange_expression(sv2017::Range_expressionContext *ctx) {

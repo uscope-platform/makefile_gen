@@ -353,3 +353,37 @@ TEST(port_extraction, array_port) {
     check_ports["stream_in"][0].array_accessor.add_component(Expression_component("5"));
     ASSERT_EQ(ports, check_ports);
 }
+
+
+TEST(port_extraction, port_extraction_with_declarations) {
+    std::string test_pattern = R"(
+
+        module test_mod #()();
+
+        reg [31:0] memory [5:0];
+
+        SyndromeCalculator #(
+            .TEST_PARAM(test_package::param)
+        ) SC (
+            .clock(clock),
+            .reset(reset),
+            .data_in(data_in),
+            .syndrome(data_out)
+        );
+
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto res = analyzer.analyze()[0];
+    auto inst = res.get_dependencies()[1];
+    auto ports = inst.get_ports();
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["reset"] = {HDL_net("reset")};
+    check_ports["data_in"] = {HDL_net("data_in")};
+    check_ports["syndrome"] = {HDL_net("data_out")};
+    ASSERT_EQ(ports, check_ports);
+}
+

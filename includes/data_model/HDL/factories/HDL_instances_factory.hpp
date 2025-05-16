@@ -44,7 +44,9 @@ public:
     void stop_interface();
     void start_array() {in_array = 1;}
 
-    void start_array_range() {in_array_range = 1;}
+    void start_array_range() {
+        in_array_range = 1;
+    }
     void advance_array_range_phase(const std::string &op);
 
 
@@ -61,7 +63,7 @@ private:
     std::string port_name;
 
     HDL_instance current_instance;
-    bool valid_instance;
+    bool valid_instance = false;
 };
 
 

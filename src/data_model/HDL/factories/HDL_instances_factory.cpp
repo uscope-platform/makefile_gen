@@ -27,7 +27,8 @@ void HDL_instances_factory::add_parameter(const std::string &name, const std::sh
 
 void HDL_instances_factory::add_port(const std::string &name, const HDL_net &value) {
     if(in_array_range == 3 || in_array == 2) {
-        current_instance.add_port_connection(name, net_factory.get_nets());
+        auto nets = net_factory.get_nets();
+        current_instance.add_port_connection(name, nets);
         in_array = 0;
     } else {
         current_instance.add_port_connection(name, {value});
