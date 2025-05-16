@@ -287,18 +287,19 @@ public:
     RuleModule_or_interface_or_program_or_udp_instantiation = 491, RuleHierarchical_instance = 492, 
     RuleList_of_port_connections = 493, RuleOrdered_port_connection = 494, 
     RuleNamed_port_connection = 495, RulePort_expression_connection = 496, 
-    RulePort_concatenation_connection = 497, RuleBind_directive = 498, RuleBind_target_instance = 499, 
-    RuleBind_target_instance_list = 500, RuleBind_instantiation = 501, RuleConfig_declaration = 502, 
-    RuleDesign_statement = 503, RuleConfig_rule_statement = 504, RuleInst_clause = 505, 
-    RuleInst_name = 506, RuleCell_clause = 507, RuleLiblist_clause = 508, 
-    RuleUse_clause = 509, RuleNet_alias = 510, RuleSpecify_block = 511, 
-    RuleGenerate_region = 512, RuleGenvar_expression = 513, RuleLoop_generate_construct = 514, 
-    RuleGenvar_initialization = 515, RuleGenvar_iteration = 516, RuleConditional_generate_construct = 517, 
-    RuleIf_generate_construct = 518, RuleCase_generate_construct = 519, 
-    RuleCase_generate_item = 520, RuleGenerate_begin_end_block = 521, RuleGenerate_item = 522, 
-    RuleProgram_generate_item = 523, RuleModule_or_generate_or_interface_or_checker_item = 524, 
-    RuleModule_or_generate_or_interface_item = 525, RuleModule_or_generate_item = 526, 
-    RuleElaboration_system_task = 527, RuleModule_item_item = 528, RuleModule_item = 529
+    RulePort_concatenation_connection = 497, RulePort_replication_connection = 498, 
+    RuleBind_directive = 499, RuleBind_target_instance = 500, RuleBind_target_instance_list = 501, 
+    RuleBind_instantiation = 502, RuleConfig_declaration = 503, RuleDesign_statement = 504, 
+    RuleConfig_rule_statement = 505, RuleInst_clause = 506, RuleInst_name = 507, 
+    RuleCell_clause = 508, RuleLiblist_clause = 509, RuleUse_clause = 510, 
+    RuleNet_alias = 511, RuleSpecify_block = 512, RuleGenerate_region = 513, 
+    RuleGenvar_expression = 514, RuleLoop_generate_construct = 515, RuleGenvar_initialization = 516, 
+    RuleGenvar_iteration = 517, RuleConditional_generate_construct = 518, 
+    RuleIf_generate_construct = 519, RuleCase_generate_construct = 520, 
+    RuleCase_generate_item = 521, RuleGenerate_begin_end_block = 522, RuleGenerate_item = 523, 
+    RuleProgram_generate_item = 524, RuleModule_or_generate_or_interface_or_checker_item = 525, 
+    RuleModule_or_generate_or_interface_item = 526, RuleModule_or_generate_item = 527, 
+    RuleElaboration_system_task = 528, RuleModule_item_item = 529, RuleModule_item = 530
   };
 
   explicit sv2017(antlr4::TokenStream *input);
@@ -816,6 +817,7 @@ public:
   class Named_port_connectionContext;
   class Port_expression_connectionContext;
   class Port_concatenation_connectionContext;
+  class Port_replication_connectionContext;
   class Bind_directiveContext;
   class Bind_target_instanceContext;
   class Bind_target_instance_listContext;
@@ -10908,6 +10910,7 @@ public:
     Attribute_instanceContext* attribute_instance(size_t i);
     antlr4::tree::TerminalNode *LPAREN();
     antlr4::tree::TerminalNode *RPAREN();
+    Port_replication_connectionContext *port_replication_connection();
     Port_concatenation_connectionContext *port_concatenation_connection();
     Port_expression_connectionContext *port_expression_connection();
 
@@ -10955,6 +10958,21 @@ public:
   };
 
   Port_concatenation_connectionContext* port_concatenation_connection();
+
+  class  Port_replication_connectionContext : public antlr4::ParserRuleContext {
+  public:
+    Port_replication_connectionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    ReplicationContext *replication();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Port_replication_connectionContext* port_replication_connection();
 
   class  Bind_directiveContext : public antlr4::ParserRuleContext {
   public:

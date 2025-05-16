@@ -2116,13 +2116,14 @@ ordered_port_connection: ( attribute_instance )* ( expression )?;
 
 named_port_connection:
  ( attribute_instance )* DOT ( MUL
+                               | identifier ( LPAREN (port_replication_connection)? RPAREN )?
                                | identifier ( LPAREN (port_concatenation_connection)? RPAREN )?
                                | identifier ( LPAREN (port_expression_connection)? RPAREN )?
                               );
 
 port_expression_connection: expression;
 port_concatenation_connection: (APOSTROPHE_LBRACE|LBRACE) (expression COMMA?)* RBRACE;
-
+port_replication_connection: replication;
 bind_directive:
  KW_BIND ( identifier ( COLON bind_target_instance_list )?
           | bind_target_instance

@@ -41,16 +41,30 @@ HDL_instance HDL_instances_factory::get_dependency() {
 
 void HDL_instances_factory::start_concat_port(const std::string &n) {
     in_concat = true;
-    concat_port_name = n;
+    port_name = n;
 }
 
 void HDL_instances_factory::stop_concat_port() {
     in_concat = false;
-    current_instance.add_port_connection(concat_port_name, net_factory.get_nets());
+    current_instance.add_port_connection(port_name, net_factory.get_nets());
+}
+
+void HDL_instances_factory::start_replication_port(const std::string &n) {
+    in_replication = 1;
+    port_name = n;
+}
+
+void HDL_instances_factory::stop_replication_port() {
+    in_replication = 0;
+    current_instance.add_port_connection(port_name, net_factory.get_nets());
 }
 
 void HDL_instances_factory::add_port_connection_element(const std::string &s) {
-     if(in_bit_selection) {
+    if(in_replication==1) {
+        net_factory.add_replication_size(s);
+    } else if(in_replication == 2) {
+        net_factory.add_replication_target(s);
+    } else if(in_bit_selection) {
         net_factory.add_accessor_component(s);
     } else if(in_concat && in_array_range == 0 || in_array == 1) {
         net_factory.new_net(s);

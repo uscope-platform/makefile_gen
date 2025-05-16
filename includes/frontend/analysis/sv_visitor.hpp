@@ -99,6 +99,8 @@ public:
     void enterPrimaryDot(sv2017::PrimaryDotContext *ctx) override;
     void exitPrimaryDot(sv2017::PrimaryDotContext *ctx) override;
 
+    void enterReplication_value(sv2017::Replication_valueContext *ctx) override;
+
     void enterPrimaryRepl(sv2017::PrimaryReplContext *ctx) override;
     void exitPrimaryRepl(sv2017::PrimaryReplContext *ctx) override;
 
@@ -127,6 +129,7 @@ public:
     void enterConcatenation(sv2017::ConcatenationContext *ctx) override;
     void exitConcatenation(sv2017::ConcatenationContext *ctx) override;
 
+    void exitPort_replication_connection(sv2017::Port_replication_connectionContext *ctx) override;
 
     void enterReplication(sv2017::ReplicationContext *ctx) override;
     void exitReplication(sv2017::ReplicationContext *ctx) override;

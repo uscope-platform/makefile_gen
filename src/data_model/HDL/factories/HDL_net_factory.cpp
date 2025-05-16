@@ -38,3 +38,13 @@ void HDL_net_factory::add_range_component(const std::string &c) {
 void HDL_net_factory::set_range_type(HDL_net::range_type_t t) {
     current_net.range_type = t;
 }
+
+void HDL_net_factory::add_replication_target(const std::string &c) {
+    current_net.replication_target.set_type(expression_parameter);
+    current_net.replication_target.add_component(Expression_component(c));
+}
+
+void HDL_net_factory::add_replication_size(const std::string &c) {
+    current_net.replication_size.set_type(expression_parameter);
+    current_net.replication_size.add_component(Expression_component(c));
+}

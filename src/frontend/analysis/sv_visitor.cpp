@@ -373,6 +373,9 @@ void sv_visitor::enterNamed_port_connection(sv2017::Named_port_connectionContext
         if(ctx->port_concatenation_connection() != nullptr){
             deps_factory.start_concat_port(ctx->identifier()->getText());
         }
+        if(ctx->port_replication_connection() != nullptr) {
+            deps_factory.start_replication_port(ctx->identifier()->getText());
+        }
     }
 }
 
@@ -386,6 +389,11 @@ void sv_visitor::exitNamed_port_connection(sv2017::Named_port_connectionContext 
     if(ctx->port_concatenation_connection() != nullptr){
         if(deps_factory.is_valid_dependency()){
             deps_factory.stop_concat_port();
+        }
+    }
+    if(ctx->port_replication_connection() != nullptr){
+        if(deps_factory.is_valid_dependency()){
+            deps_factory.stop_replication_port();
         }
     }
 }
@@ -500,6 +508,12 @@ void sv_visitor::exitPrimaryDot(sv2017::PrimaryDotContext *ctx) {
     }
 }
 
+void sv_visitor::enterReplication_value(sv2017::Replication_valueContext *ctx) {
+    if(deps_factory.is_valid_dependency()) {
+        deps_factory.advance_replication();
+    }
+}
+
 void sv_visitor::enterPrimaryRepl(sv2017::PrimaryReplContext *ctx) {
 }
 
@@ -587,6 +601,11 @@ void sv_visitor::enterConcatenation(sv2017::ConcatenationContext *ctx) {
 void sv_visitor::exitConcatenation(sv2017::ConcatenationContext *ctx) {
     params_factory.stop_concatenation();
 }
+
+void sv_visitor::exitPort_replication_connection(sv2017::Port_replication_connectionContext *ctx) {
+    deps_factory.stop_replication();
+}
+
 
 void sv_visitor::enterData_type_or_implicit(sv2017::Data_type_or_implicitContext *ctx) {
     bool is_packed = false;

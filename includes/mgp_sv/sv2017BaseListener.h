@@ -1569,6 +1569,9 @@ public:
   virtual void enterPort_concatenation_connection(sv2017::Port_concatenation_connectionContext * /*ctx*/) override { }
   virtual void exitPort_concatenation_connection(sv2017::Port_concatenation_connectionContext * /*ctx*/) override { }
 
+  virtual void enterPort_replication_connection(sv2017::Port_replication_connectionContext * /*ctx*/) override { }
+  virtual void exitPort_replication_connection(sv2017::Port_replication_connectionContext * /*ctx*/) override { }
+
   virtual void enterBind_directive(sv2017::Bind_directiveContext * /*ctx*/) override { }
   virtual void exitBind_directive(sv2017::Bind_directiveContext * /*ctx*/) override { }
 

@@ -29,13 +29,15 @@ public:
     std::string name;
     HDL_parameter array_accessor;
     HDL_parameter array_range;
+    HDL_parameter replication_size;
+    HDL_parameter replication_target;
     enum range_type_t{ explicit_range, increasing_range, decreasing_range};
     range_type_t range_type = explicit_range;
     std::string get_full_name() const;
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, array_accessor, array_range);
+        ar(name, array_accessor, array_range,replication_size, replication_target, range_type);
     }
 
     friend bool operator==(const HDL_net &lhs, const HDL_net &rhs) {
@@ -44,6 +46,8 @@ public:
         retval &= lhs.array_accessor == rhs.array_accessor;
         retval &= lhs.range_type == rhs.range_type;
         retval &= lhs.array_range == rhs.array_range;
+        retval &= lhs.replication_size == rhs.replication_size;
+        retval &= lhs.replication_target == rhs.replication_target;
         return retval;
     }
 

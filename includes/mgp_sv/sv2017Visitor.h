@@ -1054,6 +1054,8 @@ public:
 
     virtual std::any visitPort_concatenation_connection(sv2017::Port_concatenation_connectionContext *context) = 0;
 
+    virtual std::any visitPort_replication_connection(sv2017::Port_replication_connectionContext *context) = 0;
+
     virtual std::any visitBind_directive(sv2017::Bind_directiveContext *context) = 0;
 
     virtual std::any visitBind_target_instance(sv2017::Bind_target_instanceContext *context) = 0;
