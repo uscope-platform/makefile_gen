@@ -18,7 +18,7 @@
 std::string HDL_net::get_full_name() const {
 
 
-    return name + Expression_component::print_expression(selection.accessor);
+    return name + Expression_component::print_expression(range.accessor);
 
 }
 

@@ -28,20 +28,26 @@ std::vector<HDL_net> HDL_net_factory::get_nets() {
     return ret;
 }
 
+
+
 void HDL_net_factory::add_accessor_component(const std::string &c) {
-    current_net.selection.accessor.emplace_back(c);
+    current_net.range.accessor.emplace_back(c);
 }
 
 void HDL_net_factory::add_range_component(const std::string &c) {
-    current_net.selection.range.emplace_back(c);
+    current_net.range.range.emplace_back(c);
 }
 
-void HDL_net_factory::set_range_type(HDL_selection::range_type_t t) {
-    current_net.selection.type = t;
+void HDL_net_factory::set_range_type(HDL_range::range_type_t t) {
+    current_net.range.type = t;
 }
 
 void HDL_net_factory::add_replication_target(const std::string &c) {
     current_net.replication.target.emplace_back(c);
+}
+
+void HDL_net_factory::add_index_component(const std::string &c) {
+    current_net.index.emplace_back(c);
 }
 
 void HDL_net_factory::add_replication_size(const std::string &c) {

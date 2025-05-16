@@ -70,7 +70,7 @@ void HDL_instances_factory::add_connection_element(const std::string &s) {
     } else if(in_replication == 2) {
         net_factory.add_replication_target(s);
     } else if(in_bit_selection) {
-        net_factory.add_accessor_component(s);
+        net_factory.add_index_component(s);
     } else if(in_concat && in_array_range == 0  && in_array == 0|| in_array == 1) {
         net_factory.new_net(s);
         if(in_array == 1) in_array++;
@@ -123,9 +123,9 @@ void HDL_instances_factory::start_array_range() {
 }
 
 void HDL_instances_factory::advance_array_range_phase(const std::string &op) {
-    if(op == "+") net_factory.set_range_type(HDL_selection::increasing_range);
-    else if(op == "-") net_factory.set_range_type(HDL_selection::decreasing_range);
-    else net_factory.set_range_type(HDL_selection::explicit_range);
+    if(op == "+") net_factory.set_range_type(HDL_range::increasing_range);
+    else if(op == "-") net_factory.set_range_type(HDL_range::decreasing_range);
+    else net_factory.set_range_type(HDL_range::explicit_range);
     in_array_range = 3;
 }
 

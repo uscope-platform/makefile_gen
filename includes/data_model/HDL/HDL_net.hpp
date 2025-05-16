@@ -44,7 +44,7 @@ struct HDL_replication {
 
 
 
-struct HDL_selection {
+struct HDL_range {
     Expression accessor;
     Expression range;
     enum range_type_t{ explicit_range, increasing_range, decreasing_range};
@@ -56,7 +56,7 @@ struct HDL_selection {
     }
 
 
-    friend bool operator==(const HDL_selection &lhs, const HDL_selection &rhs) {
+    friend bool operator==(const HDL_range &lhs, const HDL_range &rhs) {
         bool retval =true;
         retval &= lhs.accessor == rhs.accessor;
         retval &= lhs.range == rhs.range;
@@ -73,7 +73,8 @@ public:
     explicit HDL_net(const std::string &s) {name = s;}
     std::string name;
 
-    HDL_selection selection;
+    Expression index;
+    HDL_range range;
     HDL_replication replication;
     std::string get_full_name() const;
 
@@ -81,19 +82,19 @@ public:
         return !replication.size.empty();
     }
     bool is_array() {
-        return !selection.accessor.empty();
+        return !range.accessor.empty();
     }
 
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, selection,replication);
+        ar(name, range,replication);
     }
 
     friend bool operator==(const HDL_net &lhs, const HDL_net &rhs) {
         bool retval =true;
         retval &= lhs.name == rhs.name;
-        retval &= lhs.selection == rhs.selection;
+        retval &= lhs.range == rhs.range;
         retval &= lhs.replication == rhs.replication;
         return retval;
     }
