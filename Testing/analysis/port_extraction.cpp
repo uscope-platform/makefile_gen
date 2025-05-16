@@ -410,3 +410,37 @@ TEST(port_extraction, other_port_concat) {
     ASSERT_EQ(ports, check_ports);
 }
 
+
+TEST(port_extraction, replication_with_parameter) {
+    std::string test_pattern = R"(
+        module test_mod #()();
+
+            axil_crossbar_interface #(
+                .DATA_WIDTH(32),
+                .ADDR_WIDTH(32),
+                .NM(1),
+                .NS(2),
+                .SLAVE_ADDR('{CONTROLLER_ADDRESS, SPI_ADDRESS}),
+                .SLAVE_MASK('{2{32'h040}})
+            ) axi_xbar (
+                .clock(clock),
+                .reset(reset),
+                .slaves('{axi_in}),
+                .masters('{controller_axi, spi_axi})
+            );
+
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto inst = analyzer.analyze()[0].get_dependencies()[0];
+    auto ports = inst.get_ports();
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["reset"] = {HDL_net("reset")};
+    check_ports["slaves"] = {HDL_net("axi_in")};
+    check_ports["masters"] = {HDL_net("controller_axi"), HDL_net("spi_axi")};
+    ASSERT_EQ(ports, check_ports);
+}
+

@@ -504,7 +504,7 @@ void sv_visitor::exitPrimaryDot(sv2017::PrimaryDotContext *ctx) {
 }
 
 void sv_visitor::enterReplication_value(sv2017::Replication_valueContext *ctx) {
-    if(deps_factory.is_valid_dependency()) {
+    if(deps_factory.is_valid_dependency() && deps_factory.is_in_replication()) {
         deps_factory.advance_replication();
     }
 }

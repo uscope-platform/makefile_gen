@@ -40,7 +40,7 @@ public:
     void start_replication();
     void stop_replication();
     void advance_replication() {in_replication = 2;}
-
+    bool is_in_replication() const {return in_replication != 0;}
     void start_interface();
     void stop_interface();
     void start_array() {in_array = 1;}
