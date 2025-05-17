@@ -199,6 +199,36 @@ TEST(port_extraction, concat_range) {
 }
 
 
+TEST(port_extraction,range_concat_expression) {
+    std::string test_pattern = R"(
+        module test_mod #()();
+
+        address_decoder wraddr(
+            .in_data({S_AXI_AWADDR[N*ADDR_WIDTH +: ADDR_WIDTH], S_AXI_AWPROT[N*3 +: 3]}),
+            .clock(clock)
+        );
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto inst = analyzer.analyze()[0].get_dependencies()[0];
+    auto ports = inst.get_ports();
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["in_data"] = {HDL_net("S_AXI_AWADDR"), HDL_net("S_AXI_AWPROT")};
+
+    check_ports["in_data"][0].range.accessor = {Expression_component("N"),Expression_component("*"),Expression_component("ADDR_WIDTH")};
+    check_ports["in_data"][0].range.range = {Expression_component("ADDR_WIDTH")};
+    check_ports["in_data"][0].range.type = HDL_range::increasing_range;
+
+    check_ports["in_data"][1].range.accessor = {Expression_component("N"),Expression_component("*"),Expression_component("3")};
+    check_ports["in_data"][1].range.range = {Expression_component("3")};
+    check_ports["in_data"][1].range.type = HDL_range::increasing_range;
+
+    ASSERT_EQ(ports, check_ports);
+}
+
 
 
 TEST(port_extraction, concat_complex_slicing) {
@@ -404,24 +434,3 @@ TEST(port_extraction, replication_with_parameter) {
     ASSERT_EQ(ports, check_ports);
 }
 
-
-TEST(port_extraction,array_range_concat) {
-    std::string test_pattern = R"(
-        module test_mod #()();
-
-        address_decoder wraddr(
-            .in_data({ S_AXI_AWADDR[N*ADDR_WIDTH +: ADDR_WIDTH], S_AXI_AWPROT[N*3 +: 3] }),
-            .clock(clock)
-        );
-        endmodule
-    )";
-
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
-    auto inst = analyzer.analyze()[0].get_dependencies()[0];
-    auto ports = inst.get_ports();
-    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
-    check_ports["clock"] = {HDL_net("clock")};
-    check_ports["in_data"] = {HDL_net("S_AXI_AWADDR"), HDL_net("S_AXI_AWPROT")};
-    ASSERT_EQ(ports, check_ports);
-}
