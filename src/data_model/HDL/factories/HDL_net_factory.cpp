@@ -22,25 +22,62 @@ void HDL_net_factory::new_net(const std::string &name) {
 
 std::vector<HDL_net> HDL_net_factory::get_nets() {
     auto ret = nets;
-    ret.push_back(current_net);
+    if(!current_net.empty()) ret.push_back(current_net);
     nets.clear();
     current_net = HDL_net();
     return ret;
 }
 
-
-
-void HDL_net_factory::add_accessor_component(const std::string &c) {
-    current_net.range.accessor.emplace_back(c);
+void HDL_net_factory::start_range() {
+    range_factory.open_range(false );
 }
 
-void HDL_net_factory::add_range_component(const std::string &c) {
-    current_net.range.range.emplace_back(c);
+void HDL_net_factory::close_range() {
+    current_net.range = range_factory.get_range();
+}
+
+void HDL_net_factory::add_component(const std::string &c) {
+    if(in_array) {
+        current_net.index.emplace_back(c);
+    }
+    if(range_factory.is_active()) {
+        range_factory.add_component(c);
+    }
+    if(in_concatenation) {
+        if(current_net.name.empty()) {
+            current_net.name = c;
+        }
+    }
 }
 
 void HDL_net_factory::set_range_type(HDL_range::range_type_t t) {
-    current_net.range.type = t;
+    range_factory.set_range_type(t);
 }
+
+void HDL_net_factory::start_concatenation() {
+    in_concatenation = true;
+}
+
+void HDL_net_factory::stop_concatenation() {
+    in_concatenation = false;
+}
+
+void HDL_net_factory::advance_concatenation() {
+    current_net = HDL_net();
+}
+
+void HDL_net_factory::start_array() {
+    in_array = true;
+}
+
+void HDL_net_factory::stop_array() {
+    in_array = false;
+}
+
+void HDL_net_factory::set_name(const std::string &string) {
+    current_net.name = string;
+}
+
 
 void HDL_net_factory::add_replication_target(const std::string &c) {
     current_net.replication.target.emplace_back(c);

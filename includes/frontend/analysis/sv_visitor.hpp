@@ -115,6 +115,7 @@ public:
     void enterUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) override;
     void exitUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) override;
 
+    void exitConcatenation_item(sv2017::Concatenation_itemContext *ctx) override;
 
     void exitFirst_range_identifier(sv2017::First_range_identifierContext *ctx) override;
 
@@ -183,6 +184,8 @@ public:
     void enterName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
     void exitName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
 private:
+
+    bool in_array_access_declaration = false;
 
     bool in_param_declaration = false;
     bool in_function_declaration = false;

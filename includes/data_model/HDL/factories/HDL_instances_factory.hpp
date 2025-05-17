@@ -17,22 +17,26 @@
 #define MAKEFILEGEN_V2_HDL_INSTANCES_FACTORY_HPP
 
 #include "data_model/HDL/HDL_instance.hpp"
+#include "data_model/HDL/factories/HDL_range_factory.hpp"
 #include "data_model/HDL/factories/HDL_net_factory.hpp"
+#include "data_model/HDL/factories/HDL_concat_factory.hpp"
+#include "frontend/analysis/sv_visitor.hpp"
 
 class HDL_instances_factory {
 public:
     void new_dependency(const std::string &n, const std::string &p, dependency_class dc);
     void add_parameter(const std::string &name, const std::shared_ptr<HDL_parameter> &p);
     void add_port(const std::string &name);
+    void start_scalar_net(const std::string &n);
     void add_scalar_net(const std::string &name);
     HDL_instance get_dependency();
     void start_concat_port(const std::string &n);
     void stop_concat_port();
     void start_replication_port(const std::string &n);
-
+    void add_concatenation_net();
     void add_connection_element(const std::string &s);
     bool is_valid_dependency() const{return valid_instance;}
-    bool in_concatenation() const {return in_concat;}
+    bool in_concatenation() const {return net_factory.is_in_concatenation();}
     bool is_in_array_range() const { return in_array_range != 0;}
     bool is_interface() const {return in_interface;}
     void start_bit_selection();
@@ -44,26 +48,28 @@ public:
     bool is_in_replication() const {return in_replication != 0;}
     void start_interface();
     void stop_interface();
-    void start_array();
-    void stop_array();
 
-    void start_array_range();
+    void start_array_range(const std::string &n);
 
     void advance_array_range_phase(const std::string &op);
     void stop_array_range();
 
+    void start_port() {in_port = true;}
+    void stop_port() {in_port = false;}
+    bool is_in_port() const {return in_port;}
 
     void add_array_quantifier(const std::shared_ptr<HDL_parameter> &p);
 
+    void change_array_name(const std::string &s);
+
+
 private:
-    bool in_bit_selection = false;
-    bool in_concat = false;
+    bool in_port = false;
     int in_array_range = 0;
     int in_replication = 0;
     bool in_interface = false;
-    int in_array = 0;
 
-    bool disable_net_addition = false;
+    int disable_net_addition = 0;
     HDL_net_factory net_factory;
     std::string port_name;
 

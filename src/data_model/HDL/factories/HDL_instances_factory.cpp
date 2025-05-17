@@ -28,12 +28,17 @@ void HDL_instances_factory::add_parameter(const std::string &name, const std::sh
 void HDL_instances_factory::add_port(const std::string &name) {
     auto nets = net_factory.get_nets();
     current_instance.add_port_connection(name, nets);
-    disable_net_addition = false;
+    disable_net_addition = 0;
+}
+
+void HDL_instances_factory::start_scalar_net(const std::string &n) {
+    if(!net_factory.is_in_array())
+    net_factory.new_net(n);
 }
 
 void HDL_instances_factory::add_scalar_net(const std::string &name) {
     if(disable_net_addition) {
-        disable_net_addition = false;
+        disable_net_addition--;
         return;
     }
     net_factory.new_net(name);
@@ -45,13 +50,14 @@ HDL_instance HDL_instances_factory::get_dependency() {
 }
 
 void HDL_instances_factory::start_concat_port(const std::string &n) {
-    in_concat = true;
+    net_factory.start_concatenation();
     port_name = n;
 }
 
 void HDL_instances_factory::stop_concat_port() {
-    in_concat = false;
-    disable_net_addition = true;
+    net_factory.stop_concatenation();
+    current_instance.add_port_connection(port_name, net_factory.get_nets());
+    disable_net_addition =  1;
 }
 
 void HDL_instances_factory::start_replication_port(const std::string &n) {
@@ -59,37 +65,32 @@ void HDL_instances_factory::start_replication_port(const std::string &n) {
     port_name = n;
 }
 
+void HDL_instances_factory::add_concatenation_net() {
+    net_factory.advance_concatenation();
+}
+
 
 void HDL_instances_factory::add_connection_element(const std::string &s) {
     if(disable_net_addition) {
-        disable_net_addition = false;
+        disable_net_addition--;
         return;
     }
+
+    net_factory.add_component(s);
+
     if(in_replication==1) {
         net_factory.add_replication_size(s);
     } else if(in_replication == 2) {
         net_factory.add_replication_target(s);
-    } else if(in_bit_selection) {
-        net_factory.add_index_component(s);
-    } else if(in_concat && in_array_range == 0  && in_array == 0|| in_array == 1) {
-        net_factory.new_net(s);
-        if(in_array == 1) in_array++;
-    } else if(in_array_range==1) {
-        net_factory.new_net(s);
-        in_array_range++;
-    } else if(in_array_range==2) {
-        net_factory.add_accessor_component(s);
-    } else if(in_array_range==3) {
-        net_factory.add_range_component(s);
     }
 }
 
 void HDL_instances_factory::start_bit_selection() {
-    in_bit_selection =  true;
+    net_factory.start_array();
 }
 
 void HDL_instances_factory::stop_bit_selection() {
-    in_bit_selection = false;
+    net_factory.stop_array();
 }
 
 void HDL_instances_factory::start_replication() {
@@ -109,32 +110,28 @@ void HDL_instances_factory::stop_interface() {
     in_interface = false;
 }
 
-void HDL_instances_factory::start_array() {
-    in_array = 1;
-}
-
-void HDL_instances_factory::stop_array() {
-    in_array = 0;
-    if(!in_concat) disable_net_addition = true;
-}
-
-void HDL_instances_factory::start_array_range() {
+void HDL_instances_factory::start_array_range(const std::string &n) {
     in_array_range = 1;
+    net_factory.start_range();
 }
 
 void HDL_instances_factory::advance_array_range_phase(const std::string &op) {
     if(op == "+") net_factory.set_range_type(HDL_range::increasing_range);
     else if(op == "-") net_factory.set_range_type(HDL_range::decreasing_range);
     else net_factory.set_range_type(HDL_range::explicit_range);
-    in_array_range = 3;
 }
 
 void HDL_instances_factory::stop_array_range() {
     in_array_range = 0;
-    disable_net_addition = true;
+    net_factory.close_range();
+    disable_net_addition = 2;
 }
 
 
 void HDL_instances_factory::add_array_quantifier(const std::shared_ptr<HDL_parameter> &p) {
     current_instance.add_array_quantifier(p);
+}
+
+void HDL_instances_factory::change_array_name(const std::string &s){
+    net_factory.set_name(s);
 }

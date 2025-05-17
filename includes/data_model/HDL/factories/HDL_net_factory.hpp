@@ -18,19 +18,36 @@
 #define HDL_NET_FACTORY_HPP
 
 #include "data_model/HDL/HDL_net.hpp"
+#include "data_model/HDL/factories/HDL_range_factory.hpp"
 
 class HDL_net_factory {
 public:
     void new_net(const std::string &name);
     std::vector<HDL_net> get_nets();
-    void add_accessor_component(const std::string &c);
-    void add_range_component(const std::string &c);
-    void set_range_type(HDL_range::range_type_t t);
+    void start_range();
+    void close_range();
+    void add_component(const std::string &c);
     void add_replication_size(const std::string &c);
     void add_replication_target(const std::string &c);
     void add_index_component(const std::string &c);
+    void set_range_type(HDL_range::range_type_t t);
+
+    void start_concatenation();
+    void stop_concatenation();
+    bool is_in_concatenation() const {return in_concatenation;}
+    void advance_concatenation();
+
+    void start_array();
+    void stop_array();
+    bool is_in_array() const {return in_array;}
+
+    void set_name(const std::string & string);
+
 private:
+    bool in_concatenation = false;
+    bool in_array = false;
     std::vector<HDL_net> nets;
+    HDL_range_factory range_factory;
     HDL_net current_net;
 };
 

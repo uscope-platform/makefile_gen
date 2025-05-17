@@ -1,5 +1,5 @@
 
-// Generated from /home/filssavi/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.2
+// Generated from /home/fils/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -2082,6 +2082,10 @@ public:
   }
 
   virtual std::any visitPort_concatenation_connection(sv2017::Port_concatenation_connectionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitConcatenation_item(sv2017::Concatenation_itemContext *ctx) override {
     return visitChildren(ctx);
   }
 

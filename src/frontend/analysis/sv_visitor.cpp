@@ -202,6 +202,9 @@ void sv_visitor::enterPrimaryPath(sv2017::PrimaryPathContext *ctx) {
         if(!deps_factory.is_interface()) {
             deps_factory.add_connection_element(ctx->getText());
         }
+        if(deps_factory.is_in_port()) {
+            deps_factory.start_scalar_net(ctx->getText());
+        }
     }
 }
 
@@ -376,15 +379,15 @@ void sv_visitor::enterNamed_port_connection(sv2017::Named_port_connectionContext
         if(ctx->port_replication_connection() != nullptr) {
             deps_factory.start_replication_port(ctx->identifier()->getText());
         }
+        deps_factory.start_port();
     }
 }
 
 void sv_visitor::exitNamed_port_connection(sv2017::Named_port_connectionContext *ctx) {
     auto port_name = ctx->identifier()->getText();
-    if(ctx->port_expression_connection() != nullptr){
-        if(!deps_factory.is_in_replication() && !deps_factory.is_in_array_range() && !deps_factory.in_concatenation()) {
-            deps_factory.add_scalar_net(ctx->port_expression_connection()->expression()->getText());
-        }
+
+    deps_factory.stop_port();
+    if(ctx->port_expression_connection() != nullptr){\
         if(deps_factory.is_valid_dependency()){
             deps_factory.add_port(ctx->identifier()->getText());
         }
@@ -392,7 +395,6 @@ void sv_visitor::exitNamed_port_connection(sv2017::Named_port_connectionContext 
     if(ctx->port_concatenation_connection() != nullptr){
         if(deps_factory.is_valid_dependency()){
             deps_factory.stop_concat_port();
-            deps_factory.add_port(ctx->identifier()->getText());
         }
     }
     if(ctx->port_replication_connection() != nullptr){
@@ -481,25 +483,22 @@ void sv_visitor::exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) 
 
 void sv_visitor::enterPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
     if(deps_factory.is_valid_dependency()) {
-        deps_factory.start_array();
+        in_array_access_declaration = true;
     }
 }
 
 void sv_visitor::exitPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
     params_factory.close_array_index();
-    if(deps_factory.is_valid_dependency()){
-        deps_factory.stop_array();
-    }
 }
 
 void sv_visitor::enterPrimaryIndex(sv2017::PrimaryIndexContext *ctx) {
     if(ctx->array_range_expression() != nullptr) {
-        deps_factory.start_array_range();
+        deps_factory.start_array_range(ctx->primary()->getText());
     }
 }
 
 void sv_visitor::exitPrimaryIndex(sv2017::PrimaryIndexContext *ctx) {
-    if(deps_factory.is_valid_dependency() && !deps_factory.is_in_array_range()){
+    if(deps_factory.is_valid_dependency()){
         deps_factory.add_connection_element(ctx->getText());
     }
 }
@@ -570,7 +569,9 @@ void sv_visitor::exitRange_expression(sv2017::Range_expressionContext *ctx) {
 }
 
 void sv_visitor::exitArray_range_expression(sv2017::Array_range_expressionContext *ctx) {
-    deps_factory.stop_array_range();
+    if(deps_factory.is_valid_dependency()) {
+        deps_factory.stop_array_range();
+    }
 }
 
 void sv_visitor::enterUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) {
@@ -579,6 +580,12 @@ void sv_visitor::enterUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx)
 
 void sv_visitor::exitUnpacked_dimension(sv2017::Unpacked_dimensionContext *ctx) {
     params_factory.stop_unpacked_dimension_declaration();
+}
+
+void sv_visitor::exitConcatenation_item(sv2017::Concatenation_itemContext *ctx) {
+    if(deps_factory.is_valid_dependency()) {
+        deps_factory.add_concatenation_net();
+    }
 }
 
 void sv_visitor::exitFirst_range_identifier(sv2017::First_range_identifierContext *ctx) {

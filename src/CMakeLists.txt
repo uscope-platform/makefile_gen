@@ -1,6 +1,7 @@
 
 
 add_library(makefile_gen_lib STATIC)
+
 target_sources(makefile_gen_lib
     PRIVATE
     analysis/HDL_ast_builder.cpp /
@@ -33,6 +34,8 @@ target_sources(makefile_gen_lib
     data_model/HDL/parameters/Initialization_list.cpp /
     data_model/HDL/parameters/HDL_function.cpp /
     data_model/HDL/factories/HDL_functions_factory.cpp /
+    data_model/HDL/factories/HDL_range_factory.cpp /
+    data_model/HDL/factories/HDL_concat_factory.cpp /
     data_model/HDL/parameters/Expression_evaluator.cpp /
     data_model/HDL/factories/HDL_net_factory.cpp /
     data_model/HDL/HDL_net.cpp /

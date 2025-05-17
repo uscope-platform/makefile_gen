@@ -1,5 +1,5 @@
 
-// Generated from /home/filssavi/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.2
+// Generated from /home/fils/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -287,19 +287,19 @@ public:
     RuleModule_or_interface_or_program_or_udp_instantiation = 491, RuleHierarchical_instance = 492, 
     RuleList_of_port_connections = 493, RuleOrdered_port_connection = 494, 
     RuleNamed_port_connection = 495, RulePort_expression_connection = 496, 
-    RulePort_concatenation_connection = 497, RulePort_replication_connection = 498, 
-    RuleBind_directive = 499, RuleBind_target_instance = 500, RuleBind_target_instance_list = 501, 
-    RuleBind_instantiation = 502, RuleConfig_declaration = 503, RuleDesign_statement = 504, 
-    RuleConfig_rule_statement = 505, RuleInst_clause = 506, RuleInst_name = 507, 
-    RuleCell_clause = 508, RuleLiblist_clause = 509, RuleUse_clause = 510, 
-    RuleNet_alias = 511, RuleSpecify_block = 512, RuleGenerate_region = 513, 
-    RuleGenvar_expression = 514, RuleLoop_generate_construct = 515, RuleGenvar_initialization = 516, 
-    RuleGenvar_iteration = 517, RuleConditional_generate_construct = 518, 
-    RuleIf_generate_construct = 519, RuleCase_generate_construct = 520, 
-    RuleCase_generate_item = 521, RuleGenerate_begin_end_block = 522, RuleGenerate_item = 523, 
-    RuleProgram_generate_item = 524, RuleModule_or_generate_or_interface_or_checker_item = 525, 
-    RuleModule_or_generate_or_interface_item = 526, RuleModule_or_generate_item = 527, 
-    RuleElaboration_system_task = 528, RuleModule_item_item = 529, RuleModule_item = 530
+    RulePort_concatenation_connection = 497, RuleConcatenation_item = 498, 
+    RulePort_replication_connection = 499, RuleBind_directive = 500, RuleBind_target_instance = 501, 
+    RuleBind_target_instance_list = 502, RuleBind_instantiation = 503, RuleConfig_declaration = 504, 
+    RuleDesign_statement = 505, RuleConfig_rule_statement = 506, RuleInst_clause = 507, 
+    RuleInst_name = 508, RuleCell_clause = 509, RuleLiblist_clause = 510, 
+    RuleUse_clause = 511, RuleNet_alias = 512, RuleSpecify_block = 513, 
+    RuleGenerate_region = 514, RuleGenvar_expression = 515, RuleLoop_generate_construct = 516, 
+    RuleGenvar_initialization = 517, RuleGenvar_iteration = 518, RuleConditional_generate_construct = 519, 
+    RuleIf_generate_construct = 520, RuleCase_generate_construct = 521, 
+    RuleCase_generate_item = 522, RuleGenerate_begin_end_block = 523, RuleGenerate_item = 524, 
+    RuleProgram_generate_item = 525, RuleModule_or_generate_or_interface_or_checker_item = 526, 
+    RuleModule_or_generate_or_interface_item = 527, RuleModule_or_generate_item = 528, 
+    RuleElaboration_system_task = 529, RuleModule_item_item = 530, RuleModule_item = 531
   };
 
   explicit sv2017(antlr4::TokenStream *input);
@@ -817,6 +817,7 @@ public:
   class Named_port_connectionContext;
   class Port_expression_connectionContext;
   class Port_concatenation_connectionContext;
+  class Concatenation_itemContext;
   class Port_replication_connectionContext;
   class Bind_directiveContext;
   class Bind_target_instanceContext;
@@ -10945,8 +10946,8 @@ public:
     antlr4::tree::TerminalNode *RBRACE();
     antlr4::tree::TerminalNode *APOSTROPHE_LBRACE();
     antlr4::tree::TerminalNode *LBRACE();
-    std::vector<ExpressionContext *> expression();
-    ExpressionContext* expression(size_t i);
+    std::vector<Concatenation_itemContext *> concatenation_item();
+    Concatenation_itemContext* concatenation_item(size_t i);
     std::vector<antlr4::tree::TerminalNode *> COMMA();
     antlr4::tree::TerminalNode* COMMA(size_t i);
 
@@ -10958,6 +10959,21 @@ public:
   };
 
   Port_concatenation_connectionContext* port_concatenation_connection();
+
+  class  Concatenation_itemContext : public antlr4::ParserRuleContext {
+  public:
+    Concatenation_itemContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    ExpressionContext *expression();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Concatenation_itemContext* concatenation_item();
 
   class  Port_replication_connectionContext : public antlr4::ParserRuleContext {
   public:

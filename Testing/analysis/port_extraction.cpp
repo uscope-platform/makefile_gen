@@ -66,6 +66,31 @@ std::string test_pattern = R"(
 
 
 
+TEST(port_extraction, array_port) {
+    std::string test_pattern = R"(
+        module test_mod #()();
+
+            axi_stream_combiner #(
+            ) scope_combinator (
+                .clock(clock),
+                .stream_in(stream[5])
+            );
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto inst = analyzer.analyze()[0].get_dependencies()[0];
+    auto ports = inst.get_ports();
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["stream_in"] = {HDL_net("stream")};
+
+    check_ports["stream_in"][0].index = {Expression_component("5")};
+
+    ASSERT_EQ(ports, check_ports);
+}
+
 TEST(port_extraction, array_range_port) {
     std::string test_pattern = R"(
         module test_mod #()();
@@ -92,6 +117,32 @@ TEST(port_extraction, array_range_port) {
 }
 
 
+
+TEST(port_extraction, concat_simple_slicing) {
+    std::string test_pattern = R"(
+        module test_mod #()();
+
+            axi_stream_combiner #(
+            ) scope_combinator (
+                .clock(clock),
+                .stream_in({m_wdata[N],m_wstrb[N]})
+            );
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto inst = analyzer.analyze()[0].get_dependencies()[0];
+    auto ports = inst.get_ports();
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["stream_in"] = {HDL_net("m_wdata"), HDL_net("m_wstrb")};
+
+    check_ports["stream_in"][0].index = {Expression_component("N")};
+    check_ports["stream_in"][1].index = {Expression_component("N")};
+
+    ASSERT_EQ(ports, check_ports);
+}
 
 TEST(port_extraction, concat_range) {
     std::string test_pattern = R"(
@@ -124,32 +175,6 @@ TEST(port_extraction, concat_range) {
     ASSERT_EQ(ports, check_ports);
 }
 
-
-TEST(port_extraction, concat_simple_slicing) {
-    std::string test_pattern = R"(
-        module test_mod #()();
-
-            axi_stream_combiner #(
-            ) scope_combinator (
-                .clock(clock),
-                .stream_in({m_wdata[N],m_wstrb[N]})
-            );
-        endmodule
-    )";
-
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
-    auto inst = analyzer.analyze()[0].get_dependencies()[0];
-    auto ports = inst.get_ports();
-    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
-    check_ports["clock"] = {HDL_net("clock")};
-    check_ports["stream_in"] = {HDL_net("m_wdata"), HDL_net("m_wstrb")};
-
-    check_ports["stream_in"][0].index = {Expression_component("N")};
-    check_ports["stream_in"][1].index = {Expression_component("N")};
-
-    ASSERT_EQ(ports, check_ports);
-}
 
 
 
@@ -289,30 +314,6 @@ TEST(port_extraction, concat_literal) {
 
 
 
-TEST(port_extraction, array_port) {
-    std::string test_pattern = R"(
-        module test_mod #()();
-
-            axi_stream_combiner #(
-            ) scope_combinator (
-                .clock(clock),
-                .stream_in(stream[5])
-            );
-        endmodule
-    )";
-
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
-    auto inst = analyzer.analyze()[0].get_dependencies()[0];
-    auto ports = inst.get_ports();
-    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
-    check_ports["clock"] = {HDL_net("clock")};
-    check_ports["stream_in"] = {HDL_net("stream")};
-
-    check_ports["stream_in"][0].index = {Expression_component("5")};
-
-    ASSERT_EQ(ports, check_ports);
-}
 
 
 TEST(port_extraction, port_extraction_with_declarations) {
@@ -405,7 +406,7 @@ TEST(port_extraction, replication_with_parameter) {
 }
 
 
-TEST(port_extraction,array_range_replication) {
+TEST(port_extraction,array_range_concat) {
     std::string test_pattern = R"(
         module test_mod #()();
 

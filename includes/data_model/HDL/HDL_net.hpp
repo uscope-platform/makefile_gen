@@ -72,7 +72,7 @@ public:
     HDL_net() = default;
     explicit HDL_net(const std::string &s) {name = s;}
     std::string name;
-
+    bool empty() const {return name.empty() && range.accessor.empty() && replication.size.empty();}
     Expression index;
     HDL_range range;
     HDL_replication replication;

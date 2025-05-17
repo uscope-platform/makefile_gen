@@ -1,5 +1,5 @@
 
-// Generated from /home/filssavi/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.2
+// Generated from /home/fils/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -1566,6 +1566,9 @@ public:
 
   virtual void enterPort_concatenation_connection(sv2017::Port_concatenation_connectionContext *ctx) = 0;
   virtual void exitPort_concatenation_connection(sv2017::Port_concatenation_connectionContext *ctx) = 0;
+
+  virtual void enterConcatenation_item(sv2017::Concatenation_itemContext *ctx) = 0;
+  virtual void exitConcatenation_item(sv2017::Concatenation_itemContext *ctx) = 0;
 
   virtual void enterPort_replication_connection(sv2017::Port_replication_connectionContext *ctx) = 0;
   virtual void exitPort_replication_connection(sv2017::Port_replication_connectionContext *ctx) = 0;

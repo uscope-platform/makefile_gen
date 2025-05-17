@@ -1,5 +1,5 @@
 
-// Generated from /home/filssavi/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.2
+// Generated from /home/fils/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -1053,6 +1053,8 @@ public:
     virtual std::any visitPort_expression_connection(sv2017::Port_expression_connectionContext *context) = 0;
 
     virtual std::any visitPort_concatenation_connection(sv2017::Port_concatenation_connectionContext *context) = 0;
+
+    virtual std::any visitConcatenation_item(sv2017::Concatenation_itemContext *context) = 0;
 
     virtual std::any visitPort_replication_connection(sv2017::Port_replication_connectionContext *context) = 0;
 
