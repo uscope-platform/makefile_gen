@@ -16,8 +16,8 @@
 #include "data_model/HDL/factories/HDL_net_factory.hpp"
 
 void HDL_net_factory::new_net(const std::string &name) {
-    if(!current_net.name.empty() || current_net.is_array() || current_net.is_replication()) nets.push_back(current_net);
-    current_net = HDL_net(name);
+    if(!current_net.name.empty() && !is_in_concatenation()|| current_net.is_array() || current_net.is_replication()) nets.push_back(current_net);
+     current_net = HDL_net(name);
 }
 
 std::vector<HDL_net> HDL_net_factory::get_nets() {
@@ -28,7 +28,8 @@ std::vector<HDL_net> HDL_net_factory::get_nets() {
     return ret;
 }
 
-void HDL_net_factory::start_range() {
+void HDL_net_factory::start_range(const std::string &n) {
+    current_net = HDL_net(n);
     range_factory.open_range(false );
 }
 
@@ -63,6 +64,9 @@ void HDL_net_factory::stop_concatenation() {
 }
 
 void HDL_net_factory::advance_concatenation() {
+    if(!current_net.empty()) {
+        nets.push_back(current_net);
+    }
     current_net = HDL_net();
 }
 

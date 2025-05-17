@@ -117,6 +117,29 @@ TEST(port_extraction, array_range_port) {
 }
 
 
+TEST(port_extraction, concat_literal) {
+    std::string test_pattern = R"(
+        module test_mod #()();
+
+            axi_stream_combiner #(
+            ) scope_combinator (
+                .clock(clock),
+                .stream_in({1'b0,test})
+            );
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto inst = analyzer.analyze()[0].get_dependencies()[0];
+    auto ports = inst.get_ports();
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["clock"] = {HDL_net("clock")};
+    check_ports["stream_in"] = {HDL_net("1'b0"), HDL_net("test")};
+
+    ASSERT_EQ(ports, check_ports);
+}
+
 
 TEST(port_extraction, concat_simple_slicing) {
     std::string test_pattern = R"(
@@ -283,30 +306,6 @@ TEST(port_extraction, complex_nested_concat_port) {
 
     check_ports["stream_in"][1].replication.size = {Expression_component("DATA_PATH_WIDTH"),Expression_component("-"),Expression_component("1")};
     check_ports["stream_in"][1].replication.target = {Expression_component("1'b0")};
-
-    ASSERT_EQ(ports, check_ports);
-}
-
-
-TEST(port_extraction, concat_literal) {
-    std::string test_pattern = R"(
-        module test_mod #()();
-
-            axi_stream_combiner #(
-            ) scope_combinator (
-                .clock(clock),
-                .stream_in({1'b0,test})
-            );
-        endmodule
-    )";
-
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
-    auto inst = analyzer.analyze()[0].get_dependencies()[0];
-    auto ports = inst.get_ports();
-    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
-    check_ports["clock"] = {HDL_net("clock")};
-    check_ports["stream_in"] = {HDL_net("1'b0"), HDL_net("test")};
 
     ASSERT_EQ(ports, check_ports);
 }

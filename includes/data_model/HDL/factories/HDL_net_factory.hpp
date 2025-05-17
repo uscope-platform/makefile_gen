@@ -24,7 +24,7 @@ class HDL_net_factory {
 public:
     void new_net(const std::string &name);
     std::vector<HDL_net> get_nets();
-    void start_range();
+    void start_range(const std::string &n);
     void close_range();
     void add_component(const std::string &c);
     void add_replication_size(const std::string &c);
@@ -40,6 +40,7 @@ public:
     void start_array();
     void stop_array();
     bool is_in_array() const {return in_array;}
+    bool is_in_range() const {return range_factory.is_active();}
 
     void set_name(const std::string & string);
 

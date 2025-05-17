@@ -56,6 +56,7 @@ HDL_range HDL_range_factory::get_range() {
     return ret;
 }
 
-bool HDL_range_factory::is_active() {
+bool HDL_range_factory::is_active() const {
     return factory_state != idle;
 }
+

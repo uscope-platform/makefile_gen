@@ -20,7 +20,6 @@
 #include "data_model/HDL/factories/HDL_range_factory.hpp"
 #include "data_model/HDL/factories/HDL_net_factory.hpp"
 #include "data_model/HDL/factories/HDL_concat_factory.hpp"
-#include "frontend/analysis/sv_visitor.hpp"
 
 class HDL_instances_factory {
 public:

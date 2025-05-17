@@ -32,8 +32,9 @@ void HDL_instances_factory::add_port(const std::string &name) {
 }
 
 void HDL_instances_factory::start_scalar_net(const std::string &n) {
-    if(!net_factory.is_in_array())
-    net_factory.new_net(n);
+    if(!net_factory.is_in_array() && !net_factory.is_in_range()) {
+        net_factory.new_net(n);
+    }
 }
 
 void HDL_instances_factory::add_scalar_net(const std::string &name) {
@@ -111,8 +112,7 @@ void HDL_instances_factory::stop_interface() {
 }
 
 void HDL_instances_factory::start_array_range(const std::string &n) {
-    in_array_range = 1;
-    net_factory.start_range();
+    net_factory.start_range(n);
 }
 
 void HDL_instances_factory::advance_array_range_phase(const std::string &op) {
@@ -122,7 +122,6 @@ void HDL_instances_factory::advance_array_range_phase(const std::string &op) {
 }
 
 void HDL_instances_factory::stop_array_range() {
-    in_array_range = 0;
     net_factory.close_range();
     disable_net_addition = 2;
 }

@@ -193,6 +193,9 @@ void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
         params_factory.add_component(Expression_component(ctx->getText()));
     }
     if(deps_factory.is_valid_dependency()){
+        if(deps_factory.is_in_port()) {
+            deps_factory.start_scalar_net(ctx->getText());
+        }
         deps_factory.add_connection_element(ctx->getText());
     }
 }

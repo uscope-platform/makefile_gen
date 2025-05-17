@@ -28,7 +28,7 @@ public:
     void add_component(const std::string &c);
     void set_range_type(HDL_range::range_type_t t);
     HDL_range get_range();
-    bool is_active();
+    bool is_active() const;
 private:
 
     enum  {
