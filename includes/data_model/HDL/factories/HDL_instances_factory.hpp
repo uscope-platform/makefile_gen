@@ -36,7 +36,6 @@ public:
     void add_connection_element(const std::string &s);
     bool is_valid_dependency() const{return valid_instance;}
     bool in_concatenation() const {return net_factory.is_in_concatenation();}
-    bool is_in_array_range() const { return in_array_range != 0;}
     bool is_interface() const {return in_interface;}
     void start_bit_selection();
     void stop_bit_selection();
@@ -48,7 +47,7 @@ public:
     void start_interface();
     void stop_interface();
 
-    void start_array_range(const std::string &n);
+    void start_array_range();
 
     void advance_array_range_phase(const std::string &op);
     void stop_array_range();
@@ -64,7 +63,6 @@ public:
 
 private:
     bool in_port = false;
-    int in_array_range = 0;
     int in_replication = 0;
     bool in_interface = false;
 

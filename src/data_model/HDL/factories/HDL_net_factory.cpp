@@ -28,9 +28,8 @@ std::vector<HDL_net> HDL_net_factory::get_nets() {
     return ret;
 }
 
-void HDL_net_factory::start_range(const std::string &n) {
-    current_net = HDL_net(n);
-    range_factory.open_range(false );
+void HDL_net_factory::start_range() {
+    range_factory.open_range(true);
 }
 
 void HDL_net_factory::close_range() {

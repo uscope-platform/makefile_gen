@@ -495,9 +495,6 @@ void sv_visitor::exitPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
 }
 
 void sv_visitor::enterPrimaryIndex(sv2017::PrimaryIndexContext *ctx) {
-    if(ctx->array_range_expression() != nullptr) {
-        deps_factory.start_array_range(ctx->primary()->getText());
-    }
 }
 
 void sv_visitor::exitPrimaryIndex(sv2017::PrimaryIndexContext *ctx) {
@@ -569,6 +566,12 @@ void sv_visitor::exitRange_separator(sv2017::Range_separatorContext *ctx) {
 }
 
 void sv_visitor::exitRange_expression(sv2017::Range_expressionContext *ctx) {
+}
+
+void sv_visitor::enterArray_range_expression(sv2017::Array_range_expressionContext *ctx) {
+    if(deps_factory.is_valid_dependency()) {
+        deps_factory.start_array_range();
+    }
 }
 
 void sv_visitor::exitArray_range_expression(sv2017::Array_range_expressionContext *ctx) {

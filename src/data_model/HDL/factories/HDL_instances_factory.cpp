@@ -111,8 +111,8 @@ void HDL_instances_factory::stop_interface() {
     in_interface = false;
 }
 
-void HDL_instances_factory::start_array_range(const std::string &n) {
-    net_factory.start_range(n);
+void HDL_instances_factory::start_array_range() {
+    net_factory.start_range();
 }
 
 void HDL_instances_factory::advance_array_range_phase(const std::string &op) {

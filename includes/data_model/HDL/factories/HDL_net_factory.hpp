@@ -24,7 +24,7 @@ class HDL_net_factory {
 public:
     void new_net(const std::string &name);
     std::vector<HDL_net> get_nets();
-    void start_range(const std::string &n);
+    void start_range();
     void close_range();
     void add_component(const std::string &c);
     void add_replication_size(const std::string &c);
