@@ -201,13 +201,15 @@ void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
 }
 
 void sv_visitor::enterPrimaryPath(sv2017::PrimaryPathContext *ctx) {
+    auto dbg = ctx->getText();
     if(deps_factory.is_valid_dependency()){
         if(!deps_factory.is_interface()) {
             deps_factory.add_connection_element(ctx->getText());
+            if(deps_factory.is_in_port()) {
+                deps_factory.start_scalar_net(ctx->getText());
+            }
         }
-        if(deps_factory.is_in_port()) {
-            deps_factory.start_scalar_net(ctx->getText());
-        }
+
     }
 }
 
