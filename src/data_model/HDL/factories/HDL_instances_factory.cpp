@@ -63,6 +63,7 @@ void HDL_instances_factory::stop_concat_port() {
 
 void HDL_instances_factory::start_replication_port(const std::string &n) {
     in_replication = 1;
+    net_factory.start_repetition();
     port_name = n;
 }
 
@@ -101,6 +102,7 @@ void HDL_instances_factory::start_replication() {
 
 void HDL_instances_factory::stop_replication() {
     in_replication = 0;
+    net_factory.stop_repetition();
 }
 
 void HDL_instances_factory::start_interface() {

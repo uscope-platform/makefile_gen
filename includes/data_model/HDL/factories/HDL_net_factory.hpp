@@ -44,9 +44,16 @@ public:
 
     void set_name(const std::string & string);
 
+
+    void start_repetition() {in_repetition = true;}
+    void stop_repetition() {in_repetition = false;}
+    bool is_in_repetition() {return in_repetition;}
+
 private:
     bool in_concatenation = false;
     bool in_array = false;
+    bool in_repetition = false;
+
     std::vector<HDL_net> nets;
     HDL_range_factory range_factory;
     HDL_net current_net;
