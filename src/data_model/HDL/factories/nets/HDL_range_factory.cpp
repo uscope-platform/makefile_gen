@@ -15,7 +15,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "data_model/HDL/factories/HDL_range_factory.hpp"
+#include "data_model/HDL/factories/nets/HDL_range_factory.hpp"
 
 void HDL_range_factory::open_range(bool direct) {
     if(direct) {

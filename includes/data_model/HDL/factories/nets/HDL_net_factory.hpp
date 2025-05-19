@@ -18,7 +18,8 @@
 #define HDL_NET_FACTORY_HPP
 
 #include "data_model/HDL/HDL_net.hpp"
-#include "data_model/HDL/factories/HDL_range_factory.hpp"
+#include "data_model/HDL/factories/nets/HDL_repetition_factory.hpp"
+#include "data_model/HDL/factories/nets/HDL_range_factory.hpp"
 
 class HDL_net_factory {
 public:
@@ -45,16 +46,17 @@ public:
     void set_name(const std::string & string);
 
 
-    void start_repetition() {in_repetition = true;}
-    void stop_repetition() {in_repetition = false;}
-    bool is_in_repetition() {return in_repetition;}
-
+    void start_repetition() {repetition_factory.start_repetition();}
+    void stop_repetition();
+    void advance_repetition() {repetition_factory.advance_phase();}
+    bool is_in_replication() const {return repetition_factory.is_in_repetition();}
 private:
     bool in_concatenation = false;
     bool in_array = false;
     bool in_repetition = false;
 
     std::vector<HDL_net> nets;
+    HDL_repetition_factory repetition_factory;
     HDL_range_factory range_factory;
     HDL_net current_net;
 };

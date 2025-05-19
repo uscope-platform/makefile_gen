@@ -32,7 +32,7 @@ void HDL_instances_factory::add_port(const std::string &name) {
 }
 
 void HDL_instances_factory::start_scalar_net(const std::string &n) {
-    if(!net_factory.is_in_array() && !net_factory.is_in_range()) {
+    if(!net_factory.is_in_array() && !net_factory.is_in_range() && !net_factory.is_in_replication()) {
         net_factory.new_net(n);
     }
 }
@@ -62,8 +62,6 @@ void HDL_instances_factory::stop_concat_port() {
 }
 
 void HDL_instances_factory::start_replication_port(const std::string &n) {
-    in_replication = 1;
-    net_factory.start_repetition();
     port_name = n;
 }
 
@@ -77,14 +75,7 @@ void HDL_instances_factory::add_connection_element(const std::string &s) {
         disable_net_addition--;
         return;
     }
-
     net_factory.add_component(s);
-
-    if(in_replication==1) {
-        net_factory.add_replication_size(s);
-    } else if(in_replication == 2) {
-        net_factory.add_replication_target(s);
-    }
 }
 
 void HDL_instances_factory::start_bit_selection() {
@@ -97,12 +88,16 @@ void HDL_instances_factory::stop_bit_selection() {
 
 void HDL_instances_factory::start_replication() {
     net_factory.new_net("");
-    in_replication = 1;
+    net_factory.start_repetition();
 }
 
 void HDL_instances_factory::stop_replication() {
     in_replication = 0;
     net_factory.stop_repetition();
+}
+
+void HDL_instances_factory::advance_replication() {
+    net_factory.advance_repetition();
 }
 
 void HDL_instances_factory::start_interface() {

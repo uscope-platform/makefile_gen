@@ -15,4 +15,4 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "data_model/HDL/factories/HDL_concat_factory.hpp"
+#include "data_model/HDL/factories/nets/HDL_concat_factory.hpp"

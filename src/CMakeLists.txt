@@ -34,10 +34,11 @@ target_sources(makefile_gen_lib
     data_model/HDL/parameters/Initialization_list.cpp /
     data_model/HDL/parameters/HDL_function.cpp /
     data_model/HDL/factories/HDL_functions_factory.cpp /
-    data_model/HDL/factories/HDL_range_factory.cpp /
-    data_model/HDL/factories/HDL_concat_factory.cpp /
+    data_model/HDL/factories/nets/HDL_range_factory.cpp /
+    data_model/HDL/factories/nets/HDL_concat_factory.cpp /
+    data_model/HDL/factories/nets/HDL_net_factory.cpp /
+    data_model/HDL/factories/nets/HDL_repetition_factory.cpp /
     data_model/HDL/parameters/Expression_evaluator.cpp /
-    data_model/HDL/factories/HDL_net_factory.cpp /
     data_model/HDL/HDL_net.cpp /
     data_model/bus_mapping/bus_specs_manager.cpp /
     data_model/bus_mapping/mapper_bus_component.cpp /

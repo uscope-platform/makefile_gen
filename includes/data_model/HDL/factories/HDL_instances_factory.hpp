@@ -17,9 +17,9 @@
 #define MAKEFILEGEN_V2_HDL_INSTANCES_FACTORY_HPP
 
 #include "data_model/HDL/HDL_instance.hpp"
-#include "data_model/HDL/factories/HDL_range_factory.hpp"
-#include "data_model/HDL/factories/HDL_net_factory.hpp"
-#include "data_model/HDL/factories/HDL_concat_factory.hpp"
+#include "nets/HDL_range_factory.hpp"
+#include "nets/HDL_net_factory.hpp"
+#include "nets/HDL_concat_factory.hpp"
 
 class HDL_instances_factory {
 public:
@@ -42,8 +42,8 @@ public:
 
     void start_replication();
     void stop_replication();
-    void advance_replication() {in_replication = 2;}
-    bool is_in_replication() const {return in_replication != 0;}
+    void advance_replication();
+    bool is_in_replication() const {return net_factory.is_in_replication();}
     void start_interface();
     void stop_interface();
 

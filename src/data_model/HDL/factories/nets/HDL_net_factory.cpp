@@ -13,10 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "data_model/HDL/factories/HDL_net_factory.hpp"
+#include "../../../../../includes/data_model/HDL/factories/nets/HDL_net_factory.hpp"
 
 void HDL_net_factory::new_net(const std::string &name) {
-    if(!current_net.name.empty() && !is_in_concatenation()|| current_net.is_array() || current_net.is_replication()) nets.push_back(current_net);
+    if(!current_net.name.empty() && !is_in_concatenation()|| current_net.is_array() || current_net.is_replication()) {
+        nets.push_back(current_net);
+    }
      current_net = HDL_net(name);
 }
 
@@ -37,6 +39,9 @@ void HDL_net_factory::close_range() {
 }
 
 void HDL_net_factory::add_component(const std::string &c) {
+    if(repetition_factory.is_in_repetition()) {
+        repetition_factory.add_component(c);
+    }
     if(in_array) {
         current_net.index.emplace_back(c);
     }
@@ -79,6 +84,12 @@ void HDL_net_factory::stop_array() {
 
 void HDL_net_factory::set_name(const std::string &string) {
     current_net.name = string;
+}
+
+void HDL_net_factory::stop_repetition() {
+    repetition_factory.stop_repetition();
+    auto rep = repetition_factory.get_repetition();
+    current_net.replication = rep;
 }
 
 
