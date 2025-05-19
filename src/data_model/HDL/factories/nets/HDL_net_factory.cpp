@@ -49,7 +49,7 @@ void HDL_net_factory::add_component(const std::string &c) {
         range_factory.add_component(c);
     }
     if(in_concatenation) {
-        if(current_net.name.empty()) {
+        if(current_net.name.empty() && !repetition_factory.is_in_repetition()) {
             current_net.name = c;
         }
     }
@@ -87,11 +87,10 @@ void HDL_net_factory::set_name(const std::string &string) {
 }
 
 void HDL_net_factory::stop_repetition() {
-    repetition_factory.stop_repetition();
     auto rep = repetition_factory.get_repetition();
+    repetition_factory.stop_repetition();
     current_net.replication = rep;
 }
-
 
 void HDL_net_factory::add_replication_target(const std::string &c) {
     current_net.replication.target.emplace_back(c);

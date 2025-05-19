@@ -53,7 +53,6 @@ public:
 private:
     bool in_concatenation = false;
     bool in_array = false;
-    bool in_repetition = false;
 
     std::vector<HDL_net> nets;
     HDL_repetition_factory repetition_factory;

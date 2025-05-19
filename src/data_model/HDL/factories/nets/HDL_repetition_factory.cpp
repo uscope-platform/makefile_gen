@@ -16,6 +16,12 @@
 
 #include "data_model/HDL/factories/nets/HDL_repetition_factory.hpp"
 
+void HDL_repetition_factory::stop_repetition() {
+    is_active = false;
+    repetition = HDL_replication();
+    phase = size;
+}
+
 void HDL_repetition_factory::add_component(const std::string &c) {
     if(phase == size) {
         repetition.size.emplace_back(c);

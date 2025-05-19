@@ -87,8 +87,8 @@ void HDL_instances_factory::stop_bit_selection() {
 }
 
 void HDL_instances_factory::start_replication() {
-    net_factory.new_net("");
     net_factory.start_repetition();
+    net_factory.new_net("");
 }
 
 void HDL_instances_factory::stop_replication() {

@@ -23,7 +23,7 @@
 class HDL_repetition_factory {
 public:
     void start_repetition() {is_active = true;}
-    void stop_repetition() {is_active = true;}
+    void stop_repetition();
     bool is_in_repetition() const {return is_active;}
 
     void add_component(const std::string &c);
