@@ -72,20 +72,31 @@ std::vector<analysis_context> control_bus_analysis::process_interconnect(const a
         auto dependencies=  inst.node->get_parent()->get_dependencies();
         for(auto &dep:dependencies){
             for(auto &[port_name, nets]:dep->get_ports()){
-                bool stop = dep->get_name() == "chain";
+                bool stop = dep->get_name() == "pwm_cu";
+                bool stop2 = master.idx == 2;
                 if(nets.size()==1){
-                    auto net_name = nets.front().get_full_name().substr(0, nets.front().get_full_name().find('['));
-                    if(net_name == master.name && dep->get_repetition_idx() == master.idx){
+                    auto net_name = nets.front().get_base_name();
 
+                    auto idx = dep->get_repetition_idx();
+
+                    if(net_name == master.name){
                         if(specs_manager.is_interconnect(dep->get_type())) {
                             if(specs_manager.get_interconnect_source_port(dep->get_type()) == port_name) {
                                 continue;
                             }
                         }
-                        analysis_context ctx = {dep, port_name, master.address , false,
-                                                inst.current_module_top, inst.current_module_prefix, inst.proxy};
-                        ret_val.push_back(ctx);
-                        if(master.in_array) goto break2;
+                        if(idx==-1) {
+                            analysis_context ctx = {dep, port_name, master.address, false,
+                                inst.current_module_top, inst.current_module_prefix, inst.proxy};
+                            int i = 0;
+                        }else if(idx == master.idx) {
+
+                            analysis_context ctx = {dep, port_name, master.address, false,
+                                                    inst.current_module_top, inst.current_module_prefix, inst.proxy};
+                            ret_val.push_back(ctx);
+                            if(master.in_array) goto break2;
+                        }
+
                     }
                 }
 
@@ -110,35 +121,18 @@ std::vector<analysis_context> control_bus_analysis::process_nested_module(const 
         }
     }
 
-    if(inst.parametric){
-        for(auto &dep:inst.node->get_dependencies()){
-            for(auto &[port_name, nets]:dep->get_ports()){
-                for(auto &item:nets){
-                    if(item.get_full_name() == inst.interface){
-                        analysis_context ctx = {dep, port_name, inst.address,
-                                                inst.parametric, inst.current_module_top,  inst.current_module_prefix, tgt};
-                        ret_stack.push_back(ctx);
-                        goto breakNested2;
-                    }
+    for(auto &dep:inst.node->get_dependencies()){
+        for(auto &[port_name, nets]:dep->get_ports()){
+            for(auto &item:nets){
+                if(item.get_base_name() == inst.interface){
+                    analysis_context ctx = {dep, port_name, inst.address,
+                                            inst.parametric, inst.current_module_top, inst.current_module_prefix, tgt};
+                    ret_stack.push_back(ctx);
+                    goto breakNested;
                 }
             }
-            breakNested2:;
         }
-    } else{
-        for(auto &dep:inst.node->get_dependencies()){
-            for(auto &[port_name, nets]:dep->get_ports()){
-                for(auto &item:nets){
-                    auto pn = item.get_full_name().substr(0, item.get_full_name().find('[')); // TODO: This is a bodge to support array of instances, proper suppoty should be implemented
-                    if(pn == inst.interface){
-                        analysis_context ctx = {dep, port_name,
-                                                inst.address, inst.parametric, inst.current_module_top, inst.current_module_prefix, tgt};
-                        ret_stack.push_back(ctx);
-                        goto breakNested;
-                    }
-                }
-            }
-            breakNested:;
-        }
+        breakNested:;
     }
 
     for(auto &item:inst.node->get_parameters()){

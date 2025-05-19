@@ -69,7 +69,7 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
     ){
         return {};
     }
-    bool stop = type == "hil_base_logic";
+
     if(i.get_dependency_class() == module || i.get_dependency_class() == interface ) {
 
         if (!d_store->contains_hdl_entity(type)) {
@@ -133,7 +133,7 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
             if(dep.get_dependency_class() != package  && dep.get_dependency_class() != memory_init){
                 HDL_instance_AST d = dep;
                 auto dbg = d.get_name();
-                bool do_break = dbg == "core_c";
+                bool do_break = dbg == "pwm_cu";
                 if(d.get_n_loops()>1){
                     std::cout << "WARNING: Nested loops are not supported by parameter analysis\n In HDL instance: " + i.get_name() + " of type: " + type + " is in a nested loop" << std::endl;
                 } else if(d.get_n_loops() == 1){
@@ -143,10 +143,16 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
                     for(auto index:indices){
                         auto specialized_params = specialize_parameters(index, new_params, loop.init.get_name());
                         auto specialized_d = specialize_instance(d, index,specialized_params, loop.init.get_name());
+                        //TODO: Find how to specialize the port inexes
+                        //auto spec_ports = specialize_ports(specialized_d, new_params);
+                        //specialized_d.set_ports(spec_ports);
                         if (auto ll_ret = recursive_build_ast(specialized_d,specialized_params, ret_inst))
                             ret_inst->add_child(*ll_ret);
                     }
                 } else {
+                    auto spec_ports = specialize_ports(d, new_params);
+                    //d.set_ports(spec_ports);
+                    //TODO:find how to handle the indeses specialization
                     if (auto ll_ret = recursive_build_ast(d,new_params, ret_inst))
                         ret_inst->add_child(*ll_ret);
                 }
@@ -179,9 +185,10 @@ HDL_instance_AST HDL_ast_builder::specialize_instance(HDL_instance_AST &i, int64
     for(auto &[port_name, nets]:specialized_d.get_ports()){
         std::vector<HDL_net> port_content;
         for(auto &n:nets){
-            if(n.get_full_name().length()>accessor.length() && n.get_full_name().compare(n.get_full_name().length()-accessor.length(), accessor.length(), accessor) == 0){
-                auto base = n.get_full_name().substr(0, n.get_full_name().length()-accessor.length());
-                port_content.emplace_back(base);
+            if(n.is_array()) {
+                auto new_net = n;
+                new_net.index = {Expression_component(idx)};
+                port_content.emplace_back(new_net);
             } else {
                 port_content.push_back(n);
             }
@@ -191,6 +198,33 @@ HDL_instance_AST HDL_ast_builder::specialize_instance(HDL_instance_AST &i, int64
     specialized_d.set_ports(new_ports);
     return specialized_d;
 }
+
+std::unordered_map<std::string, std::vector<HDL_net>> HDL_ast_builder::specialize_ports(HDL_instance_AST &i, const Parameters_map &parameters_values) {
+
+
+    std::unordered_map<std::string, std::vector<HDL_net>> ret_val;
+    for(auto &[port_name, nets]: i.get_ports()) {
+        std::vector<HDL_net> processed_nets;
+        for (auto &n : nets) {
+            Parameter_processor p(parameters_values, d_store);
+            if(!n.index.empty()) {
+                n.index = {Expression_component(p.process_expression(n.index, nullptr))};
+            }
+            if(!n.range.accessor.empty()) {
+                n.range.accessor = {Expression_component(p.process_expression(n.range.accessor, nullptr))};
+                n.range.range = {Expression_component(p.process_expression(n.range.range, nullptr))};
+            }
+            if(!n.replication.size.empty()) {
+                n.replication.target = {Expression_component(p.process_expression(n.replication.target, nullptr))};
+                n.replication.size = {Expression_component(p.process_expression(n.replication.size, nullptr))};
+            }
+        }
+        ret_val[port_name] = processed_nets;
+    }
+
+    return ret_val;
+}
+
 
 Parameters_map
 HDL_ast_builder::specialize_parameters(int64_t idx, const Parameters_map &params,

@@ -64,9 +64,16 @@ target_sources(makefile_gen_lib
     frontend/cache_manager.cpp
 )
 
-target_link_libraries(makefile_gen_lib PUBLIC mgp_sv_lib)
-target_link_libraries(makefile_gen_lib PUBLIC mgp_vh_lib)
-target_link_libraries(makefile_gen_lib PUBLIC Threads::Threads cereal nlohmann_json::nlohmann_json OpenSSL::SSL gtest::gtest)
+target_link_libraries(makefile_gen_lib PUBLIC
+        mgp_sv_lib
+        mgp_vh_lib
+        antlr4_static
+        Threads::Threads
+        cereal
+        nlohmann_json::nlohmann_json
+        OpenSSL::SSL
+        gtest::gtest
+)
 
 set(TEMPLATE_FILES /
         ../templates/make_project_xlnx.j2 /

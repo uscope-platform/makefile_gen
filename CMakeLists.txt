@@ -5,13 +5,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 
-include(CheckLinkerFlag)
-check_linker_flag(CXX "-fuse-ld=lld" CAN_USE_LLD)
-
-if(CAN_USE_LLD)
-    add_link_options("-fuse-ld=lld")
-endif()
-
 set(OPENSSL_USE_STATIC_LIBS TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 set(ANTLR_VERSION 4.13.1)

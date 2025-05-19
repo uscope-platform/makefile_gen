@@ -77,12 +77,13 @@ public:
     HDL_range range;
     HDL_replication replication;
     std::string get_full_name() const;
+    std::string get_base_name() {return name;}
 
     bool is_replication() {
         return !replication.size.empty();
     }
     bool is_array() {
-        return !range.accessor.empty();
+        return !range.accessor.empty() || !index.empty();
     }
 
 
