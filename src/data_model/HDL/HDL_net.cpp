@@ -25,8 +25,9 @@ std::string HDL_net::get_full_name() const {
             base_name += ":" + Expression_component::print_expression(range.range);
         }
         base_name += "]";
+    } else if(!index.empty()) {
+        base_name += "[" + Expression_component::print_expression(index) + "]";
     }
-
     return base_name;
 
 }
