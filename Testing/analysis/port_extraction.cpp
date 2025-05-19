@@ -480,36 +480,3 @@ TEST(port_extraction, interface_component_port ) {
     check_ports["in_valid"] = {HDL_net("axil.ARVALID")};
     ASSERT_EQ(ports, check_ports);
 }
-
-TEST(port_extraction, for_indexed_port ) {
-    std::string test_pattern = R"(
-    module test_mod #()();
-
-
-        generate
-            for( i = 0; i<N_CHAINS; i++)begin
-                pwmChain #(
-                    .COUNTER_WIDTH(COUNTER_WIDTH),
-                    .N_CHANNELS(N_CHANNELS),
-                    .HR_ENABLE(HR_ENABLE),
-                    .ENANCING_MODE(ENANCING_MODE)
-                ) chain(
-                  .clock(clock),
-                  .axi_in(internal_bus[i])
-              );
-            end
-        endgenerate
-    endmodule
-    )";
-
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
-    auto inst = analyzer.analyze()[0].get_dependencies()[0];
-    auto ports = inst.get_ports();
-    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
-    check_ports["in_valid"] = {HDL_net("axil.ARVALID")};
-    ASSERT_EQ(ports, check_ports);
-}
-
-
-

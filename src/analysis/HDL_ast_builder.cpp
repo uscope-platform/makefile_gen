@@ -151,7 +151,7 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
                     }
                 } else {
                     auto spec_ports = specialize_ports(d, new_params);
-                    //d.set_ports(spec_ports);
+                    d.set_ports(spec_ports);
                     //TODO:find how to handle the indeses specialization
                     if (auto ll_ret = recursive_build_ast(d,new_params, ret_inst))
                         ret_inst->add_child(*ll_ret);
@@ -207,17 +207,19 @@ std::unordered_map<std::string, std::vector<HDL_net>> HDL_ast_builder::specializ
         std::vector<HDL_net> processed_nets;
         for (auto &n : nets) {
             Parameter_processor p(parameters_values, d_store);
+
             if(!n.index.empty()) {
-                n.index = {Expression_component(p.process_expression(n.index, nullptr))};
+                n.index = specialize_expression(n.index, p);
             }
             if(!n.range.accessor.empty()) {
-                n.range.accessor = {Expression_component(p.process_expression(n.range.accessor, nullptr))};
-                n.range.range = {Expression_component(p.process_expression(n.range.range, nullptr))};
+                n.range.accessor = specialize_expression(n.range.accessor, p);
+                n.range.range = specialize_expression(n.range.range, p);
             }
             if(!n.replication.size.empty()) {
-                n.replication.target = {Expression_component(p.process_expression(n.replication.target, nullptr))};
-                n.replication.size = {Expression_component(p.process_expression(n.replication.size, nullptr))};
+                n.replication.target = specialize_expression(n.replication.target, p);
+                n.replication.size = specialize_expression(n.replication.size, p);
             }
+            processed_nets.push_back(n);
         }
         ret_val[port_name] = processed_nets;
     }
@@ -235,5 +237,13 @@ HDL_ast_builder::specialize_parameters(int64_t idx, const Parameters_map &params
     idx_param->set_value(idx);
     specialized_params.insert(idx_param);
     return specialized_params;
+}
+
+Expression HDL_ast_builder::specialize_expression(Expression &e, Parameter_processor &p) {
+    try {
+        return {Expression_component(p.process_expression(e, nullptr))};
+    } catch(Parameter_processor_Exception ex) {
+        return e;
+    }
 }
 

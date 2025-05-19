@@ -85,18 +85,20 @@ std::vector<analysis_context> control_bus_analysis::process_interconnect(const a
                                 continue;
                             }
                         }
-                        if(idx==-1) {
+                        if(!master.in_array) {
                             analysis_context ctx = {dep, port_name, master.address, false,
-                                inst.current_module_top, inst.current_module_prefix, inst.proxy};
-                            int i = 0;
-                        }else if(idx == master.idx) {
-
-                            analysis_context ctx = {dep, port_name, master.address, false,
-                                                    inst.current_module_top, inst.current_module_prefix, inst.proxy};
+                                                  inst.current_module_top, inst.current_module_prefix, inst.proxy};
                             ret_val.push_back(ctx);
-                            if(master.in_array) goto break2;
-                        }
+                        } else {
+                            auto port_index = nets[0].index[0].get_numeric_value();
+                            if(port_index == master.idx) {
+                                analysis_context ctx = {dep, port_name, master.address, false,
+                                                  inst.current_module_top, inst.current_module_prefix, inst.proxy};
+                                ret_val.push_back(ctx);
+                                goto break2;
+                            }
 
+                        }
                     }
                 }
 

@@ -37,6 +37,7 @@ class HDL_ast_builder {
 
     private:
         Parameters_map specialize_parameters(int64_t idx, const Parameters_map &params, std::string idx_name);
+        Expression specialize_expression(Expression &e, Parameter_processor &p);
         HDL_instance_AST specialize_instance(HDL_instance_AST &i, int64_t idx, const Parameters_map &specialized_params, std::string idx_name);
         std::unordered_map<std::string, std::vector<HDL_net>>  specialize_ports(HDL_instance_AST &i, const Parameters_map &parameters_values);
         std::shared_ptr<settings_store> s_store;
