@@ -28,7 +28,6 @@ void HDL_instances_factory::add_parameter(const std::string &name, const std::sh
 void HDL_instances_factory::add_port(const std::string &name) {
     auto nets = net_factory.get_nets();
     current_instance.add_port_connection(name, nets);
-    disable_net_addition = 0;
 }
 
 void HDL_instances_factory::start_scalar_net(const std::string &n) {
@@ -38,10 +37,6 @@ void HDL_instances_factory::start_scalar_net(const std::string &n) {
 }
 
 void HDL_instances_factory::add_scalar_net(const std::string &name) {
-    if(disable_net_addition) {
-        disable_net_addition--;
-        return;
-    }
     net_factory.new_net(name);
 }
 
@@ -58,7 +53,6 @@ void HDL_instances_factory::start_concat_port(const std::string &n) {
 void HDL_instances_factory::stop_concat_port() {
     net_factory.stop_concatenation();
     current_instance.add_port_connection(port_name, net_factory.get_nets());
-    disable_net_addition =  1;
 }
 
 void HDL_instances_factory::start_replication_port(const std::string &n) {
@@ -71,10 +65,6 @@ void HDL_instances_factory::add_concatenation_net() {
 
 
 void HDL_instances_factory::add_connection_element(const std::string &s) {
-    if(disable_net_addition) {
-        disable_net_addition--;
-        return;
-    }
     net_factory.add_component(s);
 }
 
@@ -92,7 +82,6 @@ void HDL_instances_factory::start_replication() {
 }
 
 void HDL_instances_factory::stop_replication() {
-    in_replication = 0;
     net_factory.stop_repetition();
 }
 
@@ -120,7 +109,6 @@ void HDL_instances_factory::advance_array_range_phase(const std::string &op) {
 
 void HDL_instances_factory::stop_array_range() {
     net_factory.close_range();
-    disable_net_addition = 2;
 }
 
 

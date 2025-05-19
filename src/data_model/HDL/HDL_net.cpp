@@ -16,9 +16,18 @@
 #include "data_model/HDL/HDL_net.hpp"
 
 std::string HDL_net::get_full_name() const {
+    auto base_name = name;
+    if(!range.accessor.empty()) {
+        base_name += "[" + Expression_component::print_expression(range.accessor);
+        if(!range.range.empty()) {
+            if(range.type ==HDL_range::increasing_range) base_name += "+";
+            else if(range.type ==HDL_range::decreasing_range) base_name += "-";
+            base_name += ":" + Expression_component::print_expression(range.range);
+        }
+        base_name += "]";
+    }
 
-
-    return name + Expression_component::print_expression(range.accessor);
+    return base_name;
 
 }
 

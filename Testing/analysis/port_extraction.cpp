@@ -461,3 +461,23 @@ TEST(port_extraction, replication_with_parameter) {
     ASSERT_EQ(ports, check_ports);
 }
 
+
+TEST(port_extraction, interface_component_port ) {
+    std::string test_pattern = R"(
+        module test_mod #()();
+
+        axil_skid_buffer address_read_buffer (
+            .in_valid(axil.ARVALID)
+        );
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto inst = analyzer.analyze()[0].get_dependencies()[0];
+    auto ports = inst.get_ports();
+    std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
+    check_ports["in_valid"] = {HDL_net("axil.ARVALID")};
+    ASSERT_EQ(ports, check_ports);
+}
+

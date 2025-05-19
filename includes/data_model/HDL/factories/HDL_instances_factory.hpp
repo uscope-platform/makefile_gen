@@ -63,10 +63,8 @@ public:
 
 private:
     bool in_port = false;
-    int in_replication = 0;
     bool in_interface = false;
 
-    int disable_net_addition = 0;
     HDL_net_factory net_factory;
     std::string port_name;
 

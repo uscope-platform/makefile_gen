@@ -508,7 +508,13 @@ void sv_visitor::exitPrimaryIndex(sv2017::PrimaryIndexContext *ctx) {
 void sv_visitor::enterPrimaryDot(sv2017::PrimaryDotContext *ctx) {
     if(deps_factory.is_valid_dependency()) {
         deps_factory.start_interface();
+        if(!deps_factory.in_concatenation() || deps_factory.is_in_replication()) {
+            if(deps_factory.is_in_port()) {
+                deps_factory.start_scalar_net(ctx->getText());
+            }
+        }
     }
+
 }
 
 void sv_visitor::exitPrimaryDot(sv2017::PrimaryDotContext *ctx) {
