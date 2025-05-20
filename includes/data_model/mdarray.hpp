@@ -37,13 +37,36 @@ public:
     void set_data(const md_3d_array &d){data = d;}
 
     md_3d_array get_data(){return data;};
-    md_2d_array get_2d_slice(std::vector<int64_t> idx){return data[idx[0]];};
-    md_1d_array get_1d_slice(std::vector<int64_t> idx){return data[idx[0]][idx[1]];};
-    int64_t get_value(std::vector<int64_t> idx){return data[idx[0]][idx[1]][idx[2]];};
+md_2d_array get_2d_slice(std::vector<int64_t> idx) {
+        if(idx.empty() || idx[0] >= data.size()) {
+            std::cout << "Index out of range in get_2d_slice" << std::endl;
+            exit(1);
+        }
+        return data[idx[0]];
+    }
+
+    md_1d_array get_1d_slice(std::vector<int64_t> idx) {
+        if(idx.size() < 2 || idx[0] >= data.size() || idx[1] >= data[idx[0]].size()) {
+            std::cout << "Index out of range in get_1d_slice" << std::endl;
+            exit(1);
+        }
+        return data[idx[0]][idx[1]];
+    }
+
+    int64_t get_value(std::vector<int64_t> idx) {
+        if(idx.size() < 3 || idx[0] >= data.size() ||
+           idx[1] >= data[idx[0]].size() ||
+           idx[2] >= data[idx[0]][idx[1]].size()) {
+            std::cout << "Index out of range in get_value" << std::endl;
+            exit(1);
+        }
+        return data[idx[0]][idx[1]][idx[2]];
+    }
+
     md_3d_array dump();
 
     template<class Archive>
-    void serialize( Archive & ar ) {
+    void serialize(Archive & ar ) {
         ar(data);
     }
 
