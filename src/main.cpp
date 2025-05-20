@@ -32,7 +32,7 @@ int main(int argc, char *argv[]){
         std::string set_setting;
         std::string new_app_name;
         std::string new_app_lang;
-        bool measure_runtime;
+        bool measure_runtime = true;
         bool no_cache = false;
         bool refresh_cache = false;
         std::string cache_dir = std::string(std::getenv("HOME")) + "/.makefilegen_store";

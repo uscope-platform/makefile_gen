@@ -133,7 +133,7 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
             if(dep.get_dependency_class() != package  && dep.get_dependency_class() != memory_init){
                 HDL_instance_AST d = dep;
                 auto dbg = d.get_name();
-                bool do_break = dbg == "control_interconnect";
+                bool do_break = dbg == "dep";
                 if(d.get_n_loops()>1){
                     std::cout << "WARNING: Nested loops are not supported by parameter analysis\n In HDL instance: " + i.get_name() + " of type: " + type + " is in a nested loop" << std::endl;
                 } else if(d.get_n_loops() == 1){
@@ -143,16 +143,16 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
                     for(auto index:indices){
                         auto specialized_params = specialize_parameters(index, new_params, loop.init.get_name());
                         auto specialized_d = specialize_instance(d, index,specialized_params, loop.init.get_name());
-                        //TODO: Find how to specialize the port inexes
+
                         //auto spec_ports = specialize_ports(specialized_d, new_params);
                         //specialized_d.set_ports(spec_ports);
                         if (auto ll_ret = recursive_build_ast(specialized_d,specialized_params, ret_inst))
                             ret_inst->add_child(*ll_ret);
                     }
                 } else {
+                    //TODO: Handle arrays
                     auto spec_ports = specialize_ports(d, new_params);
                     d.set_ports(spec_ports);
-                    //TODO:find how to handle the indeses specialization
                     if (auto ll_ret = recursive_build_ast(d,new_params, ret_inst))
                         ret_inst->add_child(*ll_ret);
                 }

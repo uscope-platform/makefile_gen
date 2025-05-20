@@ -83,7 +83,11 @@ public:
 
     void start_ternary_operator();
 
+    void start_param_override() { in_param_override = true;}
+    void stop_param_override() { in_param_override = false;}
+
 private:
+    bool in_param_override = false;
     bool in_bit_selection = false;
     bool in_ternary_operator = false;
     bool in_param_assignment = false;

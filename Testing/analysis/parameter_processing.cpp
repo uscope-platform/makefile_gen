@@ -1552,3 +1552,68 @@ TEST(parameter_processing, nested_package_in_function_initialization) {
     md_1d_array reference = {0x43c00000,0x43c30004};
     ASSERT_EQ(param_value, reference);
 }
+
+TEST(parameter_processing, override_with_function_parameter) {
+    std::string test_pattern = R"(
+
+        module dependency #(
+            parameter param_1 = 4
+        )();
+
+            parameter p1_t = param_1+2;
+
+        endmodule
+
+        module test_mod #(
+        )();
+
+            parameter ADDR_WIDTH = 32;
+            parameter N_AXI_LITE = 3;
+
+
+            function logic [ADDR_WIDTH-1:0] CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = 100;
+                CTRL_ADDR_CALC[1] = 130;
+                CTRL_ADDR_CALC[2] = 356;
+            endfunction
+
+            parameter FUNCTION_PARAM = CTRL_ADDR_CALC();
+
+
+            dependency #(
+                .param_1(FUNCTION_PARAM[2])
+            ) dep ();
+
+        endmodule
+    )";
+
+
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+    nlohmann::json df_content;
+
+    Depfile df;
+    df.set_content(df_content);
+
+    HDL_ast_builder b(s_store, d_store, df);
+    auto synth_ast = b.build_ast("test_mod", {});
+
+
+    auto params = synth_ast->get_dependencies()[0]->get_parameters();
+    auto param_1 = params.get("param_1");
+    EXPECT_EQ(param_1->get_numeric_value(), 356);
+    auto p1_t = params.get("p1_t");
+    EXPECT_EQ(p1_t->get_numeric_value(), 358);
+
+    int i = 0;
+
+}

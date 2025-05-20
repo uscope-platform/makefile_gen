@@ -415,10 +415,12 @@ void sv_visitor::exitNamed_port_connection(sv2017::Named_port_connectionContext 
 
 void sv_visitor::enterNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) {
     params_factory.start_instance_parameter_assignment(ctx->identifier()->getText());
+    params_factory.start_param_override();
 }
 
 void sv_visitor::exitNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) {
     auto param = params_factory.get_parameter();
+    params_factory.stop_param_override();
     if(deps_factory.is_valid_dependency()){
         deps_factory.add_parameter(ctx->identifier()->getText(), param);
     }
@@ -491,9 +493,6 @@ void sv_visitor::exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) 
 }
 
 void sv_visitor::enterPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {
-    if(deps_factory.is_valid_dependency()) {
-        in_array_access_declaration = true;
-    }
 }
 
 void sv_visitor::exitPrimaryBitSelect(sv2017::PrimaryBitSelectContext *ctx) {

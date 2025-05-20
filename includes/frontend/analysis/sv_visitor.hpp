@@ -188,8 +188,6 @@ public:
     void exitName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
 private:
 
-    bool in_array_access_declaration = false;
-
     bool in_param_declaration = false;
     bool in_function_declaration = false;
     std::string path;

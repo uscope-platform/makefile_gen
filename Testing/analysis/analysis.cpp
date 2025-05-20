@@ -226,3 +226,36 @@ TEST(analysis_test, interfaces_array) {
     check_dependency.add_array_quantifier(array_qual);
     ASSERT_EQ(dep, check_dependency);
 }
+
+
+
+TEST(analysis_test, parameter_array_assignment) {
+    std::string test_pattern = R"(
+    module test_mod ();
+        integer i;
+
+            SyndromeCalculator #(
+                .TEST_PARAM(TEST_ARRAY[2])
+            ) SC (
+                .clock(clock)
+            );
+
+    endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    auto param = resource.get_dependencies()[0].get_parameters().get("TEST_PARAM");
+
+    HDL_parameter reference_param;
+    reference_param.set_name("TEST_PARAM");
+    Expression_component e("TEST_ARRAY");
+    e.add_array_index({Expression_component("2")});
+    reference_param.set_expression_components({e});
+    reference_param.set_type(HDL_parameter::expression_parameter);
+
+    ASSERT_EQ(reference_param, *param);
+}

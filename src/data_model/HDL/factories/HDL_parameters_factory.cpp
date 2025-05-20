@@ -73,7 +73,7 @@ void HDL_parameters_factory::stop_bit_selection() {
 }
 
 void HDL_parameters_factory::close_array_index() {
-    if(in_bit_selection & (in_param_assignment || in_packed_assignment || in_replication_assignment)){
+    if(in_bit_selection & (in_param_assignment || in_packed_assignment || in_replication_assignment|| in_param_override)){
         in_bit_selection = false;
         new_expression.back().add_array_index(bit_selection);
     }
