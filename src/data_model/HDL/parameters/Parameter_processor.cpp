@@ -15,6 +15,8 @@
 
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
+#include <spdlog/spdlog.h>
+
 #include "analysis/HDL_loop_solver.hpp"
 
 
@@ -42,7 +44,7 @@ Parameters_map Parameter_processor::process_parameters_map(const Parameters_map 
             try{
                 auto par = item;
                 auto dbg = par->get_name();
-                //std::cout << "Processing parameter: " << dbg << std::endl;
+                spdlog::trace("Processing parameter: {}", dbg);
                 if(external_parameters->contains(item->get_name())){
                     // The parameter needs to be copied out of external parameters and into the completed set otherwise it will go out of scope
                     auto param = external_parameters->get(item->get_name());
@@ -50,6 +52,8 @@ Parameters_map Parameter_processor::process_parameters_map(const Parameters_map 
                 } else {
                     completed_set->insert(process_parameter(par, spec));
                 }
+                auto param = completed_set->get(par->get_name());
+                spdlog::trace("\t processed parameter value: {}", param->value_as_string());
             } catch (Parameter_processor_Exception &ex){
                 if(!ex.unknown_parameter){
                     auto p = item;

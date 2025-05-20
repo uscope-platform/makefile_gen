@@ -34,6 +34,26 @@ void mdarray::set_2d_slice(std::vector<int64_t> idx, const md_2d_array &val) {
     data[idx[0]] =  val;
 }
 
+std::string mdarray::to_string() const {
+    std::string result = "{";
+    for(auto &item_2d: data) {
+        result += "{";
+        for(auto &item_1d: item_2d) {
+            result += "{";
+            for(auto &item: item_1d) {
+                result += std::to_string(item);
+                if(&item != &item_1d.back()) result += ", ";
+            }
+            result += "}";
+            if(&item_1d != &item_2d.back()) result += ", ";
+        }
+        result += "}";
+        if(&item_2d != &data.back()) result += ", ";
+    }
+    result += "}";
+    return result;
+}
+
 void mdarray::set_1d_slice(std::vector<int64_t> idx, const md_1d_array &val) {
     if(idx[0]>=data.size()){
         data.resize(idx[0]+1);

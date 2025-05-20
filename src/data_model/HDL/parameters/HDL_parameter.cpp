@@ -110,6 +110,19 @@ void PrintTo(const HDL_parameter &param, std::ostream *os) {
     *os << result;
 }
 
+std::string HDL_parameter::value_as_string() const {
+    if(type == string_parameter) {
+        return string_value_array[0];
+    }
+    if(type == numeric_parameter) {
+        return std::to_string(numeric_value_array[0]);
+    }
+    if(type == array_parameter) {
+        return array_value.to_string();
+    }
+    return "";
+}
+
 std::string HDL_parameter::to_string() const {
     std::string result = "\nHDL parameter:\n  NAME: " + name +
                          "\n  TYPE: " + parameter_type_to_string(type);

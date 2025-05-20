@@ -15,6 +15,8 @@
 
 #include "analysis/data_acquisition_analysis.hpp"
 
+#include <spdlog/spdlog.h>
+
 data_acquisition_analysis::data_acquisition_analysis(bool logging) : specs_manager("axi_stream"){
     log = logging;
 }
@@ -24,7 +26,7 @@ void data_acquisition_analysis::analyze(std::shared_ptr<HDL_instance_AST> &ast) 
     auto sinks = find_sinks(ast);
     if(sinks.empty()) return;
     if(sinks.size()>1){
-        std::cout<<"ERROR: Multiple  sinks are not supported for data acquisition analysis";
+        spdlog::error("Multiple sinks are not supported for data acquisition analysis");
         return;
     }
     auto scope_address = sinks[0]->get_address()[0];
@@ -65,8 +67,7 @@ data_acquisition_analysis::find_sinks(std::shared_ptr<HDL_instance_AST> &ast) {
            if(!item->get_channel_groups().empty()) {
                for (auto &g: item->get_channel_groups()) {
                    if (g.get_channels().size() > 6) {
-                       std::cout << "WARNING: The channel group named: " + g.get_name() +
-                                    " contains more than 6 channels, this is not supported on the platform\n";
+                       spdlog::warn("The channel group named: {} contains more than 6 channels, this is not supported on the platform", g.get_name());
                    }
                    groups.push_back(g);
                }
@@ -149,9 +150,7 @@ std::optional<std::vector<data_stream>> data_acquisition_analysis::process_node(
 }
 
 void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instance_AST> &node, const data_stream &in_stream) {
-    if(log) {
-        std::cout << "FOUND DATA SOURCE AT NODE: " + node->get_name() + "\n";
-    }
+    spdlog::trace("Found data source at node: {}", node->get_name());
     std::string node_names;
     if(node->has_parameter("PRAGMA_MKFG_DATAPOINT_NAMES")){
         node_names = node->get_parameter_value("PRAGMA_MKFG_DATAPOINT_NAMES")->get_string_value();
@@ -162,7 +161,7 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
     auto n_points_params = specs_manager.get_component_spec(node->get_type(), "n_points");
 
     if(!node->has_parameter(n_points_params)){
-        std::cerr << "WARNING: parameter named" + n_points_params + " not found on module :" + node->get_type() + "." + node->get_name() << std::endl;
+        spdlog::warn("parameter named {} not found on module : {}.{}", n_points_params, node->get_type(), node->get_name());
         return;
     }
     auto n_params = node->get_parameter_value(n_points_params)->get_numeric_value();
@@ -174,7 +173,7 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
     if(specs_manager.has_component_spec(node->get_type(), "initial_addresses")){
         auto addr_param_name = specs_manager.get_component_spec(node->get_type(), "initial_addresses");
         if(!node->has_parameter(addr_param_name)){
-            std::cerr << "WARNING: parameter named " + addr_param_name + " not found on module :" + node->get_type() + "." + node->get_name() << std::endl;
+            spdlog::warn("parameter named {} not found on module : {}.{}", addr_param_name, node->get_type(), node->get_name());
             return;
         }
         addresses = node->get_parameter_value(addr_param_name)->get_array_value().get_1d_slice({0,0});
@@ -241,12 +240,14 @@ data_acquisition_analysis::process_n_to_1_node(const std::shared_ptr<HDL_instanc
         }
     }
     if(log){
-        std::cout<< "ANALYZING N-TO-1 DATA NODE: "+ in_stream.if_name + " of Instance " + node->get_name() + " found sources : [";
+        std::stringstream ss;
+        ss<< fmt::format("Analyzing n-to-1 data node: {} of Instance {}, found sources: [", in_stream.if_name,node->get_name());
         for(int i =0 ; i<ret.size(); i++ ){
-            std::cout<< ret[i].if_name;
-            if(i<ret.size()-1) std::cout << ", ";
+            ss << ret[i].if_name;
+            if(i<ret.size()-1) ss << ", ";
         }
-        std::cout << "]\n";
+        ss << "]";
+        spdlog::trace(ss.str());
     }
 
     return ret;
@@ -263,7 +264,7 @@ data_acquisition_analysis::process_1_to_n_node(const std::shared_ptr<HDL_instanc
             ret.static_remap = in_stream.static_remap;
         }
     }
-    if(log) std::cout<< "ANALYZING 1-TO-N DATA NODE: "+ in_stream.if_name + " of Instance " + node->get_name() + " found sources : "+ ret.if_name + "\n";
+    if(log) spdlog::trace("Analyzing 1-to-n data node: {} of Instance {}, found sources: {}", in_stream.if_name, node->get_name(), ret.if_name);
     return {ret};
 }
 
@@ -294,8 +295,7 @@ data_acquisition_analysis::process_1_to_1_node(const std::shared_ptr<HDL_instanc
     }
 
 
-
-    if(log) std::cout<< "ANALYZING 1-TO-1 DATA NODE: "+ in_stream.if_name + " of Instance " + node->get_name() + " found sources : "+ ret.if_name + "\n";
+    if(log) spdlog::trace("Analyzing 1-to-1 data node: {} of Instance {}, found sources: {}", in_stream.if_name, node->get_name(), ret.if_name);
     return {ret};
 }
 

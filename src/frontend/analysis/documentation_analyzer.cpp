@@ -15,6 +15,7 @@
 
 #include "frontend/analysis/documentation_analyzer.hpp"
 
+#include <spdlog/spdlog.h>
 
 
 documentation_analyzer::documentation_analyzer(std::istream &s) {
@@ -55,7 +56,7 @@ void documentation_analyzer::process_documentation(Parameters_map parameters) {
         try {
             ss >> obj;
         } catch (nlohmann::json::parse_error& e) {
-            std::cout<<"ERROR: A malformed json string was found while parsing documentation comments in file: " << path<<std::endl;
+            spdlog::error("A malformed json string was found while parsing documentation comments in file: {}", path);
             exit(2);
         }
 

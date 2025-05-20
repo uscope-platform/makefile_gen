@@ -72,6 +72,7 @@ public:
     };
     mdarray get_array_value(){return array_value;};
 
+    std::string value_as_string() const;
     std::string to_string() const;
 
     friend bool operator <(const HDL_parameter& lhs, const HDL_parameter& rhs);

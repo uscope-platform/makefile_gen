@@ -17,10 +17,11 @@
 #include "frontend/Repository_walker.hpp"
 
 #include <utility>
+#include <spdlog/spdlog.h>
 
 
 Repository_walker::Repository_walker(const std::shared_ptr<settings_store>& s, const std::shared_ptr<data_store>& d, bool ephimeral) : pool(max_threads),
-                                                                                                         cache_mgr(s, d, ephimeral){
+                                                                                                                                       cache_mgr(s, d, ephimeral){
     construct_walker(s, d, {".git"});
 }
 
@@ -36,7 +37,7 @@ void Repository_walker::construct_walker(std::shared_ptr<settings_store> s, std:
     excluded_directories = std::move(ex);
     target_repository = s_store->get_setting("hdl_store");
     if(target_repository.empty()){
-        std::cout<< "Please enter the absolute path of the HDL repository"<<std::endl;
+        spdlog::info("Please enter the absolute path of the HDL repository");
         std::cin >> target_repository;
         s_store->set_setting("hdl_store", target_repository);
     }

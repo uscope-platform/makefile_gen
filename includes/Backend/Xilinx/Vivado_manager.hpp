@@ -17,6 +17,7 @@
 #define MAKEFILEGEN_V2_VIVADO_MANAGER_HPP
 
 #include <string>
+#include <spdlog/spdlog.h>
 #include <iostream>
 #include <vector>
 #include <unistd.h>

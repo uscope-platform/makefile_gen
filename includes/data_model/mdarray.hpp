@@ -36,7 +36,10 @@ public:
     void set_2d_slice(std::vector<int64_t> idx, const md_2d_array& val);
     void set_data(const md_3d_array &d){data = d;}
 
-    md_3d_array get_data(){return data;};
+    md_3d_array get_data(){return data;}
+
+    std::string to_string() const;
+
 md_2d_array get_2d_slice(std::vector<int64_t> idx) {
         if(idx.empty() || idx[0] >= data.size()) {
             std::cout << "Index out of range in get_2d_slice" << std::endl;

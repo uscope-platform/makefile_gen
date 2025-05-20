@@ -15,6 +15,8 @@
 
 #include "analysis/HDL_ast_builder.hpp"
 
+#include <spdlog/spdlog.h>
+
 
 HDL_ast_builder::HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d, const Depfile& d_f) :dep_file(d_f) {
     s_store = s;
@@ -125,7 +127,7 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
         ret_inst->set_processors(processors);
 
         if (log_structure) {
-            std::cout << "Processing Instance " << i.get_name() << " of module " << type << std::endl;
+            spdlog::info("Processing Instance {} of module {}", i.get_name(), type);
         }
 
         std::vector<nlohmann::json> leaves;
@@ -135,7 +137,7 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
                 auto dbg = d.get_name();
                 bool do_break = dbg == "dep";
                 if(d.get_n_loops()>1){
-                    std::cout << "WARNING: Nested loops are not supported by parameter analysis\n In HDL instance: " + i.get_name() + " of type: " + type + " is in a nested loop" << std::endl;
+                    spdlog::warn("Nested loops are not supported by parameter analysis\n In HDL instance: " + i.get_name() + " of type: " + type + " is in a nested loop");
                 } else if(d.get_n_loops() == 1){
                     HDL_loop_solver solver(new_params, d_store);
                     auto loop = d.get_inner_loop();

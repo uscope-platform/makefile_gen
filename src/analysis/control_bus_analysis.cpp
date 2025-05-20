@@ -15,6 +15,8 @@
 
 #include "analysis/control_bus_analysis.hpp"
 
+#include <spdlog/spdlog.h>
+
 control_bus_analysis::control_bus_analysis(const Depfile &df) : specs_manager("axi_lite"){
     dfile = df;
 }
@@ -164,7 +166,7 @@ void control_bus_analysis::process_leaf_node(const analysis_context &leaf) {
         leaf.node->get_parent()->set_leaf_module_prefix(leaf.current_module_prefix);
     }
     leaf.node->set_proxy_specs(leaf.proxy);
-    std::cout<< "Found module : " + leaf_parent->get_name() + " of type: " + leaf_parent->get_type() + " at address: " << std::hex << leaf.address << "\n";
+    spdlog::info("Found module: {0} of type: {1} at address: 0x{2:08x}", leaf.node->get_name(), leaf.node->get_type(), leaf.address);
 }
 
 std::vector<bus_context>

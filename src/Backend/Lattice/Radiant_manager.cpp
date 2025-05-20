@@ -15,12 +15,14 @@
 
 #include "Backend/Lattice/Radiant_manager.hpp"
 
+#include <spdlog/spdlog.h>
+
 
 Radiant_manager::Radiant_manager(std::shared_ptr<settings_store> s, bool del_mkfile, std::string name) : Toolchain_manager(std::move(s), del_mkfile, std::move(name)) {
     radiant_path = "";
     radiant_path = s_store->get_setting("radiant_path");
     if(radiant_path.empty()){
-        std::cout<< "Enter the full path of the Radiant installation"<<std::endl;
+        spdlog::info("Enter the full path of the Radiant installation:");
         std::cin >> radiant_path;
         s_store->set_setting("radiant_path", radiant_path);
     }

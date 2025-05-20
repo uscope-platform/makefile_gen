@@ -34,6 +34,7 @@ int main(int argc, char *argv[]){
         std::string new_app_lang;
         bool measure_runtime = true;
         bool no_cache = false;
+        bool trace = false;
         bool refresh_cache = false;
         std::string cache_dir = std::string(std::getenv("HOME")) + "/.makefilegen_store";
         bool wait_profiler = false;
@@ -58,12 +59,19 @@ int main(int argc, char *argv[]){
     app.add_flag("--no-cache",opts.no_cache, "Run the program without touching the repository cache");
     app.add_flag("--refresh-cache",opts.refresh_cache, "Refresh the repository cache and exit");
     app.add_flag("--wait_profiler", opts.wait_profiler, "Wait for the profiler to be ready before executing");
+    app.add_flag("--trace", opts.trace, "Enable extended internal state tracing");
     app.add_option("--cache_dir", opts.cache_dir, "Specify a non-default repository cache file");
 
     CLI11_PARSE(app, argc, argv);
 
+    if(opts.trace) {
+        spdlog::set_level(spdlog::level::trace);
+    } else {
+        spdlog::set_level(spdlog::level::info);
+    }
+
     if(opts.wait_profiler){
-        std::cout << "Press ANY key to continue\n";
+        spdlog::info("Press ANY key to continue");
         getchar();
     }
 
@@ -73,7 +81,7 @@ int main(int argc, char *argv[]){
     // Setup caches
     std::shared_ptr<settings_store>  s_store = std::make_shared<settings_store>(false, opts.cache_dir);
     if(!opts.get_setting.empty()){
-        std::cout << s_store->get_setting(opts.get_setting)<<std::endl;
+        spdlog::info(s_store->get_setting(opts.get_setting));
     }
 
     if(!opts.set_setting.empty()){
@@ -92,7 +100,7 @@ int main(int argc, char *argv[]){
             else if(opts.new_app_lang == "sv"|| opts.new_app_lang == "vhdl")
                 lang = opts.new_app_lang;
             else{
-                std::cout<< "ERROR: Unknown language option: " + opts.new_app_lang << std::endl;
+                spdlog::error("Unknown language option: ", opts.new_app_lang);
                 exit(1);
             }
         }
@@ -113,7 +121,7 @@ int main(int argc, char *argv[]){
     // Parse depfile
     if(opts.target.empty()) opts.target = std::filesystem::current_path().string() + "/Depfile";
     if(!std::filesystem::exists(opts.target)){
-        std::cout << "ERROR: Depfile " + opts.target + " does not exist" << std::endl;
+        spdlog::error("Depfile not found: {} does not exist", opts.target);
         exit(1);
     }
 
@@ -240,7 +248,7 @@ int main(int argc, char *argv[]){
     if(opts.measure_runtime){
         auto t2 = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> ms_double = t2 - t1;
-        std::cout<< "The Program runtime was : " + std::to_string(ms_double.count()) + " ms";
+        spdlog::info("The Program runtime was : {} ms", std::to_string(ms_double.count()));
     }
 
     return 0;
