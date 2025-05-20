@@ -1506,12 +1506,8 @@ TEST(parameter_processing, simple_package_in_function_initialization) {
 TEST(parameter_processing, nested_package_in_function_initialization) {
     std::string test_pattern = R"(
 
-
-
         package hil_address_space;
-
             parameter bus_base = 32'h43c00000;
-
         endpackage
 
 
@@ -1613,6 +1609,76 @@ TEST(parameter_processing, override_with_function_parameter) {
     EXPECT_EQ(param_1->get_numeric_value(), 356);
     auto p1_t = params.get("p1_t");
     EXPECT_EQ(p1_t->get_numeric_value(), 358);
+}
+
+
+
+TEST(parameter_processing, parameter_with_for_loop) {
+    std::string test_pattern = R"(
+
+        module dependency #(
+            parameter DMA_BASE_ADDRESS = 4
+        )();
+
+            parameter p1_t = DMA_BASE_ADDRESS+2;
+
+        endmodule
+
+        module test_mod #(
+            parameter N_CORES = 1
+        )();
+
+            function logic [ADDR_WIDTH-1:0] CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = 100;
+                CTRL_ADDR_CALC[1] = 130;
+                CTRL_ADDR_CALC[2] = 356;
+                CTRL_ADDR_CALC[3] = 62;
+            endfunction
+
+            parameter AXI_ADDRESSES = CTRL_ADDR_CALC();
+
+            for(n = 0; n<N_CORES; n=n+1)begin
+                dependency #(
+                    .DMA_BASE_ADDRESS(AXI_ADDRESSES[(N_CORES+1)-n])
+                ) dep ();
+            end
+        endmodule
+    )";
+
+
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+    nlohmann::json df_content;
+
+    Depfile df;
+    df.set_content(df_content);
+
+    HDL_ast_builder b(s_store, d_store, df);
+    auto synth_ast = b.build_ast("test_mod", {});
+
+    auto deps = synth_ast->get_dependencies();
+
+    std::vector<uint32_t> param_1;
+    std::vector<uint32_t> p1_t;
+
+    for(auto dep : deps) {
+        auto p = dep->get_parameters();
+        param_1.push_back(p.get("DMA_BASE_ADDRESS")->get_numeric_value());
+        p1_t.push_back(p.get("p1_t")->get_numeric_value());
+    }
+
+    auto params = deps[0]->get_parameters();
+    EXPECT_EQ(22, 62);
+    EXPECT_EQ(33, 64);
 
     int i = 0;
 
