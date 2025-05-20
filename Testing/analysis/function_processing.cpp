@@ -210,3 +210,46 @@ TEST(function_processing, parametrized_loop_function) {
     check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
 }
+
+
+TEST(function_processing, package_assignment) {
+    std::string test_pattern = R"(
+
+        module test_mod ();
+
+
+        function logic[31:0] CTRL_ADDR_CALC();
+            CTRL_ADDR_CALC[0] = hil_address_space::bus_base;
+        endfunction
+
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    auto functions = resource.get_functions();
+
+    EXPECT_EQ(functions.size(), 1);
+    EXPECT_TRUE(functions.contains("CTRL_ADDR_CALC"));
+    auto result = functions["CTRL_ADDR_CALC"];
+
+
+    HDL_function check_f;
+    check_f.set_name("CTRL_ADDR_CALC");
+
+    assignment a = {
+        "CTRL_ADDR_CALC",
+        {Expression_component("0")},
+        {Expression_component("bus_base")}
+    };
+    a.value[0].set_package_prefix("hil_address_space");
+    check_f.add_assignment(a);
+
+
+    EXPECT_EQ(check_f,result);
+}
+
+
+

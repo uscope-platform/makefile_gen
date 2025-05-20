@@ -42,6 +42,7 @@ Parameters_map Parameter_processor::process_parameters_map(const Parameters_map 
             try{
                 auto par = item;
                 auto dbg = par->get_name();
+                std::cout << "Processing parameter: " << dbg << std::endl;
                 if(external_parameters->contains(item->get_name())){
                     // The parameter needs to be copied out of external parameters and into the completed set otherwise it will go out of scope
                     auto param = external_parameters->get(item->get_name());
@@ -122,11 +123,16 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_vector_function_para
 
     std::shared_ptr<HDL_parameter> return_par = par;
     std::unordered_map<uint64_t, uint64_t> explicit_values;
-    for(auto &item:fcn.get_assignments()) {
-        auto index = process_expression(item.index, nullptr);
-        auto value = process_expression(item.value, nullptr);
-        explicit_values.insert({index, value});
+    try {
+        for(auto &item:fcn.get_assignments()) {
+            auto index = process_expression(item.index, nullptr);
+            auto value = process_expression(item.value, nullptr);
+            explicit_values.insert({index, value});
+        }
+    } catch(Parameter_processor_Exception ex) {
+        int i = 0;
     }
+
     auto loop = fcn.get_loop();
     auto loop_values = evaluate_loop(loop, spec);
 
@@ -220,8 +226,11 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
             if(external_parameters->contains(i.get_string_value())) {
                 Expression_component e(external_parameters->get(i.get_raw_string_value())->get_numeric_value());
                 processed_rpn.emplace_back(e);
-            } else if(completed_set->contains(i.get_raw_string_value())){
+            } else if(completed_set->contains(i.get_raw_string_value())) {
                 processed_rpn.emplace_back(completed_set->get(i.get_raw_string_value())->get_numeric_value());
+            } else if(!i.get_package_prefix().empty()){
+                int64_t val = get_package_parameter(i, nullptr);
+                processed_rpn.emplace_back(val);
             } else {
                 throw Parameter_processor_Exception();
             }
@@ -263,6 +272,23 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
     return evaluator_stack.top().get_numeric_value();
 }
 
+int64_t Parameter_processor::get_package_parameter(const Expression_component &ex, int64_t *result_size) {
+    int64_t return_val;
+    auto pkg = ex.get_package_prefix();
+    if(d_store->contains_hdl_entity(pkg)) {
+        auto res = d_store->get_HDL_resource(pkg);
+        Parameter_processor p({}, d_store);
+        auto pkg_params = p.process_parameters_map(res.get_parameters(),res);
+        return_val = pkg_params.get(ex.get_string_value())->get_numeric_value();
+        if(result_size != nullptr){
+            *result_size = Expression_component::calculate_binary_size(return_val);
+        }
+    } else {
+        throw std::runtime_error("Error: The package " + pkg + " was not found");
+    }
+    return return_val;
+}
+
 
 void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
     for(auto &res:v){
@@ -286,20 +312,7 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
     }
 
     if(!ec.get_package_prefix().empty()){
-
-        auto pkg = ec.get_package_prefix();
-        if(d_store->contains_hdl_entity(pkg)){
-            auto res = d_store->get_HDL_resource(pkg);
-            Parameter_processor p({}, d_store);
-            auto pkg_params = p.process_parameters_map(res.get_parameters(),res);
-            auto val = pkg_params.get(ec.get_string_value())->get_numeric_value();
-            if(result_size != nullptr){
-                *result_size = Expression_component::calculate_binary_size(val);
-            }
-            return val;
-        } else{
-            throw std::runtime_error("Error: Encountered unknown package: " + ec.get_package_prefix());
-        }
+        return get_package_parameter(ec, nullptr);
     }
 
     std::string param_name;

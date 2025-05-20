@@ -72,7 +72,6 @@ public:
     static void convert_parameters(std::vector<HDL_Resource> &v);
     int64_t process_expression(const std::vector<Expression_component>& expr, int64_t *reslt_size);
 
-
     void set_data_store(std::shared_ptr<data_store> &ds){d_store = ds;};
 
     std::shared_ptr<HDL_parameter> process_parameter(const std::shared_ptr<HDL_parameter> &par, HDL_Resource &spec);
@@ -93,6 +92,7 @@ private:
         std::unordered_map<uint64_t, uint64_t> &loop_values
     );
 
+    int64_t get_package_parameter(const Expression_component &ex, int64_t *result_size);
 
     std::shared_ptr<Parameters_map> completed_set;
     std::map<std::string, std::shared_ptr<HDL_parameter>> string_set;

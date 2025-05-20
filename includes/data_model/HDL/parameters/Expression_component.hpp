@@ -49,11 +49,11 @@ public:
 
     void set_string_value(const std::string &s){string_value = s;};
     std::string get_raw_string_value();
-    std::string get_string_value(){ return string_value;};
-    int64_t  get_numeric_value() {return numeric_value;};
+    std::string get_string_value() const { return string_value;};
+    int64_t  get_numeric_value() const {return numeric_value;};
 
     void set_package_prefix(const std::string &s) {package_prefix = s;};
-    std::string get_package_prefix() {return package_prefix;};
+    std::string get_package_prefix() const {return package_prefix;};
 
     bool is_right_associative();
     int64_t get_operator_precedence();

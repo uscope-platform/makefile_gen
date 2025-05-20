@@ -1448,3 +1448,107 @@ TEST(parameter_processing, complex_vector_function_parameter) {
     ASSERT_EQ(param_value, reference);
 
 }
+
+
+TEST(parameter_processing, simple_package_in_function_initialization) {
+    std::string test_pattern = R"(
+
+
+
+        package hil_address_space;
+
+            parameter bus_base = 32'h43c00000;
+
+        endpackage
+
+
+        module test_mod #(
+            parameter ADDR_WIDTH = 32,
+            parameter N_CORES = 3
+        )();
+
+            localparam N_AXI_LITE = N_CORES+3;
+            localparam BASE_ADDR = 32'h43c00000 + 'h30000;
+
+            typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE];
+            function ctrl_addr_init_t CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = hil_address_space::bus_base;
+                CTRL_ADDR_CALC[1] = BASE_ADDR + 4;
+            endfunction
+
+            localparam [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
+
+        endmodule
+
+
+    )";
+
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+
+    auto ds = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    auto resources = analyzer.analyze();
+    ds->store_hdl_entity(resources[0]);
+    ds->store_hdl_entity(resources[1]);
+    Parameter_processor proc({}, ds);
+
+    auto parameters = proc.process_parameters_map(resources[1].get_parameters(), resources[1]);
+
+    auto param = parameters.get("AXI_ADDRESSES");
+    auto param_value = param->get_array_value().get_1d_slice({0, 0});
+    md_1d_array reference = {0x43c00000,0x43c30004};
+    ASSERT_EQ(param_value, reference);
+}
+
+
+TEST(parameter_processing, nested_package_in_function_initialization) {
+    std::string test_pattern = R"(
+
+
+
+        package hil_address_space;
+
+            parameter bus_base = 32'h43c00000;
+
+        endpackage
+
+
+        module test_mod #(
+            parameter ADDR_WIDTH = 32,
+            parameter N_CORES = 3
+        )();
+
+            localparam N_AXI_LITE = N_CORES+3;
+            localparam BASE_ADDR = hil_address_space::bus_base + 'h30000;
+
+            typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE];
+            function ctrl_addr_init_t CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = hil_address_space::bus_base;
+                CTRL_ADDR_CALC[1] = BASE_ADDR + 4;
+            endfunction
+
+            localparam [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
+
+        endmodule
+
+
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+
+    auto ds = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    auto resources = analyzer.analyze();
+    ds->store_hdl_entity(resources[0]);
+    ds->store_hdl_entity(resources[1]);
+    Parameter_processor proc({}, ds);
+
+    auto parameters = proc.process_parameters_map(resources[1].get_parameters(), resources[1]);
+
+    auto param = parameters.get("AXI_ADDRESSES");
+    auto param_value = param->get_array_value().get_1d_slice({0, 0});
+    md_1d_array reference = {0x43c00000,0x43c30004};
+    ASSERT_EQ(param_value, reference);
+}

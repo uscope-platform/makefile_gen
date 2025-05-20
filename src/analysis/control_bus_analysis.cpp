@@ -72,12 +72,10 @@ std::vector<analysis_context> control_bus_analysis::process_interconnect(const a
         auto dependencies=  inst.node->get_parent()->get_dependencies();
         for(auto &dep:dependencies){
             for(auto &[port_name, nets]:dep->get_ports()){
-                bool stop = dep->get_name() == "pwm_cu";
-                bool stop2 = master.idx == 2;
+
                 if(nets.size()==1){
                     auto net_name = nets.front().get_base_name();
 
-                    auto idx = dep->get_repetition_idx();
 
                     if(net_name == master.name){
                         if(specs_manager.is_interconnect(dep->get_type())) {

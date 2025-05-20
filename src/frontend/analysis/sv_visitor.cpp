@@ -187,7 +187,8 @@ void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
     if(loops_factory.in_loop()) {
         loops_factory.add_component(Expression_component(ctx->getText()));
     } else if(in_function_declaration) {
-        functions_factory.add_component(Expression_component(ctx->getText()));
+        auto val = ctx->getText();
+        functions_factory.add_component(Expression_component(val));
     }
     if(params_factory.is_component_relevant()){
         params_factory.add_component(Expression_component(ctx->getText()));
@@ -216,23 +217,26 @@ void sv_visitor::enterPrimaryPath(sv2017::PrimaryPathContext *ctx) {
 
 void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
 
+    Expression_component ec;
+
+    if(!package_prefix.empty()){
+        ec = Expression_component(package_item);
+        ec.set_package_prefix(package_prefix);
+        package_prefix.clear();
+        package_item.clear();
+    } else {
+        ec = Expression_component(ctx->getText());
+    }
+
+
     if(loops_factory.in_loop()) {
-        loops_factory.add_component(Expression_component(ctx->getText()));
+        loops_factory.add_component(ec);
     } else if(in_function_declaration) {
-        functions_factory.add_component(Expression_component(ctx->getText()));
+        functions_factory.add_component(ec);
     }
 
     if(params_factory.is_component_relevant()){
-        if(!package_prefix.empty()){
-            Expression_component ec(package_item);
-            ec.set_package_prefix(package_prefix);
-            params_factory.add_component(ec);
-            package_prefix.clear();
-            package_item.clear();
-        } else {
-            params_factory.add_component(Expression_component(ctx->getText()));
-        }
-
+        params_factory.add_component(ec);
     }
 }
 
