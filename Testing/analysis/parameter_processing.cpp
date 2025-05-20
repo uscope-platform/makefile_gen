@@ -1625,7 +1625,7 @@ TEST(parameter_processing, parameter_with_for_loop) {
         endmodule
 
         module test_mod #(
-            parameter N_CORES = 1
+            parameter N_CORES = 2
         )();
 
             function logic [ADDR_WIDTH-1:0] CTRL_ADDR_CALC();
@@ -1676,10 +1676,10 @@ TEST(parameter_processing, parameter_with_for_loop) {
         p1_t.push_back(p.get("p1_t")->get_numeric_value());
     }
 
-    auto params = deps[0]->get_parameters();
-    EXPECT_EQ(22, 62);
-    EXPECT_EQ(33, 64);
+    std::vector<uint32_t> expected_param_1 = {62, 356};
+    EXPECT_EQ(param_1, expected_param_1);
+    std::vector<uint32_t> expected_p1_t = {64, 358};
+    EXPECT_EQ(p1_t, expected_p1_t);
 
-    int i = 0;
 
 }
