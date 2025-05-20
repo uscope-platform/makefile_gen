@@ -106,6 +106,7 @@ int main(int argc, char *argv[]){
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(opts.no_cache, opts.cache_dir);
 
+
     // analyze repository content and update cache
     Repository_walker walker(s_store, d_store, opts.no_cache);
 
@@ -115,6 +116,11 @@ int main(int argc, char *argv[]){
         std::cout << "ERROR: Depfile " + opts.target + " does not exist" << std::endl;
         exit(1);
     }
+
+    auto test = d_store->get_HDL_resource("hil_base_logic");
+    auto p = test.get_parameters();
+    auto pp = p.get("AXI_ADDRESSES");
+
     Depfile dep(opts.target);
 
     // Resolve auxiliary files (scripts and constraints)
@@ -225,6 +231,10 @@ int main(int argc, char *argv[]){
         app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
     }
 
+
+    auto test2 = d_store->get_HDL_resource("hil_base_logic");
+    auto p2 = test.get_parameters();
+    auto pp2 = p.get("AXI_ADDRESSES");
 
 
     if(opts.measure_runtime){

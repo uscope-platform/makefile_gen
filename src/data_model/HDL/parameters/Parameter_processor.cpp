@@ -42,7 +42,7 @@ Parameters_map Parameter_processor::process_parameters_map(const Parameters_map 
             try{
                 auto par = item;
                 auto dbg = par->get_name();
-                std::cout << "Processing parameter: " << dbg << std::endl;
+                //std::cout << "Processing parameter: " << dbg << std::endl;
                 if(external_parameters->contains(item->get_name())){
                     // The parameter needs to be copied out of external parameters and into the completed set otherwise it will go out of scope
                     auto param = external_parameters->get(item->get_name());
@@ -82,7 +82,7 @@ Parameters_map Parameter_processor::process_parameters_map(const Parameters_map 
 
 std::shared_ptr<HDL_parameter> Parameter_processor::process_parameter(const std::shared_ptr<HDL_parameter> &par, HDL_Resource &spec) {
     std::shared_ptr<HDL_parameter> p;
-    if(par->get_type()== function_parameter) {
+    if(par->get_type()== HDL_parameter::function_parameter) {
         auto fs = spec.get_functions();
         auto components = par->get_expression_components();
         if(components.size() != 1) {
@@ -121,7 +121,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_function_para
 std::shared_ptr<HDL_parameter> Parameter_processor::process_vector_function_parameter(
     const std::shared_ptr<HDL_parameter> &par, const HDL_function &fcn, HDL_Resource &spec) {
 
-    std::shared_ptr<HDL_parameter> return_par = par;
+    std::shared_ptr<HDL_parameter> return_par = std::make_shared<HDL_parameter>(*par);
     std::unordered_map<uint64_t, uint64_t> explicit_values;
     try {
         for(auto &item:fcn.get_assignments()) {
@@ -147,7 +147,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
     std::shared_ptr<HDL_parameter> return_par = par;
     auto components = return_par->get_expression_components();
 
-    if(par->get_type() == numeric_parameter){
+    if(par->get_type() == HDL_parameter::numeric_parameter){
         return return_par;
     }
 
@@ -164,7 +164,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
                 return_par->set_array_value(value);
             } else {
                 auto parameter = external_parameters->get(return_par->get_name());
-                if(parameter->get_type() == numeric_parameter){
+                if(parameter->get_type() == HDL_parameter::numeric_parameter){
                     auto value = parameter->get_numeric_value();
                     return_par->set_expression_components({Expression_component(std::to_string(value))});
                     return_par->set_value(value);
@@ -327,9 +327,9 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
 
     if(external_parameters->contains(param_name)) {
         auto parameter = external_parameters->get(param_name);
-        if (parameter->get_type() == array_parameter) {
+        if (parameter->get_type() == HDL_parameter::array_parameter) {
             throw array_value_exception(parameter->get_array_value());
-        } else if(parameter->get_type() == string_parameter) {
+        } else if(parameter->get_type() == HDL_parameter::string_parameter) {
             throw string_parameter_exception(parameter->get_string_value());
         } else {
             val = parameter->get_numeric_value();
@@ -361,7 +361,7 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
 std::unordered_map<uint64_t, uint64_t> Parameter_processor::evaluate_loop(HDL_loop_metadata &loop, HDL_Resource &spec) {
     std::unordered_map<uint64_t, uint64_t> retval;
 
-    if(loop.init.get_name().empty() && loop.init.get_type() == string_parameter) return retval;
+    if(loop.init.get_name().empty() && loop.init.get_type() == HDL_parameter::string_parameter) return retval;
     auto loop_variable = process_parameter(std::make_shared<HDL_parameter>(loop.init), spec);
 
     while(evaluate_loop_expression(loop.end_c,loop_variable) != 0){
@@ -439,7 +439,7 @@ Expression_component Parameter_processor::process_array_access(Expression_compon
         throw Parameter_processor_Exception();
     }
     int64_t  val;
-    if(p->get_type() == array_parameter){
+    if(p->get_type() == HDL_parameter::array_parameter){
         val = p->get_array_value().get_value(array_index_values);
     } else {
         auto mask = 0x1<<array_index_values[2];
@@ -452,7 +452,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_array_parameter(cons
     std::shared_ptr<HDL_parameter> return_par = par;
     mdarray arr_val;
     if(external_parameters->contains(par->get_name())){
-        if(external_parameters->get(par->get_name())->get_type()==array_parameter){
+        if(external_parameters->get(par->get_name())->get_type()==HDL_parameter::array_parameter){
             arr_val = external_parameters->get(par->get_name())->get_array_value();
             return_par->add_initialization_list({});
         } else {
@@ -481,10 +481,10 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_packed_parameter(con
     std::shared_ptr<HDL_parameter> return_par = par;
     Initialization_list il;
     if(external_parameters->contains(return_par->get_name())){
-        if(external_parameters->get(return_par->get_name())->get_type() == numeric_parameter){
+        if(external_parameters->get(return_par->get_name())->get_type() == HDL_parameter::numeric_parameter){
             return_par->set_value(external_parameters->get(return_par->get_name())->get_numeric_value());
             return return_par;
-        } else if(external_parameters->get(return_par->get_name())->get_type() == string_parameter){
+        } else if(external_parameters->get(return_par->get_name())->get_type() == HDL_parameter::string_parameter){
             return_par->set_value(external_parameters->get(return_par->get_name())->get_string_value());
             return return_par;
         } else{

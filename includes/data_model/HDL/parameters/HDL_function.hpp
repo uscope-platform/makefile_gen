@@ -40,7 +40,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, assignments);
+        ar(name, assignments, loop_metadata);
     }
     std::string name;
 private:

@@ -35,13 +35,13 @@ TEST( analysis_test , package) {
     auto p = std::make_shared<HDL_parameter>();
     p->set_name("bus_base");
     p->set_expression_components({Expression_component("32'h43c00000")});
-    p->set_type(expression_parameter);
+    p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("timebase");
     p->set_expression_components({ Expression_component("bus_base")});
-    p->set_type(expression_parameter);
+    p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
@@ -54,19 +54,19 @@ TEST( analysis_test , package) {
         Expression_component("1"),
 
     });
-    p->set_type(expression_parameter);
+    p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("scope_mux");
     p->set_expression_components({ Expression_component("gpio")});
-    p->set_type(expression_parameter);
+    p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("out_of_order");
     p->set_expression_components({ Expression_component("scope_mux")});
-    p->set_type(expression_parameter);
+    p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
@@ -74,7 +74,7 @@ TEST( analysis_test , package) {
     p->set_expression_components({
         Expression_component("3"),Expression_component("%"),Expression_component("2")
     });
-    p->set_type(expression_parameter);
+    p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
@@ -82,7 +82,7 @@ TEST( analysis_test , package) {
     p->set_expression_components({
         Expression_component("'o4"),Expression_component("-"),Expression_component("'b10")
     });
-    p->set_type(expression_parameter);
+    p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     ASSERT_EQ(check_map, parameters);
@@ -105,7 +105,7 @@ TEST( analysis_test , sv_module) {
     Expression_component e("param");
     e.set_package_prefix("test_package");
     p->set_expression_components({e});
-    p->set_type(expression_parameter);
+    p->set_type(HDL_parameter::expression_parameter);
     d3.add_parameter("TEST_PARAM", p);
 
     HDL_instance d2("param", "test_package", package);
@@ -114,7 +114,7 @@ TEST( analysis_test , sv_module) {
     p = std::make_shared<HDL_parameter>();
     p->set_name("instance_array_qualifier");
     p->set_expression_components({Expression_component("module_parameter_2"),Expression_component("+"),Expression_component("1")});
-    p->set_type(expression_parameter);
+    p->set_type(HDL_parameter::expression_parameter);
     d0.add_array_quantifier(p);
     std::vector<HDL_instance> deps = {d0, d1, d2, d3};
 
@@ -137,14 +137,14 @@ TEST( analysis_test , sv_module) {
     p = std::make_shared<HDL_parameter>();
     p->set_name("module_parameter_1");
     p->add_component(Expression_component("56"));
-    p->set_type(expression_parameter);
+    p->set_type(HDL_parameter::expression_parameter);
     check_res.add_parameter(p);
 
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("module_parameter_2");
     p->add_component(Expression_component("74"));
-    p->set_type(expression_parameter);
+    p->set_type(HDL_parameter::expression_parameter);
     check_res.add_parameter(p);
 
     ASSERT_EQ(resource, check_res);
@@ -221,7 +221,7 @@ TEST(analysis_test, interfaces_array) {
     check_dependency.set_dependency_class(module);
     auto array_qual = std::make_shared<HDL_parameter>();
     array_qual->set_name("instance_array_qualifier");
-    array_qual->set_type(expression_parameter);
+    array_qual->set_type(HDL_parameter::expression_parameter);
     array_qual->add_component(Expression_component("3"));
     check_dependency.add_array_quantifier(array_qual);
     ASSERT_EQ(dep, check_dependency);

@@ -58,7 +58,7 @@ void HDL_loops_factory::set_phase(loop_phase_t p) {
         current_expression.clear();
     } else if(p==end) {
         loop_specs.init.set_expression_components(current_expression);
-        loop_specs.init.set_type(expression_parameter);
+        loop_specs.init.set_type(HDL_parameter::expression_parameter);
         current_expression.clear();
     } else if(p==step) {
         loop_specs.end_c = current_expression;

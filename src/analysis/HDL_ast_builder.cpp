@@ -133,7 +133,7 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
             if(dep.get_dependency_class() != package  && dep.get_dependency_class() != memory_init){
                 HDL_instance_AST d = dep;
                 auto dbg = d.get_name();
-                bool do_break = dbg == "pwm_cu";
+                bool do_break = dbg == "control_interconnect";
                 if(d.get_n_loops()>1){
                     std::cout << "WARNING: Nested loops are not supported by parameter analysis\n In HDL instance: " + i.get_name() + " of type: " + type + " is in a nested loop" << std::endl;
                 } else if(d.get_n_loops() == 1){

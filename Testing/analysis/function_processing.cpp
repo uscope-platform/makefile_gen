@@ -84,7 +84,7 @@ TEST(function_processing, simple_loop_function) {
     auto metadata = HDL_loop_metadata();
     metadata.init.set_name("i");
     metadata.init.add_component(Expression_component("0"));
-    metadata.init.set_type(expression_parameter);
+    metadata.init.set_type(HDL_parameter::expression_parameter);
     metadata.end_c.emplace_back("i");
     metadata.end_c.emplace_back("<");
     metadata.end_c.emplace_back("N_CORES");
@@ -136,7 +136,7 @@ TEST(function_processing, complex_loop_function) {
     auto metadata = HDL_loop_metadata();
     metadata.init.set_name("i");
     metadata.init.add_component(Expression_component("1"));
-    metadata.init.set_type(expression_parameter);
+    metadata.init.set_type(HDL_parameter::expression_parameter);
     metadata.end_c.emplace_back("i");
     metadata.end_c.emplace_back("<");
     metadata.end_c.emplace_back("N_CORES");

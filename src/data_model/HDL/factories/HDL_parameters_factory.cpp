@@ -18,7 +18,7 @@
 
 void HDL_parameters_factory::new_parameter() {
       resources_factory_base<HDL_parameter>::new_basic_resource();
-      current_resource.set_type(expression_parameter);
+      current_resource.set_type(HDL_parameter::expression_parameter);
       for(auto &dim:packed_dimensions){
           init_list.add_dimension(dim, dim.packed);
       }
@@ -147,7 +147,7 @@ void HDL_parameters_factory::stop_expression_new() {
                 current_resource.set_expression_components(new_expression);
                 if(in_function_assignment) {
                     in_function_assignment = false;
-                    current_resource.set_type(function_parameter);
+                    current_resource.set_type(HDL_parameter::function_parameter);
                 }
             }
         }
@@ -214,7 +214,7 @@ void HDL_parameters_factory::stop_packed_dimension() {
 
 void HDL_parameters_factory::start_instance_parameter_assignment(const std::string& parameter_name) {
     resources_factory_base<HDL_parameter>::new_basic_resource();
-    current_resource.set_type(expression_parameter);
+    current_resource.set_type(HDL_parameter::expression_parameter);
     current_resource.set_name(parameter_name);
 }
 

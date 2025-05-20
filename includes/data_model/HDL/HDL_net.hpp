@@ -89,7 +89,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, range,replication);
+        ar(name,index, range,replication);
     }
 
     friend bool operator==(const HDL_net &lhs, const HDL_net &rhs) {

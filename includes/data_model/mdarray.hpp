@@ -42,6 +42,11 @@ public:
     int64_t get_value(std::vector<int64_t> idx){return data[idx[0]][idx[1]][idx[2]];};
     md_3d_array dump();
 
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(data);
+    }
+
 
 
     friend bool operator==(const mdarray&lhs, const mdarray&rhs){

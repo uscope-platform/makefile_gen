@@ -26,26 +26,6 @@
 #include <cereal/types/vector.hpp>
 #include "cereal/types/utility.hpp"
 
-enum parameter_type {
-    string_parameter=0,
-    numeric_parameter=1,
-    array_parameter = 2,
-    expression_parameter = 4,
-    function_parameter = 5
-};
-
-
-constexpr std::string parameter_type_to_string(parameter_type in){
-    switch(in){
-        case string_parameter: return "string_parameter";
-        case numeric_parameter: return "numeric_parameter";
-        case array_parameter: return "array_parameter";
-        case expression_parameter: return "expression_parameter";
-        case function_parameter: return "function_parameter";
-        default: return "unknown parameter type";
-    }
-}
-
 
 class HDL_parameter {
 public:
@@ -66,8 +46,18 @@ public:
 
     std::string get_name() const {return name;};
 
-    parameter_type get_type() const {return type;};
-    void set_type(parameter_type t){type = t;};
+    enum parameter_type {
+        string_parameter=0,
+        numeric_parameter=1,
+        array_parameter = 2,
+        expression_parameter = 4,
+        function_parameter = 5
+    };
+
+    parameter_type get_type() const {return type;}
+    void set_type(parameter_type t) {
+        type = t;
+    }
 
     bool is_empty();
 
@@ -95,7 +85,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, string_value_array, numeric_value_array, type,
+        ar(name, string_value_array, numeric_value_array,array_value,type,
            expression_components, i_l);
     }
 
@@ -114,5 +104,15 @@ private:
     Initialization_list i_l;
 };
 
+constexpr std::string parameter_type_to_string(HDL_parameter::parameter_type in){
+    switch(in){
+        case HDL_parameter::string_parameter: return "string_parameter";
+        case HDL_parameter::numeric_parameter: return "numeric_parameter";
+        case HDL_parameter::array_parameter: return "array_parameter";
+        case HDL_parameter::expression_parameter: return "expression_parameter";
+        case HDL_parameter::function_parameter: return "function_parameter";
+        default: return "unknown parameter type";
+    }
+}
 
 #endif //MAKEFILEGEN_V2_HDL_PARAMETER_HPP
