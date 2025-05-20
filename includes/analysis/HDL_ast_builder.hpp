@@ -42,7 +42,6 @@ class HDL_ast_builder {
         std::unordered_map<std::string, std::vector<HDL_net>>  specialize_ports(HDL_instance_AST &i, const Parameters_map &parameters_values);
         std::shared_ptr<settings_store> s_store;
         std::shared_ptr<data_store> d_store;
-        bool log_structure;
         std::optional<std::shared_ptr<HDL_instance_AST>> recursive_build_ast(HDL_instance_AST &i,
                                                                          const Parameters_map &external_parameters,
                                                                          const std::shared_ptr<HDL_instance_AST>& parent
