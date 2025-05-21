@@ -44,16 +44,18 @@ Parameters_map Parameter_processor::process_parameters_map(const Parameters_map 
             try{
                 auto par = item;
                 auto dbg = par->get_name();
-                spdlog::trace("Processing parameter: {}", dbg);
+                spdlog::trace("Handling parameter: {}", dbg);
                 if(external_parameters->contains(item->get_name())){
                     // The parameter needs to be copied out of external parameters and into the completed set otherwise it will go out of scope
                     auto param = external_parameters->get(item->get_name());
                     completed_set->insert(param);
+                    spdlog::trace("\tMatched external parameter value: {}", param->value_as_string());
                 } else {
-                    completed_set->insert(process_parameter(par, spec));
+                    auto do_stop = dbg=="p1_t";
+                    auto param = process_parameter(par, spec);
+                    completed_set->insert(param);
+                    spdlog::trace("\tProcessed parameter value: {}", param->value_as_string());
                 }
-                auto param = completed_set->get(par->get_name());
-                spdlog::trace("\t processed parameter value: {}", param->value_as_string());
             } catch (Parameter_processor_Exception &ex){
                 if(!ex.unknown_parameter){
                     auto p = item;
@@ -115,7 +117,10 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_function_para
     const std::shared_ptr<HDL_parameter> &par,
     const HDL_function &fcn
 ) {
-    std::shared_ptr<HDL_parameter> return_par = par;
+    spdlog::trace("\tProcessing scalar function parameter: {}", par->get_name());
+
+    std::shared_ptr<HDL_parameter> return_par = par->clone();
+
     auto expr = fcn.get_assignments()[0].value;
     auto res = process_expression(expr, nullptr);
     return_par->set_value(res);
@@ -125,7 +130,9 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_function_para
 std::shared_ptr<HDL_parameter> Parameter_processor::process_vector_function_parameter(
     const std::shared_ptr<HDL_parameter> &par, const HDL_function &fcn, HDL_Resource &spec) {
 
-    std::shared_ptr<HDL_parameter> return_par = std::make_shared<HDL_parameter>(*par);
+    spdlog::trace("\tProcessing vector function parameter: {}", par->get_name());
+
+    std::shared_ptr<HDL_parameter> return_par = par->clone();
     std::unordered_map<uint64_t, uint64_t> explicit_values;
     try {
         for(auto &item:fcn.get_assignments()) {
@@ -145,10 +152,43 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_vector_function_para
     return return_par;
 }
 
+std::shared_ptr<HDL_parameter> Parameter_processor::process_array_parameter(const std::shared_ptr<HDL_parameter> &par) {
+
+    std::shared_ptr<HDL_parameter> return_par = par->clone();
+
+    spdlog::trace("\tProcessing array parameter: {}", par->get_name());
+    mdarray arr_val;
+    if(external_parameters->contains(par->get_name())){
+        if(external_parameters->get(par->get_name())->get_type()==HDL_parameter::array_parameter){
+            arr_val = external_parameters->get(par->get_name())->get_array_value();
+            return_par->add_initialization_list({});
+        } else {
+            Initialization_list il = external_parameters->get(par->get_name())->get_i_l();
+            il.link_processor( external_parameters, completed_set, d_store);
+            arr_val = il.get_values();
+        }
+
+    } else {
+        Initialization_list il = return_par->get_i_l();
+        il.link_processor( external_parameters, completed_set, d_store);
+        arr_val = il.get_values();
+    }
+
+    if(return_par->get_i_l().get_unpacked_dimensions().empty()){
+        return_par->set_value(arr_val.get_value({0,0,0}));
+    } else {
+        return_par->set_array_value(arr_val);
+    }
+    return_par->clear_expression_components();
+    completed_set->insert(return_par);
+    return return_par;
+}
 
 std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(const std::shared_ptr<HDL_parameter> &par) {
 
-    std::shared_ptr<HDL_parameter> return_par = par;
+    std::shared_ptr<HDL_parameter> return_par = par->clone();
+
+    spdlog::trace("\tProcessing scalar parameter: {}", par->get_name());
     auto components = return_par->get_expression_components();
 
     if(par->get_type() == HDL_parameter::numeric_parameter){
@@ -452,37 +492,9 @@ Expression_component Parameter_processor::process_array_access(Expression_compon
     return Expression_component(val);
 }
 
-std::shared_ptr<HDL_parameter> Parameter_processor::process_array_parameter(const std::shared_ptr<HDL_parameter> &par) {
-    std::shared_ptr<HDL_parameter> return_par = par;
-    mdarray arr_val;
-    if(external_parameters->contains(par->get_name())){
-        if(external_parameters->get(par->get_name())->get_type()==HDL_parameter::array_parameter){
-            arr_val = external_parameters->get(par->get_name())->get_array_value();
-            return_par->add_initialization_list({});
-        } else {
-            Initialization_list il = external_parameters->get(par->get_name())->get_i_l();
-            il.link_processor( external_parameters, completed_set, d_store);
-            arr_val = il.get_values();
-        }
-
-    } else {
-        Initialization_list il = return_par->get_i_l();
-        il.link_processor( external_parameters, completed_set, d_store);
-        arr_val = il.get_values();
-    }
-
-    if(return_par->get_i_l().get_unpacked_dimensions().empty()){
-        return_par->set_value(arr_val.get_value({0,0,0}));
-    } else {
-        return_par->set_array_value(arr_val);
-    }
-    return_par->clear_expression_components();
-    completed_set->insert(return_par);
-    return return_par;
-}
 
 std::shared_ptr<HDL_parameter> Parameter_processor::process_packed_parameter(const std::shared_ptr<HDL_parameter> &par) {
-    std::shared_ptr<HDL_parameter> return_par = par;
+    std::shared_ptr<HDL_parameter> return_par = par->clone();
     Initialization_list il;
     if(external_parameters->contains(return_par->get_name())){
         if(external_parameters->get(return_par->get_name())->get_type() == HDL_parameter::numeric_parameter){

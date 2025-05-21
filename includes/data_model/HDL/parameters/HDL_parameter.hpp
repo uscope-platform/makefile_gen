@@ -33,6 +33,7 @@ public:
     HDL_parameter( const HDL_parameter &c );
     HDL_parameter();
     void set_name(const std::string &n) {name  = n;};
+    std::shared_ptr<HDL_parameter> clone() const;
 
     void set_value(const std::string &v);
     void set_value(int64_t val);
@@ -89,7 +90,8 @@ public:
         ar(name, string_value_array, numeric_value_array,array_value,type,
            expression_components, i_l);
     }
-
+    void set_loop_index(){loop_index = true;}
+    bool is_loop_index() const {return loop_index;}
     nlohmann::json dump();
 
 private:
@@ -99,6 +101,7 @@ private:
     std::vector<int64_t> numeric_value_array;
     mdarray array_value;
     parameter_type type;
+    bool loop_index = false;
 
     Expression expression_components;
 

@@ -24,6 +24,7 @@ HDL_parameter::HDL_parameter(const HDL_parameter &c) {
     expression_components = c.expression_components;
     array_value = c.array_value;
     i_l = c.i_l;
+    loop_index = c.loop_index;
 }
 
 HDL_parameter::HDL_parameter() {
@@ -46,6 +47,7 @@ bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
     ret_val &= lhs.expression_components == rhs.expression_components;
     ret_val &= lhs.array_value == rhs.array_value;
     ret_val &= lhs.i_l == rhs.i_l;
+    ret_val &= lhs.loop_index == rhs.loop_index;
     return ret_val;
 }
 
@@ -71,6 +73,10 @@ bool HDL_parameter::is_empty() {
 void HDL_parameter::set_value(int64_t val) {
     type = numeric_parameter;
     numeric_value_array[0] = val;
+}
+
+std::shared_ptr<HDL_parameter> HDL_parameter::clone() const {
+    return std::make_shared<HDL_parameter>(*this);
 }
 
 void HDL_parameter::set_value(const std::string &v) {

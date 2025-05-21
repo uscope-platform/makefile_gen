@@ -24,7 +24,9 @@ HDL_loop_solver::HDL_loop_solver(const Parameters_map &pm, const std::shared_ptr
 std::vector<int64_t> HDL_loop_solver::solve_loop(HDL_loop_metadata &l, HDL_Resource &spec) {
     std::vector<int64_t> ret;
     Parameter_processor init_processor(parent_parameters,d_store);
-    auto loop_variable = init_processor.process_parameter(std::make_shared<HDL_parameter>(l.init), spec);
+    auto param = std::make_shared<HDL_parameter>(l.init);
+    param->set_loop_index();
+    auto loop_variable = init_processor.process_parameter(param, spec);
 
     while(!is_loop_done(loop_variable, l.end_c)){
         ret.push_back(loop_variable->get_numeric_value());
