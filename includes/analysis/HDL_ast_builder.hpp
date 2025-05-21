@@ -46,9 +46,18 @@ class HDL_ast_builder {
                                                                          const Parameters_map &external_parameters,
                                                                          const std::shared_ptr<HDL_instance_AST>& parent
                                                                          );
+
+        std::string get_current_path() {
+            if(current_path.empty()) return "";
+            std::ostringstream oss;
+            std::copy(current_path.begin(), current_path.end(),
+           std::ostream_iterator<std::string>(oss, "."));
+            return oss.str();
+        }
+        std::string trace_prefix = "";
         nlohmann::json log;
         Depfile dep_file;
-
+        std::vector<std::string> current_path;
 
 };
 

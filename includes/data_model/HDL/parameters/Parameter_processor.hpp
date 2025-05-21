@@ -68,6 +68,7 @@ public:
     Parameter_processor(const Parameters_map& ep,
                         std::shared_ptr<Parameters_map> &cs
     );
+    void set_trace_prefix(std::string &s) {trace_prefix = s;}
     Parameters_map process_parameters_map(const Parameters_map &map, HDL_Resource &spec);
     static void convert_parameters(std::vector<HDL_Resource> &v);
     int64_t process_expression(const std::vector<Expression_component>& expr, int64_t *reslt_size);
@@ -101,6 +102,7 @@ private:
 
     std::unordered_map<std::string, std::vector<int64_t>> array_parameter_values;
     std::shared_ptr<data_store> d_store;
+    std::string trace_prefix = "";
 };
 
 

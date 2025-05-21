@@ -79,11 +79,13 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
         auto res = d_store->get_HDL_resource(type);
 
         Parameter_processor p(external_parameters, d_store);
+        p.set_trace_prefix(trace_prefix);
         auto parent_parameters = i.get_parameters_copy();
         auto instance_parameters = p.process_parameters_map(parent_parameters, res);
 
 
         Parameter_processor p2 = Parameter_processor(instance_parameters, d_store);
+        p2.set_trace_prefix(trace_prefix);
         auto pm = res.get_parameters();
         auto new_params = p2.process_parameters_map(pm, res);
 
@@ -120,31 +122,36 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
 
         if(i.get_array_quantifier()!= nullptr){
             Parameter_processor p3(parent->get_parameters(), d_store);
+            p3.set_trace_prefix(trace_prefix);
             auto new_quantifier = p3.process_parameter(i.get_array_quantifier(), res);
             ret_inst->add_array_quantifier(new_quantifier);
         }
         ret_inst->set_processors(processors);
 
-        spdlog::trace("====================================================");
-        spdlog::trace("Processing Instance {} of module {}", i.get_name(), type);
-        spdlog::trace("====================================================");
+        spdlog::trace("{}====================================================", trace_prefix);
+        spdlog::trace("{}Processing module {} at {}", trace_prefix, type, get_current_path() + i.get_name());
+        spdlog::trace("{}====================================================",trace_prefix);
 
+        current_path.push_back(i.get_name());
+        trace_prefix += "    ";
         std::vector<nlohmann::json> leaves;
         for(auto &dep: res.get_dependencies()){
             if(dep.get_dependency_class() != package  && dep.get_dependency_class() != memory_init){
                 HDL_instance_AST d = dep;
                 auto dbg = d.get_name();
-                spdlog::trace("----------------------------------------------------");
-                spdlog::trace("Processing dependency {} of module {}", d.get_name(), d.get_type());
-                spdlog::trace("----------------------------------------------------");
+                spdlog::trace("{}----------------------------------------------------",trace_prefix);
+                spdlog::trace("{}Processing dependency {} in module {}",trace_prefix, get_current_path() + d.get_name(), d.get_type());
+                spdlog::trace("{}----------------------------------------------------",trace_prefix);
                 bool do_break = dbg == "dep";
                 if(d.get_n_loops()>1){
                     spdlog::warn("Nested loops are not supported by parameter analysis\n In HDL instance: " + i.get_name() + " of type: " + type + " is in a nested loop");
                 } else if(d.get_n_loops() == 1){
                     HDL_loop_solver solver(new_params, d_store);
+                    solver.set_trace_prefix(trace_prefix);
                     auto loop = d.get_inner_loop();
                     auto indices =solver.solve_loop(loop, res);
                     for(auto index:indices){
+                        spdlog::trace("{}**Processing iteration {} of loop with index {}**", trace_prefix, index, loop.init.get_name());
                         auto specialized_params = specialize_parameters(index, new_params, loop.init.get_name());
                         auto specialized_d = specialize_instance(d, index,specialized_params, loop.init.get_name());
 
@@ -172,6 +179,8 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
         }
 
     }
+    current_path.erase(current_path.end() - 1);
+    trace_prefix = trace_prefix.substr(0, trace_prefix.length() - 4);
 
 
     return ret_inst;
@@ -211,7 +220,7 @@ std::unordered_map<std::string, std::vector<HDL_net>> HDL_ast_builder::specializ
         std::vector<HDL_net> processed_nets;
         for (auto &n : nets) {
             Parameter_processor p(parameters_values, d_store);
-
+            p.set_trace_prefix(trace_prefix);
             if(!n.index.empty()) {
                 n.index = specialize_expression(n.index, p);
             }

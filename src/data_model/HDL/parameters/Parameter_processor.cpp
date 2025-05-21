@@ -44,17 +44,17 @@ Parameters_map Parameter_processor::process_parameters_map(const Parameters_map 
             try{
                 auto par = item;
                 auto dbg = par->get_name();
-                spdlog::trace("Handling parameter: {}", dbg);
+                spdlog::trace("{}Handling parameter: {}", trace_prefix, dbg);
                 if(external_parameters->contains(item->get_name())){
                     // The parameter needs to be copied out of external parameters and into the completed set otherwise it will go out of scope
                     auto param = external_parameters->get(item->get_name());
                     completed_set->insert(param);
-                    spdlog::trace("\tMatched external parameter value: {}", param->value_as_string());
+                    spdlog::trace("{}->Matched external parameter value: {}", trace_prefix, param->value_as_string());
                 } else {
                     auto do_stop = dbg=="p1_t";
                     auto param = process_parameter(par, spec);
                     completed_set->insert(param);
-                    spdlog::trace("\tProcessed parameter value: {}", param->value_as_string());
+                    spdlog::trace("{}->Processed parameter value: {}", trace_prefix, trace_prefix, param->value_as_string());
                 }
             } catch (Parameter_processor_Exception &ex){
                 if(!ex.unknown_parameter){
@@ -117,7 +117,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_function_para
     const std::shared_ptr<HDL_parameter> &par,
     const HDL_function &fcn
 ) {
-    spdlog::trace("\tProcessing scalar function parameter: {}", par->get_name());
+    spdlog::trace("{}->Processing scalar function parameter: {}", trace_prefix, par->get_name());
 
     std::shared_ptr<HDL_parameter> return_par = par->clone();
 
@@ -130,7 +130,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_function_para
 std::shared_ptr<HDL_parameter> Parameter_processor::process_vector_function_parameter(
     const std::shared_ptr<HDL_parameter> &par, const HDL_function &fcn, HDL_Resource &spec) {
 
-    spdlog::trace("\tProcessing vector function parameter: {}", par->get_name());
+    spdlog::trace("{}->Processing vector function parameter: {}", trace_prefix, par->get_name());
 
     std::shared_ptr<HDL_parameter> return_par = par->clone();
     std::unordered_map<uint64_t, uint64_t> explicit_values;
@@ -156,7 +156,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_array_parameter(cons
 
     std::shared_ptr<HDL_parameter> return_par = par->clone();
 
-    spdlog::trace("\tProcessing array parameter: {}", par->get_name());
+    spdlog::trace("{}->Processing array parameter: {}", trace_prefix, par->get_name());
     mdarray arr_val;
     if(external_parameters->contains(par->get_name())){
         if(external_parameters->get(par->get_name())->get_type()==HDL_parameter::array_parameter){
@@ -188,7 +188,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
 
     std::shared_ptr<HDL_parameter> return_par = par->clone();
 
-    spdlog::trace("\tProcessing scalar parameter: {}", par->get_name());
+    spdlog::trace("{}->Processing scalar parameter: {}", trace_prefix, par->get_name());
     auto components = return_par->get_expression_components();
 
     if(par->get_type() == HDL_parameter::numeric_parameter){
