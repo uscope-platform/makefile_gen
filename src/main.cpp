@@ -237,8 +237,10 @@ int main(int argc, char *argv[]){
         app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
     }
 
-
-
+    auto ast_dump = synth_ast->dump().dump(4);
+    std::ofstream ast_file("/tmp/ast.json");
+    ast_file << ast_dump;
+    ast_file.close();
     if(opts.measure_runtime){
         auto t2 = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> ms_double = t2 - t1;

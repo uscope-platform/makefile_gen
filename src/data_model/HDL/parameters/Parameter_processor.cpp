@@ -454,6 +454,8 @@ mdarray Parameter_processor::merge_function_contributions(std::unordered_map<uin
         }
         parameter_value[idx] = value;
     }
+
+    std::reverse(parameter_value.begin(), parameter_value.end());
     mdarray md_values;
     md_values.set_1d_slice({0, 0}, parameter_value);
     return md_values;
