@@ -32,7 +32,7 @@
 #include <cereal/types/vector.hpp>
 #include <cereal/types/memory.hpp>
 
-#include "../../../../../.conan2/p/b/spdlo60806f3bf4ee5/p/include/spdlog/spdlog.h"
+#include <spdlog/spdlog.h>
 #include "data_model/HDL/HDL_definitions.hpp"
 #include "parameters/HDL_function.hpp"
 

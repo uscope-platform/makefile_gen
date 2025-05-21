@@ -1364,7 +1364,7 @@ TEST(parameter_processing, simple_vector_function_parameter) {
 
     auto param = parameters.get("AXI_ADDRESSES");
     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-    md_1d_array reference = {100, 200, 300};
+    md_1d_array reference = {300, 200, 100};
     ASSERT_EQ(param_value, reference);
 }
 
@@ -1404,7 +1404,7 @@ TEST(parameter_processing, loop_vector_function_parameter) {
 
     auto param = parameters.get("AXI_ADDRESSES");
     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-    md_1d_array reference = {200, 100, 0};
+    md_1d_array reference = {0, 100, 200};
     ASSERT_EQ(param_value, reference);
 }
 
@@ -1444,7 +1444,7 @@ TEST(parameter_processing, complex_vector_function_parameter) {
 
     auto param = parameters.get("AXI_ADDRESSES");
     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-    md_1d_array reference = {44, 100, 200, 300, 667};
+    md_1d_array reference = {667, 300, 200, 100, 44};
     ASSERT_EQ(param_value, reference);
 
 }
@@ -1498,7 +1498,7 @@ TEST(parameter_processing, simple_package_in_function_initialization) {
 
     auto param = parameters.get("AXI_ADDRESSES");
     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-    md_1d_array reference = {0x43c00000,0x43c30004};
+    md_1d_array reference = {0x43c30004,0x43c00000};
     ASSERT_EQ(param_value, reference);
 }
 
@@ -1545,7 +1545,7 @@ TEST(parameter_processing, nested_package_in_function_initialization) {
 
     auto param = parameters.get("AXI_ADDRESSES");
     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-    md_1d_array reference = {0x43c00000,0x43c30004};
+    md_1d_array reference = {0x43c30004,0x43c00000};
     ASSERT_EQ(param_value, reference);
 }
 
@@ -1606,9 +1606,9 @@ TEST(parameter_processing, override_with_function_parameter) {
 
     auto params = synth_ast->get_dependencies()[0]->get_parameters();
     auto param_1 = params.get("param_1");
-    EXPECT_EQ(param_1->get_numeric_value(), 356);
+    EXPECT_EQ(param_1->get_numeric_value(), 100);
     auto p1_t = params.get("p1_t");
-    EXPECT_EQ(p1_t->get_numeric_value(), 358);
+    EXPECT_EQ(p1_t->get_numeric_value(), 102);
 }
 
 
@@ -1676,10 +1676,9 @@ TEST(parameter_processing, parameter_with_for_loop) {
         p1_t.push_back(p.get("p1_t")->get_numeric_value());
     }
 
-    std::vector<uint32_t> expected_param_1 = {62, 356};
+    std::vector<uint32_t> expected_param_1 = {100, 130};
     EXPECT_EQ(param_1, expected_param_1);
-    std::vector<uint32_t> expected_p1_t = {64, 358};
+    std::vector<uint32_t> expected_p1_t = {102, 132};
     EXPECT_EQ(p1_t, expected_p1_t);
-
 
 }

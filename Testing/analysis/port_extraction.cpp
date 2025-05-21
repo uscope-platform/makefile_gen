@@ -277,7 +277,7 @@ TEST(port_extraction, concat_complex_slicing) {
     range.range = {Expression_component("3")};
     range.type = HDL_range::increasing_range;
 
-    check_ports["in_data"][1].set_range(range);
+    check_ports["stream_in"][1].set_range(range);
 
     ASSERT_EQ(ports, check_ports);
 }
