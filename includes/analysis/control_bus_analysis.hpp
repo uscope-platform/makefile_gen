@@ -63,7 +63,15 @@ private:
     Depfile dfile;
     std::string bus_type;
     bus_specs_manager specs_manager;
+    std::vector<std::string> current_path;
 
+    std::string get_current_path() {
+        if(current_path.empty()) return "";
+        std::ostringstream oss;
+        std::copy(current_path.begin(), current_path.end(),
+       std::ostream_iterator<std::string>(oss, "."));
+        return oss.str();
+    }
 };
 
 

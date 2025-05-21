@@ -25,14 +25,14 @@ std::vector<int64_t> HDL_loop_solver::solve_loop(HDL_loop_metadata &l, HDL_Resou
     std::vector<int64_t> ret;
     Parameter_processor init_processor(parent_parameters,d_store);
     init_processor.set_trace_prefix(trace_prefix);
-    auto param = std::make_shared<HDL_parameter>(l.init);
+    auto param = std::make_shared<HDL_parameter>(l.get_init());
     param->set_loop_index();
     auto loop_variable = init_processor.process_parameter(param, spec);
 
-    while(!is_loop_done(loop_variable, l.end_c)){
+    while(!is_loop_done(loop_variable, l.get_end_c())){
         ret.push_back(loop_variable->get_numeric_value());
 
-        auto new_loop_var = process_expression(l.iter, loop_variable);
+        auto new_loop_var = process_expression(l.get_iter(), loop_variable);
 
         loop_variable->set_value(new_loop_var);
     }
@@ -46,7 +46,7 @@ bool HDL_loop_solver::is_loop_done(std::shared_ptr<HDL_parameter> &lv, Expressio
     return ec == 0;
 }
 
-int64_t HDL_loop_solver::process_expression(Expression &e, std::shared_ptr<HDL_parameter> loop_var) {
+int64_t HDL_loop_solver::process_expression(const Expression &e, std::shared_ptr<HDL_parameter> loop_var) {
     Parameters_map end_condition_map = parent_parameters;
     end_condition_map.insert(loop_var);
     Parameter_processor processor(end_condition_map,d_store);

@@ -24,7 +24,7 @@
 class HDL_instances_factory {
 public:
     void new_dependency(const std::string &n, const std::string &p, dependency_class dc);
-    void add_parameter(const std::string &name, const std::shared_ptr<HDL_parameter> &p);
+    void add_parameter(const std::shared_ptr<HDL_parameter> &p);
     void add_port(const std::string &name);
     void start_scalar_net(const std::string &n);
     void add_scalar_net(const std::string &name);

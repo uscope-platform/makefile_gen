@@ -71,6 +71,7 @@ bool HDL_parameter::is_empty() {
 }
 
 void HDL_parameter::set_value(int64_t val) {
+    locking_violation_check();
     type = numeric_parameter;
     numeric_value_array[0] = val;
 }
@@ -80,6 +81,7 @@ std::shared_ptr<HDL_parameter> HDL_parameter::clone() const {
 }
 
 void HDL_parameter::set_value(const std::string &v) {
+    locking_violation_check();
     type = string_parameter;
     string_value_array[0] = v;
 }
@@ -108,6 +110,7 @@ HDL_parameter::operator std::string() {
 }
 
 void HDL_parameter::add_component(const Expression_component& component) {
+    locking_violation_check();
     expression_components.push_back(component);
 }
 

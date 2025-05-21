@@ -38,30 +38,114 @@ struct assignment {
     Expression value;
 };
 
-struct HDL_loop_metadata {
+class HDL_loop_metadata {
+
+public:
+
+    HDL_loop_metadata() = default;
+
+    HDL_loop_metadata(const HDL_loop_metadata &other)
+        : locked(other.locked),
+          init(other.init),
+          end_c(other.end_c),
+          iter(other.iter),
+          assignments(other.assignments) {
+    }
+
+    HDL_loop_metadata(HDL_loop_metadata &&other) noexcept
+        : locked(other.locked),
+          init(std::move(other.init)),
+          end_c(std::move(other.end_c)),
+          iter(std::move(other.iter)),
+          assignments(std::move(other.assignments)) {
+    }
+
+    HDL_loop_metadata & operator=(const HDL_loop_metadata &other) {
+        if(this == &other)
+            return *this;
+        locked = other.locked;
+        init = other.init;
+        end_c = other.end_c;
+        iter = other.iter;
+        assignments = other.assignments;
+        return *this;
+    }
+
+    HDL_loop_metadata & operator=(HDL_loop_metadata &&other) noexcept {
+        if(this == &other)
+            return *this;
+        locked = other.locked;
+        init = std::move(other.init);
+        end_c = std::move(other.end_c);
+        iter = std::move(other.iter);
+        assignments = std::move(other.assignments);
+        return *this;
+    }
+
+    void lock() {locked = true;}
+    void set_init(const HDL_parameter &p) {
+        locking_violation_check();
+        init = p;
+    }
+    void set_end_c(const Expression &e) {
+        locking_violation_check();
+        end_c = e;
+    }
+    void set_iter(const Expression &i) {
+        locking_violation_check();
+        iter = i;
+    }
+    void add_assignment(const assignment &a) {
+        locking_violation_check();
+        assignments.push_back(a);
+    }
+    void set_assignments(const std::vector<assignment> &a) {
+        locking_violation_check();
+        assignments = a;
+    }
+    HDL_parameter get_init() const {
+        return init;
+    }
+    Expression get_end_c() const {
+        return end_c;
+    }
+    Expression get_iter() const {
+        return iter;
+    }
+    std::vector<assignment> get_assignments() const {
+        return assignments;
+    }
+    template<class Archive>
+    void serialize(Archive & archive){
+        archive( init, end_c, iter, assignments);
+    }
+    void locking_violation_check() {
+        if(locked) {
+            spdlog::error("Attempting to modify a locked loop with index {}",init.get_name());
+            exit(1);
+        }
+    }
+private:
+    bool locked = false;
     HDL_parameter init;
     Expression end_c;
     Expression iter;
     std::vector<assignment> assignments;
 
-
-    template<class Archive>
-    void serialize(Archive & archive)
-    {
-        archive( init, end_c, iter);
+    friend bool operator==(const HDL_loop_metadata &lhs, const HDL_loop_metadata &rhs) {
+        return lhs.locked == rhs.locked
+               && lhs.init == rhs.init
+               && lhs.end_c == rhs.end_c
+               && lhs.iter == rhs.iter
+               && lhs.assignments == rhs.assignments;
     }
 
+    friend bool operator!=(const HDL_loop_metadata &lhs, const HDL_loop_metadata &rhs) {
+        return !(lhs == rhs);
+    }
+
+
+
 };
-
-bool operator==(const HDL_loop_metadata& lhs, const HDL_loop_metadata& rhs);
-
-inline bool operator==(const HDL_loop_metadata &lhs, const HDL_loop_metadata &rhs) {
-    bool ret = true;
-    ret &= lhs.init == rhs.init;
-    ret &= lhs.end_c == rhs.end_c;
-    ret &= lhs.iter == rhs.iter;
-    ret &= lhs.assignments == rhs.assignments;
-    return ret;
-}
 
 #endif //HDL_LOOP_HPP

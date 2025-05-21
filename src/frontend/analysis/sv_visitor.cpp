@@ -422,7 +422,7 @@ void sv_visitor::exitNamed_parameter_assignment(sv2017::Named_parameter_assignme
     auto param = params_factory.get_parameter();
     params_factory.stop_param_override();
     if(deps_factory.is_valid_dependency()){
-        deps_factory.add_parameter(ctx->identifier()->getText(), param);
+        deps_factory.add_parameter(param);
     }
 }
 

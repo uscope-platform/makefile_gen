@@ -33,11 +33,13 @@ HDL_instance::HDL_instance(std::string dep_name, std::string dep_type, dependenc
     type = std::move(dep_type);
 }
 
-void HDL_instance::add_parameter(const std::string& parameter_name, const std::shared_ptr<HDL_parameter> &p) {
+void HDL_instance::add_parameter(const std::shared_ptr<HDL_parameter> &p) {
+    locking_violation_check();
     parameters.insert(p);
 }
 
 void HDL_instance::add_port_connection(const std::string& port_name, std::vector<HDL_net> value) {
+    locking_violation_check();
     ports_map[port_name] = std::move(value);
 }
 
@@ -65,7 +67,15 @@ bool operator==(const HDL_instance &lhs, const HDL_instance &rhs) {
 }
 
 void HDL_instance::add_parameters(Parameters_map &p) {
+    locking_violation_check();
     parameters.insert(p.begin(), p.end());
+}
+
+void HDL_instance::lock_dependency() {
+    lock = true;
+    for(auto &p:parameters) p->lock_parameter();
+    for(auto &val: ports_map | std::views::values) for(auto n:val) n.lock();
+    for(auto &ls:loop_specs) ls.lock();
 }
 
 nlohmann::json HDL_instance::dump() {

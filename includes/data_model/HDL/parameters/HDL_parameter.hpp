@@ -19,6 +19,7 @@
 #include <string>
 #include <regex>
 #include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
 
 #include "data_model/HDL/parameters/Expression_component.hpp"
 #include "data_model/HDL/parameters/Initialization_list.hpp"
@@ -32,7 +33,10 @@ public:
 
     HDL_parameter( const HDL_parameter &c );
     HDL_parameter();
-    void set_name(const std::string &n) {name  = n;};
+    void set_name(const std::string &n) {
+        locking_violation_check();
+        name  = n;
+    };
     std::shared_ptr<HDL_parameter> clone() const;
 
     void set_value(const std::string &v);
@@ -63,11 +67,18 @@ public:
     bool is_empty();
 
     void add_component(const Expression_component &component);
-    void set_expression_components(const Expression  &c){expression_components = c;};
-    Expression  get_expression_components() { return expression_components;};
-    void clear_expression_components(){expression_components.clear();};
+    void set_expression_components(const Expression  &c) {
+        locking_violation_check();
+        expression_components = c;
+    };
+    Expression  get_expression_components() { return expression_components;}
+    void clear_expression_components() {
+        locking_violation_check();
+        expression_components.clear();
+    }
 
     void set_array_value(const mdarray &arr){
+        locking_violation_check();
         type = array_parameter;
         array_value = arr;
     };
@@ -82,19 +93,36 @@ public:
     friend void PrintTo(const HDL_parameter& point, std::ostream* os);
 
 
-    void add_initialization_list(const Initialization_list &i){ i_l = i;};
-    Initialization_list get_i_l() {return i_l;};
+    void add_initialization_list(const Initialization_list &i){
+        locking_violation_check();
+        i_l = i;
+    }
+    Initialization_list get_i_l() {return i_l;}
 
     template<class Archive>
     void serialize( Archive & ar ) {
         ar(name, string_value_array, numeric_value_array,array_value,type,
            expression_components, i_l);
     }
-    void set_loop_index(){loop_index = true;}
+
+    void set_loop_index() {
+        locking_violation_check();
+        loop_index = true;
+    }
     bool is_loop_index() const {return loop_index;}
     nlohmann::json dump();
 
+    void lock_parameter(){lock = true;}
+
+    void locking_violation_check() {
+        if(lock) {
+            spdlog::error("Attempting to modify a locked parameter {}",name);
+            exit(1);
+        }
+    }
 private:
+
+    bool lock = false;
 
     std::string name;
     std::vector<std::string> string_value_array;

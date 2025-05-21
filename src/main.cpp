@@ -118,16 +118,14 @@ int main(int argc, char *argv[]){
     // analyze repository content and update cache
     Repository_walker walker(s_store, d_store, opts.no_cache);
 
+    d_store->lock_resources();
+
     // Parse depfile
     if(opts.target.empty()) opts.target = std::filesystem::current_path().string() + "/Depfile";
     if(!std::filesystem::exists(opts.target)){
         spdlog::error("Depfile not found: {} does not exist", opts.target);
         exit(1);
     }
-
-    auto test = d_store->get_HDL_resource("hil_base_logic");
-    auto p = test.get_parameters();
-    auto pp = p.get("AXI_ADDRESSES");
 
     Depfile dep(opts.target);
 
@@ -239,10 +237,6 @@ int main(int argc, char *argv[]){
         app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
     }
 
-
-    auto test2 = d_store->get_HDL_resource("hil_base_logic");
-    auto p2 = test.get_parameters();
-    auto pp2 = p.get("AXI_ADDRESSES");
 
 
     if(opts.measure_runtime){

@@ -87,7 +87,7 @@ private:
     Expression_component process_array_access(Expression_component &e);
     int64_t get_component_value(Expression_component &ec, int64_t *result_size);
     std::unordered_map<uint64_t, uint64_t> evaluate_loop(HDL_loop_metadata &loop, HDL_Resource &spec);
-    int64_t evaluate_loop_expression(Expression &e, std::shared_ptr<HDL_parameter> loop_var);
+    int64_t evaluate_loop_expression(const Expression &e, std::shared_ptr<HDL_parameter> loop_var);
     mdarray merge_function_contributions(
         std::unordered_map<uint64_t, uint64_t> &explicit_values,
         std::unordered_map<uint64_t, uint64_t> &loop_values

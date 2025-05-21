@@ -405,17 +405,17 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
 std::unordered_map<uint64_t, uint64_t> Parameter_processor::evaluate_loop(HDL_loop_metadata &loop, HDL_Resource &spec) {
     std::unordered_map<uint64_t, uint64_t> retval;
 
-    if(loop.init.get_name().empty() && loop.init.get_type() == HDL_parameter::string_parameter) return retval;
-    auto loop_variable = process_parameter(std::make_shared<HDL_parameter>(loop.init), spec);
+    if(loop.get_init().get_name().empty() && loop.get_init().get_type() == HDL_parameter::string_parameter) return retval;
+    auto loop_variable = process_parameter(std::make_shared<HDL_parameter>(loop.get_init()), spec);
 
-    while(evaluate_loop_expression(loop.end_c,loop_variable) != 0){
-        for(auto a:loop.assignments) {
+    while(evaluate_loop_expression(loop.get_end_c(),loop_variable) != 0){
+        for(auto a:loop.get_assignments()) {
             auto idx = evaluate_loop_expression(a.index, loop_variable);
             auto value = evaluate_loop_expression(a.value, loop_variable);
             retval.insert({idx, value});
         }
 
-        auto new_loop_var = evaluate_loop_expression(loop.iter, loop_variable);
+        auto new_loop_var = evaluate_loop_expression(loop.get_iter(), loop_variable);
         loop_variable->set_value(new_loop_var);
     }
 
@@ -424,7 +424,7 @@ std::unordered_map<uint64_t, uint64_t> Parameter_processor::evaluate_loop(HDL_lo
 }
 
 
-int64_t Parameter_processor::evaluate_loop_expression(Expression &e, std::shared_ptr<HDL_parameter> loop_var) {
+int64_t Parameter_processor::evaluate_loop_expression(const Expression &e, std::shared_ptr<HDL_parameter> loop_var) {
 
     std::shared_ptr<HDL_parameter> shadowed_var= nullptr;
     if(external_parameters->contains(loop_var->get_name())) {

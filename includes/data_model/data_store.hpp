@@ -74,6 +74,7 @@ public:
     std::unordered_map<std::string, Constraints> get_constraints_cache() const {return cache.constraints;};
     std::unordered_map<std::string, DataFile> get_data_cache() const {return cache.data;};
 
+    void lock_resources();
 
     ~data_store();
 private:

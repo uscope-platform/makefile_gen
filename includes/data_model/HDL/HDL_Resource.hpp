@@ -32,6 +32,7 @@
 #include <cereal/types/vector.hpp>
 #include <cereal/types/memory.hpp>
 
+#include "../../../../../.conan2/p/b/spdlo60806f3bf4ee5/p/include/spdlog/spdlog.h"
 #include "data_model/HDL/HDL_definitions.hpp"
 #include "parameters/HDL_function.hpp"
 
@@ -42,48 +43,77 @@ class HDL_Resource {
         HDL_Resource(dependency_class type, std::string n, std::string p);
 
         std::vector<HDL_instance> get_dependencies(){return dependencies;};
-        void set_dependencies(std::vector<HDL_instance> &d) {dependencies = d;};
+        void set_dependencies(std::vector<HDL_instance> &d) {
+            locking_violation_check();
+            dependencies = d;
+        };
 
         void add_dependencies(std::vector<HDL_instance> deps);
         void add_dependency(const HDL_instance &dep);
 
-        void set_name(const std::string &n) {name  = n;};
+        void set_name(const std::string &n) {
+            locking_violation_check();
+            name  = n;
+        };
         const std::string &getName() const {return name;};
 
-        void set_path(const std::string &p) {path  = p;};
-        std::string get_path() {return path;};
-        void set_type(const dependency_class t) { hdl_type  = t;};
+        void set_path(const std::string &p) {
+            locking_violation_check();
+            path  = p;
+        };
+        std::string get_path() {return path;}
+        void set_type(const dependency_class t) {
+            locking_violation_check();
+            hdl_type  = t;
+        };
         dependency_class get_type() {return hdl_type;};
         bool is_interface();
 
-        void set_ports(std::unordered_map<std::string, port_direction_t> m) {ports = std::move(m);};
-        void add_ports(const std::string &p_n, port_direction_t dir) {ports[p_n] = dir;};
+        void set_ports(std::unordered_map<std::string, port_direction_t> m) {
+            locking_violation_check();
+            ports = std::move(m);
+        };
+        void add_ports(const std::string &p_n, port_direction_t dir) {
+            locking_violation_check();
+            ports[p_n] = dir;
+        };
 
         void add_if_port_specs(const std::string &p_n, const std::string &if_name, const std::string &modport);
         std::unordered_map<std::string, std::array<std::string, 2>> get_if_port_specs();
 
 
-        void add_processor_doc(processor_instance &p) {processor_docs.push_back(p);};
+        void add_processor_doc(processor_instance &p) {
+            locking_violation_check();
+            processor_docs.push_back(p);
+        };
         std::vector<processor_instance> get_processor_doc() {return processor_docs;};
         bool  has_processors() {return !processor_docs.empty();};
 
-        void add_parameter(const std::shared_ptr<HDL_parameter> &p) { parameters.insert(p);};
+        void add_parameter(const std::shared_ptr<HDL_parameter> &p) {
+            locking_violation_check();
+            parameters.insert(p);
+        }
         void set_parameters(Parameters_map p);
         Parameters_map get_parameters() {return parameters;};
 
         void add_function(const HDL_function &f) {
+            locking_violation_check();
             functions[f.name] = f;
         }
         std::unordered_map<std::string, HDL_function> get_functions() {return functions;};
 
 
-        void set_documentation(module_documentation &d) {doc= d;};
-        module_documentation get_documentation() const { return doc;};
+        void set_documentation(module_documentation &d) {
+            locking_violation_check();
+            doc= d;
+        };
+        module_documentation get_documentation() const { return doc;}
 
         template<class Archive>
         void serialize( Archive & ar ) {
             ar(name, path, hdl_type, dependencies, if_specs, parameters, ports, doc, processor_docs, functions);
         }
+        void lock_resource();
 
         bool is_empty();
         friend bool operator <(const HDL_Resource& lhs, const HDL_Resource& rhs);
@@ -91,7 +121,15 @@ class HDL_Resource {
 
         friend void PrintTo(const HDL_Resource& res, std::ostream* os);
 
+        void locking_violation_check() {
+            if(lock) {
+                spdlog::error("Attempting to modify a locked resource {}:{}",path, name);
+                exit(1);
+            }
+        }
+
 private:
+        bool lock = false;
         std::string name;
         std::string path;
         dependency_class hdl_type;

@@ -82,23 +82,23 @@ TEST(function_processing, simple_loop_function) {
     HDL_function check_f;
     check_f.set_name("CTRL_ADDR_CALC");
     auto metadata = HDL_loop_metadata();
-    metadata.init.set_name("i");
-    metadata.init.add_component(Expression_component("0"));
-    metadata.init.set_type(HDL_parameter::expression_parameter);
-    metadata.end_c.emplace_back("i");
-    metadata.end_c.emplace_back("<");
-    metadata.end_c.emplace_back("N_CORES");
 
-    metadata.iter.emplace_back("i");
-    metadata.iter.emplace_back("+");
-    metadata.iter.emplace_back(1);
+    HDL_parameter p;
+    p.set_name("i");
+    p.add_component(Expression_component("0"));
+    p.set_type(HDL_parameter::expression_parameter);
+    metadata.set_init(p);
+    metadata.set_end_c({Expression_component("i"),Expression_component("<"),Expression_component("N_CORES")});
+
+    metadata.set_iter({Expression_component("i"), Expression_component("+"), Expression_component(1)});
+
     assignment a = {
         "CTRL_ADDR_CALC",
         {Expression_component("i")},
         {Expression_component("100"), Expression_component("*"), Expression_component("i")}
     };
 
-    metadata.assignments.push_back(a);
+    metadata.add_assignment(a);
     check_f.add_loop_metadata(metadata);
     EXPECT_EQ(check_f,result);
 }
@@ -134,25 +134,29 @@ TEST(function_processing, complex_loop_function) {
     HDL_function check_f;
     check_f.set_name("CTRL_ADDR_CALC");
     auto metadata = HDL_loop_metadata();
-    metadata.init.set_name("i");
-    metadata.init.add_component(Expression_component("1"));
-    metadata.init.set_type(HDL_parameter::expression_parameter);
-    metadata.end_c.emplace_back("i");
-    metadata.end_c.emplace_back("<");
-    metadata.end_c.emplace_back("N_CORES");
-    metadata.end_c.emplace_back("+");
-    metadata.end_c.emplace_back("1");
 
-    metadata.iter.emplace_back("i");
-    metadata.iter.emplace_back("+");
-    metadata.iter.emplace_back(1);
+    HDL_parameter p;
+    p.set_name("i");
+    p.add_component(Expression_component("1"));
+    p.set_type(HDL_parameter::expression_parameter);
+    metadata.set_init(p);
+    metadata.set_end_c({
+        Expression_component("i"),
+        Expression_component("<"),
+        Expression_component("N_CORES"),
+        Expression_component("+"),
+        Expression_component("1")
+    });
+
+    metadata.set_iter({Expression_component("i"), Expression_component("+"), Expression_component(1)});
+
     assignment a = {
         "CTRL_ADDR_CALC",
         {Expression_component("i")},
         {Expression_component("100"), Expression_component("*"), Expression_component("i")}
     };
 
-    metadata.assignments.push_back(a);
+    metadata.add_assignment(a);
     check_f.add_loop_metadata(metadata);
     a = {
         "CTRL_ADDR_CALC",

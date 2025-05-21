@@ -53,6 +53,10 @@ bool HDL_Resource::is_interface() {
 }
 
 
+void HDL_Resource::lock_resource() {
+    lock = true;
+    for(auto &dep:dependencies) dep.lock_dependency();
+}
 
 bool HDL_Resource::is_empty() {
     bool ret = true;
@@ -71,10 +75,12 @@ bool HDL_Resource::is_empty() {
 }
 
 void HDL_Resource::add_dependency(const HDL_instance &dep) {
+    locking_violation_check();
     dependencies.push_back(dep);
 }
 
 void HDL_Resource::add_dependencies(std::vector<HDL_instance> deps) {
+    locking_violation_check();
     dependencies.insert(dependencies.begin(), deps.begin(), deps.end());
 }
 
@@ -101,6 +107,7 @@ bool operator<(const HDL_Resource &lhs, const HDL_Resource &rhs) {
 }
 
 void HDL_Resource::add_if_port_specs(const std::string &p_n, const std::string &if_name, const std::string &modport) {
+    locking_violation_check();
     if_specs[p_n] = {if_name, modport};
 }
 
@@ -109,6 +116,7 @@ std::unordered_map<std::string, std::array<std::string, 2>> HDL_Resource::get_if
 }
 
 void HDL_Resource::set_parameters(Parameters_map p) {
+    locking_violation_check();
     parameters = std::move(p);
 }
 

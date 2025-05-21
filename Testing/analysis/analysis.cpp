@@ -106,7 +106,7 @@ TEST( analysis_test , sv_module) {
     e.set_package_prefix("test_package");
     p->set_expression_components({e});
     p->set_type(HDL_parameter::expression_parameter);
-    d3.add_parameter("TEST_PARAM", p);
+    d3.add_parameter(p);
 
     HDL_instance d2("param", "test_package", package);
     HDL_instance d1("__init_file__", "file", memory_init);

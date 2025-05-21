@@ -34,7 +34,7 @@ void HDL_loops_factory::clear() {
 void HDL_loops_factory::start_assignment(const std::string &name) {
     if(loop_phase == body) {
         expression_valid = true;
-        loop_specs.assignments.push_back({name, {}});
+        loop_specs.add_assignment({name, {}});
     }
 }
 
@@ -48,8 +48,9 @@ void HDL_loops_factory::add_component(const Expression_component &c) {
 }
 
 void HDL_loops_factory::add_loop_variable(const std::string &p) {
-    loop_specs.init = HDL_parameter();
-    loop_specs.init.set_name(p);
+    HDL_parameter param;
+    param.set_name(p);
+    loop_specs.set_init(param);
 }
 
 void HDL_loops_factory::set_phase(loop_phase_t p) {
@@ -57,29 +58,34 @@ void HDL_loops_factory::set_phase(loop_phase_t p) {
     if(p==init) {
         current_expression.clear();
     } else if(p==end) {
-        loop_specs.init.set_expression_components(current_expression);
-        loop_specs.init.set_type(HDL_parameter::expression_parameter);
+        auto init = loop_specs.get_init();
+        init.set_expression_components(current_expression);
+        init.set_type(HDL_parameter::expression_parameter);
+        loop_specs.set_init(init);
         current_expression.clear();
     } else if(p==step) {
-        loop_specs.end_c = current_expression;
+        loop_specs.set_end_c(current_expression);
         current_expression.clear();
     } else if(p==body) {
-        loop_specs.iter = current_expression;
+        loop_specs.set_iter(current_expression);
         current_expression.clear();
     }
 }
 
 void HDL_loops_factory::advance_expression() {
     if(expression_valid) {
-        auto assignment = loop_specs.assignments.back();
-        loop_specs.assignments.back().index = current_expression;
+        auto assignments = loop_specs.get_assignments();
+        assignments.back().index = current_expression;
+        loop_specs.set_assignments(assignments);
         current_expression.clear();
     }
 }
 
 void HDL_loops_factory::close_expression() {
     if(expression_valid) {
-        loop_specs.assignments.back().value = current_expression;
+        auto assignments = loop_specs.get_assignments();
+        assignments.back().value = current_expression;
+        loop_specs.set_assignments(assignments);
         expression_valid = false;
         current_expression.clear();
     }
@@ -90,9 +96,9 @@ void HDL_loops_factory::add_expression(const Expression &e) {
         current_expression = e;
     } else {
         if(end_cond_valid){
-            loop_specs.iter = e;
+            loop_specs.set_iter(e);
         } else {
-            loop_specs.end_c = e;
+            loop_specs.set_end_c(e);
             end_cond_valid = true;
         }
     }

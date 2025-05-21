@@ -44,6 +44,7 @@ void control_bus_analysis::analyze_bus(std::shared_ptr<HDL_instance_AST> &ast,co
 
 void control_bus_analysis::analize_node(const std::vector<analysis_context> &n) {
     for(auto &leaf:n){
+        current_path.push_back(leaf.node->get_name());
         auto type = leaf.node->get_type();
         if(specs_manager.is_sink(type)){
             //manage_sink
@@ -55,6 +56,7 @@ void control_bus_analysis::analize_node(const std::vector<analysis_context> &n) 
             // manage_nested_modules
             analize_node(process_nested_module(leaf));
         }
+        current_path.erase(current_path.end()-1);
     }
 }
 
@@ -90,7 +92,7 @@ std::vector<analysis_context> control_bus_analysis::process_interconnect(const a
                                                   inst.current_module_top, inst.current_module_prefix, inst.proxy};
                             ret_val.push_back(ctx);
                         } else {
-                            auto port_index = nets[0].index[0].get_numeric_value();
+                            auto port_index = nets[0].get_index_at(0).get_numeric_value();
                             if(port_index == master.idx) {
                                 analysis_context ctx = {dep, port_name, master.address, false,
                                                   inst.current_module_top, inst.current_module_prefix, inst.proxy};
@@ -166,7 +168,7 @@ void control_bus_analysis::process_leaf_node(const analysis_context &leaf) {
         leaf.node->get_parent()->set_leaf_module_prefix(leaf.current_module_prefix);
     }
     leaf.node->set_proxy_specs(leaf.proxy);
-    spdlog::info("Found module: {0} of type: {1} at address: 0x{2:08x}", leaf.node->get_name(), leaf.node->get_type(), leaf.address);
+    spdlog::info("Found module: {0}\nType: {1}\nAddress: 0x{2:08x}",get_current_path() + leaf.node->get_name(), leaf.node->get_type(), leaf.address);
 }
 
 std::vector<bus_context>

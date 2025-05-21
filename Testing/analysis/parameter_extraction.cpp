@@ -1123,9 +1123,9 @@ TEST(parameter_extraction, generate_for) {
     p.set_type(HDL_parameter::expression_parameter);
     p.add_component(Expression_component("0"));
 
-    check_loop.init = p;
-    check_loop.end_c = {Expression_component("n"), Expression_component("<"), Expression_component("N_REPETITIONS")};
-    check_loop.iter = {Expression_component("n"), Expression_component("+"), Expression_component("1")};
+    check_loop.set_init(p);
+    check_loop.set_end_c({Expression_component("n"), Expression_component("<"), Expression_component("N_REPETITIONS")});
+    check_loop.set_iter({Expression_component("n"), Expression_component("+"), Expression_component("1")});
 
     ASSERT_EQ(loop, check_loop);
 }

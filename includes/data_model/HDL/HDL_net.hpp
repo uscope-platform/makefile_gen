@@ -71,11 +71,8 @@ class HDL_net {
 public:
     HDL_net() = default;
     explicit HDL_net(const std::string &s) {name = s;}
-    std::string name;
     bool empty() const {return name.empty() && range.accessor.empty() && replication.size.empty();}
-    Expression index;
-    HDL_range range;
-    HDL_replication replication;
+
     std::string get_full_name() const;
     std::string get_base_name() {return name;}
 
@@ -99,12 +96,64 @@ public:
         retval &= lhs.replication == rhs.replication;
         return retval;
     }
+    std::string get_name() const {
+        return name;
+    }
+    Expression_component get_index_at(uint32_t i) {return index[i];}
+    Expression get_index() const {return index;}
+    HDL_range get_range() const {return range;}
+    HDL_replication get_replication() const {return replication;}
+
+    void set_name(const std::string &s) {
+        locking_violation_check();
+        name = s;
+    }
+    void set_index(Expression i) {
+        locking_violation_check();
+        index = i;
+    }
+    void add_index_component(const std::string &ec) {
+        locking_violation_check();
+        index.emplace_back(ec);
+    }
+    void set_range(HDL_range r) {
+        locking_violation_check();
+        range = r;
+    }
+    void add_relication_size(const std::string &ec) {
+        locking_violation_check();
+        replication.size.emplace_back(ec);
+    }
+    void add_relication_target(const std::string &ec) {
+        locking_violation_check();
+        replication.target.emplace_back(ec);
+    }
+    void set_replication(HDL_replication r) {
+        locking_violation_check();
+        replication = r;
+    }
 
     friend bool operator!=(const HDL_net &lhs, const HDL_net &rhs) {
         return !(lhs == rhs);
     }
 
+    void lock() {
+        locked = true;
+    }
+    void locking_violation_check() {
+        if(locked) {
+            spdlog::error("Attempting to modify a locked net {}", name);
+            exit(1);
+        }
+    }
+
     virtual nlohmann::json dump();
+private:
+    bool locked = false;
+    std::string name;
+    Expression index;
+    HDL_range range;
+    HDL_replication replication;
 };
 
 

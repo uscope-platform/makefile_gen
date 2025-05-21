@@ -54,6 +54,7 @@ class HDL_ast_builder {
            std::ostream_iterator<std::string>(oss, "."));
             return oss.str();
         }
+
         std::string trace_prefix = "";
         nlohmann::json log;
         Depfile dep_file;

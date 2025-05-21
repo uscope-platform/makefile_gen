@@ -16,7 +16,7 @@
 #include "../../../../../includes/data_model/HDL/factories/nets/HDL_net_factory.hpp"
 
 void HDL_net_factory::new_net(const std::string &name) {
-    if(!current_net.name.empty() && !is_in_concatenation()|| current_net.is_array() || current_net.is_replication()) {
+    if(!current_net.get_name().empty() && !is_in_concatenation()|| current_net.is_array() || current_net.is_replication()) {
         nets.push_back(current_net);
     }
      current_net = HDL_net(name);
@@ -35,7 +35,7 @@ void HDL_net_factory::start_range() {
 }
 
 void HDL_net_factory::close_range() {
-    current_net.range = range_factory.get_range();
+    current_net.set_range(range_factory.get_range());
 }
 
 void HDL_net_factory::add_component(const std::string &c) {
@@ -43,14 +43,14 @@ void HDL_net_factory::add_component(const std::string &c) {
         repetition_factory.add_component(c);
     }
     if(in_array) {
-        current_net.index.emplace_back(c);
+        current_net.add_index_component(c);
     }
     if(range_factory.is_active()) {
         range_factory.add_component(c);
     }
     if(in_concatenation) {
-        if(current_net.name.empty() && !repetition_factory.is_in_repetition()) {
-            current_net.name = c;
+        if(current_net.get_name().empty() && !repetition_factory.is_in_repetition()) {
+            current_net.set_name(c);
         }
     }
 }
@@ -83,23 +83,23 @@ void HDL_net_factory::stop_array() {
 }
 
 void HDL_net_factory::set_name(const std::string &string) {
-    current_net.name = string;
+    current_net.set_name(string);
 }
 
 void HDL_net_factory::stop_repetition() {
     auto rep = repetition_factory.get_repetition();
     repetition_factory.stop_repetition();
-    current_net.replication = rep;
+    current_net.set_replication(rep);
 }
 
 void HDL_net_factory::add_replication_target(const std::string &c) {
-    current_net.replication.target.emplace_back(c);
+    current_net.add_relication_target(c);
 }
 
 void HDL_net_factory::add_index_component(const std::string &c) {
-    current_net.index.emplace_back(c);
+    current_net.add_index_component(c);
 }
 
 void HDL_net_factory::add_replication_size(const std::string &c) {
-    current_net.replication.size.emplace_back(c);
+    current_net.add_relication_size(c);
 }

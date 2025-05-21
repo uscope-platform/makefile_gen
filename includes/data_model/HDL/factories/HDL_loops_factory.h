@@ -29,7 +29,7 @@ public:
 
     void add_instance(HDL_instance &i);
     void add_expression(const Expression &e);
-    void set_identifier(HDL_parameter &id) {loop_specs.init  = id;}
+    void set_identifier(HDL_parameter &id) {loop_specs.set_init(id);}
     void start_assignment(const std::string &name);
     std::vector<HDL_instance> get_instances();
     HDL_loop_metadata get_loop_specs() {return loop_specs;}

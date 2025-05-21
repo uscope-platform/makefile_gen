@@ -151,9 +151,9 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
                     auto loop = d.get_inner_loop();
                     auto indices =solver.solve_loop(loop, res);
                     for(auto index:indices){
-                        spdlog::trace("{}**Processing iteration {} of loop with index {}**", trace_prefix, index, loop.init.get_name());
-                        auto specialized_params = specialize_parameters(index, new_params, loop.init.get_name());
-                        auto specialized_d = specialize_instance(d, index,specialized_params, loop.init.get_name());
+                        spdlog::trace("{}**Processing iteration {} of loop with index {}**", trace_prefix, index, loop.get_init().get_name());
+                        auto specialized_params = specialize_parameters(index, new_params, loop.get_init().get_name());
+                        auto specialized_d = specialize_instance(d, index,specialized_params, loop.get_init().get_name());
 
                         //auto spec_ports = specialize_ports(specialized_d, new_params);
                         //specialized_d.set_ports(spec_ports);
@@ -200,7 +200,7 @@ HDL_instance_AST HDL_ast_builder::specialize_instance(HDL_instance_AST &i, int64
         for(auto &n:nets){
             if(n.is_array()) {
                 auto new_net = n;
-                new_net.index = {Expression_component(idx)};
+                new_net.set_index({Expression_component(idx)});
                 port_content.emplace_back(new_net);
             } else {
                 port_content.push_back(n);
@@ -221,16 +221,21 @@ std::unordered_map<std::string, std::vector<HDL_net>> HDL_ast_builder::specializ
         for (auto &n : nets) {
             Parameter_processor p(parameters_values, d_store);
             p.set_trace_prefix(trace_prefix);
-            if(!n.index.empty()) {
-                n.index = specialize_expression(n.index, p);
+            if(!n.get_index().empty()) {
+                auto current_idx = n.get_index();
+                n.set_index(specialize_expression(current_idx, p));
             }
-            if(!n.range.accessor.empty()) {
-                n.range.accessor = specialize_expression(n.range.accessor, p);
-                n.range.range = specialize_expression(n.range.range, p);
+            if(!n.get_range().accessor.empty()) {
+                auto range = n.get_range();
+                range.accessor = specialize_expression(range.accessor, p);
+                range.range = specialize_expression(range.range, p);
+                n.set_range(range);
             }
-            if(!n.replication.size.empty()) {
-                n.replication.target = specialize_expression(n.replication.target, p);
-                n.replication.size = specialize_expression(n.replication.size, p);
+            if(!n.get_replication().size.empty()) {
+                auto replication = n.get_replication();
+                replication.target = specialize_expression(replication.target, p);
+                replication.size = specialize_expression(replication.size, p);
+                n.set_replication(replication);
             }
             processed_nets.push_back(n);
         }
