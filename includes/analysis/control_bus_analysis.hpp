@@ -22,16 +22,16 @@
 #include "data_model/settings_store.hpp"
 #include "data_model/Depfile.hpp"
 
-
+#include <spdlog/spdlog.h>
 
 typedef struct {
     std::shared_ptr<HDL_instance_AST> node;
     std::string interface;
     int64_t address;
-    bool parametric;
     std::string current_module_top;
     std::string current_module_prefix;
     proxy_target proxy;
+    int32_t array_index = -1;
 }analysis_context;
 
 struct bus_context{

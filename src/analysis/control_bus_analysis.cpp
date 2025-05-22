@@ -15,7 +15,7 @@
 
 #include "analysis/control_bus_analysis.hpp"
 
-#include <spdlog/spdlog.h>
+
 
 control_bus_analysis::control_bus_analysis(const Depfile &df) : specs_manager("axi_lite"){
     dfile = df;
@@ -29,7 +29,8 @@ void control_bus_analysis::analyze_bus(std::shared_ptr<HDL_instance_AST> &ast) {
     auto bus = dfile.get_bus_section()["control"];
     std::string bus_if = bus["bus_interface"];
 
-    analysis_context top = {ast, bus_if, 0, false, "", {}};
+    analysis_context top = {ast, bus_if, 0, "",
+        {}, "","",-1};
     analize_node({top});
 }
 
@@ -37,7 +38,8 @@ void control_bus_analysis::analyze_bus(std::shared_ptr<HDL_instance_AST> &ast,co
 
     std::string bus_if = intf;
 
-    analysis_context top = {ast, bus_if, 0, false, "", {}};
+    analysis_context top = {ast, bus_if, 0, "",
+        {},"","", -1};
     analize_node({top});
 }
 
@@ -90,14 +92,15 @@ std::vector<analysis_context> control_bus_analysis::process_interconnect(const a
                             }
                         }
                         if(!master.in_array) {
-                            analysis_context ctx = {dep, port_name, master.address, false,
-                                                  inst.current_module_top, inst.current_module_prefix, inst.proxy};
+                            analysis_context ctx = {dep, port_name, master.address,
+                                                  inst.current_module_top, inst.current_module_prefix, inst.proxy, inst.array_index};
                             ret_val.push_back(ctx);
                         } else {
                             auto port_index = nets[0].get_index_at(0).get_numeric_value();
                             if(port_index == master.idx) {
-                                analysis_context ctx = {dep, port_name, master.address, false,
-                                                  inst.current_module_top, inst.current_module_prefix, inst.proxy};
+                                int32_t index = master.in_array && inst.array_index == -1 ? master.idx : inst.array_index;
+                                analysis_context ctx = {dep, port_name, master.address,
+                                                  inst.current_module_top, inst.current_module_prefix, inst.proxy, index};
                                 ret_val.push_back(ctx);
                                 goto break2;
                             }
@@ -140,7 +143,7 @@ std::vector<analysis_context> control_bus_analysis::process_nested_module(const 
             for(auto &item:nets){
                 if(item.get_base_name() == inst.interface){
                     analysis_context ctx = {dep, port_name, inst.address,
-                                            inst.parametric, inst.current_module_top, inst.current_module_prefix, tgt};
+                        inst.current_module_top, inst.current_module_prefix, tgt, inst.array_index};
                     ret_stack.push_back(ctx);
                     goto breakNested;
                 }
@@ -178,7 +181,13 @@ void control_bus_analysis::process_leaf_node(const analysis_context &leaf) {
         leaf.node->get_parent()->set_leaf_module_prefix(leaf.current_module_prefix);
     }
     leaf.node->set_proxy_specs(leaf.proxy);
-    spdlog::info("Found module: {0} Type: {1} Address: 0x{2:08x}",get_current_path() + leaf.node->get_name(), leaf.node->get_type(), leaf.address);
+    if(leaf.array_index >=0) {
+            spdlog::info("Found module: {0}[{3}] Type: {1} Address: 0x{2:08x}",
+                get_current_path() + leaf.node->get_name(), leaf.node->get_type(), leaf.address, leaf.array_index);
+    } else {
+        spdlog::info("Found module: {0} Type: {1} Address: 0x{2:08x}",get_current_path() + leaf.node->get_name(), leaf.node->get_type(), leaf.address);
+    }
+
 }
 
 std::vector<bus_context>
