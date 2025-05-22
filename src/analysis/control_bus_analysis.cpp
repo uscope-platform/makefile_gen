@@ -57,6 +57,10 @@ void control_bus_analysis::analize_node(const std::vector<analysis_context> &n) 
             analize_node(process_nested_module(leaf));
         }
         current_path.erase(current_path.end()-1);
+        if(!modules_array_stack.empty()) {
+            modules_array_size = modules_array_stack.back();
+            modules_array_stack.pop_back();
+        }
     }
 }
 
@@ -68,9 +72,7 @@ std::vector<analysis_context> control_bus_analysis::process_interconnect(const a
     auto addresses = ic->get_parameter_value("SLAVE_ADDR")->get_array_value().get_1d_slice({0,0});
     auto masters_ifs = ic->get_ports()[specs_manager.get_interconnect_source_port(ic->get_type())];
 
-    //std::reverse(masters_ifs.begin(), masters_ifs.end());
-
-    auto masters = expand_bus_array(masters_ifs, ic->get_parent(), addresses);
+    auto masters = expand_bus_array(masters_ifs, addresses);
 
     for(auto & master : masters){
         auto dependencies=  inst.node->get_parent()->get_dependencies();
@@ -124,7 +126,15 @@ std::vector<analysis_context> control_bus_analysis::process_nested_module(const 
 
         }
     }
-
+    modules_array_stack.push_back(modules_array_size);
+    modules_array_size.clear();
+    for(auto &d:inst.node->get_dependencies()) {
+        if(d->get_array_quantifier() != nullptr) {
+            modules_array_size[d->get_name()] = d->get_array_quantifier()->get_numeric_value();
+        } else {
+            modules_array_size[d->get_name()] = 1;
+        }
+    }
     for(auto &dep:inst.node->get_dependencies()){
         for(auto &[port_name, nets]:dep->get_ports()){
             for(auto &item:nets){
@@ -168,42 +178,28 @@ void control_bus_analysis::process_leaf_node(const analysis_context &leaf) {
         leaf.node->get_parent()->set_leaf_module_prefix(leaf.current_module_prefix);
     }
     leaf.node->set_proxy_specs(leaf.proxy);
-    spdlog::info("Found module: {0}\nType: {1}\nAddress: 0x{2:08x}",get_current_path() + leaf.node->get_name(), leaf.node->get_type(), leaf.address);
+    spdlog::info("Found module: {0} Type: {1} Address: 0x{2:08x}",get_current_path() + leaf.node->get_name(), leaf.node->get_type(), leaf.address);
 }
 
 std::vector<bus_context>
-control_bus_analysis::expand_bus_array( const std::vector<HDL_net> &s, const std::shared_ptr<HDL_instance_AST> &parent,
-                                        const std::vector<int64_t> &a ) {
+control_bus_analysis::expand_bus_array( const std::vector<HDL_net> &masters, const std::vector<int64_t> &addresses ) {
     std::vector<bus_context> ret;
-    int address_idx = 0;
-    for(auto  &m: s){
-        for(auto &dep:parent->get_dependencies()){
-            if(m.get_full_name() == dep->get_name()){
-                auto q = dep->get_array_quantifier();
-
-                if(q != nullptr){
-                    for(int i = 0; i<q->get_numeric_value(); i++){
-                        bus_context b;
-                        b.address = a[address_idx];
-                        address_idx++;
-                        b.name = m.get_full_name();
-                        b.in_array = true;
-                        b.idx = i;
-                        ret.push_back(b);
-                    }
-
-                } else{
-                    bus_context b;
-                    b.address = a[address_idx];
-                    address_idx++;
-                    b.name = m.get_full_name();
-                    b.in_array = false;
-                    b.idx = 0;
-                    ret.push_back(b);
-                }
-            }
+    uint16_t current_bus = 0;
+    for(auto &m:masters) {
+        auto current_array_idx = 0;
+        while(current_array_idx < modules_array_size[m.get_name()]) {
+            bus_context b;
+            b.address = addresses[addresses.size()-current_bus-1];
+            b.name = m.get_name();
+            b.in_array = modules_array_size[m.get_name()]>1;
+            b.idx = current_array_idx;
+            ret.push_back(b);
+            current_array_idx++;
+            current_bus++;
         }
     }
+
+
     return ret;
 }
 

@@ -55,7 +55,6 @@ private:
     void analize_node(const std::vector<analysis_context> &c);
     std::vector<bus_context> expand_bus_array(
             const std::vector<HDL_net> &s,
-            const std::shared_ptr<HDL_instance_AST> &parent,
             const std::vector<int64_t> &a
             );
 
@@ -64,6 +63,9 @@ private:
     std::string bus_type;
     bus_specs_manager specs_manager;
     std::vector<std::string> current_path;
+
+    std::unordered_map<std::string, uint32_t> modules_array_size;
+    std::vector<std::unordered_map<std::string, uint32_t>> modules_array_stack;
 
     std::string get_current_path() {
         if(current_path.empty()) return "";

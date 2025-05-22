@@ -161,7 +161,6 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
                             ret_inst->add_child(*ll_ret);
                     }
                 } else {
-                    //TODO: Handle arrays
                     auto spec_ports = specialize_ports(d, new_params);
                     d.set_ports(spec_ports);
                     if (auto ll_ret = recursive_build_ast(d,new_params, ret_inst))
