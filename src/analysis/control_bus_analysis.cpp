@@ -99,6 +99,7 @@ std::vector<analysis_context> control_bus_analysis::process_interconnect(const a
                             auto port_index = nets[0].get_index_at(0).get_numeric_value();
                             if(port_index == master.idx) {
                                 int32_t index = master.in_array && inst.array_index == -1 ? master.idx : inst.array_index;
+                                dep->set_array_index(index);
                                 analysis_context ctx = {dep, port_name, master.address,
                                                   inst.current_module_top, inst.current_module_prefix, inst.proxy, index};
                                 ret_val.push_back(ctx);
@@ -181,6 +182,8 @@ void control_bus_analysis::process_leaf_node(const analysis_context &leaf) {
         leaf.node->get_parent()->set_leaf_module_prefix(leaf.current_module_prefix);
     }
     leaf.node->set_proxy_specs(leaf.proxy);
+
+
     if(leaf.array_index >=0) {
             spdlog::info("Found module: {0}[{3}] Type: {1} Address: 0x{2:08x}",
                 get_current_path() + leaf.node->get_name(), leaf.node->get_type(), leaf.address, leaf.array_index);

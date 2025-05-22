@@ -74,6 +74,11 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
                 periph["name"] = prefix + current_node->get_name();
                 periph["peripheral_id"] = prefix + current_node->get_name();
             }
+
+            if(current_node->get_array_index() !=-1) {
+                periph["name"] = std::string(periph["name"]) +"." + std::to_string(current_node->get_array_index());
+            }
+
             std::string type = current_node->get_type();
             if(alias_map.contains(type)){
                 type = alias_map[type];
@@ -196,12 +201,12 @@ void application_definition_generator::deduplicate_peripheral_names() {
         if(duplicate_periph_count[p["name"]] != 1){
             if(deduplication_progressive.contains(p["name"])){
                 std::string name = p["name"];
-                p["name"] = (std::string) p["name"] + "_" +std::to_string(deduplication_progressive[name]);
+                p["name"] = (std::string) p["name"] + "." +std::to_string(deduplication_progressive[name]);
                 deduplication_progressive[name]++;
                 p["peripheral_id"] = p["name"];
             } else{
                 deduplication_progressive[p["name"]] = 1;
-                p["name"] = (std::string) p["name"] + "_0";
+                p["name"] = (std::string) p["name"] + ".0";
                 p["peripheral_id"] = p["name"];
             }
         }

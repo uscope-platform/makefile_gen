@@ -39,7 +39,10 @@ public:
     HDL_instance_AST(const HDL_instance &c );
 
     std::vector<std::shared_ptr<HDL_instance_AST>> get_dependencies() {return child_instances;};
-    void add_child(const std::shared_ptr<HDL_instance_AST> &i) {child_instances.push_back(i);};
+    void add_child(const std::shared_ptr<HDL_instance_AST> &i) {
+        i->set_array_index(array_index);
+        child_instances.push_back(i);
+    }
 
     void set_parent(const std::shared_ptr<HDL_instance_AST> &p){parent = p;};
     std::shared_ptr<HDL_instance_AST> get_parent(){return parent;};
@@ -81,6 +84,9 @@ public:
 
     friend bool operator==(const HDL_instance_AST&lhs, const HDL_instance_AST&rhs);
 
+    void set_array_index(int16_t i){array_index = i;}
+    uint32_t get_array_index() const {return array_index;}
+
 private:
 
     std::vector<int64_t> bus_address;
@@ -91,6 +97,8 @@ private:
     std::vector<std::string> package_dependencies;
 
     std::vector<processor_instance> processors;
+
+    int32_t array_index = -1;
 
     std::unordered_map<std::string, std::array<std::string, 2>> if_specs;
 
