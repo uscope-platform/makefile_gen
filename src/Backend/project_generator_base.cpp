@@ -78,7 +78,7 @@ void project_generator_base::write_makefile(std::ostream &output) {
         output<< "set_property top " <<tl<<" [get_filesets sources_1]"<< std::endl;
     }
 
-    output << "set_property include_dirs {$commons_dir} [get_filesets sources_1]\n";
+    output << "set_property include_dirs $commons_dir [get_filesets sources_1]\n";
     output << "set_property SOURCE_SET sources_1 [get_filesets sim_1]\n";
 
     output << "add_files -fileset sim_1 -norecurse $sim_sources\n";
