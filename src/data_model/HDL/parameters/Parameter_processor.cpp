@@ -91,8 +91,11 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_parameter(const std:
     if(par->get_type()== HDL_parameter::function_parameter) {
         auto fs = spec.get_functions();
         auto components = par->get_expression_components();
+
         if(components.size() != 1) {
-            throw std::runtime_error("ERROR: Function initialized parameters with arguments are not supported");
+            spdlog::warn("Parameter {} is initialized by function with arguments, which is currently unsupported", par->get_name());
+            p = process_unsupported_parameter(par, components);
+            return p;
         }
         auto function = spec.get_functions().at(components[0].get_string_value());
         if(function.is_scalar()) {
@@ -149,6 +152,25 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_vector_function_para
 
 
     return_par->set_array_value(merge_function_contributions(explicit_values, loop_values));
+    return return_par;
+}
+
+std::shared_ptr<HDL_parameter> Parameter_processor::process_unsupported_parameter(
+    const std::shared_ptr<HDL_parameter> &par, const Expression &expr) {
+    spdlog::trace("{}->Processing unsupported parameter: {}", trace_prefix, par->get_name());
+
+    std::shared_ptr<HDL_parameter> return_par = par->clone();
+    std::string value = expr[0].get_string_value()+ "(";
+    for(int i = 1; i <expr.size(); i++) {
+
+        value += expr[i].get_string_value();
+        if(i<expr.size()-1) {
+            value += ",";
+        } else {
+            value += ")";
+        }
+    }
+    return_par->set_value(value);
     return return_par;
 }
 
