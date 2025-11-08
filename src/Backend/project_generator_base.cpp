@@ -107,7 +107,7 @@ void project_generator_base::set_directories(const std::string &base, const std:
     include_dirs.reserve(commons.size());
 
     for(const auto& item:commons){
-        include_dirs.push_back(base + "/"+item);
+        include_dirs.push_back(base +item);
     }
 
     data.base_dir = "set base_dir " + base;
