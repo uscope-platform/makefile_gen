@@ -109,11 +109,8 @@ void application_definition_generator::process_ast(const std::shared_ptr<HDL_ins
 
             periph["spec_id"] = spec["id"];
 
-            if(spec["parametric"]){
-                    periph["hdl_parameters"] = get_parameters(spec, current_node);
-            } else{
-                periph["hdl_parameters"] =  std::vector<std::string>();
-            }
+
+            periph["hdl_parameters"] = get_parameters(spec, current_node);
 
             peripherals.push_back(periph);
         }

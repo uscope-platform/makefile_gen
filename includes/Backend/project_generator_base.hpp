@@ -29,6 +29,19 @@
 using json = nlohmann::json;
 
 
+struct project_data {
+    std::string name;
+    std::string base_dir;
+    std::vector<std::string> commons_dir;
+    std::vector<std::string> synth_sources;
+    std::vector<std::string> sim_sources;
+    std::string synth_tl;
+    std::string board_part;
+    std::string tb_tl;
+    std::unordered_set<std::string> constraints_sources;
+    std::unordered_set<std::string> scripts;
+};
+
 class project_generator_base {
 public:
     explicit project_generator_base(const std::string& template_f);
@@ -48,7 +61,7 @@ protected:
 private:
     std::string base_dir;
     std::string template_file;
-    json data;
+    project_data data;
 };
 
 

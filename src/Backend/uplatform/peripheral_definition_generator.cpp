@@ -86,7 +86,6 @@ void peripheral_definition_generator::generate_peripheral(const HDL_Resource &re
     specs["version"] = ver;
 
     auto mod_doc = res.get_documentation();
-    specs["parametric"] = true;
 
     if(mod_doc.is_variant()){
         std::string variant = parameters.get(mod_doc.get_variant_parameter())->get_string_value();
@@ -96,7 +95,6 @@ void peripheral_definition_generator::generate_peripheral(const HDL_Resource &re
     }else if(mod_doc.is_parametric()) {
         specs["registers"] = generate_parametric_module_registers(mod_doc.get_registers(), parameters);
     } else{
-        specs["parametric"] = false;
         specs["registers"] = generate_simple_module_registers(mod_doc.get_registers());
     }
 

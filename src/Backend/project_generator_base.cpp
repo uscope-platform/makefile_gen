@@ -18,42 +18,42 @@
 project_generator_base::project_generator_base(const std::string& template_f) {
     std::string templates_dir = TEMPLATES_FOLDER;
     template_file = templates_dir + "/" + template_f;
-    data["board_part"] = "";
+    data.board_part = "";
 }
 
 void project_generator_base::write_makefile(std::ostream &output) {
 
 
-    output << "set project_name " <<  data["name"] <<std::endl;
+    output << "set project_name " <<  data.name <<std::endl;
     output << "set origin_dir \".\""<<std::endl;
-    std::string bd = data["base_dir"];
+    std::string bd = data.base_dir;
     output << bd << std::endl;
 
     output << "set commons_dir [list ";
-    for(std::string str:data["commons_dir"]){
+    for(const auto& str:data.commons_dir){
         output << "\""<< str << "\" ";
     }
     output << "]"<< std::endl;
 
     output << "set synth_sources [list ";
-    for(std::string str:data["synth_sources"]){
+    for(const auto& str:data.synth_sources){
         output << "\""<< str << "\" ";
     }
     output << "]"<< std::endl;
 
     output << "set sim_sources [list ";
-    for(std::string str:data["sim_sources"]){
+    for(const auto& str:data.sim_sources){
         output << "\""<< str << "\" ";
     }
     output << "]"<< std::endl;
 
     output << "set constraints_sources [list ";
-    for(std::string str:data["constraints_sources"]){
+    for(const auto& str:data.constraints_sources){
         output << "\""<< str << "\" ";
     }
     output << "]"<< std::endl;
 
-    std::string board_part = data["board_part"];
+    std::string board_part = data.board_part;
 
     if(!board_part.empty()){
 
@@ -67,13 +67,13 @@ void project_generator_base::write_makefile(std::ostream &output) {
 
     output<<"# Set the directory path for the new project\nset proj_dir [get_property directory [current_project]]\n";
     output << "set obj [current_project]\n";
-    for(std::string scr:data["scripts"]){
+    for(const auto& scr:data.scripts){
         output << "source " << scr << std::endl;
     }
 
     output << "add_files -norecurse $synth_sources\n";
 
-    std::string tl = data["synth_tl"];
+    std::string tl = data.synth_tl;
     if(!tl.empty()){
         output<< "set_property top " <<tl<<" [get_filesets sources_1]"<< std::endl;
     }
@@ -81,15 +81,15 @@ void project_generator_base::write_makefile(std::ostream &output) {
     output << "set_property include_dirs $commons_dir [get_filesets sources_1]\n";
     output << "set_property SOURCE_SET sources_1 [get_filesets sim_1]\n";
 
-    output << "add_files -fileset sim_1 -norecurse $sim_sources\n";
-    tl = data["tb_tl"];
-    if(!tl.empty()){
-        output<< "set_property top " <<tl<<" [get_filesets sim_1]"<< std::endl;
-    }
-
-    std::unordered_set<std::string> constr = data["constraints_sources"];
+    std::unordered_set<std::string> constr = data.constraints_sources;
     if(!constr.empty()){
         output << "add_files -fileset constrs_1 -norecurse  $constraints_sources\n";
+    }
+
+    output << "add_files -fileset sim_1 -norecurse $sim_sources\n";
+    tl = data.tb_tl;
+    if(!tl.empty()){
+        output<< "set_property top " <<tl<<" [get_filesets sim_1]"<< std::endl;
     }
 
     output << "update_compile_order\n";
@@ -98,7 +98,7 @@ void project_generator_base::write_makefile(std::ostream &output) {
 
 
 void project_generator_base::set_project_name(const std::string &name) {
-    data["name"] = name;
+    data.name = name;
 }
 
 void project_generator_base::set_directories(const std::string &base, const std::vector<std::string> &commons) {
@@ -110,43 +110,43 @@ void project_generator_base::set_directories(const std::string &base, const std:
         include_dirs.push_back(base + "/"+item);
     }
 
-    data["base_dir"] = "set base_dir " + base;
-    data["commons_dir"] = include_dirs;
+    data.base_dir = "set base_dir " + base;
+    data.commons_dir = include_dirs;
 }
 
 void project_generator_base::set_synth_sources(const std::set<std::string> &paths) {
-    data["synth_sources"] = this->process_sources_set(paths);
+    data.synth_sources = this->process_sources_set(paths);
 }
 
 void project_generator_base::set_sim_sources(const std::set<std::string> &paths) {
-    std::vector<std::string> synth_sources = data["synth_sources"];
+    std::vector<std::string> synth_sources = data.synth_sources;
     std::vector<std::string> raw_sim_sources = this->process_sources_set(paths);
     std::vector<std::string> diff;
 
     std::set_difference(raw_sim_sources.begin(), raw_sim_sources.end(), synth_sources.begin(), synth_sources.end(),
                         std::inserter(diff, diff.begin()));
 
-    data["sim_sources"] = diff;
+    data.sim_sources = diff;
 }
 
 void project_generator_base::set_synth_tl(const std::string &tl) {
-    data["synth_tl"] = tl;
+    data.synth_tl= tl;
 }
 void project_generator_base::set_board_part(const std::string &bp) {
-    data["board_part"] = bp;
+    data.board_part = bp;
 }
 
 void project_generator_base::set_sim_tl(const std::string &tl) {
-    data["tb_tl"] = tl;
+    data.tb_tl = tl;
 }
 
 
 void project_generator_base::set_constraint_sources(const std::unordered_set<std::string> &paths) {
-    data["constraints_sources"] = paths;
+    data.constraints_sources = paths;
 }
 
 void project_generator_base::set_script_sources(const std::unordered_set<std::string> &paths) {
-    data["scripts"] = paths;
+    data.scripts = paths;
 }
 
 std::vector<std::string> project_generator_base::process_sources_set(const std::set<std::string> &paths) {
