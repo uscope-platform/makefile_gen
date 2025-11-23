@@ -22,11 +22,12 @@
 #include <unordered_set>
 
 struct script_source {
+    std::string name;
     std::string path;
     std::map<std::string, std::string> variables;
 
     bool operator==(const script_source& other) const {
-        return path == other.path && variables == other.variables;
+        return path == other.path && variables == other.variables && name == other.name;
     }
 };
 

@@ -15,6 +15,8 @@
 
 #include "data_model/Depfile.hpp"
 
+#include <sys/stat.h>
+
 Depfile::Depfile(const std::string& filename) {
 // read a JSON file
     std::ifstream dfstream(filename);
@@ -63,7 +65,11 @@ std::vector<Script> Depfile::get_scripts() {
     std::vector<Script> retval;
     for(auto item : content["scripts"]){
         Script scr(item["name"], item["type"]);
-        scr.set_arguments( item["arguments"]);
+        auto args =  item["arguments"];
+        if(args.is_array() && args.size() > 0) {
+            if(args[0].is_string()) scr.set_arguments(static_cast<std::vector<std::string>>( item["arguments"]));
+            else scr.set_arguments(static_cast<std::vector<nlohmann::json>>(item["arguments"]));
+        }
 
         if(item.contains("product_include")) {
             scr.set_product(item["product_include"], item["product_type"]);

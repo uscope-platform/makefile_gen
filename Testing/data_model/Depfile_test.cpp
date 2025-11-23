@@ -108,7 +108,24 @@ TEST_F( DepfileTest , Depfile_scripts) {
     correct_answer.emplace_back("test_script.tcl", "tcl");
     correct_answer.emplace_back("test_script.py", "py");
     correct_answer.emplace_back("test_script.py", "py");
-    correct_answer[1].set_arguments({"B"});
-    correct_answer[2].set_arguments({"A"});
-    ASSERT_THAT(file->get_scripts(), testing::ContainerEq(correct_answer));
+    correct_answer.emplace_back("test_script_args.tcl", "tcl");
+
+    auto arg_s = std::vector<std::string>({"B"});
+    correct_answer[1].set_arguments(arg_s);
+
+    arg_s =std::vector<std::string>({"A"});
+    correct_answer[2].set_arguments(arg_s);
+
+    nlohmann::json p1;
+    p1["name"] = "A";
+    p1["value"] ="1";
+    nlohmann::json p2;
+    p2["name"] = "B";
+    p2["value"] ="2";
+
+    auto arguments = std::vector({p1, p2});
+    correct_answer[3].set_arguments(arguments);
+
+    auto res = file->get_scripts();
+    ASSERT_THAT(res, testing::ContainerEq(correct_answer));
 }

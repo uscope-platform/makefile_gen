@@ -21,7 +21,10 @@
 #include <sstream>
 #include <utility>
 #include <cereal/types/vector.hpp>
+#include <cereal/types/utility.hpp>
 #include <cereal/types/string.hpp>
+#include <nlohmann/json.hpp>
+#include <nlohmann/detail/meta/std_fs.hpp>
 
 #define SCRIPT_TCL 0
 #define SCRIPT_PYTHON 1
@@ -49,9 +52,11 @@ public:
     [[nodiscard]] bool get_product_include() const;
     [[nodiscard]] std::string get_product_type() const;
     void set_arguments(std::vector<std::string> args);
+    void set_arguments(std::vector<nlohmann::json> args);
+    void set_arguments(std::vector<std::pair<std::string,std::string>> args);
     void set_path(std::string p);
     std::string get_path();
-    std::vector<std::string> get_arguments();
+    std::vector<std::pair<std::string,std::string>> get_arguments();
 
     template<class Archive>
     void serialize( Archive & ar ) {
@@ -65,7 +70,7 @@ private:
     script_type_t type;
     std::string product_type;
     bool product_include;
-    std::vector<std::string> arguments;
+    std::vector<std::pair<std::string,std::string>> arguments;
 };
 
 

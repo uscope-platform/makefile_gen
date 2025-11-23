@@ -68,10 +68,14 @@ void project_generator_base::write_makefile(std::ostream &output) {
     output<<"# Set the directory path for the new project\nset proj_dir [get_property directory [current_project]]\n";
     output << "set obj [current_project]\n";
     for(const auto& scr:data.scripts){
-        for(const auto &[var_name, var_value]: scr.variables) {
-            output << "setenv "<<var_name<<" "<<var_value<<std::endl;
-        }
         output << "source " << scr.path << std::endl;
+        if(!scr.name.empty()) {
+            output << scr.name;
+            for(const auto &val: scr.variables | std::views::values) {
+                output << " " << val ;
+            }
+            output << std::endl;
+        }
     }
 
     output << "add_files -norecurse $synth_sources\n";

@@ -53,14 +53,27 @@ TEST( Script_test , ser_des_script) {
 
 }
 
-TEST( Script_test , arguments) {
+TEST( Script_test , string_arguments) {
     Script test_script("test", "tcl");
-    test_script.set_arguments({"test_arg_1", "test_arg_2"});
-    std::vector<std::string> args = test_script.get_arguments();
-    std::vector<std::string> results = {"test_arg_1", "test_arg_2"};
+    std::vector<std::string> arg = {"test_arg_1", "test_arg_2"};
+    test_script.set_arguments(arg);
+    auto args = test_script.get_arguments();
+    std::vector<std::pair<std::string, std::string>> results = {{"test_arg_1", ""}, {"test_arg_2",""}};
 
     ASSERT_THAT(args, testing::ContainerEq(results));
 }
+
+TEST( Script_test , variables_arguments) {
+
+    Script test_script("test", "tcl");
+    std::vector<nlohmann::json> arg = {{{"name", "A"}, {"value", "1"}}, {{"name", "B"}, {"value", "2"}}};
+    test_script.set_arguments(arg);
+    auto args = test_script.get_arguments();
+    std::vector<std::pair<std::string, std::string>> results = {{"A", "1"}, {"B","2"}};
+
+    ASSERT_THAT(args, testing::ContainerEq(results));
+}
+
 
 
 TEST( Script_test , get_type) {

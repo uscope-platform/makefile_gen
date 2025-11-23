@@ -28,6 +28,7 @@ std::vector<script_source> Auxiliary_resolver::get_tcl_script_paths(const std::v
         Script scr = d_store->get_script(script_name);
         if(scr.get_type() == tcl_script) {
             script_source s;
+            s.name = scr.get_name();
             s.path = scr.get_path();
             s.variables = {};
             ret_val.emplace_back(s);

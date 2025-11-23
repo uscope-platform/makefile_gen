@@ -27,6 +27,14 @@
             "name":"test_script.py",
             "type": "py",
             "arguments":["A"]
+        },
+        {
+            "name":"test_script_args.tcl",
+            "type": "tcl",
+            "arguments":[
+                {"name":"A", "value":"1"},
+                {"name":"B", "value":"2"}
+            ]
         }
     ],
     "excluded_modules":[

@@ -19,20 +19,20 @@ void python_script_runner::run_python_scripts(std::vector<Script> scripts) {
     for(auto& item: scripts){
         std::filesystem::path p(item.get_path());
         std::string base_path = p.parent_path();
-        std::vector<std::string> args =  item.get_arguments();
+        auto args =  item.get_arguments();
         std::vector<std::string> arg_v;
         arg_v.emplace_back("python3");
         arg_v.emplace_back(p);
         if(!args.empty()) {
-            std::string target = base_path + "/" + args[0];
+            std::string target = base_path + "/" + args[0].first;
             arg_v.emplace_back(target);
             for (int i = 1; i < args.size(); ++i) {
-                arg_v.push_back(args[i]);
+                arg_v.push_back(args[i].first);
             }
         }
         spawn_process(arg_v, false, true);
         if(!args.empty()) {
-            std::string target = base_path + "/" + args[0];
+            std::string target = base_path + "/" + args[0].first;
             if(item.get_product_include()){
                 std::string tmp_type = item.get_product_type();
                 if(tmp_type == "tcl"){

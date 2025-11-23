@@ -43,13 +43,26 @@ script_type_t Script::get_type() {
     return type;
 }
 
-std::vector<std::string> Script::get_arguments() {
+std::vector<std::pair<std::string,std::string>> Script::get_arguments() {
     return arguments;
 }
 
 void Script::set_arguments(std::vector<std::string> args) {
+    for(auto &item: args) {
+        arguments.push_back({item, ""});
+    }
+}
+
+void Script::set_arguments(std::vector<nlohmann::json> args) {
+    for(auto &item: args) {
+        arguments.push_back({item["name"], item["value"]});
+    }
+}
+
+void Script::set_arguments(std::vector<std::pair<std::string, std::string>> args) {
     arguments = std::move(args);
 }
+
 
 void Script::set_path(std::string p) {
     path = std::move(p);

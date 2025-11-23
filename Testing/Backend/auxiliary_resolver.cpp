@@ -47,13 +47,14 @@ protected:
 TEST_F(aux_resolver, get_py_obj){
     Auxiliary_resolver res(d_store);
     Script s1("python_test", "py");
-    s1.set_arguments({"arg1", "arg2", "arg3"});
+    std::vector<std::string> arg ={"arg1", "arg2", "arg3"};
+    s1.set_arguments(arg);
     s1.set_product(true, "test.tcl");
     auto result = res.get_python_objects({s1});
 
     Script s1_check("python_test", "py");
     s1_check.set_path("/tests/script.py");
-    s1_check.set_arguments({"arg1", "arg2", "arg3"});
+    s1_check.set_arguments(arg);
     s1_check.set_product(true, "test.tcl");
     ASSERT_EQ(result[0], s1_check);
 }
@@ -63,7 +64,8 @@ TEST_F(aux_resolver, get_py_obj){
 TEST_F(aux_resolver, get_python_path){
     Auxiliary_resolver res(d_store);
     Script s1("python_test", "py");
-    s1.set_arguments({"arg1", "arg2", "arg3"});
+    std::vector<std::string> arg ={"arg1", "arg2", "arg3"};
+    s1.set_arguments(arg);
     s1.set_product(true, "test.tcl");
     auto result = res.get_python_script_paths({s1});
     std::unordered_set<std::string> check = {"/tests/script.py"};
@@ -75,12 +77,13 @@ TEST_F(aux_resolver, get_python_path){
 TEST_F(aux_resolver, get_tcl_script){
     Auxiliary_resolver res(d_store);
     Script s1("tcl_test", "tcl");
-    s1.set_arguments({"arg1", "arg2", "arg3"});
+    std::vector<std::string> arg ={"arg1", "arg2", "arg3"};
+    s1.set_arguments(arg);
     auto result = res.get_tcl_objects({s1});
 
     Script s2_check("tcl_test", "tcl");
     s2_check.set_path("/tests/tcl_test.tcl");
-    s2_check.set_arguments({"arg1", "arg2", "arg3"});
+    s2_check.set_arguments(arg);
     ASSERT_EQ(result[0], s2_check);
 }
 
@@ -88,9 +91,10 @@ TEST_F(aux_resolver, get_tcl_script){
 TEST_F(aux_resolver, get_tcl_path){
     Auxiliary_resolver res(d_store);
     Script s1("tcl_test", "tcl");
-    s1.set_arguments({"arg1", "arg2", "arg3"});
+    std::vector<std::string> arg ={"arg1", "arg2", "arg3"};
+    s1.set_arguments(arg);
     auto result = res.get_tcl_script_paths({s1});
-    std::vector<script_source> check = {{"/tests/tcl_test.tcl",{}}};
+    std::vector<script_source> check = {{"tcl_test","/tests/tcl_test.tcl",{}}};
     ASSERT_EQ(result, check);
 }
 

@@ -22,7 +22,8 @@ TEST(python_script_runner, run_script){
 
     Script s("python_test", "py");
     s.set_path("check_files/python_test.py");
-    s.set_arguments({"test_file.tcl"});
+    std::vector<std::string> arg = {"test_file.tcl"};
+    s.set_arguments(arg);
     s.set_product(true, "tcl");
     std::vector<Script> script_vect = {s};
 
