@@ -22,12 +22,13 @@
 #include <regex>
 
 #include "data_model/data_store.hpp"
+#include "Backend/backend_types.hpp"
 
 
 class Auxiliary_resolver {
 public:
     explicit Auxiliary_resolver(std::shared_ptr<data_store> store);
-    std::unordered_set<std::string> get_tcl_script_paths(const std::vector<Script> &names);
+    std::vector<script_source> get_tcl_script_paths(const std::vector<Script> &names);
     std::unordered_set<std::string> get_python_script_paths(const std::vector<Script> &names);
     std::vector<Script> get_tcl_objects(const std::vector<Script> &names);
     std::vector<Script> get_python_objects(const std::vector<Script> &names);

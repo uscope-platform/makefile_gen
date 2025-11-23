@@ -90,7 +90,7 @@ TEST_F(aux_resolver, get_tcl_path){
     Script s1("tcl_test", "tcl");
     s1.set_arguments({"arg1", "arg2", "arg3"});
     auto result = res.get_tcl_script_paths({s1});
-    std::unordered_set<std::string> check = {"/tests/tcl_test.tcl"};
+    std::vector<script_source> check = {{"/tests/tcl_test.tcl",{}}};
     ASSERT_EQ(result, check);
 }
 

@@ -134,10 +134,10 @@ int main(int argc, char *argv[]){
 
     python_script_runner py_runner;
     py_runner.run_python_scripts(aux_resolver.get_python_objects(dep.get_scripts()));
-    std::unordered_set<std::string> script_deps = aux_resolver.get_tcl_script_paths(dep.get_scripts());
+    auto script_deps = aux_resolver.get_tcl_script_paths(dep.get_scripts());
 
-    std::set<std::string> additional_script_deps = py_runner.get_script_dependencies();
-    script_deps.insert(additional_script_deps.begin(), additional_script_deps.end());
+    auto additional_script_deps = py_runner.get_script_dependencies();
+    script_deps.insert(script_deps.end(), additional_script_deps.begin(), additional_script_deps.end());
 
     std::set<std::string> additional_constr_deps = py_runner.get_constraints_dependencies();
     std::unordered_set<std::string> constr_deps = aux_resolver.get_constraints(dep.get_constraints());

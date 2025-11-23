@@ -25,22 +25,10 @@
 #include <regex>
 #include <nlohmann/json.hpp>
 
+#include "Backend/backend_types.hpp"
 
 using json = nlohmann::json;
 
-
-struct project_data {
-    std::string name;
-    std::string base_dir;
-    std::vector<std::string> commons_dir;
-    std::vector<std::string> synth_sources;
-    std::vector<std::string> sim_sources;
-    std::string synth_tl;
-    std::string board_part;
-    std::string tb_tl;
-    std::unordered_set<std::string> constraints_sources;
-    std::unordered_set<std::string> scripts;
-};
 
 class project_generator_base {
 public:
@@ -54,7 +42,7 @@ public:
     void set_sim_tl(const std::string& tl);
     void set_board_part(const std::string & bp);
     void set_constraint_sources(const std::unordered_set<std::string>& paths);
-    void set_script_sources(const std::unordered_set<std::string>& paths);
+    void set_script_sources(const std::vector<script_source>& paths);
 
 protected:
     std::vector<std::string> process_sources_set(const std::set<std::string>& paths);

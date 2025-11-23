@@ -68,7 +68,10 @@ void project_generator_base::write_makefile(std::ostream &output) {
     output<<"# Set the directory path for the new project\nset proj_dir [get_property directory [current_project]]\n";
     output << "set obj [current_project]\n";
     for(const auto& scr:data.scripts){
-        output << "source " << scr << std::endl;
+        for(const auto &[var_name, var_value]: scr.variables) {
+            output << "setenv "<<var_name<<" "<<var_value<<std::endl;
+        }
+        output << "source " << scr.path << std::endl;
     }
 
     output << "add_files -norecurse $synth_sources\n";
@@ -77,6 +80,7 @@ void project_generator_base::write_makefile(std::ostream &output) {
     if(!tl.empty()){
         output<< "set_property top " <<tl<<" [get_filesets sources_1]"<< std::endl;
     }
+
 
     output << "set_property include_dirs $commons_dir [get_filesets sources_1]\n";
     output << "set_property SOURCE_SET sources_1 [get_filesets sim_1]\n";
@@ -145,7 +149,7 @@ void project_generator_base::set_constraint_sources(const std::unordered_set<std
     data.constraints_sources = paths;
 }
 
-void project_generator_base::set_script_sources(const std::unordered_set<std::string> &paths) {
+void project_generator_base::set_script_sources(const std::vector<script_source> &paths) {
     data.scripts = paths;
 }
 

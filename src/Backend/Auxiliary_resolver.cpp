@@ -21,8 +21,20 @@ Auxiliary_resolver::Auxiliary_resolver(std::shared_ptr<data_store> store) {
     d_store = std::move(store);
 }
 
-std::unordered_set<std::string> Auxiliary_resolver::get_tcl_script_paths(const std::vector<Script> &names) {
-    return this->get_script_paths_by_type(names, tcl_script);
+std::vector<script_source> Auxiliary_resolver::get_tcl_script_paths(const std::vector<Script> &names) {
+    std::vector<script_source> ret_val;
+    for(auto item : names){
+        std::string script_name = std::regex_replace(item.get_name(), std::regex("\\.tcl|\\.py"), "");
+        Script scr = d_store->get_script(script_name);
+        if(scr.get_type() == tcl_script) {
+            script_source s;
+            s.path = scr.get_path();
+            s.variables = {};
+            ret_val.emplace_back(s);
+        }
+
+    }
+    return ret_val;
 }
 
 std::unordered_set<std::string> Auxiliary_resolver::get_python_script_paths(const std::vector<Script> &names) {

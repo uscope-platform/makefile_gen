@@ -36,7 +36,8 @@ void python_script_runner::run_python_scripts(std::vector<Script> scripts) {
             if(item.get_product_include()){
                 std::string tmp_type = item.get_product_type();
                 if(tmp_type == "tcl"){
-                    script_dependencies.insert(target);
+                    script_source s = {target, {}};
+                    script_dependencies.push_back(s);
                 } else if(tmp_type == "hdl"){
                     hdl_dependencies.insert(target);
                 } else if(tmp_type == "xdc"){
@@ -48,7 +49,7 @@ void python_script_runner::run_python_scripts(std::vector<Script> scripts) {
     }
 }
 
-std::set<std::string> python_script_runner::get_script_dependencies() {
+std::vector<script_source> python_script_runner::get_script_dependencies() {
     return script_dependencies;
 }
 

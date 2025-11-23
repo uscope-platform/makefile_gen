@@ -25,7 +25,7 @@ TEST(xilinx_project_gen, gen){
     gen.set_directories("/test/dir", {"include"});
     gen.set_synth_sources({"/test/synth/source.sv"});
     gen.set_sim_sources({"/test/sim/source.sv"});
-    gen.set_script_sources({"/test/script/source.sv"});
+    gen.set_script_sources({{"/test/script/source.sv", {}}});
     gen.set_constraint_sources({"/test/constr/source.sv"});
     gen.set_sim_tl("sim_tl");
     gen.set_synth_tl("synth_tl");
