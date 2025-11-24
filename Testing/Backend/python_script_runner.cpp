@@ -34,7 +34,7 @@ TEST(python_script_runner, run_script){
     std::filesystem::remove("check_files/test_file.tcl");
     auto tcl_dep = runner.get_script_dependencies();
     std::vector<script_source> check_deps;
-    check_deps.push_back({"check_files/test_file.tcl", {}});
+    check_deps.push_back({"gen_script", "check_files/test_file.tcl", false, {}});
 
     ASSERT_EQ(tcl_dep, check_deps);
 }

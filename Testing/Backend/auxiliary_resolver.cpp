@@ -94,7 +94,7 @@ TEST_F(aux_resolver, get_tcl_path){
     std::vector<std::string> arg ={"arg1", "arg2", "arg3"};
     s1.set_arguments(arg);
     auto result = res.get_tcl_script_paths({s1});
-    std::vector<script_source> check = {{"tcl_test","/tests/tcl_test.tcl",{}}};
+    std::vector<script_source> check = {{"tcl_test","/tests/tcl_test.tcl",false,{{"arg1", ""}, {"arg2", ""}, {"arg3", ""}}}};
     ASSERT_EQ(result, check);
 }
 
