@@ -30,7 +30,8 @@ std::vector<script_source> Auxiliary_resolver::get_tcl_script_paths(const std::v
             script_source s;
             s.name = scr.get_name();
             s.path = scr.get_path();
-            s.variables = {};
+            s.function_mode = item.get_function_mode();
+            s.variables = item.get_arguments_map();
             ret_val.emplace_back(s);
         }
 

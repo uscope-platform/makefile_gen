@@ -48,6 +48,8 @@ public:
     Script(std::string n, const std::string& t);
     std::string get_name();
     script_type_t get_type();
+    void set_function_mode(const bool f) {function_mode = f;}
+    bool get_function_mode() const {return function_mode;}
     void set_product(bool gen, std::string t);
     [[nodiscard]] bool get_product_include() const;
     [[nodiscard]] std::string get_product_type() const;
@@ -56,17 +58,19 @@ public:
     void set_arguments(std::vector<std::pair<std::string,std::string>> args);
     void set_path(std::string p);
     std::string get_path();
+    std::map<std::string,std::string> get_arguments_map();
     std::vector<std::pair<std::string,std::string>> get_arguments();
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, path, type, product_type, product_include,arguments);
+        ar(name, path, type, product_type, product_include,arguments, function_mode);
     }
 
     friend bool operator==(const Script&lhs, const Script&rhs);
 private:
     std::string name;
     std::string path;
+    bool function_mode = false;
     script_type_t type;
     std::string product_type;
     bool product_include;

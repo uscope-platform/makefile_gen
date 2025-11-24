@@ -23,7 +23,6 @@ project_generator_base::project_generator_base(const std::string& template_f) {
 
 void project_generator_base::write_makefile(std::ostream &output) {
 
-
     output << "set project_name " <<  data.name <<std::endl;
     output << "set origin_dir \".\""<<std::endl;
     std::string bd = data.base_dir;
@@ -67,15 +66,24 @@ void project_generator_base::write_makefile(std::ostream &output) {
 
     output<<"# Set the directory path for the new project\nset proj_dir [get_property directory [current_project]]\n";
     output << "set obj [current_project]\n";
+
+    std::set<std::string> sourced_scripts;
+
     for(const auto& scr:data.scripts){
-        output << "source " << scr.path << std::endl;
-        if(!scr.name.empty()) {
-            output << scr.name;
-            for(const auto &val: scr.variables | std::views::values) {
-                output << " " << val ;
+        if(scr.function_mode) {
+            if(!sourced_scripts.contains(scr.path)) output << "source " << scr.path << std::endl;
+
+            if(!scr.name.empty()) {
+                output << scr.name;
+                for(const auto &val: scr.variables | std::views::values) {
+                    output << " " << val ;
+                }
+                output << std::endl;
             }
-            output << std::endl;
+        } else {
+            if(!sourced_scripts.contains(scr.path)) output << "source " << scr.path << std::endl;
         }
+        sourced_scripts.insert(scr.path);
     }
 
     output << "add_files -norecurse $synth_sources\n";

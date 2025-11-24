@@ -24,10 +24,11 @@
 struct script_source {
     std::string name;
     std::string path;
+    bool function_mode = false;
     std::map<std::string, std::string> variables;
 
     bool operator==(const script_source& other) const {
-        return path == other.path && variables == other.variables && name == other.name;
+        return path == other.path && variables == other.variables && name == other.name && function_mode == other.function_mode;
     }
 };
 

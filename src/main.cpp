@@ -132,9 +132,12 @@ int main(int argc, char *argv[]){
     // Resolve auxiliary files (scripts and constraints)
     Auxiliary_resolver aux_resolver(d_store);
 
+
+    auto scripts = dep.get_scripts();
+
     python_script_runner py_runner;
-    py_runner.run_python_scripts(aux_resolver.get_python_objects(dep.get_scripts()));
-    auto script_deps = aux_resolver.get_tcl_script_paths(dep.get_scripts());
+    py_runner.run_python_scripts(aux_resolver.get_python_objects(scripts));
+    auto script_deps = aux_resolver.get_tcl_script_paths(scripts);
 
     auto additional_script_deps = py_runner.get_script_dependencies();
     script_deps.insert(script_deps.end(), additional_script_deps.begin(), additional_script_deps.end());

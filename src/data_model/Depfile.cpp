@@ -69,6 +69,11 @@ std::vector<Script> Depfile::get_scripts() {
         if(args.is_array() && args.size() > 0) {
             if(args[0].is_string()) scr.set_arguments(static_cast<std::vector<std::string>>( item["arguments"]));
             else scr.set_arguments(static_cast<std::vector<nlohmann::json>>(item["arguments"]));
+            if(item.contains("function_mode") && item["function_mode"]) {
+                scr.set_function_mode(true);
+            } else {
+                scr.set_function_mode(false);
+            }
         }
 
         if(item.contains("product_include")) {

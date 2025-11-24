@@ -25,6 +25,7 @@ Script::Script(const Script &S) {
     arguments = S.arguments;
     product_type = S.product_type;
     product_include = S.product_include;
+    function_mode = S.function_mode;
 }
 
 Script::Script(std::string n, const std::string& t) {
@@ -72,11 +73,20 @@ std::string Script::get_path() {
     return path;
 }
 
+std::map<std::string, std::string> Script::get_arguments_map() {
+    std::map<std::string, std::string> ret_val;
+    for(auto &item: arguments){
+        ret_val[item.first] = item.second;
+    }
+    return ret_val;
+}
+
 bool operator==(const Script &lhs, const Script &rhs) {
 
     bool ret = true;
     ret &= lhs.name == rhs.name;
     ret &= lhs.path == rhs.path;
+    ret &= lhs.function_mode == rhs.function_mode;
     ret &= lhs.type == rhs.type;
     ret &= lhs.arguments == rhs.arguments;
     ret &= lhs.product_type == rhs.product_type;

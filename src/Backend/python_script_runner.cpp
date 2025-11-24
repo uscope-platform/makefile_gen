@@ -36,7 +36,7 @@ void python_script_runner::run_python_scripts(std::vector<Script> scripts) {
             if(item.get_product_include()){
                 std::string tmp_type = item.get_product_type();
                 if(tmp_type == "tcl"){
-                    script_source s = {target, {}};
+                    script_source s = {"gen_script", target, {}};
                     script_dependencies.push_back(s);
                 } else if(tmp_type == "hdl"){
                     hdl_dependencies.insert(target);
