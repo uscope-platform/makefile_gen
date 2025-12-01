@@ -15,10 +15,12 @@
 
 #include "data_model/data_store.hpp"
 
+#include <utility>
+
 
 data_store::data_store(bool e, std::string cache_dir_path) {
     ephemeral = e;
-    store_path = cache_dir_path;
+    store_path = std::move(cache_dir_path);
     std::filesystem::create_directory(store_path);
 
     unified_cache = store_path + "/unified_cache";

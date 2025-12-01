@@ -66,5 +66,9 @@ void settings_store::remove_setting(const std::string &setting) {
     settings_backend.erase(setting);
 }
 
+void settings_store::flush() {
+    store_settings_backend();
+}
+
 
 

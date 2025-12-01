@@ -35,6 +35,7 @@ int main(int argc, char *argv[]){
         bool measure_runtime = true;
         bool no_cache = false;
         bool trace = false;
+        bool clear_cache = false;
         bool refresh_cache = false;
         std::string cache_dir = std::string(std::getenv("HOME")) + "/.makefilegen_store";
         bool wait_profiler = false;
@@ -58,6 +59,7 @@ int main(int argc, char *argv[]){
     app.add_flag("--measure-runtime",opts.measure_runtime, "Measure the runtime of the current program invocation");
     app.add_flag("--no-cache",opts.no_cache, "Run the program without touching the repository cache");
     app.add_flag("--refresh-cache",opts.refresh_cache, "Refresh the repository cache and exit");
+    app.add_flag("--clear-cache",opts.clear_cache, "Clear HDL cache");
     app.add_flag("--wait_profiler", opts.wait_profiler, "Wait for the profiler to be ready before executing");
     app.add_flag("--trace", opts.trace, "Enable extended internal state tracing");
     app.add_option("--cache_dir", opts.cache_dir, "Specify a non-default repository cache file");
@@ -84,6 +86,13 @@ int main(int argc, char *argv[]){
         spdlog::info(s_store->get_setting(opts.get_setting));
     }
 
+    if(opts.clear_cache) {
+        data_store::clear_cache(opts.cache_dir);
+        s_store->remove_setting("cache_dump");
+        s_store->flush();
+        exit(0);
+    }
+
     if(!opts.set_setting.empty()){
         std::string line;
         std::istringstream ss(opts.set_setting);
@@ -108,15 +117,15 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    if(opts.refresh_cache) {
-        exit(0);
-    }
-
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(opts.no_cache, opts.cache_dir);
 
 
     // analyze repository content and update cache
     Repository_walker walker(s_store, d_store, opts.no_cache);
+
+    if(opts.refresh_cache) {
+        exit(0);
+    }
 
     d_store->lock_resources();
 

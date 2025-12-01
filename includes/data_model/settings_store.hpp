@@ -30,11 +30,13 @@ public:
     std::string get_setting(const std::string& setting);
     void set_setting(const std::string& name, const std::string& value);
     void remove_setting(const std::string& setting);
+    void flush();
     ~settings_store();
 private:
 
     void load_settings_backend();
     void store_settings_backend();
+
     std::map<std::string, std::string> settings_backend;
 
     bool ephemeral;
