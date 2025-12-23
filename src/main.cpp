@@ -184,7 +184,6 @@ int main(int argc, char *argv[]){
 
     proxy_bus_analysis proxy_analyzer(s_store, d_store, dep);
     proxy_analyzer.analyze(synth_ast);
-
         //Generate makefile
     if(opts.generate_xilinx){
         xilinx_project_generator generator;
@@ -204,7 +203,7 @@ int main(int argc, char *argv[]){
         generator.write_makefile(makefile);
 
         Vivado_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
-        manager.create_project("makefile.tcl",  ~opts.no_open);
+        manager.create_project("makefile.tcl",  !opts.no_open);
     }
 
     if(opts.generate_lattice){
@@ -222,7 +221,7 @@ int main(int argc, char *argv[]){
         generator.write_makefile(makefile);
 
         Radiant_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
-        manager.create_project("makefile.tcl",  ~opts.no_open);
+        manager.create_project("makefile.tcl",  !opts.no_open);
     }
 
     peripheral_definition_generator periph_def_gen(d_store, synth_ast);
