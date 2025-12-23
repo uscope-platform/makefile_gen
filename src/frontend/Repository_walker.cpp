@@ -110,7 +110,10 @@ void Repository_walker::collect_analysis_results() {
 /// \param dir Target directory
 /// \return true if the directory needs to be skipped
 bool Repository_walker::is_excluded_directory(const std::filesystem::path& dir) {
-    return excluded_directories.find(dir.filename()) != excluded_directories.end();
+    for (const auto &excl_dir:excluded_directories) {
+        if (std::filesystem::equivalent(dir, excl_dir)) return true;
+    }
+    return false;
 }
 
 /// Check if the target directory needs to be skipped on the base of its content

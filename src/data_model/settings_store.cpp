@@ -33,6 +33,18 @@ std::string settings_store::get_setting(const std::string& setting) {
     return settings_backend[setting];
 }
 
+std::set<std::string> settings_store::get_setting_list(const std::string &setting) const{
+    std::set<std::string> ret_val;
+    if (!settings_backend.contains(setting)) return ret_val;
+    std::stringstream ss(settings_backend.at(setting));
+    std::string item;
+
+    while (std::getline(ss, item, ':')) {
+        if (!item.empty()) ret_val.insert(item);
+    }
+    return ret_val;
+}
+
 void settings_store::load_settings_backend() {
     std::ifstream setting_stream(settings_file);
     std::string line;

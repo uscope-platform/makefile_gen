@@ -122,7 +122,7 @@ int main(int argc, char *argv[]){
 
 
     // analyze repository content and update cache
-    Repository_walker walker(s_store, d_store, opts.no_cache);
+    Repository_walker walker(s_store, d_store, opts.no_cache, s_store->get_setting_list("excluded_paths"));
 
     if(opts.refresh_cache) {
         exit(0);
