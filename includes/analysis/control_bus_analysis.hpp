@@ -24,7 +24,7 @@
 
 #include <spdlog/spdlog.h>
 
-typedef struct {
+struct analysis_context{
     std::shared_ptr<HDL_instance_AST> node;
     std::string interface;
     int64_t address;
@@ -32,7 +32,7 @@ typedef struct {
     std::string current_module_prefix;
     proxy_target proxy;
     int32_t array_index = -1;
-}analysis_context;
+};
 
 struct bus_context{
     std::string name;

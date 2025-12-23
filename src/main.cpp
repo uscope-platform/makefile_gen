@@ -35,6 +35,7 @@ int main(int argc, char *argv[]){
         bool measure_runtime = true;
         bool no_cache = false;
         bool trace = false;
+        bool no_open = false;
         bool clear_cache = false;
         bool refresh_cache = false;
         std::string cache_dir = std::string(std::getenv("HOME")) + "/.makefilegen_store";
@@ -63,7 +64,7 @@ int main(int argc, char *argv[]){
     app.add_flag("--wait_profiler", opts.wait_profiler, "Wait for the profiler to be ready before executing");
     app.add_flag("--trace", opts.trace, "Enable extended internal state tracing");
     app.add_option("--cache_dir", opts.cache_dir, "Specify a non-default repository cache file");
-
+    app.add_option("--no_open", opts.no_open, "Do not open the generated project");
     CLI11_PARSE(app, argc, argv);
 
     if(opts.trace) {
@@ -203,7 +204,7 @@ int main(int argc, char *argv[]){
         generator.write_makefile(makefile);
 
         Vivado_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
-        manager.create_project("makefile.tcl",  true);
+        manager.create_project("makefile.tcl",  ~opts.no_open);
     }
 
     if(opts.generate_lattice){
@@ -221,7 +222,7 @@ int main(int argc, char *argv[]){
         generator.write_makefile(makefile);
 
         Radiant_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
-        manager.create_project("makefile.tcl",  true);
+        manager.create_project("makefile.tcl",  ~opts.no_open);
     }
 
     peripheral_definition_generator periph_def_gen(d_store, synth_ast);
