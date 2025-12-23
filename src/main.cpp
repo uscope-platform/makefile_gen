@@ -64,7 +64,7 @@ int main(int argc, char *argv[]){
     app.add_flag("--wait_profiler", opts.wait_profiler, "Wait for the profiler to be ready before executing");
     app.add_flag("--trace", opts.trace, "Enable extended internal state tracing");
     app.add_option("--cache_dir", opts.cache_dir, "Specify a non-default repository cache file");
-    app.add_option("--no_open", opts.no_open, "Do not open the generated project");
+    app.add_flag("--no_open", opts.no_open, "Do not open the generated project");
     CLI11_PARSE(app, argc, argv);
 
     if(opts.trace) {
