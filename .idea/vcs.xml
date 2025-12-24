@@ -2,5 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/build/Testing/check_files/test_data" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/build/antlr_runtime-prefix/src/antlr_runtime" vcs="Git" />
   </component>
 </project>
