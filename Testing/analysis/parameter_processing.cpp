@@ -1682,3 +1682,52 @@ TEST(parameter_processing, parameter_with_for_loop) {
     EXPECT_EQ(p1_t, expected_p1_t);
 
 }
+
+
+
+TEST(parameter_processing, parent_parameter_collision) {
+    std::string test_pattern = R"(
+
+        module inner_dep();
+
+        endmodule
+
+        module dependency #(
+            INNER_PARAMETER = 1
+        )();
+            for(n = 0; n<INNER_PARAMETER; n=n+1)begin
+                inner_dep #() dep ();
+            end
+        endmodule
+
+        module test_mod #(
+        )();
+
+            parameter  [31:0] INNER_PARAMETER [2:0] = '{6,2,4};
+            dependency #(
+                .INNER_PARAMETER(2)
+            ) d ();
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+    d_store->store_hdl_entity(resources[2]);
+
+
+
+    Depfile df;
+    HDL_ast_builder b(s_store, d_store, df);
+    auto ast = b.build_ast("test_mod", {});
+    auto deps = ast->get_dependencies();
+    ASSERT_EQ(deps[0]->get_parameters().get("INNER_PARAMETER")->get_numeric_value(), 5);
+
+}
