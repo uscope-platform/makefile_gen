@@ -18,6 +18,7 @@
 
 HDL_parameter::HDL_parameter(const HDL_parameter &c) {
     name = c.name;
+    scope = c.scope;
     string_value_array = c.string_value_array;
     numeric_value_array = c.numeric_value_array;
     type = c.type;
@@ -41,6 +42,7 @@ std::string HDL_parameter::get_string_value() const {
 bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
     bool ret_val = true;
     ret_val &= lhs.name == rhs.name;
+    ret_val &= lhs.scope == rhs.scope;
     ret_val &= lhs.string_value_array == rhs.string_value_array;
     ret_val &= lhs.numeric_value_array == rhs.numeric_value_array;
     ret_val &= lhs.type == rhs.type;
@@ -134,6 +136,7 @@ std::string HDL_parameter::value_as_string() const {
 
 std::string HDL_parameter::to_string() const {
     std::string result = "\nHDL parameter:\n  NAME: " + name +
+                         "\n  SCOPE: " + scope +
                          "\n  TYPE: " + parameter_type_to_string(type);
 
     if(type == numeric_parameter){
@@ -161,6 +164,7 @@ nlohmann::json HDL_parameter::dump() {
     nlohmann::json ret;
 
     ret["name"] = name;
+    ret["scope"] = scope;
     ret["type"] = parameter_type_to_string(type);
     if(type == string_parameter){
         ret["value"] = string_value_array;
