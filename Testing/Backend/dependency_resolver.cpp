@@ -50,7 +50,7 @@ TEST_F(dep_resolver , dependency_resolver) {
     Depfile df;
     df.add_excluded_module("excluded_module");
     HDL_ast_builder b(s_store, d_store, df);
-    auto synth = b.build_ast("test_module", {});
+    auto synth = b.build_ast(std::vector<std::string>({"test_module"}), {})[0];
     std::vector<std::string> add_synyh_mod = {"expl_dep"};
     auto additional_synth_modules = b.build_ast(add_synyh_mod, {});
     additional_synth_modules.insert(additional_synth_modules.end(), synth);

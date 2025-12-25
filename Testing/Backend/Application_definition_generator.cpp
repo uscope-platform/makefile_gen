@@ -64,7 +64,7 @@ TEST( app_def_generation , generate_app_def) {
     df.set_content(df_content);
 
     HDL_ast_builder b(s_store, d_store, df);
-    auto synth_ast = b.build_ast("PID", {});
+    auto synth_ast = b.build_ast(std::vector<std::string>({"PID"}), {})[0];
 
 
     control_bus_analysis bus_analyzer(df);

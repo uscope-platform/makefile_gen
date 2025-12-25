@@ -53,7 +53,7 @@ TEST( hdl_ast_builder, pid_ast_build) {
 
 
     HDL_ast_builder b(s_store, d_store, Depfile());
-    auto synth_ast = b.build_ast("PID", {});
+    auto synth_ast = b.build_ast(std::vector<std::string>({"PID"}), {})[0];
 
 
     auto ast_dump = synth_ast->dump();
@@ -96,7 +96,7 @@ TEST( hdl_ast_builder, spi_ast_build) {
 
 
     HDL_ast_builder b(s_store, d_store, Depfile());
-    auto synth_ast = b.build_ast("SPI", {});
+    auto synth_ast = b.build_ast(std::vector<std::string>({"SPI"}), {})[0];
 
 
     auto ast_dump = synth_ast->dump();
@@ -136,7 +136,7 @@ TEST( hdl_ast_builder, pwm_ast_build) {
 
 
     HDL_ast_builder b(s_store, d_store, Depfile());
-    auto synth_ast = b.build_ast("PwmGenerator", {});
+    auto synth_ast = b.build_ast(std::vector<std::string>({"PwmGenerator"}), {})[0];
 
 
     auto ast_dump = synth_ast->dump();
@@ -179,7 +179,7 @@ TEST( hdl_ast_builder, adc_ast_build) {
 
 
     HDL_ast_builder b(s_store, d_store, Depfile());
-    auto synth_ast = b.build_ast("AdcProcessing", {});
+    auto synth_ast = b.build_ast(std::vector<std::string>({"AdcProcessing"}), {})[0];
 
 
     auto ast_dump = synth_ast->dump();
@@ -232,7 +232,7 @@ TEST( hdl_ast_builder, interface_parameter) {
     d_store->store_hdl_entity(resource);
 
     HDL_ast_builder b(s_store, d_store, Depfile());
-    auto synth_ast = b.build_ast("test_mod", {});
+    auto synth_ast = b.build_ast(std::vector<std::string>({"test_mod"}), {})[0];
 
 
     auto ast_dump = synth_ast->dump();

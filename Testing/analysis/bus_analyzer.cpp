@@ -67,7 +67,7 @@ TEST( bus_analysis, simple_bus_analysis) {
     df.set_content(df_content);
 
     HDL_ast_builder b(s_store, d_store, df);
-    auto synth_ast = b.build_ast("ad2s1210", {});
+    auto synth_ast = b.build_ast(std::vector<std::string>({"ad2s1210"}), {})[0];
 
 
     control_bus_analysis bus_analyzer(df);
@@ -118,7 +118,7 @@ TEST( bus_analysis, parametric_interconnect) {
     df.set_content(df_content);
 
     HDL_ast_builder b(s_store, d_store, df);
-    auto synth_ast = b.build_ast("PwmGenerator", {});
+    auto synth_ast = b.build_ast(std::vector<std::string>({"PwmGenerator"}), {})[0];
 
 
     control_bus_analysis bus_analyzer(df);

@@ -1238,7 +1238,7 @@ TEST(parameter_processing, simple_for_array_parameter) {
 
     Depfile df;
     HDL_ast_builder b(s_store, d_store, df);
-    auto ast = b.build_ast("test_mod", {});
+    auto ast = b.build_ast(std::vector<std::string>({"test_mod"}), {})[0];
     auto deps = ast->get_dependencies();
     ASSERT_EQ(deps[0]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 4);
     ASSERT_EQ(deps[1]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 2);
@@ -1286,7 +1286,7 @@ TEST(parameter_processing, complex_for_array_parameter) {
 
     Depfile df;
     HDL_ast_builder b(s_store, d_store, df);
-    auto ast = b.build_ast("test_mod", {});
+    auto ast = b.build_ast(std::vector<std::string>({"test_mod"}), {})[0];
     auto deps = ast->get_dependencies();
     ASSERT_EQ(deps[0]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 6);
     ASSERT_EQ(deps[1]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 2);
@@ -1601,7 +1601,7 @@ TEST(parameter_processing, override_with_function_parameter) {
     df.set_content(df_content);
 
     HDL_ast_builder b(s_store, d_store, df);
-    auto synth_ast = b.build_ast("test_mod", {});
+    auto synth_ast = b.build_ast(std::vector<std::string>({"test_mod"}), {})[0];
 
 
     auto params = synth_ast->get_dependencies()[0]->get_parameters();
@@ -1663,7 +1663,7 @@ TEST(parameter_processing, parameter_with_for_loop) {
     df.set_content(df_content);
 
     HDL_ast_builder b(s_store, d_store, df);
-    auto synth_ast = b.build_ast("test_mod", {});
+    auto synth_ast = b.build_ast(std::vector<std::string>({"test_mod"}), {})[0];
 
     auto deps = synth_ast->get_dependencies();
 
@@ -1726,7 +1726,7 @@ TEST(parameter_processing, parent_parameter_collision) {
 
     Depfile df;
     HDL_ast_builder b(s_store, d_store, df);
-    auto ast = b.build_ast("test_mod", {});
+    auto ast = b.build_ast(std::vector<std::string>({"test_mod"}), {})[0];
     auto deps = ast->get_dependencies();
     ASSERT_EQ(deps[0]->get_parameters().get("INNER_PARAMETER")->get_numeric_value(), 5);
 

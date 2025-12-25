@@ -32,10 +32,10 @@
 class HDL_ast_builder {
     public:
         HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d, const Depfile& d_f);
-        std::shared_ptr<HDL_instance_AST> build_ast(const std::string& top_level_module,const Parameters_map &external_parameters);
         std::vector<std::shared_ptr<HDL_instance_AST>> build_ast(const std::vector<std::string>& modules,const Parameters_map &external_parameters);
 
     private:
+        std::shared_ptr<HDL_instance_AST> build_ast(const std::string& top_level_module,const Parameters_map &external_parameters);
         Parameters_map specialize_parameters(int64_t idx, const Parameters_map &params, std::string idx_name);
         Expression specialize_expression(Expression &e, Parameter_processor &p);
         HDL_instance_AST specialize_instance(HDL_instance_AST &i, int64_t idx, const Parameters_map &specialized_params, std::string idx_name);
