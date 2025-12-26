@@ -4,63 +4,64 @@ add_library(makefile_gen_lib STATIC)
 
 target_sources(makefile_gen_lib
     PRIVATE
-    analysis/HDL_ast_builder.cpp /
-    analysis/data_acquisition_analysis.cpp /
-    analysis/control_bus_analysis.cpp /
-    analysis/HDL_loop_solver.cpp /
-    analysis/proxy_bus_analysis.cpp /
-    Backend/Dependency_resolver.cpp /
-    Backend/uplatform/application_definition_generator.cpp /
-    Backend/uplatform/peripheral_definition_generator.cpp /
-    Backend/Xilinx/Vivado_manager.cpp /
-    Backend/new_app_generator.cpp /
-    Backend/Auxiliary_resolver.cpp /
-    Backend/project_generator_base.cpp /
-    Backend/Lattice/Radiant_manager.cpp /
-    Backend/Toolchain_manager.cpp /
-    Backend/python_script_runner.cpp /
-    data_model/HDL/HDL_Resource.cpp /
-    data_model/HDL/HDL_instance.cpp /
-    data_model/HDL/HDL_instance_AST.cpp /
-    data_model/HDL/factories/HDL_instances_factory.cpp /
-    data_model/HDL/factories/HDL_modules_factory.cpp /
-    data_model/HDL/factories/HDL_interfaces_factory.cpp /
-    data_model/HDL/factories/HDL_loops_factory.cpp /
-    data_model/HDL/factories/HDL_parameters_factory.cpp /
-    data_model/HDL/factories/resource_factory_base.cpp /
-    data_model/HDL/parameters/HDL_parameter.cpp /
-    data_model/HDL/parameters/Expression_component.cpp /
-    data_model/HDL/parameters/Parameter_processor.cpp /
-    data_model/HDL/parameters/Initialization_list.cpp /
-    data_model/HDL/parameters/HDL_function.cpp /
-    data_model/HDL/factories/HDL_functions_factory.cpp /
-    data_model/HDL/factories/nets/HDL_range_factory.cpp /
-    data_model/HDL/factories/nets/HDL_concat_factory.cpp /
-    data_model/HDL/factories/nets/HDL_net_factory.cpp /
-    data_model/HDL/factories/nets/HDL_repetition_factory.cpp /
-    data_model/HDL/parameters/Expression_evaluator.cpp /
-    data_model/HDL/HDL_net.cpp /
-    data_model/bus_mapping/bus_specs_manager.cpp /
-    data_model/bus_mapping/mapper_bus_component.cpp /
-    data_model/settings_store.cpp /
-    data_model/data_store.cpp /
-    data_model/DataFile.cpp /
-    data_model/mdarray.cpp /
-    data_model/documentation/module_documentation.cpp /
-    data_model/documentation/register_documentation.cpp /
-    data_model/documentation/field_documentation.cpp /
-    data_model/documentation/processor_instance.cpp /
-    data_model/documentation/channel_group.cpp /
-    data_model/documentation/channel.cpp /
-    data_model/Depfile.cpp /
-    data_model/Script.cpp /
-    data_model/Constraints.cpp /
-    frontend/analysis/sv_visitor.cpp /
-    frontend/analysis/sv_analyzer.cpp /
-    frontend/Repository_walker.cpp /
-    frontend/analysis/vhdl_analyzer.cpp /
-    frontend/analysis/documentation_analyzer.cpp /
-    frontend/analysis/vhdl_visitor.cpp /
+    analysis/HDL_ast_builder.cpp
+    analysis/HDL_ast_builder_v2.cpp
+    analysis/data_acquisition_analysis.cpp
+    analysis/control_bus_analysis.cpp
+    analysis/HDL_loop_solver.cpp
+    analysis/proxy_bus_analysis.cpp
+    Backend/Dependency_resolver.cpp
+    Backend/uplatform/application_definition_generator.cpp
+    Backend/uplatform/peripheral_definition_generator.cpp
+    Backend/Xilinx/Vivado_manager.cpp
+    Backend/new_app_generator.cpp
+    Backend/Auxiliary_resolver.cpp
+    Backend/project_generator_base.cpp
+    Backend/Lattice/Radiant_manager.cpp
+    Backend/Toolchain_manager.cpp
+    Backend/python_script_runner.cpp
+    data_model/HDL/HDL_Resource.cpp
+    data_model/HDL/HDL_instance.cpp
+    data_model/HDL/HDL_instance_AST.cpp
+    data_model/HDL/factories/HDL_instances_factory.cpp
+    data_model/HDL/factories/HDL_modules_factory.cpp
+    data_model/HDL/factories/HDL_interfaces_factory.cpp
+    data_model/HDL/factories/HDL_loops_factory.cpp
+    data_model/HDL/factories/HDL_parameters_factory.cpp
+    data_model/HDL/factories/resource_factory_base.cpp
+    data_model/HDL/parameters/HDL_parameter.cpp
+    data_model/HDL/parameters/Expression_component.cpp
+    data_model/HDL/parameters/Parameter_processor.cpp
+    data_model/HDL/parameters/Initialization_list.cpp
+    data_model/HDL/parameters/HDL_function.cpp
+    data_model/HDL/factories/HDL_functions_factory.cpp
+    data_model/HDL/factories/nets/HDL_range_factory.cpp
+    data_model/HDL/factories/nets/HDL_concat_factory.cpp
+    data_model/HDL/factories/nets/HDL_net_factory.cpp
+    data_model/HDL/factories/nets/HDL_repetition_factory.cpp
+    data_model/HDL/parameters/Expression_evaluator.cpp
+    data_model/HDL/HDL_net.cpp
+    data_model/bus_mapping/bus_specs_manager.cpp
+    data_model/bus_mapping/mapper_bus_component.cpp
+    data_model/settings_store.cpp
+    data_model/data_store.cpp
+    data_model/DataFile.cpp
+    data_model/mdarray.cpp
+    data_model/documentation/module_documentation.cpp
+    data_model/documentation/register_documentation.cpp
+    data_model/documentation/field_documentation.cpp
+    data_model/documentation/processor_instance.cpp
+    data_model/documentation/channel_group.cpp
+    data_model/documentation/channel.cpp
+    data_model/Depfile.cpp
+    data_model/Script.cpp
+    data_model/Constraints.cpp
+    frontend/analysis/sv_visitor.cpp
+    frontend/analysis/sv_analyzer.cpp
+    frontend/Repository_walker.cpp
+    frontend/analysis/vhdl_analyzer.cpp
+    frontend/analysis/documentation_analyzer.cpp
+    frontend/analysis/vhdl_visitor.cpp
     frontend/cache_manager.cpp
 )
 
