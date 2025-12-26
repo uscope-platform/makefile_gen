@@ -67,7 +67,7 @@ TEST( hdl_ast_builder, pid_ast_build) {
     ASSERT_EQ(ast_dump, check_obj);
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-    auto ast_v2 = b.build_ast(std::vector<std::string>({"PID"}), {})[0];
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"PID"}))[0];
 
     auto struct_v2 = ast_v2->dump_structure();
     ASSERT_EQ(struct_v2, struct_s);
@@ -119,7 +119,7 @@ TEST( hdl_ast_builder, spi_ast_build) {
     ASSERT_EQ(ast_dump, check_obj);
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-    auto ast_v2 = b.build_ast(std::vector<std::string>({"SPI"}), {})[0];
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"SPI"}))[0];
 
     auto struct_v2 = ast_v2->dump_structure();
     ASSERT_EQ(struct_v2, struct_s);
@@ -172,7 +172,7 @@ TEST( hdl_ast_builder, pwm_ast_build) {
 
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-    auto ast_v2 = b.build_ast(std::vector<std::string>({"PwmGenerator"}), {})[0];
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"PwmGenerator"}))[0];
 
     auto struct_v2 = ast_v2->dump_structure();
     ASSERT_EQ(struct_v2, struct_s);
@@ -225,7 +225,7 @@ TEST( hdl_ast_builder, adc_ast_buildI) {
     ASSERT_EQ(ast_dump, check_obj);
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-    auto ast_v2 = b.build_ast(std::vector<std::string>({"AdcProcessing"}), {})[0];
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"AdcProcessing"}))[0];
 
     auto struct_v2 = ast_v2->dump_structure();
     ASSERT_EQ(struct_v2, struct_s);
@@ -289,7 +289,7 @@ TEST( hdl_ast_builder, interface_parameter) {
     ASSERT_EQ(ast_dump, check_obj);
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-    auto ast_v2 = b.build_ast(std::vector<std::string>({"test_mod"}), {})[0];
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
 
     auto struct_v2 = ast_v2->dump_structure();
     ASSERT_EQ(struct_v2, struct_s);

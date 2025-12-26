@@ -143,7 +143,6 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
                 spdlog::trace("{}----------------------------------------------------",trace_prefix);
                 spdlog::trace("{}Processing dependency {} in module {}",trace_prefix, get_current_path() + d.get_name(), d.get_type());
                 spdlog::trace("{}----------------------------------------------------",trace_prefix);
-                bool do_break = dbg == "dep";
                 if(d.get_n_loops()>1){
                     spdlog::warn("Nested loops are not supported by parameter analysis\n In HDL instance: " + i.get_name() + " of type: " + type + " is in a nested loop");
                 } else if(d.get_n_loops() == 1){

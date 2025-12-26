@@ -13,30 +13,19 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_HDL_AST_BUILDER_V2_HPP
-#define MAKEFILEGEN_V2_HDL_AST_BUILDER_V2_HPP
-
+#ifndef MAKEFILEGEN_V2_PASS_BASE_HPP
+#define MAKEFILEGEN_V2_PASS_BASE_HPP
 
 #include <vector>
 #include <memory>
 
-#include "data_model/Depfile.hpp"
 #include "data_model/HDL/HDL_instance_AST.hpp"
-#include "data_model/data_store.hpp"
-#include "data_model/settings_store.hpp"
-#include "analysis/passes/pass_manager.hpp"
-
-
-class HDL_ast_builder_v2 {
+class pass_base {
 public:
-    HDL_ast_builder_v2(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d, const Depfile& d_f);
-    std::vector<std::shared_ptr<HDL_instance_AST>> build_ast(const std::vector<std::string>& modules);
+    virtual void process_node(const std::shared_ptr<HDL_instance_AST> &node) {};
+protected:
 private:
-    std::shared_ptr<HDL_instance_AST> build_ast(const std::string& top_level_module);
-    std::shared_ptr<data_store> d_store;
-    std::shared_ptr<settings_store> s_store;
-    Depfile  dep_file;
 };
 
 
-#endif //MAKEFILEGEN_V2_HDL_AST_BUILDER_V2_HPP
+#endif //MAKEFILEGEN_V2_PASS_BASE_HPP

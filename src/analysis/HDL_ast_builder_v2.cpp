@@ -26,22 +26,23 @@ std::vector<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder_v2::build_ast(con
     std::vector<std::shared_ptr<HDL_instance_AST>> ret;
     ret.reserve(modules.size());
     for(auto &item:modules){
-        ret.push_back(build_ast(item));
+        auto ast = build_ast(item);
+//        pass_manager pass_mgr;
+//        pass_mgr.apply_passes(ast);
+        ret.push_back(ast);
     }
     return ret;
 }
 
 std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::string &top_level_module) {
 
-        HDL_instance_AST i;
-        i.set_name("TL");
-        i.set_type(top_level_module);
-        i.set_dependency_class(module);
+        auto top = std::make_shared<HDL_instance_AST>();
+        top->set_name("TL");
+        top->set_type(top_level_module);
+        top->set_dependency_class(module);
 
         std::stack< std::shared_ptr<HDL_instance_AST> > working_stack;
-        working_stack.push(std::make_shared<HDL_instance_AST>(i));
-
-        std::shared_ptr<HDL_instance_AST>  parent = nullptr;
+        working_stack.push(top);
 
 
         while (!working_stack.empty()) {
@@ -50,40 +51,28 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
 
             auto type = working_instance->get_type();
 
-            auto new_node = std::make_shared<HDL_instance_AST>();
-
             if(
                 dep_file.is_module_excluded(type) ||
                 d_store->is_primitive(type)
             ) continue;
 
-            if(i.get_dependency_class() == module || i.get_dependency_class() == interface ) {
+            if(working_instance->get_dependency_class() == module || working_instance->get_dependency_class() == interface ) {
 
                 if (!d_store->contains_hdl_entity(type)) {
                     std::cerr << "ERROR:\n HDL entity: " + type + " Not found\n";
                 }
                 auto res = d_store->get_HDL_resource(type);
 
+                for (auto &dep: res.get_dependencies()) {
 
-                new_node->set_channel_groups(i.get_channel_groups());
-                new_node->set_ports(i.get_ports());
-                new_node->set_if_specs(res.get_if_port_specs());
+                    auto child = std::make_shared<HDL_instance_AST>(dep);
 
-                new_node->set_name(i.get_name());
-                new_node->set_type(type);
-                new_node->set_dependency_class(module);
-                new_node->set_repeated(i.get_repeated());
-                new_node->set_repetition_idx(i.get_repetition_idx());
-                if (parent != nullptr) {
-                    new_node->set_parent(parent);
-                    parent->add_child(new_node);
+                    child->set_parent(working_instance);
+                    working_instance->add_child(child);
+
+                    working_stack.push(child);
                 }
-                parent = new_node;
-                for (auto &dep: i.get_dependencies()) {
-                    working_stack.push(dep);
-                }
-
             }
         }
-    return {};
+    return top;
 }
