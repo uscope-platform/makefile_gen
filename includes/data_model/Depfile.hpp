@@ -30,8 +30,13 @@ using json = nlohmann::json;
 class Depfile {
 public:
     Depfile();
+
+    Depfile(const Depfile &other) = default;
+    Depfile(Depfile &&other) noexcept = default;
+    Depfile & operator=(const Depfile &other) = default;
+    Depfile & operator=(Depfile &&other) noexcept = default;
+
     explicit Depfile(const std::string& filename);
-    explicit Depfile ( const Depfile & file);
     void set_content(const nlohmann::json &c){content = c;};
     std::string get_synth_tl();
     [[nodiscard]] json get_content() const {return content;};

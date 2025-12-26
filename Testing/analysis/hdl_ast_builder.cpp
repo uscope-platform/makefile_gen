@@ -21,6 +21,7 @@
 
 #include "frontend/analysis/sv_analyzer.hpp"
 #include "analysis/HDL_ast_builder.hpp"
+#include "analysis/HDL_ast_builder_v2.hpp"
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
 TEST( hdl_ast_builder, pid_ast_build) {
@@ -55,13 +56,20 @@ TEST( hdl_ast_builder, pid_ast_build) {
     HDL_ast_builder b(s_store, d_store, Depfile());
     auto synth_ast = b.build_ast(std::vector<std::string>({"PID"}), {})[0];
 
-
+    auto struct_s = synth_ast->dump_structure();
     auto ast_dump = synth_ast->dump();
+    auto reference_structure = "TL:PID\n    CU:axil_simple_register_cu\n        address_read_buffer:axil_skid_buffer\n        address_write_buffer:axil_skid_buffer\n        write_data_buffer:axil_skid_buffer\n    pid_int:Integrator\n";
+    EXPECT_EQ(struct_s, reference_structure);
     nlohmann::json check_obj = nlohmann::json::parse(R"({"children":[{"children":[{"children":[],"instance_name":"address_read_buffer","instance_type":"axil_skid_buffer","parameters":{"DATA_WIDTH":{"name":"DATA_WIDTH","scope":"","type":"numeric_parameter","value":[32]},"REGISTER_OUTPUT":{"name":"REGISTER_OUTPUT","scope":"","type":"numeric_parameter","value":[0]}},"ports_map":{"clock":["clock"],"in_data":["axil.ARADDR"],"in_ready":["axil.ARREADY"],"in_valid":["axil.ARVALID"],"out_data":["read_address"],"out_ready":["read_ready"],"out_valid":["read_address_valid"],"reset":["reset"]}},{"children":[],"instance_name":"address_write_buffer","instance_type":"axil_skid_buffer","parameters":{"DATA_WIDTH":{"name":"DATA_WIDTH","scope":"","type":"numeric_parameter","value":[32]},"REGISTER_OUTPUT":{"name":"REGISTER_OUTPUT","scope":"","type":"numeric_parameter","value":[0]}},"ports_map":{"clock":["clock"],"in_data":["axil.AWADDR"],"in_ready":["axil.AWREADY"],"in_valid":["axil.AWVALID"],"out_data":["write_address"],"out_ready":["write_ready"],"out_valid":["write_address_valid"],"reset":["reset"]}},{"children":[],"instance_name":"write_data_buffer","instance_type":"axil_skid_buffer","parameters":{"DATA_WIDTH":{"name":"DATA_WIDTH","scope":"","type":"numeric_parameter","value":[36]},"REGISTER_OUTPUT":{"name":"REGISTER_OUTPUT","scope":"","type":"numeric_parameter","value":[0]}},"ports_map":{"clock":["clock"],"in_data":["axil.WDATA","axil.WSTRB"],"in_ready":["axil.WREADY"],"in_valid":["axil.WVALID"],"out_data":["write_data","write_strobe"],"out_ready":["write_ready"],"out_valid":["write_data_valid"],"reset":["reset"]}}],"instance_name":"CU","instance_type":"axil_simple_register_cu","parameters":{"ADDRESS_MASK":{"name":"ADDRESS_MASK","scope":"","type":"numeric_parameter","value":[63]},"INITIAL_OUTPUT_VALUES":{"name":"INITIAL_OUTPUT_VALUES","scope":"","type":"array_parameter","value":[[[0,0,0,0,32767,-32767,32767,-32767,65793]]]},"N_READ_REGISTERS":{"name":"N_READ_REGISTERS","scope":"","type":"numeric_parameter","value":[9]},"N_TRIGGER_REGISTERS":{"name":"N_TRIGGER_REGISTERS","scope":"","type":"numeric_parameter","value":[1]},"N_WRITE_REGISTERS":{"name":"N_WRITE_REGISTERS","scope":"","type":"numeric_parameter","value":[9]},"REGISTERED_BUFFERS":{"name":"REGISTERED_BUFFERS","scope":"","type":"numeric_parameter","value":[0]},"REGISTERS_WIDTH":{"name":"REGISTERS_WIDTH","scope":"","type":"numeric_parameter","value":[32]},"TRIGGER_REGISTERS_IDX":{"name":"TRIGGER_REGISTERS_IDX","scope":"","type":"array_parameter","value":[[[0]]]}},"ports_map":{"axil":["axil"],"clock":["clock"],"input_registers":["cu_read_registers"],"output_registers":["cu_write_registers"],"reset":["reset"]}},{"children":[],"instance_name":"pid_int","instance_type":"Integrator","parameters":{"DATA_WIDTH":{"name":"DATA_WIDTH","scope":"","type":"numeric_parameter","value":[16]}},"ports_map":{"clock":["clock"],"error_in":["integrator_in"],"input_valid":["integrator_in_valid"],"limit_int_down":["limit_int_down"],"limit_int_up":["limit_int_up"],"out":["integral_out"],"reset":["reset"]}}],"instance_name":"TL","instance_type":"PID","parameters":{"ADDITIONAL_BITS":{"name":"ADDITIONAL_BITS","scope":"","type":"numeric_parameter","value":[16]},"INITIAL_OUTPUT_VALUES":{"name":"INITIAL_OUTPUT_VALUES","scope":"","type":"array_parameter","value":[[[0,0,0,0,32767,-32767,32767,-32767,65793]]]},"INPUT_DATA_WIDTH":{"name":"INPUT_DATA_WIDTH","scope":"","type":"numeric_parameter","value":[12]},"OUTPUT_DATA_WIDTH":{"name":"OUTPUT_DATA_WIDTH","scope":"","type":"numeric_parameter","value":[16]}},"ports_map":{}})");
 
     ASSERT_EQ(ast_dump, check_obj);
-}
 
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b.build_ast(std::vector<std::string>({"PID"}), {})[0];
+
+    auto struct_v2 = ast_v2->dump_structure();
+    ASSERT_EQ(struct_v2, struct_s);
+}
 
 
 TEST( hdl_ast_builder, spi_ast_build) {

@@ -18,9 +18,10 @@
 #include <spdlog/spdlog.h>
 
 
-HDL_ast_builder::HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d, const Depfile& d_f) :dep_file(d_f) {
+HDL_ast_builder::HDL_ast_builder(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d, const Depfile& d_f) {
     s_store = s;
     d_store = d;
+    dep_file = d_f;
 }
 
 std::vector<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::build_ast(const std::vector<std::string> &modules,

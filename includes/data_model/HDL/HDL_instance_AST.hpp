@@ -87,7 +87,10 @@ public:
     void set_array_index(int16_t i){array_index = i;}
     uint32_t get_array_index() const {return array_index;}
 
+    std::string dump_structure();
 private:
+
+    static std::string dump_structure(const std::shared_ptr<HDL_instance_AST>&ast, const std::string &prefix);
 
     std::vector<int64_t> bus_address;
     std::shared_ptr<HDL_instance_AST> parent;

@@ -83,4 +83,22 @@ nlohmann::json HDL_instance_AST::dump() {
     return ret;
 }
 
+std::string HDL_instance_AST::dump_structure() {
+    std::ostringstream oss;
+    oss << name << ":" << type << "\n";
+    for (const auto &dep: get_dependencies()) {
+        oss << dump_structure(dep, "    ");
+    }
+    return oss.str();
+}
+
+std::string HDL_instance_AST::dump_structure(const std::shared_ptr<HDL_instance_AST> &ast, const std::string &prefix) {
+    std::ostringstream oss;
+    oss << prefix << ast->get_name() << ":" << ast->get_type() << "\n";
+    for (const auto &dep: ast->get_dependencies()) {
+        oss << prefix + dump_structure(dep, "    ");
+    }
+    return oss.str();
+}
+
 

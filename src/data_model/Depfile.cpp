@@ -23,10 +23,6 @@ Depfile::Depfile(const std::string& filename) {
     dfstream >> content;
 }
 
-Depfile::Depfile(const Depfile &file) {
-    content = file.get_content();
-}
-
 std::string Depfile::get_synth_tl() {
     return content["general"]["synth_tl"];
 }
