@@ -77,6 +77,13 @@ void mdarray::set_value(std::vector<int64_t> idx, int64_t val) {
     data[idx[0]][idx[1]][idx[2]] = val;
 }
 
+void mdarray::set_scalar(int64_t val) {
+    data[0][0][0] = val;
+}
+
+int64_t mdarray::get_scalar()const {
+    return data[0][0][0];
+}
 void PrintTo(const mdarray &res, std::ostream *os) {
     std::string result = "{";
     for(auto & item_2d:res.data){

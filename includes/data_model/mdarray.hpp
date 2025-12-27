@@ -31,6 +31,8 @@ class mdarray {
 public:
     mdarray() = default;
     mdarray(std::vector<int64_t> dimensions, int64_t value);
+    void set_scalar(int64_t val);
+    int64_t get_scalar() const;
     void set_value(std::vector<int64_t> idx, int64_t val);
     void set_1d_slice(std::vector<int64_t> idx, const md_1d_array &val);
     void set_2d_slice(std::vector<int64_t> idx, const md_2d_array& val);
