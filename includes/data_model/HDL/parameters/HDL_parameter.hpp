@@ -102,7 +102,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, string_value_array, numeric_value_array,array_value,type,
+        ar(name, string_value_array, numeric_value,array_value,type,
            expression_components, i_l);
     }
 
@@ -128,7 +128,7 @@ private:
     std::string name;
     std::string scope;
     std::vector<std::string> string_value_array;
-    std::vector<int64_t> numeric_value_array;
+    int64_t numeric_value;
     mdarray array_value;
     parameter_type type;
     bool loop_index = false;

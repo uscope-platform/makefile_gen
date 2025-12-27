@@ -20,7 +20,7 @@ HDL_parameter::HDL_parameter(const HDL_parameter &c) {
     name = c.name;
     scope = c.scope;
     string_value_array = c.string_value_array;
-    numeric_value_array = c.numeric_value_array;
+    numeric_value = c.numeric_value;
     type = c.type;
     expression_components = c.expression_components;
     array_value = c.array_value;
@@ -30,7 +30,7 @@ HDL_parameter::HDL_parameter(const HDL_parameter &c) {
 
 HDL_parameter::HDL_parameter() {
     type = string_parameter;
-    numeric_value_array = {0};
+    numeric_value = 0;
     string_value_array = {""};
 }
 
@@ -44,7 +44,7 @@ bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
     ret_val &= lhs.name == rhs.name;
     ret_val &= lhs.scope == rhs.scope;
     ret_val &= lhs.string_value_array == rhs.string_value_array;
-    ret_val &= lhs.numeric_value_array == rhs.numeric_value_array;
+    ret_val &= lhs.numeric_value == rhs.numeric_value;
     ret_val &= lhs.type == rhs.type;
     ret_val &= lhs.expression_components == rhs.expression_components;
     ret_val &= lhs.array_value == rhs.array_value;
@@ -64,7 +64,7 @@ bool HDL_parameter::is_empty() {
     if(type == string_parameter) {
         ret &= string_value_array.empty() || string_value_array.size() == 1 && string_value_array[0].empty();
     } else if(type == numeric_parameter) {
-        ret &= numeric_value_array.empty();
+        ret &= numeric_value == 0;
     }
 
 
@@ -75,7 +75,7 @@ bool HDL_parameter::is_empty() {
 void HDL_parameter::set_value(int64_t val) {
     locking_violation_check();
     type = numeric_parameter;
-    numeric_value_array[0] = val;
+    numeric_value = val;
 }
 
 std::shared_ptr<HDL_parameter> HDL_parameter::clone() const {
@@ -89,7 +89,7 @@ void HDL_parameter::set_value(const std::string &v) {
 }
 
 int64_t HDL_parameter::get_numeric_value() const {
-    return numeric_value_array[0];
+    return numeric_value;
 }
 
 
@@ -100,7 +100,7 @@ HDL_parameter::operator std::string() {
             ret_val = string_value_array[0];
             break;
         case numeric_parameter:
-            ret_val =  std::to_string(numeric_value_array[0]);
+            ret_val =  std::to_string(numeric_value);
             break;
         case array_parameter:
             ret_val = "array value";
@@ -126,7 +126,7 @@ std::string HDL_parameter::value_as_string() const {
         return string_value_array[0];
     }
     if(type == numeric_parameter) {
-        return std::to_string(numeric_value_array[0]);
+        return std::to_string(numeric_value);
     }
     if(type == array_parameter) {
         return array_value.to_string();
@@ -140,7 +140,7 @@ std::string HDL_parameter::to_string() const {
                          "\n  TYPE: " + parameter_type_to_string(type);
 
     if(type == numeric_parameter){
-        result += "\n  VALUE: " + std::to_string(numeric_value_array[0]);
+        result += "\n  VALUE: " + std::to_string(numeric_value);
     }
 
     result += "\n  EXPRESSION:\n";
@@ -170,7 +170,7 @@ nlohmann::json HDL_parameter::dump() {
         ret["value"] = string_value_array;
     } else if(type == numeric_parameter){
 
-        ret["value"]= numeric_value_array;
+        ret["value"]= std::vector<int64_t>({numeric_value});
     } else if(type == array_parameter){
         ret["value"] = array_value.dump();
     }
