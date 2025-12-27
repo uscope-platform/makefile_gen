@@ -27,12 +27,13 @@
 #include <cereal/types/vector.hpp>
 
 enum expression_component_type {
-    string_component=0,
-    numeric_component=1,
-    operator_component=2,
-    function_component=3,
-    array_component = 4,
-    marker_component = 5
+    string_component,
+    parenthesis_component,
+    numeric_component,
+    operator_component,
+    function_component,
+    array_component,
+    marker_component
 };
 
 
@@ -112,6 +113,10 @@ private:
     std::set<std::string> operators_set = {
             "!", "~", "*", "/", "%","+","-","<<",">>", ">", ">=", "<", "<=", "==", "!="
     };
+
+    std::set<std::string> parenthesis_set = {
+        "(", ")", "[", "]", "{", "}"
+};
 
     std::set<std::string> functions_set = {
             "$clog2","$ceil", "$floor","$pow"

@@ -42,8 +42,10 @@ Expression_component::Expression_component(const std::string &s) {
     numeric_value = 0;
     if(operators_set.contains(s)) {
         component_type = operator_component;
-    } else if(functions_set.contains(s)){
+    } else if(functions_set.contains(s)) {
         component_type = function_component;
+    }else if (parenthesis_set.contains(s)){
+        component_type = parenthesis_component;
     } else {
         component_type = string_component;
     }
