@@ -34,6 +34,7 @@ struct parameter_value {
 class parameter_solution_pass : public pass_base {
 public:
     parameter_solution_pass();
+    void setup(const std::shared_ptr<HDL_instance_AST> &root) override;
     void process_node(const std::shared_ptr<HDL_instance_AST> &node) override;
 private:
     std::unordered_map<std::string, parameter_value> parameters_map;

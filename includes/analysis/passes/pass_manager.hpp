@@ -25,9 +25,9 @@
 class pass_manager {
 public:
    pass_manager();
-   std::shared_ptr<HDL_instance_AST> apply_passes(const std::shared_ptr<HDL_instance_AST> &c);
+   void apply_passes(std::shared_ptr<HDL_instance_AST> &c);
 private:
-   std::shared_ptr<HDL_instance_AST> apply_pass(const std::shared_ptr<HDL_instance_AST> &c,const std::shared_ptr<pass_base> &pass);
+   void apply_pass(std::shared_ptr<HDL_instance_AST> &c,const std::shared_ptr<pass_base> &pass);
    std::vector<std::shared_ptr<pass_base>> passes;
 };
 

@@ -22,7 +22,8 @@
 #include "data_model/HDL/HDL_instance_AST.hpp"
 class pass_base {
 public:
-    virtual void process_node(const std::shared_ptr<HDL_instance_AST> &node) {};
+    virtual void process_node(const std::shared_ptr<HDL_instance_AST> &node) {}
+    virtual void setup(const std::shared_ptr<HDL_instance_AST> &root) {}
 protected:
 private:
 };

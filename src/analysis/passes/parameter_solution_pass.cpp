@@ -19,6 +19,10 @@ parameter_solution_pass::parameter_solution_pass() {
     parameters_map = {};
 }
 
+void parameter_solution_pass::setup(const std::shared_ptr<HDL_instance_AST> &root) {
+    int i = 0;
+}
+
 void parameter_solution_pass::process_node(const std::shared_ptr<HDL_instance_AST> &node) {
     int i = 0;
 }
