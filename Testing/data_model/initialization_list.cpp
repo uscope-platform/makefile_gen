@@ -21,7 +21,7 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "frontend/analysis/sv_analyzer.hpp"
 
-Initialization_list construct_unpacked_list(const md_3d_array &in, const md_2d_array &dims, std::vector<bool> packing){
+Initialization_list construct_unpacked_list(const mdarray<int64_t>::md_3d_array &in, const mdarray<int64_t>::md_2d_array &dims, std::vector<bool> packing){
     Initialization_list li;
 
     for(int i = 0; i<dims.size(); i++){
@@ -46,7 +46,7 @@ Initialization_list construct_unpacked_list(const md_3d_array &in, const md_2d_a
 }
 
 
-Initialization_list construct_packed_list(const std::vector<std::vector<std::vector<std::vector<std::string>>>> &in, const md_2d_array &dims, std::vector<bool> packing){
+Initialization_list construct_packed_list(const std::vector<std::vector<std::vector<std::vector<std::string>>>> &in, const mdarray<int64_t>::md_2d_array &dims, std::vector<bool> packing){
     Initialization_list li;
 
     for(int i = 0; i<dims.size(); i++){
@@ -96,7 +96,7 @@ TEST(Initialization_list, get_values_1d_unpacked)  {
 
     il.link_processor(external_parameters,cs,d_store);
 
-    mdarray check_array;
+    mdarray<int64_t> check_array;
     check_array.set_1d_slice({0, 0}, {69, 6, 4 , 3, 5});
 
     auto values = il.get_values();
@@ -126,7 +126,7 @@ TEST(Initialization_list, get_values_2d_unpacked) {
 
     il.link_processor( external_parameters,cs, d_store);
 
-    mdarray check_array;
+    mdarray<int64_t> check_array;
     check_array.set_2d_slice({0, 0}, {{54,69,6},{4,3,5}});
 
     auto values = il.get_values();
@@ -157,7 +157,7 @@ TEST(Initialization_list, get_values_3d_unpacked) {
 
     il.link_processor( external_parameters,cs, d_store);
 
-    mdarray check_array;
+    mdarray<int64_t> check_array;
     check_array.set_data({{{11,82,43},{24,13,57}},{{54,69,6},{4,3,5}}});
 
     auto values = il.get_values();
@@ -187,7 +187,7 @@ TEST(Initialization_list, get_values_1d_packed) {
 
     il.link_processor( external_parameters,cs, d_store);
 
-    mdarray check_array;
+    mdarray<int64_t> check_array;
     check_array.set_1d_slice({0, 0}, {1, 6, 5, 2, 5});
 
     auto values = il.get_values();
@@ -216,7 +216,7 @@ TEST(Initialization_list, get_values_2d_packed) {
 
     il.link_processor( external_parameters,cs, d_store);
 
-    mdarray check_array;
+    mdarray<int64_t> check_array;
     check_array.set_2d_slice({0}, {{6, 5}, {2, 5}});
 
     auto values = il.get_values();
@@ -265,7 +265,7 @@ TEST(Initialization_list, get_values_3d_packed) {
 
     il.link_processor( external_parameters,cs, d_store);
 
-    mdarray check_array;
+    mdarray<int64_t> check_array;
     check_array.set_data(
     {
             {
@@ -330,7 +330,7 @@ TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
 
     il.link_processor( external_parameters,cs, d_store);
 
-    mdarray check_array;
+    mdarray<int64_t> check_array;
     check_array.set_1d_slice({0, 0}, {0x27e0, 0x220e0, 3 , 3, 3});
 
     auto values = il.get_values();
@@ -368,7 +368,7 @@ TEST(Initialization_list, multidimensional_packed_array) {
 
     auto values = il.get_values();
 
-    mdarray check_array;
+    mdarray<int64_t> check_array;
     check_array.set_2d_slice({0, 0}, {{29, 226}, {28 , 227}});
 
     ASSERT_EQ(check_array, values);
@@ -409,7 +409,7 @@ TEST(Initialization_list, concatenation_of_packed_arrays) {
 
     auto processed_array = parameters.get("INITIAL_REGISTER_VALUES")->get_array_value().get_1d_slice({0,0});
 
-    md_1d_array check_array = {224,1,0,0,2,2,2};
+    mdarray<int64_t>::md_1d_array check_array = {224,1,0,0,2,2,2};
 
     ASSERT_EQ(check_array, processed_array);
 

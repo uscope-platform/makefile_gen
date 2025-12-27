@@ -60,14 +60,14 @@ public:
                         const std::shared_ptr<Parameters_map> &cs,
                         const std::shared_ptr<data_store> &ds);
     int64_t get_value_at(std::vector<uint64_t> idx);
-    mdarray get_values();
+    mdarray<int64_t> get_values();
 
     void set_packed_dimensions(const std::vector<dimension_t>  &d) {packed_dimensions = d;};
     void set_unpacked_dimensions(const std::vector<dimension_t>  &d) {unpacked_dimensions = d;};
     std::vector<dimension_t> get_packed_dimensions(){return  packed_dimensions;};
     std::vector<dimension_t> get_unpacked_dimensions(){return  unpacked_dimensions;};
 
-    mdarray process_default_initialization();
+    mdarray<int64_t> process_default_initialization();
 
     static bool is_repetition(Expression &e){
         if(!e.empty()){
@@ -93,13 +93,13 @@ private:
     std::vector<int64_t> expand_repetition(Expression &e, Parameter_processor &p, std::vector<int64_t> *sizes);
 
     Parameter_processor get_parameter_processor();
-    mdarray get_packed_1d_list_values();
-    mdarray get_1d_list_values();
-    std::pair<md_1d_array, md_1d_array> get_sized_1d_list_values(bool &already_packed);
-    mdarray get_2d_list_values();
-    mdarray get_3d_list_values();
+    mdarray<int64_t> get_packed_1d_list_values();
+    mdarray<int64_t> get_1d_list_values();
+    std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> get_sized_1d_list_values(bool &already_packed);
+    mdarray<int64_t> get_2d_list_values();
+    mdarray<int64_t> get_3d_list_values();
 
-    int64_t pack_values(const std::pair<md_1d_array, md_1d_array> &components);
+    int64_t pack_values(const std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> &components);
 
     std::shared_ptr<Parameters_map> external_parameters;
     std::shared_ptr<Parameters_map> completed_set;

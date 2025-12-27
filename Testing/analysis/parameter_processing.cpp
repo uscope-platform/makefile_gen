@@ -215,7 +215,7 @@ TEST(parameter_processing, array_expression) {
     i.add_item({Expression_component("32")});
     i.add_item({Expression_component("5")});
     par->add_initialization_list(i);
-    mdarray av;
+    mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {5,32});
     par->set_array_value(av);
     check_params.insert(par);
@@ -278,7 +278,7 @@ TEST(parameter_processing, multidimensional_array_expression) {
     i.close_level();
     par->add_initialization_list(i);
 
-    mdarray av;
+    mdarray<int64_t> av;
     av.set_2d_slice({0}, {{6,5}, {32,32}});
     par->set_array_value(av);
     check_params.insert(par);
@@ -541,7 +541,7 @@ TEST(parameter_processing, negative_number_array_init) {
     i.add_item({Expression_component("16'sd32767")});
 
     par->add_initialization_list(i);
-    mdarray av;
+    mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {32767,-32767});
     par->set_array_value(av);
     check_params.insert(par);
@@ -607,7 +607,7 @@ TEST(parameter_processing, expression_array_init) {
     i.add_item({Expression_component("5"), Expression_component("+"), Expression_component("4")});
     i.add_item({Expression_component("7"), Expression_component("*"), Expression_component("6")});
 
-    mdarray av;
+    mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {42,9});
     par->set_array_value(av);
 
@@ -812,7 +812,7 @@ TEST(parameter_processing, array_expression_override) {
     il.add_item({Expression_component("2")});
     il.add_item({Expression_component("22")});
     par->add_initialization_list(il);
-    mdarray av;
+    mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {2,22});
     par->set_array_value(av);
     parent_param.insert(par);
@@ -847,7 +847,7 @@ TEST(parameter_processing, array_expression_override) {
     par->set_name("array_parameter");
     par->set_type(HDL_parameter::expression_parameter);
     par->set_expression_components({Expression_component("22")});
-    av = mdarray();
+    av = mdarray<int64_t>();
     av.set_1d_slice({0,0}, {2,22});
     par->set_array_value(av);
     par->add_initialization_list(il);
@@ -984,7 +984,7 @@ TEST(parameter_processing, array_instance_parameter_override) {
     auto par = std::make_shared<HDL_parameter>();
     par->set_name("param_2");
     par->set_expression_components({Expression_component("override_array")});
-    mdarray av;
+    mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {9,8});
     par->set_array_value(av);
 
@@ -1121,7 +1121,7 @@ TEST(parameter_processing, array_initialization_default) {
     i.add_item({{Expression_component("p_1"), Expression_component("+"), Expression_component("p_2")}});
     i.set_default();
     p->add_initialization_list(i);
-    mdarray array;
+    mdarray<int64_t> array;
     array.set_data({{{9,9},{9,9},{9,9}}});
 
     p->set_array_value(array);
@@ -1364,7 +1364,7 @@ TEST(parameter_processing, simple_vector_function_parameter) {
 
     auto param = parameters.get("AXI_ADDRESSES");
     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-    md_1d_array reference = {300, 200, 100};
+    mdarray<int64_t>::md_1d_array reference = {300, 200, 100};
     ASSERT_EQ(param_value, reference);
 }
 
@@ -1404,7 +1404,7 @@ TEST(parameter_processing, loop_vector_function_parameter) {
 
     auto param = parameters.get("AXI_ADDRESSES");
     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-    md_1d_array reference = {0, 100, 200};
+    mdarray<int64_t>::md_1d_array reference = {0, 100, 200};
     ASSERT_EQ(param_value, reference);
 }
 
@@ -1444,7 +1444,7 @@ TEST(parameter_processing, complex_vector_function_parameter) {
 
     auto param = parameters.get("AXI_ADDRESSES");
     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-    md_1d_array reference = {667, 300, 200, 100, 44};
+    mdarray<int64_t>::md_1d_array reference = {667, 300, 200, 100, 44};
     ASSERT_EQ(param_value, reference);
 
 }
@@ -1498,7 +1498,7 @@ TEST(parameter_processing, simple_package_in_function_initialization) {
 
     auto param = parameters.get("AXI_ADDRESSES");
     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-    md_1d_array reference = {0x43c30004,0x43c00000};
+    mdarray<int64_t>::md_1d_array reference = {0x43c30004,0x43c00000};
     ASSERT_EQ(param_value, reference);
 }
 
@@ -1545,7 +1545,7 @@ TEST(parameter_processing, nested_package_in_function_initialization) {
 
     auto param = parameters.get("AXI_ADDRESSES");
     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-    md_1d_array reference = {0x43c30004,0x43c00000};
+    mdarray<int64_t>::md_1d_array reference = {0x43c30004,0x43c00000};
     ASSERT_EQ(param_value, reference);
 }
 

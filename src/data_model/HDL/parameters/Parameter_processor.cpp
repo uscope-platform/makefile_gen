@@ -179,7 +179,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_array_parameter(cons
     std::shared_ptr<HDL_parameter> return_par = par->clone();
 
     spdlog::trace("{}->Processing array parameter: {}", trace_prefix, par->get_name());
-    mdarray arr_val;
+    mdarray<int64_t> arr_val;
     if(external_parameters->contains(par->get_name())){
         if(external_parameters->get(par->get_name())->get_type()==HDL_parameter::array_parameter){
             arr_val = external_parameters->get(par->get_name())->get_array_value();
@@ -462,10 +462,10 @@ int64_t Parameter_processor::evaluate_loop_expression(const Expression &e, std::
     return val;
 }
 
-mdarray Parameter_processor::merge_function_contributions(std::unordered_map<uint64_t, uint64_t> &explicit_values,
+mdarray<int64_t> Parameter_processor::merge_function_contributions(std::unordered_map<uint64_t, uint64_t> &explicit_values,
     std::unordered_map<uint64_t, uint64_t> &loop_values) {
     auto output_size = explicit_values.size() + loop_values.size();
-    md_1d_array parameter_value(output_size);
+    mdarray<int64_t>::md_1d_array parameter_value(output_size);
 
     for(auto &[idx, value]:explicit_values) {
         parameter_value[idx] = value;
@@ -478,7 +478,7 @@ mdarray Parameter_processor::merge_function_contributions(std::unordered_map<uin
     }
 
     std::reverse(parameter_value.begin(), parameter_value.end());
-    mdarray md_values;
+    mdarray<int64_t> md_values;
     md_values.set_1d_slice({0, 0}, parameter_value);
     return md_values;
 }

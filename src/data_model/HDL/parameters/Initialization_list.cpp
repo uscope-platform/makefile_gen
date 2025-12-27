@@ -146,8 +146,8 @@ int64_t Initialization_list::get_value_at(std::vector<uint64_t> idx) {
     return 0;
 }
 
-mdarray  Initialization_list::get_values() {
-    mdarray ret;
+mdarray<int64_t>  Initialization_list::get_values() {
+    mdarray<int64_t> ret;
 
     if(default_initialization){
         return process_default_initialization();
@@ -166,7 +166,7 @@ mdarray  Initialization_list::get_values() {
     return ret;
 }
 
-mdarray Initialization_list::get_1d_list_values() {
+mdarray<int64_t> Initialization_list::get_1d_list_values() {
 
     if(!packed_dimensions.empty() && !lower_dimension_leaves.empty()) {
         return get_packed_1d_list_values();
@@ -174,7 +174,7 @@ mdarray Initialization_list::get_1d_list_values() {
 
 
     auto p = get_parameter_processor();
-    md_1d_array values;
+    mdarray<int64_t>::md_1d_array values;
     for(auto &expr:expression_leaves){
         if(is_repetition(expr)){
             auto res = expand_repetition(expr, p, nullptr);
@@ -191,15 +191,15 @@ mdarray Initialization_list::get_1d_list_values() {
         }
     }
     std::reverse(values.begin(), values.end());
-    mdarray ret;
+    mdarray<int64_t> ret;
     ret.set_1d_slice({0, 0}, values);
     return ret;
 }
 
 
-std::pair<md_1d_array, md_1d_array> Initialization_list::get_sized_1d_list_values(bool &already_packed) {
-    md_1d_array values;
-    md_1d_array sizes;
+std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> Initialization_list::get_sized_1d_list_values(bool &already_packed) {
+    mdarray<int64_t>::md_1d_array values;
+    mdarray<int64_t>::md_1d_array sizes;
     already_packed = false;
     auto p = get_parameter_processor();
 
@@ -238,11 +238,11 @@ std::pair<md_1d_array, md_1d_array> Initialization_list::get_sized_1d_list_value
 
 
 
-mdarray Initialization_list::get_packed_1d_list_values() {
-    mdarray ret;
+mdarray<int64_t> Initialization_list::get_packed_1d_list_values() {
+    mdarray<int64_t> ret;
 
     auto p = get_parameter_processor();
-    md_1d_array values;
+    mdarray<int64_t>::md_1d_array values;
     if(!lower_dimension_leaves.empty()){
         for(auto &item:lower_dimension_leaves){
             bool already_packed = false;
@@ -257,7 +257,7 @@ mdarray Initialization_list::get_packed_1d_list_values() {
 
     } else{
 
-        md_1d_array sizes;
+        mdarray<int64_t>::md_1d_array sizes;
         for(auto &item:expression_leaves){
             if(is_repetition(item)){
                 values = expand_repetition(item, p, &sizes);
@@ -277,7 +277,7 @@ mdarray Initialization_list::get_packed_1d_list_values() {
     return ret;
 }
 
-int64_t Initialization_list::pack_values(const std::pair<md_1d_array, md_1d_array> &components) {
+int64_t Initialization_list::pack_values(const std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> &components) {
 
     int64_t total_size = 0;
     for(auto &size:components.second){
@@ -304,8 +304,8 @@ int64_t Initialization_list::pack_values(const std::pair<md_1d_array, md_1d_arra
 }
 
 
-mdarray Initialization_list::get_2d_list_values() {
-    mdarray ret;
+mdarray<int64_t> Initialization_list::get_2d_list_values() {
+    mdarray<int64_t> ret;
     for(int i = 0; i< lower_dimension_leaves.size(); i++){
         auto sub_list = lower_dimension_leaves[i];
         auto row_val = sub_list.get_1d_list_values();
@@ -316,8 +316,8 @@ mdarray Initialization_list::get_2d_list_values() {
     return ret;
 }
 
-mdarray Initialization_list::get_3d_list_values() {
-    mdarray ret;
+mdarray<int64_t> Initialization_list::get_3d_list_values() {
+    mdarray<int64_t> ret;
     for(int i = 0; i< lower_dimension_leaves.size(); i++){
         auto row_val = lower_dimension_leaves[i].get_2d_list_values();
         auto idx = (int64_t)lower_dimension_leaves.size()-1-i;
@@ -394,10 +394,10 @@ std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Param
     return ret_val;
 }
 
-mdarray Initialization_list::process_default_initialization() {
+mdarray<int64_t> Initialization_list::process_default_initialization() {
 
     std::vector<int64_t> dimensions;
-    mdarray result;
+    mdarray<int64_t> result;
 
     auto p = get_parameter_processor();
 

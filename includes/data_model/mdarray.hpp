@@ -21,26 +21,85 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
-typedef std::vector<int64_t> md_1d_array;
-typedef std::vector<md_1d_array> md_2d_array;
-typedef std::vector<md_2d_array> md_3d_array;
-
-
+template<typename T>
 class mdarray {
-
 public:
+
+    using md_1d_array = std::vector<T>;
+    using md_2d_array = std::vector<md_1d_array> ;
+    using md_3d_array = std::vector<md_2d_array> ;
+
     mdarray() = default;
-    mdarray(std::vector<int64_t> dimensions, int64_t value);
-    void set_scalar(int64_t val);
-    int64_t get_scalar() const;
-    void set_value(std::vector<int64_t> idx, int64_t val);
-    void set_1d_slice(std::vector<int64_t> idx, const md_1d_array &val);
-    void set_2d_slice(std::vector<int64_t> idx, const md_2d_array& val);
+    mdarray(std::vector<int64_t> dimensions, T value){
+        for(auto &item:dimensions){
+            if(item == 0){
+                item = 1;
+            }
+        }
+        md_1d_array l3(dimensions[2],value);
+        md_2d_array l2(dimensions[1], l3);
+        data = md_3d_array(dimensions[0], l2);
+    };
+
+    void set_scalar(T val){
+        data[0][0][0] = val;
+    }
+    T get_scalar() const {
+        return data[0][0][0];
+    }
+
+    void set_value(std::vector<int64_t> idx, T val){
+        if(idx[0]>=data.size()){
+            data.resize(idx[0]+1);
+        }
+        if(idx[1]>=data[idx[0]].size()){
+            data[idx[0]].resize(idx[1]+1);
+        }
+        if(idx[2]>=data[idx[0]][idx[2]].size()){
+            data[idx[0]][idx[1]].resize(idx[2]+1);
+        }
+        data[idx[0]][idx[1]][idx[2]] = val;
+    }
+
+    void set_1d_slice(std::vector<int64_t> idx, const md_1d_array &val){
+        if(idx[0]>=data.size()){
+            data.resize(idx[0]+1);
+        }
+        if(idx[1]>=data[idx[0]].size()){
+            data[idx[0]].resize(idx[1]+1);
+        }
+        data[idx[0]][idx[1]] = val;
+    }
+    void set_2d_slice(std::vector<int64_t> idx, const md_2d_array& val){
+        if(idx[0]>=data.size()){
+            data.resize(idx[0]+1);
+        }
+        data[idx[0]] =  val;
+    }
+
     void set_data(const md_3d_array &d){data = d;}
 
     md_3d_array get_data(){return data;}
 
-    std::string to_string() const;
+    std::string to_string() const {
+        std::string result = "{";
+        for(auto &item_2d: data) {
+            result += "{";
+            for(auto &item_1d: item_2d) {
+                result += "{";
+                for(auto &item: item_1d) {
+                    result += std::to_string(item);
+                    if(&item != &item_1d.back()) result += ", ";
+                }
+                result += "}";
+                if(&item_1d != &item_2d.back()) result += ", ";
+            }
+            result += "}";
+            if(&item_2d != &data.back()) result += ", ";
+        }
+        result += "}";
+        return result;
+    }
 
 md_2d_array get_2d_slice(std::vector<int64_t> idx) {
         if(idx.empty() || idx[0] >= data.size()) {
@@ -58,7 +117,7 @@ md_2d_array get_2d_slice(std::vector<int64_t> idx) {
         return data[idx[0]][idx[1]];
     }
 
-    int64_t get_value(std::vector<int64_t> idx) {
+    T get_value(std::vector<int64_t> idx) {
         if(idx.size() < 3 || idx[0] >= data.size() ||
            idx[1] >= data[idx[0]].size() ||
            idx[2] >= data[idx[0]][idx[1]].size()) {
@@ -68,7 +127,10 @@ md_2d_array get_2d_slice(std::vector<int64_t> idx) {
         return data[idx[0]][idx[1]][idx[2]];
     }
 
-    md_3d_array dump();
+    md_3d_array dump(){
+        return data;
+    }
+
 
     template<class Archive>
     void serialize(Archive & ar ) {
@@ -81,7 +143,25 @@ md_2d_array get_2d_slice(std::vector<int64_t> idx) {
         return lhs.data == rhs.data;
     };
 
-    friend void PrintTo(const mdarray& res, std::ostream* os);
+    friend void PrintTo(const mdarray& res, std::ostream* os){
+        std::string result = "{";
+        for(auto & item_2d:res.data){
+            result += "{";
+            for(auto &item_1d:item_2d){
+                result += "{";
+                for(auto &item:item_1d){
+                    result += std::to_string(item);
+                    if (&item != &item_1d.back()) result += ", ";
+                }
+                result += "}";
+                if (&item_1d != &item_2d.back()) result += ", ";
+            }
+            result += "}";
+            if (&item_2d != &res.data.back()) result += ", ";
+        }
+
+        *os << result;
+    }
 
 private:
     md_3d_array data;

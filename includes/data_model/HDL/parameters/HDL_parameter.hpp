@@ -25,12 +25,12 @@
 #include "data_model/HDL/parameters/Initialization_list.hpp"
 
 #include <cereal/types/vector.hpp>
+#include <cereal/types/variant.hpp>
 #include "cereal/types/utility.hpp"
 
 
 class HDL_parameter {
 public:
-
     HDL_parameter( const HDL_parameter &c );
     HDL_parameter();
     void set_name(const std::string &n) {
@@ -78,12 +78,14 @@ public:
         expression_components.clear();
     }
 
-    void set_array_value(const mdarray &arr){
+    void set_array_value(const mdarray<int64_t> &arr){
         locking_violation_check();
         type = array_parameter;
-        array_value = arr;
+        value = arr;
     };
-    mdarray get_array_value(){return array_value;};
+    mdarray<int64_t> get_array_value() {
+        return std::get<mdarray<int64_t>>(value);
+    };
 
     std::string value_as_string() const;
     std::string to_string() const;
@@ -102,7 +104,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, string_value_array,array_value,type,
+        ar(name, value,type,
            expression_components, i_l);
     }
 
@@ -127,8 +129,7 @@ private:
 
     std::string name;
     std::string scope;
-    std::vector<std::string> string_value_array;
-    mdarray array_value;
+    std::variant<mdarray<int64_t>, mdarray<std::string>::md_1d_array> value;
     parameter_type type;
     bool loop_index = false;
 
