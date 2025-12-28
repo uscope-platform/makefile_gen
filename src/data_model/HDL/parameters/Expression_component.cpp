@@ -15,6 +15,8 @@
 
 #include "data_model/HDL/parameters/Expression_component.hpp"
 
+#include "data_model/HDL/parameters/Expression.hpp"
+
 const std::regex Expression_component::sv_constant_regex(R"(^\d*'(s)?(h|d|o|b)([0-9a-fA-F]+))");
 const std::regex Expression_component::number_regex("^\\d+$");
 const std::regex Expression_component::size_regex(R"(^(\d*)'[0-9a-zA-Z]+)");
@@ -183,25 +185,10 @@ bool Expression_component::is_right_associative() {
     return right_associative_set.contains(string_value);
 }
 
-const std::string Expression_component::print_expression(const std::vector<Expression_component> &exp) {
+const std::string Expression_component::print_index(const std::vector<Expression> &index) {
     std::string ret_val;
-    for(auto &item:exp){
-        if(item.get_type() == numeric_component){
-            ret_val += std::to_string(item.numeric_value);
-        } else if(item.get_type() == string_component || item.get_type() == operator_component || item.get_type()== function_component) {
-            if(!item.package_prefix.empty()){
-                ret_val += item.package_prefix + "::";
-            }
-            ret_val += item.string_value;
-        }
-    }
-    return ret_val;
-}
-
-const std::string Expression_component::print_index(const std::vector<std::vector<Expression_component>> &index) {
-    std::string ret_val;
-    for(auto &item:array_index){
-        ret_val += "[" + print_expression(item) + "]";
+    for(auto &item:index){
+        ret_val += "[" + item.print() + "]";
     }
     return ret_val;
 }
@@ -221,6 +208,6 @@ int64_t Expression_component::calculate_binary_size(int64_t in) {
     }
 }
 
-void Expression_component::add_array_index(const std::vector<Expression_component> &c) {
+void Expression_component::add_array_index(const Expression &c) {
     array_index.push_back(c);
 }

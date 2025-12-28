@@ -90,14 +90,14 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_parameter(const std:
     std::shared_ptr<HDL_parameter> p;
     if(par->get_type()== HDL_parameter::function_parameter) {
         auto fs = spec.get_functions();
-        auto components = par->get_expression_components();
+        auto expression = par->get_expression_components();
 
-        if(components.size() != 1) {
+        if(expression.components.size() != 1) {
             spdlog::warn("Parameter {} is initialized by function with arguments, which is currently unsupported", par->get_name());
-            p = process_unsupported_parameter(par, components);
+            p = process_unsupported_parameter(par, expression);
             return p;
         }
-        auto function = spec.get_functions().at(components[0].get_string_value());
+        auto function = spec.get_functions().at(expression.components[0].get_string_value());
         if(function.is_scalar()) {
             p = process_scalar_function_parameter(par, function);
         } else {
@@ -160,11 +160,11 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_unsupported_paramete
     spdlog::trace("{}->Processing unsupported parameter: {}", trace_prefix, par->get_name());
 
     std::shared_ptr<HDL_parameter> return_par = par->clone();
-    std::string value = expr[0].get_string_value()+ "(";
-    for(int i = 1; i <expr.size(); i++) {
+    std::string value = expr.components[0].get_string_value()+ "(";
+    for(int i = 1; i <expr.components.size(); i++) {
 
-        value += expr[i].get_string_value();
-        if(i<expr.size()-1) {
+        value += expr.components[i].get_string_value();
+        if(i<expr.components.size()-1) {
             value += ",";
         } else {
             value += ")";
@@ -232,11 +232,15 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
                 auto parameter = external_parameters->get(return_par->get_name());
                 if(parameter->get_type() == HDL_parameter::numeric_parameter){
                     auto value = parameter->get_numeric_value();
-                    return_par->set_expression_components({Expression_component(std::to_string(value))});
+                    Expression e;
+                    e.emplace_back(std::to_string(value));
+                    return_par->set_expression_components(e);
                     return_par->set_value(value);
                 } else {
                     auto value = parameter->get_string_value();
-                    return_par->set_expression_components({Expression_component(value)});
+                    Expression e;
+                    e.emplace_back(value);
+                    return_par->set_expression_components(e);
                     return_par->set_value(value);
                 }
             }
@@ -257,23 +261,23 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
 }
 
 
-int64_t Parameter_processor::process_expression(const std::vector<Expression_component> &expr, int64_t *result_size) {
+int64_t Parameter_processor::process_expression(const Expression &expr, int64_t *result_size) {
 
-    std::vector<Expression_component> rpn_vect;
-    if(!expr[0].is_rpn()){
-        if(expr.size()==1){
-            auto comp = expr[0];
+    Expression rpn_vect;
+    if(!expr.components[0].is_rpn()){
+        if(expr.components.size()==1){
+            auto comp = expr.components[0];
             return get_component_value(comp, result_size);
         } else {
             rpn_vect = Expression_evaluator::expr_vector_to_rpn(expr);
         }
     } else {
-        if(expr.size() == 2){
-            auto comp = expr[1];
+        if(expr.components.size() == 2){
+            auto comp = expr.components[1];
             return get_component_value(comp, result_size);
         } else {
             rpn_vect = std::move(expr);
-            rpn_vect.erase(rpn_vect.begin());
+            rpn_vect.components.erase(rpn_vect.components.begin());
         }
 
     }
@@ -281,7 +285,7 @@ int64_t Parameter_processor::process_expression(const std::vector<Expression_com
     std::vector<Expression_component> processed_rpn;
 
 
-    for(auto i : rpn_vect){
+    for(auto i : rpn_vect.components){
         if(!i.get_array_index().empty()){
             i = process_array_access(i);
         }

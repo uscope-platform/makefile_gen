@@ -13,19 +13,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef EXPRESSION_EVALUATOR_HPP
-#define EXPRESSION_EVALUATOR_HPP
 
 #include "data_model/HDL/parameters/Expression.hpp"
 
-class Expression_evaluator {
-public:
-    static std::optional<int64_t> evaluate_expression(const Expression &expr);
-    static Expression expr_vector_to_rpn(const Expression& v);
-    static int64_t evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string& operation);
-    static int64_t evaluate_unary_expression(int64_t operand, const std::string& operation);
-};
-
-
-
-#endif //EXPRESSION_EVALUATOR_HPP
+std::string Expression::print() const {
+    std::string ret_val;
+    for(auto &item:components){
+        if(item.get_type() == numeric_component){
+            ret_val += std::to_string(item.get_numeric_value());
+        } else if(item.get_type() == string_component || item.get_type() == operator_component || item.get_type()== function_component) {
+            if(!item.get_package_prefix().empty()){
+                ret_val += item.get_package_prefix() + "::";
+            }
+            ret_val += item.get_string_value();
+        }
+    }
+    return ret_val;
+}

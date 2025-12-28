@@ -1,4 +1,4 @@
-// Copyright 2021 University of Nottingham Ningbo China
+ // Copyright 2021 University of Nottingham Ningbo China
 // Author: Filippo Savi <filssavi@gmail.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,8 @@
 #include "data_model/HDL/HDL_instance.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/documentation/module_documentation.hpp"
+
+#include "analysis/passes/parameter_solution_pass.hpp"
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/unordered_map.hpp>
@@ -108,6 +110,8 @@ class HDL_Resource {
             doc= d;
         };
         module_documentation get_documentation() const { return doc;}
+
+        void process_parameters();
 
         template<class Archive>
         void serialize( Archive & ar ) {

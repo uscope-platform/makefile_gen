@@ -146,11 +146,7 @@ std::string HDL_parameter::to_string() const {
 
     result += "\n  EXPRESSION:\n";
 
-    auto comps = expression_components;
-
-    for(auto &item:comps){
-        result += "    " + item.print_value() + "\n";
-    }
+    auto comps = expression_components.print();
 
     result += "\n  INITIALIZATION LIST:\n    ";
 

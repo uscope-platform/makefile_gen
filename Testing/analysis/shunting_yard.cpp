@@ -23,24 +23,30 @@
 TEST(shunting_yard, shunting_yard_priority){
 
 
-    std::vector<Expression_component> expr = {
-            Expression_component("add_expr_p"),
-            Expression_component("+"),
-            Expression_component("mul_expr_p"),
-            Expression_component("*"),
-            Expression_component("5")
+    Expression expr = {
+            {
+                    Expression_component("add_expr_p"),
+                    Expression_component("+"),
+                    Expression_component("mul_expr_p"),
+                    Expression_component("*"),
+                    Expression_component("5")
+            },
+            false
+
     };
     auto rpn_expr = Expression_evaluator::expr_vector_to_rpn(expr);
 
     Expression_component e("");
     e.set_rpn_marker();
-    std::vector<Expression_component> expected_result = {
+    Expression expected_result = {
+        {
             e,
             Expression_component("add_expr_p"),
             Expression_component("mul_expr_p"),
             Expression_component("5"),
             Expression_component("*"),
             Expression_component("+")
+        }, false
     };
 
     ASSERT_EQ(rpn_expr, expected_result);
@@ -49,64 +55,74 @@ TEST(shunting_yard, shunting_yard_priority){
 
 TEST(shunting_yard, shunting_yard_parenthesis){
 
-    std::vector<Expression_component> expr_1 = {
-            Expression_component("("),
-            Expression_component("add_expr_p"),
-            Expression_component("+"),
-            Expression_component("mul_expr_p"),
-            Expression_component(")"),
-            Expression_component("*"),
-            Expression_component("5")
+    Expression expr_1 = {
+            {
+                    Expression_component("("),
+                    Expression_component("add_expr_p"),
+                    Expression_component("+"),
+                    Expression_component("mul_expr_p"),
+                    Expression_component(")"),
+                    Expression_component("*"),
+                    Expression_component("5")
+            }, false
     };
     auto rpn_expr_1 = Expression_evaluator::expr_vector_to_rpn(expr_1);
 
     Expression_component e("");
     e.set_rpn_marker();
-    std::vector<Expression_component> expected_result_1 = {
-            e,
-            Expression_component("add_expr_p"),
-            Expression_component("mul_expr_p"),
-            Expression_component("+"),
-            Expression_component("5"),
-            Expression_component("*")
+    Expression expected_result_1 = {
+            {
+                    e,
+                    Expression_component("add_expr_p"),
+                    Expression_component("mul_expr_p"),
+                    Expression_component("+"),
+                    Expression_component("5"),
+                    Expression_component("*")
+            }, false
     };
 
     ASSERT_EQ(rpn_expr_1, expected_result_1);
 
-    std::vector<Expression_component> expr_2 = {
-            Expression_component("5"),
-            Expression_component("*"),
-            Expression_component("("),
-            Expression_component("add_expr_p"),
-            Expression_component("+"),
-            Expression_component("mul_expr_p"),
-            Expression_component(")")
+    Expression expr_2 = {
+            {
+                    Expression_component("5"),
+                    Expression_component("*"),
+                    Expression_component("("),
+                    Expression_component("add_expr_p"),
+                    Expression_component("+"),
+                    Expression_component("mul_expr_p"),
+                    Expression_component(")")
 
+            },false
     };
 
     auto rpn_expr_2 = Expression_evaluator::expr_vector_to_rpn(expr_2);
 
-    std::vector<Expression_component> expected_result_2 = {
-            e,
-            Expression_component("5"),
-            Expression_component("add_expr_p"),
-            Expression_component("mul_expr_p"),
-            Expression_component("+"),
-            Expression_component("*")
+    Expression expected_result_2 = {
+            {
+                    e,
+                    Expression_component("5"),
+                    Expression_component("add_expr_p"),
+                    Expression_component("mul_expr_p"),
+                    Expression_component("+"),
+                    Expression_component("*")
+            },false
     };
     ASSERT_EQ(rpn_expr_2, expected_result_2);
 }
 
 TEST(shunting_yard, shunting_yard_function){
 
-    std::vector<Expression_component> expr = {
-            Expression_component("$clog2"),
-            Expression_component("("),
-            Expression_component("add_expr_p"),
-            Expression_component("+"),
-            Expression_component("2"),
-            Expression_component(")")
+    Expression expr = {
+            {
+                    Expression_component("$clog2"),
+                    Expression_component("("),
+                    Expression_component("add_expr_p"),
+                    Expression_component("+"),
+                    Expression_component("2"),
+                    Expression_component(")")
 
+            },false
     };
 
     auto rpn_expr = Expression_evaluator::expr_vector_to_rpn(expr);
@@ -114,12 +130,14 @@ TEST(shunting_yard, shunting_yard_function){
 
     Expression_component e("");
     e.set_rpn_marker();
-    std::vector<Expression_component> expected_result = {
-            e,
-            Expression_component("add_expr_p"),
-            Expression_component("2"),
-            Expression_component("+"),
-            Expression_component("$clog2")
+    Expression expected_result = {
+            {
+                    e,
+                    Expression_component("add_expr_p"),
+                    Expression_component("2"),
+                    Expression_component("+"),
+                    Expression_component("$clog2")
+            }, false
     };
 
 
@@ -128,31 +146,35 @@ TEST(shunting_yard, shunting_yard_function){
 
 TEST(shunting_yard, shunting_yard_parenthesis_complex){
 
-    std::vector<Expression_component> expr_1 = {
-            Expression_component("("),
-            Expression_component("4"),
-            Expression_component("*"),
-            Expression_component("3"),
-            Expression_component("+"),
-            Expression_component("5"),
-            Expression_component(")"),
-            Expression_component("+"),
-            Expression_component("1")
+    Expression expr_1 = {
+            {
+                    Expression_component("("),
+                    Expression_component("4"),
+                    Expression_component("*"),
+                    Expression_component("3"),
+                    Expression_component("+"),
+                    Expression_component("5"),
+                    Expression_component(")"),
+                    Expression_component("+"),
+                    Expression_component("1")
+            }, false
     };
     auto rpn_expr_1 = Expression_evaluator::expr_vector_to_rpn(expr_1);
 
     Expression_component e("");
     e.set_rpn_marker();
 
-    std::vector<Expression_component> expected_result_1 = {
-            e,
-            Expression_component("4"),
-            Expression_component("3"),
-            Expression_component("*"),
-            Expression_component("5"),
-            Expression_component("+"),
-            Expression_component("1"),
-            Expression_component("+")
+    Expression expected_result_1 = {
+            {
+                    e,
+                    Expression_component("4"),
+                    Expression_component("3"),
+                    Expression_component("*"),
+                    Expression_component("5"),
+                    Expression_component("+"),
+                    Expression_component("1"),
+                    Expression_component("+")
+            }, false
     };
 
     ASSERT_EQ(rpn_expr_1, expected_result_1);
@@ -162,13 +184,15 @@ TEST(shunting_yard, shunting_yard_test_5){
 
     Expression_component e("");
     e.set_rpn_marker();
-    std::vector<Expression_component> expr_1 = {
-            e,
-            Expression_component("N_CHANNELS"),
-            Expression_component("8"),
-            Expression_component("/"),
-            Expression_component("1"),
-            Expression_component("+")
+    Expression expr_1 = {
+            {
+                    e,
+                    Expression_component("N_CHANNELS"),
+                    Expression_component("8"),
+                    Expression_component("/"),
+                    Expression_component("1"),
+                    Expression_component("+")
+            }, false
     };
     auto rpn_expr_1 = Expression_evaluator::expr_vector_to_rpn(expr_1);
 

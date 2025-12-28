@@ -199,7 +199,9 @@ HDL_instance_AST HDL_ast_builder::specialize_instance(HDL_instance_AST &i, int64
         for(auto &n:nets){
             if(n.is_array()) {
                 auto new_net = n;
-                new_net.set_index({Expression_component(idx)});
+                Expression n_idx;
+                n_idx.emplace_back(idx);
+                new_net.set_index(n_idx);
                 port_content.emplace_back(new_net);
             } else {
                 port_content.push_back(n);
@@ -258,7 +260,9 @@ HDL_ast_builder::specialize_parameters(int64_t idx, const Parameters_map &params
 
 Expression HDL_ast_builder::specialize_expression(Expression &e, Parameter_processor &p) {
     try {
-        return {Expression_component(p.process_expression(e, nullptr))};
+        Expression ret;
+        ret.emplace_back(p.process_expression(e, nullptr));
+        return e;
     } catch(Parameter_processor_Exception ex) {
         return e;
     }

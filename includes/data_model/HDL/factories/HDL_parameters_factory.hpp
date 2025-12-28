@@ -20,7 +20,6 @@
 #include "data_model/HDL/parameters/Initialization_list.hpp"
 #include "resource_factory_base.hpp"
 
-typedef std::vector<Expression_component> Expression;
 
 class HDL_parameters_factory : protected resources_factory_base<HDL_parameter> {
 

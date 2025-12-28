@@ -189,10 +189,18 @@ TEST(parameter_extraction, array_expression) {
 
 
     Initialization_list il;
-    il.add_dimension({{Expression_component("31")}, {Expression_component("0")},true},true);
-    il.add_dimension({{Expression_component("1")},{Expression_component("0")}},false);
-    il.add_item({Expression_component("32")});
-    il.add_item({Expression_component("5")});
+    dimension_t d;
+    d.first_bound = {{Expression_component("31")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = true;
+    il.add_dimension(d,true);
+
+    d.first_bound = {{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    il.add_dimension(d,false);
+    il.add_item({{Expression_component("32")}, false});
+    il.add_item({{Expression_component("5")}, false});
 
     p->add_initialization_list(il);
 
@@ -203,12 +211,14 @@ TEST(parameter_extraction, array_expression) {
     p->set_type(HDL_parameter::expression_parameter);
     p->set_name("array_parameter_expr_p");
     Expression_component e = Expression_component("array_parameter");
-    std::vector<std::vector<Expression_component>> ai = {{Expression_component("sv_numeric_p"), Expression_component("*"), Expression_component("0")}};
+    std::vector<Expression> ai;
+    ai.push_back({{Expression_component("sv_numeric_p"), Expression_component("*"), Expression_component("0")}, false});
     e.set_array_index(ai);
     p->add_component(e);
     p->add_component(Expression_component("+"));
     e = Expression_component("array_parameter");
-    ai = {{Expression_component("1")}};
+    ai.clear();
+    ai.push_back({{Expression_component("1")}, false});
     e.set_array_index(ai);
     p->add_component(e);
     check_params.insert(p);
@@ -253,21 +263,29 @@ TEST(parameter_extraction, multidimensional_array_expression) {
 
 
     init_list_t init;
-    init.dimensions = {
-            {{Expression_component("31")}, {Expression_component("0")}, true},
-            {{Expression_component("repetition_size"),Expression_component("-"), Expression_component("1")},{Expression_component("0")}},
-            {{Expression_component("1")},{Expression_component("0")}}
-                       };
-
-    init.values = {
-        {
-            {Expression_component("32")},
-            {Expression_component("32")}
-        },{
-            {Expression_component("5")},
-            {Expression_component("6")}
-        }
-    };
+    std::vector<dimension_t> d;
+    dimension_t dim;
+    dim.first_bound = {{Expression_component("31")}, false};
+    dim.second_bound= { {Expression_component("0")}, false};
+    dim.packed = true;
+    d.push_back(dim);
+    dim.first_bound = {{Expression_component("repetition_size"),Expression_component("-"), Expression_component("1")}, false};
+    dim.second_bound= { {Expression_component("0")}, false};
+    dim.packed = false;
+    d.push_back(dim);
+    dim.first_bound = {{Expression_component("1")}, false};
+    dim.second_bound= { {Expression_component("0")}, false};
+    dim.packed = false;
+    d.push_back(dim);
+    init.dimensions = d;
+    std::vector<Expression> e;
+    e.push_back({{Expression_component("32")}, false});
+    e.push_back({{Expression_component("32")}, false});
+    init.values.push_back(e);
+    e.clear();
+    e.push_back({{Expression_component("5")}, false});
+    e.push_back({{Expression_component("6")}, false});
+    init.values.push_back(e);
 
     p->add_initialization_list(produce_check_init_list(init));
 
@@ -279,10 +297,12 @@ TEST(parameter_extraction, multidimensional_array_expression) {
     p = std::make_shared<HDL_parameter>();
     p->set_type(HDL_parameter::expression_parameter);
     p->set_name("multidim_array_access");
-    Expression_component e = Expression_component("multidim_array_parameter");
-    std::vector<Expression> ai = {{Expression_component("1")},{Expression_component("0")}};
-    e.set_array_index(ai);
-    p->add_component(e);
+    Expression_component ec = Expression_component("multidim_array_parameter");
+    std::vector<Expression> ai;
+    ai.push_back({{Expression_component("1")}, false});
+    ai.push_back({{Expression_component("0")}, false});
+    ec.set_array_index(ai);
+    p->add_component(ec);
     check_params.insert(p);
 
 
@@ -329,10 +349,14 @@ TEST(parameter_extraction, repetition_initialization) {
     p->set_name("repetition_parameter_1");
 
     init_list_t init;
-    init.dimensions = {{{Expression_component("1")},{Expression_component("0")}, false}};
-    init.values = {{
-                           {Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("1")}
-                   }};
+    dimension_t d;
+    d.first_bound = {{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    init.dimensions.push_back(d);
+    init.values.push_back({
+                           {{Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("1")}, false}
+                   });
 
     p->add_initialization_list(produce_check_init_list_1d(init));
 
@@ -342,10 +366,16 @@ TEST(parameter_extraction, repetition_initialization) {
     p->set_type(HDL_parameter::expression_parameter);
     p->set_name("repetition_parameter_2");
 
-    init.dimensions = {{{Expression_component("1")},{Expression_component("0")}, false}};
-    init.values = {{
-                           {Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("4")}
-                   }};
+    d.first_bound = {{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    init.values.clear();
+    init.dimensions.clear();
+    init.dimensions.push_back(d);
+    init.values.push_back({
+                           {{Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("4")}, false}
+                   });
+
 
     p->add_initialization_list(produce_check_init_list_1d(init));
 
@@ -356,11 +386,16 @@ TEST(parameter_extraction, repetition_initialization) {
     p->set_type(HDL_parameter::expression_parameter);
     p->set_name("multi_repetition_parameter");
 
-    init.dimensions = {{{Expression_component("3")},{Expression_component("0")}}};
-    init.values = {{
-                           {Expression_component("repetition_parameter_1")},
-                           {Expression_component("repetition_parameter_2")}
-                   }};
+    d.first_bound = {{Expression_component("3")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    init.values.clear();
+    init.dimensions.clear();
+    init.dimensions.push_back(d);
+    init.values.push_back({
+                           {{Expression_component("repetition_parameter_1")}, false},
+                           {{Expression_component("repetition_parameter_2")}, false}
+                   });
 
     p->add_initialization_list(produce_check_init_list(init));
 
@@ -370,12 +405,18 @@ TEST(parameter_extraction, repetition_initialization) {
     p->set_type(HDL_parameter::expression_parameter);
     p->set_name("mixed_repetition_parameter");
 
-    init.dimensions = {{{Expression_component("3")},{Expression_component("0")}}};
-    init.values = {{
-                           {Expression_component("1")},
-                           {Expression_component("2")},
-                           {Expression_component("repetition_parameter_2")}
-                   }};
+
+    d.first_bound = {{Expression_component("3")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    init.values.clear();
+    init.dimensions.clear();
+    init.dimensions.push_back(d);
+    init.values.push_back({
+                           {{Expression_component("1")}, false},
+                           {{Expression_component("2")}, false},
+                           {{Expression_component("repetition_parameter_2")}, false}
+                   });
 
 
     p->add_initialization_list(produce_check_init_list(init));
@@ -412,17 +453,22 @@ TEST(parameter_extraction, packed_array) {
     p->set_name("packed_param");
 
     init_list_t init;
-    init.dimensions = {{{Expression_component("7")}, {Expression_component("0")}, true}};
-    init.values = {{
-            {Expression_component("1'b1")},
-            {Expression_component("1'b0")},
-            {Expression_component("1'b1")},
-            {Expression_component("1'b0")},
-            {Expression_component("1'b1")},
-            {Expression_component("1'b0")},
-            {Expression_component("1'b0")},
-            {Expression_component("1'b1")}
-    }};
+    dimension_t d;
+
+    d.first_bound = {{Expression_component("7")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = true;
+    init.dimensions.push_back(d);
+    init.values.push_back({
+            {{Expression_component("1'b1")}, false},
+            {{Expression_component("1'b0")}, false},
+            {{Expression_component("1'b1")}, false},
+            {{Expression_component("1'b0")}, false},
+            {{Expression_component("1'b1")}, false},
+            {{Expression_component("1'b0")}, false},
+            {{Expression_component("1'b0")}, false},
+            {{Expression_component("1'b1")}, false},
+    });
 
     p->add_initialization_list(produce_check_init_list(init));
 
@@ -431,9 +477,9 @@ TEST(parameter_extraction, packed_array) {
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
-    for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item->get_name()));
-        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    for(const auto& check_item:check_params){
+        ASSERT_TRUE(parameters.contains(check_item->get_name()));
+        ASSERT_EQ(*check_item, *parameters.get(check_item->get_name()));
     }
 
 }
@@ -526,13 +572,15 @@ TEST(parameter_extraction, negative_number_array_init) {
     p->set_name("negative_array_param");
 
     init_list_t init;
-    init.dimensions = {
-            {{Expression_component("1")},{Expression_component("0")}, false}
-    };
-    init.values = {{
-       {Expression_component("-"),Expression_component("16'sd32767")},
-       {Expression_component("16'sd32767")}
-    }};
+    dimension_t d;
+    d.first_bound = {{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    init.dimensions = {d};
+    init.values.push_back({
+       {{Expression_component("-"),Expression_component("16'sd32767")}, false},
+       {{Expression_component("16'sd32767")}, false}
+    });
 
     p->add_initialization_list(produce_check_init_list_1d(init));
 
@@ -569,14 +617,15 @@ TEST(parameter_extraction, expression_array_init) {
     p->set_name("expression_array_param");
 
     init_list_t init;
-    init.dimensions = {
-            {{Expression_component("1")},{Expression_component("0")}, false}
-    };
-    init.values = {{
-        {Expression_component("5"),Expression_component("+"),Expression_component("4")},
-        {Expression_component("7"),Expression_component("*"),Expression_component("6")}
-   }};
-
+    dimension_t d;
+    d.first_bound = {{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    init.dimensions.push_back(d);
+    init.values.push_back({
+        {{Expression_component("5"),Expression_component("+"),Expression_component("4")}, false},
+        {{Expression_component("7"),Expression_component("*"),Expression_component("6")}, false}
+   });
     p->add_initialization_list(produce_check_init_list_1d(init));
 
 
@@ -613,30 +662,35 @@ TEST(parameter_extraction, combined_packed_unpacked_init) {
     p->set_name("param_a");
 
     init_list_t init;
-    init.dimensions = {
-            {{Expression_component("7")}, {Expression_component("0")}, true},
-            {{Expression_component("1")}, {Expression_component("0")}, false}
-    };
-    init.values = {{
-                           {Expression_component("1'b1")},
-                           {Expression_component("1'b1")},
-                           {Expression_component("1'b1")},
-                           {Expression_component("1'b0")},
-                           {Expression_component("1'b0")},
-                           {Expression_component("1'b0")},
-                           {Expression_component("1'b1")},
-                           {Expression_component("1'b0")}
-                   },
-                   {
-                           {Expression_component("1'b0")},
-                           {Expression_component("1'b0")},
-                           {Expression_component("1'b0")},
-                           {Expression_component("1'b1")},
-                           {Expression_component("1'b1")},
-                           {Expression_component("1'b1")},
-                           {Expression_component("1'b0")},
-                           {Expression_component("1'b1")}
-                   }};
+    dimension_t d;
+    d.first_bound  ={{Expression_component("7")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = true;
+    init.dimensions.push_back(d);
+    d.first_bound  ={{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    init.dimensions.push_back(d);
+    init.values.push_back({
+           {{Expression_component("1'b1")},false},
+           {{Expression_component("1'b1")},false},
+           {{Expression_component("1'b1")},false},
+           {{Expression_component("1'b0")},false},
+           {{Expression_component("1'b0")},false},
+           {{Expression_component("1'b0")},false},
+           {{Expression_component("1'b1")},false},
+           {{Expression_component("1'b0")},false}
+   });
+    init.values.push_back({
+           {{Expression_component("1'b0")},false},
+           {{Expression_component("1'b0")},false},
+           {{Expression_component("1'b0")},false},
+           {{Expression_component("1'b1")},false},
+           {{Expression_component("1'b1")},false},
+           {{Expression_component("1'b1")},false},
+           {{Expression_component("1'b0")},false},
+           {{Expression_component("1'b1")},false}
+   });
 
     p->add_initialization_list(produce_check_init_list(init));
 
@@ -648,22 +702,32 @@ TEST(parameter_extraction, combined_packed_unpacked_init) {
     p = std::make_shared<HDL_parameter>();
     p->set_type(HDL_parameter::expression_parameter);
     p->set_name("param_b");
-
-    init.dimensions = {
-            {{Expression_component("7")}, {Expression_component("0")}, true},
-            {{Expression_component("1")}, {Expression_component("0")}, false}
-    };
-    init.values = {{
-                           {Expression_component("$repeat_init"),
-                                   Expression_component("8"),
-                                   Expression_component(","),
-                                   Expression_component("1'b1")}
-                   },
-                   {{Expression_component("$repeat_init"),
-                            Expression_component("8"),
-                            Expression_component(","),
-                            Expression_component("1'b0")}
-                   }};
+    init.dimensions.clear();
+    init.values.clear();
+    d.first_bound  ={{Expression_component("7")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = true;
+    init.dimensions.push_back(d);
+    d.first_bound  ={{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    init.dimensions.push_back(d);
+    init.values.push_back({
+                               {
+                                   {Expression_component("$repeat_init"),
+                                          Expression_component("8"),
+                                          Expression_component(","),
+                                          Expression_component("1'b1")}, false
+                               }
+                   });
+    init.values.push_back({
+                           {
+                               {Expression_component("$repeat_init"),
+                                      Expression_component("8"),
+                                      Expression_component(","),
+                                      Expression_component("1'b0")}, false
+                           }
+               });
 
     p->add_initialization_list(produce_check_init_list(init));
 
@@ -799,35 +863,41 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
     p->set_name("FIXED_REGISTER_VALUES");
 
     init_list_t init;
-    init.dimensions = {
-            {{Expression_component("31")}, {Expression_component("0")}, true},
-            {{Expression_component("4")}, {Expression_component("0")}, false}
-    };
-    init.values = {{
-                           {Expression_component("3")},
-                   },
-                   {
-                           {Expression_component("3")},
-                   },
-                   {
-                           {Expression_component("3")},
-                   },
-                   {
-                           {Expression_component("SS_POLARITY_DEFAULT")},
-                           {Expression_component("3'b0")},
-                           {Expression_component("SS_POLARITY_DEFAULT")},
-                           {Expression_component("5'b0")},
-                           {Expression_component("4'hE")},
-                           {Expression_component("4'b0")}
-                   },
-                   {
-                           {Expression_component("2'h2")},
-                           {Expression_component("2'b1")},
-                           {Expression_component("2'h3")},
-                           {Expression_component("4'hE")},
-                           {Expression_component("4'b0")},
-                   },
-                   };
+    dimension_t d;
+    d.first_bound  ={{Expression_component("31")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = true;
+    init.dimensions.push_back(d);
+    d.first_bound  ={{Expression_component("4")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    init.dimensions.push_back(d);
+
+    init.values.push_back({
+           {{Expression_component("3")},false}
+    });
+    init.values.push_back({
+           {{Expression_component("3")},false}
+    });
+    init.values.push_back({
+           {{Expression_component("3")},false}
+    });
+    init.values.push_back({
+        {{Expression_component("SS_POLARITY_DEFAULT")}, false},
+        {{Expression_component("3'b0")},false},
+        {{Expression_component("SS_POLARITY_DEFAULT")},false},
+        {{Expression_component("5'b0")},false},
+        {{Expression_component("4'hE")},false},
+        {{Expression_component("4'b0")},false}
+    });
+    init.values.push_back({
+            {{Expression_component("2'h2")}, false},
+            {{Expression_component("2'b1")}, false},
+            {{Expression_component("2'h3")}, false},
+            {{Expression_component("4'hE")}, false},
+            {{Expression_component("4'b0")}, false}
+    });
+
     p->add_initialization_list(produce_check_init_list(init));
 
 
@@ -873,25 +943,28 @@ TEST(parameter_extraction, multidimensional_packed_array) {
     check_params.clear();
 
 
-    Expression v1 = {
-            Expression_component("1'b1"),
-            Expression_component("1'b1"),
-            Expression_component("1'b1"),
-            Expression_component("1'b0"),
-            Expression_component("1'b0"),
-            Expression_component("1'b0"),
-            Expression_component("1'b1"),
-            Expression_component("1'b0")
+    Expression v1 = {{
+        Expression_component("1'b1"),
+        Expression_component("1'b1"),
+        Expression_component("1'b1"),
+        Expression_component("1'b0"),
+        Expression_component("1'b0"),
+        Expression_component("1'b0"),
+        Expression_component("1'b1"),
+        Expression_component("1'b0")
+    }, false
     };
     Expression v2 = {
-            Expression_component("1'b0"),
-            Expression_component("1'b0"),
-            Expression_component("1'b0"),
-            Expression_component("1'b1"),
-            Expression_component("1'b1"),
-            Expression_component("1'b1"),
-            Expression_component("1'b0"),
-            Expression_component("1'b1")
+    {
+                Expression_component("1'b0"),
+                Expression_component("1'b0"),
+                Expression_component("1'b0"),
+                Expression_component("1'b1"),
+                Expression_component("1'b1"),
+                Expression_component("1'b1"),
+                Expression_component("1'b0"),
+                Expression_component("1'b1")
+        }, false
     };
 
     auto p = std::make_shared<HDL_parameter>();
@@ -899,31 +972,31 @@ TEST(parameter_extraction, multidimensional_packed_array) {
     p->set_name("param_a");
 
     Initialization_list il;
-    il.add_dimension({{Expression_component("7")}, {Expression_component("0")},true}, true);
-    il.add_dimension({{Expression_component("1")}, {Expression_component("0")},false},false);
-    il.add_dimension({{Expression_component("1")}, {Expression_component("0")},false},false);
+    il.add_dimension({{{Expression_component("7")}, false}, {{Expression_component("0")}, false},true}, true);
+    il.add_dimension({{{Expression_component("1")}, false}, {{Expression_component("0")}, false},false},false);
+    il.add_dimension({{{Expression_component("1")}, false}, {{Expression_component("0")}, false},false},false);
 
     il.open_level();
     il.open_level();
-    for(const auto& item:v1){
-        il.add_item({item});
+    for(const auto& item:v1.components){
+        il.add_item({{item}, false});
     }
     il.close_level();
     il.open_level();
-    for(const auto& item:v2){
-        il.add_item({item});
+    for(const auto& item:v2.components){
+        il.add_item({{item}, false});
     }
     il.close_level();
     il.close_level();
     il.open_level();
     il.open_level();
-    for(const auto& item:v2){
-        il.add_item({item});
+    for(const auto& item:v2.components){
+        il.add_item({{item}, false});
     }
     il.close_level();
     il.open_level();
-    for(const auto& item:v1){
-        il.add_item({item});
+    for(const auto& item:v1.components){
+        il.add_item({{item}, false});
     }
     il.close_level();
     il.close_level();
@@ -963,12 +1036,20 @@ TEST(parameter_extraction, packed_replication_init) {
     p->set_name("test_parameter");
 
     init_list_t init;
-    init.dimensions = {
-            {{Expression_component("4")},{Expression_component("0")}, true}
-    };
-    init.values = {{
-                           {Expression_component("$repeat_init"),Expression_component("5"),Expression_component(","),Expression_component("1'b1")}
-                   }};
+    dimension_t d;
+    d.first_bound = {{Expression_component("4")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = true;
+    init.dimensions.push_back(d);
+    init.values.push_back(
+        {{
+            {
+                Expression_component("$repeat_init"),
+                Expression_component("5"),
+                Expression_component(","),
+                Expression_component("1'b1")
+            }, false
+        }});
 
     p->add_initialization_list(produce_check_init_list_1d(init));
 
@@ -1003,10 +1084,20 @@ TEST(parameter_extraction, array_initialization_default) {
     p->set_name("test_parameter");
     p->set_type(HDL_parameter::expression_parameter);
     Initialization_list i;
-    i.add_dimension({{Expression_component("4")}, {Expression_component("0")}, true}, true);
-    i.add_dimension({{Expression_component("2")}, {Expression_component("0")}, false}, false);
-    i.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false}, false);
-    i.add_item({Expression_component("0")});
+    dimension_t d;
+    d.first_bound = {{Expression_component("4")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = true;
+    i.add_dimension(d, true);
+    d.first_bound = {{Expression_component("2")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    i.add_dimension(d, false);
+    d.first_bound = {{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    i.add_dimension(d, false);
+    i.add_item({{Expression_component("0")}, false});
     i.set_default();
     p->add_initialization_list(i);
     check_params.insert(p);
@@ -1124,8 +1215,8 @@ TEST(parameter_extraction, generate_for) {
     p.add_component(Expression_component("0"));
 
     check_loop.set_init(p);
-    check_loop.set_end_c({Expression_component("n"), Expression_component("<"), Expression_component("N_REPETITIONS")});
-    check_loop.set_iter({Expression_component("n"), Expression_component("+"), Expression_component("1")});
+    check_loop.set_end_c({{Expression_component("n"), Expression_component("<"), Expression_component("N_REPETITIONS")}, false});
+    check_loop.set_iter({{Expression_component("n"), Expression_component("+"), Expression_component("1")}, false});
 
     ASSERT_EQ(loop, check_loop);
 }

@@ -26,3 +26,24 @@ void parameter_solution_pass::setup(const std::shared_ptr<HDL_instance_AST> &roo
 void parameter_solution_pass::process_node(const std::shared_ptr<HDL_instance_AST> &node) {
     int i = 0;
 }
+
+Parameters_map parameter_solution_pass::process_parameters(const Parameters_map &map) {
+    Parameters_map solved_parameters;
+    std::map<std::string, std::vector<std::string>> dependencies_map;
+    for (auto &param: map) {
+        auto param_name = param->get_name();
+        dependencies_map[param_name] = {};
+        for (auto &comp:param->get_expression_components().components) {
+            auto type = comp.get_type();
+            if (type == string_component) {
+                dependencies_map[param_name].push_back(comp.get_string_value());
+            }
+        }
+    }
+    for (auto &[param, dependencies] : dependencies_map ) {
+        if (dependencies_map.empty()) {
+
+        }
+    }
+    return solved_parameters;
+}

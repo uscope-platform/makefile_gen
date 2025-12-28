@@ -34,54 +34,54 @@ TEST( analysis_test , package) {
 
     auto p = std::make_shared<HDL_parameter>();
     p->set_name("bus_base");
-    p->set_expression_components({Expression_component("32'h43c00000")});
+    p->set_expression_components({{Expression_component("32'h43c00000")}, false});
     p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("timebase");
-    p->set_expression_components({ Expression_component("bus_base")});
+    p->set_expression_components({{ Expression_component("bus_base")}, false});
     p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("gpio");
-    p->set_expression_components({
+    p->set_expression_components({{
         Expression_component("timebase"), Expression_component("+"),
         Expression_component("32'h1000"), Expression_component("*"),
         Expression_component("2"), Expression_component("/"),
         Expression_component("2"), Expression_component("+"),
         Expression_component("1"),
 
-    });
+    }, false});
     p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("scope_mux");
-    p->set_expression_components({ Expression_component("gpio")});
+    p->set_expression_components({{ Expression_component("gpio")}, false});
     p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("out_of_order");
-    p->set_expression_components({ Expression_component("scope_mux")});
+    p->set_expression_components({{ Expression_component("scope_mux")}, false});
     p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("modulo_parameter");
-    p->set_expression_components({
+    p->set_expression_components({{
         Expression_component("3"),Expression_component("%"),Expression_component("2")
-    });
+    }, false});
     p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("subtraction_parameter");
-    p->set_expression_components({
+    p->set_expression_components({{
         Expression_component("'o4"),Expression_component("-"),Expression_component("'b10")
-    });
+    }, false});
     p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
@@ -104,7 +104,7 @@ TEST( analysis_test , sv_module) {
     p->set_name("TEST_PARAM");
     Expression_component e("param");
     e.set_package_prefix("test_package");
-    p->set_expression_components({e});
+    p->set_expression_components({{e}, false});
     p->set_type(HDL_parameter::expression_parameter);
     d3.add_parameter(p);
 
@@ -113,7 +113,7 @@ TEST( analysis_test , sv_module) {
     HDL_instance d0("if_array", "axi_lite", module);
     p = std::make_shared<HDL_parameter>();
     p->set_name("instance_array_qualifier");
-    p->set_expression_components({Expression_component("module_parameter_2"),Expression_component("+"),Expression_component("1")});
+    p->set_expression_components({{Expression_component("module_parameter_2"),Expression_component("+"),Expression_component("1")}, false});
     p->set_type(HDL_parameter::expression_parameter);
     d0.add_array_quantifier(p);
     std::vector<HDL_instance> deps = {d0, d1, d2, d3};
@@ -253,8 +253,8 @@ TEST(analysis_test, parameter_array_assignment) {
     HDL_parameter reference_param;
     reference_param.set_name("TEST_PARAM");
     Expression_component e("TEST_ARRAY");
-    e.add_array_index({Expression_component("2")});
-    reference_param.set_expression_components({e});
+    e.add_array_index({{Expression_component("2")}, false});
+    reference_param.set_expression_components({{e}, false});
     reference_param.set_type(HDL_parameter::expression_parameter);
 
     ASSERT_EQ(reference_param, *param);

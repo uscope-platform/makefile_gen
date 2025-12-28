@@ -20,7 +20,7 @@
 #include <cstdint>
 
 
-#include "data_model/HDL/parameters/Expression_component.hpp"
+#include "data_model/HDL/parameters/Expression.hpp"
 #include "data_model/HDL/HDL_loop.hpp"
 
 class HDL_function {

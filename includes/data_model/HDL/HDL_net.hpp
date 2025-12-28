@@ -99,7 +99,7 @@ public:
     std::string get_name() const {
         return name;
     }
-    Expression_component get_index_at(uint32_t i) {return index[i];}
+    Expression_component get_index_at(uint32_t i) {return index.components[i];}
     Expression get_index() const {return index;}
     HDL_range get_range() const {return range;}
     HDL_replication get_replication() const {return replication;}

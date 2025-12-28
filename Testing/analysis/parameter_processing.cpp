@@ -91,8 +91,6 @@ TEST(parameter_processing, simple_parameters) {
     };
 
 
-
-
     Parameters_map check_params = produce_check_components(vect_params);
 
     auto p = std::make_shared<HDL_parameter>();
@@ -178,8 +176,8 @@ TEST(parameter_processing, array_expression) {
     auto parameters = run_test(test_pattern);
 
     std::vector<param_check_t> vect_params = {
-            {"sv_numeric_p", {"5'o10"}, HDL_parameter::numeric_parameter, 8},
-    };
+        {"sv_numeric_p", {"5'o10"}, HDL_parameter::numeric_parameter, 8},
+};
 
     Parameters_map check_params= produce_check_components(vect_params);
 
@@ -189,12 +187,14 @@ TEST(parameter_processing, array_expression) {
     par->set_value(37);
     par->set_name("array_parameter_expr_p");
     Expression_component e("array_parameter");
-    std::vector<std::vector<Expression_component>> ai = {{Expression_component("sv_numeric_p"), {Expression_component("*")}, {Expression_component("0")}}};
+    std::vector<Expression> ai;
+    ai.push_back({{Expression_component("sv_numeric_p"), Expression_component("*"), Expression_component("0")}, false});
     e.set_array_index(ai);
     par->add_component(e);
     e = Expression_component("array_parameter");
     par->add_component(Expression_component("+"));
-    ai = {{Expression_component("1")}};
+    ai.clear();
+    ai.push_back({{Expression_component("1")}, false});
     e.set_array_index(ai);
     par->add_component(e);
     check_params.insert(par);
@@ -204,16 +204,19 @@ TEST(parameter_processing, array_expression) {
     par->set_name("array_parameter");
     par->set_type(HDL_parameter::expression_parameter);
     Initialization_list i;
-    dimension_t  d = {{Expression_component("31")}, {Expression_component("0")}, true};
+    dimension_t  d;
+    d.first_bound ={{Expression_component("31")},false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = true;
 
     i.add_dimension(d,true);
-
-    d = {{Expression_component("1")}, {Expression_component("0")}, false};
-
+    d.first_bound = {{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")},false};
+    d.packed = false;
     i.add_dimension(d, false);
 
-    i.add_item({Expression_component("32")});
-    i.add_item({Expression_component("5")});
+    i.add_item({{Expression_component("32")}, false});
+    i.add_item({{Expression_component("5")}, false});
     par->add_initialization_list(i);
     mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {5,32});
@@ -252,7 +255,9 @@ TEST(parameter_processing, multidimensional_array_expression) {
     par->set_value(32);
     par->set_name("multidim_array_access");
     Expression_component e = Expression_component("multidim_array_parameter");
-    std::vector<Expression> ai = {{Expression_component("1")},{Expression_component("0")}};
+    std::vector<Expression> ai;
+    ai.push_back({{Expression_component("1")}, false});
+    ai.push_back({{Expression_component("0")}, false});
     e.set_array_index(ai);
     par->add_component(e);
     check_params.insert(par);
@@ -261,20 +266,20 @@ TEST(parameter_processing, multidimensional_array_expression) {
     par->set_name("multidim_array_parameter");
     par->set_type(HDL_parameter::expression_parameter);
     Initialization_list i;
-    dimension_t  d = {{Expression_component("31")}, {Expression_component("0")}, true};
+    dimension_t  d = {{{Expression_component("31")}}, {{Expression_component("0")}}, true};
     i.add_dimension(d,true);
-    d = {{Expression_component("repetition_size"), Expression_component("-"), Expression_component("1")}, {Expression_component("0")}, false};
+    d = {{{Expression_component("repetition_size"), Expression_component("-"), Expression_component("1")}},{ {Expression_component("0")}}, false};
     i.add_dimension(d, false);
-    d = {{Expression_component("1")}, {Expression_component("0")}, false};
+    d = {{{Expression_component("1")}}, {{Expression_component("0")}}, false};
     i.add_dimension(d, false);
 
     i.open_level();
-    i.add_item({Expression_component("32")});
-    i.add_item({Expression_component("32")});
+    i.add_item({{Expression_component("32")}, false});
+    i.add_item({{Expression_component("32")}, false});
     i.close_level();
     i.open_level();
-    i.add_item({Expression_component("5")});
-    i.add_item({Expression_component("6")});
+    i.add_item({{Expression_component("5")}, false});
+    i.add_item({{Expression_component("6")}, false});
     i.close_level();
     par->add_initialization_list(i);
 
@@ -322,7 +327,8 @@ TEST(parameter_processing, repetition_initialization) {
     par->set_value(1);
     par->set_name("p1");
     Expression_component e = Expression_component("multi_repetition_parameter");
-    std::vector<Expression> ai = {{Expression_component("2")}};
+    std::vector<Expression> ai;
+    ai.push_back({{Expression_component("2")}, false});
     e.set_array_index(ai);
     par->add_component(e);
     check_params.insert(par);
@@ -333,7 +339,8 @@ TEST(parameter_processing, repetition_initialization) {
     par->set_value(4);
     par->set_name("p2");
     e = Expression_component("mixed_repetition_parameter");
-    ai = {{Expression_component("1")}};
+    ai.clear();
+    ai.push_back({{Expression_component("1")}, false});
     e.set_array_index(ai);
     par->add_component(e);
     check_params.insert(par);
@@ -343,7 +350,8 @@ TEST(parameter_processing, repetition_initialization) {
     par->set_value(2);
     par->set_name("p3");
     e = Expression_component("mixed_repetition_parameter");
-    ai = {{Expression_component("2")}};
+    ai.clear();
+    ai.push_back({{Expression_component("2")}, false});
     e.set_array_index(ai);
     par->add_component(e);
     check_params.insert(par);
@@ -518,12 +526,12 @@ TEST(parameter_processing, negative_number_array_init) {
     par->set_type(HDL_parameter::numeric_parameter);
     par->set_value(-65534);
     Expression_component ec("negative_array_param");
-    std::vector<Expression_component> idx = {Expression_component("1")};
+    Expression idx = {{Expression_component("1")}, false};
     ec.add_array_index(idx);
     par->add_component(ec);
     par->add_component(Expression_component("-"));
     ec = Expression_component("negative_array_param");
-    idx = {Expression_component("0")};
+    idx = {{Expression_component("0")}, false};
     ec.add_array_index(idx);
     par->add_component(ec);
 
@@ -533,12 +541,14 @@ TEST(parameter_processing, negative_number_array_init) {
     par->set_name("negative_array_param");
     par->set_type(HDL_parameter::expression_parameter);
     Initialization_list i;
-    dimension_t  d = {{Expression_component("1")}, {Expression_component("0")}, false};
-
+    dimension_t  d;
+    d.first_bound = {{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
     i.add_dimension(d, false);
 
-    i.add_item({Expression_component("-"), Expression_component("16'sd32767")});
-    i.add_item({Expression_component("16'sd32767")});
+    i.add_item({{Expression_component("-"), Expression_component("16'sd32767")}, false});
+    i.add_item({{Expression_component("16'sd32767")}, false});
 
     par->add_initialization_list(i);
     mdarray<int64_t> av;
@@ -579,7 +589,7 @@ TEST(parameter_processing, expression_array_init) {
     par->set_type(HDL_parameter::numeric_parameter);
     par->set_value(42);
     Expression_component ec("expression_array_param");
-    std::vector<Expression_component> idx = {Expression_component("0")};
+    Expression idx = {{Expression_component("0")}, false};
     ec.add_array_index(idx);
     par->add_component(ec);
 
@@ -590,7 +600,7 @@ TEST(parameter_processing, expression_array_init) {
     par->set_type(HDL_parameter::numeric_parameter);
     par->set_value(9);
     ec = Expression_component("expression_array_param");
-    idx = {Expression_component("1")};
+    idx = {{Expression_component("1")}, false};
     ec.add_array_index(idx);
     par->add_component(ec);
 
@@ -600,12 +610,15 @@ TEST(parameter_processing, expression_array_init) {
     par->set_name("expression_array_param");
     par->set_type(HDL_parameter::expression_parameter);
     Initialization_list i;
-    dimension_t  d = {{Expression_component("1")}, {Expression_component("0")}, false};
+    dimension_t  d;
+    d.first_bound = {{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
 
     i.add_dimension(d, false);
 
-    i.add_item({Expression_component("5"), Expression_component("+"), Expression_component("4")});
-    i.add_item({Expression_component("7"), Expression_component("*"), Expression_component("6")});
+    i.add_item({{Expression_component("5"), Expression_component("+"), Expression_component("4")}, false});
+    i.add_item({{Expression_component("7"), Expression_component("*"), Expression_component("6")}, false});
 
     mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {42,9});
@@ -656,7 +669,7 @@ TEST(parameter_processing, mixed_packed_unpacked_init) {
     par->set_type(HDL_parameter::numeric_parameter);
     par->set_value(29);
     Expression_component ec("param_a");
-    std::vector<Expression_component> idx = {Expression_component("0")};
+    Expression idx = {{Expression_component("0")}, false};
     ec.add_array_index(idx);
     par->add_component(ec);
     check_params.insert(par);
@@ -666,7 +679,7 @@ TEST(parameter_processing, mixed_packed_unpacked_init) {
     par->set_type(HDL_parameter::numeric_parameter);
     par->set_value(226);
     ec = Expression_component ("param_a");
-    idx = {Expression_component("1")};
+    idx = {{Expression_component("1")}, false};
     ec.add_array_index(idx);
     par->add_component(ec);
 
@@ -677,7 +690,7 @@ TEST(parameter_processing, mixed_packed_unpacked_init) {
     par->set_type(HDL_parameter::numeric_parameter);
     par->set_value(0);
     ec = Expression_component ("param_b");
-    idx = {Expression_component("0")};
+    idx = {{Expression_component("0")}, false};
     ec.add_array_index(idx);
     par->add_component(ec);
 
@@ -688,7 +701,7 @@ TEST(parameter_processing, mixed_packed_unpacked_init) {
     par->set_type(HDL_parameter::numeric_parameter);
     par->set_value(255);
     ec = Expression_component ("param_b");
-    idx = {Expression_component("1")};
+    idx = {{Expression_component("1")}, false};
     ec.add_array_index(idx);
     par->add_component(ec);
 
@@ -807,10 +820,17 @@ TEST(parameter_processing, array_expression_override) {
     par->add_component(Expression_component("22"));
     par->set_type(HDL_parameter::expression_parameter);
     Initialization_list il;
-    il.add_dimension({{Expression_component("31")}, {Expression_component("0")}, true}, true);
-    il.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false}, false);
-    il.add_item({Expression_component("2")});
-    il.add_item({Expression_component("22")});
+    dimension_t d;
+    d.first_bound = {{Expression_component("31")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = true;
+    il.add_dimension(d, true);
+    d.first_bound = {{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    il.add_dimension(d, false);
+    il.add_item({{Expression_component("2")}, false});
+    il.add_item({{Expression_component("22")}, false});
     par->add_initialization_list(il);
     mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {2,22});
@@ -831,22 +851,27 @@ TEST(parameter_processing, array_expression_override) {
     par->set_type(HDL_parameter::numeric_parameter);
     par->set_value(24);
     par->set_name("array_parameter_expr_p");
-    Expression_component e =Expression_component("array_parameter");
-    std::vector<std::vector<Expression_component>> ai = {{Expression_component("sv_numeric_p"), {Expression_component("*")}, {Expression_component("0")}}};
-    e.set_array_index(ai);
-    par->add_component(e);
+    Expression_component ec =Expression_component("array_parameter");
+    Expression e;
+    std::vector<Expression> ai;
+    e.emplace_back("sv_numeric_p"); e.emplace_back("*"); e.emplace_back("0");
+    ai.push_back(e);
+    ec.set_array_index(ai);
+    par->add_component(ec);
     par->add_component(Expression_component("+"));
-    e = Expression_component("array_parameter");
-    ai = {{Expression_component("1")}};
-    e.set_array_index(ai);
-    par->add_component(e);
+    ec = Expression_component("array_parameter");
+    ai.clear();
+    e.components = {Expression_component("1")};
+    ai.push_back(e);
+    ec.set_array_index(ai);
+    par->add_component(ec);
     check_params.insert(par);
 
 
     par  = std::make_shared<HDL_parameter>();
     par->set_name("array_parameter");
     par->set_type(HDL_parameter::expression_parameter);
-    par->set_expression_components({Expression_component("22")});
+    par->set_expression_components({{Expression_component("22")}, false});
     av = mdarray<int64_t>();
     av.set_1d_slice({0,0}, {2,22});
     par->set_array_value(av);
@@ -896,7 +921,8 @@ TEST(parameter_processing, repetition_array_override) {
     par->set_value(1);
     par->set_name("p1");
     Expression_component e = Expression_component("repetition_parameter_a");
-    std::vector<std::vector<Expression_component>> ai = {{Expression_component("2")}};
+    std::vector<Expression> ai;
+    ai.push_back({{Expression_component("2")}, false});
     e.set_array_index(ai);
     Initialization_list il;
     par->add_component(e);
@@ -971,19 +997,23 @@ TEST(parameter_processing, array_instance_parameter_override) {
 
     auto param = check_params.get("p1_t");
     auto ec = param->get_expression_components();
-    ec[0].set_array_index({{Expression_component("0")}});
+    std::vector<Expression> index;
+    index.push_back({{Expression_component("0")}, false});
+    ec.components[0].set_array_index(index);
     param->set_expression_components(ec);
     check_params.insert(param);
 
      param = check_params.get("p2_t");
     ec = param->get_expression_components();
-    ec[0].set_array_index({{Expression_component("1")}});
+    index.clear();
+    index.push_back({{Expression_component("1")}});
+    ec.components[0].set_array_index(index);
     param->set_expression_components(ec);
     check_params.insert(param);
 
     auto par = std::make_shared<HDL_parameter>();
     par->set_name("param_2");
-    par->set_expression_components({Expression_component("override_array")});
+    par->set_expression_components({{Expression_component("override_array")}, false});
     mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {9,8});
     par->set_array_value(av);
@@ -1082,8 +1112,12 @@ TEST(parameter_processing, packed_replication_init) {
     check_param->set_value(31);
 
     Initialization_list i;
-    i.add_dimension({{Expression_component("4")},{Expression_component("0")}, true}, true);
-    i.add_item({Expression_component("$repeat_init"),Expression_component("5"),Expression_component(","),Expression_component("1'b1")});
+    dimension_t d;
+    d.first_bound = {{Expression_component("4")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = true;
+    i.add_dimension(d, true);
+    i.add_item({{Expression_component("$repeat_init"),Expression_component("5"),Expression_component(","),Expression_component("1'b1")}, false});
 
     check_param->add_initialization_list(i);
 
@@ -1115,9 +1149,19 @@ TEST(parameter_processing, array_initialization_default) {
     p->set_name("test_parameter");
     p->set_type(HDL_parameter::expression_parameter);
     Initialization_list i;
-    i.add_dimension({{Expression_component("4")}, {Expression_component("0")}, true}, true);
-    i.add_dimension({{Expression_component("2")}, {Expression_component("0")}, false}, false);
-    i.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false}, false);
+    dimension_t d;
+    d.first_bound = {{Expression_component("4")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = true;
+    i.add_dimension(d, true);
+    d.first_bound = {{Expression_component("2")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    i.add_dimension(d, false);
+    d.first_bound = {{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    i.add_dimension(d, false);
     i.add_item({{Expression_component("p_1"), Expression_component("+"), Expression_component("p_2")}});
     i.set_default();
     p->add_initialization_list(i);

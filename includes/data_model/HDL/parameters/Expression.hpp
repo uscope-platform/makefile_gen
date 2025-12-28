@@ -1,0 +1,47 @@
+//  Copyright 2025 Filippo Savi
+//  Author: Filippo Savi <filssavi@gmail.com>
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+
+#ifndef MAKEFILEGEN_V2_EXPRESSION_HPP
+#define MAKEFILEGEN_V2_EXPRESSION_HPP
+
+
+#include <vector>
+#include "data_model/HDL/parameters/Expression_component.hpp"
+
+struct Expression {
+    std::vector<Expression_component> components;
+    bool rpn = false;
+    void clear() {components.clear(); rpn = false;}
+    bool empty() const {return components.empty();}
+    void push_back(const Expression_component &ec) {components.emplace_back(ec);}
+    void push_front(const Expression_component &ec) {components.insert(components.begin(), ec);}
+    void emplace_back(const std::string &ec) {components.emplace_back(ec);}
+    void emplace_back(const int64_t &ec) {components.emplace_back(ec);}
+    std::string print() const;
+    friend bool operator==(const Expression &lhs, const Expression &rhs) {
+        return std::tie(lhs.components, lhs.rpn) == std::tie(rhs.components, rhs.rpn);
+    }
+
+    friend bool operator!=(const Expression &lhs, const Expression &rhs) {
+        return !(lhs == rhs);
+    }
+
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(components, rpn);
+    }
+};
+
+#endif //MAKEFILEGEN_V2_EXPRESSION_HPP

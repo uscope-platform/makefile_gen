@@ -44,7 +44,9 @@ void HDL_modules_factory::add_port(const std::string &p_n, port_direction_t dir)
 
 
 HDL_Resource HDL_modules_factory::get_module() {
-    return resources_factory_base<HDL_Resource>::get_resource();
+    auto res = get_resource();
+    res.process_parameters();
+    return res;
 }
 
 void

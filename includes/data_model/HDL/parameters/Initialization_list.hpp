@@ -21,7 +21,7 @@
 #include <utility>
 #include <cereal/types/vector.hpp>
 
-#include "data_model/HDL/parameters/Expression_component.hpp"
+#include "data_model/HDL/parameters/Expression.hpp"
 #include "data_model/mdarray.hpp"
 
 
@@ -71,7 +71,7 @@ public:
 
     static bool is_repetition(Expression &e){
         if(!e.empty()){
-            return e[0].get_string_value() == "$repeat_init";
+            return e.components[0].get_string_value() == "$repeat_init";
         }
         return false;
     }

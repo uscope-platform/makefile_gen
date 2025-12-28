@@ -46,9 +46,17 @@ TEST(function_processing, simple_function) {
     auto result = functions["CTRL_ADDR_CALC"];
     HDL_function check_f;
     check_f.set_name("CTRL_ADDR_CALC");
-    check_f.add_assignment({"CTRL_ADDR_CALC", {Expression_component("0")}, {Expression_component("100")}});
-    check_f.add_assignment({"CTRL_ADDR_CALC", {Expression_component("1")}, {Expression_component("200")}});
-    check_f.add_assignment({"CTRL_ADDR_CALC", {Expression_component("2")}, {Expression_component("300")}});
+    assignment a;
+    a.name = "CTRL_ADDR_CALC";
+    a.index = {{Expression_component("0")}, false};
+    a.value = {{Expression_component("100")}, false};
+    check_f.add_assignment(a);
+    a.index.components[0] = Expression_component("1");
+    a.value.components[0] = Expression_component("200");
+    check_f.add_assignment(a);
+    a.index.components[0] = Expression_component("2");
+    a.value.components[0] = Expression_component("300");
+    check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
 
 }
@@ -88,14 +96,21 @@ TEST(function_processing, simple_loop_function) {
     p.add_component(Expression_component("0"));
     p.set_type(HDL_parameter::expression_parameter);
     metadata.set_init(p);
-    metadata.set_end_c({Expression_component("i"),Expression_component("<"),Expression_component("N_CORES")});
+    metadata.set_end_c({{
+        Expression_component("i"),
+        Expression_component("<"),
+        Expression_component("N_CORES")
+        }, false});
 
-    metadata.set_iter({Expression_component("i"), Expression_component("+"), Expression_component(1)});
+    metadata.set_iter({{
+        Expression_component("i"),
+        Expression_component("+"),
+        Expression_component(1)}, false});
 
     assignment a = {
         "CTRL_ADDR_CALC",
-        {Expression_component("i")},
-        {Expression_component("100"), Expression_component("*"), Expression_component("i")}
+        {{Expression_component("i")},false},
+        {{Expression_component("100"), Expression_component("*"), Expression_component("i")},false}
     };
 
     metadata.add_assignment(a);
@@ -141,33 +156,41 @@ TEST(function_processing, complex_loop_function) {
     p.set_type(HDL_parameter::expression_parameter);
     metadata.set_init(p);
     metadata.set_end_c({
-        Expression_component("i"),
-        Expression_component("<"),
-        Expression_component("N_CORES"),
-        Expression_component("+"),
-        Expression_component("1")
+            {
+                Expression_component("i"),
+               Expression_component("<"),
+               Expression_component("N_CORES"),
+               Expression_component("+"),
+               Expression_component("1")
+            }, false
     });
 
-    metadata.set_iter({Expression_component("i"), Expression_component("+"), Expression_component(1)});
+    metadata.set_iter({
+        {
+            Expression_component("i"),
+            Expression_component("+"),
+            Expression_component(1)
+        },
+    false});
 
     assignment a = {
         "CTRL_ADDR_CALC",
-        {Expression_component("i")},
-        {Expression_component("100"), Expression_component("*"), Expression_component("i")}
+        {{Expression_component("i")},false},
+        {{Expression_component("100"), Expression_component("*"), Expression_component("i")},false}
     };
 
     metadata.add_assignment(a);
     check_f.add_loop_metadata(metadata);
     a = {
         "CTRL_ADDR_CALC",
-        {Expression_component("0")},
-        {Expression_component("44")}
+        {{Expression_component("0")},false},
+        {{Expression_component("44")},false}
     };
     check_f.add_assignment(a);
     a = {
         "CTRL_ADDR_CALC",
-        {Expression_component("4")},
-        {Expression_component("667")}
+        {{Expression_component("4")},false},
+        {{Expression_component("667")},false}
     };
     check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
@@ -202,14 +225,14 @@ TEST(function_processing, parametrized_loop_function) {
 
     assignment a = {
         "CTRL_ADDR_CALC",
-        {Expression_component("0")},
-        {Expression_component("44")}
+        {{Expression_component("0")},false},
+        {{Expression_component("44")},false}
     };
     check_f.add_assignment(a);
     a = {
         "CTRL_ADDR_CALC",
-        {Expression_component("N_CORES")},
-        {Expression_component("33")}
+        {{Expression_component("N_CORES")}, false},
+        {{Expression_component("33")},false}
     };
     check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
@@ -245,10 +268,10 @@ TEST(function_processing, package_assignment) {
 
     assignment a = {
         "CTRL_ADDR_CALC",
-        {Expression_component("0")},
-        {Expression_component("bus_base")}
+        {{Expression_component("0")}, false},
+        {{Expression_component("bus_base")},false}
     };
-    a.value[0].set_package_prefix("hil_address_space");
+    a.value.components[0].set_package_prefix("hil_address_space");
     check_f.add_assignment(a);
 
 

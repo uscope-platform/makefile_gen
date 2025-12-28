@@ -18,6 +18,7 @@
 #define MAKEFILEGEN_V2_PARAMETER_SOLVING_PASS_HPP
 
 #include "analysis/passes/pass_base.hpp"
+#include "data_model/HDL/parameters/Expression_evaluator.hpp"
 
 enum parameter_type {
     string_parameter,
@@ -36,6 +37,7 @@ public:
     parameter_solution_pass();
     void setup(const std::shared_ptr<HDL_instance_AST> &root) override;
     void process_node(const std::shared_ptr<HDL_instance_AST> &node) override;
+    Parameters_map process_parameters(const Parameters_map & map);
 private:
     std::unordered_map<std::string, parameter_value> parameters_map;
 };

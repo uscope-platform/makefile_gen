@@ -211,9 +211,9 @@ std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> Initiali
             values.insert(values.end(), res.begin(), res.end());
         } else{
             try{
-                if(expr.size() == 1 && expr[0].get_type() == numeric_component){
-                    values.push_back(expr[0].get_numeric_value());
-                    sizes.push_back(expr[0].get_binary_size());
+                if(expr.components.size() == 1 && expr.components[0].get_type() == numeric_component){
+                    values.push_back(expr.components[0].get_numeric_value());
+                    sizes.push_back(expr.components[0].get_binary_size());
                 } else {
                     int64_t  bin_size;
                     auto val = p.process_expression(expr, &bin_size);
@@ -342,16 +342,16 @@ void PrintTo(const Initialization_list &il, std::ostream *os) {
     result += "-----------------------------\n";
     result += "UNPACKED DIMENSIONS\n";
     for(const auto &item:il.unpacked_dimensions){
-        result +="[" + Expression_component::print_expression(item.first_bound) + ":" + Expression_component::print_expression(item.second_bound)+ "]";
+        result +="[" + item.first_bound.print() + ":" + item.second_bound.print()+ "]";
     }
     result += "PACKED DIMENSIONS\n";
     for(const auto &item:il.packed_dimensions){
-        result +="[" + Expression_component::print_expression(item.first_bound) + ":" + Expression_component::print_expression(item.second_bound)+ "]";
+        result +="[" + item.first_bound.print() + ":" + item.second_bound.print()+ "]";
     }
 
     result += "EXPRESSION LEAVES\n";
     for(const auto &item:il.expression_leaves){
-        result +=  "  " + Expression_component::print_expression(item) + "\n";
+        result +=  "  " + item.print() + "\n";
     }
 
     for(const auto &item:il.lower_dimension_leaves){
@@ -368,15 +368,15 @@ void PrintTo(const Initialization_list &il, std::ostream *os) {
 std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Parameter_processor &p, std::vector<int64_t> *sizes) {
     Expression size_expr, val_expr;
     bool in_size = true;
-    for(int i = 1; i<e.size(); i++){
+    for(int i = 1; i<e.components.size(); i++){
         if(in_size){
-            if(e[i].get_string_value() == ","){
+            if(e.components[i].get_string_value() == ","){
                 in_size = false;
             } else{
-                size_expr.push_back(e[i]);
+                size_expr.push_back(e.components[i]);
             }
         } else {
-            val_expr.push_back(e[i]);
+            val_expr.push_back(e.components[i]);
         }
     }
 

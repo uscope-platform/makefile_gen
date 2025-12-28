@@ -53,6 +53,11 @@ bool HDL_Resource::is_interface() {
 }
 
 
+void HDL_Resource::process_parameters() {
+    parameter_solution_pass engine;
+    engine.process_parameters(parameters);
+}
+
 void HDL_Resource::lock_resource() {
     lock = true;
     for(auto &dep:dependencies) dep.lock_dependency();

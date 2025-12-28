@@ -36,6 +36,7 @@ enum expression_component_type {
     marker_component
 };
 
+struct Expression;
 
 class Expression_component {
 public:
@@ -47,6 +48,7 @@ public:
 
     void set_rpn_marker();
     bool is_rpn()const{return rpn_marker;};
+    bool is_numeric() const {return component_type == numeric_component;}
 
     void set_string_value(const std::string &s){string_value = s;};
     std::string get_raw_string_value();
@@ -72,12 +74,11 @@ public:
     friend bool operator==(const Expression_component&lhs, const Expression_component&rhs);
 
 
-    void set_array_index(const std::vector<std::vector<Expression_component>> &v) {array_index = v;};
-    void add_array_index(const std::vector<Expression_component> &c);
-    std::vector<std::vector<Expression_component>> get_array_index() {return array_index;};
+    void set_array_index(const std::vector<Expression> &v) {array_index = v;}
+    void add_array_index(const Expression &c);
+    std::vector<Expression> get_array_index() {return array_index;};
 
-    static const std::string print_expression(const std::vector<Expression_component> &exp);
-    const std::string print_index(const std::vector<std::vector<Expression_component>> &index);
+    const std::string print_index(const std::vector<Expression> &index);
 
     int64_t get_binary_size() const{return binary_size;};
 
@@ -107,7 +108,7 @@ private:
     static const std::regex number_regex;
     static const std::regex size_regex;
 
-    std::vector<std::vector<Expression_component>> array_index;
+    std::vector<Expression> array_index;
 
 
     std::set<std::string> operators_set = {
@@ -172,7 +173,5 @@ private:
             "$clog2","$ceil", "$floor","$pow", "!", "~"
     };
 };
-
-typedef  std::vector<Expression_component> Expression;
 
 #endif //MAKEFILEGEN_V2_EXPRESSION_COMPONENT_HPP

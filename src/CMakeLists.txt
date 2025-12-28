@@ -48,6 +48,7 @@ target_sources(makefile_gen_lib
     data_model/settings_store.cpp
     data_model/data_store.cpp
     data_model/DataFile.cpp
+    data_model/HDL/parameters/Expression.cpp
     data_model/documentation/module_documentation.cpp
     data_model/documentation/register_documentation.cpp
     data_model/documentation/field_documentation.cpp

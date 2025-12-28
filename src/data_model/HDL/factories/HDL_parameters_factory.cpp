@@ -75,7 +75,7 @@ void HDL_parameters_factory::stop_bit_selection() {
 void HDL_parameters_factory::close_array_index() {
     if(in_bit_selection & (in_param_assignment || in_packed_assignment || in_replication_assignment|| in_param_override)){
         in_bit_selection = false;
-        new_expression.back().add_array_index(bit_selection);
+        new_expression.components.back().add_array_index(bit_selection);
     }
 }
 
@@ -97,7 +97,7 @@ void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
 void HDL_parameters_factory::stop_replication() {
     if(in_replication){
         in_replication = false;
-        replication_components.insert(replication_components.begin(), {Expression_component("$repeat_init")});
+        replication_components.components.insert(replication_components.components.begin(), {Expression_component("$repeat_init")});
         init_list.add_item(replication_components);
         init_list.close_level();
         replication_components.clear();
@@ -107,7 +107,7 @@ void HDL_parameters_factory::stop_replication() {
 
 void HDL_parameters_factory::stop_replication_assignment() {
     in_replication_assignment = false;
-    replication_components.insert(replication_components.begin(), {Expression_component("$repeat_init")});
+    replication_components.push_front(Expression_component("$repeat_init"));
     init_list.add_item(replication_components);
     replication_components.clear();
 }
@@ -135,7 +135,7 @@ void HDL_parameters_factory::stop_expression_new() {
     if(expression_level == 0){
         if(!new_expression.empty()){
             if(in_replication || in_replication_assignment) {
-                replication_components.insert(replication_components.end(), new_expression.begin(), new_expression.end());
+                replication_components.components.insert(replication_components.components.end(), new_expression.components.begin(), new_expression.components.end());
             } else if(in_unpacked_declaration || in_packed_dimension){
                 expression_stack.push(new_expression);
             } else if(in_packed_assignment || in_initialization_list) {

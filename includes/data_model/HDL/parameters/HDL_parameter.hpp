@@ -21,7 +21,7 @@
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
-#include "data_model/HDL/parameters/Expression_component.hpp"
+#include "data_model/HDL/parameters/Expression.hpp"
 #include "data_model/HDL/parameters/Initialization_list.hpp"
 
 #include <cereal/types/vector.hpp>

@@ -16,18 +16,29 @@
 #include"data_model/HDL/parameters/Expression_evaluator.hpp"
 
 
-std::vector<Expression_component> Expression_evaluator::expr_vector_to_rpn(const std::vector<Expression_component> &v) {// IMPLEMENTATION OF THE SHUNTING YARD ALGORITHM
-    std::vector<Expression_component> rpn_exp;
+std::optional<int64_t> Expression_evaluator::evaluate_expression(const Expression &expr) {
+    if (expr.components.size() == 1) {
+        if (expr.components[0].is_numeric()) return expr.components[0].get_numeric_value();
+        return std::nullopt;
+    }
+
+    auto expr_stack = expr_vector_to_rpn(expr);
+    int i =0;
+    return 0;
+}
+
+Expression Expression_evaluator::expr_vector_to_rpn(const Expression &v) {// IMPLEMENTATION OF THE SHUNTING YARD ALGORITHM
+    Expression rpn_exp;
     std::stack<Expression_component> shunting_stack;
 
-    if(v.size()==0){
+    if(v.empty()){
         return {};
     }
-    if(v[0].is_rpn()){
+    if(v.components[0].is_rpn()){
         return v;
     }
 
-    for(auto item:v){
+    for(auto item:v.components){
         if(item.get_type() == operator_component){ // token is operator
             while (
                     !shunting_stack.empty() &&
@@ -66,7 +77,7 @@ std::vector<Expression_component> Expression_evaluator::expr_vector_to_rpn(const
     }
     Expression_component e("");
     e.set_rpn_marker();
-    rpn_exp.insert(rpn_exp.begin(), {e});
+    rpn_exp.components.insert(rpn_exp.components.begin(), {e});
     return rpn_exp;
 }
 

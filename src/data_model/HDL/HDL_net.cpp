@@ -18,15 +18,15 @@
 std::string HDL_net::get_full_name() const {
     auto base_name = name;
     if(!range.accessor.empty()) {
-        base_name += "[" + Expression_component::print_expression(range.accessor);
+        base_name += "[" + range.accessor.print();
         if(!range.range.empty()) {
             if(range.type ==HDL_range::increasing_range) base_name += "+";
             else if(range.type ==HDL_range::decreasing_range) base_name += "-";
-            base_name += ":" + Expression_component::print_expression(range.range);
+            base_name += ":" + range.range.print();
         }
         base_name += "]";
     } else if(!index.empty()) {
-        base_name += "[" + Expression_component::print_expression(index) + "]";
+        base_name += "[" + index.print() + "]";
     }
     return base_name;
 
