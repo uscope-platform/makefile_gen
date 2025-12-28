@@ -37,16 +37,14 @@ TEST(shunting_yard, shunting_yard_priority){
     auto rpn_expr = Expression_evaluator::expr_vector_to_rpn(expr);
 
     Expression_component e("");
-    e.set_rpn_marker();
     Expression expected_result = {
         {
-            e,
             Expression_component("add_expr_p"),
             Expression_component("mul_expr_p"),
             Expression_component("5"),
             Expression_component("*"),
             Expression_component("+")
-        }, false
+        }, true
     };
 
     ASSERT_EQ(rpn_expr, expected_result);
@@ -64,21 +62,19 @@ TEST(shunting_yard, shunting_yard_parenthesis){
                     Expression_component(")"),
                     Expression_component("*"),
                     Expression_component("5")
-            }, false
+            },
     };
     auto rpn_expr_1 = Expression_evaluator::expr_vector_to_rpn(expr_1);
 
     Expression_component e("");
-    e.set_rpn_marker();
     Expression expected_result_1 = {
             {
-                    e,
                     Expression_component("add_expr_p"),
                     Expression_component("mul_expr_p"),
                     Expression_component("+"),
                     Expression_component("5"),
                     Expression_component("*")
-            }, false
+            }, true
     };
 
     ASSERT_EQ(rpn_expr_1, expected_result_1);
@@ -100,13 +96,12 @@ TEST(shunting_yard, shunting_yard_parenthesis){
 
     Expression expected_result_2 = {
             {
-                    e,
                     Expression_component("5"),
                     Expression_component("add_expr_p"),
                     Expression_component("mul_expr_p"),
                     Expression_component("+"),
                     Expression_component("*")
-            },false
+            },true
     };
     ASSERT_EQ(rpn_expr_2, expected_result_2);
 }
@@ -129,15 +124,13 @@ TEST(shunting_yard, shunting_yard_function){
 
 
     Expression_component e("");
-    e.set_rpn_marker();
     Expression expected_result = {
             {
-                    e,
                     Expression_component("add_expr_p"),
                     Expression_component("2"),
                     Expression_component("+"),
                     Expression_component("$clog2")
-            }, false
+            }, true
     };
 
 
@@ -162,11 +155,9 @@ TEST(shunting_yard, shunting_yard_parenthesis_complex){
     auto rpn_expr_1 = Expression_evaluator::expr_vector_to_rpn(expr_1);
 
     Expression_component e("");
-    e.set_rpn_marker();
 
     Expression expected_result_1 = {
             {
-                    e,
                     Expression_component("4"),
                     Expression_component("3"),
                     Expression_component("*"),
@@ -174,7 +165,7 @@ TEST(shunting_yard, shunting_yard_parenthesis_complex){
                     Expression_component("+"),
                     Expression_component("1"),
                     Expression_component("+")
-            }, false
+            }, true
     };
 
     ASSERT_EQ(rpn_expr_1, expected_result_1);
@@ -183,16 +174,14 @@ TEST(shunting_yard, shunting_yard_parenthesis_complex){
 TEST(shunting_yard, shunting_yard_test_5){
 
     Expression_component e("");
-    e.set_rpn_marker();
     Expression expr_1 = {
             {
-                    e,
                     Expression_component("N_CHANNELS"),
                     Expression_component("8"),
                     Expression_component("/"),
                     Expression_component("1"),
                     Expression_component("+")
-            }, false
+            }, true
     };
     auto rpn_expr_1 = Expression_evaluator::expr_vector_to_rpn(expr_1);
 

@@ -34,7 +34,7 @@ Expression Expression_evaluator::expr_vector_to_rpn(const Expression &v) {// IMP
     if(v.empty()){
         return {};
     }
-    if(v.components[0].is_rpn()){
+    if(v.rpn){
         return v;
     }
 
@@ -75,9 +75,7 @@ Expression Expression_evaluator::expr_vector_to_rpn(const Expression &v) {// IMP
         rpn_exp.push_back(shunting_stack.top());
         shunting_stack.pop();
     }
-    Expression_component e("");
-    e.set_rpn_marker();
-    rpn_exp.components.insert(rpn_exp.components.begin(), {e});
+    rpn_exp.rpn = true;
     return rpn_exp;
 }
 

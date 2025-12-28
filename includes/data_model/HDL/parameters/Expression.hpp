@@ -23,6 +23,7 @@
 struct Expression {
     std::vector<Expression_component> components;
     bool rpn = false;
+
     void clear() {components.clear(); rpn = false;}
     bool empty() const {return components.empty();}
     void push_back(const Expression_component &ec) {components.emplace_back(ec);}

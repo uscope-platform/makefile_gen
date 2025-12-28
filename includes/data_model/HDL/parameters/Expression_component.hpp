@@ -32,8 +32,7 @@ enum expression_component_type {
     numeric_component,
     operator_component,
     function_component,
-    array_component,
-    marker_component
+    array_component
 };
 
 struct Expression;
@@ -46,8 +45,6 @@ public:
     explicit Expression_component(const std::string &s);
     explicit Expression_component(int64_t n);
 
-    void set_rpn_marker();
-    bool is_rpn()const{return rpn_marker;};
     bool is_numeric() const {return component_type == numeric_component;}
 
     void set_string_value(const std::string &s){string_value = s;};
@@ -101,8 +98,6 @@ private:
     int64_t numeric_value;
 
     int64_t binary_size = 0;
-
-    bool rpn_marker = false;
 
     static const std::regex sv_constant_regex;
     static const std::regex number_regex;

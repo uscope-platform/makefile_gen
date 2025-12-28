@@ -49,9 +49,9 @@ Parameters_map produce_check_components(std::vector<param_check_t> &in){
         auto par = std::make_shared<HDL_parameter>();
         par->set_name(vt.name);
         if(vt.is_rpn){
-            Expression_component e = Expression_component("");
-            e.set_rpn_marker();
-            par->add_component(e);
+            auto expr= par->get_expression_components();
+            expr.rpn = true;
+            par->set_expression_components(expr);
         }
         for(auto &cpt:vt.components){
             par->add_component(Expression_component(cpt));

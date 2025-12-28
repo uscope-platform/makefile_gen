@@ -264,22 +264,11 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
 int64_t Parameter_processor::process_expression(const Expression &expr, int64_t *result_size) {
 
     Expression rpn_vect;
-    if(!expr.components[0].is_rpn()){
-        if(expr.components.size()==1){
-            auto comp = expr.components[0];
-            return get_component_value(comp, result_size);
-        } else {
-            rpn_vect = Expression_evaluator::expr_vector_to_rpn(expr);
-        }
+    if(expr.components.size()==1){
+        auto comp = expr.components[0];
+        return get_component_value(comp, result_size);
     } else {
-        if(expr.components.size() == 2){
-            auto comp = expr.components[1];
-            return get_component_value(comp, result_size);
-        } else {
-            rpn_vect = std::move(expr);
-            rpn_vect.components.erase(rpn_vect.components.begin());
-        }
-
+        rpn_vect = Expression_evaluator::expr_vector_to_rpn(expr);
     }
 
     std::vector<Expression_component> processed_rpn;
