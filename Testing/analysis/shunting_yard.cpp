@@ -34,7 +34,7 @@ TEST(shunting_yard, shunting_yard_priority){
             false
 
     };
-    auto rpn_expr = Expression_evaluator::expr_vector_to_rpn(expr);
+    auto rpn_expr = expr.to_rpm();
 
     Expression_component e("");
     Expression expected_result = {
@@ -64,7 +64,7 @@ TEST(shunting_yard, shunting_yard_parenthesis){
                     Expression_component("5")
             },
     };
-    auto rpn_expr_1 = Expression_evaluator::expr_vector_to_rpn(expr_1);
+    auto rpn_expr_1 = expr_1.to_rpm();
 
     Expression_component e("");
     Expression expected_result_1 = {
@@ -92,7 +92,7 @@ TEST(shunting_yard, shunting_yard_parenthesis){
             },false
     };
 
-    auto rpn_expr_2 = Expression_evaluator::expr_vector_to_rpn(expr_2);
+    auto rpn_expr_2 = expr_2.to_rpm();
 
     Expression expected_result_2 = {
             {
@@ -120,7 +120,7 @@ TEST(shunting_yard, shunting_yard_function){
             },false
     };
 
-    auto rpn_expr = Expression_evaluator::expr_vector_to_rpn(expr);
+    auto rpn_expr = expr.to_rpm();
 
 
     Expression_component e("");
@@ -152,7 +152,7 @@ TEST(shunting_yard, shunting_yard_parenthesis_complex){
                     Expression_component("1")
             }, false
     };
-    auto rpn_expr_1 = Expression_evaluator::expr_vector_to_rpn(expr_1);
+    auto rpn_expr_1 = expr_1.to_rpm();
 
     Expression_component e("");
 
@@ -183,7 +183,7 @@ TEST(shunting_yard, shunting_yard_test_5){
                     Expression_component("+")
             }, true
     };
-    auto rpn_expr_1 = Expression_evaluator::expr_vector_to_rpn(expr_1);
+    auto rpn_expr_1 = expr_1.to_rpm();
 
     ASSERT_EQ(rpn_expr_1, expr_1);
 }

@@ -268,7 +268,7 @@ int64_t Parameter_processor::process_expression(const Expression &expr, int64_t 
         auto comp = expr.components[0];
         return get_component_value(comp, result_size);
     } else {
-        rpn_vect = Expression_evaluator::expr_vector_to_rpn(expr);
+        rpn_vect = expr.to_rpm();
     }
 
     std::vector<Expression_component> processed_rpn;

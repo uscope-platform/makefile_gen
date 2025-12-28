@@ -24,17 +24,21 @@ struct Expression {
     std::vector<Expression_component> components;
     bool rpn = false;
 
+
+
     void clear() {components.clear(); rpn = false;}
     bool empty() const {return components.empty();}
     void push_back(const Expression_component &ec) {components.emplace_back(ec);}
     void push_front(const Expression_component &ec) {components.insert(components.begin(), ec);}
     void emplace_back(const std::string &ec) {components.emplace_back(ec);}
     void emplace_back(const int64_t &ec) {components.emplace_back(ec);}
+
     std::string print() const;
+    Expression to_rpm() const;
+    std::optional<int64_t> evaluate();
     friend bool operator==(const Expression &lhs, const Expression &rhs) {
         return std::tie(lhs.components, lhs.rpn) == std::tie(rhs.components, rhs.rpn);
     }
-
     friend bool operator!=(const Expression &lhs, const Expression &rhs) {
         return !(lhs == rhs);
     }

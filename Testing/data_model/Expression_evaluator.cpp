@@ -25,7 +25,7 @@
 TEST(Expression_evaluator, pure_number){
     Expression e;
     e.emplace_back("8'b10110");
-    auto val = Expression_evaluator::evaluate_expression(e);
+    auto val = e.evaluate();
     ASSERT_TRUE(val.has_value());
     ASSERT_EQ(val.value(), 22);
 }
@@ -35,7 +35,7 @@ TEST(Expression_evaluator, pure_number){
 TEST(Expression_evaluator, string){
     Expression e;
     e.emplace_back("test");
-    auto val = Expression_evaluator::evaluate_expression(e);
+    auto val = e.evaluate();
     ASSERT_FALSE(val.has_value());
 }
 
@@ -46,7 +46,7 @@ TEST(Expression_evaluator, simple_expression){
     e.emplace_back("+");
     e.emplace_back("4");
 
-    auto val = Expression_evaluator::evaluate_expression(e);
+    auto val = e.evaluate();
     ASSERT_TRUE(val.has_value());
     ASSERT_EQ(val.value(), 9);
 }
@@ -62,7 +62,7 @@ TEST(Expression_evaluator, parenthesis_expression){
     e.emplace_back("*");
     e.emplace_back("2");
 
-    auto val = Expression_evaluator::evaluate_expression(e);
+    auto val = e.evaluate();
     ASSERT_TRUE(val.has_value());
     ASSERT_EQ(val.value(), 18);
 }

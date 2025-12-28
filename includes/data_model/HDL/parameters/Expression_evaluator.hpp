@@ -20,8 +20,6 @@
 
 class Expression_evaluator {
 public:
-    static std::optional<int64_t> evaluate_expression(const Expression &expr);
-    static Expression expr_vector_to_rpn(const Expression& v);
     static int64_t evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string& operation);
     static int64_t evaluate_unary_expression(int64_t operand, const std::string& operation);
 };

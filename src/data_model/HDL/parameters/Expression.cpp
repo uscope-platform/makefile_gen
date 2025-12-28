@@ -30,3 +30,69 @@ std::string Expression::print() const {
     }
     return ret_val;
 }
+
+Expression Expression::to_rpm() const {
+    Expression rpn_exp;
+    std::stack<Expression_component> shunting_stack;
+
+    if(components.empty()){
+        return {};
+    }
+    if(rpn){
+        Expression expr;
+        expr.components = components;
+        expr.rpn = rpn;
+        return expr;
+    }
+
+    for(auto item:components){
+        if(item.get_type() == operator_component){ // token is operator
+            while (
+                    !shunting_stack.empty() &&
+                    shunting_stack.top().get_raw_string_value()!="(" &&
+                    (
+                        shunting_stack.top().get_type() == function_component ||
+                        shunting_stack.top().get_operator_precedence()<item.get_operator_precedence() ||
+                        shunting_stack.top().get_operator_precedence()==item.get_operator_precedence() &&
+                        !shunting_stack.top().is_right_associative()
+                    )
+            ){
+                rpn_exp.push_back(shunting_stack.top());
+                shunting_stack.pop();
+            }
+            shunting_stack.push(item);
+        } else if(item.get_raw_string_value() == "(" || item.get_type() == function_component){
+            shunting_stack.push(item);
+        } else if(item.get_raw_string_value() == ")"){
+            while (shunting_stack.top().get_raw_string_value() != "(") {
+                rpn_exp.push_back(shunting_stack.top());
+                shunting_stack.pop();
+                if(shunting_stack.top().get_type()==function_component){
+                    rpn_exp.push_back(shunting_stack.top());
+                    shunting_stack.pop();
+                }
+            }
+            shunting_stack.pop();
+        } else{ // token is number
+            rpn_exp.push_back(item);
+        }
+    }
+
+    while(!shunting_stack.empty()){
+        rpn_exp.push_back(shunting_stack.top());
+        shunting_stack.pop();
+    }
+    rpn_exp.rpn = true;
+    return rpn_exp;
+}
+
+std::optional<int64_t> Expression::evaluate() {
+    if (components.size() == 1) {
+        if (components[0].is_numeric()) return components[0].get_numeric_value();
+        return std::nullopt;
+    }
+
+    auto expr_stack = to_rpm();
+    int i =0;
+    return 0;
+}
