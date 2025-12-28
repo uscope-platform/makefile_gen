@@ -36,6 +36,11 @@ struct Expression {
     std::string print() const;
     Expression to_rpm() const;
     std::optional<int64_t> evaluate();
+    std::optional<int64_t> evaluate( int64_t *result_size);
+    int64_t evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string &operation);
+    int64_t evaluate_unary_expression(int64_t operand, const std::string &operation);
+
+
     friend bool operator==(const Expression &lhs, const Expression &rhs) {
         return std::tie(lhs.components, lhs.rpn) == std::tie(rhs.components, rhs.rpn);
     }
@@ -48,5 +53,6 @@ struct Expression {
         ar(components, rpn);
     }
 };
+
 
 #endif //MAKEFILEGEN_V2_EXPRESSION_HPP
