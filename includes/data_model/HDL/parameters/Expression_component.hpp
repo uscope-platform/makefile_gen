@@ -22,6 +22,7 @@
 #include <set>
 #include <nlohmann/json.hpp>
 #include <unordered_map>
+#include <variant>
 #include <cmath>
 
 #include <cereal/types/vector.hpp>
@@ -47,10 +48,23 @@ public:
 
     bool is_numeric() const {return component_type == numeric_component;}
 
-    void set_string_value(const std::string &s){string_value = s;};
+    void set_string_value(const std::string &s) {
+        value = s;
+        component_type = string_component;
+    };
+    void set_numeric_value(int64_t v) {
+        value = v;
+        component_type = numeric_component;
+    }
     std::string get_raw_string_value();
-    std::string get_string_value() const { return string_value;};
-    int64_t  get_numeric_value() const {return numeric_value;};
+    std::string get_string_value() const {
+        if (std::holds_alternative<int64_t>(value)) return "";
+        return  std::get<std::string>(value);
+    };
+    int64_t  get_numeric_value() const {
+        if (std::holds_alternative<std::string>(value)) return 0;
+        return std::get<int64_t>(value);
+    }
 
     void set_package_prefix(const std::string &s) {package_prefix = s;};
     std::string get_package_prefix() const {return package_prefix;};
@@ -81,7 +95,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(component_type, string_value, numeric_value, array_index, package_prefix, binary_size);
+        ar(component_type, value, array_index, package_prefix, binary_size);
     }
 
     nlohmann::json dump();
@@ -93,9 +107,9 @@ private:
 
     expression_component_type component_type;
 
-    std::string string_value;
+    std::variant<int64_t, std::string> value;
+
     std::string package_prefix;
-    int64_t numeric_value;
 
     int64_t binary_size = 0;
 
