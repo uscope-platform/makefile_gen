@@ -91,7 +91,7 @@ int64_t HDL_parameter::get_numeric_value() const {
     return std::get<mdarray<int64_t>>(value).get_scalar();
 }
 
-void HDL_parameter::propagate_constant(const std::string& constant_name, int64_t constant_value) {
+void HDL_parameter::propagate_constant(const std::string& constant_name, const std::variant<int64_t, std::string> &constant_value) {
     expression.propagate_constant(constant_name, constant_value);
 }
 

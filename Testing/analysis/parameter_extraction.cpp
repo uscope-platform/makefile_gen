@@ -104,6 +104,19 @@ TEST(parameter_extraction, simple_parameters) {
         ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
+    auto defaults = resource.get_default_parameters();
+    std::map<std::string, std::variant<int64_t, std::string>> check_defaults = {
+        {"simple_numeric_p", 32},
+        {"local_p", 74},
+        {"sv_numeric_p", 8},
+        {"dimensionless_sv_numeric_p", 63},
+        {"string_p", R"("423")"},
+        {"nested_p", R"("423")"}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
 }
 
 TEST(parameter_extraction, simple_expressions) {

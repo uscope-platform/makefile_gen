@@ -88,14 +88,13 @@ Expression Expression::to_rpm() const {
     return rpn_exp;
 }
 
-std::optional<int64_t> Expression::evaluate() {
+std::optional<std::variant<int64_t, std::string>> Expression::evaluate() {
     return evaluate(nullptr);
 }
 
-std::optional<int64_t> Expression::evaluate(int64_t *result_size) {
+std::optional<std::variant<int64_t, std::string>> Expression::evaluate(int64_t *result_size) {
     if (components.size() == 1) {
-        if (components[0].is_numeric()) return std::get<int64_t>(components[0].get_value());
-        return std::nullopt;
+        return components[0].get_value();
     }
 
     auto expr_stack = to_rpm();
@@ -185,7 +184,7 @@ int64_t Expression::evaluate_unary_expression(int64_t operand, const std::string
         throw std::runtime_error("Error: Attempted evaluation of an unsupported unary expression expression " + operation);
     }
 }
-void Expression::propagate_constant(const std::string &name, int64_t value) {
+void Expression::propagate_constant(const std::string &name, const std::variant<int64_t, std::string> & value) {
     for (auto & component : components) {
         if (component.is_string()) {
             if (std::get<std::string>(component.get_value()) == name) {

@@ -32,11 +32,11 @@ struct Expression {
     void push_front(const Expression_component &ec) {components.insert(components.begin(), ec);}
     void emplace_back(const std::string &ec) {components.emplace_back(ec);}
     void emplace_back(const int64_t &ec) {components.emplace_back(ec);}
-    void propagate_constant(const std::string &name, int64_t value);
+    void propagate_constant(const std::string &name, const std::variant<int64_t, std::string> &value);
     std::string print() const;
     Expression to_rpm() const;
-    std::optional<int64_t> evaluate();
-    std::optional<int64_t> evaluate( int64_t *result_size);
+    std::optional<std::variant<int64_t, std::string>> evaluate();
+    std::optional<std::variant<int64_t, std::string>> evaluate( int64_t *result_size);
     int64_t evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string &operation);
     int64_t evaluate_unary_expression(int64_t operand, const std::string &operation);
 

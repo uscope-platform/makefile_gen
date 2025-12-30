@@ -50,38 +50,33 @@ std::map<std::string, std::variant<int64_t, std::string>> parameter_solution_pas
 
         int rounds_counter = 0;
         while (!dependencies_map.empty() && rounds_counter < 100) {
-            try {
-                for (auto &[param_name, dependencies] : dependencies_map ) {
-                    if (dependencies.empty() && !solved_parameters.contains(param_name)) {
-                        auto to_solve = map.const_get(param_name);
+            for (auto &[param_name, dependencies] : dependencies_map ) {
+                if (dependencies.empty() && !solved_parameters.contains(param_name)) {
+                    auto to_solve = map.const_get(param_name);
 
-                        if (to_solve->get_expression().empty()){
-                            // TODO: HANDLE ARRAYS AND SHIT
-                            int i = 0;
+                    if (to_solve->get_expression().empty()){
+                        // TODO: HANDLE ARRAYS AND SHIT
+                        int i = 0;
+                    } else {
+
+                        auto value = to_solve->get_expression().evaluate();
+                        if (!value.has_value()) {
+                            solved_parameters.insert({param_name, ""});
                         } else {
-
-                            auto value = to_solve->get_expression().evaluate();
-                            if (!value.has_value()) {
-                                solved_parameters.insert({param_name, ""});
-                            } else {
-                                solved_parameters.insert({param_name, value.value()});
-                            }
-                        }
-
-                    }
-                }
-                for (auto &param: solved_parameters) {
-                    dependencies_map.erase(param.first);
-                    for (auto &dep: dependencies_map) {
-                        if (dep.second.contains(param.first)) {
-                            dep.second.erase(param.first);
-                            if (std::holds_alternative<std::string>(param.second)) throw std::runtime_error("attempted propagation of ai string");
-                            map.get(dep.first)->propagate_constant(param.first, std::get<int64_t>(param.second));
+                            solved_parameters.insert({param_name, value.value()});
                         }
                     }
+
                 }
-            } catch (std::runtime_error &e) {
-                spdlog::critical("default Paranmeter value processing error");
+            }
+            for (auto &param: solved_parameters) {
+                dependencies_map.erase(param.first);
+                for (auto &dep: dependencies_map) {
+                    if (dep.second.contains(param.first)) {
+                        dep.second.erase(param.first);
+                        map.get(dep.first)->propagate_constant(param.first, param.second);
+                    }
+                }
             }
             rounds_counter++;
         }

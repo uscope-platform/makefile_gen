@@ -44,7 +44,7 @@ public:
     void set_value(int64_t val);
     std::string get_string_value() const;
     int64_t  get_numeric_value() const;
-    void propagate_constant(const std::string& name, int64_t constant_value);
+    void propagate_constant(const std::string& name, const std::variant<int64_t, std::string> &constant_value);
     explicit operator std::string();
 
     bool is_array() const {return !i_l.empty();};
