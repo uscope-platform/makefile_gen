@@ -282,11 +282,12 @@ int64_t Parameter_processor::process_expression(const Expression &expr, int64_t 
         if(i.is_numeric() || i.is_operator() || i.is_function()){
             processed_rpn.push_back(i);
         } else if(i.is_string()) {
-            if(external_parameters->contains(std::get<std::string>(i.get_value()))) {
-                Expression_component e(external_parameters->get(i.get_raw_string_value())->get_numeric_value());
+            auto component_string = std::get<std::string>(i.get_value());
+            if(external_parameters->contains(component_string)) {
+                Expression_component e(external_parameters->get(std::get<std::string>(i.get_value()))->get_numeric_value());
                 processed_rpn.emplace_back(e);
-            } else if(completed_set->contains(i.get_raw_string_value())) {
-                processed_rpn.emplace_back(completed_set->get(i.get_raw_string_value())->get_numeric_value());
+            } else if(completed_set->contains(component_string)) {
+                processed_rpn.emplace_back(completed_set->get(component_string)->get_numeric_value());
             } else if(!i.get_package_prefix().empty()){
                 int64_t val = get_package_parameter(i, nullptr);
                 processed_rpn.emplace_back(val);
@@ -319,7 +320,7 @@ int64_t Parameter_processor::process_expression(const Expression &expr, int64_t 
                     evaluator_stack.pop();
                 }
 
-                result = Expression_evaluator::evaluate_binary_expression(op_a, op_b, i.get_raw_string_value());
+                result = Expression_evaluator::evaluate_binary_expression(op_a, op_b, std::get<std::string>(i.get_value()));
             }
             evaluator_stack.emplace(result);
         }

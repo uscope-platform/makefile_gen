@@ -46,10 +46,9 @@ public:
         if (is_numeric()) return false;
         return operators_set.contains(std::get<std::string>(value));
     }
+
     std::variant<int64_t, std::string> get_value()const {return value;}
     void set_value(const std::variant<int64_t, std::string> &v){value = v;}
-
-    std::string get_raw_string_value();
 
     void set_package_prefix(const std::string &s) {package_prefix = s;};
     std::string get_package_prefix() const {return package_prefix;};
@@ -67,7 +66,6 @@ public:
     operator_type_t get_operator_type();
 
     friend bool operator==(const Expression_component&lhs, const Expression_component&rhs);
-
 
     void set_array_index(const std::vector<Expression> &v) {array_index = v;}
     void add_array_index(const Expression &c);

@@ -46,10 +46,12 @@ Expression Expression::to_rpm() const {
     }
 
     for(auto item:components){
-        if(item.is_operator()){
+        if (item.is_numeric()) {
+            rpn_exp.push_back(item);
+        } else if(item.is_operator()){
             while (
                     !shunting_stack.empty() &&
-                    shunting_stack.top().get_raw_string_value()!="(" &&
+                    std::get<std::string>(shunting_stack.top().get_value())!="(" &&
                     (
                         shunting_stack.top().is_function() ||
                         shunting_stack.top().get_operator_precedence()<item.get_operator_precedence() ||
@@ -61,10 +63,10 @@ Expression Expression::to_rpm() const {
                 shunting_stack.pop();
             }
             shunting_stack.push(item);
-        } else if(item.get_raw_string_value() == "(" || item.is_function()){
+        } else if(std::get<std::string>(item.get_value()) == "(" || item.is_function()){
             shunting_stack.push(item);
-        } else if(item.get_raw_string_value() == ")"){
-            while (shunting_stack.top().get_raw_string_value() != "(") {
+        } else if(std::get<std::string>(item.get_value())  == ")"){
+            while (std::get<std::string>(shunting_stack.top().get_value()) != "(") {
                 rpn_exp.push_back(shunting_stack.top());
                 shunting_stack.pop();
                 if(shunting_stack.top().is_function()){
@@ -73,7 +75,7 @@ Expression Expression::to_rpm() const {
                 }
             }
             shunting_stack.pop();
-        } else{ // token is number
+        } else {
             rpn_exp.push_back(item);
         }
     }
@@ -121,7 +123,7 @@ std::optional<int64_t> Expression::evaluate(int64_t *result_size) {
                     evaluator_stack.pop();
                 }
 
-                result = evaluate_binary_expression(op_a, op_b, i.get_raw_string_value());
+                result = evaluate_binary_expression(op_a, op_b, std::get<std::string>(i.get_value()));
             }
             evaluator_stack.emplace(result);
         }

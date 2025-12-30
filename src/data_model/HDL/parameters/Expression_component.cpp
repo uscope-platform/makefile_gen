@@ -127,17 +127,6 @@ bool Expression_component::test_parameter_type(const std::regex &r, const std::s
     }
 }
 
-std::string Expression_component::get_raw_string_value() {
-    std::string  base_string;
-    if (std::holds_alternative<std::string>(value)) base_string = std::get<std::string>(value);
-    else base_string = std::to_string(std::get<int64_t>(value));
-    if(array_index.empty()){
-        return base_string;
-    } else {
-        return base_string + print_index(array_index);
-    }
-}
-
 Expression_component::operator_type_t Expression_component::get_operator_type() {
     if(!operators_types.contains(std::get<std::string>(value))){
         throw std::runtime_error("Error: attempted to get the type of a non operator/function expression component");
