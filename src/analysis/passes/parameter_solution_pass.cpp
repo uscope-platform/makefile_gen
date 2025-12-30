@@ -36,12 +36,12 @@ std::map<std::string, std::variant<int64_t, std::string>> parameter_solution_pas
         auto param_name = param->get_name();
         dependencies_map[param_name] = {};
         for (auto &comp:param->get_expression().components) {
-            auto dep = comp.get_string_value();
             if (comp.is_string()) {
+                auto dep = std::get<std::string>(comp.get_value());
                 if (!map.contains(dep)) {
                     solved_parameters.insert({param_name, dep});
                 } else {
-                    dependencies_map[param_name].insert(comp.get_string_value());
+                    dependencies_map[param_name].insert(dep);
                 }
             }
         }

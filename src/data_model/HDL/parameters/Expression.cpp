@@ -20,12 +20,12 @@ std::string Expression::print() const {
     std::string ret_val;
     for(auto &item:components){
         if(item.is_numeric()){
-            ret_val += std::to_string(item.get_numeric_value());
+            ret_val += std::to_string(std::get<int64_t>(item.get_value()));
         } else {
             if(!item.get_package_prefix().empty()){
                 ret_val += item.get_package_prefix() + "::";
             }
-            ret_val += item.get_string_value();
+            ret_val += std::get<std::string>(item.get_value());
         }
     }
     return ret_val;
@@ -92,7 +92,7 @@ std::optional<int64_t> Expression::evaluate() {
 
 std::optional<int64_t> Expression::evaluate(int64_t *result_size) {
     if (components.size() == 1) {
-        if (components[0].is_numeric()) return components[0].get_numeric_value();
+        if (components[0].is_numeric()) return std::get<int64_t>(components[0].get_value());
         return std::nullopt;
     }
 
@@ -107,17 +107,17 @@ std::optional<int64_t> Expression::evaluate(int64_t *result_size) {
         } else {
             int64_t result;
             if(i.get_operator_type() == Expression_component::unary_operator){
-                auto op = evaluator_stack.top().get_numeric_value();
-                result = evaluate_unary_expression(op, i.get_string_value());
+                auto op = std::get<int64_t>(evaluator_stack.top().get_value());
+                result = evaluate_unary_expression(op, std::get<std::string>(i.get_value()));
                 evaluator_stack.pop();
             } else if(i.get_operator_type() == Expression_component::binary_operator){
                 int64_t op_a;
-                auto op_b = evaluator_stack.top().get_numeric_value();
+                auto op_b = std::get<int64_t>(evaluator_stack.top().get_value());
                 evaluator_stack.pop();
                 if(expr_stack.components.size()==2)
                     op_a = 0;
                 else {
-                    op_a = evaluator_stack.top().get_numeric_value();
+                    op_a = std::get<int64_t>(evaluator_stack.top().get_value());
                     evaluator_stack.pop();
                 }
 
@@ -128,10 +128,10 @@ std::optional<int64_t> Expression::evaluate(int64_t *result_size) {
     }
     if(result_size != nullptr){
 
-        *result_size = Expression_component::calculate_binary_size(evaluator_stack.top().get_numeric_value());
+        *result_size = Expression_component::calculate_binary_size(std::get<int64_t>(evaluator_stack.top().get_value()));
     }
     if (evaluator_stack.empty())throw std::runtime_error("Evaluation of an empty expression");
-    return evaluator_stack.top().get_numeric_value();
+    return std::get<int64_t>(evaluator_stack.top().get_value());
 
 
 
@@ -186,8 +186,8 @@ int64_t Expression::evaluate_unary_expression(int64_t operand, const std::string
 void Expression::propagate_constant(const std::string &name, int64_t value) {
     for (auto & component : components) {
         if (component.is_string()) {
-            if (component.get_string_value() == name) {
-                component.set_numeric_value(value);
+            if (std::get<std::string>(component.get_value()) == name) {
+                component.set_value(value);
             }
         }
     }

@@ -71,7 +71,8 @@ public:
 
     static bool is_repetition(Expression &e){
         if(!e.empty()){
-            return e.components[0].get_string_value() == "$repeat_init";
+            if (std::holds_alternative<std::string>(e.components[0].get_value()))
+            return std::get<std::string>(e.components[0].get_value()) == "$repeat_init";
         }
         return false;
     }

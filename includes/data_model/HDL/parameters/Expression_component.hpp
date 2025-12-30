@@ -46,23 +46,10 @@ public:
         if (is_numeric()) return false;
         return operators_set.contains(std::get<std::string>(value));
     }
-    void set_string_value(const std::string &s) {
-        value = s;
-    };
-    void set_numeric_value(int64_t v) {
-        value = v;
-    }
-    std::variant<int64_t, std::string> get_value(){return value;}
+    std::variant<int64_t, std::string> get_value()const {return value;}
     void set_value(const std::variant<int64_t, std::string> &v){value = v;}
+
     std::string get_raw_string_value();
-    std::string get_string_value() const {
-        if (std::holds_alternative<int64_t>(value)) return "";
-        return  std::get<std::string>(value);
-    };
-    int64_t  get_numeric_value() const {
-        if (std::holds_alternative<std::string>(value)) return 0;
-        return std::get<int64_t>(value);
-    }
 
     void set_package_prefix(const std::string &s) {package_prefix = s;};
     std::string get_package_prefix() const {return package_prefix;};

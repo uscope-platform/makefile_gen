@@ -97,7 +97,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_parameter(const std:
             p = process_unsupported_parameter(par, expression);
             return p;
         }
-        auto function = spec.get_functions().at(expression.components[0].get_string_value());
+        auto function = spec.get_functions().at(std::get<std::string>(expression.components[0].get_value()));
         if(function.is_scalar()) {
             p = process_scalar_function_parameter(par, function);
         } else {
@@ -160,10 +160,10 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_unsupported_paramete
     spdlog::trace("{}->Processing unsupported parameter: {}", trace_prefix, par->get_name());
 
     std::shared_ptr<HDL_parameter> return_par = par->clone();
-    std::string value = expr.components[0].get_string_value()+ "(";
+    std::string value = std::get<std::string>(expr.components[0].get_value())+ "(";
     for(int i = 1; i <expr.components.size(); i++) {
 
-        value += expr.components[i].get_string_value();
+        value += std::get<std::string>(expr.components[i].get_value());
         if(i<expr.components.size()-1) {
             value += ",";
         } else {
@@ -282,7 +282,7 @@ int64_t Parameter_processor::process_expression(const Expression &expr, int64_t 
         if(i.is_numeric() || i.is_operator() || i.is_function()){
             processed_rpn.push_back(i);
         } else if(i.is_string()) {
-            if(external_parameters->contains(i.get_string_value())) {
+            if(external_parameters->contains(std::get<std::string>(i.get_value()))) {
                 Expression_component e(external_parameters->get(i.get_raw_string_value())->get_numeric_value());
                 processed_rpn.emplace_back(e);
             } else if(completed_set->contains(i.get_raw_string_value())) {
@@ -306,7 +306,7 @@ int64_t Parameter_processor::process_expression(const Expression &expr, int64_t 
             int64_t result;
             if(i.get_operator_type() == Expression_component::unary_operator){
                 auto op = get_component_value(evaluator_stack.top(), nullptr);
-                result = Expression_evaluator::evaluate_unary_expression(op, i.get_string_value());
+                result = Expression_evaluator::evaluate_unary_expression(op, std::get<std::string>(i.get_value()));
                 evaluator_stack.pop();
             } else if(i.get_operator_type() == Expression_component::binary_operator){
                 int64_t op_a;
@@ -326,19 +326,20 @@ int64_t Parameter_processor::process_expression(const Expression &expr, int64_t 
     }
     if(result_size != nullptr){
 
-        *result_size = Expression_component::calculate_binary_size(evaluator_stack.top().get_numeric_value());
+        *result_size = Expression_component::calculate_binary_size(std::get<int64_t>(evaluator_stack.top().get_value()));
     }
-    return evaluator_stack.top().get_numeric_value();
+    return std::get<int64_t>(evaluator_stack.top().get_value());
 }
 
 int64_t Parameter_processor::get_package_parameter(const Expression_component &ex, int64_t *result_size) {
     int64_t return_val;
     auto pkg = ex.get_package_prefix();
+    if (ex.is_numeric()) throw std::runtime_error("Encountered a number as parameter name in a package");
     if(d_store->contains_hdl_entity(pkg)) {
         auto res = d_store->get_HDL_resource(pkg);
         Parameter_processor p({}, d_store);
         auto pkg_params = p.process_parameters_map(res.get_parameters(),res);
-        return_val = pkg_params.get(ex.get_string_value())->get_numeric_value();
+        return_val = pkg_params.get(std::get<std::string>(ex.get_value()))->get_numeric_value();
         if(result_size != nullptr){
             *result_size = Expression_component::calculate_binary_size(return_val);
         }
@@ -365,7 +366,7 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
         if(result_size != nullptr){
             *result_size = ec.get_binary_size();
         }
-        return ec.get_numeric_value();
+        return std::get<int64_t>(ec.get_value());
     } else if(ec.is_operator() || ec.is_function()){
         throw std::runtime_error("Error: attempted to get the numeric value of an operator or Function");
     }
@@ -376,9 +377,9 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
 
     std::string param_name;
     if(!ec.get_array_index().empty()){
-        return process_array_access(ec).get_numeric_value();
+        return std::get<int64_t>(process_array_access(ec).get_value());
     } else{
-        param_name = ec.get_string_value();
+        param_name = std::get<std::string>(ec.get_value());
     }
 
     std::map<std::vector<int64_t>, int64_t>   result_array;
@@ -409,7 +410,7 @@ int64_t Parameter_processor::get_component_value(Expression_component &ec, int64
             }
         }
     } else {
-        auto s = ec.get_string_value();
+        auto s = std::get<std::string>(ec.get_value());
         s.erase(std::remove( s.begin(), s.end(), '\"' ),s.end());
         throw Parameter_processor_Exception(s);
     }
@@ -491,11 +492,14 @@ Expression_component Parameter_processor::process_array_access(Expression_compon
 
     std::reverse(array_index_values.begin(), array_index_values.end());
 
+    if (e.is_numeric()) throw std::runtime_error("Encounteded a subscripted number");
+
+    auto component_value = std::get<std::string>(e.get_value());
     std::shared_ptr<HDL_parameter> p;
-    if(external_parameters->contains(e.get_string_value())){
-        p = external_parameters->get(e.get_string_value());
-    }else if(completed_set->contains(e.get_string_value())){
-        p = completed_set->get(e.get_string_value());
+    if(external_parameters->contains(component_value)){
+        p = external_parameters->get(component_value);
+    }else if(completed_set->contains(component_value)){
+        p = completed_set->get(component_value);
     } else {
         throw Parameter_processor_Exception();
     }

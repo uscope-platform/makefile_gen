@@ -212,7 +212,7 @@ std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> Initiali
         } else{
             try{
                 if(expr.components.size() == 1 && expr.components[0].is_numeric()){
-                    values.push_back(expr.components[0].get_numeric_value());
+                    values.push_back(std::get<int64_t>(expr.components[0].get_value()));
                     sizes.push_back(expr.components[0].get_binary_size());
                 } else {
                     int64_t  bin_size;
@@ -370,7 +370,7 @@ std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Param
     bool in_size = true;
     for(int i = 1; i<e.components.size(); i++){
         if(in_size){
-            if(e.components[i].get_string_value() == ","){
+            if(std::get<std::string>(e.components[i].get_value()) == ","){
                 in_size = false;
             } else{
                 size_expr.push_back(e.components[i]);
