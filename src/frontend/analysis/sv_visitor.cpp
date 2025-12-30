@@ -705,7 +705,7 @@ void sv_visitor::enterGenvar_expression(sv2017::Genvar_expressionContext *ctx) {
 
 void sv_visitor::exitGenvar_expression(sv2017::Genvar_expressionContext *ctx) {
     auto param = params_factory.get_parameter();
-    auto ex = param->get_expression_components();
+    auto ex = param->get_expression();
     loops_factory.add_expression (ex);
 }
 

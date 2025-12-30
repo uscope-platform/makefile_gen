@@ -144,7 +144,7 @@ void HDL_parameters_factory::stop_expression_new() {
                 concat_components.push_back(new_expression);
                 init_list.add_item(new_expression);
             } else {
-                current_resource.set_expression_components(new_expression);
+                current_resource.set_expression(new_expression);
                 if(in_function_assignment) {
                     in_function_assignment = false;
                     current_resource.set_type(HDL_parameter::function_parameter);

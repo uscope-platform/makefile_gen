@@ -49,9 +49,9 @@ Parameters_map produce_check_components(std::vector<param_check_t> &in){
         auto par = std::make_shared<HDL_parameter>();
         par->set_name(vt.name);
         if(vt.is_rpn){
-            auto expr= par->get_expression_components();
+            auto expr= par->get_expression();
             expr.rpn = true;
-            par->set_expression_components(expr);
+            par->set_expression(expr);
         }
         for(auto &cpt:vt.components){
             par->add_component(Expression_component(cpt));
@@ -871,7 +871,7 @@ TEST(parameter_processing, array_expression_override) {
     par  = std::make_shared<HDL_parameter>();
     par->set_name("array_parameter");
     par->set_type(HDL_parameter::expression_parameter);
-    par->set_expression_components({{Expression_component("22")}, false});
+    par->set_expression({{Expression_component("22")}, false});
     av = mdarray<int64_t>();
     av.set_1d_slice({0,0}, {2,22});
     par->set_array_value(av);
@@ -996,24 +996,24 @@ TEST(parameter_processing, array_instance_parameter_override) {
     Parameters_map check_params= produce_check_components(vect_params);
 
     auto param = check_params.get("p1_t");
-    auto ec = param->get_expression_components();
+    auto ec = param->get_expression();
     std::vector<Expression> index;
     index.push_back({{Expression_component("0")}, false});
     ec.components[0].set_array_index(index);
-    param->set_expression_components(ec);
+    param->set_expression(ec);
     check_params.insert(param);
 
      param = check_params.get("p2_t");
-    ec = param->get_expression_components();
+    ec = param->get_expression();
     index.clear();
     index.push_back({{Expression_component("1")}});
     ec.components[0].set_array_index(index);
-    param->set_expression_components(ec);
+    param->set_expression(ec);
     check_params.insert(param);
 
     auto par = std::make_shared<HDL_parameter>();
     par->set_name("param_2");
-    par->set_expression_components({{Expression_component("override_array")}, false});
+    par->set_expression({{Expression_component("override_array")}, false});
     mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {9,8});
     par->set_array_value(av);

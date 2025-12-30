@@ -93,10 +93,10 @@ class HDL_Resource {
 
         void add_parameter(const std::shared_ptr<HDL_parameter> &p) {
             locking_violation_check();
-            parameters.insert(p);
+            parameters_spec.insert(p);
         }
         void set_parameters(Parameters_map p);
-        Parameters_map get_parameters() {return parameters;};
+        Parameters_map get_parameters() {return parameters_spec;};
 
         void add_function(const HDL_function &f) {
             locking_violation_check();
@@ -104,7 +104,13 @@ class HDL_Resource {
         }
         std::unordered_map<std::string, HDL_function> get_functions() {return functions;};
 
+        std::map<std::string, std::variant<int64_t, std::string>> get_default_parameters() {
+            return default_values;
+        };
 
+        void set_default_parameters(const std::map<std::string, std::variant<int64_t, std::string>>  &values) {
+            default_values = values;
+        }
         void set_documentation(module_documentation &d) {
             locking_violation_check();
             doc= d;
@@ -115,7 +121,7 @@ class HDL_Resource {
 
         template<class Archive>
         void serialize( Archive & ar ) {
-            ar(name, path, hdl_type, dependencies, if_specs, parameters, ports, doc, processor_docs, functions);
+            ar(name, path, hdl_type, dependencies, if_specs, parameters_spec, ports, doc, processor_docs, functions, default_values);
         }
         void lock_resource();
 
@@ -141,7 +147,8 @@ private:
         std::unordered_map<std::string, port_direction_t> ports;
         std::unordered_map<std::string, std::array<std::string, 2>> if_specs;
 
-        Parameters_map parameters;
+        Parameters_map parameters_spec;
+        std::map<std::string, std::variant<int64_t, std::string>> default_values;
         std::unordered_map<std::string, HDL_function> functions;
 
         std::vector<processor_instance> processor_docs;

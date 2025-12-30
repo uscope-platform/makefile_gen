@@ -99,9 +99,10 @@ std::optional<int64_t> Expression::evaluate(int64_t *result_size) {
     auto expr_stack = to_rpm();
 
 
+
     std::stack<Expression_component> evaluator_stack;
     for(auto & i : expr_stack.components){
-        if(i.get_type() == numeric_component){
+        if(i.get_type() == numeric_component) {
             evaluator_stack.push(i);
         } else {
             int64_t result;
@@ -129,12 +130,11 @@ std::optional<int64_t> Expression::evaluate(int64_t *result_size) {
 
         *result_size = Expression_component::calculate_binary_size(evaluator_stack.top().get_numeric_value());
     }
+    if (evaluator_stack.empty())throw std::runtime_error("Evaluation of an empty expression");
     return evaluator_stack.top().get_numeric_value();
 
 
 
-    int i =0;
-    return 0;
 }
 
 
@@ -181,5 +181,14 @@ int64_t Expression::evaluate_unary_expression(int64_t operand, const std::string
         return (int64_t) floor((double) operand);
     } else{
         throw std::runtime_error("Error: Attempted evaluation of an unsupported unary expression expression " + operation);
+    }
+}
+void Expression::propagate_constant(const std::string &name, int64_t value) {
+    for (auto & component : components) {
+        if (component.get_type() == string_component) {
+            if (component.get_string_value() == name) {
+                component.set_numeric_value(value);
+            }
+        }
     }
 }

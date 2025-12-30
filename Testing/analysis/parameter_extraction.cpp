@@ -158,13 +158,33 @@ TEST(parameter_extraction, simple_expressions) {
         check_params.insert(p);
     }
 
+
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(parameters.contains(item->get_name()));
-        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+        EXPECT_TRUE(parameters.contains(item->get_name()));
+        EXPECT_EQ(*item, *parameters.get(item->get_name()));
     }
 
+    auto defaults = resource.get_default_parameters();
+    std::map<std::string, std::variant<int64_t, std::string>> check_defaults = {
+        {"simple_numeric_p", 32},
+        {"sv_numeric_p", 8},
+        {"dimensionless_sv_numeric_p", 63},
+        {"simple_log_expr_p",6},
+        {"add_expr_p", 40},
+        {"sub_expr_p", 24},
+        {"mul_expr_p", 256},
+        {"div_expr_p", 4},
+        {"chained_expression", 1320},
+        {"modulo_expr_p", 0},
+        {"complex_log_expr_p", 6},
+        {"parenthesised_expr_p", 1480}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
 }
 
 TEST(parameter_extraction, array_expression) {

@@ -44,7 +44,7 @@ public:
     void set_value(int64_t val);
     std::string get_string_value() const;
     int64_t  get_numeric_value() const;
-
+    void propagate_constant(const std::string& name, int64_t constant_value);
     explicit operator std::string();
 
     bool is_array() const {return !i_l.empty();};
@@ -68,14 +68,14 @@ public:
     bool is_empty();
 
     void add_component(const Expression_component &component);
-    void set_expression_components(const Expression  &c) {
+    void set_expression(const Expression  &c) {
         locking_violation_check();
-        expression_components = c;
+        expression = c;
     };
-    Expression  get_expression_components() { return expression_components;}
-    void clear_expression_components() {
+    Expression  get_expression() { return expression;}
+    void clear_expression() {
         locking_violation_check();
-        expression_components.clear();
+        expression.clear();
     }
 
     void set_array_value(const mdarray<int64_t> &arr){
@@ -98,6 +98,7 @@ public:
 
     void add_initialization_list(const Initialization_list &i){
         locking_violation_check();
+        //type = array_parameter;
         i_l = i;
     }
     Initialization_list get_i_l() {return i_l;}
@@ -105,7 +106,7 @@ public:
     template<class Archive>
     void serialize( Archive & ar ) {
         ar(name, value,type,
-           expression_components, i_l);
+           expression, i_l);
     }
 
     void set_loop_index() {
@@ -133,8 +134,7 @@ private:
     parameter_type type;
     bool loop_index = false;
 
-    Expression expression_components;
-
+    Expression expression;
     Initialization_list i_l;
 };
 

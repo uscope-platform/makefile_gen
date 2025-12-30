@@ -22,7 +22,7 @@
 class Parameters_map{
 public:
     size_t size(){return inner_map.size();};
-    void clear() {inner_map.clear();};
+    void clear() {inner_map.clear();}
     bool empty(){return inner_map.empty();}
     bool contains(const std::string &name) const {
         bool retval = false;

@@ -21,7 +21,7 @@ HDL_parameter::HDL_parameter(const HDL_parameter &c) {
     scope = c.scope;
     value = c.value;
     type = c.type;
-    expression_components = c.expression_components;
+    expression = c.expression;
     i_l = c.i_l;
     loop_index = c.loop_index;
 }
@@ -45,7 +45,7 @@ bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
     ret_val &= lhs.scope == rhs.scope;
     ret_val &= lhs.value == rhs.value;
     ret_val &= lhs.type == rhs.type;
-    ret_val &= lhs.expression_components == rhs.expression_components;
+    ret_val &= lhs.expression == rhs.expression;
     ret_val &= lhs.i_l == rhs.i_l;
     ret_val &= lhs.loop_index == rhs.loop_index;
     return ret_val;
@@ -63,9 +63,7 @@ bool HDL_parameter::is_empty() {
         auto str_arr = std::get<std::vector<std::string>>(value);
         ret &= str_arr.empty() || str_arr.size() == 1 && str_arr[0].empty();
     }
-
-
-    ret &= expression_components.empty();
+    ret &= expression.empty();
     return ret;
 }
 
@@ -93,6 +91,10 @@ int64_t HDL_parameter::get_numeric_value() const {
     return std::get<mdarray<int64_t>>(value).get_scalar();
 }
 
+void HDL_parameter::propagate_constant(const std::string& constant_name, int64_t constant_value) {
+    expression.propagate_constant(constant_name, constant_value);
+}
+
 
 HDL_parameter::operator std::string() {
     std::string ret_val;
@@ -114,7 +116,7 @@ HDL_parameter::operator std::string() {
 
 void HDL_parameter::add_component(const Expression_component& component) {
     locking_violation_check();
-    expression_components.push_back(component);
+    expression.push_back(component);
 }
 
 void PrintTo(const HDL_parameter &param, std::ostream *os) {
@@ -146,7 +148,7 @@ std::string HDL_parameter::to_string() const {
 
     result += "\n  EXPRESSION:\n";
 
-    auto comps = expression_components.print();
+    auto comps = expression.print();
 
     result += "\n  INITIALIZATION LIST:\n    ";
 

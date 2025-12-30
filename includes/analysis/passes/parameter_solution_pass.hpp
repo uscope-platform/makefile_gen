@@ -37,7 +37,7 @@ public:
     parameter_solution_pass();
     void setup(const std::shared_ptr<HDL_instance_AST> &root) override;
     void process_node(const std::shared_ptr<HDL_instance_AST> &node) override;
-    Parameters_map process_parameters(const Parameters_map & map);
+     std::map<std::string, std::variant<int64_t, std::string>> process_parameters(const Parameters_map &map);
 private:
     std::unordered_map<std::string, parameter_value> parameters_map;
 };

@@ -90,7 +90,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_parameter(const std:
     std::shared_ptr<HDL_parameter> p;
     if(par->get_type()== HDL_parameter::function_parameter) {
         auto fs = spec.get_functions();
-        auto expression = par->get_expression_components();
+        auto expression = par->get_expression();
 
         if(expression.components.size() != 1) {
             spdlog::warn("Parameter {} is initialized by function with arguments, which is currently unsupported", par->get_name());
@@ -201,7 +201,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_array_parameter(cons
     } else {
         return_par->set_array_value(arr_val);
     }
-    return_par->clear_expression_components();
+    return_par->clear_expression();
     completed_set->insert(return_par);
     return return_par;
 }
@@ -211,7 +211,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
     std::shared_ptr<HDL_parameter> return_par = par->clone();
 
     spdlog::trace("{}->Processing scalar parameter: {}", trace_prefix, par->get_name());
-    auto components = return_par->get_expression_components();
+    auto components = return_par->get_expression();
 
     if(par->get_type() == HDL_parameter::numeric_parameter){
         return return_par;
@@ -234,13 +234,13 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
                     auto value = parameter->get_numeric_value();
                     Expression e;
                     e.emplace_back(std::to_string(value));
-                    return_par->set_expression_components(e);
+                    return_par->set_expression(e);
                     return_par->set_value(value);
                 } else {
                     auto value = parameter->get_string_value();
                     Expression e;
                     e.emplace_back(value);
-                    return_par->set_expression_components(e);
+                    return_par->set_expression(e);
                     return_par->set_value(value);
                 }
             }

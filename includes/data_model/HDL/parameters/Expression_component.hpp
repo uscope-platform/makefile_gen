@@ -56,6 +56,8 @@ public:
         value = v;
         component_type = numeric_component;
     }
+    std::variant<int64_t, std::string> get_value(){return value;}
+    void set_value(const std::variant<int64_t, std::string> &v){value = v;}
     std::string get_raw_string_value();
     std::string get_string_value() const {
         if (std::holds_alternative<int64_t>(value)) return "";

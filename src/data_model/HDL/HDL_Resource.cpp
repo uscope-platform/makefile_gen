@@ -40,8 +40,8 @@ HDL_Resource::HDL_Resource(const HDL_Resource &c) {
     hdl_type = c.hdl_type;
     dependencies = c.dependencies;
     functions = c.functions;
-
-    parameters = c.parameters;
+    default_values = c.default_values;
+    parameters_spec = c.parameters_spec;
     doc = c.doc;
     processor_docs = c.processor_docs;
     ports = c.ports;
@@ -52,10 +52,9 @@ bool HDL_Resource::is_interface() {
     return hdl_type == interface;
 }
 
-
 void HDL_Resource::process_parameters() {
     parameter_solution_pass engine;
-    engine.process_parameters(parameters);
+    default_values = engine.process_parameters(parameters_spec);
 }
 
 void HDL_Resource::lock_resource() {
@@ -73,8 +72,9 @@ bool HDL_Resource::is_empty() {
     ret &= dependencies.empty();
     ret &= ports.empty();
     ret &= if_specs.empty();
-    ret &= parameters.empty();
+    ret &= parameters_spec.empty();
     ret &= functions.empty();
+    ret &= default_values.empty();
 
     return ret;
 }
@@ -101,7 +101,8 @@ bool operator==(const HDL_Resource &lhs, const HDL_Resource &rhs) {
     ret &= lhs.processor_docs == rhs.processor_docs;
     ret &= lhs.ports == rhs.ports;
     ret &= lhs.if_specs == rhs.if_specs;
-    ret &= lhs.parameters == rhs.parameters;
+    ret &= lhs.default_values == rhs.default_values;
+    ret &= lhs.parameters_spec == rhs.parameters_spec;
     ret &= lhs.functions == rhs.functions;
 
     return ret;
@@ -122,7 +123,7 @@ std::unordered_map<std::string, std::array<std::string, 2>> HDL_Resource::get_if
 
 void HDL_Resource::set_parameters(Parameters_map p) {
     locking_violation_check();
-    parameters = std::move(p);
+    parameters_spec = std::move(p);
 }
 
 
@@ -132,7 +133,7 @@ void PrintTo(const HDL_Resource &res, std::ostream *os) {
     result += "\nHDL Resource:\n  NAME: " + res.name;
     result += "\n  PATH: " + res.path;
     result += "\n  PARAMETERS: \n";
-    for(const auto& item:res.parameters){
+    for(const auto& item:res.parameters_spec){
         result += item->to_string();
     }
     result += "\n----------------------------------------------------";
