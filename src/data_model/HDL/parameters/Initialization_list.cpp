@@ -370,8 +370,12 @@ std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Param
     bool in_size = true;
     for(int i = 1; i<e.components.size(); i++){
         if(in_size){
-            if(std::get<std::string>(e.components[i].get_value()) == ","){
-                in_size = false;
+            if(!e.components[i].is_numeric()){
+                if (std::get<std::string>(e.components[i].get_value()) == ",") {
+                    in_size = false;
+                } else {
+                    size_expr.push_back(e.components[i]);
+                }
             } else{
                 size_expr.push_back(e.components[i]);
             }
