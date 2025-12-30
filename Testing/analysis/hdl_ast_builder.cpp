@@ -180,7 +180,7 @@ TEST( hdl_ast_builder, pwm_ast_build) {
 }
 
 
-TEST( hdl_ast_builder, adc_ast_buildI) {
+TEST( hdl_ast_builder, adc_ast_build) {
 
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");

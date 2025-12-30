@@ -29,6 +29,7 @@ Initialization_list::Initialization_list(const Initialization_list &i) {
     expression_leaves = i.expression_leaves;
     lower_dimension_leaves = i.lower_dimension_leaves;
     default_initialization = i.default_initialization;
+    scalar = i.scalar;
 }
 
 Initialization_list::Initialization_list(const Expression &e) {
@@ -37,6 +38,7 @@ Initialization_list::Initialization_list(const Expression &e) {
 
 
 void Initialization_list::add_dimension(const dimension_t &d, bool packed) {
+    scalar = false;
     if(packed){
         packed_dimensions.push_back(d);
     } else{
@@ -46,6 +48,7 @@ void Initialization_list::add_dimension(const dimension_t &d, bool packed) {
 }
 
 void Initialization_list::add_item(const Expression &e) {
+    scalar = false;
     if(last_dimension){
         expression_leaves.push_back(e);
     } else{
@@ -108,7 +111,7 @@ bool operator==(const Initialization_list &lhs, const Initialization_list &rhs) 
     ret &= lhs.lower_dimension_leaves == rhs.lower_dimension_leaves;
     ret &= lhs.expression_leaves == rhs.expression_leaves;
     ret &= lhs.default_initialization == rhs.default_initialization;
-
+    ret &= lhs.scalar == rhs.scalar;
     if(lhs.unpacked_dimensions.size() != rhs.unpacked_dimensions.size()) return false;
     for(int i = 0; i<lhs.unpacked_dimensions.size(); i++){
         ret &= lhs.unpacked_dimensions[i].packed == rhs.unpacked_dimensions[i].packed;
@@ -123,11 +126,15 @@ bool operator==(const Initialization_list &lhs, const Initialization_list &rhs) 
         ret &= lhs.packed_dimensions[i].second_bound == rhs.packed_dimensions[i].second_bound;
     }
 
-
     return ret;
 }
 
 bool Initialization_list::empty() const {
+
+    if (scalar) {
+        if (expression_leaves.empty()) return true;
+        return expression_leaves[0].empty();
+    }
     return expression_leaves.empty() && lower_dimension_leaves.empty();
 }
 
@@ -338,6 +345,9 @@ Parameter_processor Initialization_list::get_parameter_processor() {
 }
 
 void PrintTo(const Initialization_list &il, std::ostream *os) {
+    if (il.scalar) {
+        *os << il.expression_leaves[0].print();
+    }
     std::string result = "-----------------------------\n";
     result += "-----------------------------\n";
     result += "UNPACKED DIMENSIONS\n";
@@ -396,6 +406,33 @@ std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Param
 
     auto ret_val = std::vector<int64_t>(repetition_size, repetition_value);
     return ret_val;
+}
+
+void Initialization_list::propagate_constant(const std::string &name, const std::variant<int64_t, std::string> &value) {
+    if (scalar) {
+        expression_leaves[0].propagate_constant(name, value);
+    }
+}
+
+std::optional<Expression> Initialization_list::get_scalar() {
+    if (scalar) return expression_leaves[0];
+    return std::nullopt;
+}
+
+void Initialization_list::set_scalar(const Expression &expr) {
+    scalar = true;
+    expression_leaves  = {expr};
+    lower_dimension_leaves.clear();
+}
+
+void Initialization_list::clear_scalar() {
+    if (scalar)
+    expression_leaves[0].clear();
+}
+
+void Initialization_list::push_scalar_component(const Expression_component &comp) {
+    if (expression_leaves.empty()) expression_leaves.emplace_back();
+    expression_leaves[0].push_back(comp);
 }
 
 mdarray<int64_t> Initialization_list::process_default_initialization() {

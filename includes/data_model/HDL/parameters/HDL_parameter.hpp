@@ -47,7 +47,7 @@ public:
     void propagate_constant(const std::string& name, const std::variant<int64_t, std::string> &constant_value);
     explicit operator std::string();
 
-    bool is_array() const {return !i_l.empty();};
+    bool is_array() const {return i_l.is_array();};
     bool is_packed_array() {return i_l.is_packed();};
 
     std::string get_name() const {return name;};
@@ -70,12 +70,16 @@ public:
     void add_component(const Expression_component &component);
     void set_expression(const Expression  &c) {
         locking_violation_check();
-        expression = c;
+        i_l.set_scalar(c);;
     };
-    Expression  get_expression() { return expression;}
+    Expression  get_expression() {
+        auto exp =  i_l.get_scalar();
+        if (!exp.has_value()) throw std::runtime_error("A scalar parameter has been initialized with an array");
+        return exp.value();
+    }
     void clear_expression() {
         locking_violation_check();
-        expression.clear();
+        i_l.clear_scalar();
     }
 
     void set_array_value(const mdarray<int64_t> &arr){
@@ -105,8 +109,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, value,type,
-           expression, i_l);
+        ar(name, value,type, i_l);
     }
 
     void set_loop_index() {
@@ -134,7 +137,6 @@ private:
     parameter_type type;
     bool loop_index = false;
 
-    Expression expression;
     Initialization_list i_l;
 };
 

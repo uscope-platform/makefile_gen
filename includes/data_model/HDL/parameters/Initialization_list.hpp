@@ -43,6 +43,13 @@ typedef struct dims_struct{
 
 } dimension_t;
 
+// This class manages the recursive construction and evaluation of multi-dimensional HDL initializers.
+// It processes nested levels, handles expression repetitions, and resolves complex parameter
+// dependencies into a concrete numerical multi-dimensional structure (mdarray).
+
+// For non-scalar data, dimensions must be defined via add_dimension before the data is populated
+// to ensure the internal recursive structure is correctly initialized.
+
 class Initialization_list {
 
 public:
@@ -54,6 +61,7 @@ public:
     void open_level();
     void close_level();
     bool empty() const;
+    bool is_array() const{return !scalar;}
     bool is_packed() const{return unpacked_dimensions.empty() && !packed_dimensions.empty();};
     void link_processor(
                         const std::shared_ptr<Parameters_map> &ep,
@@ -66,6 +74,13 @@ public:
     void set_unpacked_dimensions(const std::vector<dimension_t>  &d) {unpacked_dimensions = d;};
     std::vector<dimension_t> get_packed_dimensions(){return  packed_dimensions;};
     std::vector<dimension_t> get_unpacked_dimensions(){return  unpacked_dimensions;};
+
+    void propagate_constant(const std::string &name, const std::variant<int64_t, std::string> &value);
+
+    std::optional<Expression> get_scalar();
+    void clear_scalar();
+    void push_scalar_component(const Expression_component &comp);
+    void set_scalar(const Expression &expr);
 
     mdarray<int64_t> process_default_initialization();
 
@@ -85,7 +100,7 @@ public:
     template<class Archive>
     void serialize( Archive & ar ) {
         ar(unpacked_dimensions, packed_dimensions, last_dimension, expression_leaves,
-           lower_dimension_leaves, default_initialization);
+           lower_dimension_leaves, default_initialization, scalar);
     }
 
 
@@ -101,6 +116,9 @@ private:
     mdarray<int64_t> get_3d_list_values();
 
     int64_t pack_values(const std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> &components);
+
+    bool scalar = true;
+
 
     std::shared_ptr<Parameters_map> external_parameters;
     std::shared_ptr<Parameters_map> completed_set;

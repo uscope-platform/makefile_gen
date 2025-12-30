@@ -35,13 +35,17 @@ std::map<std::string, std::variant<int64_t, std::string>> parameter_solution_pas
     for (auto &param: map) {
         auto param_name = param->get_name();
         dependencies_map[param_name] = {};
-        for (auto &comp:param->get_expression().components) {
-            if (comp.is_string()) {
-                auto dep = std::get<std::string>(comp.get_value());
-                if (!map.contains(dep)) {
-                    solved_parameters.insert({param_name, dep});
-                } else {
-                    dependencies_map[param_name].insert(dep);
+        if (param->is_array()) {
+            // TODO: HANDLE ARRAYS AND SHIT
+        } else {
+            for (auto &comp:param->get_expression().components) {
+                if (comp.is_string()) {
+                    auto dep = std::get<std::string>(comp.get_value());
+                    if (!map.contains(dep)) {
+                        solved_parameters.insert({param_name, dep});
+                    } else {
+                        dependencies_map[param_name].insert(dep);
+                    }
                 }
             }
         }
@@ -54,7 +58,7 @@ std::map<std::string, std::variant<int64_t, std::string>> parameter_solution_pas
                 if (dependencies.empty() && !solved_parameters.contains(param_name)) {
                     auto to_solve = map.const_get(param_name);
 
-                    if (to_solve->get_expression().empty()){
+                    if (to_solve->is_array()){
                         // TODO: HANDLE ARRAYS AND SHIT
                         int i = 0;
                     } else {
