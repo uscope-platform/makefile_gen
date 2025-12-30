@@ -19,9 +19,9 @@
 std::string Expression::print() const {
     std::string ret_val;
     for(auto &item:components){
-        if(item.get_type() == numeric_component){
+        if(item.is_numeric()){
             ret_val += std::to_string(item.get_numeric_value());
-        } else if(item.get_type() == string_component || item.get_type() == operator_component || item.get_type()== function_component) {
+        } else {
             if(!item.get_package_prefix().empty()){
                 ret_val += item.get_package_prefix() + "::";
             }
@@ -46,12 +46,12 @@ Expression Expression::to_rpm() const {
     }
 
     for(auto item:components){
-        if(item.get_type() == operator_component){ // token is operator
+        if(item.is_operator()){
             while (
                     !shunting_stack.empty() &&
                     shunting_stack.top().get_raw_string_value()!="(" &&
                     (
-                        shunting_stack.top().get_type() == function_component ||
+                        shunting_stack.top().is_function() ||
                         shunting_stack.top().get_operator_precedence()<item.get_operator_precedence() ||
                         shunting_stack.top().get_operator_precedence()==item.get_operator_precedence() &&
                         !shunting_stack.top().is_right_associative()
@@ -61,13 +61,13 @@ Expression Expression::to_rpm() const {
                 shunting_stack.pop();
             }
             shunting_stack.push(item);
-        } else if(item.get_raw_string_value() == "(" || item.get_type() == function_component){
+        } else if(item.get_raw_string_value() == "(" || item.is_function()){
             shunting_stack.push(item);
         } else if(item.get_raw_string_value() == ")"){
             while (shunting_stack.top().get_raw_string_value() != "(") {
                 rpn_exp.push_back(shunting_stack.top());
                 shunting_stack.pop();
-                if(shunting_stack.top().get_type()==function_component){
+                if(shunting_stack.top().is_function()){
                     rpn_exp.push_back(shunting_stack.top());
                     shunting_stack.pop();
                 }
@@ -102,7 +102,7 @@ std::optional<int64_t> Expression::evaluate(int64_t *result_size) {
 
     std::stack<Expression_component> evaluator_stack;
     for(auto & i : expr_stack.components){
-        if(i.get_type() == numeric_component) {
+        if(i.is_numeric()) {
             evaluator_stack.push(i);
         } else {
             int64_t result;
@@ -185,7 +185,7 @@ int64_t Expression::evaluate_unary_expression(int64_t operand, const std::string
 }
 void Expression::propagate_constant(const std::string &name, int64_t value) {
     for (auto & component : components) {
-        if (component.get_type() == string_component) {
+        if (component.is_string()) {
             if (component.get_string_value() == name) {
                 component.set_numeric_value(value);
             }

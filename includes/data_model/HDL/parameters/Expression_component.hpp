@@ -27,13 +27,6 @@
 
 #include <cereal/types/vector.hpp>
 
-enum expression_component_type {
-    string_component,
-    numeric_component,
-    operator_component,
-    function_component
-};
-
 struct Expression;
 
 class Expression_component {
@@ -44,15 +37,20 @@ public:
     explicit Expression_component(const std::string &s);
     explicit Expression_component(int64_t n);
     bool is_string() const;
-    bool is_numeric() const {return component_type == numeric_component;}
-
+    bool is_numeric() const {return std::holds_alternative<int64_t>(value);}
+    bool is_function() const {
+        if (is_numeric()) return false;
+        return functions_set.contains(std::get<std::string>(value));
+    }
+    bool is_operator() const {
+        if (is_numeric()) return false;
+        return operators_set.contains(std::get<std::string>(value));
+    }
     void set_string_value(const std::string &s) {
         value = s;
-        component_type = string_component;
     };
     void set_numeric_value(int64_t v) {
         value = v;
-        component_type = numeric_component;
     }
     std::variant<int64_t, std::string> get_value(){return value;}
     void set_value(const std::variant<int64_t, std::string> &v){value = v;}
@@ -72,7 +70,6 @@ public:
     bool is_right_associative();
     int64_t get_operator_precedence();
     std::string print_value();
-    expression_component_type get_type()const {return component_type;};
 
     static int64_t calculate_binary_size(int64_t in);
     typedef enum{
@@ -95,7 +92,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(component_type, value, array_index, package_prefix, binary_size);
+        ar(value, array_index, package_prefix, binary_size);
     }
 
     nlohmann::json dump();
@@ -104,8 +101,6 @@ public:
 private:
     void process_number();
     bool test_parameter_type(const std::regex &r, const std::string &s);
-
-    expression_component_type component_type;
 
     std::variant<int64_t, std::string> value;
 

@@ -211,7 +211,7 @@ std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> Initiali
             values.insert(values.end(), res.begin(), res.end());
         } else{
             try{
-                if(expr.components.size() == 1 && expr.components[0].get_type() == numeric_component){
+                if(expr.components.size() == 1 && expr.components[0].is_numeric()){
                     values.push_back(expr.components[0].get_numeric_value());
                     sizes.push_back(expr.components[0].get_binary_size());
                 } else {

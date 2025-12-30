@@ -279,9 +279,9 @@ int64_t Parameter_processor::process_expression(const Expression &expr, int64_t 
             i = process_array_access(i);
         }
 
-        if(i.get_type() == numeric_component || i.get_type() == operator_component || i.get_type()==function_component){
+        if(i.is_numeric() || i.is_operator() || i.is_function()){
             processed_rpn.push_back(i);
-        } else if(i.get_type() == string_component) {
+        } else if(i.is_string()) {
             if(external_parameters->contains(i.get_string_value())) {
                 Expression_component e(external_parameters->get(i.get_raw_string_value())->get_numeric_value());
                 processed_rpn.emplace_back(e);
@@ -300,7 +300,7 @@ int64_t Parameter_processor::process_expression(const Expression &expr, int64_t 
     std::stack<Expression_component> evaluator_stack;
 
     for(auto & i : processed_rpn){
-        if(i.get_type() == numeric_component){
+        if(i.is_numeric()){
             evaluator_stack.push(i);
         } else {
             int64_t result;
@@ -361,12 +361,12 @@ void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
 
 int64_t Parameter_processor::get_component_value(Expression_component &ec, int64_t *result_size) {
 
-    if(ec.get_type() == numeric_component){
+    if(ec.is_numeric()){
         if(result_size != nullptr){
             *result_size = ec.get_binary_size();
         }
         return ec.get_numeric_value();
-    } else if(ec.get_type() == operator_component || ec.get_type() == function_component){
+    } else if(ec.is_operator() || ec.is_function()){
         throw std::runtime_error("Error: attempted to get the numeric value of an operator or Function");
     }
 
