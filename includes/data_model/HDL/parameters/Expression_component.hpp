@@ -29,11 +29,9 @@
 
 enum expression_component_type {
     string_component,
-    parenthesis_component,
     numeric_component,
     operator_component,
-    function_component,
-    array_component
+    function_component
 };
 
 struct Expression;
@@ -45,7 +43,7 @@ public:
     Expression_component( const Expression_component &c );
     explicit Expression_component(const std::string &s);
     explicit Expression_component(int64_t n);
-
+    bool is_string() const;
     bool is_numeric() const {return component_type == numeric_component;}
 
     void set_string_value(const std::string &s) {

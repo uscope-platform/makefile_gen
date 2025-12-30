@@ -42,8 +42,6 @@ Expression_component::Expression_component(const std::string &s) {
         component_type = operator_component;
     } else if(functions_set.contains(s)) {
         component_type = function_component;
-    }else if (parenthesis_set.contains(s)){
-        component_type = parenthesis_component;
     } else {
         component_type = string_component;
     }
@@ -54,6 +52,10 @@ Expression_component::Expression_component(const std::string &s) {
 Expression_component::Expression_component(int64_t n) {
     value = n;
     component_type = numeric_component;
+}
+
+bool Expression_component::is_string() const {
+    return component_type == string_component && !parenthesis_set.contains(std::get<std::string>(value));
 }
 
 
@@ -69,9 +71,7 @@ bool operator==(const Expression_component &lhs, const Expression_component &rhs
 
 std::string Expression_component::print_value() {
     std::string ret_val;
-    if(component_type == array_component) {
-        ret_val = "$__ARRAY__$";
-    } else if(component_type == numeric_component){
+     if(component_type == numeric_component){
         ret_val = std::to_string(std::get<int64_t>(value));
     } else {
         if(!array_index.empty()){
