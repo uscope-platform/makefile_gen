@@ -88,11 +88,11 @@ Expression Expression::to_rpm() const {
     return rpn_exp;
 }
 
-std::optional<std::variant<int64_t, std::string>> Expression::evaluate() {
+std::optional<resolved_parameter> Expression::evaluate() {
     return evaluate(nullptr);
 }
 
-std::optional<std::variant<int64_t, std::string>> Expression::evaluate(int64_t *result_size) {
+std::optional<resolved_parameter> Expression::evaluate(int64_t *result_size) {
     if (components.size() == 1) {
         return components[0].get_value();
     }
@@ -107,6 +107,7 @@ std::optional<std::variant<int64_t, std::string>> Expression::evaluate(int64_t *
             evaluator_stack.push(i);
         } else {
             int64_t result;
+            if (!i.is_operator() && !i.is_function()) return std::nullopt;
             if(i.get_operator_type() == Expression_component::unary_operator){
                 auto op = std::get<int64_t>(evaluator_stack.top().get_value());
                 result = evaluate_unary_expression(op, std::get<std::string>(i.get_value()));
@@ -184,12 +185,22 @@ int64_t Expression::evaluate_unary_expression(int64_t operand, const std::string
         throw std::runtime_error("Error: Attempted evaluation of an unsupported unary expression expression " + operation);
     }
 }
-void Expression::propagate_constant(const std::string &name, const std::variant<int64_t, std::string> & value) {
+
+std::set<std::string> Expression::get_dependencies() {
+    std::set<std::string> result;
+    for (auto &comp:components) {
+        auto deps = comp.get_dependencies();
+        result.insert(deps.begin(), deps.end());
+    }
+    return result;
+}
+
+bool Expression::propagate_constant(const std::string &name, const resolved_parameter& param_value) {
+    bool retval = true;
     for (auto & component : components) {
         if (component.is_string()) {
-            if (std::get<std::string>(component.get_value()) == name) {
-                component.set_value(value);
-            }
+            retval &= component.propagate_constant(name, param_value);
         }
     }
+    return retval;
 }

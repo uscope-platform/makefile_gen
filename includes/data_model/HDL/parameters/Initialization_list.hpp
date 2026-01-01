@@ -75,7 +75,9 @@ public:
     std::vector<dimension_t> get_packed_dimensions(){return  packed_dimensions;};
     std::vector<dimension_t> get_unpacked_dimensions(){return  unpacked_dimensions;};
 
-    void propagate_constant(const std::string &name, const std::variant<int64_t, std::string> &value);
+    std::optional<resolved_parameter> evaluate();
+
+    bool propagate_constant(const std::string &name, const resolved_parameter &value);
 
     std::optional<Expression> get_scalar();
     void clear_scalar();
@@ -92,6 +94,8 @@ public:
         return false;
     }
 
+
+    std::set<std::string> get_dependencies();
     void set_default() { default_initialization = true;};
 
     friend bool operator==(const Initialization_list&lhs, const Initialization_list&rhs);

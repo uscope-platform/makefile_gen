@@ -61,6 +61,8 @@ public:
         data[idx[0]][idx[1]][idx[2]] = val;
     }
 
+
+
     void set_1d_slice(std::vector<int64_t> idx, const md_1d_array &val){
         if(idx[0]>=data.size()){
             data.resize(idx[0]+1);
@@ -76,6 +78,8 @@ public:
         }
         data[idx[0]] =  val;
     }
+
+
 
     void set_data(const md_3d_array &d){data = d;}
 
@@ -117,12 +121,16 @@ md_2d_array get_2d_slice(std::vector<int64_t> idx) {
         return data[idx[0]][idx[1]];
     }
 
-    T get_value(std::vector<int64_t> idx) {
-        if(idx.size() < 3 || idx[0] >= data.size() ||
+    std::optional<T> get_value(std::vector<int64_t> idx) {
+        if (idx.size()<3) {
+            for (int i = idx.size(); i <3 ; i++) {
+                idx.insert(idx.begin(), 0);
+            }
+        }
+        if(idx[0] >= data.size() ||
            idx[1] >= data[idx[0]].size() ||
            idx[2] >= data[idx[0]][idx[1]].size()) {
-            std::cout << "Index out of range in get_value" << std::endl;
-            exit(1);
+            return std::nullopt;
         }
         return data[idx[0]][idx[1]][idx[2]];
     }

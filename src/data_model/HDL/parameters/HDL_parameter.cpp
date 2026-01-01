@@ -89,8 +89,8 @@ int64_t HDL_parameter::get_numeric_value() const {
     return std::get<mdarray<int64_t>>(value).get_scalar();
 }
 
-void HDL_parameter::propagate_constant(const std::string& constant_name, const std::variant<int64_t, std::string> &constant_value) {
-    i_l.propagate_constant(constant_name, constant_value);
+bool HDL_parameter::propagate_constant(const std::string& constant_name, const resolved_parameter &constant_value) {
+    return i_l.propagate_constant(constant_name, constant_value);
 }
 
 
@@ -152,6 +152,10 @@ std::string HDL_parameter::to_string() const {
     result += s.str();
 
     return result;
+}
+
+std::set<std::string> HDL_parameter::get_dependencies() {
+    return i_l.get_dependencies();
 }
 
 nlohmann::json HDL_parameter::dump() {

@@ -104,11 +104,11 @@ class HDL_Resource {
         }
         std::unordered_map<std::string, HDL_function> get_functions() {return functions;};
 
-        std::map<std::string, std::variant<int64_t, std::string>> get_default_parameters() {
+        std::map<std::string, resolved_parameter> get_default_parameters() {
             return default_values;
         };
 
-        void set_default_parameters(const std::map<std::string, std::variant<int64_t, std::string>>  &values) {
+        void set_default_parameters(const std::map<std::string, resolved_parameter>  &values) {
             default_values = values;
         }
         void set_documentation(module_documentation &d) {
@@ -148,7 +148,7 @@ private:
         std::unordered_map<std::string, std::array<std::string, 2>> if_specs;
 
         Parameters_map parameters_spec;
-        std::map<std::string, std::variant<int64_t, std::string>> default_values;
+        std::map<std::string, resolved_parameter> default_values;
         std::unordered_map<std::string, HDL_function> functions;
 
         std::vector<processor_instance> processor_docs;

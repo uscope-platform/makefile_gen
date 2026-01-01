@@ -333,12 +333,29 @@ mdarray<int64_t> Initialization_list::get_3d_list_values() {
     return ret;
 }
 
+std::set<std::string> Initialization_list::get_dependencies() {
+    std::set<std::string> result;
+    for (auto &expr:expression_leaves) {
+        auto deps = expr.get_dependencies();
+        result.insert(deps.begin(), deps.end());
+    }
+    for (auto &i : lower_dimension_leaves) {
+        auto deps = i.get_dependencies();
+        result.insert(deps.begin(), deps.end());
+    }
+    return result;
+
+}
+
 
 Parameter_processor Initialization_list::get_parameter_processor() {
     Parameters_map e_p;
-    for(const auto& item:*external_parameters){
-        e_p.insert(item);
+    if (external_parameters != nullptr) {
+        for(const auto& item:*external_parameters){
+            e_p.insert(item);
+        }
     }
+
     Parameter_processor p(e_p, completed_set);
     p.set_data_store(d_store);
     return p;
@@ -408,10 +425,25 @@ std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Param
     return ret_val;
 }
 
-void Initialization_list::propagate_constant(const std::string &name, const std::variant<int64_t, std::string> &value) {
+std::optional<resolved_parameter> Initialization_list::evaluate() {
+    std::optional<resolved_parameter> result;
     if (scalar) {
-        expression_leaves[0].propagate_constant(name, value);
+        result = expression_leaves[0].evaluate();
+    } else {
+       result  = get_values();
     }
+    return result;
+}
+
+bool Initialization_list::propagate_constant(const std::string &name, const resolved_parameter &value) {
+    bool retval = true;
+    for (auto &ll_list: lower_dimension_leaves) {
+        retval &= ll_list.propagate_constant(name, value);
+    }
+    for (auto &expr:expression_leaves) {
+        retval &= expr.propagate_constant(name, value);
+    }
+    return retval;
 }
 
 std::optional<Expression> Initialization_list::get_scalar() {

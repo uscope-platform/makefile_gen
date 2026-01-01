@@ -14,7 +14,7 @@
 //  limitations under the License.
 
 
-
+#include <memory_resource>
 #include <gtest/gtest.h>
 
 #include "frontend/analysis/sv_analyzer.hpp"
@@ -105,7 +105,7 @@ TEST(parameter_extraction, simple_parameters) {
     }
 
     auto defaults = resource.get_default_parameters();
-    std::map<std::string, std::variant<int64_t, std::string>> check_defaults = {
+    std::map<std::string, resolved_parameter> check_defaults = {
         {"simple_numeric_p", 32},
         {"local_p", 74},
         {"sv_numeric_p", 8},
@@ -180,7 +180,7 @@ TEST(parameter_extraction, simple_expressions) {
     }
 
     auto defaults = resource.get_default_parameters();
-    std::map<std::string, std::variant<int64_t, std::string>> check_defaults = {
+    std::map<std::string, resolved_parameter> check_defaults = {
         {"simple_numeric_p", 32},
         {"sv_numeric_p", 8},
         {"dimensionless_sv_numeric_p", 63},
@@ -200,9 +200,357 @@ TEST(parameter_extraction, simple_expressions) {
     }
 }
 
+
+TEST(parameter_extraction, assay_assignment) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            parameter simple_numeric_p = 32,
+            sv_numeric_p = 5'o10
+        )();
+            parameter logic [31:0] concatenation [1:0] = '{simple_numeric_p, sv_numeric_p};
+
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    std::vector<std::pair<std::string, std::vector<std::string>>> vect_params = {
+            {"simple_numeric_p", {"32"}},
+            {"sv_numeric_p", {"5'o10"}}
+    };
+
+
+    for(auto &item:  vect_params){
+        auto p = std::make_shared<HDL_parameter>();
+        p->set_type(HDL_parameter::expression_parameter);
+        p->set_name(item.first);
+        for(auto &op:item.second){
+            p->add_component(Expression_component(op));
+        }
+        check_params.insert(p);
+    }
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("concatenation");
+
+    Initialization_list il;
+    il.add_dimension({{{Expression_component("31")}}, {{Expression_component("0")}, false}, true}, true);
+    il.add_dimension({{{Expression_component("1")}}, {{Expression_component("0")}, false}, false}, false);
+
+    il.add_item({{Expression_component("simple_numeric_p")}, false});
+    il.add_item({{Expression_component("sv_numeric_p")}, false});
+
+
+    p->add_initialization_list(il);
+
+
+
+    check_params.insert(p);
+
+
+   ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        EXPECT_TRUE(parameters.contains(item->get_name()));
+        EXPECT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+
+    mdarray<int64_t> av;
+    av.set_1d_slice({0, 0}, {8, 32});
+
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"simple_numeric_p", 32},
+        {"sv_numeric_p", 8},
+        {"concatenation", av}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+
+TEST(parameter_extraction, default_assign) {
+    std::string test_pattern = R"(
+        module test_mod #(
+        )();
+            parameter logic [31:0] test_array [1:0] = '{default:5};
+
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("test_array");
+
+    Initialization_list il;
+    il.add_dimension({{{Expression_component("31")}}, {{Expression_component("0")}, false}, true}, true);
+    il.add_dimension({{{Expression_component("1")}}, {{Expression_component("0")}, false}, false}, false);
+
+    il.add_item({{Expression_component("5")}, false});
+    il.set_default();
+
+    p->add_initialization_list(il);
+
+
+
+    check_params.insert(p);
+
+
+   ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        EXPECT_TRUE(parameters.contains(item->get_name()));
+        EXPECT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+
+    mdarray<int64_t> av;
+    av.set_1d_slice({0, 0}, {5, 5});
+
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"test_array", av}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+// TODO: check why this is not working (i suspect something to do with packed/unpacked and concat cr
+TEST(parameter_extraction, array_concatenation) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            parameter simple_numeric_p = 32,
+            sv_numeric_p = 5'o10
+        )();
+            parameter logic [31:0] concatenation [1:0] = {simple_numeric_p, sv_numeric_p};
+
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    std::vector<std::pair<std::string, std::vector<std::string>>> vect_params = {
+            {"simple_numeric_p", {"32"}},
+            {"sv_numeric_p", {"5'o10"}}
+    };
+
+
+    for(auto &item:  vect_params){
+        auto p = std::make_shared<HDL_parameter>();
+        p->set_type(HDL_parameter::expression_parameter);
+        p->set_name(item.first);
+        for(auto &op:item.second){
+            p->add_component(Expression_component(op));
+        }
+        check_params.insert(p);
+    }
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("concatenation");
+
+    Initialization_list il;
+    il.add_dimension({{{Expression_component("31")}}, {{Expression_component("0")}, false}, true}, true);
+    il.add_dimension({{{Expression_component("1")}}, {{Expression_component("0")}, false}, false}, false);
+
+    il.add_item({{Expression_component("simple_numeric_p")}, false});
+    il.add_item({{Expression_component("sv_numeric_p")}, false});
+
+
+    p->add_initialization_list(il);
+
+
+
+    check_params.insert(p);
+
+
+   ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        EXPECT_TRUE(parameters.contains(item->get_name()));
+        EXPECT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+
+    mdarray<int64_t> av;
+    av.set_1d_slice({0, 0}, {8, 32});
+
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"simple_numeric_p", 32},
+        {"sv_numeric_p", 8},
+        {"concatenation", av}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+TEST(parameter_extraction, array_parameter) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            parameter [31:0] array_parameter [1:0] = '{32, 5}
+        )();
+
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("array_parameter");
+
+
+    Initialization_list il;
+    dimension_t d;
+    d.first_bound = {{Expression_component("31")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = true;
+    il.add_dimension(d,true);
+
+    d.first_bound = {{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    il.add_dimension(d,false);
+    il.add_item({{Expression_component("32")}, false});
+    il.add_item({{Expression_component("5")}, false});
+
+    p->add_initialization_list(il);
+
+    check_params.insert(p);
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+    mdarray<int64_t> array_value;
+    array_value.set_1d_slice({0, 0}, {5, 32});
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"array_parameter", array_value}
+
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+
+TEST(parameter_extraction, simple_array_propagation) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            parameter [31:0] array_parameter [1:0] = '{32, 5}
+        )();
+            parameter array_parameter_expr_p = array_parameter[0] + array_parameter[1];
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("array_parameter");
+
+
+    Initialization_list il;
+    dimension_t d;
+    d.first_bound = {{Expression_component("31")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = true;
+    il.add_dimension(d,true);
+
+    d.first_bound = {{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    il.add_dimension(d,false);
+    il.add_item({{Expression_component("32")}, false});
+    il.add_item({{Expression_component("5")}, false});
+
+    p->add_initialization_list(il);
+
+    check_params.insert(p);
+
+
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("array_parameter_expr_p");
+    Expression_component e = Expression_component("array_parameter");
+    std::vector<Expression> ai;
+    ai.push_back({{Expression_component("0")}, false});
+    e.set_array_index(ai);
+    p->add_component(e);
+    p->add_component(Expression_component("+"));
+    e = Expression_component("array_parameter");
+    ai.clear();
+    ai.push_back({{Expression_component("1")}, false});
+    e.set_array_index(ai);
+    p->add_component(e);
+    check_params.insert(p);
+
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+    mdarray<int64_t> array_value;
+    array_value.set_1d_slice({0, 0}, {5, 32});
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"array_parameter", array_value},
+        {"array_parameter_expr_p", 37},
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
 TEST(parameter_extraction, array_expression) {
     std::string test_pattern = R"(
         module test_mod #(
+            parameter sv_numeric_p = 1,
             parameter [31:0] array_parameter [1:0] = '{32, 5}
         )();
             parameter array_parameter_expr_p = array_parameter[sv_numeric_p*0] + array_parameter[1];
@@ -255,7 +603,11 @@ TEST(parameter_extraction, array_expression) {
     e.set_array_index(ai);
     p->add_component(e);
     check_params.insert(p);
-
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("sv_numeric_p");
+    p->add_component(Expression_component("1"));
+    check_params.insert(p);
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
@@ -265,10 +617,12 @@ TEST(parameter_extraction, array_expression) {
     }
 
     auto defaults = resource.get_default_parameters();
-    std::map<std::string, std::variant<int64_t, std::string>> check_defaults = {
-        {"simple_numeric_p", 32},
-        {"local_p", 74},
-        {"sv_numeric_p", 8},
+    mdarray<int64_t> array_value;
+    array_value.set_1d_slice({0, 0}, {5, 32});
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"array_parameter", array_value},
+        {"array_parameter_expr_p", 37},
+        {"sv_numeric_p", 1},
 
     };
     for(const auto& [name, value]:check_defaults){
@@ -356,6 +710,89 @@ TEST(parameter_extraction, multidimensional_array_expression) {
     for(const auto& item:check_params){
         ASSERT_TRUE(parameters.contains(item->get_name()));
         ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+
+    auto defaults = resource.get_default_parameters();
+
+    mdarray<int64_t> av;
+    av.set_2d_slice({0}, {{6,5}, {32,32}});
+
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"repetition_size", 2},
+        {"multidim_array_parameter", av},
+        {"multidim_array_access", 32}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+
+}
+
+
+TEST(parameter_extraction, simple_repetition_initialization) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            parameter repetition_size = 2,
+            parameter bit repetition_parameter_1 [1:0]  = '{repetition_size{1}}
+        )();
+
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("repetition_size");
+    p->add_component(Expression_component("2"));
+    check_params.insert(p);
+
+
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("repetition_parameter_1");
+
+    init_list_t init;
+    dimension_t d;
+    d.first_bound = {{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    init.dimensions.push_back(d);
+    init.values.push_back({
+                           {{Expression_component("$repeat_init"), Expression_component("repetition_size"), Expression_component(","), Expression_component("1")}, false}
+                   });
+
+    p->add_initialization_list(produce_check_init_list_1d(init));
+
+    check_params.insert(p);
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+
+    mdarray<int64_t> av;
+    av.set_2d_slice({0}, {{1,1}});
+
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"repetition_size", 2},
+        {"repetition_parameter_1", av}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
     }
 
 }
@@ -473,6 +910,24 @@ TEST(parameter_extraction, repetition_initialization) {
     for(const auto& item:check_params){
         ASSERT_TRUE(parameters.contains(item->get_name()));
         ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+
+    mdarray<int64_t> av;
+    av.set_2d_slice({0}, {{1,1}});
+
+    mdarray<int64_t> av2;
+    av.set_2d_slice({0}, {{4,4}});
+
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"repetition_size", 2},
+        {"repetition_parameter_1", av},
+        {"repetition_parameter_2", av2}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
     }
 
 }

@@ -27,26 +27,20 @@ void parameter_solution_pass::process_node(const std::shared_ptr<HDL_instance_AS
     int i = 0;
 }
 
-std::map<std::string, std::variant<int64_t, std::string>> parameter_solution_pass::process_parameters(const Parameters_map &map_in) {
+std::map<std::string, resolved_parameter>   parameter_solution_pass::process_parameters(const Parameters_map &map_in) {
     auto map = Parameters_map::deep_copy(map_in);
 
-    std::map<std::string, std::variant<int64_t, std::string>> solved_parameters;
+    std::map<std::string, resolved_parameter> solved_parameters;
     std::map<std::string, std::set<std::string>> dependencies_map;
     for (auto &param: map) {
         auto param_name = param->get_name();
         dependencies_map[param_name] = {};
-        if (param->is_array()) {
-            // TODO: HANDLE ARRAYS AND SHIT
-        } else {
-            for (auto &comp:param->get_expression().components) {
-                if (comp.is_string()) {
-                    auto dep = std::get<std::string>(comp.get_value());
-                    if (!map.contains(dep)) {
-                        solved_parameters.insert({param_name, dep});
-                    } else {
-                        dependencies_map[param_name].insert(dep);
-                    }
-                }
+        auto param_deps = param->get_dependencies();
+        for (auto dep:param_deps) {
+            if (!map.contains(dep) && !param->is_array()) {
+                solved_parameters.insert({param_name, dep});
+            } else {
+                dependencies_map[param_name].insert(dep);
             }
         }
     }
@@ -58,29 +52,24 @@ std::map<std::string, std::variant<int64_t, std::string>> parameter_solution_pas
                 if (dependencies.empty() && !solved_parameters.contains(param_name)) {
                     auto to_solve = map.const_get(param_name);
 
-                    if (to_solve->is_array()){
-                        // TODO: HANDLE ARRAYS AND SHIT
-                        int i = 0;
-                    } else {
+                    auto value = to_solve->get_i_l().evaluate();
 
-                        auto value = to_solve->get_expression().evaluate();
-                        if (!value.has_value()) {
-                            solved_parameters.insert({param_name, ""});
-                        } else {
-                            solved_parameters.insert({param_name, value.value()});
-                        }
+                    if (value.has_value()) {
+                        solved_parameters.insert({param_name, value.value()});
                     }
 
                 }
             }
+
             for (auto &param: solved_parameters) {
-                dependencies_map.erase(param.first);
+                bool propagation_complete = true;
                 for (auto &dep: dependencies_map) {
                     if (dep.second.contains(param.first)) {
-                        dep.second.erase(param.first);
-                        map.get(dep.first)->propagate_constant(param.first, param.second);
+                        propagation_complete &= map.get(dep.first)->propagate_constant(param.first, param.second);
+                        if (propagation_complete) dep.second.erase(param.first);
                     }
                 }
+                    dependencies_map.erase(param.first);
             }
             rounds_counter++;
         }

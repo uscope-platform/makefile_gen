@@ -146,7 +146,7 @@ TEST( analysis_test , sv_module) {
     p->add_component(Expression_component("74"));
     p->set_type(HDL_parameter::expression_parameter);
     check_res.add_parameter(p);
-    std::map<std::string, std::variant<int64_t, std::string>> check_defaults;
+    std::map<std::string, resolved_parameter> check_defaults;
     check_defaults["module_parameter_1"] = 56;
     check_defaults["module_parameter_2"] = 74;
     check_res.set_default_parameters(check_defaults);

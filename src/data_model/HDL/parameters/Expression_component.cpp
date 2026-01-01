@@ -42,8 +42,56 @@ Expression_component::Expression_component(int64_t n) {
     value = n;
 }
 
+std::set<std::string> Expression_component::get_dependencies() {
+    std::set<std::string> result;
+    if (is_string()) result.insert(std::get<std::string>(value));
+    for (auto &idx:array_index) {
+        auto idx_deps = idx.get_dependencies();
+        result.insert(idx_deps.begin(), idx_deps.end());
+    }
+    return result;
+}
+
+bool Expression_component::propagate_constant(const std::string &const_name, const resolved_parameter &const_value) {
+    bool retval = true;
+
+    for (auto &component:array_index) {
+        retval &= component.propagate_constant(const_name, const_value);
+        auto idx_val = component.evaluate();
+        if (idx_val.has_value()) {
+            Expression new_exp;
+            new_exp.emplace_back(std::get<int64_t>(*idx_val));
+            component = new_exp;
+        }
+    }
+    if (std::holds_alternative<std::string>(value)) {
+        if (std::get<std::string>(value) == const_name) {
+            if (!array_index.empty()) {
+                std::vector<int64_t> idx;
+                for (auto &i:array_index) {
+                    auto eval_idx = i.evaluate();
+                    if (!std::holds_alternative<int64_t>(*eval_idx)) return false;
+                    idx.push_back(std::get<int64_t>(*eval_idx));
+                }
+                auto values = std::get<mdarray<int64_t>>(const_value);
+                auto array_val = values.get_value(idx);
+                if (array_val.has_value()) value = array_val.value();
+                else value = 0; // if the array value is not found (because of some dimensional issue) substitute with a 0 rather than crashing
+            } else {
+               value = const_value;
+            }
+        }
+        return retval;
+    }
+}
+
 bool Expression_component::is_string() const {
-    return std::holds_alternative<std::string>(value) && !parenthesis_set.contains(std::get<std::string>(value)) && !is_function() && !is_operator();
+    if (!std::holds_alternative<std::string>(value)) return false;
+    return !parenthesis_set.contains(std::get<std::string>(value))
+    && !is_function()
+    && !is_operator()
+    && std::get<std::string>(value) != "$repeat_init"
+    && std::get<std::string>(value) != ",";
 }
 
 
@@ -173,6 +221,10 @@ int64_t Expression_component::calculate_binary_size(int64_t in) {
     }else{
         return  std::ceil(n_bits);
     }
+}
+
+void Expression_component::set_array_index(const std::vector<Expression> &v) {
+    array_index = v;
 }
 
 void Expression_component::add_array_index(const Expression &c) {

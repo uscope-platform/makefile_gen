@@ -387,6 +387,37 @@ TEST(Initialization_list, multidimensional_packed_array) {
 }
 
 
+TEST(Initialization_list, get_array_dependencies) {
+    std::string test_pattern = R"(
+        module dependency #(
+            parameter SS_POLARITY_DEFAULT = 0
+        )();
+
+            localparam [31:0] FIXED_REGISTER_VALUES [3:0]= '{SS_POLARITY_DEFAULT,SS_POLARITY_DEFAULT,1};
+
+            localparam [31:0] VARIABLE_INITIAL_VALUES [2:0] = '{3{2'h2}};
+            parameter [31:0] INITIAL_REGISTER_VALUES [N_REGISTERS-1:0] = {VARIABLE_INITIAL_VALUES, FIXED_REGISTER_VALUES};
+
+        endmodule
+
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    auto params = resource.get_parameters();
+    auto deps_a = params.get("INITIAL_REGISTER_VALUES")->get_dependencies();
+    auto deps_b = params.get("FIXED_REGISTER_VALUES")->get_dependencies();
+    auto deps_c = params.get("VARIABLE_INITIAL_VALUES")->get_dependencies();
+
+    EXPECT_EQ(deps_a, std::set<std::string>({"VARIABLE_INITIAL_VALUES", "FIXED_REGISTER_VALUES"}));
+    EXPECT_EQ(deps_b, std::set<std::string>({"SS_POLARITY_DEFAULT"}));
+    EXPECT_TRUE(deps_c.empty());
+
+}
+
 TEST(Initialization_list, concatenation_of_packed_arrays) {
     std::string test_pattern = R"(
         module dependency #(

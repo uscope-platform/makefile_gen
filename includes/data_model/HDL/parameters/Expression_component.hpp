@@ -25,9 +25,15 @@
 #include <variant>
 #include <cmath>
 
+#include "data_model/mdarray.hpp"
+
 #include <cereal/types/vector.hpp>
 
 struct Expression;
+
+using resolved_parameter = std::variant<int64_t, std::string, mdarray<int64_t>>;
+
+
 
 class Expression_component {
 public:
@@ -36,6 +42,9 @@ public:
     Expression_component( const Expression_component &c );
     explicit Expression_component(const std::string &s);
     explicit Expression_component(int64_t n);
+    std::set<std::string> get_dependencies();
+    bool propagate_constant(const std::string &name, const resolved_parameter &value);
+    bool is_subscripted() const {return !array_index.empty();}
     bool is_string() const;
     bool is_numeric() const {return std::holds_alternative<int64_t>(value);}
     bool is_function() const {
@@ -47,8 +56,8 @@ public:
         return operators_set.contains(std::get<std::string>(value));
     }
 
-    std::variant<int64_t, std::string> get_value()const {return value;}
-    void set_value(const std::variant<int64_t, std::string> &v){value = v;}
+    resolved_parameter get_value()const {return value;}
+    void set_value(const resolved_parameter &v){value = v;}
 
     void set_package_prefix(const std::string &s) {package_prefix = s;};
     std::string get_package_prefix() const {return package_prefix;};
@@ -67,7 +76,7 @@ public:
 
     friend bool operator==(const Expression_component&lhs, const Expression_component&rhs);
 
-    void set_array_index(const std::vector<Expression> &v) {array_index = v;}
+    void set_array_index(const std::vector<Expression> &v);
     void add_array_index(const Expression &c);
     std::vector<Expression> get_array_index() {return array_index;};
 
@@ -87,7 +96,7 @@ private:
     void process_number();
     bool test_parameter_type(const std::regex &r, const std::string &s);
 
-    std::variant<int64_t, std::string> value;
+    resolved_parameter value;
 
     std::string package_prefix;
 

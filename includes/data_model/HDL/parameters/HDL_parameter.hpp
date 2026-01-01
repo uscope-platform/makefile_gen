@@ -44,7 +44,7 @@ public:
     void set_value(int64_t val);
     std::string get_string_value() const;
     int64_t  get_numeric_value() const;
-    void propagate_constant(const std::string& name, const std::variant<int64_t, std::string> &constant_value);
+    bool propagate_constant(const std::string& name, const resolved_parameter &constant_value);
     explicit operator std::string();
 
     bool is_array() const {return i_l.is_array();};
@@ -99,6 +99,7 @@ public:
 
     friend void PrintTo(const HDL_parameter& point, std::ostream* os);
 
+    std::set<std::string> get_dependencies();
 
     void add_initialization_list(const Initialization_list &i){
         locking_violation_check();

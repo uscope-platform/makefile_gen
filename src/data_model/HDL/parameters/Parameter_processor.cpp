@@ -197,7 +197,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_array_parameter(cons
     }
 
     if(return_par->get_i_l().get_unpacked_dimensions().empty()){
-        return_par->set_value(arr_val.get_value({0,0,0}));
+        return_par->set_value(arr_val.get_value({0,0,0}).value());
     } else {
         return_par->set_array_value(arr_val);
     }
@@ -506,7 +506,7 @@ Expression_component Parameter_processor::process_array_access(Expression_compon
     }
     int64_t  val;
     if(p->get_type() == HDL_parameter::array_parameter){
-        val = p->get_array_value().get_value(array_index_values);
+        val = p->get_array_value().get_value(array_index_values).value();
     } else {
         auto mask = 0x1<<array_index_values[2];
         val = (p->get_numeric_value()&mask)>>array_index_values[2];
@@ -533,7 +533,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_packed_parameter(con
     }
     il.link_processor( external_parameters,  completed_set, d_store);
     auto val_array = il.get_values();
-    return_par->set_value(val_array.get_value({0,0,0}));
+    return_par->set_value(val_array.get_value({0,0,0}).value());
 
     return return_par;
 }
