@@ -68,7 +68,7 @@ public:
                         const std::shared_ptr<Parameters_map> &cs,
                         const std::shared_ptr<data_store> &ds);
     int64_t get_value_at(std::vector<uint64_t> idx);
-    mdarray<int64_t> get_values();
+    resolved_parameter get_values();
 
     void set_packed_dimensions(const std::vector<dimension_t>  &d) {packed_dimensions = d;};
     void set_unpacked_dimensions(const std::vector<dimension_t>  &d) {unpacked_dimensions = d;};

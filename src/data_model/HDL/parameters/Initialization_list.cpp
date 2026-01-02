@@ -153,7 +153,7 @@ int64_t Initialization_list::get_value_at(std::vector<uint64_t> idx) {
     return 0;
 }
 
-mdarray<int64_t>  Initialization_list::get_values() {
+resolved_parameter Initialization_list::get_values() {
     mdarray<int64_t> ret;
 
     if(default_initialization){
@@ -162,7 +162,11 @@ mdarray<int64_t>  Initialization_list::get_values() {
     auto size = unpacked_dimensions.size();
 
     if(size == 0 && !packed_dimensions.empty()){
-        return get_packed_1d_list_values();
+        auto val = get_packed_1d_list_values();
+        if (packed_dimensions.size() == 1) {
+            return val.get_scalar();
+        }
+        return val;
     } else if(size == 1){
         return get_1d_list_values();
     } else if(size ==2){

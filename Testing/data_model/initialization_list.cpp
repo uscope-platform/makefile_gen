@@ -103,7 +103,7 @@ TEST(Initialization_list, get_values_1d_unpacked)  {
     mdarray<int64_t> check_array;
     check_array.set_1d_slice({0, 0}, {69, 6, 4 , 3, 5});
 
-    auto values = il.get_values();
+    auto values = std::get<mdarray<int64_t>>(il.get_values());
 
     ASSERT_EQ(check_array, values);
 
@@ -133,7 +133,7 @@ TEST(Initialization_list, get_values_2d_unpacked) {
     mdarray<int64_t> check_array;
     check_array.set_2d_slice({0, 0}, {{54,69,6},{4,3,5}});
 
-    auto values = il.get_values();
+    auto values = std::get<mdarray<int64_t>>(il.get_values());
 
     ASSERT_EQ(check_array, values);
 
@@ -164,20 +164,96 @@ TEST(Initialization_list, get_values_3d_unpacked) {
     mdarray<int64_t> check_array;
     check_array.set_data({{{11,82,43},{24,13,57}},{{54,69,6},{4,3,5}}});
 
-    auto values = il.get_values();
+    auto values = std::get<mdarray<int64_t>>(il.get_values());
 
     ASSERT_EQ(check_array, values);
 
 }
 
+TEST(Initialization_list, packed_concatenation) {
+    auto external_parameters =  std::make_shared<Parameters_map>();
+    auto cs = std::make_shared<Parameters_map>();
+    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
+
+    Initialization_list il;
+
+    dimension_t d;
+
+    d.first_bound = {{Expression_component("7")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = true;
+    il.add_dimension(d, true);
+
+    il.add_item({{Expression_component("1'b1")}, true});
+    il.add_item({{Expression_component("1'b0")}, true});
+    il.add_item({{Expression_component("1'b0")}, true});
+    il.add_item({{Expression_component("1'b1")}, true});
+    il.add_item({{Expression_component("1'b0")}, true});
+    il.add_item({{Expression_component("1'b1")}, true});
+    il.add_item({{Expression_component("1'b0")}, true});
+    il.add_item({{Expression_component("1'b1")}, true});
+
+
+
+    auto values = std::get<int64_t>(il.get_values());
+
+    ASSERT_EQ(169, values);
+
+}
+
+
 
 TEST(Initialization_list, get_values_1d_packed) {
-    auto il = construct_packed_list(
-            {{{{"1'b1", "1'b0", "1'b1"},{"1'b0", "1'b1", "1'b0"},{"1'b1", "1'b0", "1'b1"}, {"1'b1","1'b1","1'b0"}, {"1'b0","1'b0","1'b1"}}}},
-            {{2,0},{4,0}},
-            {true, false}
-    );
 
+
+    Initialization_list il;
+    il.add_dimension(
+        {{{Expression_component(2)}},{{Expression_component(0)}}, false
+        }, true);
+
+    il.add_dimension(
+        {{{Expression_component(4)}},{{Expression_component(0)}}, false
+        }, false);
+    il.open_level();
+    il.add_item({
+        {
+            {Expression_component("1'b1")},
+            {Expression_component("1'b0")},
+            {Expression_component("1'b1")}
+        }});
+    il.close_level();
+    il.open_level();
+    il.add_item({
+    {
+        {Expression_component("1'b0")},
+        {Expression_component("1'b1")},
+        {Expression_component("1'b0")}
+    }});
+    il.close_level();
+    il.open_level();
+    il.add_item({
+    {
+        {Expression_component("1'b1")},
+        {Expression_component("1'b0")},
+        {Expression_component("1'b1")}
+    }});
+    il.close_level();
+    il.open_level();
+    il.add_item({
+    {
+        {Expression_component("1'b1")},
+        {Expression_component("1'b1")},
+        {Expression_component("1'b0")}
+    }});
+    il.close_level();
+    il.open_level();
+    il.add_item({
+    {
+        {Expression_component("1'b0")},
+        {Expression_component("1'b0")},
+        {Expression_component("1'b1")}
+    }});
+    il.close_level();
 
     auto external_parameters =  std::make_shared<Parameters_map>();
     auto cs = std::make_shared<Parameters_map>();
@@ -194,7 +270,7 @@ TEST(Initialization_list, get_values_1d_packed) {
     mdarray<int64_t> check_array;
     check_array.set_1d_slice({0, 0}, {1, 6, 5, 2, 5});
 
-    auto values = il.get_values();
+    auto values = std::get<mdarray<int64_t>>(il.get_values());
 
     ASSERT_EQ(check_array, values);
 
@@ -223,7 +299,7 @@ TEST(Initialization_list, get_values_2d_packed) {
     mdarray<int64_t> check_array;
     check_array.set_2d_slice({0}, {{6, 5}, {2, 5}});
 
-    auto values = il.get_values();
+    auto values = std::get<mdarray<int64_t>>(il.get_values());
 
     ASSERT_EQ(check_array, values);
 
@@ -283,7 +359,7 @@ TEST(Initialization_list, get_values_3d_packed) {
         }
     );
 
-    auto values = il.get_values();
+    auto values = std::get<mdarray<int64_t>>(il.get_values());
 
     ASSERT_EQ(check_array, values);
 
@@ -305,7 +381,7 @@ TEST(Initialization_list, get_values_concatenation_initialization) {
     mdarray<int64_t> check_array;
     check_array.set_1d_slice({0, 0}, {31, 43});
 
-    auto values = il.get_values();
+    auto values = std::get<mdarray<int64_t>>(il.get_values());
 
     ASSERT_EQ(check_array, values);
 
@@ -365,7 +441,7 @@ TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
     mdarray<int64_t> check_array;
     check_array.set_1d_slice({0, 0}, {0x27e0, 0x220e0, 3 , 3, 3});
 
-    auto values = il.get_values();
+    auto values = std::get<mdarray<int64_t>>(il.get_values());
 
     ASSERT_EQ(check_array, values);
 
@@ -398,7 +474,7 @@ TEST(Initialization_list, multidimensional_packed_array) {
 
 
 
-    auto values = il.get_values();
+    auto values = std::get<mdarray<int64_t>>(il.get_values());
 
     mdarray<int64_t> check_array;
     check_array.set_2d_slice({0, 0}, {{29, 226}, {28 , 227}});

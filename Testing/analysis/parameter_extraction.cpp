@@ -983,8 +983,97 @@ TEST(parameter_extraction, packed_array) {
         ASSERT_EQ(*check_item, *parameters.get(check_item->get_name()));
     }
 
+    auto defaults = resource.get_default_parameters();
+
+
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"packed_param", 169}
+    };
+
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
 }
 
+
+TEST(parameter_extraction, multpidim_packed_array) {
+    std::string test_pattern = R"(
+        module test_mod #(
+             parameter logic [7:0] packed_param [1:0] = '{{1'b1,1'b0,1'b1,1'b0,1'b1,1'b0,1'b0,1'b1},{1'b1,1'b1,1'b0,1'b0,1'b1,1'b0,1'b0,1'b1}}
+        )();
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("packed_param");
+
+    init_list_t init;
+    dimension_t d;
+
+    d.first_bound = {{Expression_component("7")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = true;
+    init.dimensions.push_back(d);
+
+    d.first_bound = {{Expression_component("1")}, false};
+    d.second_bound = {{Expression_component("0")}, false};
+    d.packed = false;
+    init.dimensions.push_back(d);
+    init.values.push_back({
+            {{Expression_component("1'b1")}, false},
+            {{Expression_component("1'b0")}, false},
+            {{Expression_component("1'b1")}, false},
+            {{Expression_component("1'b0")}, false},
+            {{Expression_component("1'b1")}, false},
+            {{Expression_component("1'b0")}, false},
+            {{Expression_component("1'b0")}, false},
+            {{Expression_component("1'b1")}, false},
+    });
+    init.values.push_back({
+            {{Expression_component("1'b1")}, false},
+            {{Expression_component("1'b1")}, false},
+            {{Expression_component("1'b0")}, false},
+            {{Expression_component("1'b0")}, false},
+            {{Expression_component("1'b1")}, false},
+            {{Expression_component("1'b0")}, false},
+            {{Expression_component("1'b0")}, false},
+            {{Expression_component("1'b1")}, false},
+    });
+
+    p->add_initialization_list(produce_check_init_list(init));
+
+    check_params.insert(p);
+
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& check_item:check_params){
+        ASSERT_TRUE(parameters.contains(check_item->get_name()));
+        ASSERT_EQ(*check_item, *parameters.get(check_item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+
+
+    mdarray<int64_t> av;
+    av.set_1d_slice({0, 0}, {169, 201});
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"packed_param", av }
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
 
 TEST(parameter_extraction, package_parameters_use) {
     std::string test_pattern = R"(
