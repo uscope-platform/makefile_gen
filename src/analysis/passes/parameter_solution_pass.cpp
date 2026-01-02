@@ -51,7 +51,6 @@ std::map<std::string, resolved_parameter>   parameter_solution_pass::process_par
             for (auto &[param_name, dependencies] : dependencies_map ) {
                 if (dependencies.empty() && !solved_parameters.contains(param_name)) {
                     auto to_solve = map.const_get(param_name);
-
                     auto value = to_solve->get_i_l().evaluate();
 
                     if (value.has_value()) {

@@ -290,6 +290,26 @@ TEST(Initialization_list, get_values_3d_packed) {
 
 }
 
+TEST(Initialization_list, get_values_concatenation_initialization) {
+
+
+
+    Initialization_list il;
+    il.add_dimension({{{Expression_component("31")}}, {{Expression_component("0")}, false}, true}, true);
+    il.add_dimension({{{Expression_component("1")}}, {{Expression_component("0")}, false}, false}, false);
+    il.open_level();
+    il.add_item({{Expression_component(31)}, false});
+    il.add_item({{Expression_component(43)}, false});
+    il.close_level();
+
+    mdarray<int64_t> check_array;
+    check_array.set_1d_slice({0, 0}, {31, 43});
+
+    auto values = il.get_values();
+
+    ASSERT_EQ(check_array, values);
+
+}
 
 TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
     Initialization_list il;

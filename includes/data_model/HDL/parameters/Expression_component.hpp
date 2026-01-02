@@ -47,12 +47,14 @@ public:
     bool is_subscripted() const {return !array_index.empty();}
     bool is_string() const;
     bool is_numeric() const {return std::holds_alternative<int64_t>(value);}
+    bool is_array() const {return std::holds_alternative<mdarray<int64_t>>(value);}
+
     bool is_function() const {
-        if (is_numeric()) return false;
+        if (!std::holds_alternative<std::string>(value)) return false;
         return functions_set.contains(std::get<std::string>(value));
     }
     bool is_operator() const {
-        if (is_numeric()) return false;
+        if (!std::holds_alternative<std::string>(value)) return false;
         return operators_set.contains(std::get<std::string>(value));
     }
 

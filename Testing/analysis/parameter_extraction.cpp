@@ -333,7 +333,6 @@ TEST(parameter_extraction, default_assign) {
     }
 }
 
-// TODO: check why this is not working (i suspect something to do with packed/unpacked and concat cr
 TEST(parameter_extraction, array_concatenation) {
     std::string test_pattern = R"(
         module test_mod #(
@@ -376,9 +375,10 @@ TEST(parameter_extraction, array_concatenation) {
     il.add_dimension({{{Expression_component("31")}}, {{Expression_component("0")}, false}, true}, true);
     il.add_dimension({{{Expression_component("1")}}, {{Expression_component("0")}, false}, false}, false);
 
+    il.open_level();
     il.add_item({{Expression_component("simple_numeric_p")}, false});
     il.add_item({{Expression_component("sv_numeric_p")}, false});
-
+    il.close_level();
 
     p->add_initialization_list(il);
 
@@ -390,14 +390,14 @@ TEST(parameter_extraction, array_concatenation) {
    ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& item:check_params){
-        EXPECT_TRUE(parameters.contains(item->get_name()));
-        EXPECT_EQ(*item, *parameters.get(item->get_name()));
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
     auto defaults = resource.get_default_parameters();
 
     mdarray<int64_t> av;
-    av.set_1d_slice({0, 0}, {8, 32});
+    av.set_1d_slice({0, 0}, {32,8});
 
     std::map<std::string, resolved_parameter> check_defaults = {
         {"simple_numeric_p", 32},
@@ -914,16 +914,18 @@ TEST(parameter_extraction, repetition_initialization) {
 
     auto defaults = resource.get_default_parameters();
 
-    mdarray<int64_t> av;
+    mdarray<int64_t> av, av2, av3, av4;
     av.set_2d_slice({0}, {{1,1}});
-
-    mdarray<int64_t> av2;
-    av.set_2d_slice({0}, {{4,4}});
+    av2.set_2d_slice({0}, {{4,4}});
+    av3.set_2d_slice({0}, {{4, 4, 1, 1}});
+    av4.set_2d_slice({0}, {{4, 4, 2, 1}});
 
     std::map<std::string, resolved_parameter> check_defaults = {
         {"repetition_size", 2},
         {"repetition_parameter_1", av},
-        {"repetition_parameter_2", av2}
+        {"repetition_parameter_2", av2},
+        {"multi_repetition_parameter", av3},
+        {"mixed_repetition_parameter", av4}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));

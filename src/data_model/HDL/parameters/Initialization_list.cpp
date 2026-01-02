@@ -175,28 +175,40 @@ mdarray<int64_t>  Initialization_list::get_values() {
 
 mdarray<int64_t> Initialization_list::get_1d_list_values() {
 
-    if(!packed_dimensions.empty() && !lower_dimension_leaves.empty()) {
+    mdarray<int64_t>::md_1d_array values;
+    if(!packed_dimensions.empty() && !lower_dimension_leaves.empty() && unpacked_dimensions.empty()) {
         return get_packed_1d_list_values();
     }
-
-
-    auto p = get_parameter_processor();
-    mdarray<int64_t>::md_1d_array values;
-    for(auto &expr:expression_leaves){
-        if(is_repetition(expr)){
-            auto res = expand_repetition(expr, p, nullptr);
-            values.insert(values.end(), res.begin(), res.end());
-        } else{
-            try{
-                auto val = p.process_expression(expr, nullptr);
-                values.push_back(val);
-            } catch(array_value_exception &ex ){
-                auto v = ex.array_value.get_1d_slice({0,0});
-                values.insert(values.end(), v.begin(), v.end());
+    if (!packed_dimensions.empty() && !unpacked_dimensions.empty() && !lower_dimension_leaves.empty()) {
+        for (auto &list:lower_dimension_leaves) {
+            auto concat_component = list.get_1d_list_values().get_1d_slice({0,0});
+            values.insert(values.end(), concat_component.begin(), concat_component.end());
+        }
+    } else {
+        for(auto &expr:expression_leaves){
+            if(is_repetition(expr)){
+                auto p = get_parameter_processor();
+                auto res = expand_repetition(expr, p, nullptr);
+                values.insert(values.end(), res.begin(), res.end());
+            } else{
+                auto expr_value = expr.evaluate();
+                if (!expr_value.has_value()) {
+                    values = old_list_processing(expr, values);
+                } else {
+                    auto result = expr_value.value();
+                    if (std::holds_alternative<mdarray<int64_t>>(result)) {
+                        auto array =std::get<mdarray<int64_t>>(result).get_1d_slice({0,0});
+                        values.insert(values.end(), array.begin(), array.end());
+                    }
+                    if (std::holds_alternative<int64_t>(result)) {
+                        values.push_back(std::get<int64_t>(result));
+                    }
+                }
             }
-
         }
     }
+
+
     std::reverse(values.begin(), values.end());
     mdarray<int64_t> ret;
     ret.set_1d_slice({0, 0}, values);
@@ -333,8 +345,33 @@ mdarray<int64_t> Initialization_list::get_3d_list_values() {
     return ret;
 }
 
+mdarray<int64_t>::md_1d_array Initialization_list::old_list_processing(const Expression &expr, mdarray<int64_t>::md_1d_array values) {
+    auto p = get_parameter_processor();
+    try{
+        auto val = p.process_expression(expr, nullptr);
+        values.push_back(val);
+    } catch(array_value_exception &ex ){
+        auto v = ex.array_value.get_1d_slice({0,0});
+        values.insert(values.end(), v.begin(), v.end());
+    }
+    return values;
+}
+
 std::set<std::string> Initialization_list::get_dependencies() {
     std::set<std::string> result;
+    for (auto &dim:unpacked_dimensions) {
+        auto deps = dim.first_bound.get_dependencies();
+        result.insert(deps.begin(), deps.end());
+        deps = dim.second_bound.get_dependencies();
+        result.insert(deps.begin(), deps.end());
+    }
+
+    for (auto &dim:packed_dimensions) {
+        auto deps = dim.first_bound.get_dependencies();
+        result.insert(deps.begin(), deps.end());
+        deps = dim.second_bound.get_dependencies();
+        result.insert(deps.begin(), deps.end());
+    }
     for (auto &expr:expression_leaves) {
         auto deps = expr.get_dependencies();
         result.insert(deps.begin(), deps.end());
@@ -437,6 +474,21 @@ std::optional<resolved_parameter> Initialization_list::evaluate() {
 
 bool Initialization_list::propagate_constant(const std::string &name, const resolved_parameter &value) {
     bool retval = true;
+
+    for (auto &dim: packed_dimensions) {
+        retval &= dim.first_bound.propagate_constant(name, value);
+        retval &= dim.second_bound.propagate_constant(name, value);
+    }
+
+    for (auto &dim: unpacked_dimensions) {
+        retval &= dim.first_bound.propagate_constant(name, value);
+        retval &= dim.second_bound.propagate_constant(name, value);
+    }
+
+    for (auto &ll_list: lower_dimension_leaves) {
+        retval &= ll_list.propagate_constant(name, value);
+    }
+
     for (auto &ll_list: lower_dimension_leaves) {
         retval &= ll_list.propagate_constant(name, value);
     }
