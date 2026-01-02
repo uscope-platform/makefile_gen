@@ -19,9 +19,11 @@
 
 #include <vector>
 #include <utility>
+#include <cereal/types/variant.hpp>
 #include <cereal/types/vector.hpp>
 
 #include "data_model/HDL/parameters/Expression.hpp"
+#include "data_model/HDL/parameters/Concatenation.hpp"
 #include "data_model/mdarray.hpp"
 
 
@@ -55,7 +57,7 @@ class Initialization_list {
 public:
     Initialization_list() = default;
     Initialization_list( const Initialization_list &i);
-    explicit Initialization_list(const Expression &e);
+    explicit Initialization_list(const std::variant<Expression, Concatenation> &e);
     void add_dimension(const dimension_t &d, bool packed);
     void add_item(const Expression &e);
     void open_level();
@@ -134,7 +136,7 @@ private:
     std::vector<dimension_t> packed_dimensions;
 
     bool last_dimension = true;
-    std::vector<Expression> expression_leaves;
+    std::vector<std::variant<Expression, Concatenation>> expression_leaves;
     std::vector<Initialization_list> lower_dimension_leaves;
     bool default_initialization = false;
 };

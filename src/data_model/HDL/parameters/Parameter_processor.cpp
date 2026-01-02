@@ -51,7 +51,6 @@ Parameters_map Parameter_processor::process_parameters_map(const Parameters_map 
                     completed_set->insert(param);
                     spdlog::trace("{}->Matched external parameter value: {}", trace_prefix, param->value_as_string());
                 } else {
-                    auto do_stop = dbg=="p1_t";
                     auto param = process_parameter(par, spec);
                     completed_set->insert(param);
                     spdlog::trace("{}->Processed parameter value: {}", trace_prefix, trace_prefix, param->value_as_string());
@@ -506,7 +505,8 @@ Expression_component Parameter_processor::process_array_access(Expression_compon
     }
     int64_t  val;
     if(p->get_type() == HDL_parameter::array_parameter){
-        val = p->get_array_value().get_value(array_index_values).value();
+       auto array_val = p->get_array_value();
+        val = array_val.get_value(array_index_values).value();
     } else {
         auto mask = 0x1<<array_index_values[2];
         val = (p->get_numeric_value()&mask)>>array_index_values[2];

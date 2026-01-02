@@ -32,6 +32,9 @@ target_sources(makefile_gen_lib
     data_model/HDL/factories/HDL_parameters_factory.cpp
     data_model/HDL/factories/resource_factory_base.cpp
     data_model/HDL/parameters/HDL_parameter.cpp
+    data_model/HDL/parameters/Expression.cpp
+    data_model/HDL/parameters/Concatenation.cpp
+    data_model/HDL/parameters/Expression_evaluator.cpp
     data_model/HDL/parameters/Expression_component.cpp
     data_model/HDL/parameters/Parameter_processor.cpp
     data_model/HDL/parameters/Initialization_list.cpp
@@ -41,14 +44,12 @@ target_sources(makefile_gen_lib
     data_model/HDL/factories/nets/HDL_concat_factory.cpp
     data_model/HDL/factories/nets/HDL_net_factory.cpp
     data_model/HDL/factories/nets/HDL_repetition_factory.cpp
-    data_model/HDL/parameters/Expression_evaluator.cpp
     data_model/HDL/HDL_net.cpp
     data_model/bus_mapping/bus_specs_manager.cpp
     data_model/bus_mapping/mapper_bus_component.cpp
     data_model/settings_store.cpp
     data_model/data_store.cpp
     data_model/DataFile.cpp
-    data_model/HDL/parameters/Expression.cpp
     data_model/documentation/module_documentation.cpp
     data_model/documentation/register_documentation.cpp
     data_model/documentation/field_documentation.cpp

@@ -32,7 +32,7 @@ Initialization_list::Initialization_list(const Initialization_list &i) {
     scalar = i.scalar;
 }
 
-Initialization_list::Initialization_list(const Expression &e) {
+Initialization_list::Initialization_list(const std::variant<Expression, Concatenation> &e) {
     expression_leaves.push_back(e);
 }
 
@@ -133,7 +133,7 @@ bool Initialization_list::empty() const {
 
     if (scalar) {
         if (expression_leaves.empty()) return true;
-        return expression_leaves[0].empty();
+        return std::get<Expression>(expression_leaves[0]).empty();
     }
     return expression_leaves.empty() && lower_dimension_leaves.empty();
 }
@@ -190,25 +190,30 @@ mdarray<int64_t> Initialization_list::get_1d_list_values() {
         }
     } else {
         for(auto &expr:expression_leaves){
-            if(is_repetition(expr)){
-                auto p = get_parameter_processor();
-                auto res = expand_repetition(expr, p, nullptr);
-                values.insert(values.end(), res.begin(), res.end());
-            } else{
-                auto expr_value = expr.evaluate();
-                if (!expr_value.has_value()) {
-                    values = old_list_processing(expr, values);
-                } else {
-                    auto result = expr_value.value();
-                    if (std::holds_alternative<mdarray<int64_t>>(result)) {
-                        auto array =std::get<mdarray<int64_t>>(result).get_1d_slice({0,0});
-                        values.insert(values.end(), array.begin(), array.end());
-                    }
-                    if (std::holds_alternative<int64_t>(result)) {
-                        values.push_back(std::get<int64_t>(result));
+            if (std::holds_alternative<Concatenation>(expr)) {
+
+            } else {
+                if(is_repetition(std::get<Expression>(expr))){
+                    auto p = get_parameter_processor();
+                    auto res = expand_repetition(std::get<Expression>(expr), p, nullptr);
+                    values.insert(values.end(), res.begin(), res.end());
+                } else{
+                    auto expr_value = std::get<Expression>(expr).evaluate();
+                    if (!expr_value.has_value()) {
+                        values = old_list_processing(std::get<Expression>(expr), values);
+                    } else {
+                        auto result = expr_value.value();
+                        if (std::holds_alternative<mdarray<int64_t>>(result)) {
+                            auto array =std::get<mdarray<int64_t>>(result).get_1d_slice({0,0});
+                            values.insert(values.end(), array.begin(), array.end());
+                        }
+                        if (std::holds_alternative<int64_t>(result)) {
+                            values.push_back(std::get<int64_t>(result));
+                        }
                     }
                 }
             }
+
         }
     }
 
@@ -226,31 +231,37 @@ std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> Initiali
     already_packed = false;
     auto p = get_parameter_processor();
 
-    for(auto &expr:expression_leaves){
-        if(is_repetition(expr)){
-            std::vector<int64_t> sizes_tmp;
-            auto res = expand_repetition(expr, p, &sizes_tmp);
-            sizes.insert(sizes.end(), sizes_tmp.begin(), sizes_tmp.end());
-            values.insert(values.end(), res.begin(), res.end());
-        } else{
-            try{
-                if(expr.components.size() == 1 && expr.components[0].is_numeric()){
-                    values.push_back(std::get<int64_t>(expr.components[0].get_value()));
-                    sizes.push_back(expr.components[0].get_binary_size());
-                } else {
-                    int64_t  bin_size;
-                    auto val = p.process_expression(expr, &bin_size);
-                    sizes.push_back(bin_size);
-                    values.push_back(val);
+    for(auto &raw_expr:expression_leaves){
+        if (std::holds_alternative<Concatenation>(raw_expr)) {
+
+        } else {
+            auto expr = std::get<Expression>(raw_expr);
+            if(is_repetition(expr)){
+                std::vector<int64_t> sizes_tmp;
+                auto res = expand_repetition(expr, p, &sizes_tmp);
+                sizes.insert(sizes.end(), sizes_tmp.begin(), sizes_tmp.end());
+                values.insert(values.end(), res.begin(), res.end());
+            } else{
+                try{
+                    if(expr.components.size() == 1 && expr.components[0].is_numeric()){
+                        values.push_back(std::get<int64_t>(expr.components[0].get_value()));
+                        sizes.push_back(expr.components[0].get_binary_size());
+                    } else {
+                        int64_t  bin_size;
+                        auto val = p.process_expression(expr, &bin_size);
+                        sizes.push_back(bin_size);
+                        values.push_back(val);
+                    }
+
+                } catch(array_value_exception &ex ){
+                    auto v = ex.array_value.get_1d_slice({0,0});
+                    already_packed = true;
+                    values.insert(values.end(), v.rbegin(), v.rend());
                 }
 
-            } catch(array_value_exception &ex ){
-                auto v = ex.array_value.get_1d_slice({0,0});
-                already_packed = true;
-                values.insert(values.end(), v.rbegin(), v.rend());
             }
-
         }
+
     }
     if(!already_packed){
         std::reverse(values.begin(), values.end());
@@ -282,13 +293,18 @@ mdarray<int64_t> Initialization_list::get_packed_1d_list_values() {
 
         mdarray<int64_t>::md_1d_array sizes;
         for(auto &item:expression_leaves){
-            if(is_repetition(item)){
-                values = expand_repetition(item, p, &sizes);
-            } else{
-                int64_t s;
-                values.push_back(p.process_expression(item, &s));
-                sizes.push_back(s);
+            if (std::holds_alternative<Concatenation>(item)) {
+
+            } else {
+                if(is_repetition(std::get<Expression>(item))){
+                    values = expand_repetition(std::get<Expression>(item), p, &sizes);
+                } else{
+                    int64_t s;
+                    values.push_back(p.process_expression(std::get<Expression>(item), &s));
+                    sizes.push_back(s);
+                }
             }
+
         }
         auto val = pack_values({values, sizes});
         values = {val};
@@ -377,7 +393,11 @@ std::set<std::string> Initialization_list::get_dependencies() {
         result.insert(deps.begin(), deps.end());
     }
     for (auto &expr:expression_leaves) {
-        auto deps = expr.get_dependencies();
+        std::set<std::string> deps;
+        if (std::holds_alternative<Expression>(expr))
+            deps = std::get<Expression>(expr).get_dependencies();
+        else
+            deps = std::get<Concatenation>(expr).get_dependencies();
         result.insert(deps.begin(), deps.end());
     }
     for (auto &i : lower_dimension_leaves) {
@@ -404,7 +424,7 @@ Parameter_processor Initialization_list::get_parameter_processor() {
 
 void PrintTo(const Initialization_list &il, std::ostream *os) {
     if (il.scalar) {
-        *os << il.expression_leaves[0].print();
+        *os << std::get<Expression>(il.expression_leaves[0]).print();
     }
     std::string result = "-----------------------------\n";
     result += "-----------------------------\n";
@@ -419,7 +439,9 @@ void PrintTo(const Initialization_list &il, std::ostream *os) {
 
     result += "EXPRESSION LEAVES\n";
     for(const auto &item:il.expression_leaves){
-        result +=  "  " + item.print() + "\n";
+        if (std::holds_alternative<Expression>(item)) result +=  "  " + std::get<Expression>(item).print() + "\n";
+        else result += " " + std::get<Concatenation>(item).print() + "\n";
+
     }
 
     for(const auto &item:il.lower_dimension_leaves){
@@ -469,7 +491,7 @@ std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Param
 std::optional<resolved_parameter> Initialization_list::evaluate() {
     std::optional<resolved_parameter> result;
     if (scalar) {
-        result = expression_leaves[0].evaluate();
+        result = std::get<Expression>(expression_leaves[0]).evaluate();
     } else {
        result  = get_values();
     }
@@ -497,13 +519,14 @@ bool Initialization_list::propagate_constant(const std::string &name, const reso
         retval &= ll_list.propagate_constant(name, value);
     }
     for (auto &expr:expression_leaves) {
-        retval &= expr.propagate_constant(name, value);
+        if (std::holds_alternative<Expression>(expr)) retval &=  std::get<Expression>(expr).propagate_constant(name, value);
+        else retval &= std::get<Concatenation>(expr).propagate_constant(name, value);
     }
     return retval;
 }
 
 std::optional<Expression> Initialization_list::get_scalar() {
-    if (scalar) return expression_leaves[0];
+    if (scalar) return std::get<Expression>(expression_leaves[0]);
     return std::nullopt;
 }
 
@@ -515,12 +538,12 @@ void Initialization_list::set_scalar(const Expression &expr) {
 
 void Initialization_list::clear_scalar() {
     if (scalar)
-    expression_leaves[0].clear();
+    expression_leaves[0] = Expression();
 }
 
 void Initialization_list::push_scalar_component(const Expression_component &comp) {
     if (expression_leaves.empty()) expression_leaves.emplace_back();
-    expression_leaves[0].push_back(comp);
+    std::get<Expression>(expression_leaves[0]).push_back(comp);
 }
 
 mdarray<int64_t> Initialization_list::process_default_initialization() {
@@ -544,7 +567,7 @@ mdarray<int64_t> Initialization_list::process_default_initialization() {
         dimensions.insert(dimensions.begin(), 0);
     }
 
-    auto init_value = p.process_expression(expression_leaves[0], nullptr);
+    auto init_value = p.process_expression(std::get<Expression>(expression_leaves[0]), nullptr);
 
     return {dimensions,init_value};
 
