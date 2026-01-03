@@ -42,7 +42,7 @@ public:
     Expression_component( const Expression_component &c );
     explicit Expression_component(const std::string &s);
     explicit Expression_component(int64_t n);
-    std::set<std::string> get_dependencies();
+    std::set<std::string> get_dependencies()const;
     bool propagate_constant(const std::string &name, const resolved_parameter &value);
     bool is_subscripted() const {return !array_index.empty();}
     bool is_string() const;

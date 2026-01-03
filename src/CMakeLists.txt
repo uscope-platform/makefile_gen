@@ -34,6 +34,7 @@ target_sources(makefile_gen_lib
     data_model/HDL/parameters/HDL_parameter.cpp
     data_model/HDL/parameters/Expression.cpp
     data_model/HDL/parameters/Concatenation.cpp
+    data_model/HDL/parameters/Replication.cpp
     data_model/HDL/parameters/Expression_evaluator.cpp
     data_model/HDL/parameters/Expression_component.cpp
     data_model/HDL/parameters/Parameter_processor.cpp

@@ -25,18 +25,20 @@ struct Expression {
     std::vector<Expression_component> components;
     bool rpn = false;
 
-
-
+    Expression() = default;
+    Expression(std::initializer_list<Expression_component> list)
+            : components(list) {}
     void clear() {components.clear(); rpn = false;}
     bool empty() const {return components.empty();}
     void push_back(const Expression_component &ec) {components.emplace_back(ec);}
     void push_front(const Expression_component &ec) {components.insert(components.begin(), ec);}
     void emplace_back(const std::string &ec) {components.emplace_back(ec);}
     void emplace_back(const int64_t &ec) {components.emplace_back(ec);}
-    std::set<std::string> get_dependencies();
+    std::set<std::string> get_dependencies()const;
     bool propagate_constant(const std::string &name, const resolved_parameter &value);
     std::string print() const;
     Expression to_rpm() const;
+    void set_rpn(bool s) {rpn = s;}
     std::optional<resolved_parameter> evaluate();
     std::optional<resolved_parameter> evaluate( int64_t *result_size);
     int64_t evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string &operation);

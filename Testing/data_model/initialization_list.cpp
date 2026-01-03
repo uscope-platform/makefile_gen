@@ -26,8 +26,8 @@ Initialization_list construct_unpacked_list(const mdarray<int64_t>::md_3d_array 
 
     for(int i = 0; i<dims.size(); i++){
         dimension_t d;
-        d.first_bound = {{Expression_component(std::to_string(dims[i][0]))}, false};
-        d.second_bound = {{Expression_component(std::to_string(dims[i][1]))}, false};
+        d.first_bound = Expression({Expression_component(std::to_string(dims[i][0]))});
+        d.second_bound = Expression({Expression_component(std::to_string(dims[i][1]))});
         d.packed = packing[i];
         li.add_dimension(d, packing[i]);
     }
@@ -37,7 +37,7 @@ Initialization_list construct_unpacked_list(const mdarray<int64_t>::md_3d_array 
         for(auto &item1d:item2d){
             if(dims.size()>1) li.open_level();
             for(auto &item:item1d){
-                li.add_item({{Expression_component(std::to_string(item))}, false});
+                li.add_item(Expression({Expression_component(std::to_string(item))}));
             }
             if(dims.size()>1) li.close_level();
         }
@@ -53,8 +53,8 @@ Initialization_list construct_packed_list(const std::vector<std::vector<std::vec
 
     for(int i = 0; i<dims.size(); i++){
         dimension_t d;
-        d.first_bound = {{Expression_component(std::to_string(dims[i][0]))}, false};
-        d.second_bound = {{Expression_component(std::to_string(dims[i][1]))}, false};
+        d.first_bound = Expression({Expression_component(std::to_string(dims[i][0]))});
+        d.second_bound = Expression({Expression_component(std::to_string(dims[i][1]))});
         d.packed = packing[i];
         li.add_dimension(d, packing[i]);
     }
@@ -66,7 +66,7 @@ Initialization_list construct_packed_list(const std::vector<std::vector<std::vec
             for(auto &item:item1d){
                 if(packing[0]) li.open_level();
                 for(auto &packed_item:item){
-                    li.add_item({{Expression_component(packed_item)}, false});
+                    li.add_item(Expression({Expression_component(packed_item)}));
                 }
                 if(packing[0]) li.close_level();
             }
@@ -179,19 +179,19 @@ TEST(Initialization_list, packed_concatenation) {
 
     dimension_t d;
 
-    d.first_bound = {{Expression_component("7")}, false};
-    d.second_bound = {{Expression_component("0")}, false};
+    d.first_bound = Expression({Expression_component("7")});
+    d.second_bound = Expression({Expression_component("0")});
     d.packed = true;
     il.add_dimension(d, true);
 
-    il.add_item({{Expression_component("1'b1")}, true});
-    il.add_item({{Expression_component("1'b0")}, true});
-    il.add_item({{Expression_component("1'b0")}, true});
-    il.add_item({{Expression_component("1'b1")}, true});
-    il.add_item({{Expression_component("1'b0")}, true});
-    il.add_item({{Expression_component("1'b1")}, true});
-    il.add_item({{Expression_component("1'b0")}, true});
-    il.add_item({{Expression_component("1'b1")}, true});
+    il.add_item(Expression({Expression_component("1'b1")}));
+    il.add_item(Expression({Expression_component("1'b0")}));
+    il.add_item(Expression({Expression_component("1'b0")}));
+    il.add_item(Expression({Expression_component("1'b1")}));
+    il.add_item(Expression({Expression_component("1'b0")}));
+    il.add_item(Expression({Expression_component("1'b1")}));
+    il.add_item(Expression({Expression_component("1'b0")}));
+    il.add_item(Expression({Expression_component("1'b1")}));
 
 
 
@@ -215,44 +215,40 @@ TEST(Initialization_list, get_values_1d_packed) {
         {{{Expression_component(4)}},{{Expression_component(0)}}, false
         }, false);
     il.open_level();
-    il.add_item({
-        {
-            {Expression_component("1'b1")},
-            {Expression_component("1'b0")},
-            {Expression_component("1'b1")}
-        }});
+    il.add_item(
+        Concatenation({
+                {Expression_component("1'b1")},
+                {Expression_component("1'b0")},
+                {Expression_component("1'b1")}
+        }));
     il.close_level();
     il.open_level();
-    il.add_item({
-    {
+    il.add_item(Concatenation({
         {Expression_component("1'b0")},
         {Expression_component("1'b1")},
         {Expression_component("1'b0")}
-    }});
+    }));
     il.close_level();
     il.open_level();
-    il.add_item({
-    {
+    il.add_item(Concatenation({
         {Expression_component("1'b1")},
         {Expression_component("1'b0")},
         {Expression_component("1'b1")}
-    }});
+    }));
     il.close_level();
     il.open_level();
-    il.add_item({
-    {
+    il.add_item(Concatenation({
         {Expression_component("1'b1")},
         {Expression_component("1'b1")},
         {Expression_component("1'b0")}
-    }});
+    }));
     il.close_level();
     il.open_level();
-    il.add_item({
-    {
+    il.add_item(Concatenation({
         {Expression_component("1'b0")},
         {Expression_component("1'b0")},
         {Expression_component("1'b1")}
-    }});
+    }));
     il.close_level();
 
     auto external_parameters =  std::make_shared<Parameters_map>();
@@ -371,11 +367,11 @@ TEST(Initialization_list, get_values_concatenation_initialization) {
 
 
     Initialization_list il;
-    il.add_dimension({{{Expression_component("31")}}, {{Expression_component("0")}, false}, true}, true);
-    il.add_dimension({{{Expression_component("1")}}, {{Expression_component("0")}, false}, false}, false);
+    il.add_dimension({Expression({Expression_component("31")}), Expression({Expression_component("0")}), true}, true);
+    il.add_dimension({Expression({Expression_component("1")}), Expression({Expression_component("0")}), false}, false);
     il.open_level();
-    il.add_item({{Expression_component(31)}, false});
-    il.add_item({{Expression_component(43)}, false});
+    il.add_item(Expression({Expression_component(31)}));
+    il.add_item(Expression({Expression_component(43)}));
     il.close_level();
 
     mdarray<int64_t> check_array;
@@ -390,38 +386,38 @@ TEST(Initialization_list, get_values_concatenation_initialization) {
 TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
     Initialization_list il;
     dimension_t d;
-    d.first_bound = {{Expression_component("31")}, false};
-    d.second_bound = {{Expression_component("0")}, false};
+    d.first_bound = Expression({Expression_component("31")});
+    d.second_bound = Expression({Expression_component("0")});
     d.packed = true;
     il.add_dimension(d,true);
 
-    d.first_bound = {{Expression_component("4")}, false};
-    d.second_bound = {{Expression_component("0")}, false};
+    d.first_bound = Expression({Expression_component("4")});
+    d.second_bound = Expression({Expression_component("0")});
     d.packed = false;
     il.add_dimension(d,false);
     il.open_level();
-    il.add_item({{Expression_component("3")}, false});
+    il.add_item(Expression({Expression_component("3")}));
     il.close_level();
     il.open_level();
-    il.add_item({{Expression_component("3")}, false});
+    il.add_item(Expression({Expression_component("3")}));
     il.close_level();
     il.open_level();
-    il.add_item({{Expression_component("3")}, false});
+    il.add_item(Expression({Expression_component("3")}));
     il.close_level();
     il.open_level();
-    il.add_item({{Expression_component("SS_POLARITY_DEFAULT")}, false});
-    il.add_item({{Expression_component("3'b0")}, false});
-    il.add_item({{Expression_component("SS_POLARITY_DEFAULT")}, false});
-    il.add_item({{Expression_component("5'b0")}, false});
-    il.add_item({{Expression_component("4'hE")}, false});
-    il.add_item({{Expression_component("4'b0")}, false});
+    il.add_item(Expression({Expression_component("SS_POLARITY_DEFAULT")}));
+    il.add_item(Expression({Expression_component("3'b0")}));
+    il.add_item(Expression({Expression_component("SS_POLARITY_DEFAULT")}));
+    il.add_item(Expression({Expression_component("5'b0")}));
+    il.add_item(Expression({Expression_component("4'hE")}));
+    il.add_item(Expression({Expression_component("4'b0")}));
     il.close_level();
     il.open_level();
-    il.add_item({{Expression_component("2'h2")}, false});
-    il.add_item({{Expression_component("2'b1")}, false});
-    il.add_item({{Expression_component("2'h3")}, false});
-    il.add_item({{Expression_component("4'hE")}, false});
-    il.add_item({{Expression_component("4'b0")}, false});
+    il.add_item(Expression({Expression_component("2'h2")}));
+    il.add_item(Expression({Expression_component("2'b1")}));
+    il.add_item(Expression({Expression_component("2'h3")}));
+    il.add_item(Expression({Expression_component("4'hE")}));
+    il.add_item(Expression({Expression_component("4'b0")}));
     il.close_level();
 
 

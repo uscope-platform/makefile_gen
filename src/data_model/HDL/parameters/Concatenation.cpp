@@ -16,7 +16,7 @@
 
 #include "data_model/HDL/parameters/Concatenation.hpp"
 
-std::set<std::string> Concatenation::get_dependencies() {
+std::set<std::string> Concatenation::get_dependencies() const{
     std::set<std::string> result;
     for (auto &comp:components) {
         auto comp_deps = comp.get_dependencies();
@@ -33,7 +33,7 @@ bool Concatenation::propagate_constant(const std::string &name, const resolved_p
     return retval;
 }
 
-std::variant<int64_t, mdarray<int64_t>> Concatenation::elaborate(){
+resolved_parameter Concatenation::evaluate(){
     return 0;
 }
 

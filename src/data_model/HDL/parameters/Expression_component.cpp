@@ -42,7 +42,7 @@ Expression_component::Expression_component(int64_t n) {
     value = n;
 }
 
-std::set<std::string> Expression_component::get_dependencies() {
+std::set<std::string> Expression_component::get_dependencies()const {
     std::set<std::string> result;
     if (is_string()) result.insert(std::get<std::string>(value));
     for (auto &idx:array_index) {
@@ -83,6 +83,7 @@ bool Expression_component::propagate_constant(const std::string &const_name, con
         }
         return retval;
     }
+    return true;
 }
 
 bool Expression_component::is_string() const {

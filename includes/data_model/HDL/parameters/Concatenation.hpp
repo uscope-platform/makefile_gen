@@ -24,6 +24,8 @@
 class Concatenation {
 public:
     Concatenation() = default;
+    Concatenation(std::initializer_list<Expression> list)
+        : components(list) {}
     void add_component(const Expression &expr) {components.push_back(expr);}
 
     Concatenation(const Concatenation &other) = default;
@@ -32,9 +34,10 @@ public:
     Concatenation & operator=(const Concatenation &other) = default;
     Concatenation & operator=(Concatenation &&other) noexcept = default;
 
-    std::set<std::string> get_dependencies();
+    std::set<std::string> get_dependencies()const;
+    bool empty() const {return components.empty();}
     bool propagate_constant(const std::string &name, const resolved_parameter &value);
-    std::variant<int64_t, mdarray<int64_t>> elaborate();
+    resolved_parameter evaluate();
 
     std::string print() const;
     friend bool operator==(const Concatenation &lhs, const Concatenation &rhs) {

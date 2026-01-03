@@ -186,7 +186,7 @@ int64_t Expression::evaluate_unary_expression(int64_t operand, const std::string
     }
 }
 
-std::set<std::string> Expression::get_dependencies() {
+std::set<std::string> Expression::get_dependencies()const {
     std::set<std::string> result;
     for (auto &comp:components) {
         auto deps = comp.get_dependencies();

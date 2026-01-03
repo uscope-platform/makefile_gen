@@ -53,7 +53,7 @@ public:
     void close_replication_size();
     void stop_replication();
 
-    void start_replication_assignment() {in_replication_assignment = true;};
+    void start_replication_assignment();
     void stop_replication_assignment();
     void start_expression_new();
     void stop_expression_new();
@@ -100,15 +100,19 @@ private:
     bool in_replication_assignment = false;
     bool in_bus_array_quantifier = false;
     bool in_function_assignment = false;
+    bool in_replication_size = false;
 
+    std::stack<Concatenation> concatenations_stack;
     std::stack<Expression> expression_stack;
+    std::stack<Replication> replication_stack;
 
-    Expression replication_components;
+
     Expression bit_selection;
-    Expression replication_size;
     std::vector<Expression> concat_components;
 
     Expression new_expression;
+    Concatenation new_concatenation;
+    Replication new_replication;
     int expression_level=0;
     std::stack<int> expression_level_stack;
 

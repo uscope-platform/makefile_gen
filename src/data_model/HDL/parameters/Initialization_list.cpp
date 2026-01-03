@@ -32,7 +32,7 @@ Initialization_list::Initialization_list(const Initialization_list &i) {
     scalar = i.scalar;
 }
 
-Initialization_list::Initialization_list(const std::variant<Expression, Concatenation> &e) {
+Initialization_list::Initialization_list(const std::variant<Expression, Concatenation, Replication> &e) {
     expression_leaves.push_back(e);
 }
 
@@ -47,7 +47,7 @@ void Initialization_list::add_dimension(const dimension_t &d, bool packed) {
 
 }
 
-void Initialization_list::add_item(const Expression &e) {
+void Initialization_list::add_item(const std::variant<Expression, Concatenation, Replication> &e) {
     scalar = false;
     if(last_dimension){
         expression_leaves.push_back(e);
@@ -133,7 +133,12 @@ bool Initialization_list::empty() const {
 
     if (scalar) {
         if (expression_leaves.empty()) return true;
-        return std::get<Expression>(expression_leaves[0]).empty();
+        if (std::holds_alternative<Expression>(expression_leaves[0]))
+            return std::get<Expression>(expression_leaves[0]).empty();
+        else if (std::holds_alternative<Concatenation>(expression_leaves[0]))
+            return std::get<Concatenation>(expression_leaves[0]).empty();
+        else
+            return false;
     }
     return expression_leaves.empty() && lower_dimension_leaves.empty();
 }
@@ -147,10 +152,6 @@ void Initialization_list::link_processor(const std::shared_ptr<Parameters_map> &
     for(auto &item:lower_dimension_leaves){
         item.link_processor( ep, cs, ds);
     }
-}
-
-int64_t Initialization_list::get_value_at(std::vector<uint64_t> idx) {
-    return 0;
 }
 
 resolved_parameter Initialization_list::get_values() {
@@ -190,9 +191,13 @@ mdarray<int64_t> Initialization_list::get_1d_list_values() {
         }
     } else {
         for(auto &expr:expression_leaves){
-            if (std::holds_alternative<Concatenation>(expr)) {
+            if (std::holds_alternative<Replication>(expr)) {
+                auto raw_result = std::get<Replication>(expr).evaluate();
+                auto result = std::get<mdarray<int64_t>>(raw_result).get_1d_slice({0, 0});
+                values.insert(values.end(), result.begin(), result.end());
+            } else if (std::holds_alternative<Concatenation>(expr)) {
 
-            } else {
+            } else if (std::holds_alternative<Expression>(expr)) {
                 if(is_repetition(std::get<Expression>(expr))){
                     auto p = get_parameter_processor();
                     auto res = expand_repetition(std::get<Expression>(expr), p, nullptr);
@@ -212,7 +217,10 @@ mdarray<int64_t> Initialization_list::get_1d_list_values() {
                         }
                     }
                 }
+            } else {
+                throw std::logic_error("Unknown variant");
             }
+
 
         }
     }
@@ -396,8 +404,11 @@ std::set<std::string> Initialization_list::get_dependencies() {
         std::set<std::string> deps;
         if (std::holds_alternative<Expression>(expr))
             deps = std::get<Expression>(expr).get_dependencies();
-        else
+        else if (std::holds_alternative<Concatenation>(expr))
             deps = std::get<Concatenation>(expr).get_dependencies();
+        else if (std::holds_alternative<Replication>(expr))
+            deps = std::get<Replication>(expr).get_dependencies();
+
         result.insert(deps.begin(), deps.end());
     }
     for (auto &i : lower_dimension_leaves) {
@@ -440,8 +451,8 @@ void PrintTo(const Initialization_list &il, std::ostream *os) {
     result += "EXPRESSION LEAVES\n";
     for(const auto &item:il.expression_leaves){
         if (std::holds_alternative<Expression>(item)) result +=  "  " + std::get<Expression>(item).print() + "\n";
-        else result += " " + std::get<Concatenation>(item).print() + "\n";
-
+        else if (std::holds_alternative<Concatenation>(item)) result += " " + std::get<Concatenation>(item).print() + "\n";
+        else if (std::holds_alternative<Replication>(item)) result += " " + std::get<Replication>(item).print() + "\n";
     }
 
     for(const auto &item:il.lower_dimension_leaves){
@@ -491,7 +502,10 @@ std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Param
 std::optional<resolved_parameter> Initialization_list::evaluate() {
     std::optional<resolved_parameter> result;
     if (scalar) {
-        result = std::get<Expression>(expression_leaves[0]).evaluate();
+        if (std::holds_alternative<Expression>(expression_leaves[0]))
+            result = std::get<Expression>(expression_leaves[0]).evaluate();
+        else
+            result = std::get<Concatenation>(expression_leaves[0]).evaluate();
     } else {
        result  = get_values();
     }
@@ -520,7 +534,8 @@ bool Initialization_list::propagate_constant(const std::string &name, const reso
     }
     for (auto &expr:expression_leaves) {
         if (std::holds_alternative<Expression>(expr)) retval &=  std::get<Expression>(expr).propagate_constant(name, value);
-        else retval &= std::get<Concatenation>(expr).propagate_constant(name, value);
+        else if (std::holds_alternative<Concatenation>(expr)) retval &= std::get<Concatenation>(expr).propagate_constant(name, value);
+        else if (std::holds_alternative<Replication>(expr)) retval &= std::get<Replication>(expr).propagate_constant(name, value);
     }
     return retval;
 }

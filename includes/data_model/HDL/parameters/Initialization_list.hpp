@@ -23,6 +23,7 @@
 #include <cereal/types/vector.hpp>
 
 #include "data_model/HDL/parameters/Expression.hpp"
+#include "data_model/HDL/parameters/Replication.hpp"
 #include "data_model/HDL/parameters/Concatenation.hpp"
 #include "data_model/mdarray.hpp"
 
@@ -57,9 +58,9 @@ class Initialization_list {
 public:
     Initialization_list() = default;
     Initialization_list( const Initialization_list &i);
-    explicit Initialization_list(const std::variant<Expression, Concatenation> &e);
+    explicit Initialization_list(const std::variant<Expression, Concatenation, Replication> &e);
     void add_dimension(const dimension_t &d, bool packed);
-    void add_item(const Expression &e);
+    void add_item(const std::variant<Expression, Concatenation, Replication> &e);
     void open_level();
     void close_level();
     bool empty() const;
@@ -69,7 +70,6 @@ public:
                         const std::shared_ptr<Parameters_map> &ep,
                         const std::shared_ptr<Parameters_map> &cs,
                         const std::shared_ptr<data_store> &ds);
-    int64_t get_value_at(std::vector<uint64_t> idx);
     resolved_parameter get_values();
 
     void set_packed_dimensions(const std::vector<dimension_t>  &d) {packed_dimensions = d;};
@@ -136,7 +136,7 @@ private:
     std::vector<dimension_t> packed_dimensions;
 
     bool last_dimension = true;
-    std::vector<std::variant<Expression, Concatenation>> expression_leaves;
+    std::vector<std::variant<Expression, Concatenation, Replication>> expression_leaves;
     std::vector<Initialization_list> lower_dimension_leaves;
     bool default_initialization = false;
 };

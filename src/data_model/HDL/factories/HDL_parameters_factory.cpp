@@ -97,19 +97,19 @@ void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
 void HDL_parameters_factory::stop_replication() {
     if(in_replication){
         in_replication = false;
-        replication_components.components.insert(replication_components.components.begin(), {Expression_component("$repeat_init")});
-        init_list.add_item(replication_components);
-        init_list.close_level();
-        replication_components.clear();
+        init_list.add_item(new_replication);
     expression_level++;
     }
 }
 
+void HDL_parameters_factory::start_replication_assignment() {
+    in_replication_assignment = true;
+    in_replication_size = true;
+}
+
 void HDL_parameters_factory::stop_replication_assignment() {
     in_replication_assignment = false;
-    replication_components.push_front(Expression_component("$repeat_init"));
-    init_list.add_item(replication_components);
-    replication_components.clear();
+    init_list.add_item(new_replication);
 }
 
 void HDL_parameters_factory::stop_packed_assignment() {
@@ -121,7 +121,8 @@ void HDL_parameters_factory::stop_packed_assignment() {
 }
 
 void HDL_parameters_factory::close_replication_size() {
-    replication_components.emplace_back(",");
+    in_replication_size = false;
+
 }
 
 void HDL_parameters_factory::start_expression_new() {
@@ -135,14 +136,16 @@ void HDL_parameters_factory::stop_expression_new() {
     if(expression_level == 0){
         if(!new_expression.empty()){
             if(in_replication || in_replication_assignment) {
-                replication_components.components.insert(replication_components.components.end(), new_expression.components.begin(), new_expression.components.end());
+                if (in_replication_size)
+                    new_replication.set_size(new_expression);
+                else
+                    new_replication.set_item(new_expression);
             } else if(in_unpacked_declaration || in_packed_dimension){
                 expression_stack.push(new_expression);
-            } else if(in_packed_assignment || in_initialization_list) {
+            } else if(in_initialization_list) {
                 init_list.add_item(new_expression);
             }  else if(in_concatenation) {
-                concat_components.push_back(new_expression);
-                init_list.add_item(new_expression);
+                new_concatenation.add_component(new_expression);
             } else {
                 current_resource.set_expression(new_expression);
                 if(in_function_assignment) {
@@ -162,10 +165,10 @@ void HDL_parameters_factory::start_packed_assignment() {
 
 void HDL_parameters_factory::start_concatenation() {
     if(in_param_assignment || in_packed_assignment || in_initialization_list){
-        init_list.open_level();
         expression_level_stack.push(expression_level);
         expression_level = 0;
         in_concatenation = true;
+        new_concatenation = Concatenation();
     }
 
 }
@@ -174,18 +177,15 @@ void HDL_parameters_factory::stop_concatenation() {
     if(in_concatenation){
         expression_level = expression_level_stack.top();
         expression_level_stack.pop();
-        if(in_initialization_list){
-            concat_components.clear();
-        }
+        init_list.add_item(new_concatenation);
         in_concatenation = false;
     }
-    init_list.close_level();
 }
 
 void HDL_parameters_factory::start_replication() {
     if(in_param_assignment || in_initialization_list || in_packed_assignment){
-        init_list.open_level();
         in_replication = true;
+        in_replication_size = true;
         expression_level--;
     }
 }
