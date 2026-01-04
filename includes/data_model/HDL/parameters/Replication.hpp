@@ -40,7 +40,7 @@ public:
 
     std::set<std::string> get_dependencies()const;
     bool propagate_constant(const std::string &name, const resolved_parameter &value);
-    resolved_parameter evaluate(bool packed);
+    std::optional<resolved_parameter> evaluate(bool packed);
 
     int64_t pack_repetition(int64_t value, int64_t width, int64_t count);
 

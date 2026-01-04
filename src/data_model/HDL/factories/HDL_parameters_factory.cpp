@@ -167,6 +167,7 @@ void HDL_parameters_factory::start_concatenation() {
     if(in_param_assignment || in_packed_assignment || in_initialization_list){
         expression_level_stack.push(expression_level);
         expression_level = 0;
+        if (in_concatenation) concatenations_stack.push(new_concatenation);
         in_concatenation = true;
         new_concatenation = Concatenation();
     }
@@ -177,8 +178,15 @@ void HDL_parameters_factory::stop_concatenation() {
     if(in_concatenation){
         expression_level = expression_level_stack.top();
         expression_level_stack.pop();
-        init_list.add_item(new_concatenation);
-        in_concatenation = false;
+        Concatenation closed_concat = new_concatenation;
+        if (!concatenations_stack.empty()) {
+            new_concatenation = concatenations_stack.top();
+            concatenations_stack.pop();
+            init_list.add_item(new_concatenation);
+        } else {
+            init_list.set_scalar(new_concatenation);
+            in_concatenation = false;
+        }
     }
 }
 

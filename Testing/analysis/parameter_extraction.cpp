@@ -1021,7 +1021,7 @@ TEST(parameter_extraction, packed_array) {
     d.packed = true;
     Initialization_list il;
     il.add_dimension(d, true);
-    il.add_item({Concatenation({
+    il.set_scalar({Concatenation({
                 {Expression_component("1'b1")},
                 {Expression_component("1'b0")},
                 {Expression_component("1'b1")},

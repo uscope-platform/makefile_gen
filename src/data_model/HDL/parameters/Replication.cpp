@@ -38,7 +38,7 @@ bool Replication::propagate_constant(const std::string &name, const resolved_par
     return result;
 }
 
-resolved_parameter Replication::evaluate(bool packed) {
+std::optional<resolved_parameter> Replication::evaluate(bool packed) {
     mdarray<int64_t> result;
     auto raw_size = repetition_size.evaluate();
     if (!raw_size.has_value()) return false;
@@ -56,11 +56,11 @@ resolved_parameter Replication::evaluate(bool packed) {
             return pack_repetition(std::get<int64_t>(item.value()), repeated_size, size);
         }
     } else if (std::holds_alternative<Concatenation>(repeated_item)) {
-        //TODO: check if packed is usefull here;
-        auto item = std::get<Concatenation>(repeated_item).evaluate();
-
+        auto raw_item = std::get<Concatenation>(repeated_item).evaluate(packed);
+        if (!raw_item.has_value()) return std::nullopt;
+        auto item = raw_item.value();
         if (std::holds_alternative<int64_t>(item))
-            repeated_value = std::vector<int64_t>(size, std::get<int64_t>(item));
+            repeated_value = std::vector(size, std::get<int64_t>(item));
         else {
             auto  item_vect = std::get<mdarray<int64_t>>(item).get_1d_slice({0,0});
             for (int i = 0; i< size; i++) {

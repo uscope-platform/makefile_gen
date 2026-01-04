@@ -25,6 +25,12 @@ struct Expression {
     std::vector<Expression_component> components;
     bool rpn = false;
 
+    Expression(const Expression &other) = default;
+    Expression(Expression &&other) noexcept = default;
+
+    Expression & operator=(const Expression &other) = default;
+    Expression & operator=(Expression &&other) noexcept = default;
+
     Expression() = default;
     Expression(std::initializer_list<Expression_component> list)
             : components(list) {}

@@ -37,7 +37,7 @@ public:
     std::set<std::string> get_dependencies()const;
     bool empty() const {return components.empty();}
     bool propagate_constant(const std::string &name, const resolved_parameter &value);
-    resolved_parameter evaluate();
+    std::optional<resolved_parameter> evaluate(bool packed);
 
     std::string print() const;
     friend bool operator==(const Concatenation &lhs, const Concatenation &rhs) {
@@ -55,6 +55,9 @@ public:
     }
 
 private:
+
+
+    int64_t pack_values(const std::vector<int64_t>&components, std::vector<int64_t> &sizes);
     std::vector<Expression> components;
 };
 

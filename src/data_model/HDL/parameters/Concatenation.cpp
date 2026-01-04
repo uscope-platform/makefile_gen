@@ -33,7 +33,21 @@ bool Concatenation::propagate_constant(const std::string &name, const resolved_p
     return retval;
 }
 
-resolved_parameter Concatenation::evaluate(){
+std::optional<resolved_parameter> Concatenation::evaluate(bool packed){
+    if (packed) {
+        std::vector<int64_t> sizes(components.size());
+        std::vector<int64_t> values(components.size());
+        for (int i = 0;i<components.size(); i++) {
+            auto value_opt = components[components.size()-i-1].evaluate(&sizes[i]);
+            if (!value_opt.has_value()) return nullptr;
+            auto raw_value = value_opt.value();
+            if (!std::holds_alternative<int64_t>(raw_value)) throw std::runtime_error("packing concatenations of arrays orare unsupported");
+            values[i] = std::get<int64_t>(raw_value);
+        }
+        return pack_values(values, sizes);
+    } else {
+
+    }
     return 0;
 }
 
@@ -48,4 +62,29 @@ std::string Concatenation::print()  const{
     }
     oss <<"}";
     return oss.str();
+}
+
+int64_t Concatenation::pack_values(const std::vector<int64_t> &components, std::vector<int64_t> &sizes) {
+    int64_t total_size = 0;
+    for(auto &size:sizes){
+        total_size += size;
+    }
+    std::vector<bool> result(total_size, false);
+
+    uint64_t current_wp = 0;
+    for(ssize_t i =0; i<components.size(); i++){
+        std::bitset<64> data = components[i];
+        auto size = sizes[i];
+        for(int j = 0; j<size; j++){
+            result[current_wp] = data[j];
+            current_wp++;
+        }
+    }
+
+    int64_t packed_result = 0;
+    for(int i = 0; i<result.size(); i++){
+        packed_result += result[i]*std::pow(2, i);
+    }
+
+    return packed_result;
 }

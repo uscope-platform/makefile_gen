@@ -193,7 +193,8 @@ mdarray<int64_t> Initialization_list::get_1d_list_values() {
         for(auto &expr:expression_leaves){
             if (std::holds_alternative<Replication>(expr)) {
                 auto raw_result = std::get<Replication>(expr).evaluate(false);
-                auto result = std::get<mdarray<int64_t>>(raw_result).get_1d_slice({0, 0});
+                if (!raw_result.has_value()) throw std::runtime_error("Unexpected evaluation failure");
+                auto result = std::get<mdarray<int64_t>>(raw_result.value()).get_1d_slice({0, 0});
                 values.insert(values.end(), result.begin(), result.end());
             } else if (std::holds_alternative<Concatenation>(expr)) {
 
@@ -291,7 +292,9 @@ mdarray<int64_t> Initialization_list::get_packed_1d_list_values() {
         mdarray<int64_t>::md_1d_array sizes;
         for(auto &item:expression_leaves){
             if (std::holds_alternative<Replication>(item)) {
-                auto raw_val = std::get<mdarray<int64_t>>(std::get<Replication>(item).evaluate(false));
+                auto eval_result =std::get<Replication>(item).evaluate(false);
+                if (!eval_result.has_value()) throw std::runtime_error("Unexpected evaluation failure");
+                auto raw_val = std::get<mdarray<int64_t>>(eval_result.value());
                 int i = 0;
             } else if (std::holds_alternative<Concatenation>(item)) {
 
@@ -499,7 +502,7 @@ std::optional<resolved_parameter> Initialization_list::evaluate() {
         if (std::holds_alternative<Expression>(expression_leaves[0]))
             result = std::get<Expression>(expression_leaves[0]).evaluate();
         else if (std::holds_alternative<Concatenation>(expression_leaves[0])) {
-            result = std::get<Concatenation>(expression_leaves[0]).evaluate();
+            result = std::get<Concatenation>(expression_leaves[0]).evaluate(true);
         } else if (std::holds_alternative<Replication>(expression_leaves[0])) {
             if (unpacked_dimensions.empty()) {
                 result = std::get<Replication>(expression_leaves[0]).evaluate(true);
