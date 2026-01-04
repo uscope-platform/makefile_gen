@@ -34,21 +34,32 @@ bool Concatenation::propagate_constant(const std::string &name, const resolved_p
 }
 
 std::optional<resolved_parameter> Concatenation::evaluate(bool packed){
+    auto concat_size = components.size();
     if (packed) {
-        std::vector<int64_t> sizes(components.size());
-        std::vector<int64_t> values(components.size());
-        for (int i = 0;i<components.size(); i++) {
-            auto value_opt = components[components.size()-i-1].evaluate(&sizes[i]);
-            if (!value_opt.has_value()) return nullptr;
+        std::vector<int64_t> sizes(concat_size);
+        std::vector<int64_t> values(concat_size);
+        for (int i = 0;i<concat_size; i++) {
+            auto value_opt = components[concat_size-i-1].evaluate(&sizes[i]);
+            if (!value_opt.has_value()) return std::nullopt;
             auto raw_value = value_opt.value();
             if (!std::holds_alternative<int64_t>(raw_value)) throw std::runtime_error("packing concatenations of arrays orare unsupported");
             values[i] = std::get<int64_t>(raw_value);
         }
         return pack_values(values, sizes);
     } else {
-
+        mdarray<int64_t> result;
+        for (int i = 0;i<concat_size; i++) {
+            auto value_opt = components[concat_size-i-1].evaluate();
+            if (!value_opt.has_value()) return std::nullopt;
+            auto res = value_opt.value();
+            if (std::holds_alternative<int64_t>(res)) {
+                result.set_value({0, 0, i}, std::get<int64_t>(res));
+            } else {
+                // TODO: handle multidim concatenations
+            }
+        }
+        return result;
     }
-    return 0;
 }
 
 std::string Concatenation::print()  const{

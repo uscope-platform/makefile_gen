@@ -55,7 +55,7 @@ public:
         if(idx[1]>=data[idx[0]].size()){
             data[idx[0]].resize(idx[1]+1);
         }
-        if(idx[2]>=data[idx[0]][idx[2]].size()){
+        if(idx[2]>=data[idx[0]][idx[1]].size()){
             data[idx[0]][idx[1]].resize(idx[2]+1);
         }
         data[idx[0]][idx[1]][idx[2]] = val;

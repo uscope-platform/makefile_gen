@@ -394,10 +394,10 @@ TEST(parameter_extraction, array_concatenation) {
     il.add_dimension({{Expression_component("31")}, {Expression_component("0")}, true}, true);
     il.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false}, false);
 
-    il.open_level();
-    il.add_item(Expression({Expression_component("simple_numeric_p")}));
-    il.add_item(Expression({Expression_component("sv_numeric_p")}));
-    il.close_level();
+    Concatenation c;
+    c.add_component(Expression({Expression_component("simple_numeric_p")}));
+    c.add_component(Expression({Expression_component("sv_numeric_p")}));
+    il.set_scalar(c);
 
     p->add_initialization_list(il);
 
@@ -416,7 +416,7 @@ TEST(parameter_extraction, array_concatenation) {
     auto defaults = resource.get_default_parameters();
 
     mdarray<int64_t> av;
-    av.set_1d_slice({0, 0}, {32,8});
+    av.set_1d_slice({0, 0}, {8,32});
 
     std::map<std::string, resolved_parameter> check_defaults = {
         {"simple_numeric_p", 32},

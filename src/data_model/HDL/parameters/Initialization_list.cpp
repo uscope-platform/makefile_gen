@@ -502,7 +502,8 @@ std::optional<resolved_parameter> Initialization_list::evaluate() {
         if (std::holds_alternative<Expression>(expression_leaves[0]))
             result = std::get<Expression>(expression_leaves[0]).evaluate();
         else if (std::holds_alternative<Concatenation>(expression_leaves[0])) {
-            result = std::get<Concatenation>(expression_leaves[0]).evaluate(true);
+            bool packed_concat = unpacked_dimensions.empty();
+            result = std::get<Concatenation>(expression_leaves[0]).evaluate(packed_concat);
         } else if (std::holds_alternative<Replication>(expression_leaves[0])) {
             if (unpacked_dimensions.empty()) {
                 result = std::get<Replication>(expression_leaves[0]).evaluate(true);
