@@ -109,7 +109,7 @@ void HDL_parameters_factory::start_replication_assignment() {
 
 void HDL_parameters_factory::stop_replication_assignment() {
     in_replication_assignment = false;
-    init_list.add_item(new_replication);
+    init_list.set_scalar(new_replication);
 }
 
 void HDL_parameters_factory::stop_packed_assignment() {

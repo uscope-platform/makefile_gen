@@ -89,7 +89,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_parameter(const std:
     std::shared_ptr<HDL_parameter> p;
     if(par->get_type()== HDL_parameter::function_parameter) {
         auto fs = spec.get_functions();
-        auto expression = par->get_expression();
+        auto expression = std::get<Expression>(par->get_expression());
 
         if(expression.components.size() != 1) {
             spdlog::warn("Parameter {} is initialized by function with arguments, which is currently unsupported", par->get_name());
@@ -210,7 +210,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
     std::shared_ptr<HDL_parameter> return_par = par->clone();
 
     spdlog::trace("{}->Processing scalar parameter: {}", trace_prefix, par->get_name());
-    auto components = return_par->get_expression();
+    auto components = std::get<Expression>(return_par->get_expression());
 
     if(par->get_type() == HDL_parameter::numeric_parameter){
         return return_par;

@@ -81,20 +81,14 @@ public:
 
     bool propagate_constant(const std::string &name, const resolved_parameter &value);
 
-    std::optional<Expression> get_scalar();
+    std::optional<std::variant<Expression, Concatenation, Replication>> get_scalar();
     void clear_scalar();
     void push_scalar_component(const Expression_component &comp);
-    void set_scalar(const Expression &expr);
+    void set_scalar(const std::variant<Expression, Concatenation, Replication> &expr);
 
     mdarray<int64_t> process_default_initialization();
 
-    static bool is_repetition(Expression &e){
-        if(!e.empty()){
-            if (std::holds_alternative<std::string>(e.components[0].get_value()))
-            return std::get<std::string>(e.components[0].get_value()) == "$repeat_init";
-        }
-        return false;
-    }
+
 
 
     std::set<std::string> get_dependencies();

@@ -94,6 +94,8 @@ std::optional<resolved_parameter> Expression::evaluate() {
 
 std::optional<resolved_parameter> Expression::evaluate(int64_t *result_size) {
     if (components.size() == 1) {
+        if (result_size != nullptr)
+            *result_size = components[0].get_binary_size();
         return components[0].get_value();
     }
 

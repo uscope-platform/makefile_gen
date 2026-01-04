@@ -754,7 +754,7 @@ TEST(parameter_extraction, simple_repetition_initialization) {
     std::string test_pattern = R"(
         module test_mod #(
             parameter repetition_size = 2,
-            parameter bit repetition_parameter_1 [1:0]  = '{repetition_size{1}}
+            parameter int repetition_parameter_1 [1:0]  = '{repetition_size{1}}
         )();
 
         endmodule
@@ -784,7 +784,7 @@ TEST(parameter_extraction, simple_repetition_initialization) {
     Replication rep;
     rep.set_size({Expression_component("repetition_size")});
     rep.set_item(Expression({Expression_component("1")}));
-    il.add_item(rep);
+    il.set_scalar(rep);
 
 
     p->add_initialization_list(il);
@@ -806,6 +806,66 @@ TEST(parameter_extraction, simple_repetition_initialization) {
     std::map<std::string, resolved_parameter> check_defaults = {
         {"repetition_size", 2},
         {"repetition_parameter_1", av}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+
+}
+
+TEST(parameter_extraction, packed_repetition_initialization) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            parameter repetition_size = 2,
+            parameter int repetition_parameter_1  = {repetition_size{1}}
+        )();
+
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("repetition_size");
+    p->add_component(Expression_component("2"));
+    check_params.insert(p);
+
+
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("repetition_parameter_1");
+
+    Initialization_list il;
+    Replication rep;
+    rep.set_size({Expression_component("repetition_size")});
+    rep.set_item(Expression({Expression_component("1")}));
+    il.set_scalar(rep);
+
+
+    p->add_initialization_list(il);
+
+    check_params.insert(p);
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"repetition_size", 2},
+        {"repetition_parameter_1", 3}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));

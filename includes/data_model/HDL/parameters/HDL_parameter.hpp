@@ -72,7 +72,7 @@ public:
         locking_violation_check();
         i_l.set_scalar(c);;
     };
-    Expression  get_expression() {
+    std::variant<Expression, Concatenation, Replication>  get_expression() {
         auto exp =  i_l.get_scalar();
         if (!exp.has_value()) throw std::runtime_error("A scalar parameter has been initialized with an array");
         return exp.value();

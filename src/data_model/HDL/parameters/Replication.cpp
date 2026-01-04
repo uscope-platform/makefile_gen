@@ -38,7 +38,7 @@ bool Replication::propagate_constant(const std::string &name, const resolved_par
     return result;
 }
 
-resolved_parameter Replication::evaluate() {
+resolved_parameter Replication::evaluate(bool packed) {
     mdarray<int64_t> result;
     auto raw_size = repetition_size.evaluate();
     if (!raw_size.has_value()) return false;
@@ -46,11 +46,17 @@ resolved_parameter Replication::evaluate() {
     auto size = std::get<int64_t>(raw_size.value());
     mdarray<int64_t>::md_1d_array repeated_value;
     if (std::holds_alternative<Expression>(repeated_item)) {
-        auto item = std::get<Expression>(repeated_item).evaluate();
+        int64_t repeated_size;
+        auto item = std::get<Expression>(repeated_item).evaluate(&repeated_size);
         if (!item.has_value()) return false;
         if (!std::holds_alternative<int64_t>(item.value())) throw std::runtime_error("Tried to replicate non integer");
-        repeated_value = std::vector<int64_t>(size, std::get<int64_t>(item.value()));
+        if (!packed) {
+            repeated_value = std::vector(size, std::get<int64_t>(item.value()));
+        } else {
+            return pack_repetition(std::get<int64_t>(item.value()), repeated_size, size);
+        }
     } else if (std::holds_alternative<Concatenation>(repeated_item)) {
+        //TODO: check if packed is usefull here;
         auto item = std::get<Concatenation>(repeated_item).evaluate();
 
         if (std::holds_alternative<int64_t>(item))
@@ -65,6 +71,20 @@ resolved_parameter Replication::evaluate() {
 
     result.set_1d_slice({0,0}, repeated_value);
     return result;
+}
+
+int64_t Replication::pack_repetition(int64_t value, int64_t width, int64_t count) {
+    int64_t packed_result = 0;
+
+    int64_t mask = (static_cast<int64_t>(1) << width) - 1;
+    int64_t clean_value = value & mask;
+
+    for (int i = 0; i < count; i++) {
+        int64_t shift_amount = static_cast<int64_t>(i) * width;
+        packed_result |= (clean_value << shift_amount);
+    }
+
+    return packed_result;
 }
 
 std::string Replication::print() const {

@@ -49,7 +49,7 @@ Parameters_map produce_check_components(std::vector<param_check_t> &in){
         auto par = std::make_shared<HDL_parameter>();
         par->set_name(vt.name);
         if(vt.is_rpn){
-            auto expr= par->get_expression();
+            auto expr= std::get<Expression>(par->get_expression());
             expr.rpn = true;
             par->set_expression(expr);
         }
@@ -996,7 +996,7 @@ TEST(parameter_processing, array_instance_parameter_override) {
     Parameters_map check_params= produce_check_components(vect_params);
 
     auto param = check_params.get("p1_t");
-    auto ec = param->get_expression();
+    Expression ec = std::get<Expression>(param->get_expression());
     std::vector<Expression> index;
     index.push_back({Expression_component("0")});
     ec.components[0].set_array_index(index);
@@ -1004,7 +1004,7 @@ TEST(parameter_processing, array_instance_parameter_override) {
     check_params.insert(param);
 
      param = check_params.get("p2_t");
-    ec = param->get_expression();
+    ec = std::get<Expression>(param->get_expression());
     index.clear();
     index.push_back({{Expression_component("1")}});
     ec.components[0].set_array_index(index);

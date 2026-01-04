@@ -706,7 +706,11 @@ void sv_visitor::enterGenvar_expression(sv2017::Genvar_expressionContext *ctx) {
 void sv_visitor::exitGenvar_expression(sv2017::Genvar_expressionContext *ctx) {
     auto param = params_factory.get_parameter();
     auto ex = param->get_expression();
-    loops_factory.add_expression (ex);
+    if (!std::holds_alternative<Expression>(ex)) {
+        throw std::runtime_error("Concatenations or replications are not allowed in loop declarations");
+    };
+    loops_factory.add_expression(std::get<Expression>(ex));
+
 }
 
 void sv_visitor::enterUntyped_function_declaration(sv2017::Untyped_function_declarationContext *ctx) {
