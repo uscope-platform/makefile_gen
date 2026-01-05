@@ -47,15 +47,18 @@ std::optional<resolved_parameter> Concatenation::evaluate(bool packed){
         }
         return pack_values(values, sizes);
     } else {
+
         mdarray<int64_t> result;
-        for (int i = 0;i<concat_size; i++) {
+        for (int64_t i = 0;i<concat_size; i++) {
             auto value_opt = components[concat_size-i-1].evaluate();
             if (!value_opt.has_value()) return std::nullopt;
-            auto res = value_opt.value();
-            if (std::holds_alternative<int64_t>(res)) {
-                result.set_value({0, 0, i}, std::get<int64_t>(res));
+            if (std::holds_alternative<int64_t>(value_opt.value())) {
+                mdarray<int64_t> to_concat;
+                to_concat.set_value(0,std::get<int64_t>(value_opt.value()));
+                result = mdarray<int64_t>::concatenate(result, to_concat).value();
             } else {
-                // TODO: handle multidim concatenations
+                auto array_res = std::get<mdarray<int64_t>>(value_opt.value());
+                result = mdarray<int64_t>::concatenate(result, array_res).value();
             }
         }
         return result;
@@ -67,11 +70,11 @@ std::string Concatenation::print()  const{
     oss << "{";
     for (int i = 0; i< components.size(); i++) {
         oss << components[i].print();
-        if (components.size()>2) {
-            if (i<components.size()-1) oss <<", ";
-        }
+        if (components.size() == 1) break;
+        if (i<components.size()-1) oss <<", ";
     }
-    oss <<"}";
+    oss <<"}\n";
+    auto dbg =  oss.str();
     return oss.str();
 }
 

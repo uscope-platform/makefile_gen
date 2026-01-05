@@ -41,6 +41,40 @@ public:
         data = md_3d_array(dimensions[0], l2);
     };
 
+    static std::optional<mdarray> concatenate(const mdarray &arr_1, const mdarray &arr_2) {
+        if (arr_1.order != arr_2.order) return std::nullopt;
+        mdarray result = arr_1;
+        switch (arr_1.order) {
+            case 3:
+                if (result.data.empty())  return arr_2;
+                if (arr_2.data.empty()) return result;
+                result.data.insert(result.data.end(), arr_2.data.begin(), arr_2.data.end());
+                break;
+
+            case 2:
+                if (result.data.empty())  return arr_2;
+                if (result.data[0].empty()) return arr_2;
+                if (arr_2.data.empty()) return result;
+                if (arr_2.data[0].empty()) return  result;
+                result.data[0].insert(result.data[0].end(), arr_2.data[0].begin(), arr_2.data[0].end());
+                break;
+            case 1:
+                if (result.data.empty())  return arr_2;
+                if (result.data[0].empty()) return arr_2;
+                if (result.data[0][0].empty()) return arr_2;
+                if (arr_2.data.empty()) return result;
+                if (arr_2.data[0].empty()) return  result;
+                if (arr_2.data[0][0].empty()) return result;
+                result.data[0][0].insert(result.data[0][0].end(), arr_2.data[0][0].begin(), arr_2.data[0][0].end());
+                break;
+
+            default:
+                return std::nullopt;
+        }
+        return result;
+    }
+
+
     void set_scalar(T val){
         data[0][0][0] = val;
     }
@@ -49,6 +83,7 @@ public:
     }
 
     void set_value(std::vector<int64_t> idx, T val){
+        order = idx.size();
         if(idx[0]>=data.size()){
             data.resize(idx[0]+1);
         }
@@ -61,9 +96,23 @@ public:
         data[idx[0]][idx[1]][idx[2]] = val;
     }
 
+    void set_value(int64_t idx, T val){
+        order = 1;
+        if(data.empty()){
+            data.resize(1);
+        }
+        if(data[0].empty()){
+            data[0].resize(1);
+        }
+        if(idx>=data[0][0].size()){
+            data[0][0].resize(idx+1);
+        }
+        data[0][0][idx] = val;
+    }
 
 
     void set_1d_slice(std::vector<int64_t> idx, const md_1d_array &val){
+        order = 1;
         if(idx[0]>=data.size()){
             data.resize(idx[0]+1);
         }
@@ -73,6 +122,7 @@ public:
         data[idx[0]][idx[1]] = val;
     }
     void set_2d_slice(std::vector<int64_t> idx, const md_2d_array& val){
+        order = 2;
         if(idx[0]>=data.size()){
             data.resize(idx[0]+1);
         }
@@ -173,6 +223,7 @@ md_2d_array get_2d_slice(std::vector<int64_t> idx) {
 
 private:
     md_3d_array data;
+    uint8_t order = 1;
 };
 
 

@@ -911,7 +911,7 @@ TEST(parameter_extraction, repetition_initialization) {
     Replication r;
     r.set_size({Expression_component("repetition_size")});
     r.set_item(Expression({Expression_component("1")}));
-    il.add_item(r);
+    il.set_scalar(r);
     p->add_initialization_list(il);
 
     check_params.insert(p);
@@ -924,7 +924,7 @@ TEST(parameter_extraction, repetition_initialization) {
     il.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false}, false);
     r.set_size({Expression_component("repetition_size")});
     r.set_item(Expression({Expression_component("4")}));
-    il.add_item(r);
+    il.set_scalar(r);
     p->add_initialization_list(il);
 
     check_params.insert(p);
@@ -934,16 +934,17 @@ TEST(parameter_extraction, repetition_initialization) {
     p->set_type(HDL_parameter::expression_parameter);
     p->set_name("multi_repetition_parameter");
 
-    dimension_t d;
-    init_list_t init;
-    d.first_bound = {Expression_component("3")};
-    d.second_bound = {Expression_component("0")};
-    d.packed = false;
-    init.dimensions.push_back(d);
-    std::vector<Expression> e = {Expression({Expression_component("repetition_parameter_1")}), Expression({Expression_component("repetition_parameter_2")})};
-    init.values.emplace_back(e);
-
-    p->add_initialization_list(produce_check_init_list(init));
+    il = Initialization_list();
+    il.add_dimension({
+    {Expression_component("3")},
+    {Expression_component("0")},
+    false
+    }, false);
+    Concatenation c;
+    c.add_component(Expression({Expression_component("repetition_parameter_1")}));
+    c.add_component( Expression({Expression_component("repetition_parameter_2")}));
+    il.set_scalar(c);
+    p->add_initialization_list(il);
 
     check_params.insert(p);
 
@@ -951,18 +952,18 @@ TEST(parameter_extraction, repetition_initialization) {
     p->set_type(HDL_parameter::expression_parameter);
     p->set_name("mixed_repetition_parameter");
 
-
-    d.first_bound = {Expression_component("3")};
-    d.second_bound = {Expression_component("0")};
-    d.packed = false;
-    init.values.clear();
-    init.dimensions.clear();
-    init.dimensions.push_back(d);
-    e = {Expression({Expression_component("1")}),Expression({Expression_component("2")}),Expression({Expression_component("repetition_parameter_2")})};
-    init.values.emplace_back(e);
-
-
-    p->add_initialization_list(produce_check_init_list(init));
+    il = Initialization_list();
+    il.add_dimension({
+    {Expression_component("3")},
+    {Expression_component("0")},
+    false
+    }, false);
+    c = Concatenation();
+    c.add_component(Expression({Expression_component("1")}));
+    c.add_component( Expression({Expression_component("2")}));
+    c.add_component( Expression({Expression_component("repetition_parameter_2")}));
+    il.set_scalar(c);
+    p->add_initialization_list(il);
 
     check_params.insert(p);
 
