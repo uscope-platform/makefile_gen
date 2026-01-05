@@ -1675,21 +1675,14 @@ TEST(parameter_extraction, packed_replication_init) {
     p->set_type(HDL_parameter::expression_parameter);
     p->set_name("test_parameter");
 
-    init_list_t init;
-    dimension_t d;
-    d.first_bound = {Expression_component("4")};
-    d.second_bound = {Expression_component("0")};
-    d.packed = true;
-    init.dimensions.push_back(d);
-    auto e = {Expression({
-            Expression_component("$repeat_init"),
-            Expression_component("5"),
-            Expression_component(","),
-            Expression_component("1'b1")
-        })};
-    init.values.emplace_back(e);
+    Initialization_list il;
+    il.add_dimension({{Expression_component("4")}, {Expression_component("0")}, true}, true);
+    Replication r;
+    r.set_size({Expression_component("5")});
+    r.set_item(Expression({Expression_component("1'b1")}));
+    il.set_scalar(r);
 
-    p->add_initialization_list(produce_check_init_list_1d(init));
+    p->add_initialization_list(il);
 
 
     check_params.insert(p);
@@ -1700,6 +1693,17 @@ TEST(parameter_extraction, packed_replication_init) {
         ASSERT_TRUE(parameters.contains(item->get_name()));
         ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
+
+    auto defaults = resource.get_default_parameters();
+
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"test_parameter", 31}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+
 }
 
 
