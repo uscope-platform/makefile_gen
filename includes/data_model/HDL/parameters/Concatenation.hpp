@@ -18,10 +18,11 @@
 #define MAKEFILEGEN_V2_CONCATENATION_HPP
 
 #include "data_model/HDL/parameters/Expression.hpp"
+#include "data_model/HDL/parameters/Parameter_value_base.hpp"
 
 #include <cereal/types/vector.hpp>
 
-class Concatenation {
+class Concatenation : public Parameter_value_base {
 public:
     Concatenation() = default;
     Concatenation(std::initializer_list<Expression> list)

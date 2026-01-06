@@ -19,9 +19,10 @@
 
 #include "data_model/HDL/parameters/Expression.hpp"
 #include "data_model/HDL/parameters/Concatenation.hpp"
+#include "data_model/HDL/parameters/Parameter_value_base.hpp"
 
 
-class Replication {
+class Replication : public Parameter_value_base{
 public:
     Replication() = default;
     Replication(const Expression &size, const std::variant<Expression, Concatenation> &item) {

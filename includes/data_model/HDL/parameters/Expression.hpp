@@ -19,9 +19,10 @@
 
 #include <vector>
 #include "data_model/HDL/parameters/Expression_component.hpp"
+#include "data_model/HDL/parameters/Parameter_value_base.hpp"
 
-
-struct Expression {
+class Expression : public Parameter_value_base{
+public:
     std::vector<Expression_component> components;
     bool rpn = false;
 

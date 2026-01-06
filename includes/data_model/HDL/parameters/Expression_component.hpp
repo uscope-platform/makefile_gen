@@ -29,7 +29,7 @@
 
 #include <cereal/types/vector.hpp>
 
-struct Expression;
+class Expression;
 
 using resolved_parameter = std::variant<int64_t, std::string, mdarray<int64_t>>;
 
