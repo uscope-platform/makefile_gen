@@ -25,10 +25,12 @@
 class Concatenation : public Parameter_value_base {
 public:
     Concatenation() {
+        components = {};
         type = concatenation;
     };
     Concatenation(std::initializer_list<std::shared_ptr<Parameter_value_base>> list)
         : components(list) {
+        components = {};
         type = concatenation;
     }
     void add_component(const std::shared_ptr<Parameter_value_base> &expr) {components.push_back(expr);}
@@ -40,6 +42,8 @@ public:
 
     Concatenation &operator=(const Concatenation &other) {
         if (this != &other) {
+            components.clear();
+            components.reserve(other.components.size());
             for(auto &item: other.components) components.push_back(item->clone_ptr());
             type = other.type;
         }
@@ -48,6 +52,8 @@ public:
 
     Concatenation &operator=(Concatenation &&other) noexcept {
         if (this != &other) {
+            components.clear();
+            components.reserve(other.components.size());
             for(auto &item: other.components) components.push_back(item->clone_ptr());
             type = other.type;
         }
