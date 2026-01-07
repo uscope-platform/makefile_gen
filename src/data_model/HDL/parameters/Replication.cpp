@@ -15,6 +15,13 @@
 
 #include "data_model/HDL/parameters/Replication.hpp"
 
+Replication Replication::clone()  const{
+    Replication result;
+    result.repetition_size = repetition_size;
+    result.repeated_item = repeated_item->clone_ptr();
+    return result;
+}
+
 std::set<std::string> Replication::get_dependencies()const {
     std::set<std::string> result, deps;
     deps = repetition_size.get_dependencies();
@@ -40,8 +47,8 @@ std::optional<resolved_parameter> Replication::evaluate(bool packed) {
     auto size = std::get<int64_t>(raw_size.value());
     mdarray<int64_t>::md_1d_array repeated_value;
     if (repeated_item->is_expression()) {
-        int64_t repeated_size;
-        auto item = repeated_item->as<Expression>().evaluate(&repeated_size);
+        auto item = repeated_item->as<Expression>().evaluate();
+        int64_t repeated_size = repeated_item->as<Expression>().get_size();
         if (!item.has_value()) return false;
         if (!std::holds_alternative<int64_t>(item.value())) throw std::runtime_error("Tried to replicate non integer");
         if (!packed) {

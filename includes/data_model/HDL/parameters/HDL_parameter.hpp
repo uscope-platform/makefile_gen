@@ -33,6 +33,7 @@ class HDL_parameter {
 public:
     HDL_parameter( const HDL_parameter &c );
     HDL_parameter();
+
     void set_name(const std::string &n) {
         locking_violation_check();
         name  = n;

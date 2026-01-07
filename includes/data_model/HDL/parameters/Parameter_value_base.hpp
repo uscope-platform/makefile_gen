@@ -33,10 +33,13 @@ public:
     virtual std::optional<resolved_parameter> evaluate() {return std::nullopt;}
     virtual std::optional<resolved_parameter> evaluate(bool packed) {return std::nullopt;}
     virtual std::string print() const {return "";}
+    virtual int64_t get_size() {return 0;}
 
     bool is_expression(){return type == expression;}
     bool is_replication(){return type == replication;}
     bool is_concatenation(){return type == concatenation;}
+
+    virtual std::shared_ptr<Parameter_value_base> clone_ptr() const = 0;
 
     template<typename T>
         T& as() { return static_cast<T&>(*this); }
@@ -45,9 +48,18 @@ public:
     void serialize( Archive & ar ) {
         ar(type);
     }
+    // Public equality operator using the enum discriminator
+    bool operator==(const Parameter_value_base& other) const {
+        // Use your existing member variable instead of RTTI
+        if (this->type != other.type) return false;
+
+        // Delegate to the virtual implementation
+        return isEqual(other);
+    }
 
 protected:
     param_value_type type = expression;
+    virtual bool isEqual(const Parameter_value_base& other) const = 0;
 };
 
 

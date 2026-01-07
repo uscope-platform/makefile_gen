@@ -215,41 +215,33 @@ TEST(Initialization_list, get_values_1d_packed) {
         {{{Expression_component(4)}},{{Expression_component(0)}}, false
         }, false);
     il.open_level();
-    il.add_item(
-        Concatenation({
-                {Expression_component("1'b1")},
-                {Expression_component("1'b0")},
-                {Expression_component("1'b1")}
-        }));
-    il.close_level();
-    il.open_level();
-    il.add_item(Concatenation({
-        {Expression_component("1'b0")},
-        {Expression_component("1'b1")},
-        {Expression_component("1'b0")}
-    }));
-    il.close_level();
-    il.open_level();
-    il.add_item(Concatenation({
-        {Expression_component("1'b1")},
-        {Expression_component("1'b0")},
-        {Expression_component("1'b1")}
-    }));
-    il.close_level();
-    il.open_level();
-    il.add_item(Concatenation({
-        {Expression_component("1'b1")},
-        {Expression_component("1'b1")},
-        {Expression_component("1'b0")}
-    }));
-    il.close_level();
-    il.open_level();
-    il.add_item(Concatenation({
-        {Expression_component("1'b0")},
-        {Expression_component("1'b0")},
-        {Expression_component("1'b1")}
-    }));
-    il.close_level();
+
+    Concatenation c;
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    il.add_item(c);
+    c = Concatenation();
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    il.add_item(c);
+    c = Concatenation();
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    il.add_item(c);
+    c = Concatenation();
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    il.add_item(c);
+    c = Concatenation();
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    il.add_item(c);
+
 
     auto external_parameters =  std::make_shared<Parameters_map>();
     auto cs = std::make_shared<Parameters_map>();

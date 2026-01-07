@@ -58,6 +58,8 @@ class Initialization_list {
 public:
     Initialization_list() = default;
     Initialization_list( const Initialization_list &i);
+
+    Initialization_list clone() const;
     explicit Initialization_list(const std::variant<Expression, Concatenation, Replication> &e);
     void add_dimension(const dimension_t &d, bool packed);
     void add_item(const std::variant<Expression, Concatenation, Replication> &e);

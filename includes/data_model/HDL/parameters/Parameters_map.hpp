@@ -21,7 +21,15 @@
 
 class Parameters_map{
 public:
-    size_t size(){return inner_map.size();};
+    Parameters_map clone() const {
+        Parameters_map ret;
+        for(auto &item:inner_map) {
+            ret.insert(item->clone());
+        }
+        return ret;
+    }
+
+    size_t size(){return inner_map.size();}
     void clear() {inner_map.clear();}
     bool empty(){return inner_map.empty();}
     bool contains(const std::string &name) const {
@@ -117,14 +125,7 @@ public:
         return inner_map.end();
     };
 
-    static Parameters_map deep_copy(const Parameters_map &p){
-        Parameters_map ret;
-        for(auto &item:p){
-            HDL_parameter n_p = *item;
-            ret.insert(std::make_shared<HDL_parameter>(n_p));
-        }
-        return ret;
-    }
+
 
 private:
 

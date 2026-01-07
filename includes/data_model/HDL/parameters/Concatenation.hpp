@@ -32,6 +32,8 @@ public:
     Concatenation(const Concatenation &other) = default;
     Concatenation(Concatenation &&other) noexcept = default;
 
+    Concatenation clone() const;
+
     Concatenation & operator=(const Concatenation &other) = default;
     Concatenation & operator=(Concatenation &&other) noexcept = default;
 
@@ -42,13 +44,21 @@ public:
 
     std::string print() const;
     friend bool operator==(const Concatenation &lhs, const Concatenation &rhs) {
-        return lhs.components == rhs.components;
+        auto ret = true;
+        if(lhs.components.size() != rhs.components.size()) return false;
+        for(int i = 0; i < lhs.components.size(); i++) {
+            ret &= *lhs.components[i] == *rhs.components[i];
+        }
+        return ret;
     }
 
     friend bool operator!=(const Concatenation &lhs, const Concatenation &rhs) {
         return !(lhs == rhs);
     }
 
+    std::shared_ptr<Parameter_value_base> clone_ptr() const override {
+        return std::make_shared<Concatenation>(*this);  // Copy constructor
+    }
 
     template<class Archive>
     void serialize( Archive & ar ) {
@@ -61,7 +71,20 @@ private:
     std::optional<resolved_parameter> evaluate_unpacked();
 
     int64_t pack_values(const std::vector<int64_t>&components, std::vector<int64_t> &sizes);
+
     std::vector<std::shared_ptr<Parameter_value_base>> components;
+
+    bool isEqual(const Parameter_value_base& other) const override {
+        const auto& rhs = static_cast<const Concatenation&>(other);
+
+        return std::ranges::equal(
+            components, rhs.components,
+            [](const std::shared_ptr<Parameter_value_base>& a,
+               const std::shared_ptr<Parameter_value_base>& b) {
+                return *a == *b; // Triggers the polymorphic equality check
+            }
+        );
+    }
 };
 
 

@@ -16,6 +16,14 @@
 
 #include "data_model/HDL/parameters/Concatenation.hpp"
 
+Concatenation Concatenation::clone()  const{
+    Concatenation ret;
+    for(auto &c : components) {
+        ret.add_component(c->clone_ptr());
+    }
+    return ret;
+}
+
 std::set<std::string> Concatenation::get_dependencies() const{
     std::set<std::string> result;
     for (auto &comp:components) {
@@ -34,10 +42,37 @@ bool Concatenation::propagate_constant(const std::string &name, const resolved_p
 }
 
 std::optional<resolved_parameter> Concatenation::evaluate(bool packed){
+    auto concat_size = components.size();
+
     if (packed) {
-        return evaluate_packed();
+        std::vector<int64_t> sizes(concat_size);
+        std::vector<int64_t> values(concat_size);
+        for (int i = 0;i<concat_size; i++) {
+
+            auto value_opt = components[concat_size-i-1]->evaluate();
+            sizes[i] = components[concat_size-i-1]->get_size();
+            if (!value_opt.has_value()) return std::nullopt;
+            auto raw_value = value_opt.value();
+            if (!std::holds_alternative<int64_t>(raw_value)) throw std::runtime_error("packing concatenations of arrays orare unsupported");
+            values[i] = std::get<int64_t>(raw_value);
+        }
+        return pack_values(values, sizes);
     } else {
-        return evaluate_unpacked();
+
+        mdarray<int64_t> result;
+        for (int64_t i = 0;i<concat_size; i++) {
+            auto value_opt = components[concat_size-i-1]->evaluate();
+            if (!value_opt.has_value()) return std::nullopt;
+            if (std::holds_alternative<int64_t>(value_opt.value())) {
+                mdarray<int64_t> to_concat;
+                to_concat.set_value(0,std::get<int64_t>(value_opt.value()));
+                result = mdarray<int64_t>::concatenate(result, to_concat).value();
+            } else {
+                auto array_res = std::get<mdarray<int64_t>>(value_opt.value());
+                result = mdarray<int64_t>::concatenate(result, array_res).value();
+            }
+        }
+        return result;
     }
 }
 
@@ -54,37 +89,6 @@ std::string Concatenation::print()  const{
     return oss.str();
 }
 
-std::optional<resolved_parameter> Concatenation::evaluate_packed() {
-    auto concat_size = components.size();
-    std::vector<int64_t> sizes(concat_size);
-    std::vector<int64_t> values(concat_size);
-    for (int i = 0;i<concat_size; i++) {
-        auto value_opt = components[concat_size-i-1].evaluate(&sizes[i]);
-        if (!value_opt.has_value()) return std::nullopt;
-        auto raw_value = value_opt.value();
-        if (!std::holds_alternative<int64_t>(raw_value)) throw std::runtime_error("packing concatenations of arrays orare unsupported");
-        values[i] = std::get<int64_t>(raw_value);
-    }
-    return pack_values(values, sizes);
-}
-
-std::optional<resolved_parameter> Concatenation::evaluate_unpacked() {
-    auto concat_size = components.size();
-    mdarray<int64_t> result;
-    for (int64_t i = 0;i<concat_size; i++) {
-        auto value_opt = components[concat_size-i-1].evaluate();
-        if (!value_opt.has_value()) return std::nullopt;
-        if (std::holds_alternative<int64_t>(value_opt.value())) {
-            mdarray<int64_t> to_concat;
-            to_concat.set_value(0,std::get<int64_t>(value_opt.value()));
-            result = mdarray<int64_t>::concatenate(result, to_concat).value();
-        } else {
-            auto array_res = std::get<mdarray<int64_t>>(value_opt.value());
-            result = mdarray<int64_t>::concatenate(result, array_res).value();
-        }
-    }
-    return result;
-}
 
 int64_t Concatenation::pack_values(const std::vector<int64_t> &components, std::vector<int64_t> &sizes) {
     int64_t total_size = 0;

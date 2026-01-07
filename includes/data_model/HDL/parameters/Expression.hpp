@@ -18,6 +18,7 @@
 
 
 #include <vector>
+#include <tuple>
 #include "data_model/HDL/parameters/Expression_component.hpp"
 #include "data_model/HDL/parameters/Parameter_value_base.hpp"
 
@@ -26,6 +27,7 @@ public:
     std::vector<Expression_component> components;
     bool rpn = false;
 
+    Expression clone() const;
     Expression(const Expression &other) = default;
     Expression(Expression &&other) noexcept = default;
 
@@ -41,13 +43,13 @@ public:
     void push_front(const Expression_component &ec) {components.insert(components.begin(), ec);}
     void emplace_back(const std::string &ec) {components.emplace_back(ec);}
     void emplace_back(const int64_t &ec) {components.emplace_back(ec);}
-    std::set<std::string> get_dependencies()const;
-    bool propagate_constant(const std::string &name, const resolved_parameter &value);
-    std::string print() const;
+    std::set<std::string> get_dependencies()const override;
+    bool propagate_constant(const std::string &name, const resolved_parameter &value) override;
+    std::string print() const override;
     Expression to_rpm() const;
     void set_rpn(bool s) {rpn = s;}
-    std::optional<resolved_parameter> evaluate();
-    std::optional<resolved_parameter> evaluate( int64_t *result_size);
+    std::optional<resolved_parameter> evaluate() override;
+    int64_t get_size();
     int64_t evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string &operation);
     int64_t evaluate_unary_expression(int64_t operand, const std::string &operation);
 
@@ -59,9 +61,23 @@ public:
         return !(lhs == rhs);
     }
 
+    std::shared_ptr<Parameter_value_base> clone_ptr() const override {
+        return std::make_shared<Expression>(*this);  // Copy constructor
+    }
+
     template<class Archive>
     void serialize( Archive & ar ) {
         ar(components, rpn);
+    }
+
+    bool isEqual(const Parameter_value_base& other) const override {
+        // 1. Safe cast: The base class operator== already verified
+        // that this->type == other.type (which is 'expression')
+        const auto& rhs = static_cast<const Expression&>(other);
+
+        // 2. Compare the internal state
+        // This will use the operator== of Expression_component for each element in the vector
+        return std::tie(components, rpn) == std::tie(rhs.components, rhs.rpn);
     }
 };
 

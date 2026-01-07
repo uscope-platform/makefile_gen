@@ -32,6 +32,30 @@ Initialization_list::Initialization_list(const Initialization_list &i) {
     scalar = i.scalar;
 }
 
+Initialization_list Initialization_list::clone() const{
+    Initialization_list i_l;
+    i_l.scalar = scalar;
+    if(external_parameters != nullptr) i_l.external_parameters = std::make_shared<Parameters_map>(external_parameters->clone());
+    if(completed_set != nullptr) i_l.completed_set = std::make_shared<Parameters_map>(completed_set->clone());
+    i_l.d_store = d_store;
+    i_l.unpacked_dimensions = unpacked_dimensions;
+    i_l.packed_dimensions = packed_dimensions;
+    i_l.last_dimension = last_dimension;
+    i_l.lower_dimension_leaves = lower_dimension_leaves;
+    i_l.default_initialization = default_initialization;
+    for(auto &item:expression_leaves) {
+        if(std::holds_alternative<Expression>(item)) {
+            i_l.expression_leaves.push_back(std::get<Expression>(item).clone());
+        } else if(std::holds_alternative<Concatenation>(item)) {
+            i_l.expression_leaves.push_back(std::get<Concatenation>(item).clone());
+        } else if(std::holds_alternative<Replication>(item)) {
+            i_l.expression_leaves.push_back(std::get<Replication>(item).clone());
+        }
+
+    }
+    return i_l;
+}
+
 Initialization_list::Initialization_list(const std::variant<Expression, Concatenation, Replication> &e) {
     expression_leaves.push_back(e);
 }

@@ -106,6 +106,6 @@ Parameters_map HDL_instance::get_parameters() {
 }
 
 Parameters_map HDL_instance::get_parameters_copy() {
-    return Parameters_map::deep_copy(parameters);
+    return parameters.clone();
 }
 

@@ -458,7 +458,8 @@ void sv_visitor::exitParam_assignment(sv2017::Param_assignmentContext *ctx) {
     }
 
     if(modules_factory.is_current_valid()){
-        modules_factory.add_parameter(params_factory.get_parameter());
+        auto param = params_factory.get_parameter();
+        modules_factory.add_parameter(param);
     } else if(interfaces_factory.is_current_valid()){
         interfaces_factory.add_parameter(params_factory.get_parameter());
     }

@@ -89,13 +89,7 @@ Expression Expression::to_rpm() const {
 }
 
 std::optional<resolved_parameter> Expression::evaluate() {
-    return evaluate(nullptr);
-}
-
-std::optional<resolved_parameter> Expression::evaluate(int64_t *result_size) {
     if (components.size() == 1) {
-        if (result_size != nullptr)
-            *result_size = components[0].get_binary_size();
         return components[0].get_value();
     }
 
@@ -130,17 +124,24 @@ std::optional<resolved_parameter> Expression::evaluate(int64_t *result_size) {
             evaluator_stack.emplace(result);
         }
     }
-    if(result_size != nullptr){
 
-        *result_size = Expression_component::calculate_binary_size(std::get<int64_t>(evaluator_stack.top().get_value()));
-    }
     if (evaluator_stack.empty())throw std::runtime_error("Evaluation of an empty expression");
     return std::get<int64_t>(evaluator_stack.top().get_value());
 
-
-
 }
 
+int64_t Expression::get_size() {
+    if (components.size() == 1) {
+        return components[0].get_binary_size();
+    }
+
+    auto expression_value = evaluate();
+    if(expression_value.has_value()) {
+        if(std::holds_alternative<int64_t>(expression_value.value()))
+            return Expression_component::calculate_binary_size(std::get<int64_t>(expression_value.value()));
+    }
+    return 0;
+}
 
 int64_t Expression::evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string &operation) {
     if(operation == "+"){
@@ -186,6 +187,13 @@ int64_t Expression::evaluate_unary_expression(int64_t operand, const std::string
     } else{
         throw std::runtime_error("Error: Attempted evaluation of an unsupported unary expression expression " + operation);
     }
+}
+
+Expression Expression::clone()  const{
+    Expression ret;
+    ret.components = components;
+    ret.rpn = rpn;
+    return ret;
 }
 
 std::set<std::string> Expression::get_dependencies()const {

@@ -21,7 +21,7 @@ HDL_parameter::HDL_parameter(const HDL_parameter &c) {
     scope = c.scope;
     value = c.value;
     type = c.type;
-    i_l = c.i_l;
+    i_l = c.i_l.clone();
     loop_index = c.loop_index;
 }
 

@@ -34,6 +34,7 @@ public:
     Replication(const Replication &other) = default;
     Replication(Replication &&other) noexcept = default;
 
+    Replication clone() const;
     Replication & operator=(const Replication &other) = default;
     Replication & operator=(Replication &&other) noexcept = default;
 
@@ -49,11 +50,18 @@ public:
 
     std::string print() const;
     friend bool operator==(const Replication &lhs, const Replication &rhs) {
-        return std::tie(lhs.repetition_size, lhs.repeated_item) ==  std::tie(rhs.repetition_size, rhs.repeated_item);
+        if(lhs.repeated_item == nullptr &&  lhs.repeated_item == nullptr ) return true;
+        if(lhs.repeated_item == nullptr || lhs.repeated_item == nullptr) return false;
+
+        return std::tie(lhs.repetition_size, *lhs.repeated_item) ==  std::tie(rhs.repetition_size, *rhs.repeated_item);
     }
 
     friend bool operator!=(const Replication &lhs, const Replication &rhs) {
         return !(lhs == rhs);
+    }
+
+    std::shared_ptr<Parameter_value_base> clone_ptr() const override {
+        return std::make_shared<Replication>(*this);  // Copy constructor
     }
 
 
@@ -61,7 +69,17 @@ public:
     void serialize( Archive & ar ) {
         ar(repetition_size, repeated_item);
     }
+    bool isEqual(const Parameter_value_base &other) const override{
+        // Clangd error "No viable conversion" usually means:
+        // 1. The compiler thinks 'other' isn't a Parameter_value_base (check headers)
+        // 2. Replication isn't fully defined yet.
 
+        const auto& rhs = static_cast<const Replication&>(other);
+
+        // Use the base operator== for the shared_ptr to handle the polymorphism
+        return repetition_size == rhs.repetition_size &&
+               *repeated_item == *rhs.repeated_item;
+    }
 private:
     Expression repetition_size;
     std::shared_ptr<Parameter_value_base> repeated_item;

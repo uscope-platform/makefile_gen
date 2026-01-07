@@ -28,7 +28,7 @@ void parameter_solution_pass::process_node(const std::shared_ptr<HDL_instance_AS
 }
 
 std::map<std::string, resolved_parameter>   parameter_solution_pass::process_parameters(const Parameters_map &map_in) {
-    auto map = Parameters_map::deep_copy(map_in);
+    auto map = map_in.clone();
 
     std::map<std::string, resolved_parameter> solved_parameters;
     std::map<std::string, std::set<std::string>> dependencies_map;

@@ -27,7 +27,8 @@ void HDL_parameters_factory::new_parameter() {
 }
 
 std::shared_ptr<HDL_parameter> HDL_parameters_factory::get_parameter() {
-    return std::make_shared<HDL_parameter>(get_resource());
+    auto resource = get_resource();
+    return std::make_shared<HDL_parameter>(resource);
 }
 
 void HDL_parameters_factory::set_value(const std::string &s) {
@@ -145,7 +146,7 @@ void HDL_parameters_factory::stop_expression_new() {
             } else if(in_initialization_list) {
                 init_list.add_item(new_expression);
             }  else if(in_concatenation) {
-                new_concatenation.add_component(new_expression);
+                new_concatenation.add_component(std::make_shared<Expression>(new_expression));
             } else {
                 current_resource.set_expression(new_expression);
                 if(in_function_assignment) {
