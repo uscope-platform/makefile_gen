@@ -24,19 +24,46 @@
 
 class Replication : public Parameter_value_base{
 public:
-    Replication() = default;
+    Replication() {
+        type = replication;
+    };
     Replication(const Expression &size, std::shared_ptr<Parameter_value_base> item) {
         repeated_item = std::move(item);
         repetition_size = size;
         type = replication;
     }
 
-    Replication(const Replication &other) = default;
-    Replication(Replication &&other) noexcept = default;
+    Replication(const Replication &other) {
+        repetition_size = other.repetition_size;
+        if(other.repeated_item != nullptr) repeated_item = other.repeated_item->clone_ptr();
+        type = other.type;
+    }
+
+    Replication(Replication &&other) noexcept {
+        repetition_size = other.repetition_size;
+        if(other.repeated_item != nullptr) repeated_item = other.repeated_item->clone_ptr();
+        type = other.type;
+    }
 
     Replication clone() const;
-    Replication & operator=(const Replication &other) = default;
-    Replication & operator=(Replication &&other) noexcept = default;
+
+    Replication &operator=(const Replication &other) {
+        if (this != &other) {
+            repetition_size = other.repetition_size;
+            if(other.repeated_item != nullptr) repeated_item = other.repeated_item->clone_ptr();
+            type = other.type;
+        }
+        return *this;
+    }
+
+    Replication &operator=(Replication &&other) noexcept {
+        if (this != &other) {
+            repetition_size = other.repetition_size;
+            if(other.repeated_item != nullptr) repeated_item = other.repeated_item->clone_ptr();
+            type = other.type;
+        }
+        return *this;
+    }
 
 
     void set_item(std::shared_ptr<Parameter_value_base> item){ repeated_item = std::move(item);}
@@ -44,7 +71,7 @@ public:
 
     std::set<std::string> get_dependencies()const;
     bool propagate_constant(const std::string &name, const resolved_parameter &value);
-    std::optional<resolved_parameter> evaluate(bool packed);
+    std::optional<resolved_parameter> evaluate(bool pack_result);
 
     int64_t pack_repetition(int64_t value, int64_t width, int64_t count);
 

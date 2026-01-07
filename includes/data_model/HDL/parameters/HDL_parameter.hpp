@@ -71,9 +71,9 @@ public:
     void add_component(const Expression_component &component);
     void set_expression(const Expression  &c) {
         locking_violation_check();
-        i_l.set_scalar(c);;
+        i_l.set_scalar(std::make_shared<Expression>(c));
     };
-    std::variant<Expression, Concatenation, Replication>  get_expression() {
+    std::shared_ptr<Parameter_value_base> get_expression() {
         auto exp =  i_l.get_scalar();
         if (!exp.has_value()) throw std::runtime_error("A scalar parameter has been initialized with an array");
         return exp.value();

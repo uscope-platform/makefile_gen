@@ -30,10 +30,11 @@ public:
 
     virtual std::set<std::string> get_dependencies()const {return {};}
     virtual bool propagate_constant(const std::string &name, const resolved_parameter &value) {return true;}
-    virtual std::optional<resolved_parameter> evaluate() {return std::nullopt;}
-    virtual std::optional<resolved_parameter> evaluate(bool packed) {return std::nullopt;}
+    virtual std::optional<resolved_parameter> evaluate(bool pack_result) {return std::nullopt;}
     virtual std::string print() const {return "";}
     virtual int64_t get_size() {return 0;}
+
+    bool empty() const {return false;}
 
     bool is_expression(){return type == expression;}
     bool is_replication(){return type == replication;}

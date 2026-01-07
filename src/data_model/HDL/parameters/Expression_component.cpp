@@ -57,7 +57,7 @@ bool Expression_component::propagate_constant(const std::string &const_name, con
 
     for (auto &component:array_index) {
         retval &= component.propagate_constant(const_name, const_value);
-        auto idx_val = component.evaluate();
+        auto idx_val = component.evaluate(false);
         if (idx_val.has_value()) {
             Expression new_exp;
             new_exp.emplace_back(std::get<int64_t>(*idx_val));
@@ -69,7 +69,7 @@ bool Expression_component::propagate_constant(const std::string &const_name, con
             if (!array_index.empty()) {
                 std::vector<int64_t> idx;
                 for (auto &i:array_index) {
-                    auto eval_idx = i.evaluate();
+                    auto eval_idx = i.evaluate(false);
                     if (!std::holds_alternative<int64_t>(*eval_idx)) return false;
                     idx.push_back(std::get<int64_t>(*eval_idx));
                 }

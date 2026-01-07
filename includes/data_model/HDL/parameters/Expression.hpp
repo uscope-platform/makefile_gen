@@ -48,7 +48,7 @@ public:
     std::string print() const override;
     Expression to_rpm() const;
     void set_rpn(bool s) {rpn = s;}
-    std::optional<resolved_parameter> evaluate() override;
+    std::optional<resolved_parameter> evaluate(bool pack_result) override;
     int64_t get_size();
     int64_t evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string &operation);
     int64_t evaluate_unary_expression(int64_t operand, const std::string &operation);

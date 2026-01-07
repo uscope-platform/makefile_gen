@@ -89,14 +89,14 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_parameter(const std:
     std::shared_ptr<HDL_parameter> p;
     if(par->get_type()== HDL_parameter::function_parameter) {
         auto fs = spec.get_functions();
-        auto expression = std::get<Expression>(par->get_expression());
+        auto expression = static_cast<Expression *>(par->get_expression().get());
 
-        if(expression.components.size() != 1) {
+        if(expression->components.size() != 1) {
             spdlog::warn("Parameter {} is initialized by function with arguments, which is currently unsupported", par->get_name());
-            p = process_unsupported_parameter(par, expression);
+            p = process_unsupported_parameter(par, *expression);
             return p;
         }
-        auto function = spec.get_functions().at(std::get<std::string>(expression.components[0].get_value()));
+        auto function = spec.get_functions().at(std::get<std::string>(expression->components[0].get_value()));
         if(function.is_scalar()) {
             p = process_scalar_function_parameter(par, function);
         } else {
@@ -210,13 +210,13 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
     std::shared_ptr<HDL_parameter> return_par = par->clone();
 
     spdlog::trace("{}->Processing scalar parameter: {}", trace_prefix, par->get_name());
-    auto components = std::get<Expression>(return_par->get_expression());
+    auto expression = static_cast<Expression *>(par->get_expression().get());
 
     if(par->get_type() == HDL_parameter::numeric_parameter){
         return return_par;
     }
 
-    if(components.empty()){
+    if(expression->empty()){
         std::string error_s = "PARAMETER PROCESSING ERROR: Encountered Empty parameter (" + par->get_name() + ")";
         throw std::runtime_error(error_s);
     }
@@ -245,7 +245,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
             }
 
         } else {
-            return_par->set_value(process_expression(components, nullptr));;
+            return_par->set_value(process_expression(*expression, nullptr));;
         }
 
 

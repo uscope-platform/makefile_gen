@@ -21,11 +21,14 @@ std::string Expression::print() const {
     for(auto &item:components){
         if(item.is_numeric()){
             ret_val += std::to_string(std::get<int64_t>(item.get_value()));
-        } else {
+        } else if(item.is_string()){
             if(!item.get_package_prefix().empty()){
                 ret_val += item.get_package_prefix() + "::";
             }
             ret_val += std::get<std::string>(item.get_value());
+        } else if(item.is_array()) {
+            auto arr = std::get<mdarray<int64_t>>(item.get_value());
+            ret_val += "{xxxxxxx}";
         }
     }
     return ret_val;
@@ -88,7 +91,7 @@ Expression Expression::to_rpm() const {
     return rpn_exp;
 }
 
-std::optional<resolved_parameter> Expression::evaluate() {
+std::optional<resolved_parameter> Expression::evaluate(bool pack_result) {
     if (components.size() == 1) {
         return components[0].get_value();
     }
@@ -135,7 +138,7 @@ int64_t Expression::get_size() {
         return components[0].get_binary_size();
     }
 
-    auto expression_value = evaluate();
+    auto expression_value = evaluate(false);
     if(expression_value.has_value()) {
         if(std::holds_alternative<int64_t>(expression_value.value()))
             return Expression_component::calculate_binary_size(std::get<int64_t>(expression_value.value()));

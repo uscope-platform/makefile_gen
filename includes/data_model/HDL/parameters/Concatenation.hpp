@@ -24,23 +24,40 @@
 
 class Concatenation : public Parameter_value_base {
 public:
-    Concatenation() = default;
+    Concatenation() {
+        type = concatenation;
+    };
     Concatenation(std::initializer_list<std::shared_ptr<Parameter_value_base>> list)
-        : components(list) {}
+        : components(list) {
+        type = concatenation;
+    }
     void add_component(const std::shared_ptr<Parameter_value_base> &expr) {components.push_back(expr);}
 
-    Concatenation(const Concatenation &other) = default;
-    Concatenation(Concatenation &&other) noexcept = default;
+    Concatenation(const Concatenation &other);
+    Concatenation(Concatenation &&other) noexcept;
 
     Concatenation clone() const;
 
-    Concatenation & operator=(const Concatenation &other) = default;
-    Concatenation & operator=(Concatenation &&other) noexcept = default;
+    Concatenation &operator=(const Concatenation &other) {
+        if (this != &other) {
+            for(auto &item: other.components) components.push_back(item->clone_ptr());
+            type = other.type;
+        }
+        return *this;
+    }
+
+    Concatenation &operator=(Concatenation &&other) noexcept {
+        if (this != &other) {
+            for(auto &item: other.components) components.push_back(item->clone_ptr());
+            type = other.type;
+        }
+        return *this;
+    }
 
     std::set<std::string> get_dependencies()const;
     bool empty() const {return components.empty();}
     bool propagate_constant(const std::string &name, const resolved_parameter &value);
-    std::optional<resolved_parameter> evaluate(bool packed);
+    std::optional<resolved_parameter> evaluate(bool pack_result);
 
     std::string print() const;
     friend bool operator==(const Concatenation &lhs, const Concatenation &rhs) {
@@ -67,8 +84,6 @@ public:
 
 private:
 
-    std::optional<resolved_parameter> evaluate_packed();
-    std::optional<resolved_parameter> evaluate_unpacked();
 
     int64_t pack_values(const std::vector<int64_t>&components, std::vector<int64_t> &sizes);
 

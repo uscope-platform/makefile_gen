@@ -18,7 +18,8 @@
 Replication Replication::clone()  const{
     Replication result;
     result.repetition_size = repetition_size;
-    result.repeated_item = repeated_item->clone_ptr();
+    if(repeated_item != nullptr) result.repeated_item = repeated_item->clone_ptr();
+    result.type = type;
     return result;
 }
 
@@ -39,26 +40,26 @@ bool Replication::propagate_constant(const std::string &name, const resolved_par
     return result;
 }
 
-std::optional<resolved_parameter> Replication::evaluate(bool packed) {
+std::optional<resolved_parameter> Replication::evaluate(bool pack_result) {
     mdarray<int64_t> result;
-    auto raw_size = repetition_size.evaluate();
+    auto raw_size = repetition_size.evaluate(false);
     if (!raw_size.has_value()) return false;
     if (!std::holds_alternative<int64_t>(raw_size.value())) return false;
     auto size = std::get<int64_t>(raw_size.value());
     mdarray<int64_t>::md_1d_array repeated_value;
     if (repeated_item->is_expression()) {
-        auto item = repeated_item->as<Expression>().evaluate();
+        auto item = repeated_item->as<Expression>().evaluate(false);
         int64_t repeated_size = repeated_item->as<Expression>().get_size();
         if (!item.has_value()) return false;
         if (!std::holds_alternative<int64_t>(item.value())) throw std::runtime_error("Tried to replicate non integer");
-        if (!packed) {
+        if (!pack_result) {
             repeated_value = std::vector(size, std::get<int64_t>(item.value()));
         } else {
             return pack_repetition(std::get<int64_t>(item.value()), repeated_size, size);
         }
     } else if (repeated_item->is_concatenation()) {
 
-        auto raw_item = repeated_item->as<Concatenation>().evaluate(packed);
+        auto raw_item = repeated_item->as<Concatenation>().evaluate(pack_result);
         if (!raw_item.has_value()) return std::nullopt;
         auto item = raw_item.value();
         if (std::holds_alternative<int64_t>(item))
@@ -70,7 +71,7 @@ std::optional<resolved_parameter> Replication::evaluate(bool packed) {
             }
         }
     } else if (repeated_item->is_replication()) {
-        // Probably i just need to call evaluate again "nested style" with packed st toet to true;
+        // TODO: Probably i just need to call evaluate again "nested style" with packed st toet to true;
         throw std::runtime_error("Nested repetitions are not supported yet");
     } else {
         throw std::runtime_error("Encountered a unknown parameter value type");

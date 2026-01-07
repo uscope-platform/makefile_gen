@@ -16,6 +16,20 @@
 
 #include "data_model/HDL/parameters/Concatenation.hpp"
 
+Concatenation::Concatenation(const Concatenation &other) {
+    for(auto &item: other.components) {
+        components.push_back(item->clone_ptr());
+    }
+    type = concatenation;
+}
+
+Concatenation::Concatenation(Concatenation &&other) noexcept {
+    for(const auto &item: other.components) {
+        components.push_back(item->clone_ptr());
+    }
+    type = concatenation;
+}
+
 Concatenation Concatenation::clone()  const{
     Concatenation ret;
     for(auto &c : components) {
@@ -41,15 +55,15 @@ bool Concatenation::propagate_constant(const std::string &name, const resolved_p
     return retval;
 }
 
-std::optional<resolved_parameter> Concatenation::evaluate(bool packed){
+std::optional<resolved_parameter> Concatenation::evaluate(bool pack_result){
     auto concat_size = components.size();
 
-    if (packed) {
+    if (pack_result) {
         std::vector<int64_t> sizes(concat_size);
         std::vector<int64_t> values(concat_size);
         for (int i = 0;i<concat_size; i++) {
 
-            auto value_opt = components[concat_size-i-1]->evaluate();
+            auto value_opt = components[concat_size-i-1]->evaluate(false);
             sizes[i] = components[concat_size-i-1]->get_size();
             if (!value_opt.has_value()) return std::nullopt;
             auto raw_value = value_opt.value();
@@ -61,7 +75,7 @@ std::optional<resolved_parameter> Concatenation::evaluate(bool packed){
 
         mdarray<int64_t> result;
         for (int64_t i = 0;i<concat_size; i++) {
-            auto value_opt = components[concat_size-i-1]->evaluate();
+            auto value_opt = components[concat_size-i-1]->evaluate(false);
             if (!value_opt.has_value()) return std::nullopt;
             if (std::holds_alternative<int64_t>(value_opt.value())) {
                 mdarray<int64_t> to_concat;

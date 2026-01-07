@@ -49,9 +49,10 @@ Parameters_map produce_check_components(std::vector<param_check_t> &in){
         auto par = std::make_shared<HDL_parameter>();
         par->set_name(vt.name);
         if(vt.is_rpn){
-            auto expr= std::get<Expression>(par->get_expression());
-            expr.rpn = true;
-            par->set_expression(expr);
+
+            auto expr= static_cast<Expression *>(par->get_expression().get());
+            expr->rpn = true;
+            par->set_expression(*expr);
         }
         for(auto &cpt:vt.components){
             par->add_component(Expression_component(cpt));
@@ -215,8 +216,8 @@ TEST(parameter_processing, array_expression) {
     d.packed = false;
     i.add_dimension(d, false);
 
-    i.add_item(Expression({Expression_component("32")}));
-    i.add_item(Expression({Expression_component("5")}));
+    i.add_item(std::make_shared<Expression>(Expression({Expression_component("32")})));
+    i.add_item(std::make_shared<Expression>(Expression({Expression_component("5")})));
     par->add_initialization_list(i);
     mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {5,32});
@@ -274,12 +275,12 @@ TEST(parameter_processing, multidimensional_array_expression) {
     i.add_dimension(d, false);
 
     i.open_level();
-    i.add_item(Expression({Expression_component("32")}));
-    i.add_item(Expression({Expression_component("32")}));
+    i.add_item(std::make_shared<Expression>(Expression({Expression_component("32")})));
+    i.add_item(std::make_shared<Expression>(Expression({Expression_component("32")})));
     i.close_level();
     i.open_level();
-    i.add_item(Expression({Expression_component("5")}));
-    i.add_item(Expression({Expression_component("6")}));
+    i.add_item(std::make_shared<Expression>(Expression({Expression_component("5")})));
+    i.add_item(std::make_shared<Expression>(Expression({Expression_component("6")})));
     i.close_level();
     par->add_initialization_list(i);
 
@@ -547,8 +548,8 @@ TEST(parameter_processing, negative_number_array_init) {
     d.packed = false;
     i.add_dimension(d, false);
 
-    i.add_item(Expression({Expression_component("-"), Expression_component("16'sd32767")}));
-    i.add_item(Expression({Expression_component("16'sd32767")}));
+    i.add_item(std::make_shared<Expression>(Expression({Expression_component("-"), Expression_component("16'sd32767")})));
+    i.add_item(std::make_shared<Expression>(Expression({Expression_component("16'sd32767")})));
 
     par->add_initialization_list(i);
     mdarray<int64_t> av;
@@ -617,8 +618,8 @@ TEST(parameter_processing, expression_array_init) {
 
     i.add_dimension(d, false);
 
-    i.add_item(Expression({Expression_component("5"), Expression_component("+"), Expression_component("4")}));
-    i.add_item(Expression({Expression_component("7"), Expression_component("*"), Expression_component("6")}));
+    i.add_item(std::make_shared<Expression>(Expression({Expression_component("5"), Expression_component("+"), Expression_component("4")})));
+    i.add_item(std::make_shared<Expression>(Expression({Expression_component("7"), Expression_component("*"), Expression_component("6")})));
 
     mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {42,9});
@@ -829,8 +830,8 @@ TEST(parameter_processing, array_expression_override) {
     d.second_bound = {Expression_component("0")};
     d.packed = false;
     il.add_dimension(d, false);
-    il.add_item(Expression({Expression_component("2")}));
-    il.add_item(Expression({Expression_component("22")}));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("2")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("22")})));
     par->add_initialization_list(il);
     mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {2,22});
@@ -996,19 +997,19 @@ TEST(parameter_processing, array_instance_parameter_override) {
     Parameters_map check_params= produce_check_components(vect_params);
 
     auto param = check_params.get("p1_t");
-    Expression ec = std::get<Expression>(param->get_expression());
+    auto ec = static_cast<Expression *>(param->get_expression().get());
     std::vector<Expression> index;
     index.push_back({Expression_component("0")});
-    ec.components[0].set_array_index(index);
-    param->set_expression(ec);
+    ec->components[0].set_array_index(index);
+    param->set_expression(*ec);
     check_params.insert(param);
 
      param = check_params.get("p2_t");
-    ec = std::get<Expression>(param->get_expression());
+    ec =  static_cast<Expression *>(param->get_expression().get());
     index.clear();
     index.push_back({{Expression_component("1")}});
-    ec.components[0].set_array_index(index);
-    param->set_expression(ec);
+    ec->components[0].set_array_index(index);
+    param->set_expression(*ec);
     check_params.insert(param);
 
     auto par = std::make_shared<HDL_parameter>();
@@ -1117,7 +1118,7 @@ TEST(parameter_processing, packed_replication_init) {
     d.second_bound = {Expression_component("0")};
     d.packed = true;
     i.add_dimension(d, true);
-    i.add_item(Expression({Expression_component("$repeat_init"),Expression_component("5"),Expression_component(","),Expression_component("1'b1")}));
+    i.add_item(std::make_shared<Expression>(Expression({Expression_component("$repeat_init"),Expression_component("5"),Expression_component(","),Expression_component("1'b1")})));
 
     check_param->add_initialization_list(i);
 
@@ -1162,7 +1163,7 @@ TEST(parameter_processing, array_initialization_default) {
     d.second_bound = {Expression_component("0")};
     d.packed = false;
     i.add_dimension(d, false);
-    i.add_item(Expression({Expression_component("p_1"), Expression_component("+"), Expression_component("p_2")}));
+    i.add_item(std::make_shared<Expression>(Expression({Expression_component("p_1"), Expression_component("+"), Expression_component("p_2")})));
     i.set_default();
     p->add_initialization_list(i);
     mdarray<int64_t> array;

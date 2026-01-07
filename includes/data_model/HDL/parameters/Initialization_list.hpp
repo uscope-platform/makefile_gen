@@ -19,7 +19,6 @@
 
 #include <vector>
 #include <utility>
-#include <cereal/types/variant.hpp>
 #include <cereal/types/vector.hpp>
 
 #include "data_model/HDL/parameters/Expression.hpp"
@@ -60,9 +59,9 @@ public:
     Initialization_list( const Initialization_list &i);
 
     Initialization_list clone() const;
-    explicit Initialization_list(const std::variant<Expression, Concatenation, Replication> &e);
+    explicit Initialization_list(const std::shared_ptr<Parameter_value_base> &e);
     void add_dimension(const dimension_t &d, bool packed);
-    void add_item(const std::variant<Expression, Concatenation, Replication> &e);
+    void add_item(const std::shared_ptr<Parameter_value_base> &e);
     void open_level();
     void close_level();
     bool empty() const;
@@ -83,10 +82,10 @@ public:
 
     bool propagate_constant(const std::string &name, const resolved_parameter &value);
 
-    std::optional<std::variant<Expression, Concatenation, Replication>> get_scalar();
+    std::optional<std::shared_ptr<Parameter_value_base>> get_scalar();
     void clear_scalar();
     void push_scalar_component(const Expression_component &comp);
-    void set_scalar(const std::variant<Expression, Concatenation, Replication> &expr);
+    void set_scalar(const std::shared_ptr<Parameter_value_base> &expr);
 
     mdarray<int64_t> process_default_initialization();
 
@@ -118,7 +117,6 @@ private:
     mdarray<int64_t> get_3d_list_values();
 
 
-    mdarray<int64_t>::md_1d_array old_list_processing(const Expression &e, mdarray<int64_t>::md_1d_array values);
     int64_t pack_values(const std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> &components);
 
     bool scalar = true;
@@ -132,7 +130,7 @@ private:
     std::vector<dimension_t> packed_dimensions;
 
     bool last_dimension = true;
-    std::vector<std::variant<Expression, Concatenation, Replication>> expression_leaves;
+    std::vector<std::shared_ptr<Parameter_value_base>> expression_leaves;
     std::vector<Initialization_list> lower_dimension_leaves;
     bool default_initialization = false;
 };

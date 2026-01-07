@@ -25,7 +25,7 @@
 TEST(Expression_evaluator, pure_number){
     Expression e;
     e.emplace_back("8'b10110");
-    auto val = e.evaluate();
+    auto val = e.evaluate(false);
     ASSERT_TRUE(val.has_value());
     ASSERT_EQ(std::get<int64_t>(val.value()), 22);
 }
@@ -35,7 +35,7 @@ TEST(Expression_evaluator, pure_number){
 TEST(Expression_evaluator, string){
     Expression e;
     e.emplace_back("test");
-    auto val = e.evaluate();
+    auto val = e.evaluate(false);
     ASSERT_TRUE(val.has_value());
     ASSERT_EQ(std::get<std::string>(val.value()), "test");
 }
@@ -47,7 +47,7 @@ TEST(Expression_evaluator, simple_expression){
     e.emplace_back("+");
     e.emplace_back("4");
 
-    auto val = e.evaluate();
+    auto val = e.evaluate(false);
     ASSERT_TRUE(val.has_value());
     ASSERT_EQ(std::get<int64_t>(val.value()), 9);
 }
@@ -63,7 +63,7 @@ TEST(Expression_evaluator, parenthesis_expression){
     e.emplace_back("*");
     e.emplace_back("2");
 
-    auto val = e.evaluate();
+    auto val = e.evaluate(false);
     ASSERT_TRUE(val.has_value());
     ASSERT_EQ(std::get<int64_t>(val.value()), 18);
 }

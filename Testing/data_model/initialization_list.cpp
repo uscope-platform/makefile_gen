@@ -37,7 +37,7 @@ Initialization_list construct_unpacked_list(const mdarray<int64_t>::md_3d_array 
         for(auto &item1d:item2d){
             if(dims.size()>1) li.open_level();
             for(auto &item:item1d){
-                li.add_item(Expression({Expression_component(std::to_string(item))}));
+                li.add_item(std::make_shared<Expression>(Expression({Expression_component(std::to_string(item))})));
             }
             if(dims.size()>1) li.close_level();
         }
@@ -66,7 +66,7 @@ Initialization_list construct_packed_list(const std::vector<std::vector<std::vec
             for(auto &item:item1d){
                 if(packing[0]) li.open_level();
                 for(auto &packed_item:item){
-                    li.add_item(Expression({Expression_component(packed_item)}));
+                    li.add_item(std::make_shared<Expression>(Expression({Expression_component(packed_item)})));
                 }
                 if(packing[0]) li.close_level();
             }
@@ -184,14 +184,14 @@ TEST(Initialization_list, packed_concatenation) {
     d.packed = true;
     il.add_dimension(d, true);
 
-    il.add_item(Expression({Expression_component("1'b1")}));
-    il.add_item(Expression({Expression_component("1'b0")}));
-    il.add_item(Expression({Expression_component("1'b0")}));
-    il.add_item(Expression({Expression_component("1'b1")}));
-    il.add_item(Expression({Expression_component("1'b0")}));
-    il.add_item(Expression({Expression_component("1'b1")}));
-    il.add_item(Expression({Expression_component("1'b0")}));
-    il.add_item(Expression({Expression_component("1'b1")}));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
 
 
 
@@ -220,27 +220,27 @@ TEST(Initialization_list, get_values_1d_packed) {
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
-    il.add_item(c);
+    il.add_item(std::make_shared<Concatenation>(c));
     c = Concatenation();
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
-    il.add_item(c);
+    il.add_item(std::make_shared<Concatenation>(c));
     c = Concatenation();
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
-    il.add_item(c);
+    il.add_item(std::make_shared<Concatenation>(c));
     c = Concatenation();
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
-    il.add_item(c);
+    il.add_item(std::make_shared<Concatenation>(c));
     c = Concatenation();
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
-    il.add_item(c);
+    il.add_item(std::make_shared<Concatenation>(c));
 
 
     auto external_parameters =  std::make_shared<Parameters_map>();
@@ -362,8 +362,8 @@ TEST(Initialization_list, get_values_concatenation_initialization) {
     il.add_dimension({Expression({Expression_component("31")}), Expression({Expression_component("0")}), true}, true);
     il.add_dimension({Expression({Expression_component("1")}), Expression({Expression_component("0")}), false}, false);
     il.open_level();
-    il.add_item(Expression({Expression_component(31)}));
-    il.add_item(Expression({Expression_component(43)}));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component(31)})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component(43)})));
     il.close_level();
 
     mdarray<int64_t> check_array;
@@ -388,28 +388,28 @@ TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
     d.packed = false;
     il.add_dimension(d,false);
     il.open_level();
-    il.add_item(Expression({Expression_component("3")}));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("3")})));
     il.close_level();
     il.open_level();
-    il.add_item(Expression({Expression_component("3")}));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("3")})));
     il.close_level();
     il.open_level();
-    il.add_item(Expression({Expression_component("3")}));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("3")})));
     il.close_level();
     il.open_level();
-    il.add_item(Expression({Expression_component("SS_POLARITY_DEFAULT")}));
-    il.add_item(Expression({Expression_component("3'b0")}));
-    il.add_item(Expression({Expression_component("SS_POLARITY_DEFAULT")}));
-    il.add_item(Expression({Expression_component("5'b0")}));
-    il.add_item(Expression({Expression_component("4'hE")}));
-    il.add_item(Expression({Expression_component("4'b0")}));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("SS_POLARITY_DEFAULT")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("3'b0")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("SS_POLARITY_DEFAULT")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("5'b0")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("4'hE")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("4'b0")})));
     il.close_level();
     il.open_level();
-    il.add_item(Expression({Expression_component("2'h2")}));
-    il.add_item(Expression({Expression_component("2'b1")}));
-    il.add_item(Expression({Expression_component("2'h3")}));
-    il.add_item(Expression({Expression_component("4'hE")}));
-    il.add_item(Expression({Expression_component("4'b0")}));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("2'h2")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("2'b1")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("2'h3")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("4'hE")})));
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("4'b0")})));
     il.close_level();
 
 
