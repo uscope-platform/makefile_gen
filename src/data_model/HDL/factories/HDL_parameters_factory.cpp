@@ -143,11 +143,11 @@ void HDL_parameters_factory::stop_expression_new() {
                     new_replication.set_item(std::make_shared<Expression>(new_expression));
             } else if(in_unpacked_declaration || in_packed_dimension){
                 expression_stack.push(new_expression);
+            } else if(in_concatenation) {
+                new_concatenation.add_component(std::make_shared<Expression>(new_expression));
             } else if(in_initialization_list) {
                 init_list.add_item(std::make_shared<Expression>(new_expression));
-            }  else if(in_concatenation) {
-                new_concatenation.add_component(std::make_shared<Expression>(new_expression));
-            } else {
+            }   else {
                 current_resource.set_expression(new_expression);
                 if(in_function_assignment) {
                     in_function_assignment = false;
@@ -183,9 +183,12 @@ void HDL_parameters_factory::stop_concatenation() {
         if (!concatenations_stack.empty()) {
             new_concatenation = concatenations_stack.top();
             concatenations_stack.pop();
-            init_list.add_item(std::make_shared<Concatenation>(new_concatenation));
+            new_concatenation.add_component(std::make_shared<Concatenation>(new_concatenation));
         } else {
-            init_list.set_scalar(std::make_shared<Concatenation>(new_concatenation));
+            if(in_initialization_list)
+                init_list.add_item(std::make_shared<Concatenation>(new_concatenation));
+            else
+                init_list.set_scalar(std::make_shared<Concatenation>(new_concatenation));
             in_concatenation = false;
         }
     }

@@ -677,32 +677,20 @@ TEST(parameter_extraction, multidimensional_array_expression) {
     p->set_name("multidim_array_parameter");
 
 
-    init_list_t init;
-    std::vector<dimension_t> d;
-    dimension_t dim;
-    dim.first_bound = {Expression_component("31")};
-    dim.second_bound= {Expression_component("0")};
-    dim.packed = true;
-    d.push_back(dim);
-    dim.first_bound = {Expression_component("repetition_size"),Expression_component("-"), Expression_component("1")};
-    dim.second_bound= {Expression_component("0")};
-    dim.packed = false;
-    d.push_back(dim);
-    dim.first_bound = {Expression_component("1")};
-    dim.second_bound= {Expression_component("0")};
-    dim.packed = false;
-    d.push_back(dim);
-    init.dimensions = d;
-    std::vector<Expression> e;
-    e.push_back({Expression_component("32")});
-    e.push_back({Expression_component("32")});
-    init.values.push_back(e);
-    e.clear();
-    e.push_back({Expression_component("5")});
-    e.push_back({Expression_component("6")});
-    init.values.push_back(e);
+    Initialization_list il;
+    il.add_dimension({{Expression_component("31")}, {Expression_component("0")}, true}, true);
+    il.add_dimension({{Expression_component("repetition_size"),Expression_component("-"), Expression_component("1")}, {Expression_component("0")}, false}, false);
+    il.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false}, false);
+    Concatenation c;
+    c.add_component(std::make_shared<Expression>(Expression({{Expression_component("32")}})));
+    c.add_component(std::make_shared<Expression>(Expression({{Expression_component("32")}})));
+    il.add_item(std::make_shared<Concatenation>(c));
+    c = Concatenation();
+    c.add_component(std::make_shared<Expression>(Expression({{Expression_component("5")}})));
+    c.add_component(std::make_shared<Expression>(Expression({{Expression_component("6")}})));
+    il.add_item(std::make_shared<Concatenation>(c));
 
-    p->add_initialization_list(produce_check_init_list(init));
+    p->add_initialization_list(il);
 
 
     check_params.insert(p);
