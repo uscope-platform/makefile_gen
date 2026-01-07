@@ -25,9 +25,10 @@
 class Replication : public Parameter_value_base{
 public:
     Replication() = default;
-    Replication(const Expression &size, const std::variant<Expression, Concatenation> &item) {
-        repeated_item = item;
+    Replication(const Expression &size, std::shared_ptr<Parameter_value_base> item) {
+        repeated_item = std::move(item);
         repetition_size = size;
+        type = replication;
     }
 
     Replication(const Replication &other) = default;
@@ -36,7 +37,8 @@ public:
     Replication & operator=(const Replication &other) = default;
     Replication & operator=(Replication &&other) noexcept = default;
 
-    void set_item(const std::variant<Expression, Concatenation> &item){ repeated_item = item;}
+
+    void set_item(std::shared_ptr<Parameter_value_base> item){ repeated_item = std::move(item);}
     void set_size(const Expression &size){ repetition_size = size;}
 
     std::set<std::string> get_dependencies()const;
@@ -62,7 +64,7 @@ public:
 
 private:
     Expression repetition_size;
-    std::variant<Expression, Concatenation> repeated_item;
+    std::shared_ptr<Parameter_value_base> repeated_item;
 };
 
 

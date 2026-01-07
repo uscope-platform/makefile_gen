@@ -25,9 +25,9 @@
 class Concatenation : public Parameter_value_base {
 public:
     Concatenation() = default;
-    Concatenation(std::initializer_list<Expression> list)
+    Concatenation(std::initializer_list<std::shared_ptr<Parameter_value_base>> list)
         : components(list) {}
-    void add_component(const Expression &expr) {components.push_back(expr);}
+    void add_component(const std::shared_ptr<Parameter_value_base> &expr) {components.push_back(expr);}
 
     Concatenation(const Concatenation &other) = default;
     Concatenation(Concatenation &&other) noexcept = default;
@@ -57,9 +57,11 @@ public:
 
 private:
 
+    std::optional<resolved_parameter> evaluate_packed();
+    std::optional<resolved_parameter> evaluate_unpacked();
 
     int64_t pack_values(const std::vector<int64_t>&components, std::vector<int64_t> &sizes);
-    std::vector<Expression> components;
+    std::vector<std::shared_ptr<Parameter_value_base>> components;
 };
 
 

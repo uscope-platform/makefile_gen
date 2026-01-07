@@ -783,7 +783,7 @@ TEST(parameter_extraction, simple_repetition_initialization) {
     il.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false}, false);
     Replication rep;
     rep.set_size({Expression_component("repetition_size")});
-    rep.set_item(Expression({Expression_component("1")}));
+    rep.set_item(std::make_shared<Expression>(Expression({Expression_component("1")})));
     il.set_scalar(rep);
 
 
@@ -846,7 +846,7 @@ TEST(parameter_extraction, packed_repetition_initialization) {
     Initialization_list il;
     Replication rep;
     rep.set_size({Expression_component("repetition_size")});
-    rep.set_item(Expression({Expression_component("1")}));
+    rep.set_item(std::make_shared<Expression>(Expression({Expression_component("1")})));
     il.set_scalar(rep);
 
 
@@ -910,7 +910,7 @@ TEST(parameter_extraction, repetition_initialization) {
     il.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false}, false);
     Replication r;
     r.set_size({Expression_component("repetition_size")});
-    r.set_item(Expression({Expression_component("1")}));
+    r.set_item(std::make_shared<Expression>(Expression({Expression_component("1")})));
     il.set_scalar(r);
     p->add_initialization_list(il);
 
@@ -923,7 +923,7 @@ TEST(parameter_extraction, repetition_initialization) {
     il = Initialization_list();
     il.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false}, false);
     r.set_size({Expression_component("repetition_size")});
-    r.set_item(Expression({Expression_component("4")}));
+    r.set_item(std::make_shared<Expression>(Expression({Expression_component("4")})));
     il.set_scalar(r);
     p->add_initialization_list(il);
 
@@ -1680,7 +1680,7 @@ TEST(parameter_extraction, packed_replication_init) {
     il.add_dimension({{Expression_component("4")}, {Expression_component("0")}, true}, true);
     Replication r;
     r.set_size({Expression_component("5")});
-    r.set_item(Expression({Expression_component("1'b1")}));
+    r.set_item(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
     il.set_scalar(r);
 
     p->add_initialization_list(il);

@@ -17,15 +17,37 @@
 #define MAKEFILEGEN_V2_PARAMETER_VALUE_BASE_HPP
 
 
+
 class Parameter_value_base {
 public:
+    enum param_value_type {
+        concatenation,
+        expression,
+        replication
+    };
+
+    virtual ~Parameter_value_base() = default;
 
     virtual std::set<std::string> get_dependencies()const {return {};}
     virtual bool propagate_constant(const std::string &name, const resolved_parameter &value) {return true;}
     virtual std::optional<resolved_parameter> evaluate() {return std::nullopt;}
     virtual std::optional<resolved_parameter> evaluate(bool packed) {return std::nullopt;}
     virtual std::string print() const {return "";}
-private:
+
+    bool is_expression(){return type == expression;}
+    bool is_replication(){return type == replication;}
+    bool is_concatenation(){return type == concatenation;}
+
+    template<typename T>
+        T& as() { return static_cast<T&>(*this); }
+
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(type);
+    }
+
+protected:
+    param_value_type type = expression;
 };
 
 

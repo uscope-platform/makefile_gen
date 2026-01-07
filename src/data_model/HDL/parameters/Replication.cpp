@@ -19,10 +19,7 @@ std::set<std::string> Replication::get_dependencies()const {
     std::set<std::string> result, deps;
     deps = repetition_size.get_dependencies();
     result.insert(deps.begin(), deps.end());
-    if (std::holds_alternative<Expression>(repeated_item))
-        deps = std::get<Expression>(repeated_item).get_dependencies();
-    else if (std::holds_alternative<Concatenation>(repeated_item))
-        deps  = std::get<Concatenation>(repeated_item).get_dependencies();
+    deps = repeated_item->get_dependencies();
     result.insert(deps.begin(), deps.end());
     return result;
 }
@@ -31,10 +28,7 @@ bool Replication::propagate_constant(const std::string &name, const resolved_par
     bool result = true;
 
     result &= repetition_size.propagate_constant(name, value);
-    if (std::holds_alternative<Expression>(repeated_item))
-        result &= std::get<Expression>(repeated_item).propagate_constant(name, value);
-    else if (std::holds_alternative<Concatenation>(repeated_item))
-        result &= std::get<Concatenation>(repeated_item).propagate_constant(name, value);
+    result &= repeated_item->propagate_constant(name, value);
     return result;
 }
 
@@ -45,9 +39,9 @@ std::optional<resolved_parameter> Replication::evaluate(bool packed) {
     if (!std::holds_alternative<int64_t>(raw_size.value())) return false;
     auto size = std::get<int64_t>(raw_size.value());
     mdarray<int64_t>::md_1d_array repeated_value;
-    if (std::holds_alternative<Expression>(repeated_item)) {
+    if (repeated_item->is_expression()) {
         int64_t repeated_size;
-        auto item = std::get<Expression>(repeated_item).evaluate(&repeated_size);
+        auto item = repeated_item->as<Expression>().evaluate(&repeated_size);
         if (!item.has_value()) return false;
         if (!std::holds_alternative<int64_t>(item.value())) throw std::runtime_error("Tried to replicate non integer");
         if (!packed) {
@@ -55,8 +49,9 @@ std::optional<resolved_parameter> Replication::evaluate(bool packed) {
         } else {
             return pack_repetition(std::get<int64_t>(item.value()), repeated_size, size);
         }
-    } else if (std::holds_alternative<Concatenation>(repeated_item)) {
-        auto raw_item = std::get<Concatenation>(repeated_item).evaluate(packed);
+    } else if (repeated_item->is_concatenation()) {
+
+        auto raw_item = repeated_item->as<Concatenation>().evaluate(packed);
         if (!raw_item.has_value()) return std::nullopt;
         auto item = raw_item.value();
         if (std::holds_alternative<int64_t>(item))
@@ -67,6 +62,11 @@ std::optional<resolved_parameter> Replication::evaluate(bool packed) {
                 repeated_value.insert(repeated_value.end(), item_vect.begin(), item_vect.end());
             }
         }
+    } else if (repeated_item->is_replication()) {
+        // Probably i just need to call evaluate again "nested style" with packed st toet to true;
+        throw std::runtime_error("Nested repetitions are not supported yet");
+    } else {
+        throw std::runtime_error("Encountered a unknown parameter value type");
     }
 
     result.set_1d_slice({0,0}, repeated_value);
@@ -90,8 +90,7 @@ int64_t Replication::pack_repetition(int64_t value, int64_t width, int64_t count
 std::string Replication::print() const {
     std::ostringstream oss;
     oss << "{" << repetition_size.print()<<"{";
-    if (std::holds_alternative<Expression>(repeated_item))oss << std::get<Expression>(repeated_item).print();
-    else if(std::holds_alternative<Concatenation>(repeated_item)) oss <<std::get<Concatenation>(repeated_item).print();
+    oss << repeated_item->print();
     oss << "}}";
     return oss.str();
 }

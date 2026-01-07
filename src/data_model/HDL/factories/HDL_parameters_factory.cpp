@@ -139,7 +139,7 @@ void HDL_parameters_factory::stop_expression_new() {
                 if (in_replication_size)
                     new_replication.set_size(new_expression);
                 else
-                    new_replication.set_item(new_expression);
+                    new_replication.set_item(std::make_shared<Expression>(new_expression));
             } else if(in_unpacked_declaration || in_packed_dimension){
                 expression_stack.push(new_expression);
             } else if(in_initialization_list) {
