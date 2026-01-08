@@ -67,7 +67,7 @@ std::optional<resolved_parameter> Concatenation::evaluate(bool pack_result){
             sizes[i] = components[concat_size-i-1]->get_size();
             if (!value_opt.has_value()) return std::nullopt;
             auto raw_value = value_opt.value();
-            if (!std::holds_alternative<int64_t>(raw_value)) throw std::runtime_error("packing concatenations of arrays orare unsupported");
+            if (!std::holds_alternative<int64_t>(raw_value)) throw std::runtime_error("packing concatenations of arrays is unsupported");
             values[i] = std::get<int64_t>(raw_value);
         }
         return pack_values(values, sizes);

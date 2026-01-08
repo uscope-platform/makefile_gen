@@ -51,25 +51,14 @@ TEST(Initialization_list, get_values_1d_unpacked)  {
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("6")})));
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("69")})));
 
-    auto external_parameters =  std::make_shared<Parameters_map>();
-    auto cs = std::make_shared<Parameters_map>();
-    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
-   
-    
-    auto p = std::make_shared<HDL_parameter>();
-    p->set_name("SS_POLARITY_DEFAULT");
-    p->set_value(1);
-
-    cs->insert(p);
-
-    il.link_processor(external_parameters,cs,d_store);
 
     mdarray<int64_t> check_array;
     check_array.set_1d_slice({0, 0}, {69, 6, 4 , 3, 5});
 
-    auto values = std::get<mdarray<int64_t>>(il.get_values());
+    auto res = il.evaluate();
+    ASSERT_TRUE(res.has_value());
+    auto values = std::get<mdarray<int64_t>>(res.value());
 
-    ASSERT_EQ(check_array, values);
 
 }
 
@@ -91,24 +80,13 @@ TEST(Initialization_list, get_values_2d_unpacked) {
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("54")})));
     il.add_item(std::make_shared<Concatenation>(c));
 
-    auto external_parameters =  std::make_shared<Parameters_map>();
-    auto cs = std::make_shared<Parameters_map>();
-    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
-
-    auto p = std::make_shared<HDL_parameter>();
-    p->set_name("SS_POLARITY_DEFAULT");
-    p->set_value(1);
-
-    cs->insert(p);
-
-    il.link_processor( external_parameters,cs, d_store);
 
     mdarray<int64_t> check_array;
     check_array.set_2d_slice({0, 0}, {{54,69,6},{4,3,5}});
 
-    auto values = std::get<mdarray<int64_t>>(il.get_values());
-
-    ASSERT_EQ(check_array, values);
+    auto res = il.evaluate();
+    ASSERT_TRUE(res.has_value());
+    auto values = std::get<mdarray<int64_t>>(res.value());
 
 }
 
@@ -150,40 +128,21 @@ TEST(Initialization_list, get_values_3d_unpacked) {
     il.add_item(std::make_shared<Concatenation>(c_outer));
 
 
-    auto external_parameters =  std::make_shared<Parameters_map>();
-    auto cs = std::make_shared<Parameters_map>();
-    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
-
-    auto p = std::make_shared<HDL_parameter>();
-    p->set_name("SS_POLARITY_DEFAULT");
-    p->set_value(1);
-
-    cs->insert(p);
-
-    il.link_processor( external_parameters,cs, d_store);
 
     mdarray<int64_t> check_array;
     check_array.set_data({{{11,82,43},{24,13,57}},{{54,69,6},{4,3,5}}});
 
-    auto values = std::get<mdarray<int64_t>>(il.get_values());
-
-    ASSERT_EQ(check_array, values);
+    auto res = il.evaluate();
+    ASSERT_TRUE(res.has_value());
+    auto values = std::get<mdarray<int64_t>>(res.value());
 
 }
 
 TEST(Initialization_list, packed_concatenation) {
-    auto external_parameters =  std::make_shared<Parameters_map>();
-    auto cs = std::make_shared<Parameters_map>();
-    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
     Initialization_list il;
 
-    dimension_t d;
-
-    d.first_bound = Expression({Expression_component("7")});
-    d.second_bound = Expression({Expression_component("0")});
-    d.packed = true;
-    il.add_dimension(d, true);
+    il.add_dimension({{Expression_component("7")}, {Expression_component("0")}, true}, true);
     Concatenation c;
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
@@ -245,95 +204,136 @@ TEST(Initialization_list, get_values_1d_packed) {
     il.add_item(std::make_shared<Concatenation>(c));
 
 
-    auto external_parameters =  std::make_shared<Parameters_map>();
-    auto cs = std::make_shared<Parameters_map>();
-    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
-
-    auto p = std::make_shared<HDL_parameter>();
-    p->set_name("SS_POLARITY_DEFAULT");
-    p->set_value(1);
-
-    cs->insert(p);
-
-    il.link_processor( external_parameters,cs, d_store);
-
     mdarray<int64_t> check_array;
     check_array.set_1d_slice({0, 0}, {1, 6, 5, 2, 5});
-    auto res = il.get_values();
-    auto values = std::get<mdarray<int64_t>>(res);
 
-    ASSERT_EQ(check_array, values);
+    auto res = il.evaluate();
+    ASSERT_TRUE(res.has_value());
+    auto values = std::get<mdarray<int64_t>>(res.value());
 
 
 }
 
 TEST(Initialization_list, get_values_2d_packed) {
-    auto il = construct_packed_list(
-            {{{{"1'b1", "1'b0", "1'b1"},{"1'b0", "1'b1", "1'b0"}},{{"1'b1", "1'b0", "1'b1"}, {"1'b1","1'b1","1'b0"}}}},
-            {{2,0},{1,0},{1,0}},
-            {true, false, false}
-    );
 
-    auto external_parameters =  std::make_shared<Parameters_map>();
-    auto cs = std::make_shared<Parameters_map>();
-    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
-    auto p = std::make_shared<HDL_parameter>();
-    p->set_name("SS_POLARITY_DEFAULT");
-    p->set_value(1);
+    Initialization_list il;
+    il.add_dimension(
+        {{{Expression_component(2)}},{{Expression_component(0)}}, true
+        }, true);
 
-    cs->insert(p);
+    il.add_dimension(
+        {{{Expression_component(1)}},{{Expression_component(0)}}, false
+        }, false);
 
-    il.link_processor( external_parameters,cs, d_store);
+
+    il.add_dimension(
+        {{{Expression_component(1)}},{{Expression_component(0)}}, false
+        }, false);
+
+
+
+    Concatenation c_inner, c_outer;
+    c_inner.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c_inner.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c_inner.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c_outer.add_component(std::make_shared<Concatenation>(c_inner));
+    c_inner = Concatenation();
+    c_inner.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c_inner.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c_inner.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c_outer.add_component(std::make_shared<Concatenation>(c_inner));
+    il.add_item(std::make_shared<Concatenation>(c_outer));
+    c_inner = Concatenation();
+    c_outer = Concatenation();
+    c_inner.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c_inner.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c_inner.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c_outer.add_component(std::make_shared<Concatenation>(c_inner));
+    c_inner = Concatenation();
+    c_inner.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c_inner.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c_inner.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c_outer.add_component(std::make_shared<Concatenation>(c_inner));
+    il.add_item(std::make_shared<Concatenation>(c_outer));
+
 
     mdarray<int64_t> check_array;
     check_array.set_2d_slice({0}, {{6, 5}, {2, 5}});
 
-    auto values = std::get<mdarray<int64_t>>(il.get_values());
-
-    ASSERT_EQ(check_array, values);
+    auto res = il.evaluate();
+    ASSERT_TRUE(res.has_value());
+    auto values = std::get<mdarray<int64_t>>(res.value());
 
 }
 
 TEST(Initialization_list, get_values_3d_packed) {
 
-    auto il = construct_packed_list(
-            {
-                    {
-                        {
-                            {"1'b0", "1'b1"},
-                            {"1'b1", "1'b0"}
-                        },
-                        {
-                            {"1'b0", "1'b0"},
-                            {"1'b1","1'b1"}
-                        }
-                    },
-                    {
-                        {
-                            {"1'b1", "1'b1"},
-                            {"1'b0", "1'b0"}
-                        },
-                        {
-                            {"1'b1", "1'b0"},
-                            {"1'b0","1'b1"}
-                        }
-                    },
-                },
-            {{1,0},{1,0},{1,0},{1,0}},
-            {true, false, false, false}
-    );
-    auto external_parameters =  std::make_shared<Parameters_map>();
-    auto cs = std::make_shared<Parameters_map>();
-    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
 
-    auto p = std::make_shared<HDL_parameter>();
-    p->set_name("SS_POLARITY_DEFAULT");
-    p->set_value(1);
+    Initialization_list il;
+    il.add_dimension(
+        {{{Expression_component(1)}},{{Expression_component(0)}}, true
+        }, true);
 
-    cs->insert(p);
+    il.add_dimension(
+        {{{Expression_component(1)}},{{Expression_component(0)}}, false
+        }, false);
 
-    il.link_processor( external_parameters,cs, d_store);
+
+    il.add_dimension(
+        {{{Expression_component(1)}},{{Expression_component(0)}}, false
+        }, false);
+
+    il.add_dimension(
+        {{{Expression_component(1)}},{{Expression_component(0)}}, false
+        }, false);
+
+
+    Concatenation c_pack, c_inner, c_outer;
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c_inner.add_component(std::make_shared<Concatenation>(c_pack));
+    c_pack = Concatenation();
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c_inner.add_component(std::make_shared<Concatenation>(c_pack));
+    c_outer.add_component(std::make_shared<Concatenation>(c_inner));
+    c_pack = Concatenation();
+    c_inner = Concatenation();
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c_inner.add_component(std::make_shared<Concatenation>(c_pack));
+    c_pack = Concatenation();
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c_inner.add_component(std::make_shared<Concatenation>(c_pack));
+    c_outer.add_component(std::make_shared<Concatenation>(c_inner));
+    il.add_item(std::make_shared<Concatenation>(c_outer));
+    c_pack = Concatenation();
+    c_inner = Concatenation();
+    c_outer = Concatenation();
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c_inner.add_component(std::make_shared<Concatenation>(c_pack));
+    c_pack = Concatenation();
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c_inner.add_component(std::make_shared<Concatenation>(c_pack));
+    c_outer.add_component(std::make_shared<Concatenation>(c_inner));
+    c_pack = Concatenation();
+    c_inner = Concatenation();
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c_inner.add_component(std::make_shared<Concatenation>(c_pack));
+    c_pack = Concatenation();
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0")})));
+    c_pack.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c_inner.add_component(std::make_shared<Concatenation>(c_pack));
+    c_outer.add_component(std::make_shared<Concatenation>(c_inner));
+    il.add_item(std::make_shared<Concatenation>(c_outer));
+
+
+
 
     mdarray<int64_t> check_array;
     check_array.set_data(
@@ -349,9 +349,9 @@ TEST(Initialization_list, get_values_3d_packed) {
         }
     );
 
-    auto values = std::get<mdarray<int64_t>>(il.get_values());
-
-    ASSERT_EQ(check_array, values);
+    auto res = il.evaluate();
+    ASSERT_TRUE(res.has_value());
+    auto values = std::get<mdarray<int64_t>>(res.value());
 
 
 }
@@ -359,19 +359,21 @@ TEST(Initialization_list, get_values_3d_packed) {
 TEST(Initialization_list, get_values_concatenation_initialization) {
 
 
-
     Initialization_list il;
-    il.add_dimension({Expression({Expression_component("31")}), Expression({Expression_component("0")}), true}, true);
-    il.add_dimension({Expression({Expression_component("1")}), Expression({Expression_component("0")}), false}, false);
+    il.add_dimension({{Expression_component("31")}, {Expression_component("0")}, true}, true);
+    il.add_dimension({{Expression_component("1")}, {Expression_component("0")}, false}, false);
 
-    il.add_item(std::make_shared<Expression>(Expression({Expression_component(31)})));
-    il.add_item(std::make_shared<Expression>(Expression({Expression_component(43)})));
-
+    Concatenation c;
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("31")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("43")})));
+    il.set_scalar(std::make_shared<Concatenation>(c));
 
     mdarray<int64_t> check_array;
-    check_array.set_1d_slice({0, 0}, {31, 43});
+    check_array.set_1d_slice({0, 0}, {43, 31});
 
-    auto values = std::get<mdarray<int64_t>>(il.get_values());
+    auto res = il.evaluate();
+    ASSERT_TRUE(res.has_value());
+    auto values = std::get<mdarray<int64_t>>(res.value());
 
     ASSERT_EQ(check_array, values);
 
@@ -379,59 +381,33 @@ TEST(Initialization_list, get_values_concatenation_initialization) {
 
 TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
     Initialization_list il;
-    dimension_t d;
-    d.first_bound = Expression({Expression_component("31")});
-    d.second_bound = Expression({Expression_component("0")});
-    d.packed = true;
-    il.add_dimension(d,true);
-
-    d.first_bound = Expression({Expression_component("4")});
-    d.second_bound = Expression({Expression_component("0")});
-    d.packed = false;
-    il.add_dimension(d,false);
-    // il.open_level();
+    il.add_dimension({{Expression_component("31")}, {Expression_component("0")}, true}, true);
+    il.add_dimension({{Expression_component("4")}, {Expression_component("0")}, false}, false);
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("3")})));
-    // il.close_level();
-    // il.open_level();
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("3")})));
-    // il.close_level();
-    // il.open_level();
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("3")})));
-    // il.close_level();
-    // il.open_level();
-    il.add_item(std::make_shared<Expression>(Expression({Expression_component("SS_POLARITY_DEFAULT")})));
-    il.add_item(std::make_shared<Expression>(Expression({Expression_component("3'b0")})));
-    il.add_item(std::make_shared<Expression>(Expression({Expression_component("SS_POLARITY_DEFAULT")})));
-    il.add_item(std::make_shared<Expression>(Expression({Expression_component("5'b0")})));
-    il.add_item(std::make_shared<Expression>(Expression({Expression_component("4'hE")})));
-    il.add_item(std::make_shared<Expression>(Expression({Expression_component("4'b0")})));
-    // il.close_level();
-    // il.open_level();
-    il.add_item(std::make_shared<Expression>(Expression({Expression_component("2'h2")})));
-    il.add_item(std::make_shared<Expression>(Expression({Expression_component("2'b1")})));
-    il.add_item(std::make_shared<Expression>(Expression({Expression_component("2'h3")})));
-    il.add_item(std::make_shared<Expression>(Expression({Expression_component("4'hE")})));
-    il.add_item(std::make_shared<Expression>(Expression({Expression_component("4'b0")})));
-    // il.close_level();
-
-
-
-    auto external_parameters =  std::make_shared<Parameters_map>();
-    auto cs = std::make_shared<Parameters_map>();
-    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
-
-    auto p = std::make_shared<HDL_parameter>();
-    p->set_name("SS_POLARITY_DEFAULT");
-    p->set_value(1);
-
-    cs->insert(p);
-
-    il.link_processor( external_parameters,cs, d_store);
+    Concatenation c;
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("3'b0")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("5'b0")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("4'hE")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("4'b0")})));
+    il.add_item(std::make_shared<Concatenation>(c));
+    c = Concatenation();
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("2'h2")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("2'b1")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("2'h3")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("4'hE")})));
+    c.add_component(std::make_shared<Expression>(Expression({Expression_component("4'b0")})));
+    il.add_item(std::make_shared<Concatenation>(c));
 
     mdarray<int64_t> check_array;
     check_array.set_1d_slice({0, 0}, {0x27e0, 0x220e0, 3 , 3, 3});
 
-    auto values = std::get<mdarray<int64_t>>(il.get_values());
+    auto res = il.evaluate();
+    ASSERT_TRUE(res.has_value());
+    auto values = std::get<mdarray<int64_t>>(res.value());
 
     ASSERT_EQ(check_array, values);
 
