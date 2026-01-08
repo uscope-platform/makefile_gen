@@ -274,14 +274,14 @@ TEST(parameter_processing, multidimensional_array_expression) {
     d = {{{Expression_component("1")}}, {{Expression_component("0")}}, false};
     i.add_dimension(d, false);
 
-    i.open_level();
+    // i.open_level();
     i.add_item(std::make_shared<Expression>(Expression({Expression_component("32")})));
     i.add_item(std::make_shared<Expression>(Expression({Expression_component("32")})));
-    i.close_level();
-    i.open_level();
+    // i.close_level();
+    // i.open_level();
     i.add_item(std::make_shared<Expression>(Expression({Expression_component("5")})));
     i.add_item(std::make_shared<Expression>(Expression({Expression_component("6")})));
-    i.close_level();
+    // i.close_level();
     par->add_initialization_list(i);
 
     mdarray<int64_t> av;

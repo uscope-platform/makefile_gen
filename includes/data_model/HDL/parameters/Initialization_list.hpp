@@ -62,8 +62,6 @@ public:
     explicit Initialization_list(const std::shared_ptr<Parameter_value_base> &e);
     void add_dimension(const dimension_t &d, bool packed);
     void add_item(const std::shared_ptr<Parameter_value_base> &e);
-    void open_level();
-    void close_level();
     bool empty() const;
     bool is_array() const{return !scalar;}
     bool is_packed() const{return unpacked_dimensions.empty() && !packed_dimensions.empty();};
@@ -100,8 +98,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(unpacked_dimensions, packed_dimensions, last_dimension, expression_leaves,
-           lower_dimension_leaves, default_initialization, scalar);
+        ar(unpacked_dimensions, packed_dimensions, expression_leaves, default_initialization, scalar);
     }
 
 
@@ -124,9 +121,7 @@ private:
     std::vector<dimension_t> unpacked_dimensions;
     std::vector<dimension_t> packed_dimensions;
 
-    bool last_dimension = true;
     std::vector<std::shared_ptr<Parameter_value_base>> expression_leaves;
-    std::vector<Initialization_list> lower_dimension_leaves;
     bool default_initialization = false;
 };
 

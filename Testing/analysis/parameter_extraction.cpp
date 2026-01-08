@@ -51,29 +51,6 @@ Initialization_list produce_check_init_list_1d(const init_list_t &i){
 }
 
 
-Initialization_list produce_check_init_list(const init_list_t &i){
-    Initialization_list il;
-    for(auto &item:i.dimensions){
-        il.add_dimension(item, item.packed);
-    }
-    for(const auto &item:i.values){
-        il.open_level();
-        if (std::holds_alternative<std::vector<Expression>>(item)) {
-            auto expressions = std::get<std::vector<Expression>>(item);
-            for( auto &expr:expressions){
-                il.add_item(std::make_shared<Expression>(expr));
-            }
-        } else {
-            auto concatenations = std::get<std::vector<Concatenation>>(item);
-            for( auto &expr:concatenations){
-                il.add_item(std::make_shared<Concatenation>(expr));
-            }
-        }
-        il.close_level();
-    }
-
-    return  il;
-}
 
 
 TEST(parameter_extraction, simple_parameters) {

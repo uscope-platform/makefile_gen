@@ -21,32 +21,6 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "frontend/analysis/sv_analyzer.hpp"
 
-Initialization_list construct_unpacked_list(const mdarray<int64_t>::md_3d_array &in, const mdarray<int64_t>::md_2d_array &dims, std::vector<bool> packing){
-    Initialization_list li;
-
-    for(int i = 0; i<dims.size(); i++){
-        dimension_t d;
-        d.first_bound = Expression({Expression_component(std::to_string(dims[i][0]))});
-        d.second_bound = Expression({Expression_component(std::to_string(dims[i][1]))});
-        d.packed = packing[i];
-        li.add_dimension(d, packing[i]);
-    }
-
-    for(auto &item2d:in){
-        if(dims.size()>2) li.open_level();
-        for(auto &item1d:item2d){
-            if(dims.size()>1) li.open_level();
-            for(auto &item:item1d){
-                li.add_item(std::make_shared<Expression>(Expression({Expression_component(std::to_string(item))})));
-            }
-            if(dims.size()>1) li.close_level();
-        }
-        if(dims.size()>2) li.close_level();
-    }
-
-    return li;
-}
-
 
 Initialization_list construct_packed_list(const std::vector<std::vector<std::vector<std::vector<std::string>>>> &in, const mdarray<int64_t>::md_2d_array &dims, std::vector<bool> packing){
     Initialization_list li;
@@ -59,21 +33,7 @@ Initialization_list construct_packed_list(const std::vector<std::vector<std::vec
         li.add_dimension(d, packing[i]);
     }
 
-    for(auto &item2d:in){
-        if(dims.size()>3) li.open_level();
-        for(auto &item1d:item2d){
-            if(dims.size()>2) li.open_level();
-            for(auto &item:item1d){
-                if(packing[0]) li.open_level();
-                for(auto &packed_item:item){
-                    li.add_item(std::make_shared<Expression>(Expression({Expression_component(packed_item)})));
-                }
-                if(packing[0]) li.close_level();
-            }
-            if(dims.size()>1) li.close_level();
-        }
-        if(dims.size()>2) li.close_level();
-    }
+
 
     return li;
 }
@@ -251,13 +211,12 @@ TEST(Initialization_list, get_values_1d_packed) {
 
     Initialization_list il;
     il.add_dimension(
-        {{{Expression_component(2)}},{{Expression_component(0)}}, false
+        {{{Expression_component(2)}},{{Expression_component(0)}}, true
         }, true);
 
     il.add_dimension(
         {{{Expression_component(4)}},{{Expression_component(0)}}, false
         }, false);
-    il.open_level();
 
     Concatenation c;
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1")})));
@@ -300,8 +259,8 @@ TEST(Initialization_list, get_values_1d_packed) {
 
     mdarray<int64_t> check_array;
     check_array.set_1d_slice({0, 0}, {1, 6, 5, 2, 5});
-
-    auto values = std::get<mdarray<int64_t>>(il.get_values());
+    auto res = il.get_values();
+    auto values = std::get<mdarray<int64_t>>(res);
 
     ASSERT_EQ(check_array, values);
 
@@ -404,10 +363,10 @@ TEST(Initialization_list, get_values_concatenation_initialization) {
     Initialization_list il;
     il.add_dimension({Expression({Expression_component("31")}), Expression({Expression_component("0")}), true}, true);
     il.add_dimension({Expression({Expression_component("1")}), Expression({Expression_component("0")}), false}, false);
-    il.open_level();
+
     il.add_item(std::make_shared<Expression>(Expression({Expression_component(31)})));
     il.add_item(std::make_shared<Expression>(Expression({Expression_component(43)})));
-    il.close_level();
+
 
     mdarray<int64_t> check_array;
     check_array.set_1d_slice({0, 0}, {31, 43});
@@ -430,30 +389,30 @@ TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
     d.second_bound = Expression({Expression_component("0")});
     d.packed = false;
     il.add_dimension(d,false);
-    il.open_level();
+    // il.open_level();
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("3")})));
-    il.close_level();
-    il.open_level();
+    // il.close_level();
+    // il.open_level();
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("3")})));
-    il.close_level();
-    il.open_level();
+    // il.close_level();
+    // il.open_level();
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("3")})));
-    il.close_level();
-    il.open_level();
+    // il.close_level();
+    // il.open_level();
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("SS_POLARITY_DEFAULT")})));
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("3'b0")})));
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("SS_POLARITY_DEFAULT")})));
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("5'b0")})));
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("4'hE")})));
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("4'b0")})));
-    il.close_level();
-    il.open_level();
+    // il.close_level();
+    // il.open_level();
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("2'h2")})));
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("2'b1")})));
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("2'h3")})));
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("4'hE")})));
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("4'b0")})));
-    il.close_level();
+    // il.close_level();
 
 
 

@@ -25,9 +25,7 @@ Initialization_list::Initialization_list(const Initialization_list &i) {
     unpacked_dimensions = i.unpacked_dimensions;
     packed_dimensions = i.packed_dimensions;
 
-    last_dimension = i.last_dimension;
     expression_leaves = i.expression_leaves;
-    lower_dimension_leaves = i.lower_dimension_leaves;
     default_initialization = i.default_initialization;
     scalar = i.scalar;
 }
@@ -39,9 +37,7 @@ Initialization_list Initialization_list::clone() const{
     if(completed_set != nullptr) i_l.completed_set = std::make_shared<Parameters_map>(completed_set->clone());
     i_l.d_store = d_store;
     i_l.unpacked_dimensions = unpacked_dimensions;
-    i_l.packed_dimensions = packed_dimensions;
-    i_l.last_dimension = last_dimension;
-    i_l.lower_dimension_leaves = lower_dimension_leaves;
+    i_l.packed_dimensions = packed_dimensions;\
     i_l.default_initialization = default_initialization;
     for(auto &item:expression_leaves) {
         i_l.expression_leaves.push_back(item->clone_ptr());
@@ -66,66 +62,13 @@ void Initialization_list::add_dimension(const dimension_t &d, bool packed) {
 
 void Initialization_list::add_item(const std::shared_ptr<Parameter_value_base> &e) {
     scalar = false;
-    if(last_dimension){
-        expression_leaves.push_back(e);
-    } else{
-        lower_dimension_leaves.back().add_item(e);
-    }
-}
-
-void Initialization_list::open_level() {
-    if(last_dimension){
-
-        last_dimension = false;
-        for(auto &item:expression_leaves){
-            Initialization_list ll(item);
-            for(const auto& dim:packed_dimensions){
-                ll.add_dimension(dim, true);
-            }
-
-            for(int i = 1; i< unpacked_dimensions.size(); i++){
-                ll.add_dimension(unpacked_dimensions[i], false);
-            }
-            lower_dimension_leaves.push_back(ll);
-        }
-
-        expression_leaves.clear();
-        lower_dimension_leaves.emplace_back();
-        for(const auto& dim:packed_dimensions){
-            lower_dimension_leaves.back().add_dimension(dim, true);
-        }
-
-        for(int i = 1; i< unpacked_dimensions.size(); i++){
-            lower_dimension_leaves.back().add_dimension(unpacked_dimensions[i], false);
-        }
-    } else{
-        lower_dimension_leaves.back().open_level();
-    }
-
-}
-
-void Initialization_list::close_level() {
-    if(!unpacked_dimensions.empty()){
-        if(!last_dimension){
-            if(lower_dimension_leaves.back().last_dimension){
-                last_dimension = true;
-            }
-            lower_dimension_leaves.back().close_level();
-
-        } else {
-            last_dimension = true;
-        }
-    }
-    if(!lower_dimension_leaves.empty() && packed_dimensions.size() + unpacked_dimensions.size() == 1){
-        expression_leaves = lower_dimension_leaves[0].expression_leaves;
-    }
+    expression_leaves.push_back(e);
 }
 
 bool operator==(const Initialization_list &lhs, const Initialization_list &rhs) {
     bool ret = true;
 
     // last dimension is an internal variable only needed during construction, as such it does not need comparison
-    ret &= lhs.lower_dimension_leaves == rhs.lower_dimension_leaves;
     if(lhs.expression_leaves.size() != rhs.expression_leaves.size()) return false;
     for(int i = 0; i<lhs.expression_leaves.size(); i++) {
         ret &= *lhs.expression_leaves[i] == *rhs.expression_leaves[i];
@@ -158,7 +101,7 @@ bool Initialization_list::empty() const {
         return expression_leaves[0]->empty();
 
     }
-    return expression_leaves.empty() && lower_dimension_leaves.empty();
+    return expression_leaves.empty();
 }
 
 void Initialization_list::link_processor(const std::shared_ptr<Parameters_map> &ep,
@@ -167,9 +110,6 @@ void Initialization_list::link_processor(const std::shared_ptr<Parameters_map> &
     external_parameters = ep;
     completed_set = cs;
     d_store = ds;
-    for(auto &item:lower_dimension_leaves){
-        item.link_processor( ep, cs, ds);
-    }
 }
 
 resolved_parameter Initialization_list::get_values() {
@@ -252,10 +192,6 @@ std::set<std::string> Initialization_list::get_dependencies() {
         std::set<std::string> deps = expr->get_dependencies();
         result.insert(deps.begin(), deps.end());
     }
-    for (auto &i : lower_dimension_leaves) {
-        auto deps = i.get_dependencies();
-        result.insert(deps.begin(), deps.end());
-    }
     return result;
 
 }
@@ -294,11 +230,6 @@ void PrintTo(const Initialization_list &il, std::ostream *os) {
         result +=  "  " + item->print() + "\n";
     }
 
-    for(const auto &item:il.lower_dimension_leaves){
-        std::ostringstream ss;
-        PrintTo(item, &ss);
-        result +=  "    " +  ss.str() + "\n";
-    }
     result += "-----------------------------\n";
     result += "-----------------------------\n";
 
@@ -366,13 +297,6 @@ bool Initialization_list::propagate_constant(const std::string &name, const reso
         retval &= dim.second_bound.propagate_constant(name, value);
     }
 
-    for (auto &ll_list: lower_dimension_leaves) {
-        retval &= ll_list.propagate_constant(name, value);
-    }
-
-    for (auto &ll_list: lower_dimension_leaves) {
-        retval &= ll_list.propagate_constant(name, value);
-    }
     for (auto &expr:expression_leaves) {
         retval &=  expr->propagate_constant(name, value);
     }
@@ -387,7 +311,6 @@ std::optional<std::shared_ptr<Parameter_value_base>> Initialization_list::get_sc
 void Initialization_list::set_scalar(const std::shared_ptr<Parameter_value_base> &expr) {
     scalar = true;
     expression_leaves  = {expr};
-    lower_dimension_leaves.clear();
 }
 
 void Initialization_list::clear_scalar() {
