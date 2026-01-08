@@ -180,7 +180,9 @@ resolved_parameter Initialization_list::get_values() {
     }
 
     for(auto &expr:expression_leaves | std::views::reverse) {
-        auto expr_value = expr->evaluate(false);
+        auto expr_depth = expr->get_depth();
+        bool pack = unpacked_dimensions.size() <= expr_depth;
+        auto expr_value = expr->evaluate(pack);
         if (expr_value.has_value()) {
             if (std::holds_alternative<std::string>(expr_value.value())) {
                 throw std::runtime_error("Strings in initialization lists are not supported");
@@ -198,7 +200,7 @@ resolved_parameter Initialization_list::get_values() {
         }
     }
 
-
+    if(unpacked_dimensions.empty()) return ret.get_scalar();
     return ret;
 }
 

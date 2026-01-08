@@ -23,6 +23,10 @@ Replication Replication::clone()  const{
     return result;
 }
 
+int64_t Replication::get_depth() {
+    return repeated_item->get_depth()+1;
+}
+
 std::set<std::string> Replication::get_dependencies()const {
     std::set<std::string> result, deps;
     deps = repetition_size.get_dependencies();

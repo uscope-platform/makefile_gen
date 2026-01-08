@@ -53,6 +53,8 @@ public:
     int64_t evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string &operation);
     int64_t evaluate_unary_expression(int64_t operand, const std::string &operation);
 
+    int64_t get_depth() override { return 1;}
+
 
     friend bool operator==(const Expression &lhs, const Expression &rhs) {
         return std::tie(lhs.components, lhs.rpn) == std::tie(rhs.components, rhs.rpn);

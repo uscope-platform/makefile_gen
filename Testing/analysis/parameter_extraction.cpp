@@ -1106,7 +1106,7 @@ TEST(parameter_extraction, multpidim_packed_array) {
 
 
     mdarray<int64_t> av;
-    av.set_1d_slice({0, 0}, {169, 201});
+    av.set_1d_slice({0, 0}, {201, 169});
     std::map<std::string, resolved_parameter> check_defaults = {
         {"packed_param", av }
     };
@@ -1570,31 +1570,30 @@ TEST(parameter_extraction, multidimensional_packed_array) {
     il.add_dimension({{Expression_component("7")}, {Expression_component("0")}, true}, true);
     il.add_dimension({{Expression_component("1")}, {Expression_component("0")},false},false);
     il.add_dimension({{Expression_component("1")}, {Expression_component("0")},false},false);
+    Concatenation outer_c, inner_c;
 
-    il.open_level();
-    il.open_level();
     for(const auto& item:v1.components){
-        il.add_item(std::make_shared<Expression>(Expression({item})));
+        inner_c.add_component(std::make_shared<Expression>(Expression({item})));
     }
-    il.close_level();
-    il.open_level();
+    outer_c.add_component(std::make_shared<Concatenation>(inner_c));
+    inner_c  = Concatenation();
     for(const auto& item:v2.components){
-        il.add_item(std::make_shared<Expression>(Expression({item})));
+        inner_c.add_component(std::make_shared<Expression>(Expression({item})));
     }
-    il.close_level();
-    il.close_level();
-    il.open_level();
-    il.open_level();
+    outer_c.add_component(std::make_shared<Concatenation>(inner_c));
+    il.add_item(std::make_shared<Concatenation>(outer_c));
+    outer_c = Concatenation();
+    inner_c  = Concatenation();
     for(const auto& item:v2.components){
-        il.add_item(std::make_shared<Expression>(Expression({item})));
+        inner_c.add_component(std::make_shared<Expression>(Expression({item})));
     }
-    il.close_level();
-    il.open_level();
+    outer_c.add_component(std::make_shared<Concatenation>(inner_c));
+    inner_c  = Concatenation();
     for(const auto& item:v1.components){
-        il.add_item(std::make_shared<Expression>(Expression({item})));
+        inner_c.add_component(std::make_shared<Expression>(Expression({item})));
     }
-    il.close_level();
-    il.close_level();
+    outer_c.add_component(std::make_shared<Concatenation>(inner_c));
+    il.add_item(std::make_shared<Concatenation>(outer_c));
 
     p->add_initialization_list(il);
 

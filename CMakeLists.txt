@@ -4,15 +4,6 @@ project(makefilegen_v2)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-find_program(MOLD_LINKER mold)
-
-if(MOLD_LINKER)
-    message(STATUS "Found mold linker: ${MOLD_LINKER}")
-    add_link_options(-fuse-ld=mold)
-else()
-    message(WARNING "mold linker not found, using default linker")
-endif()
-
 set(OPENSSL_USE_STATIC_LIBS TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 set(ANTLR_VERSION 4.13.1)

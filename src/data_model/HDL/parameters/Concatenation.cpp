@@ -57,8 +57,8 @@ bool Concatenation::propagate_constant(const std::string &name, const resolved_p
 
 std::optional<resolved_parameter> Concatenation::evaluate(bool pack_result){
     auto concat_size = components.size();
-
-    if (pack_result) {
+    auto depth = get_depth();
+    if (pack_result && depth == 1) {
         std::vector<int64_t> sizes(concat_size);
         std::vector<int64_t> values(concat_size);
         for (int i = 0;i<concat_size; i++) {
@@ -75,7 +75,7 @@ std::optional<resolved_parameter> Concatenation::evaluate(bool pack_result){
 
         mdarray<int64_t> result;
         for (int64_t i = 0;i<concat_size; i++) {
-            auto value_opt = components[concat_size-i-1]->evaluate(false);
+            auto value_opt = components[concat_size-i-1]->evaluate(pack_result);
             if (!value_opt.has_value()) return std::nullopt;
             if (std::holds_alternative<int64_t>(value_opt.value())) {
                 mdarray<int64_t> to_concat;
@@ -83,7 +83,10 @@ std::optional<resolved_parameter> Concatenation::evaluate(bool pack_result){
                 result = mdarray<int64_t>::concatenate(result, to_concat).value();
             } else {
                 auto array_res = std::get<mdarray<int64_t>>(value_opt.value());
-                result = mdarray<int64_t>::concatenate(result, array_res).value();
+                if( depth ==1)
+                    result= mdarray<int64_t>::concatenate(result, array_res).value();
+                else
+                    result= mdarray<int64_t>::stack(result, array_res).value();
             }
         }
         return result;
@@ -101,6 +104,18 @@ std::string Concatenation::print()  const{
     oss <<"}\n";
     auto dbg =  oss.str();
     return oss.str();
+}
+
+int64_t Concatenation::get_depth() {
+    int64_t ret = 1;
+    for(auto &comp:components){
+        if(comp->is_concatenation() || comp->is_replication()) {
+           auto child_ret = comp->get_depth();
+           ret = std::max(ret, child_ret+1);
+        }
+
+    }
+    return ret;
 }
 
 

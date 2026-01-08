@@ -64,8 +64,9 @@ public:
     bool empty() const {return components.empty();}
     bool propagate_constant(const std::string &name, const resolved_parameter &value);
     std::optional<resolved_parameter> evaluate(bool pack_result);
-
     std::string print() const;
+    int64_t get_depth() override;
+
     friend bool operator==(const Concatenation &lhs, const Concatenation &rhs) {
         auto ret = true;
         if(lhs.components.size() != rhs.components.size()) return false;
