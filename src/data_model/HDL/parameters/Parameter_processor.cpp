@@ -185,13 +185,11 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_array_parameter(cons
             return_par->add_initialization_list({});
         } else {
             Initialization_list il = external_parameters->get(par->get_name())->get_i_l();
-            il.link_processor( external_parameters, completed_set, d_store);
             arr_val = std::get<mdarray<int64_t>>(il.get_values());
         }
 
     } else {
         Initialization_list il = return_par->get_i_l();
-        il.link_processor( external_parameters, completed_set, d_store);
         arr_val = std::get<mdarray<int64_t>>(il.get_values());
     }
 
@@ -531,7 +529,6 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_packed_parameter(con
     } else {
         il = return_par->get_i_l();
     }
-    il.link_processor( external_parameters,  completed_set, d_store);
     auto val = std::get<int64_t>(il.get_values());
     return_par->set_value(val);
 

@@ -19,9 +19,6 @@
 
 
 Initialization_list::Initialization_list(const Initialization_list &i) {
-    completed_set = i.completed_set;
-    external_parameters = i.external_parameters;
-
     unpacked_dimensions = i.unpacked_dimensions;
     packed_dimensions = i.packed_dimensions;
 
@@ -33,9 +30,6 @@ Initialization_list::Initialization_list(const Initialization_list &i) {
 Initialization_list Initialization_list::clone() const{
     Initialization_list i_l;
     i_l.scalar = scalar;
-    if(external_parameters != nullptr) i_l.external_parameters = std::make_shared<Parameters_map>(external_parameters->clone());
-    if(completed_set != nullptr) i_l.completed_set = std::make_shared<Parameters_map>(completed_set->clone());
-    i_l.d_store = d_store;
     i_l.unpacked_dimensions = unpacked_dimensions;
     i_l.packed_dimensions = packed_dimensions;\
     i_l.default_initialization = default_initialization;
@@ -104,13 +98,6 @@ bool Initialization_list::empty() const {
     return expression_leaves.empty();
 }
 
-void Initialization_list::link_processor(const std::shared_ptr<Parameters_map> &ep,
-                                         const std::shared_ptr<Parameters_map> &cs,
-                                         const std::shared_ptr<data_store> &ds) {
-    external_parameters = ep;
-    completed_set = cs;
-    d_store = ds;
-}
 
 resolved_parameter Initialization_list::get_values() {
     mdarray<int64_t> ret;
@@ -197,18 +184,6 @@ std::set<std::string> Initialization_list::get_dependencies() {
 }
 
 
-Parameter_processor Initialization_list::get_parameter_processor() {
-    Parameters_map e_p;
-    if (external_parameters != nullptr) {
-        for(const auto& item:*external_parameters){
-            e_p.insert(item);
-        }
-    }
-
-    Parameter_processor p(e_p, completed_set);
-    p.set_data_store(d_store);
-    return p;
-}
 
 void PrintTo(const Initialization_list &il, std::ostream *os) {
     if (il.scalar) {
@@ -331,26 +306,30 @@ mdarray<int64_t> Initialization_list::process_default_initialization() {
     std::vector<int64_t> dimensions;
     mdarray<int64_t> result;
 
-    auto p = get_parameter_processor();
-
     if(unpacked_dimensions.size()>3){
         throw std::runtime_error("Error: unpacked arrays with more than 3 dimensions are not supported");
     }
 
-    for(const auto &item : unpacked_dimensions){
-        auto first_dim = p.process_expression(item.first_bound, nullptr);
-        auto second_dim = p.process_expression(item.second_bound, nullptr);
-        dimensions.push_back(std::max(first_dim, second_dim)+1);
+    for(auto &item : unpacked_dimensions){
+        auto first_dim = item.first_bound.evaluate(false);
+        auto second_dim = item.second_bound.evaluate(false);
+        if (!first_dim.has_value() || !second_dim.has_value())   throw std::runtime_error("Error: dimensions of default initialized parameters should be fully defined");
+        if (!std::holds_alternative<int64_t>(first_dim.value()) || !std::holds_alternative<int64_t>(second_dim.value()))   throw std::runtime_error("Error: dimensions of default initialized parameters should be integers");
+        auto first_i = std::get<int64_t>(first_dim.value());
+        auto second_i = std::get<int64_t>(second_dim.value());
+        dimensions.push_back(std::max(first_i, second_i)+1);
     }
 
     while(dimensions.size()<3){
         dimensions.insert(dimensions.begin(), 0);
     }
 
-    auto expr = static_cast<Expression *>(expression_leaves[0].get());
-    auto init_value = p.process_expression(*expr, nullptr);
+    auto init_value = expression_leaves[0]->evaluate(false);
 
-    return {dimensions,init_value};
+    if (!init_value.has_value()) throw std::runtime_error("Error: initializer of default array should be defined");
+    if (!std::holds_alternative<int64_t>(init_value.value())) throw std::runtime_error("Error: initializer of default array should be numeric");
+
+    return {dimensions,std::get<int64_t>(init_value.value())};
 
 
 }

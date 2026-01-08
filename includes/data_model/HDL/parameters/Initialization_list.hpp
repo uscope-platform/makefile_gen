@@ -64,11 +64,8 @@ public:
     void add_item(const std::shared_ptr<Parameter_value_base> &e);
     bool empty() const;
     bool is_array() const{return !scalar;}
-    bool is_packed() const{return unpacked_dimensions.empty() && !packed_dimensions.empty();};
-    void link_processor(
-                        const std::shared_ptr<Parameters_map> &ep,
-                        const std::shared_ptr<Parameters_map> &cs,
-                        const std::shared_ptr<data_store> &ds);
+    bool is_packed() const{return unpacked_dimensions.empty() && !packed_dimensions.empty();}
+
     resolved_parameter get_values();
 
     void set_packed_dimensions(const std::vector<dimension_t>  &d) {packed_dimensions = d;};
@@ -88,8 +85,6 @@ public:
     mdarray<int64_t> process_default_initialization();
 
 
-
-
     std::set<std::string> get_dependencies();
     void set_default() { default_initialization = true;};
 
@@ -106,17 +101,12 @@ private:
 
     std::vector<int64_t> expand_repetition(Expression &e, Parameter_processor &p, std::vector<int64_t> *sizes);
 
-    Parameter_processor get_parameter_processor();
-
 
     int64_t pack_values(const std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> &components);
 
     bool scalar = true;
 
 
-    std::shared_ptr<Parameters_map> external_parameters;
-    std::shared_ptr<Parameters_map> completed_set;
-    std::shared_ptr<data_store> d_store;
 
     std::vector<dimension_t> unpacked_dimensions;
     std::vector<dimension_t> packed_dimensions;
