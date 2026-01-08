@@ -17,13 +17,15 @@
 
 
 void HDL_interfaces_factory::new_interface(std::string &p) {
-    resources_factory_base<HDL_Resource>::new_basic_resource();
+    new_basic_resource();
     current_resource.set_path(p);
     current_resource.set_type(interface);
 }
 
 HDL_Resource HDL_interfaces_factory::get_interface() {
-    return resources_factory_base<HDL_Resource>::get_resource();
+    auto res = get_resource();
+    res.process_parameters();
+    return res;
 }
 
 void HDL_interfaces_factory::add_parameter(const std::shared_ptr<HDL_parameter> &p) {

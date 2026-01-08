@@ -1081,7 +1081,6 @@ TEST(parameter_extraction, multpidim_packed_array) {
 
     auto defaults = resource.get_default_parameters();
 
-
     mdarray<int64_t> av;
     av.set_1d_slice({0, 0}, {201, 169});
     std::map<std::string, resolved_parameter> check_defaults = {
@@ -1095,6 +1094,7 @@ TEST(parameter_extraction, multpidim_packed_array) {
 
 TEST(parameter_extraction, package_parameters_use) {
     std::string test_pattern = R"(
+
         module test_mod #(
              parameter package_param = test_package::bus_base
         )();
@@ -1124,6 +1124,17 @@ TEST(parameter_extraction, package_parameters_use) {
         ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
+    auto defaults = resource.get_default_parameters();
+    mdarray<int64_t> av;
+    av.set_1d_slice({0, 0}, {8, 32});
+
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"package_param", "bus_base"}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
 }
 
 TEST(parameter_extraction, negative_number_parameters) {
@@ -1156,7 +1167,17 @@ TEST(parameter_extraction, negative_number_parameters) {
         ASSERT_TRUE(parameters.contains(item->get_name()));
         ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
+    auto defaults = resource.get_default_parameters();
+    mdarray<int64_t> av;
+    av.set_1d_slice({0, 0}, {8, 32});
 
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"negative_param", -32767}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
 }
 
 TEST(parameter_extraction, negative_number_array_init) {
@@ -1199,7 +1220,17 @@ TEST(parameter_extraction, negative_number_array_init) {
         ASSERT_TRUE(parameters.contains(item->get_name()));
         ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
+    auto defaults = resource.get_default_parameters();
+    mdarray<int64_t> av;
+    av.set_1d_slice({0, 0}, {32767, -32767});
 
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"negative_array_param", av}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
 }
 
 TEST(parameter_extraction, expression_array_init) {
@@ -1241,7 +1272,17 @@ TEST(parameter_extraction, expression_array_init) {
         ASSERT_TRUE(parameters.contains(item->get_name()));
         ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
+    auto defaults = resource.get_default_parameters();
+    mdarray<int64_t> av;
+    av.set_1d_slice({0, 0}, {42, 9});
 
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"expression_array_param", av}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
 }
 
 TEST(parameter_extraction, combined_packed_unpacked_init) {
@@ -1330,7 +1371,19 @@ TEST(parameter_extraction, combined_packed_unpacked_init) {
         ASSERT_TRUE(parameters.contains(item->get_name()));
         ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
+    auto defaults = resource.get_default_parameters();
+    mdarray<int64_t> av, av2;
+    av.set_1d_slice({0, 0}, {29, 226});
+    av2.set_1d_slice({0, 0}, {0, 255});
 
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"param_a", av},
+        {"param_a", av2}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
 }
 
 TEST(parameter_extraction, instance_parameter) {
@@ -1404,7 +1457,6 @@ TEST(parameter_extraction, instance_parameter) {
         ASSERT_TRUE(inst_parameters.contains(item->get_name()));
         ASSERT_EQ(*item, *inst_parameters.get(item->get_name()));
     }
-
 
 }
 
@@ -1486,7 +1538,18 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
         ASSERT_TRUE(parameters.contains(item->get_name()));
         ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
+    auto defaults = resource.get_default_parameters();
+    mdarray<int64_t> av;
+    av.set_1d_slice({0, 0}, {0x27e0, 0xe0, 3 , 3, 3});
 
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"SS_POLARITY_DEFAULT", 0},
+        {"FIXED_REGISTER_VALUES", av}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
 }
 
 
@@ -1582,7 +1645,19 @@ TEST(parameter_extraction, multidimensional_packed_array) {
         ASSERT_TRUE(parameters.contains(item->get_name()));
         ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
+    auto defaults = resource.get_default_parameters();
+    mdarray<int64_t> av;
+    av.set_1d_slice({0, 0}, {8, 32});
 
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"simple_numeric_p", 32},
+        {"sv_numeric_p", 8},
+        {"concatenation", av}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
 }
 
 
@@ -1641,7 +1716,7 @@ TEST(parameter_extraction, packed_replication_init) {
 TEST(parameter_extraction, array_initialization_default) {
     std::string test_pattern = R"(
         module test_mod #(
-             parameter [4:0] test_parameter [2:0][1:0] = '{default:0}
+             parameter [4:0] test_parameter [2:0][1:0] = '{default:3}
         )();
         endmodule
     )";
@@ -1670,7 +1745,7 @@ TEST(parameter_extraction, array_initialization_default) {
     d.second_bound = {Expression_component("0")};
     d.packed = false;
     i.add_dimension(d, false);
-    i.add_item(std::make_shared<Expression>(Expression({Expression_component("0")})));
+    i.add_item(std::make_shared<Expression>(Expression({Expression_component("3")})));
     i.set_default();
     p->add_initialization_list(i);
     check_params.insert(p);
@@ -1681,7 +1756,19 @@ TEST(parameter_extraction, array_initialization_default) {
         ASSERT_TRUE(parameters.contains(item->get_name()));
         ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
+    auto defaults = resource.get_default_parameters();
+    mdarray<int64_t> av;
+    av.set_1d_slice({0, 0}, {3, 3});
+    av.set_1d_slice({0, 1}, {3, 3});
+    av.set_1d_slice({0, 2}, {3, 3});
 
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"test_parameter", av}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
 }
 
 TEST(parameter_extraction, unrelated_wire_dependency_conflict) {
@@ -1716,7 +1803,7 @@ TEST(parameter_extraction, unrelated_wire_dependency_conflict) {
 
 TEST(parameter_extraction, interface_parameters) {
     std::string test_pattern = R"(
-        interface axi_stream #(DATA_WIDTH = 32, USER_WIDTH = 32, DEST_WIDTH = 32);
+        interface axi_stream #(DATA_WIDTH = 32, USER_WIDTH = 24,  DEST_WIDTH = 8);
         endinterface
     )";
 
@@ -1736,16 +1823,29 @@ TEST(parameter_extraction, interface_parameters) {
     p = std::make_shared<HDL_parameter>();
     p->set_name("USER_WIDTH");
     p->set_type(HDL_parameter::expression_parameter);
-    p->add_component(Expression_component("32"));
+    p->add_component(Expression_component("24"));
     check_params.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("DEST_WIDTH");
     p->set_type(HDL_parameter::expression_parameter);
-    p->add_component(Expression_component("32"));
+    p->add_component(Expression_component("8"));
     check_params.insert(p);
 
     ASSERT_EQ(check_params, parameters);
+    auto defaults = resource.get_default_parameters();
+    mdarray<int64_t> av;
+    av.set_1d_slice({0, 0}, {8, 32});
+
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"DATA_WIDTH", 32},
+        {"USER_WIDTH", 24},
+        {"DEST_WIDTH", 8}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
 }
 
 
