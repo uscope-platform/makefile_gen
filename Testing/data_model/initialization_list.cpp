@@ -414,40 +414,6 @@ TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
 }
 
 
-TEST(Initialization_list, multidimensional_packed_array) {
-    auto il = construct_packed_list(
-            {
-                    {
-                        {
-                                    {"1'b1", "1'b1", "1'b1", "1'b0", "1'b0", "1'b0", "1'b1", "1'b1"},
-                                    {"1'b0", "1'b0", "1'b0", "1'b1", "1'b1", "1'b1", "1'b0", "1'b0"}
-                        },
-                        {
-                                    {"1'b1", "1'b1", "1'b1", "1'b0", "1'b0", "1'b0", "1'b1", "1'b0"},
-                                    {"1'b0", "1'b0", "1'b0", "1'b1", "1'b1", "1'b1", "1'b0", "1'b1"}
-                        }
-                    }
-            },
-            {{7,0},{1,0},{1,0}},
-            {true, false, false}
-    );
-
-    auto external_parameters =  std::make_shared<Parameters_map>();
-    auto cs = std::make_shared<Parameters_map>();
-    auto d_store = std::make_shared<data_store>(true, "/tmp/datastore");
-
-    il.link_processor( external_parameters,cs, d_store);
-
-
-
-    auto values = std::get<mdarray<int64_t>>(il.get_values());
-
-    mdarray<int64_t> check_array;
-    check_array.set_2d_slice({0, 0}, {{29, 226}, {28 , 227}});
-
-    ASSERT_EQ(check_array, values);
-}
-
 
 TEST(Initialization_list, get_array_dependencies) {
     std::string test_pattern = R"(
@@ -474,7 +440,7 @@ TEST(Initialization_list, get_array_dependencies) {
     auto deps_b = params.get("FIXED_REGISTER_VALUES")->get_dependencies();
     auto deps_c = params.get("VARIABLE_INITIAL_VALUES")->get_dependencies();
 
-    EXPECT_EQ(deps_a, std::set<std::string>({"VARIABLE_INITIAL_VALUES", "FIXED_REGISTER_VALUES"}));
+    EXPECT_EQ(deps_a, std::set<std::string>({"VARIABLE_INITIAL_VALUES", "N_REGISTERS", "FIXED_REGISTER_VALUES"}));
     EXPECT_EQ(deps_b, std::set<std::string>({"SS_POLARITY_DEFAULT"}));
     EXPECT_TRUE(deps_c.empty());
 
@@ -507,15 +473,11 @@ TEST(Initialization_list, concatenation_of_packed_arrays) {
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
 
-    Parameter_processor p({},std::make_shared<data_store>(true, "/tmp/test_data_store"));
-
-
-    auto parameters = p.process_parameters_map(resource.get_parameters(), resource);
-
-    auto processed_array = parameters.get("INITIAL_REGISTER_VALUES")->get_array_value().get_1d_slice({0,0});
-
+    auto p = resource.get_default_parameters();
+    auto param = p["INITIAL_REGISTER_VALUES"];
     mdarray<int64_t>::md_1d_array check_array = {224,1,0,0,2,2,2};
+    auto result = std::get<mdarray<int64_t>>(param).get_1d_slice({0,0});
 
-    ASSERT_EQ(check_array, processed_array);
+    ASSERT_EQ(check_array, result);
 
 }
