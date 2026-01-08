@@ -1647,12 +1647,11 @@ TEST(parameter_extraction, multidimensional_packed_array) {
     }
     auto defaults = resource.get_default_parameters();
     mdarray<int64_t> av;
-    av.set_1d_slice({0, 0}, {8, 32});
+    av.set_1d_slice({0, 0}, {226, 29});
+    av.set_1d_slice({0, 1}, {29, 226});
 
     std::map<std::string, resolved_parameter> check_defaults = {
-        {"simple_numeric_p", 32},
-        {"sv_numeric_p", 8},
-        {"concatenation", av}
+        {"param_a", av}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));

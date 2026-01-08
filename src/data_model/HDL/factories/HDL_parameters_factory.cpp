@@ -183,12 +183,12 @@ void HDL_parameters_factory::stop_concatenation() {
         if (!concatenations_stack.empty()) {
             new_concatenation = concatenations_stack.top();
             concatenations_stack.pop();
-            new_concatenation.add_component(std::make_shared<Concatenation>(new_concatenation));
+            new_concatenation.add_component(std::make_shared<Concatenation>(closed_concat));
         } else {
             if(in_initialization_list)
-                init_list.add_item(std::make_shared<Concatenation>(new_concatenation));
+                init_list.add_item(std::make_shared<Concatenation>(closed_concat));
             else
-                init_list.set_scalar(std::make_shared<Concatenation>(new_concatenation));
+                init_list.set_scalar(std::make_shared<Concatenation>(closed_concat));
             in_concatenation = false;
         }
     }
