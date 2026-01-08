@@ -178,151 +178,31 @@ resolved_parameter Initialization_list::get_values() {
     if(default_initialization){
         return process_default_initialization();
     }
-    auto size = unpacked_dimensions.size();
 
-    if(size == 0 && !packed_dimensions.empty()){
-        auto val = get_packed_1d_list_values();
-        if (packed_dimensions.size() == 1) {
-            return val.get_scalar();
-        }
-        return val;
-    } else if(size == 1){
-        return get_1d_list_values();
-    } else if(size ==2){
-        return get_2d_list_values();
-    } else if(size == 3){
-        return get_3d_list_values();
-    }
-    return ret;
-}
-
-mdarray<int64_t> Initialization_list::get_1d_list_values() {
-
-    mdarray<int64_t>::md_1d_array values;
-    if(!packed_dimensions.empty() && !lower_dimension_leaves.empty() && unpacked_dimensions.empty()) {
-        return get_packed_1d_list_values();
-    }
-    if (!packed_dimensions.empty() && !unpacked_dimensions.empty() && !lower_dimension_leaves.empty()) {
-        for (auto &list:lower_dimension_leaves) {
-            auto concat_component = list.get_1d_list_values().get_1d_slice({0,0});
-            values.insert(values.end(), concat_component.begin(), concat_component.end());
-        }
-    } else {
-        for(auto &expr:expression_leaves) {
-
-            auto expr_value = expr->evaluate(false);
-            if(expr->is_replication()) {
-                if (!expr_value.has_value()) throw std::runtime_error("Unexpected evaluation failure");
-                auto result = std::get<mdarray<int64_t>>(expr_value.value()).get_1d_slice({0, 0});
-                values.insert(values.end(), result.begin(), result.end());
-            } else if(expr->is_concatenation()) {
-
-            } else if(expr->is_expression()) {
-                auto result = expr_value.value();
-                if (std::holds_alternative<mdarray<int64_t>>(result)) {
-                    auto array =std::get<mdarray<int64_t>>(result).get_1d_slice({0,0});
-                    values.insert(values.end(), array.begin(), array.end());
+    for(auto &expr:expression_leaves | std::views::reverse) {
+        auto expr_value = expr->evaluate(false);
+        if (expr_value.has_value()) {
+            if (std::holds_alternative<std::string>(expr_value.value())) {
+                throw std::runtime_error("Strings in initialization lists are not supported");
+            } else if (std::holds_alternative<int64_t>(expr_value.value())) {
+                auto stacked_arr = mdarray<int64_t>::stack(ret, std::get<int64_t>(expr_value.value()));
+                if (stacked_arr.has_value()) {
+                    ret = stacked_arr.value();
                 }
-                if (std::holds_alternative<int64_t>(result)) {
-                    values.push_back(std::get<int64_t>(result));
+            } else if (std::holds_alternative<mdarray<int64_t>>(expr_value.value())) {
+                auto stacked_arr = mdarray<int64_t>::stack(ret, std::get<mdarray<int64_t>>(expr_value.value()));
+                if (stacked_arr.has_value()) {
+                    ret = stacked_arr.value();
                 }
             }
         }
     }
 
 
-    std::reverse(values.begin(), values.end());
-    mdarray<int64_t> ret;
-    ret.set_1d_slice({0, 0}, values);
     return ret;
 }
 
 
-std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> Initialization_list::get_sized_1d_list_values(bool &already_packed) {
-    mdarray<int64_t>::md_1d_array values;
-    mdarray<int64_t>::md_1d_array sizes;
-    already_packed = false;
-    auto p = get_parameter_processor();
-
-    for(auto &raw_expr:expression_leaves){
-        if(raw_expr->is_replication()) {
-            int i = 0;
-        } else if(raw_expr->is_expression()) {
-            auto expr = static_cast<Expression *>(raw_expr.get());
-            try{
-                if(expr->components.size() == 1 && expr->components[0].is_numeric()){
-                    values.push_back(std::get<int64_t>(expr->components[0].get_value()));
-                    sizes.push_back(expr->components[0].get_binary_size());
-                } else {
-                    int64_t  bin_size;
-                    auto val = p.process_expression(*expr, &bin_size);
-                    sizes.push_back(bin_size);
-                    values.push_back(val);
-                }
-
-            } catch(array_value_exception &ex ){
-                auto v = ex.array_value.get_1d_slice({0,0});
-                already_packed = true;
-                values.insert(values.end(), v.rbegin(), v.rend());
-            }
-        } else if(raw_expr->is_concatenation()) {
-
-        }
-    }
-    if(!already_packed){
-        std::reverse(values.begin(), values.end());
-        std::reverse(sizes.begin(), sizes.end());
-    }
-    return {values, sizes};
-}
-
-
-
-mdarray<int64_t> Initialization_list::get_packed_1d_list_values() {
-    mdarray<int64_t> ret;
-
-    auto p = get_parameter_processor();
-    mdarray<int64_t>::md_1d_array values;
-    if(!lower_dimension_leaves.empty()){
-        for(auto &item:lower_dimension_leaves){
-            bool already_packed = false;
-            auto raw_values = item.get_sized_1d_list_values(already_packed);
-            if(!already_packed){
-                auto val = pack_values(raw_values);
-                values.push_back(val);
-            } else{
-                values.insert(values.end(), raw_values.first.begin(), raw_values.first.end());
-            }
-        }
-
-    } else{
-
-        mdarray<int64_t>::md_1d_array sizes;
-        for(auto &item:expression_leaves){
-            if(item->is_expression()) {
-                auto expr = static_cast<Expression *>(item.get());
-                int64_t s;
-                values.push_back(p.process_expression(*expr, &s));
-                sizes.push_back(s);
-            } else if(item->is_concatenation()) {
-
-            } else if(item->is_replication()) {
-                auto eval_result =item->evaluate(false);
-                if (!eval_result.has_value()) throw std::runtime_error("Unexpected evaluation failure");
-                auto raw_val = std::get<mdarray<int64_t>>(eval_result.value());
-                int i = 0;
-            }
-
-        }
-        auto val = pack_values({values, sizes});
-        values = {val};
-    }
-
-
-    std::reverse(values.begin(), values.end());
-    ret.set_1d_slice({0, 0}, values);
-    return ret;
-}
 
 int64_t Initialization_list::pack_values(const std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> &components) {
 
@@ -348,29 +228,6 @@ int64_t Initialization_list::pack_values(const std::pair<mdarray<int64_t>::md_1d
     }
 
     return packed_result;
-}
-
-
-mdarray<int64_t> Initialization_list::get_2d_list_values() {
-    mdarray<int64_t> ret;
-    for(int i = 0; i< lower_dimension_leaves.size(); i++){
-        auto sub_list = lower_dimension_leaves[i];
-        auto row_val = sub_list.get_1d_list_values();
-        auto idx = (int64_t)lower_dimension_leaves.size()-1-i;
-        ret.set_1d_slice({0, idx}, row_val.get_1d_slice({0, 0}));
-    }
-
-    return ret;
-}
-
-mdarray<int64_t> Initialization_list::get_3d_list_values() {
-    mdarray<int64_t> ret;
-    for(int i = 0; i< lower_dimension_leaves.size(); i++){
-        auto row_val = lower_dimension_leaves[i].get_2d_list_values();
-        auto idx = (int64_t)lower_dimension_leaves.size()-1-i;
-        ret.set_2d_slice({idx}, row_val.get_2d_slice({0}));
-    }
-    return ret;
 }
 
 

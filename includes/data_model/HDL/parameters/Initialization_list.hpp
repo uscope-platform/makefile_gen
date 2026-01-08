@@ -110,11 +110,6 @@ private:
     std::vector<int64_t> expand_repetition(Expression &e, Parameter_processor &p, std::vector<int64_t> *sizes);
 
     Parameter_processor get_parameter_processor();
-    mdarray<int64_t> get_packed_1d_list_values();
-    mdarray<int64_t> get_1d_list_values();
-    std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> get_sized_1d_list_values(bool &already_packed);
-    mdarray<int64_t> get_2d_list_values();
-    mdarray<int64_t> get_3d_list_values();
 
 
     int64_t pack_values(const std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> &components);

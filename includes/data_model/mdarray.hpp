@@ -41,6 +41,77 @@ public:
         data = md_3d_array(dimensions[0], l2);
     };
 
+
+    static std::optional<mdarray> concatenate(const mdarray &arr_1, const int64_t &val) {
+        mdarray tool;
+        tool.set_scalar(val);
+        return concatenate(arr_1, tool);
+    }
+
+    bool empty() const {
+        return data.empty();
+    }
+
+
+    static std::optional<mdarray> stack(const mdarray &arr_1, const int64_t &val) {
+        mdarray res;
+        if (arr_1.empty()) {
+            res.set_scalar(val);
+            return res;
+        }
+        auto arr = arr_1.get_1d_slice({0, 0});
+        arr.push_back(val);
+        res.set_1d_slice({0,0}, arr);
+        return res;
+    }
+
+
+    static std::optional<mdarray> stack(const mdarray &arr_1, const mdarray &arr_2) {
+
+        if (arr_1.data.empty()) {
+            return arr_2;
+        }
+
+        if (arr_2.order > arr_1.order) return std::nullopt;
+
+        mdarray result = arr_1;
+
+        if (result.order == arr_2.order) {
+            if (result.order == 1) {
+                result.order = 2;
+                result.data[0].push_back(arr_2.data[0][0]);
+            } else if (result.order == 2) {
+                result.order = 3;
+                result.data.push_back(arr_2.data[0]);
+            } else {
+
+                return std::nullopt;
+            }
+        }
+
+        else if (result.order == arr_2.order + 1) {
+            if (result.order == 2) {
+
+                result.data[0].push_back(arr_2.data[0][0]);
+            } else if (result.order == 3) {
+
+                result.data.push_back(arr_2.data[0]);
+            }
+        }
+
+        else if (result.order == 3 && arr_2.order == 1) {
+            if (!result.data.empty()) {
+                result.data.back().push_back(arr_2.data[0][0]);
+            } else {
+                result.data.push_back({arr_2.data[0][0]});
+            }
+        } else {
+            return std::nullopt;
+        }
+
+        return result;
+    }
+
     static std::optional<mdarray> concatenate(const mdarray &arr_1, const mdarray &arr_2) {
         if (arr_1.order != arr_2.order) return std::nullopt;
         mdarray result = arr_1;
@@ -76,8 +147,12 @@ public:
 
 
     void set_scalar(T val){
+        if (data.size() == 0) data.resize(1);
+        if (data[0].size() == 0) data[0].resize(1);
+        if (data[0][0].size() == 0) data[0][0].resize(1);
         data[0][0][0] = val;
     }
+
     T get_scalar() const {
         return data[0][0][0];
     }
@@ -163,7 +238,7 @@ md_2d_array get_2d_slice(std::vector<int64_t> idx) {
         return data[idx[0]];
     }
 
-    md_1d_array get_1d_slice(std::vector<int64_t> idx) {
+    md_1d_array get_1d_slice(std::vector<int64_t> idx) const {
         if(idx.size() < 2 || idx[0] >= data.size() || idx[1] >= data[idx[0]].size()) {
             std::cout << "Index out of range in get_1d_slice" << std::endl;
             exit(1);
