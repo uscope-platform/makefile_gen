@@ -73,10 +73,16 @@ bool Expression_component::propagate_constant(const std::string &const_name, con
                     if (!std::holds_alternative<int64_t>(*eval_idx)) return false;
                     idx.push_back(std::get<int64_t>(*eval_idx));
                 }
-                auto values = std::get<mdarray<int64_t>>(const_value);
-                auto array_val = values.get_value(idx);
-                if (array_val.has_value()) value = array_val.value();
-                else value = 0; // if the array value is not found (because of some dimensional issue) substitute with a 0 rather than crashing
+                if(std::holds_alternative<mdarray<int64_t>>(const_value)) {
+                    auto values = std::get<mdarray<int64_t>>(const_value);
+                    auto array_val = values.get_value(idx);
+                    if (array_val.has_value()) value = array_val.value();
+                    else value = 0; // if the array value is not found (because of some dimensional issue) substitute with a 0 rather than crashing
+                } else {
+                    std::bitset<64> bits(std::get<int64_t>(const_value));
+                    value = bits[idx[0]];
+                }
+
             } else {
                value = const_value;
             }

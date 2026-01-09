@@ -1180,6 +1180,62 @@ TEST(parameter_extraction, negative_number_parameters) {
     }
 }
 
+
+TEST(parameter_extraction, packed_bit_access) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            parameter [31:0] param_a = -1,
+            parameter [5:0] param_b = param_a[3]
+        )();
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("param_a");
+
+    p->add_component(Expression_component("-"));
+    p->add_component(Expression_component("1"));
+    check_params.insert(p);
+
+
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("param_b");
+    Expression_component ec("param_a");
+    ec.add_array_index({Expression_component("3")});
+    p->add_component(ec);
+    check_params.insert(p);
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+    auto defaults = resource.get_default_parameters();
+    mdarray<int64_t> av;
+    av.set_1d_slice({0, 0}, {8, 32});
+
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"param_a", -1},
+        {"param_b", 1}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+
 TEST(parameter_extraction, negative_number_array_init) {
     std::string test_pattern = R"(
         module test_mod #(

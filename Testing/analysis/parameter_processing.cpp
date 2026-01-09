@@ -284,7 +284,6 @@ TEST(parameter_processing, repetition_array_override) {
     parent_param.insert(par);
 
     auto parameters = run_override_test(test_pattern, parent_param);
-
     std::vector<param_check_t> vect_params = {
             {"repetition_size", {"3"}, HDL_parameter::numeric_parameter, 3}
     };
