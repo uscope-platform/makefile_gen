@@ -20,27 +20,25 @@
 #include "analysis/passes/pass_base.hpp"
 #include "data_model/HDL/HDL_Resource.hpp"
 #include "data_model/HDL/parameters/Expression_evaluator.hpp"
+#include "data_model/data_store.hpp"
 
-enum parameter_type {
-    string_parameter,
-    numeric_parameter,
-    array_parameter
-};
 
-struct parameter_value {
-    uint64_t numeric_value;
-    std::string string_value;
-    parameter_type type;
+struct work_order {
+    std::shared_ptr<HDL_instance_AST> node;
+    std::map<std::string, resolved_parameter> parent_parameters;
+    std::string path;
 };
 
 class parameter_solution_pass : public pass_base {
 public:
-    parameter_solution_pass();
+    parameter_solution_pass(const std::shared_ptr<data_store> &d);
+
     void setup(const std::shared_ptr<HDL_instance_AST> &root) override;
-    void process_node(const std::shared_ptr<HDL_instance_AST> &node) override;
      std::map<std::string, resolved_parameter> process_parameters(const Parameters_map &map);
 private:
-    std::unordered_map<std::string, parameter_value> parameters_map;
+    void update_parameters_map(std::map<std::string, resolved_parameter> parameters, std::shared_ptr<HDL_instance_AST> node);
+    std::map<std::string, resolved_parameter> override_parameters(work_order &work);
+    std::shared_ptr<data_store> d_store;
 };
 
 

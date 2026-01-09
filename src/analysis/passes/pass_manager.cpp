@@ -16,13 +16,15 @@
 
 #include "analysis/passes/pass_manager.hpp"
 
-pass_manager::pass_manager() {
+pass_manager::pass_manager(const std::shared_ptr<data_store> &d) {
+    data_store_valid = d != nullptr;
     passes = {
-        std::make_shared<parameter_solution_pass>()
+        std::make_shared<parameter_solution_pass>(d)
     };
 }
 
 void pass_manager::apply_passes(std::shared_ptr<HDL_instance_AST> &c) {
+    if(!data_store_valid) throw std::runtime_error("Data store not found while running AST passes");
     for (const auto &pass: passes) {
         apply_pass(c, pass);
     }

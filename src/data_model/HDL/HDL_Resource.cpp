@@ -53,7 +53,7 @@ bool HDL_Resource::is_interface() {
 }
 
 void HDL_Resource::process_parameters() {
-    parameter_solution_pass engine;
+    parameter_solution_pass engine(nullptr);
     default_values = engine.process_parameters(parameters_spec);
 }
 

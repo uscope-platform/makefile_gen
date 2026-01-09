@@ -71,6 +71,11 @@ void HDL_instance::add_parameters(Parameters_map &p) {
     parameters.insert(p.begin(), p.end());
 }
 
+void HDL_instance::set_parameters(Parameters_map &p) {
+    locking_violation_check();
+    parameters = std::move(p);
+}
+
 void HDL_instance::lock_dependency() {
     lock = true;
     for(auto &p:parameters) p->lock_parameter();

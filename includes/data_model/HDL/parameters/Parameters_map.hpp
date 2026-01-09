@@ -31,7 +31,7 @@ public:
 
     size_t size(){return inner_map.size();}
     void clear() {inner_map.clear();}
-    bool empty(){return inner_map.empty();}
+    bool empty() {return inner_map.empty();}
     bool contains(const std::string &name) const {
         bool retval = false;
         for(const auto &item:inner_map){

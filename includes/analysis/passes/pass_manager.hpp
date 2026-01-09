@@ -24,11 +24,12 @@
 
 class pass_manager {
 public:
-   pass_manager();
+   pass_manager(const std::shared_ptr<data_store> &d);
    void apply_passes(std::shared_ptr<HDL_instance_AST> &c);
 private:
    void apply_pass(std::shared_ptr<HDL_instance_AST> &c,const std::shared_ptr<pass_base> &pass);
    std::vector<std::shared_ptr<pass_base>> passes;
+   bool data_store_valid = false;
 };
 
 

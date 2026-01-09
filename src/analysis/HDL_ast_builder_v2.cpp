@@ -27,7 +27,7 @@ std::vector<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder_v2::build_ast(con
     ret.reserve(modules.size());
     for(auto &item:modules){
         auto ast = build_ast(item);
-        pass_manager pass_mgr;
+        pass_manager pass_mgr(d_store);
         pass_mgr.apply_passes(ast);
         ret.push_back(ast);
     }
