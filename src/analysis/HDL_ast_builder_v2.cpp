@@ -27,8 +27,6 @@ std::vector<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder_v2::build_ast(con
     ret.reserve(modules.size());
     for(auto &item:modules){
         auto ast = build_ast(item);
-        pass_manager pass_mgr(d_store);
-        pass_mgr.apply_passes(ast);
         ret.push_back(ast);
     }
     return ret;
@@ -41,12 +39,14 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
         top->set_type(top_level_module);
         top->set_dependency_class(module);
 
-        std::stack< std::shared_ptr<HDL_instance_AST> > working_stack;
-        working_stack.push(top);
+        std::stack< work_order> working_stack;
+        working_stack.push({top, {}, "TL"});
+
 
 
         while (!working_stack.empty()) {
-            auto working_instance = working_stack.top();
+            auto wo = working_stack.top();
+            auto working_instance = wo.node;
             working_stack.pop();
 
             auto type = working_instance->get_type();
@@ -62,6 +62,10 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
                     std::cerr << "ERROR:\n HDL entity: " + type + " Not found\n";
                 }
                 auto res = d_store->get_HDL_resource(type);
+                spdlog::trace("Processing dependency {} in module {}",working_instance->get_name(), type);
+
+
+                auto current_param_values = parameter_solver::override_parameters(wo, d_store);
 
                 for (auto &dep: res.get_dependencies()) {
 
@@ -70,7 +74,11 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
                     child->set_parent(working_instance);
                     working_instance->add_child(child);
 
-                    working_stack.push(child);
+                    working_stack.push({
+                                    child,
+                                    current_param_values,
+                                    wo.path + "." + working_instance->get_name()
+                                });
                 }
             }
         }

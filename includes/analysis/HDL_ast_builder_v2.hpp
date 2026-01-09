@@ -25,6 +25,7 @@
 #include "data_model/data_store.hpp"
 #include "data_model/settings_store.hpp"
 #include "analysis/passes/pass_manager.hpp"
+#include "parameter_solver.hpp"
 
 
 class HDL_ast_builder_v2 {

@@ -16,10 +16,11 @@
 
 #include "analysis/passes/pass_manager.hpp"
 
+
 pass_manager::pass_manager(const std::shared_ptr<data_store> &d) {
     data_store_valid = d != nullptr;
     passes = {
-        std::make_shared<parameter_solution_pass>(d)
+        std::make_shared<loop_solution_pass>()
     };
 }
 

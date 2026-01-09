@@ -1,4 +1,4 @@
-//  Copyright 2025 Filippo Savi
+//  Copyright 2026 Filippo Savi
 //  Author: Filippo Savi <filssavi@gmail.com>
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,16 +29,11 @@ struct work_order {
     std::string path;
 };
 
-class parameter_solution_pass : public pass_base {
+class parameter_solver {
 public:
-    parameter_solution_pass(const std::shared_ptr<data_store> &d);
-
-    void setup(const std::shared_ptr<HDL_instance_AST> &root) override;
-     std::map<std::string, resolved_parameter> process_parameters(const Parameters_map &map);
-private:
-    void update_parameters_map(std::map<std::string, resolved_parameter> parameters, std::shared_ptr<HDL_instance_AST> node);
-    std::map<std::string, resolved_parameter> override_parameters(work_order &work);
-    std::shared_ptr<data_store> d_store;
+    static std::map<std::string, resolved_parameter> process_parameters(const Parameters_map &map);
+    static void update_parameters_map(std::map<std::string, resolved_parameter> parameters, std::shared_ptr<HDL_instance_AST> node,const std::shared_ptr<data_store> &d_store);
+    static std::map<std::string, resolved_parameter> override_parameters(work_order &work, const std::shared_ptr<data_store> &d_store);
 };
 
 

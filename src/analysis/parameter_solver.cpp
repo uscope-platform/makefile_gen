@@ -13,44 +13,9 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "analysis/passes/parameter_solution_pass.hpp"
+#include "../../includes/analysis/parameter_solver.hpp"
 
-parameter_solution_pass::parameter_solution_pass(const std::shared_ptr<data_store> &d) {
-    d_store = d;
-}
-
-void parameter_solution_pass::setup(const std::shared_ptr<HDL_instance_AST> &root) {
-    auto root_res = d_store->get_HDL_resource(root->get_type());
-
-    std::stack<work_order> working_stack;
-    working_stack.push({
-        root,
-        {},
-        root->get_name()
-    });
-
-
-    while(!working_stack.empty()) {
-        auto current_node = working_stack.top();
-        working_stack.pop();
-        spdlog::trace("Processing dependency {} in module {}",current_node.path, current_node.node->get_type());
-
-
-        auto current_param_values = override_parameters(current_node);
-
-        auto current_res = d_store->get_HDL_resource(current_node.node->get_type());
-        for(auto item:current_node.node->get_dependencies()) {
-            working_stack.push({
-                item,
-                current_param_values,
-                current_node.path + "." + item->get_name()
-            });
-        }
-    }
-}
-
-
-std::map<std::string, resolved_parameter>   parameter_solution_pass::process_parameters(const Parameters_map &map_in) {
+std::map<std::string, resolved_parameter>   parameter_solver::process_parameters(const Parameters_map &map_in) {
     auto map = map_in.clone();
 
     std::map<std::string, resolved_parameter> solved_parameters;
@@ -103,7 +68,11 @@ std::map<std::string, resolved_parameter>   parameter_solution_pass::process_par
     return solved_parameters;
 }
 
-void parameter_solution_pass::update_parameters_map(std::map<std::string, resolved_parameter> solved_parameters, std::shared_ptr<HDL_instance_AST> node) {
+void parameter_solver::update_parameters_map(
+    std::map<std::string, resolved_parameter> solved_parameters,
+    std::shared_ptr<HDL_instance_AST> node,
+    const std::shared_ptr<data_store> &d_store
+) {
     auto node_parameters = node->get_parameters();
     auto resource = d_store->get_HDL_resource(node->get_type());
 
@@ -128,7 +97,7 @@ void parameter_solution_pass::update_parameters_map(std::map<std::string, resolv
     node->set_parameters(node_parameters);
 }
 
-std::map<std::string, resolved_parameter> parameter_solution_pass::override_parameters(work_order &work) {
+std::map<std::string, resolved_parameter> parameter_solver::override_parameters(work_order &work, const std::shared_ptr<data_store> &d_store) {
     auto node_spec = d_store->get_HDL_resource(work.node->get_type());
     auto node_defaults = node_spec.get_default_parameters();
     auto node_overrides = work.node->get_parameters();
@@ -167,6 +136,6 @@ std::map<std::string, resolved_parameter> parameter_solution_pass::override_para
         }
     }
 
-    update_parameters_map(solved_parameters, work.node);
+    update_parameters_map(solved_parameters, work.node, d_store);
     return node_defaults;
 }
