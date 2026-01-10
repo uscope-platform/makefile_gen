@@ -78,9 +78,9 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
                     auto loop_idx = loop_solver::solve_loop(child, res);
                     if (!loop_idx.empty()) {
                         for (auto &idx:loop_idx) {
-
                             auto new_child = std::make_shared<HDL_instance_AST>(*child);
-                            working_instance->add_child(new_child);
+                            auto specialized_child = specialize_instance(*new_child, idx, child->get_inner_loop().get_init().get_name());
+                            working_instance->add_child(specialized_child);
                         }
                     } else {
                         working_instance->add_child(child);
@@ -105,4 +105,33 @@ void HDL_ast_builder_v2::update_loop_constants(std::shared_ptr<HDL_instance_AST>
         }
         instance->update_loop(loop, 0);
     }
+}
+
+
+std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::specialize_instance(const HDL_instance_AST &i, int64_t idx, std::string idx_name) {
+    HDL_instance_AST specialized_d = i;
+    specialized_d.set_repeated(true);
+    specialized_d.set_repetition_idx(idx);
+
+    std::unordered_map<std::string, std::vector<HDL_net>> new_ports;
+
+    std::string accessor = "[" + idx_name + "]";
+
+    for(auto &[port_name, nets]:specialized_d.get_ports()){
+        std::vector<HDL_net> port_content;
+        for(auto &n:nets){
+            if(n.is_array()) {
+                auto new_net = n;
+                Expression n_idx;
+                n_idx.emplace_back(idx);
+                new_net.set_index(n_idx);
+                port_content.emplace_back(new_net);
+            } else {
+                port_content.push_back(n);
+            }
+        }
+        new_ports[port_name] = port_content;
+    }
+    specialized_d.set_ports(new_ports);
+    return std::make_shared<HDL_instance_AST>(specialized_d);
 }
