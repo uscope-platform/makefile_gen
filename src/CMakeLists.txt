@@ -11,7 +11,7 @@ target_sources(makefile_gen_lib
     analysis/passes/loop_solution_pass.cpp
     analysis/data_acquisition_analysis.cpp
     analysis/control_bus_analysis.cpp
-    analysis/HDL_loop_solver.cpp
+        analysis/loop_solver.cpp
     analysis/proxy_bus_analysis.cpp
     Backend/Dependency_resolver.cpp
     Backend/uplatform/application_definition_generator.cpp

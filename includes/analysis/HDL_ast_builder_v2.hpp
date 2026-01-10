@@ -34,6 +34,7 @@ public:
     std::vector<std::shared_ptr<HDL_instance_AST>> build_ast(const std::vector<std::string>& modules);
 private:
     std::shared_ptr<HDL_instance_AST> build_ast(const std::string& top_level_module);
+    void update_loop_constants(std::shared_ptr<HDL_instance_AST> &instance, const std::map<std::string, resolved_parameter> &parameters);
     std::shared_ptr<data_store> d_store;
     std::shared_ptr<settings_store> s_store;
     Depfile  dep_file;

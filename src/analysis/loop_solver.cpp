@@ -1,0 +1,72 @@
+//  Copyright 2024 Filippo Savi
+//  Author: Filippo Savi <filssavi@gmail.com>
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+
+
+#include "analysis/loop_solver.hpp"
+
+
+std::vector<int64_t> loop_solver::solve_loop(std::shared_ptr<HDL_instance_AST> &node, HDL_Resource &spec) {
+    if (node->get_n_loops() == 0) return {};
+    if (node->get_n_loops()>1) {
+        spdlog::warn("Nested loops are not supported by parameter analysis\n In HDL instance: " + node->get_name() + " of type: " + node->get_type() + " is in a nested loop");
+        return {};
+    }
+    auto l = node->get_inner_loop();
+    std::vector<int64_t> ret;
+
+    auto loop_variable = get_init_variable(l);
+
+
+    while(!is_loop_done(loop_variable, l.get_end_c())){
+        ret.push_back(loop_variable->get_numeric_value());
+
+       update_loop(l.get_iter(), loop_variable);
+
+    }
+
+    return ret;
+}
+
+bool loop_solver::is_loop_done(std::shared_ptr<HDL_parameter> &lv, Expression end_cond) {
+
+    end_cond.propagate_constant(lv->get_name(), lv->get_numeric_value());
+
+
+    auto ec = end_cond.evaluate(false);
+    if (!ec.has_value()) throw std::runtime_error("Could not evaluate loop end condition");
+    if (!std::holds_alternative<int64_t>(ec.value())) throw std::runtime_error("loop end condition expression must ret");
+    return std::get<int64_t>(ec.value()) == 0;
+}
+
+std::shared_ptr<HDL_parameter> loop_solver::get_init_variable(const HDL_loop_metadata &l) {
+    auto loop_variable = std::make_shared<HDL_parameter>(l.get_init());
+    loop_variable->set_loop_index();
+    auto variable_val = loop_variable->get_i_l().evaluate();
+    if (!variable_val.has_value()) return{};
+    if (!std::holds_alternative<int64_t>(variable_val.value())) return {};
+
+    loop_variable->set_value(std::get<int64_t>(variable_val.value()));
+    return loop_variable;
+}
+
+std::shared_ptr<HDL_parameter> loop_solver::update_loop( Expression e, std::shared_ptr<HDL_parameter> loop_var) {
+    e.propagate_constant(loop_var->get_name(), loop_var->get_numeric_value());
+    auto res = e.evaluate(false);
+    if (!res.has_value()) throw std::runtime_error("Could not evaluate loop end condition");
+    if (!std::holds_alternative<int64_t>(res.value())) throw std::runtime_error("loop end condition expression must ret");
+
+    loop_var->set_value(std::get<int64_t>(res.value()));
+    return loop_var;
+}

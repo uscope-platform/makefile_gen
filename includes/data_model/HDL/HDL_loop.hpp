@@ -82,6 +82,12 @@ public:
         return *this;
     }
 
+    void propagate_constant(const std::string &name, const resolved_parameter &value) {
+        init.propagate_constant(name, value);
+        end_c.propagate_constant(name, value);
+        iter.propagate_constant(name, value);
+    }
+
     void lock() {locked = true;}
     void set_init(const HDL_parameter &p) {
         locking_violation_check();

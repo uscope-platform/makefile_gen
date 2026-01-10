@@ -98,8 +98,6 @@ std::optional<resolved_parameter> Expression::evaluate(bool pack_result) {
 
     auto expr_stack = to_rpm();
 
-
-
     std::stack<Expression_component> evaluator_stack;
     for(auto & i : expr_stack.components){
         if(i.is_numeric()) {

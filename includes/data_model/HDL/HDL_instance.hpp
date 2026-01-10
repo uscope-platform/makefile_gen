@@ -83,6 +83,10 @@ public:
         locking_violation_check();
         loop_specs.push_back(l);
     };
+    void update_loop(const HDL_loop_metadata &l, int i) {
+        locking_violation_check();
+        loop_specs[i] = l;
+    }
     HDL_loop_metadata get_inner_loop() {return loop_specs[0];};
     unsigned int get_n_loops() {return loop_specs.size();};
 

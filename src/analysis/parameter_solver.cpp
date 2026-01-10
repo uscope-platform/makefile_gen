@@ -68,6 +68,7 @@ std::map<std::string, resolved_parameter>   parameter_solver::process_parameters
     return solved_parameters;
 }
 
+
 void parameter_solver::update_parameters_map(
     std::map<std::string, resolved_parameter> solved_parameters,
     std::shared_ptr<HDL_instance_AST> node,

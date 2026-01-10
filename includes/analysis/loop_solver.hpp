@@ -23,14 +23,15 @@
 #include "data_model/HDL/HDL_instance.hpp"
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
-class HDL_loop_solver {
+class loop_solver {
 public:
-    HDL_loop_solver(const Parameters_map &pm, const std::shared_ptr<data_store> &ds);
-    std::vector<int64_t> solve_loop(HDL_loop_metadata &loop_specs, HDL_Resource &spec);
+    loop_solver() = default;
+    static std::vector<int64_t> solve_loop(std::shared_ptr<HDL_instance_AST> &node, HDL_Resource &spec);
     void set_trace_prefix(const std::string &tp) {trace_prefix = tp;}
 private:
-    int64_t  process_expression(const Expression &e, std::shared_ptr<HDL_parameter> loop_var);
-    bool is_loop_done(std::shared_ptr<HDL_parameter> &lv, Expression end_cond);
+    static std::shared_ptr<HDL_parameter> get_init_variable(const HDL_loop_metadata &l);
+    static std::shared_ptr<HDL_parameter> update_loop(const Expression e, std::shared_ptr<HDL_parameter> loop_var);
+    static bool is_loop_done(std::shared_ptr<HDL_parameter> &lv, Expression end_cond);
     std::string trace_prefix = "";
     Parameters_map parent_parameters;
     std::shared_ptr<data_store> d_store;

@@ -17,7 +17,7 @@
 
 #include <spdlog/spdlog.h>
 
-#include "analysis/HDL_loop_solver.hpp"
+#include "analysis/loop_solver.hpp"
 
 
 Parameter_processor::Parameter_processor(const Parameters_map &parent_parameters, const std::shared_ptr<data_store> &ds) {

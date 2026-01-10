@@ -15,8 +15,10 @@
 
 #include "analysis/HDL_ast_builder_v2.hpp"
 
+#include "analysis/loop_solver.hpp"
+
 HDL_ast_builder_v2::HDL_ast_builder_v2(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d,
-    const Depfile &d_f){
+                                       const Depfile &d_f){
     s_store = s;
     d_store = d;
     dep_file = d_f;
@@ -63,16 +65,26 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
                 }
                 auto res = d_store->get_HDL_resource(type);
                 spdlog::trace("Processing dependency {} in module {}",working_instance->get_name(), type);
-
-
                 auto current_param_values = parameter_solver::override_parameters(wo, d_store);
 
                 for (auto &dep: res.get_dependencies()) {
 
                     auto child = std::make_shared<HDL_instance_AST>(dep);
-
                     child->set_parent(working_instance);
-                    working_instance->add_child(child);
+
+                    // The loop structure is attached to the looped instances, that need to be repeated,
+                    // But the parent parameters only need to be propagated in its expressions
+                    update_loop_constants(child, current_param_values);
+                    auto loop_idx = loop_solver::solve_loop(child, res);
+                    if (!loop_idx.empty()) {
+                        for (auto &idx:loop_idx) {
+
+                            auto new_child = std::make_shared<HDL_instance_AST>(*child);
+                            working_instance->add_child(new_child);
+                        }
+                    } else {
+                        working_instance->add_child(child);
+                    }
 
                     working_stack.push({
                                     child,
@@ -83,4 +95,14 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
             }
         }
     return top;
+}
+
+void HDL_ast_builder_v2::update_loop_constants(std::shared_ptr<HDL_instance_AST> &instance, const std::map<std::string, resolved_parameter> &parameters) {
+    if (instance->get_n_loops()>0) {
+        auto loop = instance->get_inner_loop();
+        for (auto &[param_name, param_value]: parameters) {
+            loop.propagate_constant(param_name, param_value);
+        }
+        instance->update_loop(loop, 0);
+    }
 }

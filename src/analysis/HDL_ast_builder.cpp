@@ -146,10 +146,10 @@ std::optional<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder::recursive_buil
                 if(d.get_n_loops()>1){
                     spdlog::warn("Nested loops are not supported by parameter analysis\n In HDL instance: " + i.get_name() + " of type: " + type + " is in a nested loop");
                 } else if(d.get_n_loops() == 1){
-                    HDL_loop_solver solver(new_params, d_store);
+                    loop_solver solver;
                     solver.set_trace_prefix(trace_prefix);
                     auto loop = d.get_inner_loop();
-                    auto indices =solver.solve_loop(loop, res);
+                    auto indices = std::vector<int64_t>(); //solver.solve_loop(d, res);
                     for(auto index:indices){
                         spdlog::trace("{}**Processing iteration {} of loop with index {}**", trace_prefix, index, loop.get_init().get_name());
                         auto specialized_params = specialize_parameters(index, new_params, loop.get_init().get_name());
