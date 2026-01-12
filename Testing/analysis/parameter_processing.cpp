@@ -495,6 +495,7 @@ TEST(parameter_processing, simple_for_array_parameter) {
     HDL_ast_builder b(s_store, d_store, df);
     auto ast = b.build_ast(std::vector<std::string>({"test_mod"}), {})[0];
     auto deps = ast->get_dependencies();
+    ASSERT_EQ(deps.size(), 3);
     ASSERT_EQ(deps[0]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 4);
     ASSERT_EQ(deps[1]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 2);
     ASSERT_EQ(deps[2]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 6);
@@ -543,6 +544,7 @@ TEST(parameter_processing, complex_for_array_parameter) {
     HDL_ast_builder b(s_store, d_store, df);
     auto ast = b.build_ast(std::vector<std::string>({"test_mod"}), {})[0];
     auto deps = ast->get_dependencies();
+    ASSERT_EQ(deps.size(), 3);
     ASSERT_EQ(deps[0]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 6);
     ASSERT_EQ(deps[1]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 2);
     ASSERT_EQ(deps[2]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 4);
