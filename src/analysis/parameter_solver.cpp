@@ -15,7 +15,7 @@
 
 #include "../../includes/analysis/parameter_solver.hpp"
 
-std::map<std::string, resolved_parameter>   parameter_solver::process_parameters(const Parameters_map &map_in) {
+std::map<std::string, resolved_parameter>   parameter_solver::process_parameters(const Parameters_map &map_in, std::unordered_map<std::string, HDL_function> function_defs) {
     auto map = map_in.clone();
 
     std::map<std::string, resolved_parameter> solved_parameters;
@@ -23,7 +23,14 @@ std::map<std::string, resolved_parameter>   parameter_solver::process_parameters
     for (auto &param: map) {
         auto param_name = param->get_name();
         dependencies_map[param_name] = {};
-        auto param_deps = param->get_dependencies();
+        std::set<std::string> param_deps;
+        if(param->is_function()) {
+            auto fcn_name = std::get<std::string>(param->get_i_l().evaluate().value());
+            auto fcn = function_defs[fcn_name];
+            param_deps = fcn.get_dependencies();
+        } else {
+            param_deps = param->get_dependencies();
+        }
         for (auto dep:param_deps) {
             if (!map.contains(dep) && !param->is_array()) {
                 solved_parameters.insert({param_name, dep});
@@ -39,7 +46,14 @@ std::map<std::string, resolved_parameter>   parameter_solver::process_parameters
             for (auto &[param_name, dependencies] : dependencies_map ) {
                 if (dependencies.empty() && !solved_parameters.contains(param_name)) {
                     auto to_solve = map.const_get(param_name);
-                    auto value = to_solve->get_i_l().evaluate();
+                    std::optional<resolved_parameter> value;
+                    if(to_solve->is_function()) {
+                        auto fcn_name = std::get<std::string>(to_solve->get_i_l().evaluate().value());
+                        auto fcn = function_defs[fcn_name];
+                        value = fcn.evaluate(false);
+                    } else {
+                        value = to_solve->get_i_l().evaluate();
+                    }
 
                     if (value.has_value()) {
                         solved_parameters.insert({param_name, value.value()});
@@ -132,7 +146,7 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
             }
             to_solve.insert(param);
         }
-        solved_parameters = process_parameters(to_solve);
+        solved_parameters = process_parameters(to_solve,{});
         for(auto &param:solved_parameters) {
             node_defaults[param.first] = param.second;
         }

@@ -16,10 +16,14 @@
 
 #include "data_model/HDL/parameters/HDL_function.hpp"
 
+#include "analysis/loop_solver.hpp"
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
 void HDL_function::start_assignment(const std::string &n, Expression idx) {
-    assignments.push_back({name, idx, {}});
+    if(idx.empty())
+        assignments.push_back({name, {}, {}});
+    else
+        assignments.push_back({name, idx, {}});
 }
 
 void HDL_function::close_assignment(Expression val) {
@@ -36,4 +40,84 @@ bool HDL_function::operator==(const HDL_function &rhs) const {
     retval &= assignments == rhs.assignments;
     retval &= loop_metadata == rhs.loop_metadata;
     return retval;
+}
+
+std::set<std::string> HDL_function::get_dependencies() const {
+    std::set<std::string> res;
+    for(auto &a:assignments) {
+        auto deps = a.value.get_dependencies();
+        res.insert(deps.begin(), deps.end());
+        if(a.index.has_value()) {
+            deps = a.index.value().get_dependencies();
+            res.insert(deps.begin(), deps.end());
+        }
+    }
+    for(auto &la:loop_metadata.get_assignments()) {
+        auto deps = la.value.get_dependencies();
+        res.insert(deps.begin(), deps.end());
+        if(la.index.has_value()) {
+            deps = la.index.value().get_dependencies();
+            res.insert(deps.begin(), deps.end());
+        }
+
+    }
+    auto deps = loop_metadata.get_init().get_dependencies();
+    res.insert(deps.begin(), deps.end());
+    deps = loop_metadata.get_end_c().get_dependencies();
+    res.insert(deps.begin(), deps.end());
+    deps = loop_metadata.get_iter().get_dependencies();
+    res.insert(deps.begin(), deps.end());
+    return res;
+}
+
+bool HDL_function::propagate_constant(const std::string &name, const resolved_parameter &value) {
+    bool retval = true;
+    return retval;
+}
+
+std::optional<resolved_parameter> HDL_function::evaluate_scalar() {
+    return assignments[0].value.evaluate(false);
+}
+
+std::optional<resolved_parameter> HDL_function::evaluate_vector() {
+    std::vector<int64_t> loop_indexes;
+    if(!loop_metadata.get_init().is_empty()) {
+        loop_indexes = loop_solver::solve_loop(loop_metadata);
+    } else {
+        loop_indexes = {};
+    }
+    std::vector<int64_t> values(assignments.size() + loop_indexes.size());
+    for(auto &a:assignments) {
+        auto idx = a.index.value().evaluate(false);
+        if(!idx.has_value()) return std::nullopt;
+        auto idx_val = std::get<int64_t>(idx.value());
+        auto value = a.value.evaluate(false);
+        if(!value.has_value()) return std::nullopt;
+        values[idx_val] = std::get<int64_t>(value.value());
+    }
+
+    auto loop_var = loop_metadata.get_init().get_name();
+    auto loop_assignments = loop_metadata.get_assignments();
+    for(int i = 0; i<loop_assignments.size(); i++) {
+        for(auto &l:loop_indexes) {
+            auto la = loop_assignments[i];
+            la.index.value().propagate_constant(loop_var, l);
+            auto idx = la.index.value().evaluate(false);
+            la.value.propagate_constant(loop_var, l);
+            auto var = la.value.evaluate(false);
+            values[std::get<int64_t>(idx.value())] = std::get<int64_t>(var.value());
+        }
+    }
+
+    mdarray<int64_t> result;
+    result.set_1d_slice({0, 0}, values);
+    return result;
+}
+
+std::optional<resolved_parameter> HDL_function::evaluate(bool pack_result) {
+    if( loop_metadata.get_assignments().empty() && assignments.size() == 1) {
+        return evaluate_scalar();
+    } else {
+        return evaluate_vector();
+    }
 }

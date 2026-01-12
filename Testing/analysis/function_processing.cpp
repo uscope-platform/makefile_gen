@@ -21,8 +21,43 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
 
+TEST(function_processing, simple_function_scalar) {
+    std::string test_pattern = R"(
+        module test_mod #(
+        )();
 
-TEST(function_processing, simple_function) {
+            function integer CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC = 67;
+            endfunction
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto functions = resource.get_functions();
+
+    EXPECT_EQ(functions.size(), 1);
+    EXPECT_TRUE(functions.contains("CTRL_ADDR_CALC"));
+    auto result = functions["CTRL_ADDR_CALC"];
+    HDL_function check_f;
+    check_f.set_name("CTRL_ADDR_CALC");
+    assignment a;
+    a.name = "CTRL_ADDR_CALC";
+    a.index = {};
+    a.value = {Expression_component("67")};
+    check_f.add_assignment(a);
+    EXPECT_EQ(check_f,result);
+
+    auto values = result.evaluate(false);
+    ASSERT_TRUE(values.has_value());
+    EXPECT_TRUE(std::holds_alternative<int64_t>(values.value()));
+    auto result_value = std::get<int64_t>(values.value());
+    EXPECT_EQ(result_value, 67);
+}
+
+
+TEST(function_processing, simple_function_array) {
     std::string test_pattern = R"(
         module test_mod #(
         )();
@@ -51,19 +86,92 @@ TEST(function_processing, simple_function) {
     a.index = {Expression_component("0")};
     a.value = {Expression_component("100")};
     check_f.add_assignment(a);
-    a.index.components[0] = Expression_component("1");
+    a.index.value().components[0] = Expression_component("1");
     a.value.components[0] = Expression_component("200");
     check_f.add_assignment(a);
-    a.index.components[0] = Expression_component("2");
+    a.index.value().components[0] = Expression_component("2");
     a.value.components[0] = Expression_component("300");
     check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
 
+    mdarray<int64_t> check_val;
+    check_val.set_1d_slice({0,0}, {100,200,300});
+    auto values = result.evaluate(false);
+    ASSERT_TRUE(values.has_value());
+    EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
+    auto result_value = std::get<mdarray<int64_t>>(values.value());
+    EXPECT_EQ(result_value, check_val);
 }
 
 
 
 TEST(function_processing, simple_loop_function) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            N_CORES = 3
+        )();
+
+            function logic [31:0] CTRL_ADDR_CALC();
+                for(int i = 0; i<3; i++)begin
+                    CTRL_ADDR_CALC[i] = 100*i;
+                end
+            endfunction
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    auto functions = resource.get_functions();
+
+    EXPECT_EQ(functions.size(), 1);
+    EXPECT_TRUE(functions.contains("CTRL_ADDR_CALC"));
+    auto result = functions["CTRL_ADDR_CALC"];
+
+    HDL_function check_f;
+    check_f.set_name("CTRL_ADDR_CALC");
+    auto metadata = HDL_loop_metadata();
+
+    HDL_parameter p;
+    p.set_name("i");
+    p.add_component(Expression_component("0"));
+    p.set_type(HDL_parameter::expression_parameter);
+    metadata.set_init(p);
+    metadata.set_end_c({
+        Expression_component("i"),
+        Expression_component("<"),
+        Expression_component("3")
+        });
+
+    metadata.set_iter({
+        Expression_component("i"),
+        Expression_component("+"),
+        Expression_component(1)});
+
+    assignment a = {
+        "CTRL_ADDR_CALC",
+        Expression({Expression_component("i")}),
+        {Expression_component("100"), Expression_component("*"), Expression_component("i")}
+    };
+
+    metadata.add_assignment(a);
+    check_f.add_loop_metadata(metadata);
+     EXPECT_EQ(check_f,result);
+
+    mdarray<int64_t> check_val;
+    check_val.set_1d_slice({0,0}, {0, 100,200});
+    auto values = result.evaluate(false);
+    ASSERT_TRUE(values.has_value());
+    EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
+    auto result_value = std::get<mdarray<int64_t>>(values.value());
+    EXPECT_EQ(result_value, check_val);
+}
+
+
+
+
+TEST(function_processing, parametric_loop_function) {
     std::string test_pattern = R"(
         module test_mod #(
             N_CORES = 3
@@ -109,16 +217,22 @@ TEST(function_processing, simple_loop_function) {
 
     assignment a = {
         "CTRL_ADDR_CALC",
-        {Expression_component("i")},
+        Expression({Expression_component("i")}),
         {Expression_component("100"), Expression_component("*"), Expression_component("i")}
     };
 
     metadata.add_assignment(a);
     check_f.add_loop_metadata(metadata);
     EXPECT_EQ(check_f,result);
+
+    mdarray<int64_t> check_val;
+    check_val.set_1d_slice({0,0}, {100,200,300});
+    auto values = result.evaluate(false);
+    ASSERT_TRUE(values.has_value());
+    EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
+    auto result_value = std::get<mdarray<int64_t>>(values.value());
+    EXPECT_EQ(result_value, check_val);
 }
-
-
 
 TEST(function_processing, complex_loop_function) {
     std::string test_pattern = R"(
@@ -171,7 +285,7 @@ TEST(function_processing, complex_loop_function) {
 
     assignment a = {
         "CTRL_ADDR_CALC",
-        {Expression_component("i")},
+        Expression({Expression_component("i")}),
         {Expression_component("100"), Expression_component("*"), Expression_component("i")}
     };
 
@@ -179,21 +293,29 @@ TEST(function_processing, complex_loop_function) {
     check_f.add_loop_metadata(metadata);
     a = {
         "CTRL_ADDR_CALC",
-        {Expression_component("0")},
+        Expression({Expression_component("0")}),
         {Expression_component("44")}
     };
     check_f.add_assignment(a);
     a = {
         "CTRL_ADDR_CALC",
-        {Expression_component("4")},
+        Expression({Expression_component("4")}),
         {Expression_component("667")}
     };
     check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
+
+    mdarray<int64_t> check_val;
+    check_val.set_1d_slice({0,0}, {100,200,300});
+    auto values = result.evaluate(false);
+    ASSERT_TRUE(values.has_value());
+    EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
+    auto result_value = std::get<mdarray<int64_t>>(values.value());
+    EXPECT_EQ(result_value, check_val);
 }
 
 
-TEST(function_processing, parametrized_loop_function) {
+TEST(function_processing, parametrized_function) {
     std::string test_pattern = R"(
         module test_mod #(
             N_CORES = 1
@@ -221,17 +343,25 @@ TEST(function_processing, parametrized_loop_function) {
 
     assignment a = {
         "CTRL_ADDR_CALC",
-        {Expression_component("0")},
+        Expression({Expression_component("0")}),
         {Expression_component("44")}
     };
     check_f.add_assignment(a);
     a = {
         "CTRL_ADDR_CALC",
-        {Expression_component("N_CORES")},
+        Expression({Expression_component("N_CORES")}),
         {Expression_component("33")}
     };
     check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
+
+    mdarray<int64_t> check_val;
+    check_val.set_1d_slice({0,0}, {100,200,300});
+    auto values = result.evaluate(false);
+    ASSERT_TRUE(values.has_value());
+    EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
+    auto result_value = std::get<mdarray<int64_t>>(values.value());
+    EXPECT_EQ(result_value, check_val);
 }
 
 
@@ -264,14 +394,21 @@ TEST(function_processing, package_assignment) {
 
     assignment a = {
         "CTRL_ADDR_CALC",
-        {Expression_component("0")},
+        Expression({Expression_component("0")}),
         {Expression_component("bus_base")}
     };
     a.value.components[0].set_package_prefix("hil_address_space");
     check_f.add_assignment(a);
 
-
     EXPECT_EQ(check_f,result);
+
+    mdarray<int64_t> check_val;
+    check_val.set_1d_slice({0,0}, {100,200,300});
+    auto values = result.evaluate(false);
+    ASSERT_TRUE(values.has_value());
+    EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
+    auto result_value = std::get<mdarray<int64_t>>(values.value());
+    EXPECT_EQ(result_value, check_val);
 }
 
 

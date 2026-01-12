@@ -23,20 +23,7 @@ std::vector<int64_t> loop_solver::solve_loop(std::shared_ptr<HDL_instance_AST> &
         spdlog::warn("Nested loops are not supported by parameter analysis\n In HDL instance: " + node->get_name() + " of type: " + node->get_type() + " is in a nested loop");
         return {};
     }
-    auto l = node->get_inner_loop();
-    std::vector<int64_t> ret;
-
-    auto loop_variable = get_init_variable(l);
-
-
-    while(!is_loop_done(loop_variable, l.get_end_c())){
-        ret.push_back(loop_variable->get_numeric_value());
-
-       update_loop(l.get_iter(), loop_variable);
-
-    }
-
-    return ret;
+   return solve_loop(node->get_inner_loop());
 }
 
 bool loop_solver::is_loop_done(std::shared_ptr<HDL_parameter> &lv, Expression end_cond) {
@@ -69,4 +56,21 @@ std::shared_ptr<HDL_parameter> loop_solver::update_loop( Expression e, std::shar
 
     loop_var->set_value(std::get<int64_t>(res.value()));
     return loop_var;
+}
+
+std::vector<int64_t> loop_solver::solve_loop(const HDL_loop_metadata &loop) {
+
+    std::vector<int64_t> ret;
+
+    auto loop_variable = get_init_variable(loop);
+
+
+    while(!is_loop_done(loop_variable, loop.get_end_c())){
+        ret.push_back(loop_variable->get_numeric_value());
+
+        update_loop(loop.get_iter(), loop_variable);
+
+    }
+
+    return ret;
 }

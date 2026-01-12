@@ -18,6 +18,9 @@
 
 #include "parameters/HDL_parameter.hpp"
 
+#include <optional>
+#include <cereal/types/optional.hpp>
+
 struct assignment {
     friend bool operator==(const assignment &lhs, const assignment &rhs) {
         return lhs.name == rhs.name
@@ -34,7 +37,7 @@ struct assignment {
         ar(name, index, value);
     }
     std::string name;
-    Expression index;
+    std::optional<Expression> index;
     Expression value;
 };
 

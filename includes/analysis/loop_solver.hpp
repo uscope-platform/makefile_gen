@@ -27,14 +27,11 @@ class loop_solver {
 public:
     loop_solver() = default;
     static std::vector<int64_t> solve_loop(std::shared_ptr<HDL_instance_AST> &node, HDL_Resource &spec);
-    void set_trace_prefix(const std::string &tp) {trace_prefix = tp;}
+    static std::vector<int64_t> solve_loop(const HDL_loop_metadata &loop);
 private:
     static std::shared_ptr<HDL_parameter> get_init_variable(const HDL_loop_metadata &l);
     static std::shared_ptr<HDL_parameter> update_loop(const Expression e, std::shared_ptr<HDL_parameter> loop_var);
     static bool is_loop_done(std::shared_ptr<HDL_parameter> &lv, Expression end_cond);
-    std::string trace_prefix = "";
-    Parameters_map parent_parameters;
-    std::shared_ptr<data_store> d_store;
 };
 
 

@@ -2005,8 +2005,11 @@ TEST(parameter_extraction, simple_function_parameter) {
         module test_mod #(
         )();
 
-            parameter [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
+            function logic [ADDR_WIDTH-1:0] CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC = 100;
+            endfunction
 
+            parameter [ADDR_WIDTH-1:0] TEST_PARAM = CTRL_ADDR_CALC();
         endmodule
     )";
 
@@ -2015,15 +2018,16 @@ TEST(parameter_extraction, simple_function_parameter) {
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
 
-    auto param = resource.get_parameters().get("AXI_ADDRESSES");
+    auto param = resource.get_parameters().get("TEST_PARAM");
 
     HDL_parameter p;
-    p.set_name("AXI_ADDRESSES");
+    p.set_name("TEST_PARAM");
     p.set_type(HDL_parameter::function_parameter);
     p.add_component(Expression_component("CTRL_ADDR_CALC"));
 
     ASSERT_EQ(p, *param);
 }
+
 
 /**
 

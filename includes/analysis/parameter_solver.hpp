@@ -19,6 +19,7 @@
 
 #include "analysis/passes/pass_base.hpp"
 #include "data_model/HDL/HDL_Resource.hpp"
+#include "data_model/HDL/parameters/HDL_function.hpp"
 #include "data_model/HDL/parameters/Expression_evaluator.hpp"
 #include "data_model/data_store.hpp"
 
@@ -31,7 +32,7 @@ struct work_order {
 
 class parameter_solver {
 public:
-    static std::map<std::string, resolved_parameter> process_parameters(const Parameters_map &map);
+    static std::map<std::string, resolved_parameter> process_parameters(const Parameters_map &map, std::unordered_map<std::string, HDL_function> function_defs);
     static void update_parameters_map(std::map<std::string, resolved_parameter> parameters, std::shared_ptr<HDL_instance_AST> node,const std::shared_ptr<data_store> &d_store);
     static std::map<std::string, resolved_parameter> override_parameters(work_order &work, const std::shared_ptr<data_store> &d_store);
 

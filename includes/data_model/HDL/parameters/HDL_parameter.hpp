@@ -48,8 +48,9 @@ public:
     bool propagate_constant(const std::string& name, const resolved_parameter &constant_value);
     explicit operator std::string();
 
-    bool is_array() const {return i_l.is_array();};
-    bool is_packed_array() {return i_l.is_packed();};
+    bool is_function() const {return type == function_parameter;}
+    bool is_array() const {return i_l.is_array();}
+    bool is_packed_array() {return i_l.is_packed();}
 
     std::string get_name() const {return name;};
 
