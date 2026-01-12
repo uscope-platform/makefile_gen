@@ -463,6 +463,54 @@ TEST(parameter_extraction, array_parameter) {
     }
 }
 
+TEST(parameter_extraction, integer_localparams) {
+    std::string test_pattern = R"(
+        module test_mod #(
+        )();
+            localparam serial_msb_out_first = 0, serial_lsb_out_first = 1;
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("serial_msb_out_first");
+    p->set_expression({Expression_component("0")});
+
+    check_params.insert(p);
+
+
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("serial_lsb_out_first");
+    p->set_expression({Expression_component("1")});
+
+    check_params.insert(p);
+
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"serial_msb_out_first", 0},
+        {"serial_lsb_out_first", 1},
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
 
 TEST(parameter_extraction, simple_array_propagation) {
     std::string test_pattern = R"(
