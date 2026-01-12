@@ -407,7 +407,7 @@ TEST(function_processing, package_assignment) {
     check_val.set_1d_slice({0,0}, {100,200,300});
     auto values = result.evaluate(false);
     ASSERT_TRUE(values.has_value());
-    EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
+    ASSERT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
     auto result_value = std::get<mdarray<int64_t>>(values.value());
     EXPECT_EQ(result_value, check_val);
 }
