@@ -34,6 +34,7 @@ public:
     static std::map<std::string, resolved_parameter> process_parameters(const Parameters_map &map);
     static void update_parameters_map(std::map<std::string, resolved_parameter> parameters, std::shared_ptr<HDL_instance_AST> node,const std::shared_ptr<data_store> &d_store);
     static std::map<std::string, resolved_parameter> override_parameters(work_order &work, const std::shared_ptr<data_store> &d_store);
+
 };
 
 

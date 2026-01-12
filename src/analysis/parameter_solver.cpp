@@ -105,6 +105,7 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
     auto node_parameters = node_spec.get_parameters();
 
     std::map<std::string, resolved_parameter> solved_parameters;
+    // Override default parameters if necessary
 
     if(node_overrides.empty()) {
         solved_parameters = node_defaults;
@@ -137,6 +138,15 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
         }
     }
 
+    bool stop = work.node->get_type() == "SpiRegister";
+    // add missing (defaulted) parameters to working instance'
+    auto work_parameters = work.node->get_parameters();
+    for(auto &param:node_spec.get_parameters()) {
+        if(!work_parameters.contains(param->get_name())) {
+            work.node->add_parameter(param);
+        }
+    }
+    work.node->set_parameters(work_parameters);
     update_parameters_map(solved_parameters, work.node, d_store);
     return node_defaults;
 }

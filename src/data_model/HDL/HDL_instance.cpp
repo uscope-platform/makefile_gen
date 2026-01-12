@@ -99,7 +99,9 @@ nlohmann::json HDL_instance::dump() {
 
     std::map<std::string, nlohmann::json> params_vect;
     for(auto &param:parameters){
-        params_vect.insert({param->get_name(), param->dump()});
+        auto n = param->get_name();
+        auto value = param->dump();
+        params_vect.insert({n, value});
     }
     ret["parameters"] = params_vect;
 

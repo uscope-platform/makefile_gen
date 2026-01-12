@@ -67,11 +67,13 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
                 spdlog::trace("Processing dependency {} in module {}",working_instance->get_name(), type);
                 auto current_param_values = parameter_solver::override_parameters(wo, d_store);
 
+                bool stop2 = working_instance->get_type() == "SpiRegister";
                 for (auto &dep: res.get_dependencies()) {
 
                     auto child = std::make_shared<HDL_instance_AST>(dep);
                     child->set_parent(working_instance);
 
+                    bool stop = child->get_type() == "SpiRegister";
                     // The loop structure is attached to the looped instances, that need to be repeated,
                     // But the parent parameters only need to be propagated in its expressions
                     update_loop_constants(child, current_param_values);
@@ -81,16 +83,22 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
                             auto new_child = std::make_shared<HDL_instance_AST>(*child);
                             auto specialized_child = specialize_instance(*new_child, idx, child->get_inner_loop().get_init().get_name());
                             working_instance->add_child(specialized_child);
+                            working_stack.push({
+                                specialized_child,
+                                current_param_values,
+                                wo.path + "." + working_instance->get_name()
+                            });
                         }
                     } else {
                         working_instance->add_child(child);
+                        working_stack.push({
+                            child,
+                            current_param_values,
+                            wo.path + "." + working_instance->get_name()
+                        });
                     }
 
-                    working_stack.push({
-                                    child,
-                                    current_param_values,
-                                    wo.path + "." + working_instance->get_name()
-                                });
+
                 }
             }
         }

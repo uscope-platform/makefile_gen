@@ -165,7 +165,11 @@ nlohmann::json HDL_parameter::dump() {
     ret["scope"] = scope;
     ret["type"] = parameter_type_to_string(type);
     if(type == string_parameter){
-        ret["value"] = std::get<std::vector<std::string>>(value);
+        std::vector<std::string> values_s;
+        for(auto s:std::get<std::vector<std::string>>(value)) {
+            values_s.push_back(std::regex_replace(s, std::regex(R"ctrl(^"(.*)"$)ctrl"), "$1"));
+        }
+        ret["value"] = values_s;
     } else if(type == numeric_parameter){
 
         ret["value"]= std::vector<int64_t>({std::get<mdarray<int64_t>>(value).get_scalar()});
