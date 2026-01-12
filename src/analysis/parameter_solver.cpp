@@ -137,7 +137,7 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
         for(auto &param:node_overrides) {
             auto deps = param->get_dependencies();
             for(auto &dep:deps) {
-                if(work.parent_parameters.contains(dep)) {\
+                 if(work.parent_parameters.contains(dep)) {
                     param->propagate_constant(dep, work.parent_parameters[dep]);
                     to_solve.insert(param);
                 } else {
