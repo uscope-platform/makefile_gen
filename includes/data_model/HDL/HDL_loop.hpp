@@ -85,10 +85,14 @@ public:
         return *this;
     }
 
-    void propagate_constant(const std::string &name, const resolved_parameter &value) {
-        init.propagate_constant(name, value);
-        end_c.propagate_constant(name, value);
-        iter.propagate_constant(name, value);
+    bool propagate_constant(const std::string &name, const resolved_parameter &value) {
+        bool retval = true;
+
+        retval &= init.propagate_constant(name, value);
+        retval &= end_c.propagate_constant(name, value);
+        retval &= iter.propagate_constant(name, value);
+        for(auto &a:assignments) retval &= a.value.propagate_constant(name, value);
+        return retval;
     }
 
     void lock() {locked = true;}

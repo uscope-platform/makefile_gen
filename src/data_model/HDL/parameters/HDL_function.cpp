@@ -72,6 +72,11 @@ std::set<std::string> HDL_function::get_dependencies() const {
 
 bool HDL_function::propagate_constant(const std::string &name, const resolved_parameter &value) {
     bool retval = true;
+    for(auto &a:assignments) {
+        retval &= a.value.propagate_constant(name, value);
+        if(a.index.has_value()) retval &= a.index.value().propagate_constant(name, value);
+    }
+    retval &= loop_metadata.propagate_constant(name, value);
     return retval;
 }
 
