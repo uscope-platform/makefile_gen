@@ -95,6 +95,7 @@ std::optional<resolved_parameter> HDL_function::evaluate_vector() {
     for(auto &a:assignments) {
         auto idx = a.index.value().evaluate(false);
         if(!idx.has_value()) return std::nullopt;
+        if(!std::holds_alternative<int64_t>(idx.value())) return std::nullopt;
         auto idx_val = std::get<int64_t>(idx.value());
         auto value = a.value.evaluate(false);
         if(!value.has_value()) return std::nullopt;

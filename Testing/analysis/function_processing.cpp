@@ -356,7 +356,8 @@ TEST(function_processing, parametrized_function) {
     EXPECT_EQ(check_f,result);
 
     mdarray<int64_t> check_val;
-    check_val.set_1d_slice({0,0}, {100,200,300});
+    check_val.set_1d_slice({0,0}, {44, 33});
+    result.propagate_constant("N_CORES", 1);
     auto values = result.evaluate(false);
     ASSERT_TRUE(values.has_value());
     EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
