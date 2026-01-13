@@ -1910,6 +1910,96 @@ TEST(parameter_extraction, array_initialization_default) {
     }
 }
 
+
+
+TEST(parameter_extraction, simple_function_parameter) {
+    std::string test_pattern = R"(
+
+
+        module test_mod #(
+        )();
+
+            function logic [ADDR_WIDTH-1:0] CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC = 100;
+            endfunction
+
+            parameter [ADDR_WIDTH-1:0] TEST_PARAM = CTRL_ADDR_CALC();
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    auto param = resource.get_parameters().get("TEST_PARAM");
+
+    HDL_parameter p;
+    p.set_name("TEST_PARAM");
+    p.set_type(HDL_parameter::function_parameter);
+    p.add_component(Expression_component("CTRL_ADDR_CALC", Expression_component::identifier));
+
+    ASSERT_EQ(p, *param);
+
+    auto defaults = resource.get_default_parameters();
+
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"TEST_PARAM", 100}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+
+
+TEST(parameter_extraction, loop_function_parameter) {
+    std::string test_pattern = R"(
+
+
+        module test_mod #(
+        )();
+
+            function logic [31:0] CTRL_ADDR_CALC();
+                for(int i = 0; i<3; i++)begin
+                    CTRL_ADDR_CALC[i] = 100*i;
+                end
+            endfunction
+
+            parameter [ADDR_WIDTH-1:0] TEST_PARAM = CTRL_ADDR_CALC();
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    auto param = resource.get_parameters().get("TEST_PARAM");
+
+    HDL_parameter p;
+    p.set_name("TEST_PARAM");
+    p.set_type(HDL_parameter::function_parameter);
+    p.add_component(Expression_component("CTRL_ADDR_CALC", Expression_component::identifier));
+
+    ASSERT_EQ(p, *param);
+
+    auto defaults = resource.get_default_parameters();
+
+    mdarray<int64_t> av;
+    av.set_1d_slice({0, 0}, {0, 100, 200});
+
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"TEST_PARAM", av}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+
 TEST(parameter_extraction, unrelated_wire_dependency_conflict) {
     std::string test_pattern = R"(
     module test_mod #(
@@ -2034,35 +2124,6 @@ TEST(parameter_extraction, generate_for) {
 }
 
 
-TEST(parameter_extraction, simple_function_parameter) {
-    std::string test_pattern = R"(
-
-
-        module test_mod #(
-        )();
-
-            function logic [ADDR_WIDTH-1:0] CTRL_ADDR_CALC();
-                CTRL_ADDR_CALC = 100;
-            endfunction
-
-            parameter [ADDR_WIDTH-1:0] TEST_PARAM = CTRL_ADDR_CALC();
-        endmodule
-    )";
-
-
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
-    auto resource = analyzer.analyze()[0];
-
-    auto param = resource.get_parameters().get("TEST_PARAM");
-
-    HDL_parameter p;
-    p.set_name("TEST_PARAM");
-    p.set_type(HDL_parameter::function_parameter);
-    p.add_component(Expression_component("CTRL_ADDR_CALC", Expression_component::identifier));
-
-    ASSERT_EQ(p, *param);
-}
 
 
 /**
