@@ -62,15 +62,23 @@ std::map<std::string, resolved_parameter>   parameter_solver::process_parameters
                 }
             }
 
-            for (auto &param: solved_parameters) {
+            for (auto &[param_name, param_value]: solved_parameters) {
                 bool propagation_complete = true;
                 for (auto &dep: dependencies_map) {
-                    if (dep.second.contains(param.first)) {
-                        propagation_complete &= map.get(dep.first)->propagate_constant(param.first, param.second);
-                        if (propagation_complete) dep.second.erase(param.first);
+                    if (dep.second.contains(param_name)) {
+                        auto target = map.get(dep.first);
+                        if(target->is_function()) {
+                            auto fcn_name = std::get<std::string>(target->get_i_l().evaluate().value());
+                            propagation_complete &= function_defs[fcn_name].propagate_constant(param_name, param_value);
+                            if (propagation_complete) dep.second.erase(param_name);
+                        } else {
+                            propagation_complete &= target->propagate_constant(param_name, param_value);
+                            if (propagation_complete) dep.second.erase(param_name);
+                        }
+
                     }
                 }
-                    dependencies_map.erase(param.first);
+                    dependencies_map.erase(param_name);
             }
             rounds_counter++;
         }
