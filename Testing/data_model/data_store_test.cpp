@@ -28,6 +28,7 @@ TEST( data_store_test , evict_constr) {
     std::string n = "test";
     Constraints test_item = store_1->get_constraint(n);
 
+    delete store_1;
     ASSERT_EQ(test_item, Constraints());
 
 }
@@ -43,6 +44,7 @@ TEST( data_store_test , evict_script) {
     std::string n = "test";
     Script test_item = store_1->get_script(n);
 
+    delete store_1;
     ASSERT_EQ(test_item.get_name(), "");
 
 }
@@ -58,6 +60,7 @@ TEST( data_store_test , evict_data_file) {
     std::string n = "test";
     DataFile test_item = store_1->get_data_file(n);
 
+    delete store_1;
     ASSERT_EQ(test_item, DataFile());
 
 }
@@ -73,6 +76,7 @@ TEST( data_store_test , evict_hdl_entity) {
     std::string n = "test";
     HDL_Resource test_item = store_1->get_HDL_resource(n);
 
+    delete store_1;
     ASSERT_EQ(test_item, HDL_Resource());
 
 }
@@ -88,6 +92,7 @@ TEST( data_store_test , evict_interface_entity) {
     std::string n = "test";
     HDL_Resource test_item = store_1->get_HDL_resource(n);
 
+    delete store_1;
     ASSERT_EQ(test_item, HDL_Resource());
 
 }
@@ -133,6 +138,7 @@ TEST( data_store_test , store_script_vect) {
     store->evict_script("test_1");
     store->evict_script("test_2");
 
+    delete store;
     ASSERT_EQ(test_vect[0], res_vect[0]);
     ASSERT_EQ(test_vect[1], res_vect[1]);
 }
@@ -154,6 +160,7 @@ TEST( data_store_test , store_data_file_vect) {
     store->evict_script("test_1");
     store->evict_script("test_2");
 
+    delete store;
     ASSERT_EQ(test_vect[0], res_vect[0]);
     ASSERT_EQ(test_vect[1], res_vect[1]);
 }
@@ -178,6 +185,7 @@ TEST( data_store_test , store_interface_vect) {
     store->evict_hdl_entity("test_1");
     store->evict_hdl_entity("test_2");
 
+    delete store;
     ASSERT_EQ(test_vect[0], res_vect[0]);
     ASSERT_EQ(test_vect[1], res_vect[1]);
 }
@@ -198,6 +206,7 @@ TEST( data_store_test , store_hdl_vect) {
     store->evict_hdl_entity("test_1");
     store->evict_hdl_entity("test_2");
 
+    delete store;
     ASSERT_EQ(test_vect[0], res_vect[0]);
     ASSERT_EQ(test_vect[1], res_vect[1]);
 }
@@ -218,6 +227,7 @@ TEST( data_store_test , store_const_vect) {
     store->evict_constraint("test_1");
     store->evict_constraint("test_2");
 
+    delete store;
     ASSERT_EQ(test_vect[0], res_vect[0]);
     ASSERT_EQ(test_vect[1], res_vect[1]);
 }

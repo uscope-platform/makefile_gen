@@ -69,7 +69,7 @@ void HDL_parameter::set_value(int64_t val) {
     locking_violation_check();
     type = numeric_parameter;
     if (!std::holds_alternative<mdarray<int64_t>>(value)) {
-        value = mdarray<int64_t>({1,1,1}, val);
+        value = mdarray({1,1,1}, val);
     } else {
         std::get<mdarray<int64_t>>(value).set_scalar(val);
     }

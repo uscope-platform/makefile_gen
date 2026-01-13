@@ -303,7 +303,7 @@ void Initialization_list::push_scalar_component(const Expression_component &comp
 
 mdarray<int64_t> Initialization_list::process_default_initialization() {
 
-    std::vector<int64_t> dimensions;
+    std::vector<uint64_t> dimensions;
     mdarray<int64_t> result;
 
     if(unpacked_dimensions.size()>3){
@@ -321,7 +321,7 @@ mdarray<int64_t> Initialization_list::process_default_initialization() {
     }
 
     while(dimensions.size()<3){
-        dimensions.insert(dimensions.begin(), 0);
+        dimensions.insert(dimensions.begin(), 1);
     }
 
     auto init_value = expression_leaves[0]->evaluate(false);

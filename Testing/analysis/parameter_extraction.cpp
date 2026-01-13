@@ -2006,12 +2006,13 @@ TEST(parameter_extraction, parametric_loop_function_parameter) {
 
 
         module test_mod #(
-            parameter N_CHAINS = 3
+            parameter N_CHAINS = 3,
+            parameter OFFSET = 100
         )();
 
             function logic [31:0] CTRL_ADDR_CALC();
                 for(int i = 0; i<N_CHAINS; i++)begin
-                    CTRL_ADDR_CALC[i] = 100*i;
+                    CTRL_ADDR_CALC[i] = OFFSET*i;
                 end
             endfunction
 

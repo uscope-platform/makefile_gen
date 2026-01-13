@@ -30,10 +30,12 @@ public:
     using md_3d_array = std::vector<md_2d_array> ;
 
     mdarray() = default;
-    mdarray(std::vector<int64_t> dimensions, T value){
+    mdarray(std::vector<uint64_t> dimensions, T value){
+        if(dimensions.size()<3) throw std::invalid_argument("Dimensions vector must have at least 3 elements");
+
         for(auto &item:dimensions){
             if(item == 0){
-                item = 1;
+                throw std::invalid_argument("Dimensions vector cannot contain 0 elements");
             }
         }
         md_1d_array l3(dimensions[2],value);

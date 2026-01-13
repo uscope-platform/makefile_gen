@@ -78,8 +78,9 @@ bool Expression_component::propagate_constant(const std::string &const_name, con
                 std::vector<int64_t> idx;
                 for (auto &i:array_index) {
                     auto eval_idx = i.evaluate(false);
-                    if (!std::holds_alternative<int64_t>(*eval_idx)) return false;
-                    idx.push_back(std::get<int64_t>(*eval_idx));
+                    if(!eval_idx.has_value()) return false;
+                    if (!std::holds_alternative<int64_t>(eval_idx.value())) return false;
+                    idx.push_back(std::get<int64_t>(eval_idx.value()));
                 }
                 if(std::holds_alternative<mdarray<int64_t>>(const_value)) {
                     auto values = std::get<mdarray<int64_t>>(const_value);
