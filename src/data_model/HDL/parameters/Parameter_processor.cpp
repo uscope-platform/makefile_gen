@@ -230,13 +230,13 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
                 if(parameter->get_type() == HDL_parameter::numeric_parameter){
                     auto value = parameter->get_numeric_value();
                     Expression e;
-                    e.emplace_back(std::to_string(value));
+                    e.emplace_back(value);
                     return_par->set_expression(e);
                     return_par->set_value(value);
                 } else {
                     auto value = parameter->get_string_value();
                     Expression e;
-                    e.emplace_back(value);
+                    e.emplace_back(value, Expression_component::get_type(value));
                     return_par->set_expression(e);
                     return_par->set_value(value);
                 }
@@ -281,13 +281,14 @@ int64_t Parameter_processor::process_expression(const Expression &expr, int64_t 
         } else if(i.is_string()) {
             auto component_string = std::get<std::string>(i.get_value());
             if(external_parameters->contains(component_string)) {
-                Expression_component e(external_parameters->get(std::get<std::string>(i.get_value()))->get_numeric_value());
+                int64_t val = external_parameters->get(std::get<std::string>(i.get_value()))->get_numeric_value();
+                Expression_component e(val, 64);
                 processed_rpn.emplace_back(e);
             } else if(completed_set->contains(component_string)) {
-                processed_rpn.emplace_back(completed_set->get(component_string)->get_numeric_value());
+                processed_rpn.emplace_back(completed_set->get(component_string)->get_numeric_value(), 64);
             } else if(!i.get_package_prefix().empty()){
                 int64_t val = get_package_parameter(i, nullptr);
-                processed_rpn.emplace_back(val);
+                processed_rpn.emplace_back(val, 64);
             } else {
                 throw Parameter_processor_Exception();
             }
@@ -319,7 +320,7 @@ int64_t Parameter_processor::process_expression(const Expression &expr, int64_t 
 
                 result = Expression_evaluator::evaluate_binary_expression(op_a, op_b, std::get<std::string>(i.get_value()));
             }
-            evaluator_stack.emplace(result);
+            evaluator_stack.emplace(result, 64);
         }
     }
     if(result_size != nullptr){
@@ -509,7 +510,7 @@ Expression_component Parameter_processor::process_array_access(Expression_compon
         auto mask = 0x1<<array_index_values[2];
         val = (p->get_numeric_value()&mask)>>array_index_values[2];
     }
-    return Expression_component(val);
+    return Expression_component(val, 64);
 }
 
 

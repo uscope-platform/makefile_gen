@@ -27,7 +27,7 @@ public:
     bool is_in_repetition() const {return is_active;}
 
     void add_component(const std::string &c);
-    void advance_phase() {phase = target;}
+    void advance_phase();
     HDL_replication get_repetition();
 private:
     enum  {

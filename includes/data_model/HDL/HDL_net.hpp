@@ -114,7 +114,7 @@ public:
     }
     void add_index_component(const std::string &ec) {
         locking_violation_check();
-        index.emplace_back(ec);
+        index.emplace_back(ec, Expression_component::get_type(ec));
     }
     void set_range(HDL_range r) {
         locking_violation_check();
@@ -122,11 +122,11 @@ public:
     }
     void add_relication_size(const std::string &ec) {
         locking_violation_check();
-        replication.size.emplace_back(ec);
+        replication.size.emplace_back(ec, Expression_component::get_type(ec));
     }
     void add_relication_target(const std::string &ec) {
         locking_violation_check();
-        replication.target.emplace_back(ec);
+        replication.target.emplace_back(ec, Expression_component::get_type(ec));
     }
     void set_replication(HDL_replication r) {
         locking_violation_check();

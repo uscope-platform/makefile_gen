@@ -45,7 +45,7 @@ TEST(function_processing, simple_function_scalar) {
     assignment a;
     a.name = "CTRL_ADDR_CALC";
     a.index = {};
-    a.value = {Expression_component("67")};
+    a.value = {Expression_component("67", Expression_component::number)};
     check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
 
@@ -83,14 +83,14 @@ TEST(function_processing, simple_function_array) {
     check_f.set_name("CTRL_ADDR_CALC");
     assignment a;
     a.name = "CTRL_ADDR_CALC";
-    a.index = {Expression_component("0")};
-    a.value = {Expression_component("100")};
+    a.index = {Expression_component("0", Expression_component::number)};
+    a.value = {Expression_component("100", Expression_component::number)};
     check_f.add_assignment(a);
-    a.index.value().components[0] = Expression_component("1");
-    a.value.components[0] = Expression_component("200");
+    a.index.value().components[0] = Expression_component("1", Expression_component::number);
+    a.value.components[0] = Expression_component("200", Expression_component::number);
     check_f.add_assignment(a);
-    a.index.value().components[0] = Expression_component("2");
-    a.value.components[0] = Expression_component("300");
+    a.index.value().components[0] = Expression_component("2", Expression_component::number);
+    a.value.components[0] = Expression_component("300", Expression_component::number);
     check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
 
@@ -135,24 +135,24 @@ TEST(function_processing, simple_loop_function) {
 
     HDL_parameter p;
     p.set_name("i");
-    p.add_component(Expression_component("0"));
+    p.add_component(Expression_component("0", Expression_component::number));
     p.set_type(HDL_parameter::expression_parameter);
     metadata.set_init(p);
     metadata.set_end_c({
-        Expression_component("i"),
-        Expression_component("<"),
-        Expression_component("3")
+        Expression_component("i", Expression_component::identifier),
+        Expression_component("<", Expression_component::operation),
+        Expression_component("3", Expression_component::number)
         });
 
     metadata.set_iter({
-        Expression_component("i"),
-        Expression_component("+"),
-        Expression_component(1)});
+        Expression_component("i", Expression_component::identifier),
+        Expression_component("+", Expression_component::operation),
+        Expression_component("1", Expression_component::number)});
 
     assignment a = {
         "CTRL_ADDR_CALC",
-        Expression({Expression_component("i")}),
-        {Expression_component("100"), Expression_component("*"), Expression_component("i")}
+        Expression({Expression_component("i", Expression_component::identifier)}),
+        {Expression_component("100", Expression_component::number), Expression_component("*", Expression_component::operation), Expression_component("i", Expression_component::identifier)}
     };
 
     metadata.add_assignment(a);
@@ -199,24 +199,24 @@ TEST(function_processing, parametric_loop_function) {
 
     HDL_parameter p;
     p.set_name("i");
-    p.add_component(Expression_component("0"));
+    p.add_component(Expression_component("0", Expression_component::number));
     p.set_type(HDL_parameter::expression_parameter);
     metadata.set_init(p);
     metadata.set_end_c({
-        Expression_component("i"),
-        Expression_component("<"),
-        Expression_component("N_CORES")
+        Expression_component("i", Expression_component::identifier),
+        Expression_component("<", Expression_component::operation),
+        Expression_component("N_CORES", Expression_component::identifier)
         });
 
     metadata.set_iter({
-        Expression_component("i"),
-        Expression_component("+"),
-        Expression_component(1)});
+        Expression_component("i", Expression_component::identifier),
+        Expression_component("+", Expression_component::operation),
+        Expression_component("1", Expression_component::number)});
 
     assignment a = {
         "CTRL_ADDR_CALC",
-        Expression({Expression_component("i")}),
-        {Expression_component("100"), Expression_component("*"), Expression_component("i")}
+        Expression({Expression_component("i", Expression_component::identifier)}),
+        {Expression_component("100", Expression_component::number), Expression_component("*", Expression_component::operation), Expression_component("i", Expression_component::identifier)}
     };
 
     metadata.add_assignment(a);
@@ -265,41 +265,41 @@ TEST(function_processing, complex_loop_function) {
 
     HDL_parameter p;
     p.set_name("i");
-    p.add_component(Expression_component("1"));
+    p.add_component(Expression_component("1", Expression_component::number));
     p.set_type(HDL_parameter::expression_parameter);
     metadata.set_init(p);
     metadata.set_end_c({
-                Expression_component("i"),
-               Expression_component("<"),
-               Expression_component("N_CORES"),
-               Expression_component("+"),
-               Expression_component("1")
+                Expression_component("i", Expression_component::identifier),
+               Expression_component("<", Expression_component::operation),
+               Expression_component("N_CORES", Expression_component::identifier),
+               Expression_component("+", Expression_component::operation),
+               Expression_component("1", Expression_component::number)
     });
 
     metadata.set_iter({
-            Expression_component("i"),
-            Expression_component("+"),
-            Expression_component(1)
+            Expression_component("i", Expression_component::identifier),
+            Expression_component("+", Expression_component::operation),
+            Expression_component("1", Expression_component::number)
         });
 
     assignment a = {
         "CTRL_ADDR_CALC",
-        Expression({Expression_component("i")}),
-        {Expression_component("100"), Expression_component("*"), Expression_component("i")}
+        Expression({Expression_component("i", Expression_component::identifier)}),
+        {Expression_component("100", Expression_component::number), Expression_component("*", Expression_component::operation), Expression_component("i", Expression_component::identifier)}
     };
 
     metadata.add_assignment(a);
     check_f.add_loop_metadata(metadata);
     a = {
         "CTRL_ADDR_CALC",
-        Expression({Expression_component("0")}),
-        {Expression_component("44")}
+        Expression({Expression_component("0", Expression_component::number)}),
+        {Expression_component("44", Expression_component::number)}
     };
     check_f.add_assignment(a);
     a = {
         "CTRL_ADDR_CALC",
-        Expression({Expression_component("4")}),
-        {Expression_component("667")}
+        Expression({Expression_component("4", Expression_component::number)}),
+        {Expression_component("667", Expression_component::number)}
     };
     check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
@@ -343,14 +343,14 @@ TEST(function_processing, parametrized_function) {
 
     assignment a = {
         "CTRL_ADDR_CALC",
-        Expression({Expression_component("0")}),
-        {Expression_component("44")}
+        Expression({Expression_component("0", Expression_component::number)}),
+        {Expression_component("44", Expression_component::number)}
     };
     check_f.add_assignment(a);
     a = {
         "CTRL_ADDR_CALC",
-        Expression({Expression_component("N_CORES")}),
-        {Expression_component("33")}
+        Expression({Expression_component("N_CORES", Expression_component::identifier)}),
+        {Expression_component("33", Expression_component::number)}
     };
     check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
@@ -395,8 +395,8 @@ TEST(function_processing, package_assignment) {
 
     assignment a = {
         "CTRL_ADDR_CALC",
-        Expression({Expression_component("0")}),
-        {Expression_component("bus_base")}
+        Expression({Expression_component("0", Expression_component::number)}),
+        {Expression_component("bus_base", Expression_component::identifier)}
     };
     a.value.components[0].set_package_prefix("hil_address_space");
     check_f.add_assignment(a);

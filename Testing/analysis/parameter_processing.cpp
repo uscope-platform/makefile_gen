@@ -55,7 +55,7 @@ Parameters_map produce_check_components(std::vector<param_check_t> &in){
             par->set_expression(*expr);
         }
         for(auto &cpt:vt.components){
-            par->add_component(Expression_component(cpt));
+            par->add_component(Expression_component(cpt, Expression_component::get_type(cpt)));
         }
         par->set_type(vt.type);
         if(vt.type == HDL_parameter::HDL_parameter::numeric_parameter){
@@ -167,7 +167,7 @@ TEST(parameter_processing, array_instance_parameter_override) {
     auto param = check_params.get("p1_t");
     auto ec = static_cast<Expression *>(param->get_expression().get());
     std::vector<Expression> index;
-    index.push_back({Expression_component("0")});
+    index.push_back({Expression_component("0", Expression_component::number)});
     ec->components[0].set_array_index(index);
     param->set_expression(*ec);
     check_params.insert(param);
@@ -175,14 +175,14 @@ TEST(parameter_processing, array_instance_parameter_override) {
      param = check_params.get("p2_t");
     ec =  static_cast<Expression *>(param->get_expression().get());
     index.clear();
-    index.push_back({{Expression_component("1")}});
+    index.push_back({{Expression_component("1", Expression_component::number)}});
     ec->components[0].set_array_index(index);
     param->set_expression(*ec);
     check_params.insert(param);
 
     auto par = std::make_shared<HDL_parameter>();
     par->set_name("param_2");
-    par->set_expression({Expression_component("override_array")});
+    par->set_expression({Expression_component("override_array", Expression_component::identifier)});
     mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {9,8});
     par->set_array_value(av);

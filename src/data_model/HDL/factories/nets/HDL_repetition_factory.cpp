@@ -24,10 +24,14 @@ void HDL_repetition_factory::stop_repetition() {
 
 void HDL_repetition_factory::add_component(const std::string &c) {
     if(phase == size) {
-        repetition.size.emplace_back(c);
+        repetition.size.emplace_back(c, Expression_component::get_type(c));
     } else {
-        repetition.target.emplace_back(c);
+        repetition.target.emplace_back(c,Expression_component::get_type(c));
     }
+}
+
+void HDL_repetition_factory::advance_phase() {
+    phase = target;
 }
 
 HDL_replication HDL_repetition_factory::get_repetition() {

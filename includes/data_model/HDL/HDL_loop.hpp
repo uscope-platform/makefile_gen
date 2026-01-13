@@ -146,11 +146,13 @@ private:
     std::vector<assignment> assignments;
 
     friend bool operator==(const HDL_loop_metadata &lhs, const HDL_loop_metadata &rhs) {
-        return lhs.locked == rhs.locked
-               && lhs.init == rhs.init
-               && lhs.end_c == rhs.end_c
-               && lhs.iter == rhs.iter
-               && lhs.assignments == rhs.assignments;
+        bool retval = true;
+        retval &= lhs.init == rhs.init;
+        retval &= lhs.end_c == rhs.end_c;
+        retval &= lhs.iter == rhs.iter;
+        retval &= lhs.assignments == rhs.assignments;
+        retval &= lhs.locked == rhs.locked;
+        return retval;
     }
 
     friend bool operator!=(const HDL_loop_metadata &lhs, const HDL_loop_metadata &rhs) {

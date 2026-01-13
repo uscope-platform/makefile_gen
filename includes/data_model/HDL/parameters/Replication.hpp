@@ -103,10 +103,10 @@ public:
         // 2. Replication isn't fully defined yet.
 
         const auto& rhs = static_cast<const Replication&>(other);
-
-        // Use the base operator== for the shared_ptr to handle the polymorphism
-        return repetition_size == rhs.repetition_size &&
-               *repeated_item == *rhs.repeated_item;
+        bool res = true;
+        res &= repetition_size == rhs.repetition_size;
+        res &= *repeated_item == *rhs.repeated_item;
+        return res;
     }
 private:
     Expression repetition_size;

@@ -22,6 +22,8 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
+#define EXPRESSION_WITH_TYPE(str) str, Expression_component::get_type(str)
+
 TEST( analysis_test , package) {
 
     sv_analyzer analyzer("check_files/test_package.sv");
@@ -34,44 +36,44 @@ TEST( analysis_test , package) {
 
     auto p = std::make_shared<HDL_parameter>();
     p->set_name("bus_base");
-    p->set_expression({Expression_component("32'h43c00000")});
+    p->set_expression({Expression_component(EXPRESSION_WITH_TYPE("32'h43c00000"))});
     p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("timebase");
-    p->set_expression({ Expression_component("bus_base")});
+    p->set_expression({ Expression_component(EXPRESSION_WITH_TYPE("bus_base"))});
     p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("gpio");
     p->set_expression({
-        Expression_component("timebase"), Expression_component("+"),
-        Expression_component("32'h1000"), Expression_component("*"),
-        Expression_component("2"), Expression_component("/"),
-        Expression_component("2"), Expression_component("+"),
-        Expression_component("1"),
+        Expression_component(EXPRESSION_WITH_TYPE("timebase")), Expression_component(EXPRESSION_WITH_TYPE("+")),
+        Expression_component(EXPRESSION_WITH_TYPE("32'h1000")), Expression_component(EXPRESSION_WITH_TYPE("*")),
+        Expression_component(EXPRESSION_WITH_TYPE("2")), Expression_component(EXPRESSION_WITH_TYPE("/")),
+        Expression_component(EXPRESSION_WITH_TYPE("2")), Expression_component(EXPRESSION_WITH_TYPE("+")),
+        Expression_component(EXPRESSION_WITH_TYPE("1"))
     });
     p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("scope_mux");
-    p->set_expression({ Expression_component("gpio")});
+    p->set_expression({ Expression_component(EXPRESSION_WITH_TYPE("gpio"))});
     p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("out_of_order");
-    p->set_expression({ Expression_component("scope_mux")});
+    p->set_expression({ Expression_component(EXPRESSION_WITH_TYPE("scope_mux"))});
     p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("modulo_parameter");
     p->set_expression({
-        Expression_component("3"),Expression_component("%"),Expression_component("2")
+        Expression_component(EXPRESSION_WITH_TYPE("3")),Expression_component(EXPRESSION_WITH_TYPE("%")),Expression_component(EXPRESSION_WITH_TYPE("2"))
     });
     p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
@@ -79,7 +81,7 @@ TEST( analysis_test , package) {
     p = std::make_shared<HDL_parameter>();
     p->set_name("subtraction_parameter");
     p->set_expression({
-        Expression_component("'o4"),Expression_component("-"),Expression_component("'b10")
+        Expression_component(EXPRESSION_WITH_TYPE("'o4")),Expression_component(EXPRESSION_WITH_TYPE("-")),Expression_component(EXPRESSION_WITH_TYPE("'b10"))
     });
     p->set_type(HDL_parameter::expression_parameter);
     check_map.insert(p);
@@ -101,7 +103,7 @@ TEST( analysis_test , sv_module) {
     d3.add_port_connection("syndrome", {HDL_net("data_out")});
     auto p = std::make_shared<HDL_parameter>();
     p->set_name("TEST_PARAM");
-    Expression_component e("param");
+    Expression_component e("param", Expression_component::identifier);
     e.set_package_prefix("test_package");
     p->set_expression({e});
     p->set_type(HDL_parameter::expression_parameter);
@@ -112,7 +114,7 @@ TEST( analysis_test , sv_module) {
     HDL_instance d0("if_array", "axi_lite", module);
     p = std::make_shared<HDL_parameter>();
     p->set_name("instance_array_qualifier");
-    p->set_expression({Expression_component("module_parameter_2"),Expression_component("+"),Expression_component("1")});
+    p->set_expression({Expression_component(EXPRESSION_WITH_TYPE("module_parameter_2")),Expression_component(EXPRESSION_WITH_TYPE("+")),Expression_component(EXPRESSION_WITH_TYPE("1"))});
     p->set_type(HDL_parameter::expression_parameter);
     d0.add_array_quantifier(p);
     std::vector<HDL_instance> deps = {d0, d1, d2, d3};
@@ -135,14 +137,14 @@ TEST( analysis_test , sv_module) {
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("module_parameter_1");
-    p->add_component(Expression_component("56"));
+    p->add_component(Expression_component(EXPRESSION_WITH_TYPE("56")));
     p->set_type(HDL_parameter::expression_parameter);
     check_res.add_parameter(p);
 
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("module_parameter_2");
-    p->add_component(Expression_component("74"));
+    p->add_component(Expression_component(EXPRESSION_WITH_TYPE("74")));
     p->set_type(HDL_parameter::expression_parameter);
     check_res.add_parameter(p);
     std::map<std::string, resolved_parameter> check_defaults;
@@ -225,7 +227,7 @@ TEST(analysis_test, interfaces_array) {
     auto array_qual = std::make_shared<HDL_parameter>();
     array_qual->set_name("instance_array_qualifier");
     array_qual->set_type(HDL_parameter::expression_parameter);
-    array_qual->add_component(Expression_component("3"));
+    array_qual->add_component(Expression_component(EXPRESSION_WITH_TYPE("3")));
     check_dependency.add_array_quantifier(array_qual);
     ASSERT_EQ(dep, check_dependency);
 }
@@ -255,8 +257,8 @@ TEST(analysis_test, parameter_array_assignment) {
 
     HDL_parameter reference_param;
     reference_param.set_name("TEST_PARAM");
-    Expression_component e("TEST_ARRAY");
-    e.add_array_index({Expression_component("2")});
+    Expression_component e("TEST_ARRAY", Expression_component::identifier);
+    e.add_array_index({Expression_component(EXPRESSION_WITH_TYPE("2"))});
     reference_param.set_expression({e});
     reference_param.set_type(HDL_parameter::expression_parameter);
 

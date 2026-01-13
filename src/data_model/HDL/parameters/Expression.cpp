@@ -122,7 +122,7 @@ std::optional<resolved_parameter> Expression::evaluate(bool pack_result) {
 
                 result = evaluate_binary_expression(op_a, op_b, std::get<std::string>(i.get_value()));
             }
-            evaluator_stack.emplace(result);
+            evaluator_stack.emplace(result, Expression_component::number);
         }
     }
 

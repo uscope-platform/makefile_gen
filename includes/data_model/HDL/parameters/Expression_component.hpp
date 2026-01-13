@@ -40,22 +40,34 @@ public:
 
     Expression_component();
     Expression_component( const Expression_component &c );
-    explicit Expression_component(const std::string &s);
-    explicit Expression_component(int64_t n);
+
+    enum component_type {
+        number,
+        string,
+        identifier,
+        function,
+        operation,
+        parenthesis
+    };
+
+
+    explicit Expression_component(const std::string &s,const component_type &t);
+    explicit Expression_component(int64_t n, int64_t b_s);
     std::set<std::string> get_dependencies()const;
     bool propagate_constant(const std::string &name, const resolved_parameter &value);
     bool is_subscripted() const {return !array_index.empty();}
     bool is_string() const;
-    bool is_numeric() const {return std::holds_alternative<int64_t>(value);}
     bool is_array() const {return std::holds_alternative<mdarray<int64_t>>(value);}
 
     bool is_function() const {
-        if (!std::holds_alternative<std::string>(value)) return false;
-        return functions_set.contains(std::get<std::string>(value));
+        return type == function;
     }
     bool is_operator() const {
-        if (!std::holds_alternative<std::string>(value)) return false;
-        return operators_set.contains(std::get<std::string>(value));
+        return type == operation;
+    }
+
+    bool is_numeric() const {
+        return type == number;
     }
 
     resolved_parameter get_value()const {return value;}
@@ -82,7 +94,7 @@ public:
     void add_array_index(const Expression &c);
     std::vector<Expression> get_array_index() {return array_index;};
 
-    const std::string print_index(const std::vector<Expression> &index);
+    std::string print_index(const std::vector<Expression> &index)const;
 
     int64_t get_binary_size() const{return binary_size;};
 
@@ -93,10 +105,13 @@ public:
 
     nlohmann::json dump();
 
+    static component_type get_type(const std::string &s);
 
 private:
-    void process_number();
-    bool test_parameter_type(const std::regex &r, const std::string &s);
+    static std::pair<int64_t, int64_t> process_number(const std::string &s);
+    static bool test_parameter_type(const std::regex &r, const std::string &s);
+
+    component_type type = number;
 
     resolved_parameter value;
 
@@ -110,18 +125,36 @@ private:
 
     std::vector<Expression> array_index;
 
+    static constexpr bool is_string_operator(std::string_view op) {
+        constexpr std::string_view operators[] = {
+            "!", "~", "*", "/", "%", "+", "-", "<<", ">>",
+            ">", ">=", "<", "<=", "==", "!="
+        };
 
-    std::set<std::string> operators_set = {
-            "!", "~", "*", "/", "%","+","-","<<",">>", ">", ">=", "<", "<=", "==", "!="
-    };
+        return std::ranges::any_of(operators, [op](std::string_view valid_op) {
+            return op == valid_op;
+        });
+    }
 
-    std::set<std::string> parenthesis_set = {
-        "(", ")", "[", "]", "{", "}"
-};
+    static constexpr bool is_string_parenthesis(std::string_view op) {
+        constexpr std::string_view operators[] = {
+            "(", ")", "[", "]", "{", "}"
+        };
 
-    std::set<std::string> functions_set = {
+        return std::ranges::any_of(operators, [op](std::string_view valid_op) {
+            return op == valid_op;
+        });
+    }
+
+    static constexpr bool is_string_function(std::string_view op) {
+        constexpr std::string_view operators[] = {
             "$clog2","$ceil", "$floor","$pow"
-    };
+        };
+
+        return std::ranges::any_of(operators, [op](std::string_view valid_op) {
+            return op == valid_op;
+        });
+    }
 
 
     std::unordered_map<std::string, operator_type_t> operators_types = {
@@ -172,6 +205,8 @@ private:
     std::set<std::string> right_associative_set = {
             "$clog2","$ceil", "$floor","$pow", "!", "~"
     };
+
+
 };
 
 #endif //MAKEFILEGEN_V2_EXPRESSION_COMPONENT_HPP
