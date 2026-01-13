@@ -21,7 +21,7 @@ std::string Expression::print() const {
     for(auto &item:components){
         if(item.is_numeric()){
             ret_val += std::to_string(std::get<int64_t>(item.get_value()));
-        } else if(item.is_string()){
+        } else if(item.is_identifier()){
             if(!item.get_package_prefix().empty()){
                 ret_val += item.get_package_prefix() + "::";
             }
@@ -209,7 +209,7 @@ std::set<std::string> Expression::get_dependencies()const {
 bool Expression::propagate_constant(const std::string &name, const resolved_parameter& param_value) {
     bool retval = true;
     for (auto & component : components) {
-        if (component.is_string()) {
+        if (component.is_identifier()) {
             retval &= component.propagate_constant(name, param_value);
         }
     }

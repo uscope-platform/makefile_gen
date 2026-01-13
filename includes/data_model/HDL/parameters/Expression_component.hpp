@@ -57,6 +57,7 @@ public:
     bool propagate_constant(const std::string &name, const resolved_parameter &value);
     bool is_subscripted() const {return !array_index.empty();}
     bool is_string() const;
+    bool is_identifier() const {return type == identifier;}
     bool is_array() const {return std::holds_alternative<mdarray<int64_t>>(value);}
 
     bool is_function() const {

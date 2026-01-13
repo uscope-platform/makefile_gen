@@ -52,7 +52,7 @@ Expression_component::Expression_component(int64_t n, int64_t b_s) {
 
 std::set<std::string> Expression_component::get_dependencies()const {
     std::set<std::string> result;
-    if (is_string()) result.insert(std::get<std::string>(value));
+    if (is_identifier()) result.insert(std::get<std::string>(value));
     for (auto &idx:array_index) {
         auto idx_deps = idx.get_dependencies();
         result.insert(idx_deps.begin(), idx_deps.end());
@@ -109,13 +109,7 @@ bool Expression_component::propagate_constant(const std::string &const_name, con
 }
 
 bool Expression_component::is_string() const {
-    if (!std::holds_alternative<std::string>(value)) return false;
-    auto is_paren = is_string_parenthesis(std::get<std::string>(value));
-    return !is_paren
-    && !is_function()
-    && !is_operator()
-    && std::get<std::string>(value) != "$repeat_init"
-    && std::get<std::string>(value) != ",";
+    return type == string;
 }
 
 

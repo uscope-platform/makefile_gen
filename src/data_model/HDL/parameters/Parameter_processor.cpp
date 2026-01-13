@@ -278,7 +278,7 @@ int64_t Parameter_processor::process_expression(const Expression &expr, int64_t 
 
         if(i.is_numeric() || i.is_operator() || i.is_function()){
             processed_rpn.push_back(i);
-        } else if(i.is_string()) {
+        } else if(i.is_identifier()) {
             auto component_string = std::get<std::string>(i.get_value());
             if(external_parameters->contains(component_string)) {
                 int64_t val = external_parameters->get(std::get<std::string>(i.get_value()))->get_numeric_value();

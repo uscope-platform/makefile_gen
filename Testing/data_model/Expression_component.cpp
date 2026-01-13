@@ -94,3 +94,21 @@ TEST(Expression_component, unsized_hexadecimal_sv_constant_parsing){
     ASSERT_EQ(ec.get_binary_size(), 16);
 }
 
+
+TEST(Expression_component, string){
+    Expression_component ec(EXPRESSION_WITH_TYPE("\"FALSE\""));
+
+    ASSERT_TRUE(ec.is_string());
+    ASSERT_FALSE(ec.is_identifier());
+    ASSERT_EQ(std::get<std::string>(ec.get_value()), "\"FALSE\"");
+}
+
+
+TEST(Expression_component, identifier){
+    Expression_component ec(EXPRESSION_WITH_TYPE("FALSE"));
+
+    ASSERT_TRUE(ec.is_identifier());
+    ASSERT_FALSE(ec.is_string());
+    ASSERT_EQ(std::get<std::string>(ec.get_value()), "FALSE");
+}
+
