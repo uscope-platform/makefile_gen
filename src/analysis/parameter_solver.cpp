@@ -121,33 +121,45 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
                 }
             }
         }
+        auto deps_map = get_dependency_map(node_overrides, {});
 
-        for(auto &param:node_overrides) {
-            auto deps = param->get_dependencies();
-            for(auto &dep:deps) {
-                if(work.parent_parameters.contains(dep)) {
-                    param->propagate_constant(dep, work.parent_parameters[dep]);
-                    to_solve.insert(param);
-                } else {
-                    throw std::runtime_error("Parameter " + dep + " is not defined in the design");
+        uint64_t completed_params =  to_solve.size();
+        int solution_rounds = 0;
+        std::unordered_map<std::string, uint32_t> parameters_progress;
+        while(completed_params < node_overrides.size()) {
+            if(solution_rounds > 100) throw std::runtime_error("Exceded maximum number of iterations when solving a parameter override");
+            for(auto &param:node_overrides) {
+                auto deps = param->get_dependencies();
+                if(deps.empty()) {
+                    if(!to_solve.contains(param->get_name())) {
+                        completed_params++;
+                        to_solve.insert(param);
+                    }
+                }
+                for(auto &dep:deps) {
+                    if(work.parent_parameters.contains(dep)) {
+                        if(param->propagate_constant(dep, work.parent_parameters[dep])) {
+                            parameters_progress[param->get_name()]++;
+                            if(parameters_progress[param->get_name()]== deps_map[param->get_name()].size()) {
+                                ++completed_params;
+                                to_solve.insert(param);
+                            }
+                        }
+                    } else {
+                        throw std::runtime_error("Parameter " + dep + " is not defined in the design");
+                    }
                 }
             }
-            to_solve.insert(param);
+            ++solution_rounds;
         }
+
         solved_parameters = process_parameters(to_solve,{});
         for(auto &param:solved_parameters) {
             node_defaults[param.first] = param.second;
         }
     }
 
-    // add missing (defaulted) parameters to working instance'
-    auto work_parameters = work.node->get_parameters();
-    for(auto &param:node_spec.get_parameters()) {
-        if(!work_parameters.contains(param->get_name())) {
-            work.node->add_parameter(param);
-        }
-    }
-    work.node->set_parameters(work_parameters);
+
     update_parameters_map(solved_parameters, work.node, d_store);
     return node_defaults;
 }

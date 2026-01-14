@@ -63,28 +63,30 @@ std::set<std::string> Expression_component::get_dependencies()const {
 bool Expression_component::propagate_constant(const std::string &const_name, const resolved_parameter &const_value) {
     bool retval = true;
 
+    bool index_need_rewrite = false;
+    std::vector<int64_t> indices;
     for (auto &component:array_index) {
         retval &= component.propagate_constant(const_name, const_value);
         auto idx_val = component.evaluate(false);
         if (idx_val.has_value()) {
-            Expression new_exp;
-            new_exp.emplace_back(std::get<int64_t>(*idx_val));
-            component = new_exp;
+            index_need_rewrite = true;
+            if (!std::holds_alternative<int64_t>(idx_val.value())) return false;
+            indices.push_back(std::get<int64_t>(idx_val.value()));
         }
+    }
+    if(array_index.size() != indices.size()) return false;
+    if(index_need_rewrite) {
+        for(int i = 0; i<array_index.size(); i++) {
+            array_index[i] = {Expression_component(indices[i], 0)};
+        }
+        int i = 0;
     }
     if (std::holds_alternative<std::string>(value)) {
         if (std::get<std::string>(value) == const_name) {
             if (!array_index.empty()) {
-                std::vector<int64_t> idx;
-                for (auto &i:array_index) {
-                    auto eval_idx = i.evaluate(false);
-                    if(!eval_idx.has_value()) return false;
-                    if (!std::holds_alternative<int64_t>(eval_idx.value())) return false;
-                    idx.push_back(std::get<int64_t>(eval_idx.value()));
-                }
                 if(std::holds_alternative<mdarray<int64_t>>(const_value)) {
                     auto values = std::get<mdarray<int64_t>>(const_value);
-                    auto array_val = values.get_value(idx);
+                    auto array_val = values.get_value(indices);
                     if (array_val.has_value()) {
                         type = number;
                         value = array_val.value();
@@ -96,7 +98,7 @@ bool Expression_component::propagate_constant(const std::string &const_name, con
                 } else {
                     std::bitset<64> bits(std::get<int64_t>(const_value));
                     type = number;
-                    value = bits[idx[0]];
+                    value = bits[indices[0]];
                 }
 
             } else {

@@ -90,6 +90,7 @@ int64_t HDL_parameter::get_numeric_value() const {
 }
 
 bool HDL_parameter::propagate_constant(const std::string& constant_name, const resolved_parameter &constant_value) {
+    bool stop = name == "N_TRIGGER_REGISTERS" && constant_name == "TAP_ADDR_REG";
     return i_l.propagate_constant(constant_name, constant_value);
 }
 
