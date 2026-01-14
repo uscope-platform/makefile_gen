@@ -73,7 +73,6 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
                     auto child = std::make_shared<HDL_instance_AST>(dep);
                     child->set_parent(working_instance);
 
-                    bool stop = child->get_type() == "SpiRegister";
                     // The loop structure is attached to the looped instances, that need to be repeated,
                     // But the parent parameters only need to be propagated in its expressions
                     update_loop_constants(child, current_param_values);
@@ -118,6 +117,8 @@ void HDL_ast_builder_v2::update_loop_constants(std::shared_ptr<HDL_instance_AST>
 
 std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::specialize_instance(const HDL_instance_AST &i, int64_t idx, std::string idx_name) {
     HDL_instance_AST specialized_d = i;
+    auto specialized_parameters = specialized_d.get_parameters().clone();
+    specialized_d.set_parameters(specialized_parameters);
     specialized_d.set_repeated(true);
     specialized_d.set_repetition_idx(idx);
 
@@ -141,5 +142,8 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::specialize_instance(const 
         new_ports[port_name] = port_content;
     }
     specialized_d.set_ports(new_ports);
+    for(auto &p: specialized_d.get_parameters()) {
+        p->propagate_constant(idx_name, idx);
+    }
     return std::make_shared<HDL_instance_AST>(specialized_d);
 }
