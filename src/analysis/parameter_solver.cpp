@@ -106,7 +106,7 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
     auto node_defaults = node_spec.get_default_parameters();
     auto node_overrides = work.node->get_parameters();
     auto node_parameters = node_spec.get_parameters();
-
+    auto stop = work.node->get_name() == "CU"  && work.node->get_type() == "axil_simple_register_cu" && work.path == "TL.TL.chain.ControlUnit";
     std::map<std::string, resolved_parameter> solved_parameters;
     // Override default parameters if necessary
 
@@ -116,23 +116,25 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
         Parameters_map to_solve;
         for(const auto& override:node_overrides) {
             for(const auto &param: node_parameters) {
-                if(param->get_dependencies().contains(override->get_name())) {
+                auto deps = param->get_dependencies();
+                if(deps.contains(override->get_name()) && !node_overrides.contains(param->get_name())) {
                     to_solve.insert(param);
                 }
             }
         }
         auto deps_map = get_dependency_map(node_overrides, {});
 
-        uint64_t completed_params =  to_solve.size();
         int solution_rounds = 0;
         std::unordered_map<std::string, uint32_t> parameters_progress;
-        while(completed_params < node_overrides.size()) {
+        std::set<std::string> completed_parameters;
+        while(completed_parameters.size() != node_overrides.size()) {
             if(solution_rounds > 100) throw std::runtime_error("Exceded maximum number of iterations when solving a parameter override");
             for(auto &param:node_overrides) {
+                if(completed_parameters.contains(param->get_name())) continue;
                 auto deps = param->get_dependencies();
                 if(deps.empty()) {
                     if(!to_solve.contains(param->get_name())) {
-                        completed_params++;
+                        completed_parameters.insert(param->get_name());
                         to_solve.insert(param);
                     }
                 }
@@ -141,8 +143,8 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
                         if(param->propagate_constant(dep, work.parent_parameters[dep])) {
                             parameters_progress[param->get_name()]++;
                             if(parameters_progress[param->get_name()]== deps_map[param->get_name()].size()) {
-                                ++completed_params;
                                 to_solve.insert(param);
+                                completed_parameters.insert(param->get_name());
                             }
                         }
                     } else {
