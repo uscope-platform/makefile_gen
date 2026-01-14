@@ -240,7 +240,7 @@ std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Param
         }
     }
 
-    auto ret_val = std::vector<int64_t>(repetition_size, repetition_value);
+    auto ret_val = std::vector(repetition_size, repetition_value);
     return ret_val;
 }
 

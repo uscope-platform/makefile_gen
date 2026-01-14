@@ -277,7 +277,7 @@ TEST(parameter_processing, complex_for_array_parameter) {
             parameter  [31:0] TAP_ADDR_REG [2:0] = '{6,2,4};
 
             parameter  TEST_PARAM = 1;
-
+            genvar n;
             generate
                 for(n = 0; n<3; n=n+1)begin
                     dependency #(
