@@ -19,26 +19,7 @@ std::map<std::string, resolved_parameter>   parameter_solver::process_parameters
     auto map = map_in.clone();
 
     std::map<std::string, resolved_parameter> solved_parameters;
-    std::map<std::string, std::set<std::string>> dependencies_map;
-    for (auto &param: map) {
-        auto param_name = param->get_name();
-        dependencies_map[param_name] = {};
-        std::set<std::string> param_deps;
-        if(param->is_function()) {
-            auto fcn_name = std::get<std::string>(param->get_i_l().evaluate().value());
-            auto fcn = function_defs[fcn_name];
-            param_deps = fcn.get_dependencies();
-        } else {
-            param_deps = param->get_dependencies();
-        }
-        for (auto dep:param_deps) {
-            if (!map.contains(dep) && !param->is_array()) {
-                solved_parameters.insert({param_name, dep});
-            } else {
-                dependencies_map[param_name].insert(dep);
-            }
-        }
-    }
+    auto dependencies_map = get_dependency_map(map_in, function_defs);
 
 
         int rounds_counter = 0;
@@ -132,9 +113,8 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
     if(node_overrides.empty()) {
         solved_parameters = node_defaults;
     } else{
-
         Parameters_map to_solve;
-        for(const auto override:node_overrides) {
+        for(const auto& override:node_overrides) {
             for(const auto &param: node_parameters) {
                 if(param->get_dependencies().contains(override->get_name())) {
                     to_solve.insert(param);
@@ -145,7 +125,7 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
         for(auto &param:node_overrides) {
             auto deps = param->get_dependencies();
             for(auto &dep:deps) {
-                 if(work.parent_parameters.contains(dep)) {
+                if(work.parent_parameters.contains(dep)) {
                     param->propagate_constant(dep, work.parent_parameters[dep]);
                     to_solve.insert(param);
                 } else {
@@ -160,7 +140,6 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
         }
     }
 
-    bool stop = work.node->get_type() == "SpiRegister";
     // add missing (defaulted) parameters to working instance'
     auto work_parameters = work.node->get_parameters();
     for(auto &param:node_spec.get_parameters()) {
@@ -171,4 +150,25 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
     work.node->set_parameters(work_parameters);
     update_parameters_map(solved_parameters, work.node, d_store);
     return node_defaults;
+}
+
+std::map<std::string, std::set<std::string>> parameter_solver::get_dependency_map(const Parameters_map &map,
+    std::unordered_map<std::string, HDL_function> function_defs) {
+
+    std::map<std::string, std::set<std::string>> dependencies_map;
+    for (auto &param: map) {
+        auto param_name = param->get_name();
+        dependencies_map[param_name] = {};
+        std::set<std::string> param_deps;
+        if(param->is_function()) {
+            auto fcn_name = std::get<std::string>(param->get_i_l().evaluate().value());
+            auto fcn = function_defs[fcn_name];
+            auto deps = fcn.get_dependencies();
+            dependencies_map[param_name].insert(deps.begin(), deps.end());
+        } else {
+            auto deps = param->get_dependencies();
+            dependencies_map[param_name].insert(deps.begin(), deps.end());
+        }
+    }
+    return dependencies_map;
 }
