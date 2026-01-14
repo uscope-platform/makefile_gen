@@ -197,8 +197,8 @@ Expression Expression::clone()  const{
     return ret;
 }
 
-std::set<std::string> Expression::get_dependencies()const {
-    std::set<std::string> result;
+std::set<qualified_identifier> Expression::get_dependencies()const {
+    std::set<qualified_identifier> result;
     for (auto &comp:components) {
         auto deps = comp.get_dependencies();
         result.insert(deps.begin(), deps.end());

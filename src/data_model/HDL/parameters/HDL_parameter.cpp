@@ -155,7 +155,7 @@ std::string HDL_parameter::to_string() const {
     return result;
 }
 
-std::set<std::string> HDL_parameter::get_dependencies() {
+std::set<qualified_identifier> HDL_parameter::get_dependencies() {
     return i_l.get_dependencies();
 }
 

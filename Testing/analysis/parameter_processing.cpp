@@ -69,6 +69,56 @@ Parameters_map produce_check_components(std::vector<param_check_t> &in){
 }
 
 
+TEST(parameter_processing, package_parameters_use) {
+    std::string test_pattern = R"(
+
+        package test_package;
+            parameter bus_base = 67;
+        endpackage
+
+        module test_mod #(
+             parameter package_param = test_package::bus_base
+        )();
+
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto dependency_parameters = ast_v2->get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("package_param");
+    p->add_component(Expression_component(4, 0));
+    p->set_value(4);
+
+    check_params.insert(p);
+
+    ASSERT_EQ(check_params.size(), dependency_parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(dependency_parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *dependency_parameters.get(item->get_name()));
+    }
+
+}
+
+
 TEST(parameter_processing, array_instance_parameter_override) {
     std::string test_pattern = R"(
         module dependency #(
@@ -641,14 +691,10 @@ TEST(parameter_processing, parameter_with_for_loop) {
         param_1.push_back(p.get("DMA_BASE_ADDRESS")->get_numeric_value());
         p1_t.push_back(p.get("p1_t")->get_numeric_value());
     }
-    //EXPECTED VALUES:
-    // AXI_ADDRESSES = 100 130 356 62
-    // DMA_BASE_ADDRESS 62, 356
-    // DMA_BASE_ADDRESS p1_T = 64, 358
 
-    std::vector<uint32_t> expected_param_1 = {100, 130};
+    std::vector<uint32_t> expected_param_1 = {62, 356};
     EXPECT_EQ(param_1, expected_param_1);
-    std::vector<uint32_t> expected_p1_t = {102, 132};
+    std::vector<uint32_t> expected_p1_t = {64, 358};
     EXPECT_EQ(p1_t, expected_p1_t);
 
 }

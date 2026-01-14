@@ -38,7 +38,7 @@ public:
     HDL_loop_metadata get_loop()const{ return loop_metadata;};
     bool operator==(const HDL_function &rhs) const;
 
-    std::set<std::string> get_dependencies()const;
+    std::set<qualified_identifier> get_dependencies()const;
     bool propagate_constant(const std::string &name, const resolved_parameter &value);\
     std::optional<resolved_parameter> evaluate(bool pack_result);
 

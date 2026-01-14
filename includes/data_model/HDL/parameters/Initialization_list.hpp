@@ -85,7 +85,7 @@ public:
     mdarray<int64_t> process_default_initialization();
 
 
-    std::set<std::string> get_dependencies();
+    std::set<qualified_identifier> get_dependencies();
     void set_default() { default_initialization = true;};
 
     friend bool operator==(const Initialization_list&lhs, const Initialization_list&rhs);

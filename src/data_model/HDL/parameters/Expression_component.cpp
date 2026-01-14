@@ -50,9 +50,11 @@ Expression_component::Expression_component(int64_t n, int64_t b_s) {
     type = number;
 }
 
-std::set<std::string> Expression_component::get_dependencies()const {
-    std::set<std::string> result;
-    if (is_identifier()) result.insert(std::get<std::string>(value));
+std::set<qualified_identifier> Expression_component::get_dependencies()const {
+    std::set<qualified_identifier> result;
+    if (is_identifier()){
+        result.insert({package_prefix, std::get<std::string>(value)});
+    }
     for (const auto &idx:array_index) {
         auto idx_deps = idx.get_dependencies();
         result.insert(idx_deps.begin(), idx_deps.end());

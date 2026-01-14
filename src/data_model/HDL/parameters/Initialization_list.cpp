@@ -160,8 +160,8 @@ int64_t Initialization_list::pack_values(const std::pair<mdarray<int64_t>::md_1d
 }
 
 
-std::set<std::string> Initialization_list::get_dependencies() {
-    std::set<std::string> result;
+std::set<qualified_identifier> Initialization_list::get_dependencies() {
+    std::set<qualified_identifier> result;
     for (auto &dim:unpacked_dimensions) {
         auto deps = dim.first_bound.get_dependencies();
         result.insert(deps.begin(), deps.end());
@@ -176,7 +176,7 @@ std::set<std::string> Initialization_list::get_dependencies() {
         result.insert(deps.begin(), deps.end());
     }
     for (auto &expr:expression_leaves) {
-        std::set<std::string> deps = expr->get_dependencies();
+        std::set<qualified_identifier> deps = expr->get_dependencies();
         result.insert(deps.begin(), deps.end());
     }
     return result;

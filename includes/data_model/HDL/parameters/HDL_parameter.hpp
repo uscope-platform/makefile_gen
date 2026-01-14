@@ -101,7 +101,7 @@ public:
 
     friend void PrintTo(const HDL_parameter& point, std::ostream* os);
 
-    std::set<std::string> get_dependencies();
+    std::set<qualified_identifier> get_dependencies();
 
     void add_initialization_list(const Initialization_list &i){
         locking_violation_check();

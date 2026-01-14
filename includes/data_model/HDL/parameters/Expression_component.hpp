@@ -33,7 +33,22 @@ class Expression;
 
 using resolved_parameter = std::variant<int64_t, std::string, mdarray<int64_t>>;
 
+struct qualified_identifier {
+    std::string prefix;
+    std::string name;
 
+    friend bool operator==(const qualified_identifier &lhs, const qualified_identifier &rhs) {
+        return std::tie(lhs.prefix, lhs.name) == std::tie(rhs.prefix, rhs.name);
+    }
+
+    friend bool operator!=(const qualified_identifier &lhs, const qualified_identifier &rhs) {
+        return !(lhs == rhs);
+    }
+
+    bool operator<(const qualified_identifier& other) const {
+        return std::tie(prefix, name) < std::tie(other.prefix, other.name);
+    }
+};
 
 class Expression_component {
 public:
@@ -53,7 +68,7 @@ public:
 
     explicit Expression_component(const std::string &s,const component_type &t);
     explicit Expression_component(int64_t n, int64_t b_s);
-    std::set<std::string> get_dependencies()const;
+    std::set<qualified_identifier> get_dependencies()const;
     bool propagate_constant(const std::string &name, const resolved_parameter &value);
     bool is_subscripted() const {return !array_index.empty();}
     bool is_string() const {return type == string;}

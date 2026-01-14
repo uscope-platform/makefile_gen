@@ -28,7 +28,7 @@ public:
 
     virtual ~Parameter_value_base() = default;
 
-    virtual std::set<std::string> get_dependencies()const {return {};}
+    virtual std::set<qualified_identifier> get_dependencies()const {return {};}
     virtual bool propagate_constant(const std::string &name, const resolved_parameter &value) {return true;}
     virtual std::optional<resolved_parameter> evaluate(bool pack_result) {return std::nullopt;}
     virtual std::string print() const {return "";}

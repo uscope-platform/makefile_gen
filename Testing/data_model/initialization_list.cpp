@@ -423,8 +423,10 @@ TEST(Initialization_list, get_array_dependencies) {
     auto deps_b = params.get("FIXED_REGISTER_VALUES")->get_dependencies();
     auto deps_c = params.get("VARIABLE_INITIAL_VALUES")->get_dependencies();
 
-    EXPECT_EQ(deps_a, std::set<std::string>({"VARIABLE_INITIAL_VALUES", "N_REGISTERS", "FIXED_REGISTER_VALUES"}));
-    EXPECT_EQ(deps_b, std::set<std::string>({"SS_POLARITY_DEFAULT"}));
+    std::set<qualified_identifier> check_a = {{"","VARIABLE_INITIAL_VALUES"}, {"", "N_REGISTERS"}, {"", "FIXED_REGISTER_VALUES"}};
+    std::set<qualified_identifier> check_b = {{"", "SS_POLARITY_DEFAULT"}};
+    EXPECT_EQ(deps_a, check_a);
+    EXPECT_EQ(deps_b, check_b);
     EXPECT_TRUE(deps_c.empty());
 
 }

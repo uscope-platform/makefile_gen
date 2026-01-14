@@ -46,15 +46,15 @@ std::map<std::string, resolved_parameter>   parameter_solver::process_parameters
             for (auto &[param_name, param_value]: solved_parameters) {
                 bool propagation_complete = true;
                 for (auto &dep: dependencies_map) {
-                    if (dep.second.contains(param_name)) {
+                    if (dep.second.contains({"", param_name})) {
                         auto target = map.get(dep.first);
                         if(target->is_function()) {
                             auto fcn_name = std::get<std::string>(target->get_i_l().evaluate().value());
                             propagation_complete &= function_defs[fcn_name].propagate_constant(param_name, param_value);
-                            if (propagation_complete) dep.second.erase(param_name);
+                            if (propagation_complete) dep.second.erase({"", param_name});
                         } else {
                             propagation_complete &= target->propagate_constant(param_name, param_value);
-                            if (propagation_complete) dep.second.erase(param_name);
+                            if (propagation_complete) dep.second.erase({"", param_name});
                         }
 
                     }
@@ -106,10 +106,22 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
     auto node_defaults = node_spec.get_default_parameters();
     auto node_overrides = work.node->get_parameters();
     auto node_parameters = node_spec.get_parameters();
-    auto stop = work.node->get_name() == "CU"  && work.node->get_type() == "axil_simple_register_cu" && work.path == "TL.TL.chain.ControlUnit";
+
     std::map<std::string, resolved_parameter> solved_parameters;
     // Override default parameters if necessary
 
+    std::map<qualified_identifier, resolved_parameter> package_parameters;
+    auto deps_map = get_dependency_map(node_parameters, {});
+    for (auto &[param_name, param_deps]:deps_map) {
+        for (const auto& identifier:param_deps) {
+            if (!identifier.prefix.empty()) {
+                auto package = d_store->get_HDL_resource(identifier.prefix);
+                auto param_value = package.get_default_parameters()[identifier.name];
+                package_parameters[identifier] = param_value;
+            }
+        }
+    }
+    deps_map = get_dependency_map(node_overrides, {});
     if(node_overrides.empty()) {
         solved_parameters = node_defaults;
     } else{
@@ -117,12 +129,11 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
         for(const auto& override:node_overrides) {
             for(const auto &param: node_parameters) {
                 auto deps = param->get_dependencies();
-                if(deps.contains(override->get_name()) && !node_overrides.contains(param->get_name())) {
+                if(deps.contains({"", override->get_name()}) && !node_overrides.contains(param->get_name())) {
                     to_solve.insert(param);
                 }
             }
         }
-        auto deps_map = get_dependency_map(node_overrides, {});
 
         int solution_rounds = 0;
         std::unordered_map<std::string, uint32_t> parameters_progress;
@@ -139,8 +150,8 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
                     }
                 }
                 for(auto &dep:deps) {
-                    if(work.parent_parameters.contains(dep)) {
-                        if(param->propagate_constant(dep, work.parent_parameters[dep])) {
+                    if(work.parent_parameters.contains(dep.name)) {
+                        if(param->propagate_constant(dep.name, work.parent_parameters[dep.name])) {
                             parameters_progress[param->get_name()]++;
                             if(parameters_progress[param->get_name()]== deps_map[param->get_name()].size()) {
                                 to_solve.insert(param);
@@ -148,7 +159,7 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
                             }
                         }
                     } else {
-                        throw std::runtime_error("Parameter " + dep + " is not defined in the design");
+                        throw std::runtime_error("Parameter " + dep.prefix +"::" +dep.name + " is not defined in the design");
                     }
                 }
             }
@@ -161,15 +172,19 @@ std::map<std::string, resolved_parameter> parameter_solver::override_parameters(
         }
     }
 
+    for (auto param:solved_parameters) {
+        int i = 0;
+    }
+
 
     update_parameters_map(solved_parameters, work.node, d_store);
     return node_defaults;
 }
 
-std::map<std::string, std::set<std::string>> parameter_solver::get_dependency_map(const Parameters_map &map,
+std::map<std::string, std::set<qualified_identifier>> parameter_solver::get_dependency_map(const Parameters_map &map,
     std::unordered_map<std::string, HDL_function> function_defs) {
 
-    std::map<std::string, std::set<std::string>> dependencies_map;
+    std::map<std::string, std::set<qualified_identifier>> dependencies_map;
     for (auto &param: map) {
         auto param_name = param->get_name();
         dependencies_map[param_name] = {};

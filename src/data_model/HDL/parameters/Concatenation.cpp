@@ -38,8 +38,8 @@ Concatenation Concatenation::clone()  const{
     return ret;
 }
 
-std::set<std::string> Concatenation::get_dependencies() const{
-    std::set<std::string> result;
+std::set<qualified_identifier> Concatenation::get_dependencies() const{
+    std::set<qualified_identifier> result;
     for (auto &comp:components) {
         auto comp_deps = comp->get_dependencies();
         result.insert(comp_deps.begin(), comp_deps.end());

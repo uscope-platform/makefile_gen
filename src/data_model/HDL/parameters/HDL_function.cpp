@@ -42,8 +42,8 @@ bool HDL_function::operator==(const HDL_function &rhs) const {
     return retval;
 }
 
-std::set<std::string> HDL_function::get_dependencies() const {
-    std::set<std::string> res;
+std::set<qualified_identifier> HDL_function::get_dependencies() const {
+    std::set<qualified_identifier> res;
 
 
     for(auto &la:loop_metadata.get_assignments()) {
@@ -62,7 +62,7 @@ std::set<std::string> HDL_function::get_dependencies() const {
     loop_deps = loop_metadata.get_iter().get_dependencies();
     res.insert(loop_deps.begin(), loop_deps.end());
 
-    res.erase(loop_metadata.get_init().get_name());
+    res.erase({"", loop_metadata.get_init().get_name()});
 
     for(auto &a:assignments) {
         auto deps = a.value.get_dependencies();

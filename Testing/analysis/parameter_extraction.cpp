@@ -1259,9 +1259,14 @@ TEST(parameter_extraction, multpidim_packed_array) {
 TEST(parameter_extraction, package_parameters_use) {
     std::string test_pattern = R"(
 
+        package test_package;
+            parameter bus_base = 67;
+        endpackage
+
         module test_mod #(
              parameter package_param = test_package::bus_base
         )();
+
         endmodule
     )";
 
@@ -1286,18 +1291,6 @@ TEST(parameter_extraction, package_parameters_use) {
     for(const auto& item:check_params){
         ASSERT_TRUE(parameters.contains(item->get_name()));
         ASSERT_EQ(*item, *parameters.get(item->get_name()));
-    }
-
-    auto defaults = resource.get_default_parameters();
-    mdarray<int64_t> av;
-    av.set_1d_slice({0, 0}, {8, 32});
-
-    std::map<std::string, resolved_parameter> check_defaults = {
-        {"package_param", "bus_base"}
-    };
-    for(const auto& [name, value]:check_defaults){
-        ASSERT_TRUE(defaults.contains(name));
-        ASSERT_EQ(value, defaults.at(name));
     }
 }
 
