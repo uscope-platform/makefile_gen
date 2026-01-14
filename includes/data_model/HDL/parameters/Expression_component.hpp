@@ -72,7 +72,9 @@ public:
     }
 
     resolved_parameter get_value()const {return value;}
-    void set_value(const resolved_parameter &v){value = v;}
+    void set_value(const resolved_parameter &v) {
+        value = v;
+    }
 
     void set_package_prefix(const std::string &s) {package_prefix = s;};
     std::string get_package_prefix() const {return package_prefix;};
@@ -97,7 +99,7 @@ public:
 
     std::string print_index(const std::vector<Expression> &index)const;
 
-    int64_t get_binary_size() const{return binary_size;};
+    int64_t get_binary_size() const{return binary_size;}
 
     template<class Archive>
     void serialize( Archive & ar ) {

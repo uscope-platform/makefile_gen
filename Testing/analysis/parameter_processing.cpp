@@ -19,6 +19,7 @@
 
 #include "frontend/analysis/sv_analyzer.hpp"
 #include "analysis/HDL_ast_builder.hpp"
+#include "analysis/HDL_ast_builder_v2.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
@@ -67,41 +68,6 @@ Parameters_map produce_check_components(std::vector<param_check_t> &in){
     return ret;
 }
 
-TEST(parameter_processing, package_processing) {
-
-    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-    sv_analyzer analyzer("check_files/test_package.sv");
-    analyzer.cleanup_content("`(.*)");
-    auto resource = analyzer.analyze()[0];
-
-
-    Parameter_processor param_proc({},d_store);
-
-    auto parameters = param_proc.process_parameters_map(resource.get_parameters(), resource);
-
-    std::vector<param_check_t> vect_params = {
-            {"bus_base", {"32'h43c00000"}, HDL_parameter::numeric_parameter, 0x43c00000},
-            {"timebase", {"bus_base"}, HDL_parameter::numeric_parameter, 0x43c00000},
-            {"gpio", {"timebase", "+","32'h1000", "*","2", "/","2", "+", "1"}, HDL_parameter::numeric_parameter, 0x43c01001},
-            {"scope_mux", {"gpio"}, HDL_parameter::numeric_parameter, 0x43c01001},
-            {"out_of_order", {"scope_mux"}, HDL_parameter::numeric_parameter, 0x43c01001},
-            {"modulo_parameter", {"3", "%", "2"}, HDL_parameter::numeric_parameter, 1},
-            {"subtraction_parameter", {"'o4", "-", "'b10"}, HDL_parameter::numeric_parameter, 2}
-    };
-
-
-
-    Parameters_map check_map = produce_check_components(vect_params);
-
-    ASSERT_EQ(check_map.size(), parameters.size());
-
-    for(const auto& item:check_map){
-        ASSERT_TRUE(parameters.contains(item->get_name()));
-        ASSERT_EQ(*item, *parameters.get(item->get_name()));
-    }
-
-}
-
 
 TEST(parameter_processing, array_instance_parameter_override) {
     std::string test_pattern = R"(
@@ -137,62 +103,70 @@ TEST(parameter_processing, array_instance_parameter_override) {
     analyzer.cleanup_content("`(.*)");
     auto resources = analyzer.analyze();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
     d_store->store_hdl_entity(resources[0]);
     d_store->store_hdl_entity(resources[1]);
 
-    Parameter_processor p({}, d_store);
-    auto top_res= d_store->get_HDL_resource("test_mod");
-    auto parent_parameters = p.process_parameters_map(top_res.get_parameters(), top_res);
 
-    auto instance_spec = d_store->get_HDL_resource("dependency");
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
 
-    p = Parameter_processor(parent_parameters, d_store);
+    auto dependency_parameters = ast_v2->get_dependencies()[0]->get_parameters();
 
-    auto parent_params = top_res.get_dependencies()[0].get_parameters();
-    auto instance_parameters = p.process_parameters_map(parent_params, instance_spec);
+    Parameters_map check_params;
 
-    p = Parameter_processor(instance_parameters, d_store);
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("param_1");
+    p->add_component(Expression_component(4, 0));
+    p->set_value(4);
 
-    auto dependency_params = p.process_parameters_map(instance_spec.get_parameters(), instance_spec);
+    check_params.insert(p);
 
-    std::vector<param_check_t> vect_params = {
-            {"param_1", {"test_param"}, HDL_parameter::numeric_parameter, 4},
-            {"p1_t", {"param_2"}, HDL_parameter::numeric_parameter, 9},
-            {"p2_t", {"param_2"}, HDL_parameter::numeric_parameter, 8},
-            {"param_3", {"(", "test_param", "+", "7", ")", "*", "1"}, HDL_parameter::numeric_parameter, 11}
-    };
-
-    Parameters_map check_params= produce_check_components(vect_params);
-
-    auto param = check_params.get("p1_t");
-    auto ec = static_cast<Expression *>(param->get_expression().get());
-    std::vector<Expression> index;
-    index.push_back({Expression_component("0", Expression_component::number)});
-    ec->components[0].set_array_index(index);
-    param->set_expression(*ec);
-    check_params.insert(param);
-
-     param = check_params.get("p2_t");
-    ec =  static_cast<Expression *>(param->get_expression().get());
-    index.clear();
-    index.push_back({{Expression_component("1", Expression_component::number)}});
-    ec->components[0].set_array_index(index);
-    param->set_expression(*ec);
-    check_params.insert(param);
-
-    auto par = std::make_shared<HDL_parameter>();
-    par->set_name("param_2");
-    par->set_expression({Expression_component("override_array", Expression_component::identifier)});
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("param_2");
     mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {9,8});
-    par->set_array_value(av);
+    auto ec = Expression_component(0, 0);
+    ec.set_value(av);
+    p->add_component(ec);
+    p->set_array_value(av);
+    check_params.insert(p);
 
-    check_params.insert(par);
-    ASSERT_EQ(check_params.size(), dependency_params.size());
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("param_3");
+    p->add_component(Expression_component("(", Expression_component::parenthesis));
+    p->add_component(Expression_component(4, 0));
+    p->add_component(Expression_component("+", Expression_component::operation));
+    p->add_component(Expression_component(7, 3));
+    p->add_component(Expression_component(")", Expression_component::parenthesis));
+    p->add_component(Expression_component("*", Expression_component::operation));
+    p->add_component(Expression_component(1, 1));
+    p->set_value(11);
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("p1_t");
+    ec = Expression_component("param_2", Expression_component::identifier);
+    ec.add_array_index({Expression_component(0, 1)});
+    p->add_component(ec);
+    p->set_value(9);
+    check_params.insert(p);
+
+
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("p2_t");
+    ec = Expression_component("param_2", Expression_component::identifier);
+    ec.add_array_index({Expression_component(1, 1)});
+    p->add_component(ec);
+    p->set_value(8);
+    check_params.insert(p);
+
+    ASSERT_EQ(check_params.size(), dependency_parameters.size());
 
     for(const auto& item:check_params){
-        ASSERT_TRUE(dependency_params.contains(item->get_name()));
-        ASSERT_EQ(*item, *dependency_params.get(item->get_name()));
+        ASSERT_TRUE(dependency_parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *dependency_parameters.get(item->get_name()));
     }
 
 }

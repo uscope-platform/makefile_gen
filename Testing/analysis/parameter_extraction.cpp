@@ -20,6 +20,91 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
 
+
+TEST(parameter_extraction, package_parameters) {
+    std::string test_pattern = R"(
+
+        package test_package;
+
+
+            parameter bus_base = 32'h43c00000;
+            parameter timebase = bus_base;
+            parameter gpio = timebase + 32'h1000 * 2 / 2 + 1;
+            parameter modulo_parameter = 3 % 2;
+            parameter subtraction_parameter = 'o4 - 'b10;
+
+        endpackage
+
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("bus_base");
+    p->add_component(Expression_component("32'h43c00000", Expression_component::number));
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("timebase");
+    p->add_component(Expression_component("bus_base", Expression_component::identifier));
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("gpio");
+    p->add_component(Expression_component("timebase" , Expression_component::identifier));
+    p->add_component(Expression_component("+" , Expression_component::operation));
+    p->add_component(Expression_component("32'h1000" , Expression_component::number));
+    p->add_component(Expression_component("*" , Expression_component::operation));
+    p->add_component(Expression_component("2" , Expression_component::number));
+    p->add_component(Expression_component("/" , Expression_component::operation));
+    p->add_component(Expression_component("2" , Expression_component::number));
+    p->add_component(Expression_component("+" , Expression_component::operation));
+    p->add_component(Expression_component("1" , Expression_component::number));
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("modulo_parameter");
+    p->add_component(Expression_component("3" , Expression_component::number));
+    p->add_component(Expression_component("%" , Expression_component::operation));
+    p->add_component(Expression_component("2" , Expression_component::number));
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("subtraction_parameter");
+    p->add_component(Expression_component("'o4" , Expression_component::number));
+    p->add_component(Expression_component("-" , Expression_component::operation));
+    p->add_component(Expression_component("'b10" , Expression_component::number));
+    check_params.insert(p);
+
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+
+
+    auto defaults = resource.get_default_parameters();
+    std::map<std::string, resolved_parameter> check_defaults = {
+        {"bus_base", 0x43c00000},
+        {"timebase", 0x43c00000},
+        {"gpio", 0x43c01001},
+        {"modulo_parameter", 1},
+        {"subtraction_parameter", 2}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
 TEST(parameter_extraction, simple_parameters) {
     std::string test_pattern = R"(
         module test_mod #(

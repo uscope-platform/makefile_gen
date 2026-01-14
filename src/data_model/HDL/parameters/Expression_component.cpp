@@ -111,7 +111,7 @@ bool Expression_component::propagate_constant(const std::string &const_name, con
 
 
 bool operator==(const Expression_component &lhs, const Expression_component &rhs) {
-    bool ret_val = true;
+     bool ret_val = true;
     ret_val &= lhs.value == rhs.value;
     ret_val &= lhs.array_index == rhs.array_index;
     ret_val &= lhs.package_prefix == rhs.package_prefix;

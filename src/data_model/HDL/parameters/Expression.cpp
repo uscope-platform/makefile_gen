@@ -19,16 +19,16 @@
 std::string Expression::print() const {
     std::string ret_val;
     for(auto &item:components){
-        if(item.is_numeric()){
+        if(item.is_array()) {
+            auto arr = std::get<mdarray<int64_t>>(item.get_value());
+            ret_val += "{xxxxxxx}";
+        } else if(item.is_numeric()){
             ret_val += std::to_string(std::get<int64_t>(item.get_value()));
         } else if(item.is_identifier()){
             if(!item.get_package_prefix().empty()){
                 ret_val += item.get_package_prefix() + "::";
             }
             ret_val += std::get<std::string>(item.get_value());
-        } else if(item.is_array()) {
-            auto arr = std::get<mdarray<int64_t>>(item.get_value());
-            ret_val += "{xxxxxxx}";
         }
     }
     return ret_val;
