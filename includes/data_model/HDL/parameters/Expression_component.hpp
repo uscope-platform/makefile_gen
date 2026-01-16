@@ -48,6 +48,11 @@ struct qualified_identifier {
     bool operator<(const qualified_identifier& other) const {
         return std::tie(prefix, name) < std::tie(other.prefix, other.name);
     }
+
+    template<class Archive>
+    void serialize( Archive & ar ) {
+        ar(name, prefix);
+    }
 };
 
 class Expression_component {
@@ -69,7 +74,7 @@ public:
     explicit Expression_component(const std::string &s,const component_type &t);
     explicit Expression_component(int64_t n, int64_t b_s);
     std::set<qualified_identifier> get_dependencies()const;
-    bool propagate_constant(const std::string &name, const resolved_parameter &value);
+    bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value);
     bool is_subscripted() const {return !array_index.empty();}
     bool is_string() const {return type == string;}
     bool is_identifier() const {return type == identifier;}

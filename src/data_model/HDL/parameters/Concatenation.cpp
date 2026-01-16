@@ -47,10 +47,10 @@ std::set<qualified_identifier> Concatenation::get_dependencies() const{
     return result;
 }
 
-bool Concatenation::propagate_constant(const std::string &name, const resolved_parameter &value) {
+bool Concatenation::propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) {
    bool retval = true;
     for (auto &comp:components) {
-        retval &= comp->propagate_constant(name, value);
+        retval &= comp->propagate_constant(constant_id, value);
     }
     return retval;
 }

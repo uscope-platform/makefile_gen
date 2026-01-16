@@ -26,17 +26,21 @@
 
 struct work_order {
     std::shared_ptr<HDL_instance_AST> node;
-    std::map<std::string, resolved_parameter> parent_parameters;
+    std::map<qualified_identifier, resolved_parameter> parent_parameters;
     std::string path;
 };
 
 class parameter_solver {
 public:
-    static std::map<std::string, resolved_parameter> process_parameters(const Parameters_map &map, std::unordered_map<std::string, HDL_function> function_defs);
-    static void update_parameters_map(std::map<std::string, resolved_parameter> parameters, std::shared_ptr<HDL_instance_AST> node,const std::shared_ptr<data_store> &d_store);
-    static std::map<std::string, resolved_parameter> override_parameters(work_order &work, const std::shared_ptr<data_store> &d_store);
+    static std::map<qualified_identifier, resolved_parameter> process_parameters(const Parameters_map &map, std::unordered_map<std::string, HDL_function> function_defs);
+    static void update_parameters_map(
+        std::map<qualified_identifier, resolved_parameter> parameters,
+        std::shared_ptr<HDL_instance_AST> node,
+        const std::shared_ptr<data_store> &d_store
+        );
+    static std::map<qualified_identifier, resolved_parameter> override_parameters(work_order &work, const std::shared_ptr<data_store> &d_store);
 
-    static std::map<std::string, std::set<qualified_identifier>>get_dependency_map(const Parameters_map &map, std::unordered_map<std::string, HDL_function> function_defs);
+    static std::map<qualified_identifier, std::set<qualified_identifier>>get_dependency_map(const Parameters_map &map, std::unordered_map<std::string, HDL_function> function_defs);
 };
 
 

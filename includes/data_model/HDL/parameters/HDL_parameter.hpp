@@ -45,7 +45,7 @@ public:
     void set_value(int64_t val);
     std::string get_string_value() const;
     int64_t  get_numeric_value() const;
-    bool propagate_constant(const std::string& name, const resolved_parameter &constant_value);
+    bool propagate_constant(const qualified_identifier &constant_name, const resolved_parameter &constant_value);
     explicit operator std::string();
 
     bool is_function() const {return type == function_parameter;}

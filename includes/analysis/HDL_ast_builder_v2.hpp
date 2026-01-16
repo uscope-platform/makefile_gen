@@ -34,7 +34,7 @@ public:
     std::vector<std::shared_ptr<HDL_instance_AST>> build_ast(const std::vector<std::string>& modules);
 private:
     std::shared_ptr<HDL_instance_AST> build_ast(const std::string& top_level_module);
-    void update_loop_constants(std::shared_ptr<HDL_instance_AST> &instance, const std::map<std::string, resolved_parameter> &parameters);
+    void update_loop_constants(std::shared_ptr<HDL_instance_AST> &instance, const std::map<qualified_identifier, resolved_parameter> &parameters);
     std::shared_ptr<HDL_instance_AST> specialize_instance(const HDL_instance_AST &i, int64_t idx, std::string idx_name);
     std::shared_ptr<data_store> d_store;
     std::shared_ptr<settings_store> s_store;

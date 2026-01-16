@@ -28,7 +28,7 @@ std::vector<int64_t> loop_solver::solve_loop(std::shared_ptr<HDL_instance_AST> &
 
 bool loop_solver::is_loop_done(std::shared_ptr<HDL_parameter> &lv, Expression end_cond) {
 
-    end_cond.propagate_constant(lv->get_name(), lv->get_numeric_value());
+    end_cond.propagate_constant({"", lv->get_name()}, lv->get_numeric_value());
 
 
     auto ec = end_cond.evaluate(false);
@@ -49,7 +49,7 @@ std::shared_ptr<HDL_parameter> loop_solver::get_init_variable(const HDL_loop_met
 }
 
 std::shared_ptr<HDL_parameter> loop_solver::update_loop( Expression e, std::shared_ptr<HDL_parameter> loop_var) {
-    e.propagate_constant(loop_var->get_name(), loop_var->get_numeric_value());
+    e.propagate_constant({"", loop_var->get_name()}, loop_var->get_numeric_value());
     auto res = e.evaluate(false);
     if (!res.has_value()) throw std::runtime_error("Could not evaluate loop end condition");
     if (!std::holds_alternative<int64_t>(res.value())) throw std::runtime_error("loop end condition expression must ret");

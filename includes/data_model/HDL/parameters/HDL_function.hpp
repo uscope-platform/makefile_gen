@@ -39,7 +39,7 @@ public:
     bool operator==(const HDL_function &rhs) const;
 
     std::set<qualified_identifier> get_dependencies()const;
-    bool propagate_constant(const std::string &name, const resolved_parameter &value);\
+    bool propagate_constant(const qualified_identifier &name, const resolved_parameter &value);\
     std::optional<resolved_parameter> evaluate(bool pack_result);
 
     template<class Archive>

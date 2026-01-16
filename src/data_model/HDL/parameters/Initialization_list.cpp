@@ -259,21 +259,21 @@ std::optional<resolved_parameter> Initialization_list::evaluate() {
     return result;
 }
 
-bool Initialization_list::propagate_constant(const std::string &name, const resolved_parameter &value) {
+bool Initialization_list::propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) {
     bool retval = true;
 
     for (auto &dim: packed_dimensions) {
-        retval &= dim.first_bound.propagate_constant(name, value);
-        retval &= dim.second_bound.propagate_constant(name, value);
+        retval &= dim.first_bound.propagate_constant(constant_id, value);
+        retval &= dim.second_bound.propagate_constant(constant_id, value);
     }
 
     for (auto &dim: unpacked_dimensions) {
-        retval &= dim.first_bound.propagate_constant(name, value);
-        retval &= dim.second_bound.propagate_constant(name, value);
+        retval &= dim.first_bound.propagate_constant(constant_id, value);
+        retval &= dim.second_bound.propagate_constant(constant_id, value);
     }
 
     for (auto &expr:expression_leaves) {
-        retval &=  expr->propagate_constant(name, value);
+        retval &=  expr->propagate_constant(constant_id, value);
     }
     return retval;
 }

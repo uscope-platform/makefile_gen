@@ -29,7 +29,7 @@ public:
     virtual ~Parameter_value_base() = default;
 
     virtual std::set<qualified_identifier> get_dependencies()const {return {};}
-    virtual bool propagate_constant(const std::string &name, const resolved_parameter &value) {return true;}
+    virtual bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) {return true;}
     virtual std::optional<resolved_parameter> evaluate(bool pack_result) {return std::nullopt;}
     virtual std::string print() const {return "";}
     virtual int64_t get_size() {return 0;}

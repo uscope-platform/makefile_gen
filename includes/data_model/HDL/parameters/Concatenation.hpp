@@ -62,7 +62,7 @@ public:
 
     std::set<qualified_identifier> get_dependencies()const;
     bool empty() const {return components.empty();}
-    bool propagate_constant(const std::string &name, const resolved_parameter &value);
+    bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value);
     std::optional<resolved_parameter> evaluate(bool pack_result);
     std::string print() const;
     int64_t get_depth() override;

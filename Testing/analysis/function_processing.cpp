@@ -225,7 +225,7 @@ TEST(function_processing, parametric_loop_function) {
 
     mdarray<int64_t> check_val;
     check_val.set_1d_slice({0,0}, {0,100,200});
-    auto res= result.propagate_constant("N_CORES", 3);
+    auto res= result.propagate_constant({"", "N_CORES"}, 3);
     auto values = result.evaluate(false);
     ASSERT_TRUE(values.has_value());
     EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
@@ -306,7 +306,7 @@ TEST(function_processing, complex_loop_function) {
 
     mdarray<int64_t> check_val;
     check_val.set_1d_slice({0,0}, {44, 100,200,300, 667});
-    result.propagate_constant("N_CORES", 3);
+    result.propagate_constant({"", "N_CORES"}, 3);
     auto values = result.evaluate(false);
     ASSERT_TRUE(values.has_value());
     EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
@@ -357,7 +357,7 @@ TEST(function_processing, parametrized_function) {
 
     mdarray<int64_t> check_val;
     check_val.set_1d_slice({0,0}, {44, 33});
-    result.propagate_constant("N_CORES", 1);
+    result.propagate_constant({"", "N_CORES"}, 1);
     auto values = result.evaluate(false);
     ASSERT_TRUE(values.has_value());
     EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));

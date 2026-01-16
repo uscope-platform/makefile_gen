@@ -75,7 +75,7 @@ public:
 
     std::optional<resolved_parameter> evaluate();
 
-    bool propagate_constant(const std::string &name, const resolved_parameter &value);
+    bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value);
 
     std::optional<std::shared_ptr<Parameter_value_base>> get_scalar();
     void clear_scalar();

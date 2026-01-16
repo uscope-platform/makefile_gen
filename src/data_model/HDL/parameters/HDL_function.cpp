@@ -76,13 +76,13 @@ std::set<qualified_identifier> HDL_function::get_dependencies() const {
     return res;
 }
 
-bool HDL_function::propagate_constant(const std::string &name, const resolved_parameter &value) {
+bool HDL_function::propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) {
     bool retval = true;
     for(auto &a:assignments) {
-        retval &= a.value.propagate_constant(name, value);
-        if(a.index.has_value()) retval &= a.index.value().propagate_constant(name, value);
+        retval &= a.value.propagate_constant(constant_id, value);
+        if(a.index.has_value()) retval &= a.index.value().propagate_constant(constant_id, value);
     }
-    retval &= loop_metadata.propagate_constant(name, value);
+    retval &= loop_metadata.propagate_constant(constant_id, value);
     return retval;
 }
 
@@ -108,7 +108,7 @@ std::optional<resolved_parameter> HDL_function::evaluate_vector() {
         values[idx_val] = std::get<int64_t>(value.value());
     }
 
-    auto loop_var = loop_metadata.get_init().get_name();
+    qualified_identifier loop_var = {"", loop_metadata.get_init().get_name()};
     auto loop_assignments = loop_metadata.get_assignments();
     for(int i = 0; i<loop_assignments.size(); i++) {
         for(auto &l:loop_indexes) {

@@ -71,7 +71,7 @@ public:
     void set_size(const Expression &size){ repetition_size = size;}
 
     std::set<qualified_identifier> get_dependencies()const;
-    bool propagate_constant(const std::string &name, const resolved_parameter &value);
+    bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value);
     std::optional<resolved_parameter> evaluate(bool pack_result);
 
     int64_t pack_repetition(int64_t value, int64_t width, int64_t count);

@@ -103,7 +103,7 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
     return top;
 }
 
-void HDL_ast_builder_v2::update_loop_constants(std::shared_ptr<HDL_instance_AST> &instance, const std::map<std::string, resolved_parameter> &parameters) {
+void HDL_ast_builder_v2::update_loop_constants(std::shared_ptr<HDL_instance_AST> &instance, const std::map<qualified_identifier, resolved_parameter> &parameters) {
     if (instance->get_n_loops()>0) {
         auto loop = instance->get_inner_loop();
         for (auto &[param_name, param_value]: parameters) {
@@ -142,7 +142,7 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::specialize_instance(const 
     }
     specialized_d.set_ports(new_ports);
     for(auto &p: specialized_d.get_parameters()) {
-         p->propagate_constant(idx_name, idx);
+         p->propagate_constant({"", idx_name}, idx);
     }
     return std::make_shared<HDL_instance_AST>(specialized_d);
 }

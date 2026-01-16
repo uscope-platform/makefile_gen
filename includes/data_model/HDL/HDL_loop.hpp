@@ -85,13 +85,13 @@ public:
         return *this;
     }
 
-    bool propagate_constant(const std::string &name, const resolved_parameter &value) {
+    bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) {
         bool retval = true;
 
-        retval &= init.propagate_constant(name, value);
-        retval &= end_c.propagate_constant(name, value);
-        retval &= iter.propagate_constant(name, value);
-        for(auto &a:assignments) retval &= a.value.propagate_constant(name, value);
+        retval &= init.propagate_constant(constant_id, value);
+        retval &= end_c.propagate_constant(constant_id, value);
+        retval &= iter.propagate_constant(constant_id, value);
+        for(auto &a:assignments) retval &= a.value.propagate_constant(constant_id, value);
         return retval;
     }
 

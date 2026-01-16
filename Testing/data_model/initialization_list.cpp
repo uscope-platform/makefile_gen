@@ -459,7 +459,7 @@ TEST(Initialization_list, concatenation_of_packed_arrays) {
     auto resource = analyzer.analyze()[0];
 
     auto p = resource.get_default_parameters();
-    auto param = p["INITIAL_REGISTER_VALUES"];
+    auto param = p[{"", "INITIAL_REGISTER_VALUES"}];
     mdarray<int64_t>::md_1d_array check_array = {224,1,0,0,2,2,2};
     auto result = std::get<mdarray<int64_t>>(param).get_1d_slice({0,0});
 

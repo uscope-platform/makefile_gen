@@ -62,13 +62,13 @@ std::set<qualified_identifier> Expression_component::get_dependencies()const {
     return result;
 }
 
-bool Expression_component::propagate_constant(const std::string &const_name, const resolved_parameter &const_value) {
+bool Expression_component::propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &const_value) {
     bool retval = true;
 
     bool index_need_rewrite = false;
     std::vector<int64_t> indices;
     for (auto &component:array_index) {
-        retval &= component.propagate_constant(const_name, const_value);
+        retval &= component.propagate_constant(constant_id, const_value);
         auto idx_val = component.evaluate(false);
         if (idx_val.has_value()) {
             index_need_rewrite = true;
@@ -84,7 +84,7 @@ bool Expression_component::propagate_constant(const std::string &const_name, con
         int i = 0;
     }
     if (std::holds_alternative<std::string>(value)) {
-        if (std::get<std::string>(value) == const_name) {
+        if (std::get<std::string>(value) == constant_id.name && package_prefix == constant_id.prefix) {
             if (!array_index.empty()) {
                 if(std::holds_alternative<mdarray<int64_t>>(const_value)) {
                     auto values = std::get<mdarray<int64_t>>(const_value);
