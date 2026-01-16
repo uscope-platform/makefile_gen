@@ -129,7 +129,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
         }
     }
 
-    // Handles
+    // Handle overridden parameters
     deps_map = get_dependency_map(node_overrides, {});
     if(node_overrides.empty()) {
         solved_parameters = node_defaults;
@@ -169,7 +169,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
                         throw std::runtime_error("Parameter " + dep.prefix +"::" +dep.name + " is not defined in the design");
                     }
                     if(param->propagate_constant(dep, value)) {
- parameters override                        parameters_progress[param->get_name()]++;
+                        parameters_progress[param->get_name()]++;
                         if(parameters_progress[param->get_name()]== deps_map[{"", param->get_name()}].size()) {
                             to_solve.insert(param);
                             completed_parameters.insert(param->get_name());
@@ -199,7 +199,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
             }
         }
     }
-    // Substitute runtim
+    // Substitute runtime only parameters
     auto runtime_params = process_parameters(runtime_to_eval, {});
     for (auto &[name, value]: solved_parameters) {
         if (runtime_params.contains(name)) value = runtime_params[name];
