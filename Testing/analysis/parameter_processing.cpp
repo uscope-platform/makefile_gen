@@ -104,8 +104,10 @@ TEST(parameter_processing, package_parameters_use) {
 
     auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
     p->set_name("package_param");
-    p->add_component(Expression_component(4, 0));
-    p->set_value(4);
+    Expression_component ec(67, 0);
+    ec.set_package_prefix("test_package");
+    p->add_component(ec);
+    p->set_value(67);
 
     check_params.insert(p);
 

@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "../../includes/analysis/parameter_solver.hpp"
+#include "analysis/parameter_solver.hpp"
 
 std::map<qualified_identifier, resolved_parameter>   parameter_solver::process_parameters(const Parameters_map &map_in, std::unordered_map<std::string, HDL_function> function_defs) {
     auto map = map_in.clone();
@@ -118,19 +118,19 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
     // Override default parameters if necessary
 
 
-    auto deps_map = get_dependency_map(node_overrides, {});
     std::map<qualified_identifier, resolved_parameter> package_parameters;
-
+    auto deps_map = get_dependency_map(node_parameters, {});
     for (auto &[param_name, param_deps]:deps_map) {
         for (const auto& identifier:param_deps) {
             if (!identifier.prefix.empty()) {
                 auto package = d_store->get_HDL_resource(identifier.prefix);
-                auto param_value = package.get_default_parameters()[identifier];
-                package_parameters[identifier] = param_value;
+                auto param_value = package.get_default_parameters();
+                package_parameters[identifier] = param_value[{"", identifier.name}];
             }
         }
     }
 
+    deps_map = get_dependency_map(node_overrides, {});
     if(node_overrides.empty()) {
         solved_parameters = node_defaults;
     } else{
@@ -183,22 +183,26 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
         }
     }
 
-    deps_map = get_dependency_map(node_parameters, {});
 
     Parameters_map runtime_to_eval;
     for (auto [param_name, param_value]:solved_parameters) {
         if(std::holds_alternative<std::string>(param_value)) {
             if(std::get<std::string>(param_value) == "__RUNTIME_ONLY_PARAMETER__") {
+                auto raw_param = node_parameters.get(param_name.name);
                 for(auto &[param_id, param_val] :package_parameters) {
-                    auto raw_param = node_parameters.get(param_id.name);
                     raw_param->propagate_constant(param_id, param_val);
                 }
-                runtime_to_eval.insert(node_parameters.get(param_name.name));
+                runtime_to_eval.insert(raw_param);
             }
         }
     }
     auto runtime_params = process_parameters(runtime_to_eval, {});
-
+    for (auto &[name, value]: solved_parameters) {
+        if (runtime_params.contains(name)) value = runtime_params[name];
+    }
+    for (auto &[name, value]: node_defaults) {
+        if (runtime_params.contains(name)) value = runtime_params[name];
+    }
     update_parameters_map(solved_parameters, work.node, d_store);
     return node_defaults;
 }

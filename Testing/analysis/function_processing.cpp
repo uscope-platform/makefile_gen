@@ -368,7 +368,9 @@ TEST(function_processing, parametrized_function) {
 
 TEST(function_processing, package_assignment) {
     std::string test_pattern = R"(
-
+        package hil_address_space;
+            parameter bus_base = 52;
+        endpackage
         module test_mod ();
 
 
