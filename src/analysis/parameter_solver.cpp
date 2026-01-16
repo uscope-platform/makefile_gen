@@ -115,9 +115,8 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
     auto node_parameters = node_spec.get_parameters();
 
     std::map<qualified_identifier, resolved_parameter> solved_parameters;
-    // Override default parameters if necessary
 
-
+    //retreive default package parameters
     std::map<qualified_identifier, resolved_parameter> package_parameters;
     auto deps_map = get_dependency_map(node_parameters, {});
     for (auto &[param_name, param_deps]:deps_map) {
@@ -130,6 +129,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
         }
     }
 
+    // Handles
     deps_map = get_dependency_map(node_overrides, {});
     if(node_overrides.empty()) {
         solved_parameters = node_defaults;
@@ -159,18 +159,21 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
                     }
                 }
                 for(auto &dep:deps) {
-                    if(package_parameters.contains({dep.prefix, dep.name})) {
-                        int i = 0;
-                    } else if(work.parent_parameters.contains(dep)) {
-                        if(param->propagate_constant(dep, work.parent_parameters[dep])) {
-                            parameters_progress[param->get_name()]++;
-                            if(parameters_progress[param->get_name()]== deps_map[{"", param->get_name()}].size()) {
-                                to_solve.insert(param);
-                                completed_parameters.insert(param->get_name());
-                            }
-                        }
+                    resolved_parameter value;
+                    if (!dep.prefix.empty()) {
+                       auto package = d_store->get_HDL_resource(dep.prefix);
+                       value = package.get_default_parameters()[{"", dep.name}];
+                    }else if(work.parent_parameters.contains(dep)) {
+                        value = work.parent_parameters[dep];
                     } else {
                         throw std::runtime_error("Parameter " + dep.prefix +"::" +dep.name + " is not defined in the design");
+                    }
+                    if(param->propagate_constant(dep, value)) {
+ parameters override                        parameters_progress[param->get_name()]++;
+                        if(parameters_progress[param->get_name()]== deps_map[{"", param->get_name()}].size()) {
+                            to_solve.insert(param);
+                            completed_parameters.insert(param->get_name());
+                        }
                     }
                 }
             }
@@ -196,6 +199,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
             }
         }
     }
+    // Substitute runtim
     auto runtime_params = process_parameters(runtime_to_eval, {});
     for (auto &[name, value]: solved_parameters) {
         if (runtime_params.contains(name)) value = runtime_params[name];
