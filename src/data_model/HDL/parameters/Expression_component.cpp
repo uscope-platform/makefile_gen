@@ -250,6 +250,10 @@ void Expression_component::add_array_index(const Expression &c) {
     array_index.push_back(c);
 }
 
+std::vector<Expression> Expression_component::get_array_index() {
+    return array_index;
+}
+
 Expression_component::component_type Expression_component::get_type(const std::string &s) {
     if(test_parameter_type(number_regex, s) || test_parameter_type(sv_constant_regex, s)) return number;
     if(is_string_operator(s)) return operation;

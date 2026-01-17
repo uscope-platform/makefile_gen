@@ -36,9 +36,9 @@
 
 #include <spdlog/spdlog.h>
 #include "data_model/HDL/HDL_definitions.hpp"
-#include "parameters/HDL_function.hpp"
+#include "parameters/HDL_function_def.hpp"
 
-class HDL_Resource {
+ class HDL_Resource {
     public:
         HDL_Resource( const HDL_Resource &c );
         HDL_Resource();
@@ -98,11 +98,11 @@ class HDL_Resource {
         void set_parameters(Parameters_map p);
         Parameters_map get_parameters() {return parameters_spec;};
 
-        void add_function(const HDL_function &f) {
+        void add_function(const HDL_function_def &f) {
             locking_violation_check();
             functions[f.name] = f;
         }
-        std::unordered_map<std::string, HDL_function> get_functions() {return functions;};
+        std::unordered_map<std::string, HDL_function_def> get_functions() {return functions;};
 
         std::map<qualified_identifier, resolved_parameter> get_default_parameters() {
             return default_values;
@@ -149,7 +149,7 @@ private:
 
         Parameters_map parameters_spec;
         std::map<qualified_identifier, resolved_parameter> default_values;
-        std::unordered_map<std::string, HDL_function> functions;
+        std::unordered_map<std::string, HDL_function_def> functions;
 
         std::vector<processor_instance> processor_docs;
 

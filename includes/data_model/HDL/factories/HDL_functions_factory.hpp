@@ -19,7 +19,7 @@
 #include <string>
 
 #include "data_model/HDL/HDL_loop.hpp"
-#include "data_model/HDL/parameters/HDL_function.hpp"
+#include "data_model/HDL/parameters/HDL_function_def.hpp"
 
 class HDL_functions_factory {
 public:
@@ -32,10 +32,10 @@ public:
     void close_lvalue();
     void close_assignment();
     void add_loop(const HDL_loop_metadata &md){f.add_loop_metadata(md);}
-    HDL_function get_function();
+    HDL_function_def get_function();
 private:
 
-    HDL_function f;
+    HDL_function_def f;
     bool ignore_assignment = false;
     Expression new_expression;
     std::string current_assigned_variable;

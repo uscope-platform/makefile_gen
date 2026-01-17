@@ -58,7 +58,7 @@ void HDL_modules_factory::add_parameter(const std::shared_ptr<HDL_parameter> &p)
     current_resource.add_parameter(p);
 }
 
-void HDL_modules_factory::add_function(const HDL_function &f) {
+void HDL_modules_factory::add_function(const HDL_function_def &f) {
     current_resource.add_function(f);
 }
 

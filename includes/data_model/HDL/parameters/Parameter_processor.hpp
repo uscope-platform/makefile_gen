@@ -78,9 +78,9 @@ public:
     std::shared_ptr<HDL_parameter> process_parameter(const std::shared_ptr<HDL_parameter> &par, HDL_Resource &spec);
 private:
     std::shared_ptr<HDL_parameter> process_scalar_function_parameter(const std::shared_ptr<HDL_parameter> &par,
-        const HDL_function &fcn);
+        const HDL_function_def &fcn);
     std::shared_ptr<HDL_parameter> process_vector_function_parameter(const std::shared_ptr<HDL_parameter> &par,
-        const HDL_function &fcn, HDL_Resource &spec);
+        const HDL_function_def &fcn, HDL_Resource &spec);
     std::shared_ptr<HDL_parameter> process_unsupported_parameter(const std::shared_ptr<HDL_parameter> &par,
         const Expression &fcn);
     std::shared_ptr<HDL_parameter> process_scalar_parameter(const std::shared_ptr<HDL_parameter> &par);

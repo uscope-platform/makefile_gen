@@ -40,7 +40,8 @@ target_sources(makefile_gen_lib
     data_model/HDL/parameters/Expression_component.cpp
     data_model/HDL/parameters/Parameter_processor.cpp
     data_model/HDL/parameters/Initialization_list.cpp
-    data_model/HDL/parameters/HDL_function.cpp
+    data_model/HDL/parameters/HDL_function_def.cpp
+    data_model/HDL/parameters/HDL_function_call.cpp
     data_model/HDL/factories/HDL_functions_factory.cpp
     data_model/HDL/factories/nets/HDL_range_factory.cpp
     data_model/HDL/factories/nets/HDL_concat_factory.cpp

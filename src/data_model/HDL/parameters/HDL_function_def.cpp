@@ -14,27 +14,27 @@
 //  limitations under the License.
 
 
-#include "data_model/HDL/parameters/HDL_function.hpp"
+#include "data_model/HDL/parameters/HDL_function_def.hpp"
 
 #include "analysis/loop_solver.hpp"
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
 
-void HDL_function::start_assignment(const std::string &n, Expression idx) {
+void HDL_function_def::start_assignment(const std::string &n, Expression idx) {
     if(idx.empty())
         assignments.push_back({name, {}, {}});
     else
         assignments.push_back({name, idx, {}});
 }
 
-void HDL_function::close_assignment(Expression val) {
+void HDL_function_def::close_assignment(Expression val) {
     assignments.back().value = val;
 }
 
-bool HDL_function::is_scalar() const {
+bool HDL_function_def::is_scalar() const {
     return  loop_metadata.get_assignments().empty() && assignments.size() == 1;
 }
 
-bool HDL_function::operator==(const HDL_function &rhs) const {
+bool HDL_function_def::operator==(const HDL_function_def &rhs) const {
     bool retval = true;
     retval &= name == rhs.name;
     retval &= assignments == rhs.assignments;
@@ -42,7 +42,7 @@ bool HDL_function::operator==(const HDL_function &rhs) const {
     return retval;
 }
 
-std::set<qualified_identifier> HDL_function::get_dependencies() const {
+std::set<qualified_identifier> HDL_function_def::get_dependencies() const {
     std::set<qualified_identifier> res;
 
 
@@ -76,7 +76,7 @@ std::set<qualified_identifier> HDL_function::get_dependencies() const {
     return res;
 }
 
-bool HDL_function::propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) {
+bool HDL_function_def::propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) {
     bool retval = true;
     for(auto &a:assignments) {
         retval &= a.value.propagate_constant(constant_id, value);
@@ -86,11 +86,11 @@ bool HDL_function::propagate_constant(const qualified_identifier &constant_id, c
     return retval;
 }
 
-std::optional<resolved_parameter> HDL_function::evaluate_scalar() {
+std::optional<resolved_parameter> HDL_function_def::evaluate_scalar() {
     return assignments[0].value.evaluate(false);
 }
 
-std::optional<resolved_parameter> HDL_function::evaluate_vector() {
+std::optional<resolved_parameter> HDL_function_def::evaluate_vector() {
     std::vector<int64_t> loop_indexes;
     if(!loop_metadata.get_init().is_empty()) {
         loop_indexes = loop_solver::solve_loop(loop_metadata);
@@ -126,7 +126,7 @@ std::optional<resolved_parameter> HDL_function::evaluate_vector() {
     return result;
 }
 
-std::optional<resolved_parameter> HDL_function::evaluate(bool pack_result) {
+std::optional<resolved_parameter> HDL_function_def::evaluate(bool pack_result) {
     if( loop_metadata.get_assignments().empty() && assignments.size() == 1) {
         return evaluate_scalar();
     } else {

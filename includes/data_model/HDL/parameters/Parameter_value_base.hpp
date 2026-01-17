@@ -16,14 +16,19 @@
 #ifndef MAKEFILEGEN_V2_PARAMETER_VALUE_BASE_HPP
 #define MAKEFILEGEN_V2_PARAMETER_VALUE_BASE_HPP
 
-
+#include <set>
+#include <string>
+#include <vector>
+#include "data_model/HDL/parameters/qualified_identifier.hpp"
+#include "data_model/mdarray.hpp"
 
 class Parameter_value_base {
 public:
     enum param_value_type {
         concatenation,
         expression,
-        replication
+        replication,
+        function
     };
 
     virtual ~Parameter_value_base() = default;
@@ -36,11 +41,12 @@ public:
 
     virtual int64_t get_depth() {return 0;}
 
-    bool empty() const {return false;}
+    [[nodiscard]] bool empty() const {return false;}
 
-    bool is_expression(){return type == expression;}
-    bool is_replication(){return type == replication;}
-    bool is_concatenation(){return type == concatenation;}
+    [[nodiscard]] bool is_expression() const {return type == expression;}
+    [[nodiscard]] bool is_replication() const {return type == replication;}
+    [[nodiscard]] bool is_concatenation() const {return type == concatenation;}
+    [[nodiscard]] bool is_function() const {return type == function;}
 
     virtual std::shared_ptr<Parameter_value_base> clone_ptr() const = 0;
 

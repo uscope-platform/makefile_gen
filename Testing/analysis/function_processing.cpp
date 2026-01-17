@@ -40,7 +40,7 @@ TEST(function_processing, simple_function_scalar) {
     EXPECT_EQ(functions.size(), 1);
     EXPECT_TRUE(functions.contains("CTRL_ADDR_CALC"));
     auto result = functions["CTRL_ADDR_CALC"];
-    HDL_function check_f;
+    HDL_function_def check_f;
     check_f.set_name("CTRL_ADDR_CALC");
     assignment a;
     a.name = "CTRL_ADDR_CALC";
@@ -79,7 +79,7 @@ TEST(function_processing, simple_function_array) {
     EXPECT_EQ(functions.size(), 1);
     EXPECT_TRUE(functions.contains("CTRL_ADDR_CALC"));
     auto result = functions["CTRL_ADDR_CALC"];
-    HDL_function check_f;
+    HDL_function_def check_f;
     check_f.set_name("CTRL_ADDR_CALC");
     assignment a;
     a.name = "CTRL_ADDR_CALC";
@@ -129,7 +129,7 @@ TEST(function_processing, simple_loop_function) {
     EXPECT_TRUE(functions.contains("CTRL_ADDR_CALC"));
     auto result = functions["CTRL_ADDR_CALC"];
 
-    HDL_function check_f;
+    HDL_function_def check_f;
     check_f.set_name("CTRL_ADDR_CALC");
     auto metadata = HDL_loop_metadata();
 
@@ -193,7 +193,7 @@ TEST(function_processing, parametric_loop_function) {
     EXPECT_TRUE(functions.contains("CTRL_ADDR_CALC"));
     auto result = functions["CTRL_ADDR_CALC"];
 
-    HDL_function check_f;
+    HDL_function_def check_f;
     check_f.set_name("CTRL_ADDR_CALC");
     auto metadata = HDL_loop_metadata();
 
@@ -259,7 +259,7 @@ TEST(function_processing, complex_loop_function) {
     EXPECT_TRUE(functions.contains("CTRL_ADDR_CALC"));
     auto result = functions["CTRL_ADDR_CALC"];
 
-    HDL_function check_f;
+    HDL_function_def check_f;
     check_f.set_name("CTRL_ADDR_CALC");
     auto metadata = HDL_loop_metadata();
 
@@ -338,7 +338,7 @@ TEST(function_processing, parametrized_function) {
     EXPECT_TRUE(functions.contains("CTRL_ADDR_CALC"));
     auto result = functions["CTRL_ADDR_CALC"];
 
-    HDL_function check_f;
+    HDL_function_def check_f;
     check_f.set_name("CTRL_ADDR_CALC");
 
     assignment a = {
@@ -392,7 +392,7 @@ TEST(function_processing, package_assignment) {
     auto result = functions["CTRL_ADDR_CALC"];
 
 
-    HDL_function check_f;
+    HDL_function_def check_f;
     check_f.set_name("CTRL_ADDR_CALC");
 
     assignment a = {

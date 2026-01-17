@@ -35,9 +35,9 @@ void HDL_functions_factory::close_assignment() {
     new_expression.clear();
 }
 
-HDL_function HDL_functions_factory::get_function() {
+HDL_function_def HDL_functions_factory::get_function() {
     auto current_function = f;
-    f = HDL_function();
+    f = HDL_function_def();
     new_expression.clear();
     return current_function;
 }

@@ -25,35 +25,11 @@
 #include <variant>
 #include <cmath>
 
-#include "data_model/mdarray.hpp"
+#include "data_model/HDL/parameters/qualified_identifier.hpp"
 
 #include <cereal/types/vector.hpp>
 
 class Expression;
-
-using resolved_parameter = std::variant<int64_t, std::string, mdarray<int64_t>>;
-
-struct qualified_identifier {
-    std::string prefix;
-    std::string name;
-
-    friend bool operator==(const qualified_identifier &lhs, const qualified_identifier &rhs) {
-        return std::tie(lhs.prefix, lhs.name) == std::tie(rhs.prefix, rhs.name);
-    }
-
-    friend bool operator!=(const qualified_identifier &lhs, const qualified_identifier &rhs) {
-        return !(lhs == rhs);
-    }
-
-    bool operator<(const qualified_identifier& other) const {
-        return std::tie(prefix, name) < std::tie(other.prefix, other.name);
-    }
-
-    template<class Archive>
-    void serialize( Archive & ar ) {
-        ar(name, prefix);
-    }
-};
 
 class Expression_component {
 public:
@@ -115,7 +91,7 @@ public:
 
     void set_array_index(const std::vector<Expression> &v);
     void add_array_index(const Expression &c);
-    std::vector<Expression> get_array_index() {return array_index;};
+    std::vector<Expression> get_array_index();
 
     std::string print_index(const std::vector<Expression> &index)const;
 

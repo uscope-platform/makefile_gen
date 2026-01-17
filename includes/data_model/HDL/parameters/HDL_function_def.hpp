@@ -23,7 +23,7 @@
 #include "data_model/HDL/parameters/Expression.hpp"
 #include "data_model/HDL/HDL_loop.hpp"
 
-class HDL_function {
+class HDL_function_def {
 public:
 
     void set_name(const std::string &s) { name = s;}
@@ -36,7 +36,7 @@ public:
     std::optional<resolved_parameter> evaluate_vector();
     std::vector<assignment> get_assignments()const{ return assignments;};
     HDL_loop_metadata get_loop()const{ return loop_metadata;};
-    bool operator==(const HDL_function &rhs) const;
+    bool operator==(const HDL_function_def &rhs) const;
 
     std::set<qualified_identifier> get_dependencies()const;
     bool propagate_constant(const qualified_identifier &name, const resolved_parameter &value);\

@@ -15,7 +15,7 @@
 
 #include "analysis/parameter_solver.hpp"
 
-std::map<qualified_identifier, resolved_parameter>   parameter_solver::process_parameters(const Parameters_map &map_in, std::unordered_map<std::string, HDL_function> function_defs) {
+std::map<qualified_identifier, resolved_parameter>   parameter_solver::process_parameters(const Parameters_map &map_in, std::unordered_map<std::string, HDL_function_def> function_defs) {
     auto map = map_in.clone();
 
     std::map<qualified_identifier, resolved_parameter> solved_parameters;
@@ -212,7 +212,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
 }
 
 std::map<qualified_identifier, std::set<qualified_identifier>> parameter_solver::get_dependency_map(const Parameters_map &map,
-    std::unordered_map<std::string, HDL_function> function_defs) {
+    std::unordered_map<std::string, HDL_function_def> function_defs) {
 
     std::map<qualified_identifier, std::set<qualified_identifier>> dependencies_map;
     for (auto &param: map) {

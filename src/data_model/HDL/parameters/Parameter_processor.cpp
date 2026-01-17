@@ -117,7 +117,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_parameter(const std:
 
 std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_function_parameter(
     const std::shared_ptr<HDL_parameter> &par,
-    const HDL_function &fcn
+    const HDL_function_def &fcn
 ) {
     spdlog::trace("{}->Processing scalar function parameter: {}", trace_prefix, par->get_name());
 
@@ -130,7 +130,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_function_para
 }
 
 std::shared_ptr<HDL_parameter> Parameter_processor::process_vector_function_parameter(
-    const std::shared_ptr<HDL_parameter> &par, const HDL_function &fcn, HDL_Resource &spec) {
+    const std::shared_ptr<HDL_parameter> &par, const HDL_function_def &fcn, HDL_Resource &spec) {
 
     spdlog::trace("{}->Processing vector function parameter: {}", trace_prefix, par->get_name());
 
