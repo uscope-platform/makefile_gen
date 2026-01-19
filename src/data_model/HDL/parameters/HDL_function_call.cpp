@@ -55,7 +55,7 @@ std::optional<resolved_parameter> HDL_function_call::evaluate(bool pack_result) 
 }
 
 std::optional<resolved_parameter> HDL_function_call::evaluate_scalar() {
-    return assignments[0].value->evaluate(false);
+    return assignments[0].get_value()->evaluate(false);
 }
 
 std::optional<resolved_parameter> HDL_function_call::evaluate_vector() {
@@ -69,11 +69,11 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_vector() {
     }
     std::vector<int64_t> values(assignments.size() + loop_indexes.size());
     for(auto &a:assignments) {
-        auto idx = a.index.value()->evaluate(false);
+        auto idx = a.get_index().value()->evaluate(false);
         if(!idx.has_value()) return std::nullopt;
         if(!std::holds_alternative<int64_t>(idx.value())) return std::nullopt;
         auto idx_val = std::get<int64_t>(idx.value());
-        auto value = a.value->evaluate(false);
+        auto value = a.get_value()->evaluate(false);
         if(!value.has_value()) return std::nullopt;
         values[idx_val] = std::get<int64_t>(value.value());
     }
@@ -83,11 +83,11 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_vector() {
         auto loop_assignments = loop_metadata.value().get_assignments();
         for(int i = 0; i<loop_assignments.size(); i++) {
             for(auto &l:loop_indexes) {
-                auto la = loop_assignments[i];
-                la.index.value()->propagate_constant(loop_var, l);
-                auto idx = la.index.value()->evaluate(false);
-                la.value->propagate_constant(loop_var, l);
-                auto var = la.value->evaluate(false);
+                auto la = loop_assignments[i].clone();
+                la.get_index().value()->propagate_constant(loop_var, l);
+                auto idx = la.get_index().value()->evaluate(false);
+                la.get_value()->propagate_constant(loop_var, l);
+                auto var = la.get_value()->evaluate(false);
                 values[std::get<int64_t>(idx.value())] = std::get<int64_t>(var.value());
             }
         }

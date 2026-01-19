@@ -2029,9 +2029,7 @@ TEST(parameter_extraction, simple_function_parameter) {
     p.set_type(HDL_parameter::expression_parameter);
     p.add_component(Expression_component("CTRL_ADDR_CALC", Expression_component::identifier));
     HDL_function_call call("CTRL_ADDR_CALC");
-    assignment a;
-    a.name = "CTRL_ADDR_CALC";
-    a.value = std::make_shared<Expression>(Expression({Expression_component("100", Expression_component::number)}));
+    assignment a("CTRL_ADDR_CALC", std::nullopt, std::make_shared<Expression>(Expression({Expression_component("100", Expression_component::number)})));
     call.add_body({a},std::nullopt);
     p.set_expression(std::make_shared<HDL_function_call>(call));
 
@@ -2095,14 +2093,15 @@ TEST(parameter_extraction, loop_function_parameter) {
         Expression_component("+", Expression_component::operation),
         Expression_component("1", Expression_component::number),
     });
-    assignment a;
-    a.name = "CTRL_ADDR_CALC";
-    a.index = std::make_shared<Expression>(Expression({Expression_component("i", Expression_component::identifier)}));
-    a.value = std::make_shared<Expression>(Expression({
-        Expression_component("100", Expression_component::number),
-        Expression_component("*", Expression_component::operation),
-        Expression_component("i", Expression_component::identifier)
-    }));
+    assignment a(
+    "CTRL_ADDR_CALC",
+        std::make_shared<Expression>(Expression({Expression_component("i", Expression_component::identifier)})),
+        std::make_shared<Expression>(Expression({
+            Expression_component("100", Expression_component::number),
+            Expression_component("*", Expression_component::operation),
+            Expression_component("i", Expression_component::identifier)
+        }))
+        );
     loop.add_assignment(a);
     call.add_body({},loop);
     p.set_expression(std::make_shared<HDL_function_call>(call));

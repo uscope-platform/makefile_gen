@@ -18,6 +18,13 @@
 #include "data_model/HDL/parameters/Expression.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
+assignment::assignment(const std::string &n, const std::optional<std::shared_ptr<Expression>> &idx,
+    const std::shared_ptr<Expression> &val) {
+    name = n;
+    index = idx;
+    value = val;
+}
+
 bool assignment::operator==(const assignment &rhs) const {
     bool retval = true;
     retval &= name == rhs.name;
@@ -28,6 +35,30 @@ bool assignment::operator==(const assignment &rhs) const {
     }
 
     return retval;
+}
+
+void assignment::set_index(const std::shared_ptr<Expression> &idx) {
+    index = idx;
+}
+
+void assignment::set_value(const std::shared_ptr<Expression> &val) {
+    value = val;
+}
+
+std::optional<std::shared_ptr<Expression>> assignment::get_index() const {
+    return index;
+}
+
+std::shared_ptr<Expression> assignment::get_value() const {
+    return value;
+}
+
+assignment assignment::clone() const {
+    assignment a;
+    a.name = name;
+    if(index.has_value()) a.set_index(std::make_shared<Expression>(*index.value()));
+    a.set_value(std::make_shared<Expression>(*value));
+    return a;
 }
 
 HDL_loop_metadata::~HDL_loop_metadata() = default;
@@ -77,7 +108,7 @@ bool HDL_loop_metadata::propagate_constant(const qualified_identifier &constant_
     retval &= init->propagate_constant(constant_id, value);
     retval &= end_c->propagate_constant(constant_id, value);
     retval &= iter->propagate_constant(constant_id, value);
-    for(auto &a:assignments) retval &= a.value->propagate_constant(constant_id, value);
+    for(auto &a:assignments) retval &= a.get_value()->propagate_constant(constant_id, value);
     return retval;
 }
 

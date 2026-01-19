@@ -42,10 +42,7 @@ TEST(function_processing, simple_function_scalar) {
     auto result = functions["CTRL_ADDR_CALC"];
     HDL_function_def check_f;
     check_f.set_name("CTRL_ADDR_CALC");
-    assignment a;
-    a.name = "CTRL_ADDR_CALC";
-    a.index = {};
-    a.value = std::make_shared<Expression>(Expression({Expression_component("67", Expression_component::number)}));
+    assignment a("CTRL_ADDR_CALC", std::nullopt, std::make_shared<Expression>(Expression({Expression_component("67", Expression_component::number)})));
     check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
 
@@ -81,16 +78,23 @@ TEST(function_processing, simple_function_array) {
     auto result = functions["CTRL_ADDR_CALC"];
     HDL_function_def check_f;
     check_f.set_name("CTRL_ADDR_CALC");
-    assignment a;
-    a.name = "CTRL_ADDR_CALC";
-    a.index = std::make_shared<Expression>(Expression({Expression_component("0", Expression_component::number)}));
-    a.value = std::make_shared<Expression>(Expression({Expression_component("100", Expression_component::number)}));
+    assignment a(
+        "CTRL_ADDR_CALC",
+        std::make_shared<Expression>(Expression({Expression_component("0", Expression_component::number)})),
+        std::make_shared<Expression>(Expression({Expression_component("100", Expression_component::number)}))
+        );
     check_f.add_assignment(a);
-    a.index.value()->components[0] = Expression_component("1", Expression_component::number);
-    a.value->components[0] = Expression_component("200", Expression_component::number);
+    a = assignment(
+        "CTRL_ADDR_CALC",
+        std::make_shared<Expression>(Expression({Expression_component("1", Expression_component::number)})),
+        std::make_shared<Expression>(Expression({Expression_component("200", Expression_component::number)}))
+        );
     check_f.add_assignment(a);
-    a.index.value()->components[0] = Expression_component("2", Expression_component::number);
-    a.value->components[0] = Expression_component("300", Expression_component::number);
+    a = assignment(
+        "CTRL_ADDR_CALC",
+        std::make_shared<Expression>(Expression({Expression_component("2", Expression_component::number)})),
+        std::make_shared<Expression>(Expression({Expression_component("300", Expression_component::number)}))
+        );
     check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
 
@@ -400,7 +404,7 @@ TEST(function_processing, package_assignment) {
         std::make_shared<Expression>(Expression({Expression_component("0", Expression_component::number)})),
         std::make_shared<Expression>(Expression({Expression_component("bus_base", Expression_component::identifier)}))
     };
-    a.value->components[0].set_package_prefix("hil_address_space");
+    a.get_value()->components[0].set_package_prefix("hil_address_space");
     check_f.add_assignment(a);
 
     EXPECT_EQ(check_f,result);

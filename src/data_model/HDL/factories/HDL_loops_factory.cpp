@@ -34,7 +34,7 @@ void HDL_loops_factory::clear() {
 void HDL_loops_factory::start_assignment(const std::string &name) {
     if(loop_phase == body) {
         expression_valid = true;
-        loop_specs.add_assignment({name, {}});
+        loop_specs.add_assignment(assignment(name, {}, {}));
     }
 }
 
@@ -75,7 +75,7 @@ void HDL_loops_factory::set_phase(loop_phase_t p) {
 void HDL_loops_factory::advance_expression() {
     if(expression_valid) {
         auto assignments = loop_specs.get_assignments();
-        assignments.back().index = std::make_shared<Expression>(current_expression);
+        assignments.back().set_index(std::make_shared<Expression>(current_expression));
         loop_specs.set_assignments(assignments);
         current_expression.clear();
     }
@@ -84,7 +84,7 @@ void HDL_loops_factory::advance_expression() {
 void HDL_loops_factory::close_expression() {
     if(expression_valid) {
         auto assignments = loop_specs.get_assignments();
-        assignments.back().index = std::make_shared<Expression>(current_expression);
+        assignments.back().set_value(std::make_shared<Expression>(current_expression));
         loop_specs.set_assignments(assignments);
         expression_valid = false;
         current_expression.clear();

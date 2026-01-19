@@ -28,12 +28,20 @@ class Expression;
 
 
 struct assignment {
+    assignment() = default;
+    assignment(const std::string &n,const  std::optional<std::shared_ptr<Expression>> &idx, const  std::shared_ptr<Expression> &val);
     bool operator==(const assignment &rhs) const;
 
     template<class Archive>
     void serialize( Archive & ar ){
         ar(name, index, value);
     }
+    assignment clone() const;
+    void set_index(const std::shared_ptr<Expression> &idx);
+    void set_value(const std::shared_ptr<Expression> &val);
+    std::optional<std::shared_ptr<Expression>> get_index() const;
+    std::shared_ptr<Expression> get_value() const;
+private:
     std::string name;
     std::optional<std::shared_ptr<Expression>> index;
     std::shared_ptr<Expression> value;
