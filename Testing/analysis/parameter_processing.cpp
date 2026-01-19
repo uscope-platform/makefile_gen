@@ -51,9 +51,10 @@ Parameters_map produce_check_components(std::vector<param_check_t> &in){
         par->set_name(vt.name);
         if(vt.is_rpn){
 
-            auto expr= static_cast<Expression *>(par->get_expression().get());
-            expr->rpn = true;
-            par->set_expression(*expr);
+
+            auto expr= par->get_expression()->as<Expression>();
+            expr.rpn = true;
+            par->set_expression(std::make_shared<Expression>(expr));
         }
         for(auto &cpt:vt.components){
             par->add_component(Expression_component(cpt, Expression_component::get_type(cpt)));

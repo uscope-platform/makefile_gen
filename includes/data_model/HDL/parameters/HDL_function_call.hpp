@@ -24,10 +24,11 @@
 
 class HDL_function_call : public Parameter_value_base{
 public:
-
+    HDL_function_call() = default;
+    explicit HDL_function_call(const std::string &n){function_name = n;}
     void set_name(const std::string &n){function_name = n;}
     std::string get_name(){return function_name;}
-    void add_argument(const std::shared_ptr<Parameter_value_base> &p){arguments.push_back(p);}
+    void add_argument(const std::shared_ptr<Parameter_value_base> &p);
 
     std::set<qualified_identifier> get_dependencies()const;
     bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value);

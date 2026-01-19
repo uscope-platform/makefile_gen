@@ -15,6 +15,10 @@
 
 #include "data_model/HDL/parameters/HDL_function_call.hpp"
 
+void HDL_function_call::add_argument(const std::shared_ptr<Parameter_value_base> &p) {
+    arguments.push_back(p);
+}
+
 std::set<qualified_identifier> HDL_function_call::get_dependencies() const {
     std::set<qualified_identifier> retval;
     for (auto &arg:arguments) {

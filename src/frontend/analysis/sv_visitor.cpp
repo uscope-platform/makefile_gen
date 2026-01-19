@@ -211,7 +211,6 @@ void sv_visitor::enterPrimaryPath(sv2017::PrimaryPathContext *ctx) {
                 deps_factory.start_scalar_net(ctx->getText());
             }
         }
-
     }
 }
 
@@ -550,8 +549,13 @@ void sv_visitor::exitPrimaryRepl(sv2017::PrimaryReplContext *ctx) {
     }
 }
 
+void sv_visitor::enterPrimaryCall(sv2017::PrimaryCallContext *ctx) {
+    params_factory.start_function_assignment(ctx->primary()->getText());
+}
+
+
 void sv_visitor::exitPrimaryCall(sv2017::PrimaryCallContext *ctx) {
-    params_factory.start_function_assignment();
+    params_factory.stop_function_assignment();
 }
 
 void sv_visitor::enterConstant_param_expression(sv2017::Constant_param_expressionContext *ctx) {

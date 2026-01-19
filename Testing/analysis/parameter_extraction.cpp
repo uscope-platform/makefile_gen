@@ -597,7 +597,8 @@ TEST(parameter_extraction, integer_localparams) {
     auto p = std::make_shared<HDL_parameter>();
     p->set_type(HDL_parameter::expression_parameter);
     p->set_name("serial_msb_out_first");
-    p->set_expression({Expression_component("0", Expression_component::number)});
+    Expression e = {Expression_component("0", Expression_component::number)};
+    p->set_expression(std::make_shared<Expression>(e));
 
     check_params.insert(p);
 
@@ -605,7 +606,8 @@ TEST(parameter_extraction, integer_localparams) {
     p = std::make_shared<HDL_parameter>();
     p->set_type(HDL_parameter::expression_parameter);
     p->set_name("serial_lsb_out_first");
-    p->set_expression({Expression_component("1", Expression_component::number)});
+    e = {Expression_component("1", Expression_component::number)};
+    p->set_expression(std::make_shared<Expression>(e));
 
     check_params.insert(p);
 
@@ -2020,12 +2022,14 @@ TEST(parameter_extraction, simple_function_parameter) {
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
 
-    auto param = resource.get_parameters().get("TEST_PARAM");
+    auto param =  resource.get_parameters().get("TEST_PARAM");
 
     HDL_parameter p;
     p.set_name("TEST_PARAM");
-    p.set_type(HDL_parameter::function_parameter);
+    p.set_type(HDL_parameter::expression_parameter);
     p.add_component(Expression_component("CTRL_ADDR_CALC", Expression_component::identifier));
+    HDL_function_call call("CTRL_ADDR_CALC");
+    p.set_expression(std::make_shared<HDL_function_call>(call));
 
     ASSERT_EQ(p, *param);
 
@@ -2068,8 +2072,10 @@ TEST(parameter_extraction, loop_function_parameter) {
 
     HDL_parameter p;
     p.set_name("TEST_PARAM");
-    p.set_type(HDL_parameter::function_parameter);
+    p.set_type(HDL_parameter::expression_parameter);
     p.add_component(Expression_component("CTRL_ADDR_CALC", Expression_component::identifier));
+    HDL_function_call call("CTRL_ADDR_CALC");
+    p.set_expression(std::make_shared<HDL_function_call>(call));
 
     ASSERT_EQ(p, *param);
 
@@ -2117,8 +2123,10 @@ TEST(parameter_extraction, parametric_loop_function_parameter) {
 
     HDL_parameter p;
     p.set_name("TEST_PARAM");
-    p.set_type(HDL_parameter::function_parameter);
+    p.set_type(HDL_parameter::expression_parameter);
     p.add_component(Expression_component("CTRL_ADDR_CALC", Expression_component::identifier));
+    HDL_function_call call("CTRL_ADDR_CALC");
+    p.set_expression(std::make_shared<HDL_function_call>(call));
 
     ASSERT_EQ(p, *param);
 
@@ -2129,6 +2137,52 @@ TEST(parameter_extraction, parametric_loop_function_parameter) {
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
         {{"", "TEST_PARAM"}, av}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+
+
+TEST(parameter_extraction, function_with_arguments) {
+    std::string test_pattern = R"(
+        module test_mod #(
+        )();
+
+            function logic [31:0] add(integer a, integer b);
+                add = a + b;
+            endfunction
+
+          parameter [31:0] TEST_PARAM = add(5, 7);
+
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    auto param = resource.get_parameters().get("TEST_PARAM");
+
+    HDL_parameter p;
+    p.set_name("TEST_PARAM");
+    p.set_type(HDL_parameter::expression_parameter);
+    HDL_function_call call("add");
+    call.add_argument(std::make_shared<Expression>(Expression({Expression_component("5", Expression_component::component_type::number)})));
+    call.add_argument(std::make_shared<Expression>(Expression({Expression_component("7", Expression_component::component_type::number)})));
+
+    p.set_expression(std::make_shared<HDL_function_call>(call));
+
+    ASSERT_EQ(p, *param);
+
+    auto defaults = resource.get_default_parameters();
+
+
+    std::map<qualified_identifier, resolved_parameter> check_defaults  = {
+        {{"", "TEST_PARAM"}, 12}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));

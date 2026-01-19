@@ -231,13 +231,13 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
                     auto value = parameter->get_numeric_value();
                     Expression e;
                     e.emplace_back(value);
-                    return_par->set_expression(e);
+                    return_par->set_expression(std::make_shared<Expression>(e));
                     return_par->set_value(value);
                 } else {
                     auto value = parameter->get_string_value();
                     Expression e;
                     e.emplace_back(value, Expression_component::get_type(value));
-                    return_par->set_expression(e);
+                    return_par->set_expression(std::make_shared<Expression>(e));
                     return_par->set_value(value);
                 }
             }

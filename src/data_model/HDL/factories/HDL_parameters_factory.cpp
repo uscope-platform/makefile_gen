@@ -17,7 +17,7 @@
 
 
 void HDL_parameters_factory::new_parameter() {
-      resources_factory_base<HDL_parameter>::new_basic_resource();
+      new_basic_resource();
       current_resource.set_type(HDL_parameter::expression_parameter);
       for(auto &dim:packed_dimensions){
           init_list.add_dimension(dim, dim.packed);
@@ -36,9 +36,10 @@ void HDL_parameters_factory::set_value(const std::string &s) {
 }
 
 void HDL_parameters_factory::add_component(const Expression_component &c) {
-    if(in_expression_new){
+    if(in_expression_new && !skip_call_name){
         new_expression.push_back(c);
     }
+    skip_call_name = false;
 }
 
 void HDL_parameters_factory::start_initialization_list() {
@@ -145,14 +146,12 @@ void HDL_parameters_factory::stop_expression_new() {
                 expression_stack.push(new_expression);
             } else if(in_concatenation) {
                 new_concatenation.add_component(std::make_shared<Expression>(new_expression));
+            } else if(in_function_assignment) {
+                new_call.add_argument(std::make_shared<Expression>(new_expression));
             } else if(in_initialization_list) {
                 init_list.add_item(std::make_shared<Expression>(new_expression));
-            }   else {
-                current_resource.set_expression(new_expression);
-                if(in_function_assignment) {
-                    in_function_assignment = false;
-                    current_resource.set_type(HDL_parameter::function_parameter);
-                }
+            } else {
+                current_resource.set_expression(std::make_shared<Expression>(new_expression));
             }
         }
         new_expression.clear();
@@ -225,7 +224,7 @@ void HDL_parameters_factory::stop_packed_dimension() {
 
 
 void HDL_parameters_factory::start_instance_parameter_assignment(const std::string& parameter_name) {
-    resources_factory_base<HDL_parameter>::new_basic_resource();
+    new_basic_resource();
     current_resource.set_type(HDL_parameter::expression_parameter);
     current_resource.set_name(parameter_name);
 }
@@ -245,4 +244,31 @@ void HDL_parameters_factory::start_array_quantifier() {
 
 void HDL_parameters_factory::stop_array_quantifier() {
     in_bus_array_quantifier = false;
+}
+
+void HDL_parameters_factory::start_function_assignment(const std::string &f_name) {
+    if (in_function_assignment) {
+        calls_stack.push(new_call);
+        new_call = HDL_function_call();
+    }
+    new_call.set_name(f_name);
+    in_function_assignment = true;
+    skip_call_name = true;
+    expression_level--;
+}
+
+void HDL_parameters_factory::stop_function_assignment() {
+    if (!calls_stack.empty()) {
+        auto inner_call = new_call;
+        new_call = calls_stack.top();
+        calls_stack.pop();
+        inner_call.add_argument(std::make_shared<HDL_function_call>(inner_call));
+    } else {
+        if (in_initialization_list) {
+            init_list.add_item(std::make_shared<HDL_function_call>(new_call));
+        } else {
+            current_resource.set_expression(std::make_shared<HDL_function_call>(new_call));
+        }
+    }
+    in_function_assignment = false;
 }

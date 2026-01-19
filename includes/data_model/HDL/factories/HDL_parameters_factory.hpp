@@ -18,6 +18,7 @@
 
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/parameters/Initialization_list.hpp"
+#include "data_model/HDL/parameters/HDL_function_call.hpp"
 #include "resource_factory_base.hpp"
 
 
@@ -70,7 +71,8 @@ public:
     void start_array_quantifier();
     void stop_array_quantifier();
 
-    void start_function_assignment() {in_function_assignment = true;}
+    void start_function_assignment(const std::string &f_name);
+    void stop_function_assignment();
 
     bool in_replication_assignment_context() const {return in_replication_assignment;};
     bool in_packed_context() const {return in_packed_assignment; };
@@ -101,10 +103,12 @@ private:
     bool in_bus_array_quantifier = false;
     bool in_function_assignment = false;
     bool in_replication_size = false;
+    bool skip_call_name = false;
 
     std::stack<Concatenation> concatenations_stack;
     std::stack<Expression> expression_stack;
     std::stack<Replication> replication_stack;
+    std::stack<HDL_function_call> calls_stack;
 
 
     Expression bit_selection;
@@ -113,6 +117,7 @@ private:
     Expression new_expression;
     Concatenation new_concatenation;
     Replication new_replication;
+    HDL_function_call new_call;
     int expression_level=0;
     std::stack<int> expression_level_stack;
 

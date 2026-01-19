@@ -26,6 +26,8 @@ protected:
     void new_basic_resource();
     T get_resource();
 
+    virtual ~resources_factory_base() = default;
+
     virtual void set_name(const std::string &n);
 
     T current_resource;

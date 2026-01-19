@@ -104,6 +104,7 @@ public:
     void enterPrimaryRepl(sv2017::PrimaryReplContext *ctx) override;
     void exitPrimaryRepl(sv2017::PrimaryReplContext *ctx) override;
 
+    void enterPrimaryCall(sv2017::PrimaryCallContext *ctx) override;
     void exitPrimaryCall(sv2017::PrimaryCallContext *ctx) override;
 
     void enterBit_select(sv2017::Bit_selectContext *ctx) override;

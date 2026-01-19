@@ -70,9 +70,9 @@ public:
     bool is_empty();
 
     void add_component(const Expression_component &component);
-    void set_expression(const Expression  &c) {
+    void set_expression(const std::shared_ptr<Parameter_value_base>  &e) {
         locking_violation_check();
-        i_l.set_scalar(std::make_shared<Expression>(c));
+        i_l.set_scalar(e);
     };
     std::shared_ptr<Parameter_value_base> get_expression() {
         auto exp =  i_l.get_scalar();
