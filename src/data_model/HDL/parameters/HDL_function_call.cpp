@@ -28,6 +28,14 @@ std::set<qualified_identifier> HDL_function_call::get_dependencies() const {
         auto deps = arg->get_dependencies();
         retval.insert(deps.begin(), deps.end());
     }
+    for(auto &a:assignments) {
+        auto deps = a.get_value()->get_dependencies();
+        retval.insert(deps.begin(), deps.end());
+    }
+    if(loop_metadata.has_value()) {
+        auto loop_deps = loop_metadata.value().get_dependencies();
+        retval.insert(loop_deps.begin(), loop_deps.end());
+    }
     return retval;
 }
 
@@ -35,6 +43,12 @@ bool HDL_function_call::propagate_constant(const qualified_identifier &constant_
     bool retval = true;
     for (auto &arg:arguments) {
         retval &= arg->propagate_constant(constant_id, value);
+    }
+    for(auto &a:assignments) {
+        retval &= a.get_value()->propagate_constant(constant_id, value);
+    }
+    if(loop_metadata.has_value()) {
+        retval &= loop_metadata.value().propagate_constant(constant_id, value);
     }
     return  retval;
 }

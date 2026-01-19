@@ -2155,9 +2155,36 @@ TEST(parameter_extraction, parametric_loop_function_parameter) {
     p.set_type(HDL_parameter::expression_parameter);
     p.add_component(Expression_component("CTRL_ADDR_CALC", Expression_component::identifier));
     HDL_function_call call("CTRL_ADDR_CALC");
+    HDL_loop_metadata loop;
+    HDL_parameter idx;
+    idx.set_name("i");
+    idx.set_type(HDL_parameter::expression_parameter);
+    idx.add_component(Expression_component("0", Expression_component::number));
+    loop.set_init(idx);
+    loop.set_end_c({
+        Expression_component("i", Expression_component::identifier),
+        Expression_component("<", Expression_component::operation),
+        Expression_component("N_CHAINS", Expression_component::identifier),
+    });
+    loop.set_iter({
+        Expression_component("i", Expression_component::identifier),
+        Expression_component("+", Expression_component::operation),
+        Expression_component("1", Expression_component::number),
+    });
+    assignment a(
+    "CTRL_ADDR_CALC",
+        std::make_shared<Expression>(Expression({Expression_component("i", Expression_component::identifier)})),
+        std::make_shared<Expression>(Expression({
+            Expression_component(100, 0),
+            Expression_component("*", Expression_component::operation),
+            Expression_component("i", Expression_component::identifier)
+        }))
+        );
+    loop.add_assignment(a);
+    call.add_body({},loop);
     p.set_expression(std::make_shared<HDL_function_call>(call));
 
-    ASSERT_EQ(p, *param);
+    EXPECT_EQ(p, *param);
 
     auto defaults = resource.get_default_parameters();
 

@@ -102,6 +102,25 @@ HDL_loop_metadata & HDL_loop_metadata::operator=(HDL_loop_metadata &&other) noex
     return *this;
 }
 
+std::set<qualified_identifier> HDL_loop_metadata::get_dependencies() const {
+    std::set<qualified_identifier> deps;
+    auto loop_var = init->get_name();
+
+    auto init_deps = init->get_dependencies();
+    deps.insert(init_deps.begin(), init_deps.end());
+    auto end_c_deps = end_c->get_dependencies();
+    deps.insert(end_c_deps.begin(), end_c_deps.end());
+    auto iter_deps = iter->get_dependencies();
+    deps.insert(iter_deps.begin(), iter_deps.end());
+    for(auto &a:assignments) {
+        auto a_deps = a.get_value()->get_dependencies();
+        deps.insert(a_deps.begin(), a_deps.end());
+    }
+    deps.erase({"", loop_var});
+    return deps;
+
+}
+
 bool HDL_loop_metadata::propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) {
     bool retval = true;
 

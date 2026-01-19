@@ -18,6 +18,7 @@
 
 
 #include <optional>
+#include <set>
 #include <cereal/types/optional.hpp>
 #include <spdlog/spdlog.h>
 
@@ -62,7 +63,7 @@ public:
     HDL_loop_metadata & operator=(const HDL_loop_metadata &other);
 
     HDL_loop_metadata & operator=(HDL_loop_metadata &&other) noexcept;
-
+    std::set<qualified_identifier> get_dependencies() const;
     bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value);
 
     void lock();
