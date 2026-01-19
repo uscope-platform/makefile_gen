@@ -147,7 +147,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_vector_function_para
     }
 
     auto loop = fcn.get_loop();
-    auto loop_values = evaluate_loop(loop, spec);
+    auto loop_values = evaluate_loop(loop.value(), spec);
 
 
     return_par->set_array_value(merge_function_contributions(explicit_values, loop_values));

@@ -36,7 +36,7 @@ public:
     std::optional<resolved_parameter> evaluate_scalar();
     std::optional<resolved_parameter> evaluate_vector();
     std::vector<assignment> get_assignments()const{ return assignments;};
-    HDL_loop_metadata get_loop()const{ return loop_metadata;};
+    std::optional<HDL_loop_metadata> get_loop()const{ return loop_metadata;};
     bool operator==(const HDL_function_def &rhs) const;
 
     std::set<qualified_identifier> get_dependencies()const;
@@ -50,7 +50,7 @@ public:
     std::string name;
 private:
     std::vector<assignment> assignments;
-    HDL_loop_metadata loop_metadata;
+    std::optional<HDL_loop_metadata> loop_metadata;
 };
 
 

@@ -19,9 +19,15 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
 bool assignment::operator==(const assignment &rhs) const {
-    return name == rhs.name
-           && index == rhs.index
-           && value == rhs.value;
+    bool retval = true;
+    retval &= name == rhs.name;
+    retval &= *value == *rhs.value;
+    if(index.has_value() ^ rhs.index.has_value()) return false;
+    if(index.has_value()) {
+        retval &= *index.value() == *rhs.index.value();
+    }
+
+    return retval;
 }
 
 HDL_loop_metadata::~HDL_loop_metadata() = default;
@@ -130,9 +136,9 @@ void HDL_loop_metadata::locking_violation_check() {
 
 bool HDL_loop_metadata::operator==(const HDL_loop_metadata &rhs) const {
     bool retval = true;
-    retval &= init == rhs.init;
-    retval &= end_c == rhs.end_c;
-    retval &= iter == rhs.iter;
+    retval &= *init == *rhs.init;
+    retval &= *end_c == *rhs.end_c;
+    retval &= *iter == *rhs.iter;
     retval &= assignments == rhs.assignments;
     retval &= locked == rhs.locked;
     return retval;

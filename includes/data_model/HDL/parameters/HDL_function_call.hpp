@@ -34,6 +34,10 @@ public:
     bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) override;
     void propagate_function(const HDL_function_def &def) override;
     std::optional<resolved_parameter> evaluate(bool pack_result)  override;
+
+    std::optional<resolved_parameter> evaluate_scalar();
+    std::optional<resolved_parameter> evaluate_vector();
+
     std::string print() const  override;
     int64_t get_size()  override;
 
@@ -43,7 +47,7 @@ public:
 
     std::shared_ptr<Parameter_value_base> clone_ptr() const  override;
 
-    void add_body(const std::vector<assignment> &a, const HDL_loop_metadata &loop) {
+    void add_body(const std::vector<assignment> &a, const std::optional<HDL_loop_metadata> &loop) {
         assignments = a;
         loop_metadata = loop;
     };
@@ -59,7 +63,7 @@ private:
 
 
     std::vector<assignment> assignments;
-    HDL_loop_metadata loop_metadata;
+    std::optional<HDL_loop_metadata> loop_metadata;
 
     bool isEqual(const Parameter_value_base& other) const override;
 
