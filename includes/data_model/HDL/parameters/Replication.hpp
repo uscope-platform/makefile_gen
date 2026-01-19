@@ -22,56 +22,32 @@
 #include "data_model/HDL/parameters/Parameter_value_base.hpp"
 
 
+
 class Replication : public Parameter_value_base{
 public:
     Replication() {
         type = replication;
     };
-    Replication(const Expression &size, std::shared_ptr<Parameter_value_base> item) {
-        repeated_item = std::move(item);
-        repetition_size = size;
-        type = replication;
-    }
+    Replication(const Expression &size, std::shared_ptr<Parameter_value_base> item);
 
-    Replication(const Replication &other) {
-        repetition_size = other.repetition_size;
-        if(other.repeated_item != nullptr) repeated_item = other.repeated_item->clone_ptr();
-        type = other.type;
-    }
+    Replication(const Replication &other);
 
-    Replication(Replication &&other) noexcept {
-        repetition_size = other.repetition_size;
-        if(other.repeated_item != nullptr) repeated_item = other.repeated_item->clone_ptr();
-        type = other.type;
-    }
+    Replication(Replication &&other) noexcept;
 
     Replication clone() const;
     int64_t get_depth() override;
 
-    Replication &operator=(const Replication &other) {
-        if (this != &other) {
-            repetition_size = other.repetition_size;
-            if(other.repeated_item != nullptr) repeated_item = other.repeated_item->clone_ptr();
-            type = other.type;
-        }
-        return *this;
-    }
+    Replication &operator=(const Replication &other);
 
-    Replication &operator=(Replication &&other) noexcept {
-        if (this != &other) {
-            repetition_size = other.repetition_size;
-            if(other.repeated_item != nullptr) repeated_item = other.repeated_item->clone_ptr();
-            type = other.type;
-        }
-        return *this;
-    }
+    Replication &operator=(Replication &&other) noexcept;
 
 
     void set_item(std::shared_ptr<Parameter_value_base> item){ repeated_item = std::move(item);}
-    void set_size(const Expression &size){ repetition_size = size;}
+    void set_size(const Expression &size);
 
     std::set<qualified_identifier> get_dependencies()const;
-    bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value);
+    bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value)override;
+    void propagate_function(const HDL_function_def &def) override;
     std::optional<resolved_parameter> evaluate(bool pack_result);
 
     int64_t pack_repetition(int64_t value, int64_t width, int64_t count);

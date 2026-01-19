@@ -215,3 +215,9 @@ bool Expression::propagate_constant(const qualified_identifier &constant_id, con
     }
     return retval;
 }
+
+void Expression::propagate_function(const HDL_function_def &def) {
+    for (auto & component : components) {
+        component.propagate_function(def);
+    }
+}

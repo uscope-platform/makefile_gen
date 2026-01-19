@@ -55,6 +55,12 @@ bool Concatenation::propagate_constant(const qualified_identifier &constant_id, 
     return retval;
 }
 
+void Concatenation::propagate_function(const HDL_function_def &def) {
+    for (auto &comp:components) {
+        comp->propagate_function(def);
+    }
+}
+
 std::optional<resolved_parameter> Concatenation::evaluate(bool pack_result){
     auto concat_size = components.size();
     auto depth = get_depth();

@@ -30,6 +30,7 @@
 // FORWARD DECLARATIONS
 class HDL_parameter;
 class Parameter_processor;
+class HDL_function_def;
 class data_store;
 class Parameters_map;
 
@@ -76,6 +77,7 @@ public:
     std::optional<resolved_parameter> evaluate();
 
     bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value);
+    void propagate_function(const HDL_function_def &def);
 
     std::optional<std::shared_ptr<Parameter_value_base>> get_scalar();
     void clear_scalar();

@@ -17,11 +17,12 @@
 #define HDL_FUNCTION_HPP
 #include <string>
 #include <vector>
-#include <cstdint>
+#include<set>
 
 
-#include "data_model/HDL/parameters/Expression.hpp"
 #include "data_model/HDL/HDL_loop.hpp"
+
+class Expression;
 
 class HDL_function_def {
 public:

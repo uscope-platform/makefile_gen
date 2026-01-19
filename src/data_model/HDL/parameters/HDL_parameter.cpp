@@ -93,6 +93,10 @@ bool HDL_parameter::propagate_constant(const qualified_identifier &constant_id, 
     return i_l.propagate_constant(constant_id, constant_value);
 }
 
+void HDL_parameter::propagate_function(const HDL_function_def &def) {
+    i_l.propagate_function(def);
+}
+
 
 HDL_parameter::operator std::string() {
     std::string ret_val;

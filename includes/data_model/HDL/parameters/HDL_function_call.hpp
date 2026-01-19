@@ -19,7 +19,7 @@
 
 #include "data_model/HDL/parameters/Parameter_value_base.hpp"
 #include "data_model/HDL/parameters/Expression_component.hpp"
-
+#include "data_model/HDL/HDL_loop.hpp"
 
 
 class HDL_function_call : public Parameter_value_base{
@@ -30,19 +30,23 @@ public:
     std::string get_name(){return function_name;}
     void add_argument(const std::shared_ptr<Parameter_value_base> &p);
 
-    std::set<qualified_identifier> get_dependencies()const;
-    bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value);
-    std::optional<resolved_parameter> evaluate(bool pack_result);
-    std::string print() const;
-    int64_t get_size();
+    std::set<qualified_identifier> get_dependencies()const  override;
+    bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) override;
+    void propagate_function(const HDL_function_def &def) override;
+    std::optional<resolved_parameter> evaluate(bool pack_result)  override;
+    std::string print() const  override;
+    int64_t get_size()  override;
 
-    int64_t get_depth();
+    int64_t get_depth()  override;
 
     [[nodiscard]] bool empty() const;
 
-    std::shared_ptr<Parameter_value_base> clone_ptr() const;
+    std::shared_ptr<Parameter_value_base> clone_ptr() const  override;
 
-
+    void add_body(const std::vector<assignment> &a, const HDL_loop_metadata &loop) {
+        assignments = a;
+        loop_metadata = loop;
+    };
 
     template<class Archive>
     void serialize( Archive & ar ) {
@@ -52,6 +56,10 @@ public:
 private:
     std::string function_name;
     std::vector<std::shared_ptr<Parameter_value_base>> arguments;
+
+
+    std::vector<assignment> assignments;
+    HDL_loop_metadata loop_metadata;
 
     bool isEqual(const Parameter_value_base& other) const override;
 

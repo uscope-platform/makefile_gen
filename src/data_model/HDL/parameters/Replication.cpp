@@ -14,6 +14,26 @@
 //  limitations under the License.
 
 #include "data_model/HDL/parameters/Replication.hpp"
+#include "data_model/HDL/parameters/Expression.hpp"
+#include "data_model/HDL/parameters/Concatenation.hpp"
+
+Replication::Replication(const Expression &size, std::shared_ptr<Parameter_value_base> item)  {
+    repeated_item = std::move(item);
+    repetition_size = size;
+    type = replication;
+}
+
+Replication::Replication(const Replication &other) {
+    repetition_size = other.repetition_size;
+    if(other.repeated_item != nullptr) repeated_item = other.repeated_item->clone_ptr();
+    type = other.type;
+}
+
+Replication::Replication(Replication &&other) noexcept {
+    repetition_size = other.repetition_size;
+    if(other.repeated_item != nullptr) repeated_item = other.repeated_item->clone_ptr();
+    type = other.type;
+}
 
 Replication Replication::clone()  const{
     Replication result;
@@ -26,6 +46,26 @@ Replication Replication::clone()  const{
 int64_t Replication::get_depth() {
     return repeated_item->get_depth()+1;
 }
+
+Replication & Replication::operator=(const Replication &other) {
+    if (this != &other) {
+        repetition_size = other.repetition_size;
+        if(other.repeated_item != nullptr) repeated_item = other.repeated_item->clone_ptr();
+        type = other.type;
+    }
+    return *this;
+}
+
+Replication & Replication::operator=(Replication &&other) noexcept {
+    if (this != &other) {
+        repetition_size = other.repetition_size;
+        if(other.repeated_item != nullptr) repeated_item = other.repeated_item->clone_ptr();
+        type = other.type;
+    }
+    return *this;
+}
+
+void Replication::set_size(const Expression &size) { repetition_size = size;}
 
 std::set<qualified_identifier> Replication::get_dependencies()const {
     std::set<qualified_identifier> result, deps;
@@ -42,6 +82,11 @@ bool Replication::propagate_constant(const qualified_identifier &constant_id, co
     result &= repetition_size.propagate_constant(constant_id, value);
     result &= repeated_item->propagate_constant(constant_id, value);
     return result;
+}
+
+void Replication::propagate_function(const HDL_function_def &def) {
+    repetition_size.propagate_function(def);
+    repeated_item->propagate_function(def);
 }
 
 std::optional<resolved_parameter> Replication::evaluate(bool pack_result) {

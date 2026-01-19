@@ -44,7 +44,9 @@
         HDL_Resource();
         HDL_Resource(dependency_class type, std::string n, std::string p);
 
-        std::vector<HDL_instance> get_dependencies(){return dependencies;};
+        std::vector<HDL_instance> get_dependencies(){return dependencies;}
+
+        void process_calls();
         void set_dependencies(std::vector<HDL_instance> &d) {
             locking_violation_check();
             dependencies = d;

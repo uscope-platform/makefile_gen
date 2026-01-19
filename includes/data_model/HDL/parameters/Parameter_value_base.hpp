@@ -22,6 +22,8 @@
 #include "data_model/HDL/parameters/qualified_identifier.hpp"
 #include "data_model/mdarray.hpp"
 
+class HDL_function_def;
+
 class Parameter_value_base {
 public:
     enum param_value_type {
@@ -35,6 +37,7 @@ public:
 
     virtual std::set<qualified_identifier> get_dependencies()const {return {};}
     virtual bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) {return true;}
+    virtual void propagate_function(const HDL_function_def &def) {}
     virtual std::optional<resolved_parameter> evaluate(bool pack_result) {return std::nullopt;}
     virtual std::string print() const {return "";}
     virtual int64_t get_size() {return 0;}

@@ -28,6 +28,7 @@
 #include <cereal/types/variant.hpp>
 #include "cereal/types/utility.hpp"
 
+class HDL_function_def;
 
 class HDL_parameter {
 public:
@@ -45,7 +46,9 @@ public:
     void set_value(int64_t val);
     std::string get_string_value() const;
     int64_t  get_numeric_value() const;
+
     bool propagate_constant(const qualified_identifier &constant_name, const resolved_parameter &constant_value);
+    void propagate_function(const HDL_function_def &def);
     explicit operator std::string();
 
     bool is_function() const {return type == function_parameter;}

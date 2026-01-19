@@ -19,6 +19,8 @@
 #include <string>
 
 #include "data_model/HDL/HDL_loop.hpp"
+#include "data_model/HDL/parameters/Expression_component.hpp"
+#include "data_model/HDL/parameters/Expression.hpp"
 #include "data_model/HDL/parameters/HDL_function_def.hpp"
 
 class HDL_functions_factory {

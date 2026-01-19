@@ -18,16 +18,17 @@
 
 #include "analysis/loop_solver.hpp"
 #include "data_model/HDL/parameters/Parameter_processor.hpp"
+#include "data_model/HDL/parameters/Expression.hpp"
 
 void HDL_function_def::start_assignment(const std::string &n, Expression idx) {
     if(idx.empty())
         assignments.push_back({name, {}, {}});
     else
-        assignments.push_back({name, idx, {}});
+        assignments.push_back({name, std::make_shared<Expression>(idx), {}});
 }
 
 void HDL_function_def::close_assignment(Expression val) {
-    assignments.back().value = val;
+    assignments.back().value = std::make_shared<Expression>(val);
 }
 
 bool HDL_function_def::is_scalar() const {
@@ -47,10 +48,10 @@ std::set<qualified_identifier> HDL_function_def::get_dependencies() const {
 
 
     for(auto &la:loop_metadata.get_assignments()) {
-        auto deps = la.value.get_dependencies();
+        auto deps = la.value->get_dependencies();
         res.insert(deps.begin(), deps.end());
         if(la.index.has_value()) {
-            deps = la.index.value().get_dependencies();
+            deps = la.index.value()->get_dependencies();
             res.insert(deps.begin(), deps.end());
         }
 
@@ -65,10 +66,10 @@ std::set<qualified_identifier> HDL_function_def::get_dependencies() const {
     res.erase({"", loop_metadata.get_init().get_name()});
 
     for(auto &a:assignments) {
-        auto deps = a.value.get_dependencies();
+        auto deps = a.value->get_dependencies();
         res.insert(deps.begin(), deps.end());
         if(a.index.has_value()) {
-            deps = a.index.value().get_dependencies();
+            deps = a.index.value()->get_dependencies();
             res.insert(deps.begin(), deps.end());
         }
     }
@@ -79,15 +80,15 @@ std::set<qualified_identifier> HDL_function_def::get_dependencies() const {
 bool HDL_function_def::propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) {
     bool retval = true;
     for(auto &a:assignments) {
-        retval &= a.value.propagate_constant(constant_id, value);
-        if(a.index.has_value()) retval &= a.index.value().propagate_constant(constant_id, value);
+        retval &= a.value->propagate_constant(constant_id, value);
+        if(a.index.has_value()) retval &= a.index.value()->propagate_constant(constant_id, value);
     }
     retval &= loop_metadata.propagate_constant(constant_id, value);
     return retval;
 }
 
 std::optional<resolved_parameter> HDL_function_def::evaluate_scalar() {
-    return assignments[0].value.evaluate(false);
+    return assignments[0].value->evaluate(false);
 }
 
 std::optional<resolved_parameter> HDL_function_def::evaluate_vector() {
@@ -99,11 +100,11 @@ std::optional<resolved_parameter> HDL_function_def::evaluate_vector() {
     }
     std::vector<int64_t> values(assignments.size() + loop_indexes.size());
     for(auto &a:assignments) {
-        auto idx = a.index.value().evaluate(false);
+        auto idx = a.index.value()->evaluate(false);
         if(!idx.has_value()) return std::nullopt;
         if(!std::holds_alternative<int64_t>(idx.value())) return std::nullopt;
         auto idx_val = std::get<int64_t>(idx.value());
-        auto value = a.value.evaluate(false);
+        auto value = a.value->evaluate(false);
         if(!value.has_value()) return std::nullopt;
         values[idx_val] = std::get<int64_t>(value.value());
     }
@@ -113,10 +114,10 @@ std::optional<resolved_parameter> HDL_function_def::evaluate_vector() {
     for(int i = 0; i<loop_assignments.size(); i++) {
         for(auto &l:loop_indexes) {
             auto la = loop_assignments[i];
-            la.index.value().propagate_constant(loop_var, l);
-            auto idx = la.index.value().evaluate(false);
-            la.value.propagate_constant(loop_var, l);
-            auto var = la.value.evaluate(false);
+            la.index.value()->propagate_constant(loop_var, l);
+            auto idx = la.index.value()->evaluate(false);
+            la.value->propagate_constant(loop_var, l);
+            auto var = la.value->evaluate(false);
             values[std::get<int64_t>(idx.value())] = std::get<int64_t>(var.value());
         }
     }

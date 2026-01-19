@@ -56,6 +56,15 @@ void HDL_Resource::process_parameters() {
     default_values = parameter_solver::process_parameters(parameters_spec, functions);
 }
 
+void HDL_Resource::process_calls() {
+    for(auto &function: functions | std::views::values) {
+        for(const auto &param:parameters_spec) {
+            param->propagate_function(function);
+        }
+    }
+}
+
+
 void HDL_Resource::lock_resource() {
     lock = true;
     for(auto &dep:dependencies) dep.lock_dependency();

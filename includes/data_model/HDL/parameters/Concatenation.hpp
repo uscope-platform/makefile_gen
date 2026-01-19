@@ -60,11 +60,12 @@ public:
         return *this;
     }
 
-    std::set<qualified_identifier> get_dependencies()const;
+    std::set<qualified_identifier> get_dependencies()const override;
     bool empty() const {return components.empty();}
-    bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value);
-    std::optional<resolved_parameter> evaluate(bool pack_result);
-    std::string print() const;
+    bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) override;
+    void propagate_function(const HDL_function_def &def) override;
+    std::optional<resolved_parameter> evaluate(bool pack_result) override;
+    std::string print() const override;
     int64_t get_depth() override;
 
     friend bool operator==(const Concatenation &lhs, const Concatenation &rhs) {

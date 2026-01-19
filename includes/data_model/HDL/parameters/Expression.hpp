@@ -45,6 +45,7 @@ public:
     void emplace_back(const int64_t &ec) {components.emplace_back(ec, Expression_component::number);}
     std::set<qualified_identifier> get_dependencies()const override;
     bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) override;
+    void propagate_function(const HDL_function_def &def) override;
     std::string print() const override;
     Expression to_rpm() const;
     void set_rpn(bool s) {rpn = s;}

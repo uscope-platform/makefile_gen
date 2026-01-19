@@ -1,0 +1,139 @@
+//  Copyright 2026 Filippo Savi
+//  Author: Filippo Savi <filssavi@gmail.com>
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+
+#include "data_model/HDL/HDL_loop.hpp"
+
+#include "data_model/HDL/parameters/Expression.hpp"
+#include "data_model/HDL/parameters/HDL_parameter.hpp"
+
+bool assignment::operator==(const assignment &rhs) const {
+    return name == rhs.name
+           && index == rhs.index
+           && value == rhs.value;
+}
+
+HDL_loop_metadata::~HDL_loop_metadata() = default;
+
+HDL_loop_metadata::HDL_loop_metadata(const HDL_loop_metadata &other)
+        : locked(other.locked),
+          init(other.init),
+          assignments(other.assignments) {
+
+    end_c = other.end_c ? std::make_unique<Expression>(*other.end_c): nullptr;
+    iter = other.iter ? std::make_unique<Expression>(*other.iter): nullptr;
+}
+
+HDL_loop_metadata::HDL_loop_metadata(HDL_loop_metadata &&other) noexcept
+        : locked(other.locked),
+          init(std::move(other.init)),
+          end_c(std::move(other.end_c)),
+          iter(std::move(other.iter)),
+          assignments(std::move(other.assignments)) {
+}
+
+HDL_loop_metadata & HDL_loop_metadata::operator=(const HDL_loop_metadata &other) {
+    if(this == &other)
+        return *this;
+    locked = other.locked;
+    init = other.init;
+    end_c = other.end_c ? std::make_unique<Expression>(*other.end_c): nullptr;
+    iter = other.iter ? std::make_unique<Expression>(*other.iter): nullptr;
+    assignments = other.assignments;
+    return *this;
+}
+
+HDL_loop_metadata & HDL_loop_metadata::operator=(HDL_loop_metadata &&other) noexcept {
+    if(this == &other)
+        return *this;
+    locked = other.locked;
+    init = std::move(other.init);
+    end_c = std::move(other.end_c);
+    iter = std::move(other.iter);
+    assignments = std::move(other.assignments);
+    return *this;
+}
+
+bool HDL_loop_metadata::propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) {
+    bool retval = true;
+
+    retval &= init->propagate_constant(constant_id, value);
+    retval &= end_c->propagate_constant(constant_id, value);
+    retval &= iter->propagate_constant(constant_id, value);
+    for(auto &a:assignments) retval &= a.value->propagate_constant(constant_id, value);
+    return retval;
+}
+
+
+void HDL_loop_metadata::lock() {locked = true;}
+
+void HDL_loop_metadata::set_init(const HDL_parameter &p) {
+    locking_violation_check();
+    init = std::make_shared<HDL_parameter>(p);
+}
+void HDL_loop_metadata::set_end_c(const Expression &e) {
+    locking_violation_check();
+    end_c = std::make_unique<Expression>(e);
+}
+void HDL_loop_metadata::set_iter(const Expression &i) {
+    locking_violation_check();
+    iter = std::make_unique<Expression>(i);
+}
+
+
+HDL_parameter HDL_loop_metadata::get_init() const {
+    if(init == nullptr) return HDL_parameter();
+    return *init;
+}
+Expression HDL_loop_metadata::get_end_c() const {
+    if(end_c == nullptr) return Expression();
+    return *end_c;
+}
+
+Expression HDL_loop_metadata::get_iter() const {
+    if(iter == nullptr) return Expression();
+    return *iter;
+}
+
+void HDL_loop_metadata::add_assignment(const assignment &a) {
+    locking_violation_check();
+    assignments.push_back(a);
+}
+void HDL_loop_metadata::set_assignments(const std::vector<assignment> &a) {
+    locking_violation_check();
+    assignments = a;
+}
+
+std::vector<assignment> HDL_loop_metadata::get_assignments() const {
+    return assignments;
+}
+
+void HDL_loop_metadata::locking_violation_check() {
+    if(locked) {
+        spdlog::error("Attempting to modify a locked loop with index {}",init->get_name());
+        exit(1);
+    }
+}
+
+
+
+bool HDL_loop_metadata::operator==(const HDL_loop_metadata &rhs) const {
+    bool retval = true;
+    retval &= init == rhs.init;
+    retval &= end_c == rhs.end_c;
+    retval &= iter == rhs.iter;
+    retval &= assignments == rhs.assignments;
+    retval &= locked == rhs.locked;
+    return retval;
+}

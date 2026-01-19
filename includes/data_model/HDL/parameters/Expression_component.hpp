@@ -29,6 +29,8 @@
 
 #include <cereal/types/vector.hpp>
 
+#include "HDL_function_def.hpp"
+
 class Expression;
 
 class Expression_component {
@@ -51,6 +53,7 @@ public:
     explicit Expression_component(int64_t n, int64_t b_s);
     std::set<qualified_identifier> get_dependencies()const;
     bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value);
+    void propagate_function(HDL_function_def def);
     bool is_subscripted() const {return !array_index.empty();}
     bool is_string() const {return type == string;}
     bool is_identifier() const {return type == identifier;}
@@ -72,7 +75,7 @@ public:
         value = v;
     }
 
-    void set_package_prefix(const std::string &s) {package_prefix = s;};
+    void set_package_prefix(const std::string &s) {package_prefix = s;}
     std::string get_package_prefix() const {return package_prefix;};
 
     bool is_right_associative();

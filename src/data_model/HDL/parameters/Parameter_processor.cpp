@@ -124,7 +124,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_function_para
     std::shared_ptr<HDL_parameter> return_par = par->clone();
 
     auto expr = fcn.get_assignments()[0].value;
-    auto res = process_expression(expr, nullptr);
+    auto res = process_expression(*expr, nullptr);
     return_par->set_value(res);
     return return_par;
 }
@@ -138,8 +138,8 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_vector_function_para
     std::unordered_map<uint64_t, uint64_t> explicit_values;
     try {
         for(auto &item:fcn.get_assignments()) {
-            auto index = process_expression(item.index.value(), nullptr);
-            auto value = process_expression(item.value, nullptr);
+            auto index = process_expression(*item.index.value(), nullptr);
+            auto value = process_expression(*item.value, nullptr);
             explicit_values.insert({index, value});
         }
     } catch(Parameter_processor_Exception ex) {
@@ -425,8 +425,8 @@ std::unordered_map<uint64_t, uint64_t> Parameter_processor::evaluate_loop(HDL_lo
 
     while(evaluate_loop_expression(loop.get_end_c(),loop_variable) != 0){
         for(auto a:loop.get_assignments()) {
-            auto idx = evaluate_loop_expression(a.index.value(), loop_variable);
-            auto value = evaluate_loop_expression(a.value, loop_variable);
+            auto idx = evaluate_loop_expression(*a.index.value(), loop_variable);
+            auto value = evaluate_loop_expression(*a.value, loop_variable);
             retval.insert({idx, value});
         }
 

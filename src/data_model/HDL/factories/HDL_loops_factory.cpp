@@ -75,7 +75,7 @@ void HDL_loops_factory::set_phase(loop_phase_t p) {
 void HDL_loops_factory::advance_expression() {
     if(expression_valid) {
         auto assignments = loop_specs.get_assignments();
-        assignments.back().index = current_expression;
+        assignments.back().index = std::make_shared<Expression>(current_expression);
         loop_specs.set_assignments(assignments);
         current_expression.clear();
     }
@@ -84,7 +84,7 @@ void HDL_loops_factory::advance_expression() {
 void HDL_loops_factory::close_expression() {
     if(expression_valid) {
         auto assignments = loop_specs.get_assignments();
-        assignments.back().value = current_expression;
+        assignments.back().index = std::make_shared<Expression>(current_expression);
         loop_specs.set_assignments(assignments);
         expression_valid = false;
         current_expression.clear();

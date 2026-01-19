@@ -14,6 +14,7 @@
 //  limitations under the License.
 
 #include "data_model/HDL/parameters/HDL_function_call.hpp"
+#include "data_model/HDL/parameters/Expression.hpp"
 
 void HDL_function_call::add_argument(const std::shared_ptr<Parameter_value_base> &p) {
     arguments.push_back(p);
@@ -34,6 +35,13 @@ bool HDL_function_call::propagate_constant(const qualified_identifier &constant_
         retval &= arg->propagate_constant(constant_id, value);
     }
     return  retval;
+}
+
+void HDL_function_call::propagate_function(const HDL_function_def &def) {
+    if(def.name == function_name) {
+        assignments = def.get_assignments();
+        loop_metadata = def.get_loop();
+    }
 }
 
 std::optional<resolved_parameter> HDL_function_call::evaluate(bool pack_result) {
@@ -90,5 +98,7 @@ bool HDL_function_call::isEqual(const Parameter_value_base &other) const {
     for (int i = 0; i< arguments.size(); i++) {
         is_equal &= *arguments[i] == *rhs.arguments[i];
     }
+    is_equal &= loop_metadata == rhs.loop_metadata;
+    is_equal &= assignments == rhs.assignments;
     return is_equal;
 }

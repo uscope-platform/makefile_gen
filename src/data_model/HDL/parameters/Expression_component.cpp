@@ -113,6 +113,12 @@ bool Expression_component::propagate_constant(const qualified_identifier &consta
     return true;
 }
 
+void Expression_component::propagate_function(HDL_function_def def) {
+    for (auto &component:array_index) {
+        component.propagate_function(def);
+    }
+}
+
 
 bool operator==(const Expression_component &lhs, const Expression_component &rhs) {
      bool ret_val = true;

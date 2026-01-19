@@ -278,6 +278,13 @@ bool Initialization_list::propagate_constant(const qualified_identifier &constan
     return retval;
 }
 
+void Initialization_list::propagate_function(const HDL_function_def &def) {
+    for (auto &expr:expression_leaves) {
+        expr->propagate_function(def);
+    }
+}
+
+
 std::optional<std::shared_ptr<Parameter_value_base>> Initialization_list::get_scalar() {
     if (scalar) return expression_leaves[0];
     return std::nullopt;

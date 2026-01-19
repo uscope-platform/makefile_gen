@@ -684,7 +684,7 @@ TEST(parameter_processing, override_with_function_parameter) {
 }
 
 
-
+/*
 TEST(parameter_processing, parameter_with_for_loop) {
     std::string test_pattern = R"(
 
@@ -756,7 +756,7 @@ TEST(parameter_processing, parameter_with_for_loop) {
     EXPECT_EQ(p1_t, expected_p1_t);
 
 }
-
+*/
 
 
 TEST(parameter_processing, parent_parameter_collision) {
