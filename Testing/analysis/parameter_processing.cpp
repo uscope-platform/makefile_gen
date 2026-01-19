@@ -805,3 +805,44 @@ TEST(parameter_processing, parent_parameter_collision) {
     ASSERT_EQ(deps[0]->get_parameters().get("INNER_PARAMETER")->get_numeric_value(), 2);
 
 }
+
+
+TEST(parameter_processing, override_after_localparam) {
+    std::string test_pattern = R"(
+
+    module PwmControlUnit #(
+        INITIAL_STOPPED_STATE = 0
+    )();
+
+    endmodule
+
+    module PwmGenerator #(
+        parameter INITIAL_STOPPED_STATE = 0
+    )();
+
+        localparam [31:0] AXI_ADDRESSES [1:0] = ADDR_CALC();
+
+        PwmControlUnit #(
+            .INITIAL_STOPPED_STATE(INITIAL_STOPPED_STATE)
+        ) pwm_cu();
+
+    endmodule
+
+
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"PwmGenerator"}))[0];
+
+}
