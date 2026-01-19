@@ -39,14 +39,17 @@ TEST(function_processing, simple_function_scalar) {
 
     EXPECT_EQ(functions.size(), 1);
     EXPECT_TRUE(functions.contains("CTRL_ADDR_CALC"));
-    auto result = functions["CTRL_ADDR_CALC"];
+
+    auto call = HDL_function_call("CTRL_ADDR_CALC");
+    call.add_body(functions["CTRL_ADDR_CALC"].get_assignments(), functions["CTRL_ADDR_CALC"].get_loop());
+
     HDL_function_def check_f;
     check_f.set_name("CTRL_ADDR_CALC");
     assignment a("CTRL_ADDR_CALC", std::nullopt, std::make_shared<Expression>(Expression({Expression_component("67", Expression_component::number)})));
     check_f.add_assignment(a);
-    EXPECT_EQ(check_f,result);
+    EXPECT_EQ(check_f,functions["CTRL_ADDR_CALC"]);
 
-    auto values = result.evaluate(false);
+    auto values = call.evaluate(false);
     ASSERT_TRUE(values.has_value());
     EXPECT_TRUE(std::holds_alternative<int64_t>(values.value()));
     auto result_value = std::get<int64_t>(values.value());
@@ -98,9 +101,12 @@ TEST(function_processing, simple_function_array) {
     check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
 
+    auto call = HDL_function_call("CTRL_ADDR_CALC");
+    call.add_body(functions["CTRL_ADDR_CALC"].get_assignments(), functions["CTRL_ADDR_CALC"].get_loop());
+
     mdarray<int64_t> check_val;
     check_val.set_1d_slice({0,0}, {100,200,300});
-    auto values = result.evaluate(false);
+    auto values = call.evaluate(false);
     ASSERT_TRUE(values.has_value());
     EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
     auto result_value = std::get<mdarray<int64_t>>(values.value());
@@ -163,9 +169,12 @@ TEST(function_processing, simple_loop_function) {
     check_f.add_loop_metadata(metadata);
      EXPECT_EQ(check_f,result);
 
+    auto call = HDL_function_call("CTRL_ADDR_CALC");
+    call.add_body(functions["CTRL_ADDR_CALC"].get_assignments(), functions["CTRL_ADDR_CALC"].get_loop());
+
     mdarray<int64_t> check_val;
     check_val.set_1d_slice({0,0}, {0, 100,200});
-    auto values = result.evaluate(false);
+    auto values = call.evaluate(false);
     ASSERT_TRUE(values.has_value());
     EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
     auto result_value = std::get<mdarray<int64_t>>(values.value());
@@ -229,8 +238,13 @@ TEST(function_processing, parametric_loop_function) {
 
     mdarray<int64_t> check_val;
     check_val.set_1d_slice({0,0}, {0,100,200});
-    auto res= result.propagate_constant({"", "N_CORES"}, 3);
-    auto values = result.evaluate(false);
+
+    auto call = HDL_function_call("CTRL_ADDR_CALC");
+    call.add_body(functions["CTRL_ADDR_CALC"].get_assignments(), functions["CTRL_ADDR_CALC"].get_loop());
+
+
+    auto res= call.propagate_constant({"", "N_CORES"}, 3);
+    auto values = call.evaluate(false);
     ASSERT_TRUE(values.has_value());
     EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
     auto result_value = std::get<mdarray<int64_t>>(values.value());
@@ -308,10 +322,14 @@ TEST(function_processing, complex_loop_function) {
     check_f.add_assignment(a);
     EXPECT_EQ(check_f,result);
 
+    auto call = HDL_function_call("CTRL_ADDR_CALC");
+    call.add_body(functions["CTRL_ADDR_CALC"].get_assignments(), functions["CTRL_ADDR_CALC"].get_loop());
+
+
     mdarray<int64_t> check_val;
     check_val.set_1d_slice({0,0}, {44, 100,200,300, 667});
-    result.propagate_constant({"", "N_CORES"}, 3);
-    auto values = result.evaluate(false);
+    call.propagate_constant({"", "N_CORES"}, 3);
+    auto values = call.evaluate(false);
     ASSERT_TRUE(values.has_value());
     EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
     auto result_value = std::get<mdarray<int64_t>>(values.value());
@@ -361,8 +379,13 @@ TEST(function_processing, parametrized_function) {
 
     mdarray<int64_t> check_val;
     check_val.set_1d_slice({0,0}, {44, 33});
-    result.propagate_constant({"", "N_CORES"}, 1);
-    auto values = result.evaluate(false);
+
+    auto call = HDL_function_call("CTRL_ADDR_CALC");
+    call.add_body(functions["CTRL_ADDR_CALC"].get_assignments(), functions["CTRL_ADDR_CALC"].get_loop());
+
+
+    call.propagate_constant({"", "N_CORES"}, 1);
+    auto values = call.evaluate(false);
     ASSERT_TRUE(values.has_value());
     EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
     auto result_value = std::get<mdarray<int64_t>>(values.value());
@@ -411,7 +434,11 @@ TEST(function_processing, package_assignment) {
 
     mdarray<int64_t> check_val;
     check_val.set_1d_slice({0,0}, {100,200,300});
-    auto values = result.evaluate(false);
+
+    auto call = HDL_function_call("CTRL_ADDR_CALC");
+    call.add_body(functions["CTRL_ADDR_CALC"].get_assignments(), functions["CTRL_ADDR_CALC"].get_loop());
+
+    auto values = call.evaluate(false);
     ASSERT_TRUE(values.has_value());
     ASSERT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
     auto result_value = std::get<mdarray<int64_t>>(values.value());

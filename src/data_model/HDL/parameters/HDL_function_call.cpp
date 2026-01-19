@@ -45,6 +45,9 @@ bool HDL_function_call::propagate_constant(const qualified_identifier &constant_
         retval &= arg->propagate_constant(constant_id, value);
     }
     for(auto &a:assignments) {
+        if(a.get_index().has_value()) {
+            retval &= a.get_index().value()->propagate_constant(constant_id, value);
+        }
         retval &= a.get_value()->propagate_constant(constant_id, value);
     }
     if(loop_metadata.has_value()) {

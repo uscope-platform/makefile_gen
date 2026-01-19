@@ -15,11 +15,11 @@
 
 #include "analysis/parameter_solver.hpp"
 
-std::map<qualified_identifier, resolved_parameter>   parameter_solver::process_parameters(const Parameters_map &map_in, std::unordered_map<std::string, HDL_function_def> function_defs) {
+std::map<qualified_identifier, resolved_parameter>   parameter_solver::process_parameters(const Parameters_map &map_in) {
     auto map = map_in.clone();
 
     std::map<qualified_identifier, resolved_parameter> solved_parameters;
-    auto dependencies_map = get_dependency_map(map_in, function_defs);
+    auto dependencies_map = get_dependency_map(map_in);
 
 
         int rounds_counter = 0;
@@ -27,14 +27,7 @@ std::map<qualified_identifier, resolved_parameter>   parameter_solver::process_p
             for (auto &[param_id, dependencies] : dependencies_map ) {
                 if (dependencies.empty() && !solved_parameters.contains(param_id)) {
                     auto to_solve = map.const_get(param_id.name);
-                    std::optional<resolved_parameter> value;
-                    if(to_solve->is_function()) {
-                        auto fcn_name = std::get<std::string>(to_solve->get_i_l().evaluate().value());
-                        auto fcn = function_defs[fcn_name];
-                        value = fcn.evaluate(false);
-                    } else {
-                        value = to_solve->get_i_l().evaluate();
-                    }
+                    std::optional<resolved_parameter> value = to_solve->get_i_l().evaluate();
 
                     if (value.has_value()) {
                         solved_parameters.insert({param_id, value.value()});
@@ -55,15 +48,8 @@ std::map<qualified_identifier, resolved_parameter>   parameter_solver::process_p
                 for (auto &dep: dependencies_map) {
                     if (dep.second.contains(param_id)) {
                         auto target = map.get(dep.first.name);
-                        if(target->is_function()) {
-                            auto fcn_name = std::get<std::string>(target->get_i_l().evaluate().value());
-                            propagation_complete &= function_defs[fcn_name].propagate_constant(param_id, param_value);
-                            if (propagation_complete) dep.second.erase(param_id);
-                        } else {
-                            propagation_complete &= target->propagate_constant(param_id, param_value);
-                            if (propagation_complete) dep.second.erase(param_id);
-                        }
-
+                        propagation_complete &= target->propagate_constant(param_id, param_value);
+                        if (propagation_complete) dep.second.erase(param_id);
                     }
                 }
                     dependencies_map.erase(param_id);
@@ -118,7 +104,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
 
     //retreive default package parameters
     std::map<qualified_identifier, resolved_parameter> package_parameters;
-    auto deps_map = get_dependency_map(node_parameters, {});
+    auto deps_map = get_dependency_map(node_parameters);
     for (auto &[param_name, param_deps]:deps_map) {
         for (const auto& identifier:param_deps) {
             if (!identifier.prefix.empty()) {
@@ -130,7 +116,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
     }
 
     // Handle overridden parameters
-    deps_map = get_dependency_map(node_overrides, {});
+    deps_map = get_dependency_map(node_overrides);
     if(node_overrides.empty()) {
         solved_parameters = node_defaults;
     } else{
@@ -180,7 +166,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
             ++solution_rounds;
         }
 
-        solved_parameters = process_parameters(to_solve,{});
+        solved_parameters = process_parameters(to_solve);
         for(auto &param:solved_parameters) {
             node_defaults[param.first] = param.second;
         }
@@ -199,8 +185,9 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
             }
         }
     }
+
     // Substitute runtime only parameters
-    auto runtime_params = process_parameters(runtime_to_eval, {});
+    auto runtime_params = process_parameters(runtime_to_eval);
     for (auto &[name, value]: solved_parameters) {
         if (runtime_params.contains(name)) value = runtime_params[name];
     }
@@ -211,23 +198,15 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
     return node_defaults;
 }
 
-std::map<qualified_identifier, std::set<qualified_identifier>> parameter_solver::get_dependency_map(const Parameters_map &map,
-    std::unordered_map<std::string, HDL_function_def> function_defs) {
+std::map<qualified_identifier, std::set<qualified_identifier>> parameter_solver::get_dependency_map(const Parameters_map &map) {
 
     std::map<qualified_identifier, std::set<qualified_identifier>> dependencies_map;
     for (auto &param: map) {
         auto param_name = param->get_name();
         dependencies_map[{"", param_name}] = {};
         std::set<std::string> param_deps;
-        if(param->is_function()) {
-            auto fcn_name = std::get<std::string>(param->get_i_l().evaluate().value());
-            auto fcn = function_defs[fcn_name];
-            auto deps = fcn.get_dependencies();
-            dependencies_map[{"", param_name}].insert(deps.begin(), deps.end());
-        } else {
-            auto deps = param->get_dependencies();
-            dependencies_map[{"", param_name}].insert(deps.begin(), deps.end());
-        }
+        auto deps = param->get_dependencies();
+        dependencies_map[{"", param_name}].insert(deps.begin(), deps.end());
     }
     return dependencies_map;
 }

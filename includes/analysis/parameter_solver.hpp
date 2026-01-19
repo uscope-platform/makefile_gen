@@ -32,7 +32,7 @@ struct work_order {
 
 class parameter_solver {
 public:
-    static std::map<qualified_identifier, resolved_parameter> process_parameters(const Parameters_map &map, std::unordered_map<std::string, HDL_function_def> function_defs);
+    static std::map<qualified_identifier, resolved_parameter> process_parameters(const Parameters_map &map);
     static void update_parameters_map(
         std::map<qualified_identifier, resolved_parameter> parameters,
         std::shared_ptr<HDL_instance_AST> node,
@@ -40,7 +40,7 @@ public:
         );
     static std::map<qualified_identifier, resolved_parameter> override_parameters(work_order &work, const std::shared_ptr<data_store> &d_store);
 
-    static std::map<qualified_identifier, std::set<qualified_identifier>>get_dependency_map(const Parameters_map &map, std::unordered_map<std::string, HDL_function_def> function_defs);
+    static std::map<qualified_identifier, std::set<qualified_identifier>>get_dependency_map(const Parameters_map &map);
 };
 
 
