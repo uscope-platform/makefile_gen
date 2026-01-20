@@ -48,11 +48,11 @@ public:
     std::set<qualified_identifier> get_dependencies()const;
     bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value)override;
     void propagate_function(const HDL_function_def &def) override;
-    std::optional<resolved_parameter> evaluate(bool pack_result);
+    std::optional<resolved_parameter> evaluate(bool pack_result) override;
 
     int64_t pack_repetition(int64_t value, int64_t width, int64_t count);
 
-    std::string print() const;
+    std::string print() const override;
     friend bool operator==(const Replication &lhs, const Replication &rhs) {
         if(lhs.repeated_item == nullptr &&  lhs.repeated_item == nullptr ) return true;
         if(lhs.repeated_item == nullptr || lhs.repeated_item == nullptr) return false;

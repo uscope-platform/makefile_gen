@@ -850,3 +850,117 @@ TEST(parameter_processing, override_after_function_localparam) {
     auto i_l = deps[0]->get_parameters().get("INITIAL_STOPPED_STATE")->get_i_l().get_scalar();
     ASSERT_FALSE(i_l.value()->as<Expression>().empty());
 }
+
+
+
+
+TEST(parameter_processing, test) {
+    std::string test_pattern = R"(
+
+    module axil_crossbar_interface #(
+        parameter NS = 8,
+        parameter [31:0] SLAVE_ADDR [NS-1:0] = '{NS{0}},
+        parameter [31:0] SLAVE_MASK [NS-1:0] =  '{NS{0}}
+    ) (
+    );
+
+
+    endmodule
+
+    module top_module #(
+        parameter BASE_ADDRESS = 32'h43c00000
+    )();
+
+        localparam CONTROLLER_ADDRESS = BASE_ADDRESS;
+        localparam SPI_ADDRESS = BASE_ADDRESS+'h40;
+
+        axil_crossbar_interface #(
+            .NS(2),
+            .SLAVE_ADDR('{CONTROLLER_ADDRESS, SPI_ADDRESS}),
+            .SLAVE_MASK('{2{32'h040}})
+        ) axi_xbar (
+        );
+
+    endmodule
+)";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"top_module"}))[0];
+
+    auto dependency_parameters = ast_v2->get_dependencies()[0]->get_parameters();
+
+    Parameters_map check_params;
+    HDL_parameter p;
+    p.set_name("NS");
+    p.set_expression(std::make_shared<Expression>(Expression({Expression_component("2", Expression_component::number)})));
+    p.set_value(2);
+    check_params.insert(std::make_shared<HDL_parameter>(p));
+    p = HDL_parameter();
+    p.set_name("SLAVE_ADDR");
+    Initialization_list il;
+    il.add_dimension({
+        {Expression_component("NS", Expression_component::identifier),Expression_component("-", Expression_component::operation),Expression_component("1", Expression_component::number),},
+        {Expression_component("0", Expression_component::number)},
+        false},false);
+    il.add_dimension({
+    {Expression_component("31", Expression_component::number),},
+    {Expression_component("0", Expression_component::number)},
+    true},true);
+    il.add_item(std::make_shared<Expression>(Expression({
+        Expression_component(1136656384, 0)
+    })));
+    il.add_item(std::make_shared<Expression>(Expression({
+          Expression_component(1136656448, 0)
+      })));
+    p.add_initialization_list(il);
+
+
+    mdarray<int64_t> av;
+    av.set_1d_slice({0,0}, {1136656448,1136656384});
+    p.set_array_value(av);
+
+    check_params.insert(std::make_shared<HDL_parameter>(p));
+    p = HDL_parameter();
+    p.set_name("SLAVE_MASK");
+    il = Initialization_list();
+    Replication r;
+    r.set_item(std::make_shared<Expression>(Expression({Expression_component(64, 32)})));
+    r.set_size({Expression_component(2, 1)});
+    il.add_dimension({
+    {Expression_component("NS", Expression_component::identifier),Expression_component("-", Expression_component::operation),Expression_component("1", Expression_component::number),},
+    {Expression_component("0", Expression_component::number)},
+    false},false);
+    il.add_dimension({
+    {Expression_component("31", Expression_component::number),},
+    {Expression_component("0", Expression_component::number)},
+    true},true);
+    il.set_scalar(std::make_shared<Replication>(r));
+    p.add_initialization_list(il);
+
+    av.set_1d_slice({0,0}, {64,64});
+    p.set_array_value(av);
+
+    check_params.insert(std::make_shared<HDL_parameter>(p));
+
+
+    ASSERT_EQ(check_params.size(), dependency_parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(dependency_parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *dependency_parameters.get(item->get_name()));
+    }
+}
+
+
+

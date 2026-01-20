@@ -139,6 +139,13 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
             }
         }
 
+        for(auto &param:node_overrides) {
+            auto i_l = param->get_i_l();
+            i_l.set_packed_dimensions(node_parameters.get(param->get_name())->get_i_l().get_packed_dimensions());
+            i_l.set_unpacked_dimensions(node_parameters.get(param->get_name())->get_i_l().get_unpacked_dimensions());
+            param->add_initialization_list(i_l);
+        }
+
         int solution_rounds = 0;
         std::unordered_map<std::string, uint32_t> parameters_progress;
         std::set<std::string> completed_parameters;
@@ -155,17 +162,23 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
                 }
                 for(auto &dep:deps) {
                     resolved_parameter value;
+                    bool internal_dependency = false;
                     if (!dep.prefix.empty()) {
                        auto package = d_store->get_HDL_resource(dep.prefix);
                        value = package.get_default_parameters()[{"", dep.name}];
                     }else if(work.parent_parameters.contains(dep)) {
                         value = work.parent_parameters[dep];
+                    }else if(node_overrides.contains(dep.name)){
+                       internal_dependency = true;
                     } else {
                         throw std::runtime_error("Parameter " + dep.prefix +"::" +dep.name + " is not defined in the design");
                     }
-                    if(param->propagate_constant(dep, value)) {
+
+                    bool propagation_done = false;
+                    if(!internal_dependency) propagation_done = param->propagate_constant(dep, value);
+                    if(internal_dependency || propagation_done) {
                         parameters_progress[param->get_name()]++;
-                        if(parameters_progress[param->get_name()]== deps_map[{"", param->get_name()}].size()) {
+                        if(parameters_progress[param->get_name()]>= deps_map[{"", param->get_name()}].size()) {
                             to_solve.insert(param);
                             completed_parameters.insert(param->get_name());
                         }
