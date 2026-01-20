@@ -168,8 +168,10 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
                        value = package.get_default_parameters()[{"", dep.name}];
                     }else if(work.parent_parameters.contains(dep)) {
                         value = work.parent_parameters[dep];
-                    }else if(node_overrides.contains(dep.name)){
-                       internal_dependency = true;
+                    }else if(node_overrides.contains(dep.name)) {
+                        internal_dependency = true;
+                    }else if(node_defaults.contains({"", dep.name})){
+                        value = node_defaults[{"", dep.name}];
                     } else {
                         throw std::runtime_error("Parameter " + dep.prefix +"::" +dep.name + " is not defined in the design");
                     }
