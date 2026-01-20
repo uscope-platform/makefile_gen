@@ -100,7 +100,7 @@ public:
         locking_violation_check();
         array_quantifier = p;
     };
-    std::shared_ptr<HDL_parameter> get_array_quantifier() {return array_quantifier;};
+    std::shared_ptr<HDL_parameter> get_array_quantifier() const {return array_quantifier;};
 
     template<class Archive>
     void serialize( Archive & ar ) {
@@ -113,7 +113,7 @@ public:
 
     friend bool operator==(const HDL_instance&lhs, const HDL_instance&rhs);
 
-    void locking_violation_check() {
+    void locking_violation_check() const {
         if(lock) {
             spdlog::error("Attempting to modify a locked instance {}:{}",type, name);
             exit(1);

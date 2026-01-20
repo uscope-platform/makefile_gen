@@ -76,6 +76,8 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
                     // But the parent parameters only need to be propagated in its expressions
                     update_loop_constants(child, current_param_values);
                     auto loop_idx = loop_solver::solve_loop(child, res);
+                    process_quantifier(child->get_array_quantifier(), current_param_values);
+
                     if (!loop_idx.empty()) {
                         for (auto &idx:loop_idx) {
                             auto new_child = std::make_shared<HDL_instance_AST>(*child);
@@ -145,4 +147,17 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::specialize_instance(const 
          p->propagate_constant({"", idx_name}, idx);
     }
     return std::make_shared<HDL_instance_AST>(specialized_d);
+}
+
+void HDL_ast_builder_v2::process_quantifier(const std::shared_ptr<HDL_parameter> &quantifier, const std::map<qualified_identifier, resolved_parameter> &parameters) {
+
+    if (quantifier != nullptr) {
+        bool complete = true;
+        for (auto &param:parameters) {
+            complete &= quantifier->propagate_constant(param.first, param.second);
+        }
+        if (!complete) throw std::runtime_error("unknown indentifiers remain in an array quantifier");
+        auto value = quantifier->get_i_l().evaluate();
+        quantifier->set_value(value.value());
+    }
 }
