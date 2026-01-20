@@ -254,7 +254,8 @@ void HDL_parameters_factory::start_function_assignment(const std::string &f_name
     new_call.set_name(f_name);
     in_function_assignment = true;
     skip_call_name = true;
-    expression_level--;
+    expression_level_stack.push(expression_level);
+    expression_level = 0;
 }
 
 void HDL_parameters_factory::stop_function_assignment() {
@@ -262,13 +263,15 @@ void HDL_parameters_factory::stop_function_assignment() {
         auto inner_call = new_call;
         new_call = calls_stack.top();
         calls_stack.pop();
-        inner_call.add_argument(std::make_shared<HDL_function_call>(inner_call));
+        new_call.add_argument(std::make_shared<HDL_function_call>(inner_call));
     } else {
         if (in_initialization_list) {
             init_list.add_item(std::make_shared<HDL_function_call>(new_call));
         } else {
             current_resource.set_expression(std::make_shared<HDL_function_call>(new_call));
         }
+        in_function_assignment = false;
     }
-    in_function_assignment = false;
+    expression_level = expression_level_stack.top();
+    expression_level_stack.pop();
 }

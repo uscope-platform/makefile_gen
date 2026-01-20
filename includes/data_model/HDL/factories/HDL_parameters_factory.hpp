@@ -47,8 +47,12 @@ public:
     void close_first_range();
     void close_array_index();
 
-    void start_param_assignment() { in_param_assignment = true; };
-    void stop_param_assignment() { in_param_assignment = false; };
+    void start_param_assignment() {
+        in_param_assignment = true;
+    };
+    void stop_param_assignment() {
+        in_param_assignment = false;
+    };
 
     void start_replication();
     void close_replication_size();
@@ -84,7 +88,9 @@ public:
 
     void start_ternary_operator();
 
-    void start_param_override() { in_param_override = true;}
+    void start_param_override() {
+        in_param_override = true;
+    }
     void stop_param_override() { in_param_override = false;}
 
 private:

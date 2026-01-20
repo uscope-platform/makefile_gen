@@ -807,7 +807,7 @@ TEST(parameter_processing, parent_parameter_collision) {
 }
 
 
-TEST(parameter_processing, override_after_localparam) {
+TEST(parameter_processing, override_after_function_localparam) {
     std::string test_pattern = R"(
 
     module PwmControlUnit #(
@@ -817,7 +817,7 @@ TEST(parameter_processing, override_after_localparam) {
     endmodule
 
     module PwmGenerator #(
-        parameter INITIAL_STOPPED_STATE = 0
+        parameter INITIAL_STOPPED_STATE = 52
     )();
 
         localparam [31:0] AXI_ADDRESSES [1:0] = ADDR_CALC();
@@ -845,4 +845,8 @@ TEST(parameter_processing, override_after_localparam) {
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
     auto ast_v2 = b2.build_ast(std::vector<std::string>({"PwmGenerator"}))[0];
 
+    auto deps = ast_v2->get_dependencies();
+    ASSERT_EQ(deps[0]->get_parameters().get("INITIAL_STOPPED_STATE")->get_numeric_value(), 52);
+    auto i_l = deps[0]->get_parameters().get("INITIAL_STOPPED_STATE")->get_i_l().get_scalar();
+    ASSERT_FALSE(i_l.value()->as<Expression>().empty());
 }
