@@ -65,24 +65,28 @@ bool HDL_parameter::is_empty() {
     return ret;
 }
 
-void HDL_parameter::set_value(int64_t val) {
+void HDL_parameter::set_value(const resolved_parameter &val) {
     locking_violation_check();
-    type = numeric_parameter;
-    if (!std::holds_alternative<mdarray<int64_t>>(value)) {
-        value = mdarray({1,1,1}, val);
-    } else {
-        std::get<mdarray<int64_t>>(value).set_scalar(val);
+    if(std::holds_alternative<std::string>(val)) {
+        type = string_parameter;
+        std::get<std::vector<std::string>>(value)[0] = std::get<std::string>(val);
+    } else if(std::holds_alternative<int64_t>(val)) {
+        type = numeric_parameter;
+        if (!std::holds_alternative<mdarray<int64_t>>(value)) {
+            value = mdarray({1,1,1}, std::get<int64_t>(val));
+        } else {
+            std::get<mdarray<int64_t>>(value).set_scalar(std::get<int64_t>(val));
+        }
+    } else if(std::holds_alternative<mdarray<int64_t>>(val)) {
+        type = array_parameter;
+        value = std::get<mdarray<int64_t>>(val);
     }
+
 }
+
 
 std::shared_ptr<HDL_parameter> HDL_parameter::clone() const {
     return std::make_shared<HDL_parameter>(*this);
-}
-
-void HDL_parameter::set_value(const std::string &v) {
-    locking_violation_check();
-    type = string_parameter;
-    std::get<std::vector<std::string>>(value)[0] = v;
 }
 
 int64_t HDL_parameter::get_numeric_value() const {

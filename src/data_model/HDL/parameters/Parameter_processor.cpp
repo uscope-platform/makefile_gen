@@ -150,7 +150,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_vector_function_para
     auto loop_values = evaluate_loop(loop.value(), spec);
 
 
-    return_par->set_array_value(merge_function_contributions(explicit_values, loop_values));
+    return_par->set_value(merge_function_contributions(explicit_values, loop_values));
     return return_par;
 }
 
@@ -196,7 +196,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_array_parameter(cons
     if(return_par->get_i_l().get_unpacked_dimensions().empty()){
         return_par->set_value(arr_val.get_value({0,0,0}).value());
     } else {
-        return_par->set_array_value(arr_val);
+        return_par->set_value(arr_val);
     }
     return_par->clear_expression();
     completed_set->insert(return_par);
@@ -224,7 +224,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
         if (external_parameters->contains(return_par->get_name())) {
             if(external_parameters->get(return_par->get_name())->is_array()){
                 auto value = external_parameters->get(return_par->get_name())->get_array_value();
-                return_par->set_array_value(value);
+                return_par->set_value(value);
             } else {
                 auto parameter = external_parameters->get(return_par->get_name());
                 if(parameter->get_type() == HDL_parameter::numeric_parameter){
@@ -249,7 +249,7 @@ std::shared_ptr<HDL_parameter> Parameter_processor::process_scalar_parameter(con
 
 
     } catch (array_value_exception &ex){
-        return_par->set_array_value(ex.array_value);
+        return_par->set_value(ex.array_value);
     } catch (string_parameter_exception &ex){
         return_par->set_value(ex.str_val);
     }

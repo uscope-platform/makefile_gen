@@ -42,8 +42,9 @@ public:
     std::shared_ptr<HDL_parameter> clone() const;
     void set_scope(const std::string &s){ scope = s;}
     std::string get_scope() {return  scope;}
-    void set_value(const std::string &v);
-    void set_value(int64_t val);
+
+    void set_value(const resolved_parameter &val);
+
     std::string get_string_value() const;
     int64_t  get_numeric_value() const;
 
@@ -87,11 +88,6 @@ public:
         i_l.clear_scalar();
     }
 
-    void set_array_value(const mdarray<int64_t> &arr){
-        locking_violation_check();
-        type = array_parameter;
-        value = arr;
-    };
     mdarray<int64_t> get_array_value() {
         return std::get<mdarray<int64_t>>(value);
     };

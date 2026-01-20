@@ -183,7 +183,7 @@ TEST(parameter_processing, array_instance_parameter_override) {
         {Expression_component("1", Expression_component::number)},
         {Expression_component("0", Expression_component::number)},
         false
-    }, false);
+    });
     mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {9,8});
     auto ec = Expression_component(0, 0);
@@ -191,7 +191,7 @@ TEST(parameter_processing, array_instance_parameter_override) {
     il.set_scalar(std::make_shared<Expression>(Expression({ec})));
     p->add_initialization_list(il);
 
-    p->set_array_value(av);
+    p->set_value(av);
     check_params.insert(p);
 
     p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
@@ -920,11 +920,11 @@ TEST(parameter_processing, test) {
     il.add_dimension({
         {Expression_component("NS", Expression_component::identifier),Expression_component("-", Expression_component::operation),Expression_component("1", Expression_component::number),},
         {Expression_component("0", Expression_component::number)},
-        false},false);
+        false});
     il.add_dimension({
     {Expression_component("31", Expression_component::number),},
     {Expression_component("0", Expression_component::number)},
-    true},true);
+    true});
     il.add_item(std::make_shared<Expression>(Expression({
         Expression_component(1136656384, 0)
     })));
@@ -936,7 +936,7 @@ TEST(parameter_processing, test) {
 
     mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {1136656448,1136656384});
-    p.set_array_value(av);
+    p.set_value(av);
 
     check_params.insert(std::make_shared<HDL_parameter>(p));
     p = HDL_parameter();
@@ -948,16 +948,16 @@ TEST(parameter_processing, test) {
     il.add_dimension({
     {Expression_component("NS", Expression_component::identifier),Expression_component("-", Expression_component::operation),Expression_component("1", Expression_component::number),},
     {Expression_component("0", Expression_component::number)},
-    false},false);
+    false});
     il.add_dimension({
     {Expression_component("31", Expression_component::number),},
     {Expression_component("0", Expression_component::number)},
-    true},true);
+    true});
     il.set_scalar(std::make_shared<Replication>(r));
     p.add_initialization_list(il);
 
     av.set_1d_slice({0,0}, {64,64});
-    p.set_array_value(av);
+    p.set_value(av);
 
     check_params.insert(std::make_shared<HDL_parameter>(p));
 

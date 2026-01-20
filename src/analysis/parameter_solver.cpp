@@ -85,9 +85,7 @@ void parameter_solver::update_parameters_map(
         } else {
             param_val = resource.get_default_parameters()[{"", param->get_name()}];
         }
-        if(std::holds_alternative<int64_t>(param_val)) ast_param->set_value(std::get<int64_t>(param_val));
-        else if(std::holds_alternative<std::string>(param_val)) ast_param->set_value(std::get<std::string>(param_val));
-        else if(std::holds_alternative<mdarray<int64_t>>(param_val)) ast_param->set_array_value(std::get<mdarray<int64_t>>(param_val));
+        ast_param->set_value(param_val);
         if(!node_parameters.contains(param->get_name())) node_parameters.insert(ast_param);
     }
 

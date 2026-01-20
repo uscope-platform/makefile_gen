@@ -44,9 +44,9 @@ Initialization_list::Initialization_list(const std::shared_ptr<Parameter_value_b
 }
 
 
-void Initialization_list::add_dimension(const dimension_t &d, bool packed) {
+void Initialization_list::add_dimension(const dimension_t &d) {
     scalar = false;
-    if(packed){
+    if(d.packed){
         packed_dimensions.push_back(d);
     } else{
         unpacked_dimensions.push_back(d);

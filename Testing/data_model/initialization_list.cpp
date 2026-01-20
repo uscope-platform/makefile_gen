@@ -27,7 +27,7 @@ TEST(Initialization_list, get_values_1d_unpacked)  {
 
     Initialization_list il;
 
-    il.add_dimension({{Expression({Expression_component("4", Expression_component::number)})}, {Expression({Expression_component("0", Expression_component::number)})}, false}, false);
+    il.add_dimension({{Expression({Expression_component("4", Expression_component::number)})}, {Expression({Expression_component("0", Expression_component::number)})}, false});
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("5", Expression_component::number)})));
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("3", Expression_component::number)})));
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("4", Expression_component::number)})));
@@ -50,8 +50,8 @@ TEST(Initialization_list, get_values_2d_unpacked) {
 
     Initialization_list il;
 
-    il.add_dimension({{Expression({Expression_component("2", Expression_component::number)})}, {Expression({Expression_component("0", Expression_component::number)})}, false}, false);
-    il.add_dimension({{Expression({Expression_component("1", Expression_component::number)})}, {Expression({Expression_component("0", Expression_component::number)})}, false}, false);
+    il.add_dimension({{Expression({Expression_component("2", Expression_component::number)})}, {Expression({Expression_component("0", Expression_component::number)})}, false});
+    il.add_dimension({{Expression({Expression_component("1", Expression_component::number)})}, {Expression({Expression_component("0", Expression_component::number)})}, false});
     Concatenation c;
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("5", Expression_component::number)})));
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("3", Expression_component::number)})));
@@ -82,9 +82,9 @@ TEST(Initialization_list, get_values_3d_unpacked) {
 
     Initialization_list il;
 
-    il.add_dimension({{Expression({Expression_component("2", Expression_component::number)})}, {Expression({Expression_component("0", Expression_component::number)})}, false}, false);
-    il.add_dimension({{Expression({Expression_component("1", Expression_component::number)})}, {Expression({Expression_component("0", Expression_component::number)})}, false}, false);
-    il.add_dimension({{Expression({Expression_component("1", Expression_component::number)})}, {Expression({Expression_component("0", Expression_component::number)})}, false}, false);
+    il.add_dimension({{Expression({Expression_component("2", Expression_component::number)})}, {Expression({Expression_component("0", Expression_component::number)})}, false});
+    il.add_dimension({{Expression({Expression_component("1", Expression_component::number)})}, {Expression({Expression_component("0", Expression_component::number)})}, false});
+    il.add_dimension({{Expression({Expression_component("1", Expression_component::number)})}, {Expression({Expression_component("0", Expression_component::number)})}, false});
 
     Concatenation c_inner, c_outer;
     c_inner.add_component(std::make_shared<Expression>(Expression({Expression_component("5", Expression_component::number)})));
@@ -125,7 +125,7 @@ TEST(Initialization_list, packed_concatenation) {
 
     Initialization_list il;
 
-    il.add_dimension({{Expression_component("7", Expression_component::number)}, {Expression_component("0", Expression_component::number)}, true}, true);
+    il.add_dimension({{Expression_component("7", Expression_component::number)}, {Expression_component("0", Expression_component::number)}, true});
     Concatenation c;
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1", Expression_component::number)})));
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0", Expression_component::number)})));
@@ -154,11 +154,11 @@ TEST(Initialization_list, get_values_1d_packed) {
     Initialization_list il;
     il.add_dimension(
         {{{Expression_component("2", Expression_component::number)}},{{Expression_component("0", Expression_component::number)}}, true
-        }, true);
+        });
 
     il.add_dimension(
         {{{Expression_component("4", Expression_component::number)}},{{Expression_component("0", Expression_component::number)}}, false
-        }, false);
+        });
 
     Concatenation c;
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1", Expression_component::number)})));
@@ -203,16 +203,16 @@ TEST(Initialization_list, get_values_2d_packed) {
     Initialization_list il;
     il.add_dimension(
         {{{Expression_component("2", Expression_component::number)}},{{Expression_component("0", Expression_component::number)}}, true
-        }, true);
+        });
 
     il.add_dimension(
         {{{Expression_component("1", Expression_component::number)}},{{Expression_component("0", Expression_component::number)}}, false
-        }, false);
+        });
 
 
     il.add_dimension(
         {{{Expression_component("1", Expression_component::number)}},{{Expression_component("0", Expression_component::number)}}, false
-        }, false);
+        });
 
 
 
@@ -256,20 +256,20 @@ TEST(Initialization_list, get_values_3d_packed) {
     Initialization_list il;
     il.add_dimension(
         {{{Expression_component("1", Expression_component::number)}},{{Expression_component("0", Expression_component::number)}}, true
-        }, true);
+        });
 
     il.add_dimension(
         {{{Expression_component("1", Expression_component::number)}},{{Expression_component("0", Expression_component::number)}}, false
-        }, false);
+        });
 
 
     il.add_dimension(
         {{{Expression_component("1", Expression_component::number)}},{{Expression_component("0", Expression_component::number)}}, false
-        }, false);
+        });
 
     il.add_dimension(
         {{{Expression_component("1", Expression_component::number)}},{{Expression_component("0", Expression_component::number)}}, false
-        }, false);
+        });
 
 
     Concatenation c_pack, c_inner, c_outer;
@@ -343,8 +343,8 @@ TEST(Initialization_list, get_values_concatenation_initialization) {
 
 
     Initialization_list il;
-    il.add_dimension({{Expression_component("31", Expression_component::number)}, {Expression_component("0", Expression_component::number)}, true}, true);
-    il.add_dimension({{Expression_component("1", Expression_component::number)}, {Expression_component("0", Expression_component::number)}, false}, false);
+    il.add_dimension({{Expression_component("31", Expression_component::number)}, {Expression_component("0", Expression_component::number)}, true});
+    il.add_dimension({{Expression_component("1", Expression_component::number)}, {Expression_component("0", Expression_component::number)}, false});
 
     Concatenation c;
     c.add_component(std::make_shared<Expression>(Expression({Expression_component("31", Expression_component::number)})));
@@ -364,8 +364,8 @@ TEST(Initialization_list, get_values_concatenation_initialization) {
 
 TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
     Initialization_list il;
-    il.add_dimension({{Expression_component("31", Expression_component::number)}, {Expression_component("0", Expression_component::number)}, true}, true);
-    il.add_dimension({{Expression_component("4", Expression_component::number)}, {Expression_component("0", Expression_component::number)}, false}, false);
+    il.add_dimension({{Expression_component("31", Expression_component::number)}, {Expression_component("0", Expression_component::number)}, true});
+    il.add_dimension({{Expression_component("4", Expression_component::number)}, {Expression_component("0", Expression_component::number)}, false});
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("3", Expression_component::number)})));
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("3", Expression_component::number)})));
     il.add_item(std::make_shared<Expression>(Expression({Expression_component("3", Expression_component::number)})));

@@ -20,7 +20,7 @@ void HDL_parameters_factory::new_parameter() {
       new_basic_resource();
       current_resource.set_type(HDL_parameter::expression_parameter);
       for(auto &dim:packed_dimensions){
-          init_list.add_dimension(dim, dim.packed);
+          init_list.add_dimension(dim);
       }
       packed_dimensions.clear();
 
@@ -92,7 +92,7 @@ void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
         auto first_expr = expression_stack.top();
         expression_stack.pop();
         dimension_t dim = {first_expr, second_expr, false};
-        init_list.add_dimension(dim, dim.packed);
+        init_list.add_dimension(dim);
     }
 }
 
