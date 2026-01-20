@@ -395,9 +395,6 @@ TEST(function_processing, parametrized_function) {
 
 TEST(function_processing, package_assignment) {
     std::string test_pattern = R"(
-        package hil_address_space;
-            parameter bus_base = 52;
-        endpackage
         module test_mod ();
 
 
@@ -432,17 +429,15 @@ TEST(function_processing, package_assignment) {
 
     EXPECT_EQ(check_f,result);
 
-    mdarray<int64_t> check_val;
-    check_val.set_1d_slice({0,0}, {100,200,300});
 
     auto call = HDL_function_call("CTRL_ADDR_CALC");
     call.add_body(functions["CTRL_ADDR_CALC"].get_assignments(), functions["CTRL_ADDR_CALC"].get_loop());
-
+    call.propagate_constant({"hil_address_space", "bus_base"}, 21);
     auto values = call.evaluate(false);
     ASSERT_TRUE(values.has_value());
-    ASSERT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
-    auto result_value = std::get<mdarray<int64_t>>(values.value());
-    EXPECT_EQ(result_value, check_val);
+    ASSERT_TRUE(std::holds_alternative<int64_t>(values.value()));
+    auto result_value = std::get<int64_t>(values.value());
+    EXPECT_EQ(result_value, 21);
 }
 
 

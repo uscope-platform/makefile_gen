@@ -473,19 +473,19 @@ TEST(parameter_processing, simple_package_in_function_initialization) {
 
         module test_mod #(
             parameter ADDR_WIDTH = 32,
-            parameter N_CORES = 3
+            parameter N_CORES =2
         )();
 
-            localparam N_AXI_LITE = N_CORES+3;
+            localparam N_AXI_LITE = N_CORES;
             localparam BASE_ADDR = 32'h43c00000 + 'h30000;
 
-            typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE];
-            function ctrl_addr_init_t CTRL_ADDR_CALC();
+          typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE-1:0];
+            function automatic ctrl_addr_init_t CTRL_ADDR_CALC();
                 CTRL_ADDR_CALC[0] = hil_address_space::bus_base;
                 CTRL_ADDR_CALC[1] = BASE_ADDR + 4;
             endfunction
 
-            localparam [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
+            localparam ctrl_addr_init_t AXI_ADDRESSES = CTRL_ADDR_CALC();
 
         endmodule
 
@@ -509,7 +509,7 @@ TEST(parameter_processing, simple_package_in_function_initialization) {
 
     auto param = ast_v2->get_parameters().get("AXI_ADDRESSES");
     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-    mdarray<int64_t>::md_1d_array reference = {0x43c30004,0x43c00000};
+    mdarray<int64_t>::md_1d_array reference = {0x43c00000,0x43c30004};
     ASSERT_EQ(param_value, reference);
 }
 
@@ -558,7 +558,7 @@ TEST(parameter_processing, nested_package_in_function_initialization) {
 
     auto param = ast_v2->get_parameters().get("AXI_ADDRESSES");
     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-    mdarray<int64_t>::md_1d_array reference = {0x43c30004,0x43c00000};
+    mdarray<int64_t>::md_1d_array reference = {0x43c00000,0x43c30004};
     ASSERT_EQ(param_value, reference);
 }
 

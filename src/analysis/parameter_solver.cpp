@@ -103,14 +103,13 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
     std::map<qualified_identifier, resolved_parameter> solved_parameters;
 
     //retreive default package parameters
-    std::map<qualified_identifier, resolved_parameter> package_parameters;
     auto deps_map = get_dependency_map(node_parameters);
-    for (auto &[param_name, param_deps]:deps_map) {
+    for (auto &param_deps: deps_map | std::views::values) {
         for (const auto& identifier:param_deps) {
             if (!identifier.prefix.empty()) {
                 auto package = d_store->get_HDL_resource(identifier.prefix);
                 auto param_value = package.get_default_parameters();
-                package_parameters[identifier] = param_value[{"", identifier.name}];
+                solved_parameters[identifier] = param_value[{"", identifier.name}];
             }
         }
     }
@@ -118,7 +117,17 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
     // Handle overridden parameters
     deps_map = get_dependency_map(node_overrides);
     if(node_overrides.empty()) {
-        solved_parameters = node_defaults;
+        for(auto &[name, value]:node_defaults) {
+            if(std::holds_alternative<std::string>(value)) {
+                if(std::get<std::string>(value) != "__RUNTIME_ONLY_PARAMETER__") {
+                    solved_parameters.insert({name, value});
+                } else {
+                    auto raw_param = node_parameters.get(name.name);
+                }
+            } else {
+                solved_parameters.insert({name, value});
+            }
+        }
     } else{
         Parameters_map to_solve;
         for(const auto& override:node_overrides) {
@@ -173,26 +182,13 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
     }
 
 
-    Parameters_map runtime_to_eval;
-    for (auto [param_name, param_value]:solved_parameters) {
-        if(std::holds_alternative<std::string>(param_value)) {
-            if(std::get<std::string>(param_value) == "__RUNTIME_ONLY_PARAMETER__") {
-                auto raw_param = node_parameters.get(param_name.name);
-                for(auto &[param_id, param_val] :package_parameters) {
-                    raw_param->propagate_constant(param_id, param_val);
-                }
-                runtime_to_eval.insert(raw_param);
-            }
-        }
-    }
+    auto  runtime_params = specialize_runtime_parameters(solved_parameters, node_parameters);
+    solved_parameters.insert(runtime_params.begin(), runtime_params.end());
 
-    // Substitute runtime only parameters
-    auto runtime_params = process_parameters(runtime_to_eval);
-    for (auto &[name, value]: solved_parameters) {
-        if (runtime_params.contains(name)) value = runtime_params[name];
-    }
     for (auto &[name, value]: node_defaults) {
-        if (runtime_params.contains(name)) value = runtime_params[name];
+        if (runtime_params.contains(name)) {
+            value = runtime_params[name];
+        }
     }
     update_parameters_map(solved_parameters, work.node, d_store);
     return node_defaults;
@@ -209,4 +205,24 @@ std::map<qualified_identifier, std::set<qualified_identifier>> parameter_solver:
         dependencies_map[{"", param_name}].insert(deps.begin(), deps.end());
     }
     return dependencies_map;
+}
+
+std::map<qualified_identifier, resolved_parameter> parameter_solver::specialize_runtime_parameters(
+    const std::map<qualified_identifier, resolved_parameter> &solved_parameters,
+    Parameters_map &node_parameters
+    ) {
+
+    Parameters_map runtime_to_eval;
+
+    for(auto &param:node_parameters) {
+        if(!solved_parameters.contains({"", param->get_name()})) {
+            runtime_to_eval.insert(param);
+            for(auto &[solution_name, solution_value]:solved_parameters) {
+                runtime_to_eval.get(param->get_name())->propagate_constant(solution_name, solution_value);
+            }
+        }
+    }
+
+    // Substitute runtime only parameters
+    return process_parameters(runtime_to_eval);
 }

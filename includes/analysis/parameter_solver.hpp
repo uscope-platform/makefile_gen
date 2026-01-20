@@ -41,6 +41,11 @@ public:
     static std::map<qualified_identifier, resolved_parameter> override_parameters(work_order &work, const std::shared_ptr<data_store> &d_store);
 
     static std::map<qualified_identifier, std::set<qualified_identifier>>get_dependency_map(const Parameters_map &map);
+
+    static std::map<qualified_identifier, resolved_parameter> specialize_runtime_parameters(
+        const std::map<qualified_identifier, resolved_parameter> &solved_parameters,
+        Parameters_map &node_parameters
+    );
 };
 
 
