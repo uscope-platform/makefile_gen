@@ -178,11 +178,19 @@ TEST(parameter_processing, array_instance_parameter_override) {
 
     p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
     p->set_name("param_2");
+    Initialization_list il;
+    il.add_dimension({
+        {Expression_component("1", Expression_component::number)},
+        {Expression_component("0", Expression_component::number)},
+        false
+    }, false);
     mdarray<int64_t> av;
     av.set_1d_slice({0,0}, {9,8});
     auto ec = Expression_component(0, 0);
     ec.set_value(av);
-    p->add_component(ec);
+    il.set_scalar(std::make_shared<Expression>(Expression({ec})));
+    p->add_initialization_list(il);
+
     p->set_array_value(av);
     check_params.insert(p);
 
