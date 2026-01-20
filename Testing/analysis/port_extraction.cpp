@@ -39,6 +39,8 @@ TEST(port_extraction, regular_port) {
     check_ports["stream_in"] = {HDL_net("buck_merged")};
 
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["stream_in"][0].get_full_name(), "buck_merged");
 }
 
 TEST(port_extraction, concat_port) {
@@ -62,6 +64,9 @@ std::string test_pattern = R"(
     check_ports["stream_in"] = {HDL_net("buck_merged"), HDL_net("dab_merged")};
 
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["stream_in"][0].get_full_name(), "buck_merged");
+    ASSERT_EQ(check_ports["stream_in"][1].get_full_name(), "dab_merged");
 }
 
 
@@ -89,6 +94,8 @@ TEST(port_extraction, array_port) {
     check_ports["stream_in"][0].set_index({Expression_component("5", Expression_component::number)});
 
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["stream_in"][0].get_full_name(), "stream[5]");
 }
 
 TEST(port_extraction, array_range_port) {
@@ -117,6 +124,8 @@ TEST(port_extraction, array_range_port) {
     range.type = HDL_range::increasing_range;
     check_ports["stream_in"][0].set_range(range);
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["stream_in"][0].get_full_name(), "S_AXI_AWADDR[3+:1]");
 }
 
 
@@ -141,6 +150,9 @@ TEST(port_extraction, concat_literal) {
     check_ports["stream_in"] = {HDL_net("1'b0"), HDL_net("test")};
 
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["stream_in"][0].get_full_name(), "1'b0");
+    ASSERT_EQ(check_ports["stream_in"][1].get_full_name(), "test");
 }
 
 
@@ -168,6 +180,9 @@ TEST(port_extraction, concat_simple_slicing) {
     check_ports["stream_in"][1].set_index({Expression_component("N", Expression_component::identifier)});
 
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["stream_in"][0].get_full_name(), "m_wdata[N]");
+    ASSERT_EQ(check_ports["stream_in"][1].get_full_name(), "m_wstrb[N]");
 }
 
 TEST(port_extraction, concat_range) {
@@ -205,6 +220,9 @@ TEST(port_extraction, concat_range) {
 
 
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["stream_in"][0].get_full_name(), "S_AXI_AWADDR[N+:3]");
+    ASSERT_EQ(check_ports["stream_in"][1].get_full_name(), "S_AXI_AWPROT[C-:1]");
 }
 
 
@@ -241,6 +259,9 @@ TEST(port_extraction,range_concat_expression) {
     check_ports["in_data"][1].set_range(range);
 
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["in_data"][0].get_full_name(), "S_AXI_AWADDR[N*ADDR_WIDTH+:ADDR_WIDTH]");
+    ASSERT_EQ(check_ports["in_data"][1].get_full_name(), "S_AXI_AWPROT[N*3+:3]");
 }
 
 
@@ -280,6 +301,9 @@ TEST(port_extraction, concat_complex_slicing) {
     check_ports["stream_in"][1].set_range(range);
 
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["stream_in"][0].get_full_name(), "S_AXI_AWADDR[N*ADDR_WIDTH+:ADDR_WIDTH]");
+    ASSERT_EQ(check_ports["stream_in"][1].get_full_name(), "S_AXI_AWPROT[N*3+:3]");
 }
 
 
@@ -303,6 +327,9 @@ TEST(port_extraction, concat_interface_component) {
     check_ports["clock"] = {HDL_net("clock")};
     check_ports["stream_in"] = {HDL_net("axil.WDATA"), HDL_net("axil.WSTRB")};
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["stream_in"][0].get_full_name(), "axil.WDATA");
+    ASSERT_EQ(check_ports["stream_in"][1].get_full_name(), "axil.WSTRB");
 }
 
 
@@ -332,6 +359,8 @@ TEST(port_extraction, repetition_port) {
     check_ports["stream_in"][0].set_replication(rep);
 
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["stream_in"][0].get_full_name(), "");
 }
 
 
@@ -363,6 +392,9 @@ TEST(port_extraction, complex_nested_concat_port) {
     check_ports["stream_in"][1].set_replication(rep);
 
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["stream_in"][0].get_full_name(), "OUTPUT_SIGNED[data_in.dest]");
+    ASSERT_EQ(check_ports["stream_in"][1].get_full_name(), "");
 }
 
 
@@ -400,6 +432,9 @@ TEST(port_extraction, concat_of_repetitions) {
     check_ports["stream_in"][1].set_replication(rep);
 
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["stream_in"][0].get_full_name(), "");
+    ASSERT_EQ(check_ports["stream_in"][1].get_full_name(), "");
 }
 
 TEST(port_extraction, port_extraction_with_declarations) {
@@ -432,6 +467,10 @@ TEST(port_extraction, port_extraction_with_declarations) {
     check_ports["data_in"] = {HDL_net("data_in")};
     check_ports["syndrome"] = {HDL_net("data_out")};
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["reset"][0].get_full_name(), "reset");
+    ASSERT_EQ(check_ports["data_in"][0].get_full_name(), "data_in");
+    ASSERT_EQ(check_ports["syndrome"][0].get_full_name(), "data_out");
 }
 
 TEST(port_extraction, other_port_concat) {
@@ -455,6 +494,11 @@ TEST(port_extraction, other_port_concat) {
     check_ports["slaves"] = {HDL_net("axi_in")};
     check_ports["masters"] = {HDL_net("timebase_axi"), HDL_net("gpio_axi"), HDL_net("fcore_axi")};
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["slaves"][0].get_full_name(), "axi_in");
+    ASSERT_EQ(check_ports["masters"][0].get_full_name(), "timebase_axi");
+    ASSERT_EQ(check_ports["masters"][1].get_full_name(), "gpio_axi");
+    ASSERT_EQ(check_ports["masters"][2].get_full_name(), "fcore_axi");
 }
 
 
@@ -489,6 +533,11 @@ TEST(port_extraction, replication_with_parameter) {
     check_ports["slaves"] = {HDL_net("axi_in")};
     check_ports["masters"] = {HDL_net("controller_axi"), HDL_net("spi_axi")};
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["clock"][0].get_full_name(), "clock");
+    ASSERT_EQ(check_ports["reset"][0].get_full_name(), "reset");
+    ASSERT_EQ(check_ports["slaves"][0].get_full_name(), "axi_in");
+    ASSERT_EQ(check_ports["masters"][0].get_full_name(), "controller_axi");
+    ASSERT_EQ(check_ports["masters"][1].get_full_name(), "spi_axi");
 }
 
 
@@ -509,4 +558,5 @@ TEST(port_extraction, interface_component_port ) {
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
     check_ports["in_valid"] = {HDL_net("axil.ARVALID")};
     ASSERT_EQ(ports, check_ports);
+    ASSERT_EQ(check_ports["in_valid"][0].get_full_name(), "axil.ARVALID");
 }

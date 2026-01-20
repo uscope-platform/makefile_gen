@@ -29,6 +29,8 @@ std::string Expression::print() const {
                 ret_val += item.get_package_prefix() + "::";
             }
             ret_val += std::get<std::string>(item.get_value());
+        } else if(item.is_operator()) {
+            ret_val += std::get<std::string>(item.get_value());
         }
     }
     return ret_val;
