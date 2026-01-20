@@ -29,7 +29,6 @@
 
 // FORWARD DECLARATIONS
 class HDL_parameter;
-class Parameter_processor;
 class HDL_function_def;
 class data_store;
 class Parameters_map;
@@ -101,13 +100,8 @@ public:
 
 private:
 
-    std::vector<int64_t> expand_repetition(Expression &e, Parameter_processor &p, std::vector<int64_t> *sizes);
-
-
-    int64_t pack_values(const std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> &components);
 
     bool scalar = true;
-
 
 
     std::vector<dimension_t> unpacked_dimensions;

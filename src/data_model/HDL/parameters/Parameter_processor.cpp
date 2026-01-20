@@ -349,15 +349,6 @@ int64_t Parameter_processor::get_package_parameter(const Expression_component &e
 }
 
 
-void Parameter_processor::convert_parameters(std::vector<HDL_Resource> &v) {
-    for(auto &res:v){
-        Parameters_map new_params;
-        for(auto &item: res.get_parameters()){
-            new_params.insert(item);
-        }
-        res.set_parameters(new_params);
-    }
-}
 
 int64_t Parameter_processor::get_component_value(Expression_component &ec, int64_t *result_size) {
 

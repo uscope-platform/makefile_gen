@@ -70,7 +70,6 @@ public:
     );
     void set_trace_prefix(std::string &s) {trace_prefix = s;}
     Parameters_map process_parameters_map(const Parameters_map &map, HDL_Resource &spec);
-    static void convert_parameters(std::vector<HDL_Resource> &v);
     int64_t process_expression(const Expression& expr, int64_t *reslt_size);
 
     void set_data_store(std::shared_ptr<data_store> &ds){d_store = ds;};

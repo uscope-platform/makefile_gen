@@ -133,33 +133,6 @@ resolved_parameter Initialization_list::get_values() {
 
 
 
-int64_t Initialization_list::pack_values(const std::pair<mdarray<int64_t>::md_1d_array, mdarray<int64_t>::md_1d_array> &components) {
-
-    int64_t total_size = 0;
-    for(auto &size:components.second){
-        total_size += size;
-    }
-    std::vector<bool> result(total_size, false);
-
-    uint64_t current_wp = 0;
-    for(ssize_t i =0; i<components.first.size(); i++){
-        std::bitset<64> data = components.first[i];
-        auto size = components.second[i];
-        for(int j = 0; j<size; j++){
-            result[current_wp] = data[j];
-            current_wp++;
-        }
-    }
-
-    int64_t packed_result = 0;
-    for(int i = 0; i<result.size(); i++){
-        packed_result += result[i]*std::pow(2, i);
-    }
-
-    return packed_result;
-}
-
-
 std::set<qualified_identifier> Initialization_list::get_dependencies() {
     std::set<qualified_identifier> result;
     for (auto &dim:unpacked_dimensions) {
@@ -211,38 +184,6 @@ void PrintTo(const Initialization_list &il, std::ostream *os) {
     *os << result;
 }
 
-std::vector<int64_t> Initialization_list::expand_repetition(Expression &e, Parameter_processor &p, std::vector<int64_t> *sizes) {
-    Expression size_expr, val_expr;
-    bool in_size = true;
-    for(int i = 1; i<e.components.size(); i++){
-        if(in_size){
-            if(!e.components[i].is_numeric()){
-                if (std::get<std::string>(e.components[i].get_value()) == ",") {
-                    in_size = false;
-                } else {
-                    size_expr.push_back(e.components[i]);
-                }
-            } else{
-                size_expr.push_back(e.components[i]);
-            }
-        } else {
-            val_expr.push_back(e.components[i]);
-        }
-    }
-
-
-    auto repetition_size = p.process_expression(size_expr, nullptr);
-    int64_t value_bin_size;
-    auto repetition_value = p.process_expression(val_expr,&value_bin_size);
-    if(sizes != nullptr){
-        for(int i = 0; i<repetition_size; i++){
-            sizes->push_back(value_bin_size);
-        }
-    }
-
-    auto ret_val = std::vector(repetition_size, repetition_value);
-    return ret_val;
-}
 
 std::optional<resolved_parameter> Initialization_list::evaluate() {
     std::optional<resolved_parameter> result;
