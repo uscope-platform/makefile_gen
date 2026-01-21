@@ -83,7 +83,7 @@ public:
     void push_scalar_component(const Expression_component &comp);
     void set_scalar(const std::shared_ptr<Parameter_value_base> &expr);
 
-    mdarray<int64_t> process_default_initialization();
+    resolved_parameter process_default_initialization();
 
 
     std::set<qualified_identifier> get_dependencies();

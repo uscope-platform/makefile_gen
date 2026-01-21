@@ -256,7 +256,7 @@ void Initialization_list::push_scalar_component(const Expression_component &comp
     }
 }
 
-mdarray<int64_t> Initialization_list::process_default_initialization() {
+resolved_parameter Initialization_list::process_default_initialization() {
 
     std::vector<uint64_t> dimensions;
     mdarray<int64_t> result;
@@ -282,10 +282,15 @@ mdarray<int64_t> Initialization_list::process_default_initialization() {
     auto init_value = expression_leaves[0]->evaluate(false);
 
     if (!init_value.has_value()) throw std::runtime_error("Error: initializer of default array should be defined");
-    if (!std::holds_alternative<int64_t>(init_value.value())) throw std::runtime_error("Error: initializer of default array should be numeric");
-
-    return {dimensions,std::get<int64_t>(init_value.value())};
-
+    if(std::holds_alternative<int64_t>(init_value.value())) {
+        mdarray<int64_t> ret_i = {dimensions,std::get<int64_t>(init_value.value())};
+        return ret_i;
+    }
+    if(std::holds_alternative<std::string>(init_value.value())) {
+        mdarray<std::string> ret_s = {dimensions,std::get<std::string>(init_value.value())};
+        return ret_s;
+    }
+    throw std::runtime_error("Error: initializer of default array should be a string or a number");
 
 }
 

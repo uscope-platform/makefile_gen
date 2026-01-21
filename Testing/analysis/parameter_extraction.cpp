@@ -19,6 +19,55 @@
 #include "frontend/analysis/sv_analyzer.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
+TEST(parameter_extraction, strings_dafault_init) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            )();
+
+            parameter N_CORES = 3;
+            parameter string TRANSLATION_TABLE_INIT[3:0] = '{default:"FILE"};
+
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("N_CORES");
+    p->add_component(Expression_component("3", Expression_component::number));
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("TRANSLATION_TABLE_INIT");
+    Initialization_list  il;
+    il.add_dimension({{Expression_component("3", Expression_component::number)}, {Expression_component("0", Expression_component::number)}, false});
+    il.add_item(std::make_shared<Expression>(Expression({Expression_component("\"FILE\"", Expression_component::string)})));
+    il.set_default();
+
+    p->add_initialization_list(il);
+    check_params.insert(p);
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+    mdarray<std::string> tti_val;
+    tti_val.set_1d_slice({0, 0}, {"\"FILE\"", "\"FILE\"", "\"FILE\"", "\"FILE\""});
+
+    ASSERT_EQ(3, std::get<int64_t>(defaults.at({"", "N_CORES"})));
+    ASSERT_EQ(tti_val, std::get<mdarray<std::string>>(defaults.at({"", "TRANSLATION_TABLE_INIT"})));
+}
+
+
 
 
 TEST(parameter_extraction, strings_array) {
