@@ -14,7 +14,7 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
-#include "analysis/HDL_ast_builder.hpp"
+#include "analysis/HDL_ast_builder_v2.hpp"
 #include "Backend/Dependency_resolver.hpp"
 
 
@@ -49,10 +49,10 @@ TEST_F(dep_resolver , dependency_resolver) {
 
     Depfile df;
     df.add_excluded_module("excluded_module");
-    HDL_ast_builder b(s_store, d_store, df);
-    auto synth = b.build_ast(std::vector<std::string>({"test_module"}), {})[0];
+    HDL_ast_builder_v2 b(s_store, d_store, df);
+    auto synth = b.build_ast(std::vector<std::string>({"test_module"}))[0];
     std::vector<std::string> add_synyh_mod = {"expl_dep"};
-    auto additional_synth_modules = b.build_ast(add_synyh_mod, {});
+    auto additional_synth_modules = b.build_ast(add_synyh_mod);
     additional_synth_modules.insert(additional_synth_modules.end(), synth);
 
     // RESOLVE DEPENDENCIES

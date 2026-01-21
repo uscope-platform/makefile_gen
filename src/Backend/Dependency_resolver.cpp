@@ -42,9 +42,8 @@ std::set<std::string> Dependency_resolver_v2::solve_dep(std::shared_ptr<HDL_inst
     for(auto &dep:i->get_dependencies()){
         if(d_store->contains_hdl_entity(dep->get_type())){
 
-            auto res = d_store->get_HDL_resource(dep->get_type());
-
-            ret_val.insert(res.get_path());
+            auto path = d_store->get_HDL_resource(dep->get_type()).get_path();
+            if(!path.empty()) ret_val.insert(path);
         }
         auto dep_set = solve_dep(dep);
         ret_val.insert(dep_set.begin(), dep_set.end());

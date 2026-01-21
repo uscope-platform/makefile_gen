@@ -33,8 +33,8 @@ void proxy_bus_analysis::analyze(const std::shared_ptr<HDL_instance_AST> &node) 
         working_stack.pop();
 
         if(!current_node->get_proxy_specs().module.empty()){
-            HDL_ast_builder b(s_store, d_store, dep_file);
-            auto bus_ast = b.build_ast(std::vector<std::string>({current_node->get_proxy_specs().module}), {})[0];
+            HDL_ast_builder_v2 b(s_store, d_store, dep_file);
+            auto bus_ast = b.build_ast(std::vector<std::string>({current_node->get_proxy_specs().module}))[0];
             control_bus_analysis bus_analyzer(dep_file);
             bus_analyzer.analyze_bus(bus_ast, current_node->get_proxy_specs().interface);
             current_node->set_proxy_ast(bus_ast);

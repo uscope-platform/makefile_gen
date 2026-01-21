@@ -17,7 +17,7 @@
 #define MAKEFILEGEN_V2_PROXY_BUS_ANALYSIS_HPP
 
 #include "data_model/HDL/HDL_instance_AST.hpp"
-#include "analysis/HDL_ast_builder.hpp"
+#include "analysis/HDL_ast_builder_v2.hpp"
 #include "analysis/control_bus_analysis.hpp"
 
 class proxy_bus_analysis {
