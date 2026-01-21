@@ -21,6 +21,61 @@
 
 
 
+TEST(parameter_extraction, float_parameter) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            parameter LUT_DEPTH   = 9
+            )();
+
+            localparam STEP   = (2*3.14159265358979323846/4.0) / LUT_DEPTH;
+
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("LUT_DEPTH");
+    p->add_component(Expression_component("9", Expression_component::number));
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("STEP");
+    p->add_component(Expression_component("(", Expression_component::parenthesis));
+    p->add_component(Expression_component("2", Expression_component::number));
+    p->add_component(Expression_component("*", Expression_component::operation));
+    p->add_component(Expression_component("3.14159265358979323846", Expression_component::number));
+    p->add_component(Expression_component("/", Expression_component::operation));
+    p->add_component(Expression_component("4.0", Expression_component::number));
+    p->add_component(Expression_component(")", Expression_component::parenthesis));
+    p->add_component(Expression_component("/", Expression_component::operation));
+    p->add_component(Expression_component("LUT_DEPTH", Expression_component::identifier));
+    check_params.insert(p);
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+    std::map<qualified_identifier, resolved_parameter> check_defaults = {
+        {{"", "LUT_DEPTH"}, 9},
+        {{"", "STEP"}, 0.174533f}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+
 TEST(parameter_extraction, package_parameters) {
     std::string test_pattern = R"(
 

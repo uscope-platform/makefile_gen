@@ -17,7 +17,8 @@
 #include "data_model/HDL/parameters/Expression_component.hpp"
 
 const std::regex Expression_component::sv_constant_regex(R"(^\d*'(s)?(h|d|o|b)([0-9a-fA-F]+))");
-const std::regex Expression_component::number_regex("^\\d+$");
+const std::regex Expression_component::number_regex(R"(^\d+$)");
+const std::regex Expression_component::float_regex(R"(^[+-]?(\d+\.\d*|\.\d+)([eE][+-]?\d+)?$|^[+-]?\d+[eE][+-]?\d+$)");
 const std::regex Expression_component::size_regex(R"(^(\d*)'[0-9a-zA-Z]+)");
 
 
@@ -81,7 +82,6 @@ bool Expression_component::propagate_constant(const qualified_identifier &consta
         for(int i = 0; i<array_index.size(); i++) {
             array_index[i] = {Expression_component(indices[i], 0)};
         }
-        int i = 0;
     }
     if (std::holds_alternative<std::string>(value)) {
         if (std::get<std::string>(value) == constant_id.name && package_prefix == constant_id.prefix) {
@@ -100,7 +100,7 @@ bool Expression_component::propagate_constant(const qualified_identifier &consta
                 } else {
                     std::bitset<64> bits(std::get<int64_t>(const_value));
                     type = number;
-                    value = bits[indices[0]];
+                    value = static_cast<int64_t>(bits[indices[0]]);
                 }
 
             } else {
@@ -129,7 +129,7 @@ bool operator==(const Expression_component &lhs, const Expression_component &rhs
     return ret_val;
 }
 
-std::string Expression_component::print_value() {
+std::string Expression_component::print_value() const {
     std::string ret_val;
      if(is_numeric()){
         ret_val = std::to_string(std::get<int64_t>(value));
@@ -145,12 +145,16 @@ std::string Expression_component::print_value() {
     return ret_val;
 }
 
- std::pair<int64_t, int64_t>  Expression_component::process_number(const std::string &s) {
-    std::pair<int64_t, int64_t> ret_val;
+std::pair<resolved_parameter, int64_t>  Expression_component::process_number(const std::string &s) {
 
-    if(test_parameter_type(number_regex, s)) {
-        ret_val.first = static_cast<int64_t>(std::stoul(s));
-        ret_val.second = calculate_binary_size(ret_val.first);
+    int64_t ret_size;
+    resolved_parameter ret_value;
+    if(test_parameter_type(float_regex, s)) {
+        ret_size = 64;
+        ret_value = std::stod(s);
+    } else if(test_parameter_type(number_regex, s)) {
+        ret_value = static_cast<int64_t>(std::stoul(s));
+        ret_size = calculate_binary_size(std::get<int64_t>(ret_value));
     } else if(test_parameter_type(sv_constant_regex, s)){
         std::smatch base_match;
         if(std::regex_search(s, base_match, sv_constant_regex)){
@@ -168,26 +172,26 @@ std::string Expression_component::print_value() {
                     break;
             }
             if(base =="h"){
-                ret_val.first = static_cast<int64_t>(std::stoul(str_value, nullptr, 16));
+                ret_value = static_cast<int64_t>(std::stoul(str_value, nullptr, 16));
             } else if(base =="d") {
-                ret_val.first = static_cast<int64_t>(std::stoul(str_value, nullptr, 10));
+                ret_value = static_cast<int64_t>(std::stoul(str_value, nullptr, 10));
             } else if(base =="o") {
-                ret_val.first = static_cast<int64_t>(std::stoul(str_value, nullptr, 8));
+                ret_value = static_cast<int64_t>(std::stoul(str_value, nullptr, 8));
             } else if(base =="b") {
-                ret_val.first = static_cast<int64_t>(std::stoul(str_value, nullptr, 2));
+                ret_value = static_cast<int64_t>(std::stoul(str_value, nullptr, 2));
             }
             // Process size
 
             if(std::regex_search(s, base_match, size_regex)){
                 if(!base_match[1].str().empty()) {
-                    ret_val.second = std::stoll(base_match[1].str());
+                    ret_size = std::stoll(base_match[1].str());
                 } else {
-                    ret_val.second = calculate_binary_size(ret_val.first);
+                    ret_size = calculate_binary_size(std::get<int64_t>(ret_value));
                 }
             }
         }
     }
-    return ret_val;
+    return std::make_pair(ret_value, ret_size);
 }
 
 bool Expression_component::test_parameter_type(const std::regex &r, const std::string &s) {

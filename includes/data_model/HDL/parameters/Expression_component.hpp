@@ -80,7 +80,7 @@ public:
 
     bool is_right_associative();
     int64_t get_operator_precedence();
-    std::string print_value();
+    std::string print_value() const;
 
     static int64_t calculate_binary_size(int64_t in);
     typedef enum{
@@ -110,7 +110,7 @@ public:
     static component_type get_type(const std::string &s);
 
 private:
-    static std::pair<int64_t, int64_t> process_number(const std::string &s);
+    static  std::pair<resolved_parameter, int64_t>  process_number(const std::string &s);
     static bool test_parameter_type(const std::regex &r, const std::string &s);
 
     component_type type = number;
@@ -123,6 +123,7 @@ private:
 
     static const std::regex sv_constant_regex;
     static const std::regex number_regex;
+    static const std::regex float_regex;
     static const std::regex size_regex;
 
     std::vector<Expression> array_index;

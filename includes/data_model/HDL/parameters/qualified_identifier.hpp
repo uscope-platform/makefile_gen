@@ -24,7 +24,7 @@
 #include <variant>
 #include "data_model/mdarray.hpp"
 
-using resolved_parameter = std::variant<int64_t, std::string, mdarray<int64_t>>;
+using resolved_parameter = std::variant<int64_t, std::string, mdarray<int64_t>,  double>;
 
 struct qualified_identifier {
     std::string prefix;
