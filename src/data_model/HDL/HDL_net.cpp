@@ -32,6 +32,49 @@ std::string HDL_net::get_full_name() const {
 
 }
 
+void HDL_net::evaluate() {
+    auto val = range.accessor.evaluate(true);
+    if(val.has_value()) {
+        if(std::holds_alternative<int64_t>(val.value())) {
+            range.accessor = {Expression_component(std::get<int64_t>(val.value()), 0)};
+        }
+    }
+    val = range.range.evaluate(true);
+    if(val.has_value()) {
+        if(std::holds_alternative<int64_t>(val.value())) {
+            range.range = {Expression_component(std::get<int64_t>(val.value()), 0)};
+        }
+    }
+    index.evaluate(true);
+    val = index.evaluate(true);
+    if(val.has_value()) {
+        if(std::holds_alternative<int64_t>(val.value())) {
+            index = {Expression_component(std::get<int64_t>(val.value()), 0)};
+        }
+    }
+    val = replication.size.evaluate(true);
+    if(val.has_value()) {
+        if(std::holds_alternative<int64_t>(val.value())) {
+            replication.size = {Expression_component(std::get<int64_t>(val.value()), 0)};
+        }
+    }
+    val = replication.target.evaluate(true);
+    if(val.has_value()) {
+        if(std::holds_alternative<int64_t>(val.value())) {
+            replication.target = {Expression_component(std::get<int64_t>(val.value()), 0)};
+        }
+    }
+}
+
+void HDL_net::propagate_constant(const qualified_identifier &id, const resolved_parameter &param) {
+
+    range.accessor.propagate_constant(id, param);
+    range.range.propagate_constant(id, param);
+    index.propagate_constant(id, param);
+    replication.size.propagate_constant(id, param);
+    replication.target.propagate_constant(id, param);
+}
+
 nlohmann::json HDL_net::dump() {
     nlohmann::json ret;
     ret["name"] = name;

@@ -27,10 +27,14 @@ HDL_ast_builder_v2::HDL_ast_builder_v2(const std::shared_ptr<settings_store> &s,
 std::vector<std::shared_ptr<HDL_instance_AST>> HDL_ast_builder_v2::build_ast(const std::vector<std::string> &modules) {
     std::vector<std::shared_ptr<HDL_instance_AST>> ret;
     ret.reserve(modules.size());
+    pass_manager m(d_store);
     for(auto &item:modules){
         auto ast = build_ast(item);
+        m.apply_passes(ast);
         ret.push_back(ast);
     }
+
+
     return ret;
 }
 

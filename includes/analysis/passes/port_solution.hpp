@@ -13,18 +13,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-
-#ifndef MAKEFILEGEN_V2_LOOP_SOLUTION_PASS_HPP
-#define MAKEFILEGEN_V2_LOOP_SOLUTION_PASS_HPP
+#ifndef MAKEFILEGEN_V2_PORT_SOLUTION_HPP
+#define MAKEFILEGEN_V2_PORT_SOLUTION_HPP
 
 #include "analysis/passes/pass_base.hpp"
 
-class loop_solution_pass : public pass_base{
+class port_solution  : public pass_base {
 public:
-    loop_solution_pass() = default;
-    void setup(const std::shared_ptr<HDL_instance_AST> &root) override;
-    std::vector<std::shared_ptr<HDL_instance_AST>> process_loops(const std::shared_ptr<HDL_instance_AST> &root);
+     void process_node(const std::shared_ptr<HDL_instance_AST> &node) override;
 };
 
 
-#endif //MAKEFILEGEN_V2_LOOP_SOLUTION_PASS_HPP
+#endif //MAKEFILEGEN_V2_PORT_SOLUTION_HPP

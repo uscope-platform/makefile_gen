@@ -43,8 +43,29 @@ public:
 
     void set_value(const resolved_parameter &val);
 
-    std::string get_string_value() const;
-    int64_t  get_numeric_value() const;
+    std::string get_string_value() const {
+        if (std::holds_alternative<std::vector<std::string>>(value))
+            return std::get<std::vector<std::string>>(value)[0];
+        else
+            return "";
+    }
+    int64_t  get_numeric_value() const {
+        return std::get<mdarray<int64_t>>(value).get_scalar();
+    }
+    mdarray<int64_t> get_array_value() const{
+        return std::get<mdarray<int64_t>>(value);
+    };
+    resolved_parameter get_value() const {
+        if(is_array()) {
+            return get_array_value();
+        } else {
+            if(std::holds_alternative<std::vector<std::string>>(value)){
+                return get_string_value();
+            } else {
+                return get_numeric_value();
+            }
+        }
+    }
 
     bool propagate_constant(const qualified_identifier &constant_name, const resolved_parameter &constant_value);
     void propagate_function(const HDL_function_def &def);
@@ -85,10 +106,6 @@ public:
         locking_violation_check();
         i_l.clear_scalar();
     }
-
-    mdarray<int64_t> get_array_value() {
-        return std::get<mdarray<int64_t>>(value);
-    };
 
     std::string value_as_string() const;
     std::string to_string() const;

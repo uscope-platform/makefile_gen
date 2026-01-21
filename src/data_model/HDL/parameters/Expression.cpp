@@ -94,6 +94,7 @@ Expression Expression::to_rpm() const {
 }
 
 std::optional<resolved_parameter> Expression::evaluate(bool pack_result) {
+    if(components.empty()) return std::nullopt;
     if (components.size() == 1) {
         return components[0].get_value();
     }

@@ -30,13 +30,6 @@ HDL_parameter::HDL_parameter() {
 }
 
 
-std::string HDL_parameter::get_string_value() const {
-    if (std::holds_alternative<std::vector<std::string>>(value))
-        return std::get<std::vector<std::string>>(value)[0];
-    else
-        return "";
-}
-
 bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
     bool ret_val = true;
     ret_val &= lhs.name == rhs.name;
@@ -85,10 +78,6 @@ void HDL_parameter::set_value(const resolved_parameter &val) {
 
 std::shared_ptr<HDL_parameter> HDL_parameter::clone() const {
     return std::make_shared<HDL_parameter>(*this);
-}
-
-int64_t HDL_parameter::get_numeric_value() const {
-    return std::get<mdarray<int64_t>>(value).get_scalar();
 }
 
 bool HDL_parameter::propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &constant_value) {
