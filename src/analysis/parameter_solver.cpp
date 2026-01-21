@@ -15,7 +15,8 @@
 
 #include "analysis/parameter_solver.hpp"
 
-std::map<qualified_identifier, resolved_parameter>   parameter_solver::process_parameters(const Parameters_map &map_in) {
+std::map<qualified_identifier, resolved_parameter> parameter_solver::process_parameters(
+    const Parameters_map &map_in, const std::string_view &parent_module) {
     auto map = map_in.clone();
 
     std::map<qualified_identifier, resolved_parameter> solved_parameters;
@@ -58,7 +59,17 @@ std::map<qualified_identifier, resolved_parameter>   parameter_solver::process_p
         }
 
         if (rounds_counter >=100) {
-            spdlog::warn("Some parameters could not be solved in 100 passes");
+            std::string parameters;
+            int i = 0;
+            for(const auto &name: dependencies_map | std::views::keys) {
+                parameters += name.name;
+                if(dependencies_map.size()>1 && i<dependencies_map.size()-1) {
+                    parameters += ", ";
+                    i++;
+                }
+            }
+            spdlog::warn("Parameters {} could not be solved in 100 passes while processing instance {}",
+                parameters,  parent_module);
         }
 
     return solved_parameters;
@@ -188,14 +199,14 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
             ++solution_rounds;
         }
 
-        solved_parameters = process_parameters(to_solve);
+        solved_parameters = process_parameters(to_solve, work.node->get_name());
         for(auto &param:solved_parameters) {
             node_defaults[param.first] = param.second;
         }
     }
 
 
-    auto  runtime_params = specialize_runtime_parameters(solved_parameters, node_parameters);
+    auto runtime_params = specialize_runtime_parameters(solved_parameters, node_parameters, work.node->get_name());
     solved_parameters.insert(runtime_params.begin(), runtime_params.end());
 
     for (auto &[name, value]: node_defaults) {
@@ -222,7 +233,7 @@ std::map<qualified_identifier, std::set<qualified_identifier>> parameter_solver:
 
 std::map<qualified_identifier, resolved_parameter> parameter_solver::specialize_runtime_parameters(
     const std::map<qualified_identifier, resolved_parameter> &solved_parameters,
-    Parameters_map &node_parameters
+    Parameters_map &node_parameters, const std::string_view &parent_module
     ) {
 
     Parameters_map runtime_to_eval;
@@ -237,5 +248,5 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::specialize_
     }
 
     // Substitute runtime only parameters
-    return process_parameters(runtime_to_eval);
+    return process_parameters(runtime_to_eval, parent_module);
 }

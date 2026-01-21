@@ -32,7 +32,10 @@ struct work_order {
 
 class parameter_solver {
 public:
-    static std::map<qualified_identifier, resolved_parameter> process_parameters(const Parameters_map &map);
+    static std::map<qualified_identifier, resolved_parameter> process_parameters(
+        const Parameters_map &map,
+        const std::string_view &parent_module
+    );
     static void update_parameters_map(
         std::map<qualified_identifier, resolved_parameter> parameters,
         std::shared_ptr<HDL_instance_AST> node,
@@ -44,7 +47,7 @@ public:
 
     static std::map<qualified_identifier, resolved_parameter> specialize_runtime_parameters(
         const std::map<qualified_identifier, resolved_parameter> &solved_parameters,
-        Parameters_map &node_parameters
+        Parameters_map &node_parameters,const std::string_view &parent_module
     );
 };
 
