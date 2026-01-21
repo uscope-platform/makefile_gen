@@ -20,7 +20,7 @@
 #include "data_model/data_store.hpp"
 #include "data_model/settings_store.hpp"
 #include "frontend/analysis/sv_analyzer.hpp"
-#include "analysis/HDL_ast_builder.hpp"
+#include "analysis/HDL_ast_builder_v2.hpp"
 #include "analysis/control_bus_analysis.hpp"
 #include "Backend/uplatform/peripheral_definition_generator.hpp"
 #include "Backend/uplatform/application_definition_generator.hpp"
@@ -63,8 +63,8 @@ TEST( app_def_generation , generate_app_def) {
     Depfile df;
     df.set_content(df_content);
 
-    HDL_ast_builder b(s_store, d_store, df);
-    auto synth_ast = b.build_ast(std::vector<std::string>({"PID"}), {})[0];
+    HDL_ast_builder_v2 b(s_store, d_store, Depfile());
+    auto synth_ast = b.build_ast(std::vector<std::string>({"PID"}))[0];
 
 
     control_bus_analysis bus_analyzer(df);
