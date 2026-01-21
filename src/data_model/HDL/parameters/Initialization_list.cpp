@@ -99,30 +99,39 @@ bool Initialization_list::empty() const {
 
 resolved_parameter Initialization_list::get_values() {
     mdarray<int64_t> ret;
-
+    mdarray<std::string> ret_s;
     if(default_initialization){
         return process_default_initialization();
     }
-
+    bool ret_string = true;
     for(auto &expr:expression_leaves | std::views::reverse) {
         auto expr_depth = expr->get_depth();
         bool pack = unpacked_dimensions.size() <= expr_depth;
         auto expr_value = expr->evaluate(pack);
         if (expr_value.has_value()) {
             if (std::holds_alternative<std::string>(expr_value.value())) {
-                throw std::runtime_error("Strings in initialization lists are not supported");
+                auto stacked_arr = mdarray<std::string>::stack(ret_s, std::get<std::string>(expr_value.value()));
+                if (stacked_arr.has_value()) {
+                    ret_s = stacked_arr.value();
+                }
             } else if (std::holds_alternative<int64_t>(expr_value.value())) {
+                ret_string = false;
                 auto stacked_arr = mdarray<int64_t>::stack(ret, std::get<int64_t>(expr_value.value()));
                 if (stacked_arr.has_value()) {
                     ret = stacked_arr.value();
                 }
             } else if (std::holds_alternative<mdarray<int64_t>>(expr_value.value())) {
+                ret_string = false;
                 auto stacked_arr = mdarray<int64_t>::stack(ret, std::get<mdarray<int64_t>>(expr_value.value()));
                 if (stacked_arr.has_value()) {
                     ret = stacked_arr.value();
                 }
             }
         }
+    }
+
+    if(ret_string) {
+        return ret_s;
     }
 
     if(unpacked_dimensions.empty()) return ret.get_scalar();

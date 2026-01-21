@@ -151,9 +151,9 @@ int64_t Expression::get_size() {
 }
 
 std::variant<int64_t, double> Expression::evaluate_binary_expression(resolved_parameter op_a, resolved_parameter op_b, const std::string &operation) {
-    if(
-        std::holds_alternative<std::string>(op_a) || std::holds_alternative<mdarray<int64_t>>(op_a) ||
-        std::holds_alternative<std::string>(op_b) || std::holds_alternative<mdarray<int64_t>>(op_b) ) {
+    bool supported_a = (std::holds_alternative<int64_t>(op_a) || std::holds_alternative<double>(op_a) );
+    bool supported_b = (std::holds_alternative<int64_t>(op_b) || std::holds_alternative<double>(op_b) );
+    if(  !supported_a || !supported_b) {
         spdlog::warn("Attempted evaluation of operant of unsupported type");
         return  0;
     }
@@ -226,13 +226,16 @@ std::variant<int64_t, double> Expression::evaluate_binary_expression(resolved_pa
 }
 
 std::variant<int64_t, double> Expression::evaluate_unary_expression(resolved_parameter operand, const std::string &operation) {
-    if( std::holds_alternative<std::string>(operand) || std::holds_alternative<mdarray<int64_t>>(operand)) {
+    if( !std::holds_alternative<int64_t>(operand) || std::holds_alternative<double>(operand)) {
         spdlog::warn("Attempted evaluation of operant of unsupported type");
         return  0;
     }
     const bool int_exec = std::holds_alternative<int64_t>(operand);
-    const int64_t int_op = std::get<int64_t>(operand);
-    const double double_op = std::get<double>(operand);
+
+    int64_t int_op = 0;
+    if(int_exec) int_op = std::get<int64_t>(operand);
+    double double_op = 0;
+    if(std::holds_alternative<double>(operand)) double_op = std::get<double>(operand);
     if(operation == "!"){
         if(int_exec) return !int_op;
         return double_op != 0 ? 1 : 0;

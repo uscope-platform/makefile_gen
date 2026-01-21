@@ -44,7 +44,7 @@ public:
     };
 
 
-    static std::optional<mdarray> concatenate(const mdarray &arr_1, const int64_t &val) {
+    static std::optional<mdarray> concatenate(const mdarray &arr_1, const T &val) {
         mdarray tool;
         tool.set_scalar(val);
         return concatenate(arr_1, tool);
@@ -55,7 +55,7 @@ public:
     }
 
 
-    static std::optional<mdarray> stack(const mdarray &arr_1, const int64_t &val) {
+    static std::optional<mdarray> stack(const mdarray &arr_1, const T &val) {
         mdarray res;
         if (arr_1.empty()) {
             res.set_scalar(val);
@@ -272,7 +272,13 @@ md_2d_array get_2d_slice(std::vector<int64_t> idx) {
         ar(data);
     }
 
-
+    static std::string stringify(const T& item) {
+        if constexpr (std::is_same_v<T, std::string>) {
+            return item;
+        } else {
+            return std::to_string(item);
+        }
+    }
 
     friend bool operator==(const mdarray&lhs, const mdarray&rhs){
         return lhs.data == rhs.data;
@@ -285,7 +291,7 @@ md_2d_array get_2d_slice(std::vector<int64_t> idx) {
             for(auto &item_1d:item_2d){
                 result += "{";
                 for(auto &item:item_1d){
-                    result += std::to_string(item);
+                    result += stringify(item);
                     if (&item != &item_1d.back()) result += ", ";
                 }
                 result += "}";
