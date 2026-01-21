@@ -617,7 +617,7 @@ TEST(parameter_processing, override_with_package_parameter) {
     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
 
 
-    auto params = ast_v2->get_dependencies()[1]->get_parameters();
+    auto params = ast_v2->get_dependencies()[0]->get_parameters();
     auto param_1 = params.get("param_1");
     EXPECT_EQ(param_1->get_numeric_value(), 33);
     auto p1_t = params.get("p1_t");
