@@ -57,10 +57,24 @@ public:
     void add_package_dependency(const std::string &p){package_dependencies.push_back(p);};
     std::vector<std::string> get_package_dependencies(){return package_dependencies;};
 
-    void set_leaf_module_top(const std::string &s){leaf_module_top = s;};
+    void set_leaf_module_top(const std::string &s) {
+        std::string_view sv = s;
+        if(s.length() >=2 && s.starts_with('"') && s.ends_with('"')){
+            sv.remove_prefix(1);
+            sv.remove_suffix(1);
+        }
+        leaf_module_top =  std::string(sv);
+    };
     std::string get_leaf_module_top(){return leaf_module_top;};
 
-    void set_leaf_module_prefix(const std::string &s){leaf_module_prefix = s;};
+    void set_leaf_module_prefix(const std::string &s) {
+        std::string_view sv = s;
+        if(s.length() >=2 && s.starts_with('"') && s.ends_with('"')){
+            sv.remove_prefix(1);
+            sv.remove_suffix(1);
+        }
+        leaf_module_prefix =  std::string(sv);
+    };
     std::string get_leaf_module_prefix(){return leaf_module_prefix;};
 
     void set_if_specs(const std::unordered_map<std::string, std::array<std::string, 2>> &if_s){if_specs = if_s;};

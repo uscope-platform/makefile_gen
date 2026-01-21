@@ -40,8 +40,6 @@ public:
         name  = n;
     };
     std::shared_ptr<HDL_parameter> clone() const;
-    void set_scope(const std::string &s){ scope = s;}
-    std::string get_scope() {return  scope;}
 
     void set_value(const resolved_parameter &val);
 
@@ -134,7 +132,6 @@ private:
     bool lock = false;
 
     std::string name;
-    std::string scope;
     std::variant<mdarray<int64_t>, mdarray<std::string>::md_1d_array> value;
     parameter_type type;
     bool loop_index = false;

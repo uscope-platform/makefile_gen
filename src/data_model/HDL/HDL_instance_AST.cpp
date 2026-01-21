@@ -58,7 +58,6 @@ bool operator==(const HDL_instance_AST &lhs, const HDL_instance_AST &rhs) {
     ret &= lhs.data_dependencies == rhs.data_dependencies;
     ret &= lhs.package_dependencies == rhs.package_dependencies;
     ret &= lhs.leaf_module_top == rhs.leaf_module_top;
-    ret &= lhs.bus_address == rhs.bus_address;
     ret &= lhs.processors == rhs.processors;
     ret &= lhs.proxy_specs == rhs.proxy_specs;
     ret &= lhs.repeated_instance == rhs.repeated_instance;
@@ -80,6 +79,14 @@ nlohmann::json HDL_instance_AST::dump() {
 
     if(!bus_address.empty()) ret["address"] = bus_address;
 
+    if(!leaf_module_top.empty()) ret["leaf_module_top"] = leaf_module_top;
+    if(!leaf_module_prefix.empty()) ret["leaf_module_prefix"] = leaf_module_prefix;
+    if(!proxy_specs.interface.empty() || !proxy_specs.module.empty()) {
+        ret["proxy"] = nlohmann::json{
+            {"module", proxy_specs.module},
+            {"interface", proxy_specs.interface}
+        };
+    }
     return ret;
 }
 
