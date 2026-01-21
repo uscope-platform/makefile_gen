@@ -270,3 +270,77 @@ TEST( hdl_ast_builder, interface_parameter) {
     auto struct_v2 = ast_v2->dump_structure();
     ASSERT_EQ(struct_v2, struct_s);
 }
+
+TEST( hdl_ast_builder, package_dependency) {
+
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    std::string test_pattern = R"(
+
+        package test_package;
+            parameter bus_base = 67;
+        endpackage
+
+        module test_mod #(
+             parameter package_param = test_package::bus_base
+        )();
+
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto entities = analyzer.analyze();
+    entities[0].set_path("/tmp/dep.sv");
+    for(auto &entity: entities){
+        d_store->store_hdl_entity(entity);
+    }
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto synth_ast = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+    auto deps = synth_ast->get_package_dependencies();
+    std::vector<std::string> deps_check = {"/tmp/dep.sv"};
+    EXPECT_EQ(deps, deps_check);
+}
+
+
+TEST( hdl_ast_builder, memory_dependency) {
+
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    std::string test_pattern = R"(
+
+        module test_mod #(
+        )();
+
+        reg [31:0] memory [99:0];
+
+        initial begin
+            $readmemb("/tmp/mem.dat", memory);
+        end
+
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto entities = analyzer.analyze();
+    for(auto &entity: entities){
+        d_store->store_hdl_entity(entity);
+    }
+
+    DataFile d("mem", "/tmp/mem.dat");
+    d_store->store_data_file(d);
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto synth_ast = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+    auto deps = synth_ast->get_data_dependencies();
+    std::vector<std::string> deps_check = {"/tmp/mem.dat"};
+    EXPECT_EQ(deps, deps_check);
+}

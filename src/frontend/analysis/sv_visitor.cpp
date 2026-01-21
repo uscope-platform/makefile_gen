@@ -119,7 +119,8 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
         std::string data_file = ctx->list_of_arguments()->expression()[0]->getText();
         data_file = std::regex_replace(data_file, std::regex("\\\""), "");
         std::filesystem::path p = data_file;
-        if(p.extension().string() == ".dat"|| p.extension().string() == ".mem"){
+        auto ext = p.extension().string();
+        if(ext == ".dat"|| ext == ".mem"){
             HDL_instance dep("__init_file__", p.stem(), memory_init);
             modules_factory.add_mem_file_dep(dep);
         }

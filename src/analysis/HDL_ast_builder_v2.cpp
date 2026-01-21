@@ -72,37 +72,42 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
                 auto current_param_values = parameter_solver::override_parameters(wo, d_store);
 
                 for (auto &dep: res.get_dependencies()) {
+                    if(dep.get_dependency_class() == interface || dep.get_dependency_class() == module) {
+                        auto child = std::make_shared<HDL_instance_AST>(dep);
+                        child->set_parent(working_instance);
 
-                    auto child = std::make_shared<HDL_instance_AST>(dep);
-                    child->set_parent(working_instance);
+                        // The loop structure is attached to the looped instances, that need to be repeated,
+                        // But the parent parameters only need to be propagated in its expressions
+                        update_loop_constants(child, current_param_values);
+                        auto loop_idx = loop_solver::solve_loop(child, res);
+                        process_quantifier(child->get_array_quantifier(), current_param_values);
 
-                    // The loop structure is attached to the looped instances, that need to be repeated,
-                    // But the parent parameters only need to be propagated in its expressions
-                    update_loop_constants(child, current_param_values);
-                    auto loop_idx = loop_solver::solve_loop(child, res);
-                    process_quantifier(child->get_array_quantifier(), current_param_values);
-
-                    if (!loop_idx.empty()) {
-                        for (auto &idx:loop_idx) {
-                            auto new_child = std::make_shared<HDL_instance_AST>(*child);
-                            auto specialized_child = specialize_instance(*new_child, idx, child->get_inner_loop().get_init().get_name());
-                            working_instance->add_child(specialized_child);
+                        if (!loop_idx.empty()) {
+                            for (auto &idx:loop_idx) {
+                                auto new_child = std::make_shared<HDL_instance_AST>(*child);
+                                auto specialized_child = specialize_instance(*new_child, idx, child->get_inner_loop().get_init().get_name());
+                                working_instance->add_child(specialized_child);
+                                working_stack.push({
+                                    specialized_child,
+                                    current_param_values,
+                                    wo.path + "." + working_instance->get_name()
+                                });
+                            }
+                        } else {
+                            working_instance->add_child(child);
                             working_stack.push({
-                                specialized_child,
+                                child,
                                 current_param_values,
                                 wo.path + "." + working_instance->get_name()
                             });
                         }
-                    } else {
-                        working_instance->add_child(child);
-                        working_stack.push({
-                            child,
-                            current_param_values,
-                            wo.path + "." + working_instance->get_name()
-                        });
+                    } else if(dep.get_dependency_class() == package) {
+                        auto path = d_store->get_HDL_resource(dep.get_type()).get_path();
+                        working_instance->add_package_dependency(path);
+                    } else if(dep.get_dependency_class() == memory_init) {
+                        auto path = d_store->get_data_file(dep.get_type()).get_path();
+                        working_instance->add_data_dependency(path);
                     }
-
-
                 }
             }
         }
