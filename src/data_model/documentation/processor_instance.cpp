@@ -71,3 +71,26 @@ std::string io::get_type() const {
             return "";
     }
 }
+
+nlohmann::json io::dump() {
+    nlohmann::json ret;
+    ret["name"] = name;
+    ret["address"] = address;
+    ret["type"] = type;
+    return ret;
+}
+
+nlohmann::json processor_instance::dump() {
+    nlohmann::json ret;
+
+    ret["target"] = target;
+    ret["address_param"] = address_param;
+    ret["address_index"] = address_index;
+    ret["address_value"] = address_value;
+    ret["name"] = name;
+    ret["dma_io"] = nlohmann::json();
+    for(auto i:dma_io) {
+        ret["dma_io"].push_back(i.dump());
+    }
+    return ret;
+}

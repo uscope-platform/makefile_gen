@@ -344,3 +344,131 @@ TEST( hdl_ast_builder, memory_dependency) {
     std::vector<std::string> deps_check = {"/tmp/mem.dat"};
     EXPECT_EQ(deps, deps_check);
 }
+
+
+
+TEST( hdl_ast_builder, fcore_complex) {
+
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    std::vector<std::string> paths = {
+            "Components/Common",
+            "Components/system/fcore_complex/rtl",
+            "Components/system/fcore/rtl",
+            "Components/system/axi_stream/data_mover/rtl",
+            "Components/system/axi_lite/simple_register_cu/rtl",
+            "Components/system/axi_lite/external_registers_cu/rtl",
+            "Components/system/axi_lite/skid_buffer/rtl",
+            "Components/system/fcore/istore/rtl",
+            "Components/system/axi_stream/fifo/rtl",
+            "Components/system/fcore/alu/rtl",
+            "Components/system/fcore/alu/ip",
+            "Components/system/axi_stream/combiner/rtl",
+            "Components/system/fcore_infrastructure/multichannel_constant/rtl",
+            "Components/system/axi_lite/crossbar/rtl",
+            "Components/system/axi_stream/register_slice/rtl",
+            "Components/system/fcore/efi/sorter/rtl",
+            "Components/system/fcore/efi/reciprocal/rtl",
+            "Components/system/sorter/rtl",
+            "Components/system/fcore/efi/trig_unit/rtl",
+            "Components/system/axi_stream/mux/rtl",
+            "Components/system/axi_stream/selector/rtl",
+            "Components/Adapters"
+    };
+
+    auto prefix = "check_files/test_data/";
+    for(auto &p:paths){
+        for(auto &f:std::filesystem::directory_iterator(prefix + p)){
+            if(f.path().extension() == ".v" || f.path().extension() == ".sv" || f.path().extension() == ".svh"){
+                sv_analyzer analyzer(f.path());
+                analyzer.cleanup_content("`(.*)");
+
+                for(auto &entity:analyzer.analyze()){
+                    d_store->store_hdl_entity(entity);
+                }
+            }
+        }
+    }
+
+    std::string test_pattern = R"(
+
+        module test_mod #(
+        )();
+
+
+        localparam int CORE_AXI_ADDR = 'h83c80000;
+        fcore_complex #(
+            .PRAGMA_MKFG_CHILD_PREFIX("buck"),
+            .SIM_CONFIG("FALSE"),
+            .INSTRUCTION_STORE_SIZE(1024),
+            .FAST_DEBUG("FALSE"),
+            .INIT_FILE(""),
+            .DMA_BASE_ADDRESS(54671),
+            .RECIPROCAL_PRESENT(0),
+            .BITMANIP_IMPLEMENTED(0),
+            .LOGIC_IMPLEMENTED(1),
+            .EFI_IMPLEMENTED(1),
+            .CONDITIONAL_SELECT_IMPLEMENTED(1),
+            .FULL_COMPARE(0),
+            .TRANSLATION_TABLE_INIT("ZERO"),
+            .MAX_CHANNELS(1),
+            .MOVER_ADDRESS_WIDTH(32),
+            .MOVER_CHANNEL_NUMBER(16),
+            .PRAGMA_MKFG_DATAPOINT_NAMES("buck_core_out"),
+            .EFI_TYPE("RECIPROCAL"),
+            .AXI_ADDR_WIDTH(32),
+            .N_CONSTANTS(3),
+            .REPEAT_MODE(0),
+            .MULTICHANNEL_MODE(1)
+        ) buck_processor(
+        );
+
+        endmodule
+
+
+    /**
+        {
+            "name": "buck_controller",
+            "type": "processor_instance",
+            "target": "buck_processor",
+            "parent": "test_mod",
+            "address": {
+                "parameter":"CORE_AXI_ADDR"
+            },
+            "dma_io": [
+                {
+                    "name": "v_meas",
+                    "type": "input",
+                    "address": "0"
+                }
+            ]
+        }
+    **/
+
+
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    d_store->store_hdl_entity(resource);
+
+    Depfile df;
+    df.add_excluded_module("fcore_div_alu");
+    df.add_excluded_module("vivado_axis_v1_0");
+    df.add_excluded_module("rec_sv");
+    df.add_excluded_module("mul_sv");
+    df.add_excluded_module("fti_sv");
+    df.add_excluded_module("itf_sv");
+    df.add_excluded_module("adder_sv");
+
+    HDL_ast_builder_v2 b(s_store, d_store, df);
+    auto synth_ast = b.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto proc  = synth_ast->get_processors()[0].dump().dump();
+    std::string proc_check = R"lit({"address_index":0,"address_param":"CORE_AXI_ADDR","address_value":2210922496,"dma_io":[{"address":0,"name":"v_meas","type":1}],"name":"buck_controller","target":"buck_processor"})lit";
+
+    EXPECT_EQ(proc, proc_check);
+}

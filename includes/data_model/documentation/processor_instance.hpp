@@ -19,6 +19,7 @@
 
 #include <string>
 #include <utility>
+#include <nlohmann/json.hpp>
 #include <vector>
 
 #include <cereal/types/vector.hpp>
@@ -36,6 +37,7 @@ public:
     uint32_t address;
 
     std::string get_type() const;
+    nlohmann::json dump();
 
     friend bool operator==(const io&lhs, const io&rhs);
 
@@ -65,6 +67,7 @@ public:
     void set_address_value(int64_t i) {address_value = i;};
     int64_t get_address_value() const {return address_value;};
 
+    nlohmann::json dump();
 
     template<class Archive>
     void serialize(Archive & archive) {

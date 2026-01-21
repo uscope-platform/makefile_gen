@@ -1,4 +1,4 @@
-//  Copyright 2025 Filippo Savi
+//  Copyright 2026 Filippo Savi
 //  Author: Filippo Savi <filssavi@gmail.com>
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,26 +13,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_PASS_MANAGER_HPP
-#define MAKEFILEGEN_V2_PASS_MANAGER_HPP
 
-#include <memory>
-#include <vector>
+#ifndef MAKEFILEGEN_V2_PROCESSORS_DETECTION_HPP
+#define MAKEFILEGEN_V2_PROCESSORS_DETECTION_HPP
 
 #include "analysis/passes/pass_base.hpp"
-#include "../parameter_solver.hpp"
-#include "analysis/passes/port_solution.hpp"
-#include "analysis/passes/processor_detection.hpp"
 
-class pass_manager {
+class processor_detection : public pass_base{
 public:
-   pass_manager(const std::shared_ptr<data_store> &d);
-   void apply_passes(std::shared_ptr<HDL_instance_AST> &c);
+    processor_detection(const std::shared_ptr<data_store> &d);
+    void process_node(const std::shared_ptr<HDL_instance_AST> &node) override;
 private:
-   void apply_pass(std::shared_ptr<HDL_instance_AST> &c,const std::shared_ptr<pass_base> &pass);
-   std::vector<std::shared_ptr<pass_base>> passes;
-   bool data_store_valid = false;
+    std::shared_ptr<data_store> d_store;
 };
 
 
-#endif //MAKEFILEGEN_V2_PASS_MANAGER_HPP
+
+#endif //MAKEFILEGEN_V2_PROCESSORS_DETECTION_HPP

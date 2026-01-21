@@ -20,7 +20,8 @@
 pass_manager::pass_manager(const std::shared_ptr<data_store> &d) {
     data_store_valid = d != nullptr;
     passes = {
-        std::make_shared<port_solution>()
+        std::make_shared<port_solution>(),
+        std::make_shared<processor_detection>(d)
     };
 }
 

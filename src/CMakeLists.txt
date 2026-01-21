@@ -8,6 +8,7 @@ target_sources(makefile_gen_lib
     analysis/HDL_ast_builder_v2.cpp
     analysis/passes/pass_manager.cpp
     analysis/parameter_solver.cpp
+    analysis/passes/processor_detection.cpp
     analysis/passes/port_solution.cpp
     analysis/data_acquisition_analysis.cpp
     analysis/control_bus_analysis.cpp
