@@ -20,8 +20,7 @@
 
 #include <memory>
 #include "data_model/HDL/parameters/Parameters_map.hpp"
-#include "data_model/HDL/HDL_instance.hpp"
-#include "data_model/HDL/parameters/Parameter_processor.hpp"
+#include "data_model/HDL/HDL_instance_AST.hpp"
 
 class loop_solver {
 public:

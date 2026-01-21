@@ -14,9 +14,7 @@
 //  limitations under the License.
 
 #include "data_model/HDL/parameters/Initialization_list.hpp"
-#include "data_model/HDL/parameters/Parameter_processor.hpp"
-#include "data_model/HDL/parameters/Parameters_map.hpp"
-
+#include "data_model/HDL/parameters/HDL_parameter.hpp"
 
 Initialization_list::Initialization_list(const Initialization_list &i) {
     unpacked_dimensions = i.unpacked_dimensions;

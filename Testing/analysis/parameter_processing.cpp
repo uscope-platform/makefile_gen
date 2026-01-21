@@ -18,56 +18,9 @@
 #include <gtest/gtest.h>
 
 #include "frontend/analysis/sv_analyzer.hpp"
-#include "analysis/HDL_ast_builder.hpp"
 #include "analysis/HDL_ast_builder_v2.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
-#include "data_model/HDL/parameters/Parameter_processor.hpp"
 
-typedef struct {
-    std::string name;
-    std::vector<std::string> components;
-    HDL_parameter::parameter_type type;
-    int64_t value;
-    bool is_rpn;
-}param_check_t;
-
-Parameters_map run_test(std::string & t_p){
-
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(t_p));
-    analyzer.cleanup_content("`(.*)");
-    auto resource = analyzer.analyze()[0];
-
-    Parameter_processor p({},std::make_shared<data_store>(true, "/tmp/test_data_store"));
-
-    return p.process_parameters_map(resource.get_parameters(), resource);
-
-}
-
-Parameters_map produce_check_components(std::vector<param_check_t> &in){
-    Parameters_map ret;
-
-    for(auto & vt : in){
-        auto par = std::make_shared<HDL_parameter>();
-        par->set_name(vt.name);
-        if(vt.is_rpn){
-
-
-            auto expr= par->get_expression()->as<Expression>();
-            expr.rpn = true;
-            par->set_expression(std::make_shared<Expression>(expr));
-        }
-        for(auto &cpt:vt.components){
-            par->add_component(Expression_component(cpt, Expression_component::get_type(cpt)));
-        }
-        par->set_type(vt.type);
-        if(vt.type == HDL_parameter::HDL_parameter::numeric_parameter){
-            par->set_value(vt.value);
-        }
-
-        ret.insert(par);
-    }
-    return ret;
-}
 
 
 TEST(parameter_processing, package_parameters_use) {

@@ -20,9 +20,7 @@
 
 
 #include "frontend/analysis/sv_analyzer.hpp"
-#include "analysis/HDL_ast_builder.hpp"
 #include "analysis/HDL_ast_builder_v2.hpp"
-#include "data_model/HDL/parameters/Parameter_processor.hpp"
 
 TEST( hdl_ast_builder, pid_ast_build) {
 
@@ -248,8 +246,8 @@ TEST( hdl_ast_builder, interface_parameter) {
     auto resource = analyzer.analyze()[0];
     d_store->store_hdl_entity(resource);
 
-    HDL_ast_builder b(s_store, d_store, Depfile());
-    auto synth_ast = b.build_ast(std::vector<std::string>({"test_mod"}), {})[0];
+    HDL_ast_builder_v2 b(s_store, d_store, Depfile());
+    auto synth_ast = b.build_ast(std::vector<std::string>({"test_mod"}))[0];
 
 
     auto struct_s = synth_ast->dump_structure();

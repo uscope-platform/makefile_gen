@@ -20,9 +20,7 @@
 
 
 #include "frontend/analysis/sv_analyzer.hpp"
-#include "analysis/HDL_ast_builder.hpp"
 #include "analysis/HDL_ast_builder_v2.hpp"
-#include "data_model/HDL/parameters/Parameter_processor.hpp"
 #include "analysis/control_bus_analysis.hpp"
 
 TEST( bus_analysis, simple_bus_analysis) {

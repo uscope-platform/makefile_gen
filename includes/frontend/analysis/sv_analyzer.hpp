@@ -25,7 +25,6 @@
 
 #include "data_model/HDL/HDL_Resource.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
-#include "data_model/HDL/parameters/Parameter_processor.hpp"
 
 #include "frontend/analysis/documentation_analyzer.hpp"
 

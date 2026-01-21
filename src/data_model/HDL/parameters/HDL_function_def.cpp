@@ -17,7 +17,6 @@
 #include "data_model/HDL/parameters/HDL_function_def.hpp"
 
 #include "analysis/loop_solver.hpp"
-#include "data_model/HDL/parameters/Parameter_processor.hpp"
 #include "data_model/HDL/parameters/Expression.hpp"
 
 void HDL_function_def::start_assignment(const std::string &n, Expression idx) {

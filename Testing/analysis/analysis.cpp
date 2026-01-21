@@ -20,7 +20,6 @@
 #include "frontend/analysis/sv_analyzer.hpp"
 #include "frontend/analysis/vhdl_analyzer.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
-#include "data_model/HDL/parameters/Parameter_processor.hpp"
 
 #define EXPRESSION_WITH_TYPE(str) str, Expression_component::get_type(str)
 

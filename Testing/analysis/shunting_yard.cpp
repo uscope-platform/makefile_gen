@@ -18,7 +18,6 @@
 #include <gtest/gtest.h>
 
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
-#include "data_model/HDL/parameters/Parameter_processor.hpp"
 
 #define EXPRESSION_WITH_TYPE(str) str, Expression_component::get_type(str)
 

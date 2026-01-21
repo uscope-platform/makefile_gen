@@ -4,7 +4,6 @@ add_library(makefile_gen_lib STATIC)
 
 target_sources(makefile_gen_lib
     PRIVATE
-    analysis/HDL_ast_builder.cpp
     analysis/HDL_ast_builder_v2.cpp
     analysis/passes/pass_manager.cpp
     analysis/parameter_solver.cpp
@@ -39,7 +38,6 @@ target_sources(makefile_gen_lib
     data_model/HDL/parameters/Replication.cpp
     data_model/HDL/parameters/Expression_evaluator.cpp
     data_model/HDL/parameters/Expression_component.cpp
-    data_model/HDL/parameters/Parameter_processor.cpp
     data_model/HDL/parameters/Initialization_list.cpp
     data_model/HDL/parameters/HDL_function_def.cpp
     data_model/HDL/parameters/HDL_function_call.cpp
