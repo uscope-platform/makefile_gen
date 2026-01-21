@@ -23,7 +23,11 @@ std::string Expression::print() const {
             auto arr = std::get<mdarray<int64_t>>(item.get_value());
             ret_val += "{xxxxxxx}";
         } else if(item.is_numeric()){
-            ret_val += std::to_string(std::get<int64_t>(item.get_value()));
+            if(std::holds_alternative<int64_t>(item.get_value()))
+                ret_val += std::to_string(std::get<int64_t>(item.get_value()));
+            else if(std::holds_alternative<double>(item.get_value())) {
+                ret_val += std::to_string(std::get<double>(item.get_value()));
+            }
         } else if(item.is_identifier()){
             if(!item.get_package_prefix().empty()){
                 ret_val += item.get_package_prefix() + "::";
@@ -106,23 +110,22 @@ std::optional<resolved_parameter> Expression::evaluate(bool pack_result) {
         if(i.is_numeric()) {
             evaluator_stack.push(i);
         } else {
-            int64_t result;
+            std::variant<int64_t, double> result;
             if (!i.is_operator() && !i.is_function()) return std::nullopt;
             if(i.get_operator_type() == Expression_component::unary_operator){
-                auto op = std::get<int64_t>(evaluator_stack.top().get_value());
+                auto op = evaluator_stack.top().get_value();
                 result = evaluate_unary_expression(op, std::get<std::string>(i.get_value()));
                 evaluator_stack.pop();
             } else if(i.get_operator_type() == Expression_component::binary_operator){
-                int64_t op_a;
-                auto op_b = std::get<int64_t>(evaluator_stack.top().get_value());
+                resolved_parameter op_a;
+                auto op_b = evaluator_stack.top().get_value();
                 evaluator_stack.pop();
                 if(expr_stack.components.size()==2)
                     op_a = 0;
                 else {
-                    op_a = std::get<int64_t>(evaluator_stack.top().get_value());
+                    op_a = evaluator_stack.top().get_value();
                     evaluator_stack.pop();
                 }
-
                 result = evaluate_binary_expression(op_a, op_b, std::get<std::string>(i.get_value()));
             }
             evaluator_stack.emplace(result, Expression_component::number);
@@ -130,7 +133,7 @@ std::optional<resolved_parameter> Expression::evaluate(bool pack_result) {
     }
 
     if (evaluator_stack.empty())throw std::runtime_error("Evaluation of an empty expression");
-    return std::get<int64_t>(evaluator_stack.top().get_value());
+    return evaluator_stack.top().get_value();
 
 }
 
@@ -147,50 +150,127 @@ int64_t Expression::get_size() {
     return 0;
 }
 
-int64_t Expression::evaluate_binary_expression(int64_t op_a, int64_t op_b, const std::string &operation) {
-    if(operation == "+"){
-        return op_a + op_b;
-    } else if(operation ==  "-"){
-        return op_a - op_b;
-    } else if(operation ==  "*"){
-        return op_a * op_b;
-    } else if(operation ==  "/"){
-        return op_a / op_b;
-    } else if(operation ==  "%"){
-        return op_a % op_b;
-    } else if(operation ==  "<<"){
-        return op_a << op_b;
-    } else if(operation ==  ">"){
-        return op_a > op_b;
-    } else if(operation ==  ">="){
-        return op_a >= op_b;
-    } else if(operation ==  "<"){
-        return op_a < op_b;
-    } else if(operation ==  "<="){
-        return op_a <= op_b;
-    } else if(operation ==  "=="){
-        return op_a == op_b;
-    } else if(operation ==  "!="){
-        return op_a != op_b;
-    } else{
-        throw std::runtime_error("Error: Attempted evaluation of an unsupported binary expression expression " + operation);
+std::variant<int64_t, double> Expression::evaluate_binary_expression(resolved_parameter op_a, resolved_parameter op_b, const std::string &operation) {
+    if(
+        std::holds_alternative<std::string>(op_a) || std::holds_alternative<mdarray<int64_t>>(op_a) ||
+        std::holds_alternative<std::string>(op_b) || std::holds_alternative<mdarray<int64_t>>(op_b) ) {
+        spdlog::warn("Attempted evaluation of operant of unsupported type");
+        return  0;
     }
+    bool int_exec = std::holds_alternative<int64_t>(op_a) && std::holds_alternative<int64_t>(op_b);
+    double d_a, d_b;
+    int64_t i_a = 0;
+    int64_t i_b = 0;
+
+    if(std::holds_alternative<double>(op_a))  d_a = std::get<double>(op_a);
+    else d_a = static_cast<double>(std::get<int64_t>(op_a));
+    if(std::holds_alternative<double>(op_b))  d_b = std::get<double>(op_b);
+    else d_b = static_cast<double>(std::get<int64_t>(op_b));
+    if(std::holds_alternative<int64_t>(op_a)) i_a =  std::get<int64_t>(op_a);
+    if(std::holds_alternative<int64_t>(op_b)) i_b =  std::get<int64_t>(op_b);
+    if(operation == "+"){
+        if(int_exec) return i_a + i_b;
+        return d_a + d_b;
+    }
+    if(operation ==  "-"){
+        if(int_exec) return i_a - i_b;
+        return d_a - d_b;
+    }
+    if(operation ==  "*"){
+        if(int_exec) return i_a * i_b;
+        return d_a * d_b;
+    }
+    if(operation ==  "/"){
+        if(int_exec) return i_a / i_b;
+        return d_a / d_b;
+    }
+    if(operation ==  "%"){
+        if(int_exec) return i_a % i_b;
+        spdlog::warn("The modulus operator is only defined between integers");
+        return 0;
+    }
+    if(operation ==  "<<"){
+        if(int_exec) return i_a << i_b;
+        spdlog::warn("The shift operator is only defined between integers");
+        return 0;
+    }
+    if(operation ==  ">>"){
+        if(int_exec) return i_a >> i_b;
+        spdlog::warn("The shift operator is only defined between integers");
+        return 0;
+    }
+    if(operation ==  ">"){
+        if(int_exec) return i_a > i_b;
+        return d_a > d_b;
+    }
+    if(operation ==  ">="){
+        if(int_exec) return i_a >= i_b;
+        return d_a >= d_b;
+
+    }
+    if(operation ==  "<"){
+        if(int_exec) return i_a < i_b;
+        return d_a < d_b;
+    }
+    if(operation ==  "<="){
+        if(int_exec) return i_a <= i_b;
+        return d_a <= d_b;
+    }
+    if(operation ==  "=="){
+        return op_a == op_b;
+    }
+    if(operation ==  "!="){
+        return op_a != op_b;
+    }
+    throw std::runtime_error("Error: Attempted evaluation of an unsupported binary expression expression " + operation);
 }
 
-int64_t Expression::evaluate_unary_expression(int64_t operand, const std::string &operation) {
-    if(operation == "!"){
-        return !operand;
-    } else if(operation ==  "~"){
-        return ~operand;
-    } else if(operation ==  "$clog2"){
-        return (int64_t) ceil(log2((double) operand));
-    } else if(operation ==  "$ceil"){
-        return (int64_t) ceil((double) operand);
-    } else if(operation ==  "$floor"){
-        return (int64_t) floor((double) operand);
-    } else{
-        throw std::runtime_error("Error: Attempted evaluation of an unsupported unary expression expression " + operation);
+std::variant<int64_t, double> Expression::evaluate_unary_expression(resolved_parameter operand, const std::string &operation) {
+    if( std::holds_alternative<std::string>(operand) || std::holds_alternative<mdarray<int64_t>>(operand)) {
+        spdlog::warn("Attempted evaluation of operant of unsupported type");
+        return  0;
     }
+    const bool int_exec = std::holds_alternative<int64_t>(operand);
+    const int64_t int_op = std::get<int64_t>(operand);
+    const double double_op = std::get<double>(operand);
+    if(operation == "!"){
+        if(int_exec) return !int_op;
+        return double_op != 0 ? 1 : 0;
+    }
+    if(operation ==  "$ceil"){
+        if(int_exec) {
+            return static_cast<int64_t>(
+                ceil(static_cast<double>(int_op))
+            );
+        }
+        return static_cast<int64_t>(
+            ceil(double_op)
+        );
+    }
+    if(operation ==  "$floor"){
+        if(int_exec) {
+            return static_cast<int64_t>(
+                floor(static_cast<double>(std::get<int64_t>(operand)))
+            );
+        }
+        return static_cast<int64_t>(
+            floor(double_op)
+        );
+    }
+    if(!int_exec) {
+        spdlog::warn("The "+operation+"() function is only defined between integers");
+        return 0;
+    }
+    if(operation ==  "~"){
+        return ~std::get<int64_t>(operand);
+    }
+    if(operation ==  "$clog2"){
+        return static_cast<int64_t>(
+            ceil(log2(static_cast<double>(std::get<int64_t>(operand))))
+        );
+    }
+
+    throw std::runtime_error("Error: Attempted evaluation of an unsupported unary expression expression " + operation);
 }
 
 Expression Expression::clone()  const{

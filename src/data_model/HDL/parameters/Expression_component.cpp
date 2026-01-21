@@ -45,8 +45,12 @@ Expression_component::Expression_component(const std::string &s, const component
     }
 }
 
-Expression_component::Expression_component(int64_t n, int64_t b_s) {
-    value = n;
+Expression_component::Expression_component(std::variant<int64_t, double> n, int64_t b_s) {
+    if(std::holds_alternative<double>(n)) {
+        value = std::get<double>(n);
+    } else {
+        value = std::get<int64_t>(n);
+    }
     binary_size = b_s;
     type = number;
 }
@@ -265,7 +269,7 @@ std::vector<Expression> Expression_component::get_array_index() {
 }
 
 Expression_component::component_type Expression_component::get_type(const std::string &s) {
-    if(test_parameter_type(number_regex, s) || test_parameter_type(sv_constant_regex, s)) return number;
+    if(test_parameter_type(number_regex, s) || test_parameter_type(sv_constant_regex, s)|| test_parameter_type(float_regex, s)) return number;
     if(is_string_operator(s)) return operation;
     if(is_string_function(s)) return function;
     if(is_string_parenthesis(s)) return parenthesis;

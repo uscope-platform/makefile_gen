@@ -50,7 +50,7 @@ public:
 
 
     explicit Expression_component(const std::string &s,const component_type &t);
-    explicit Expression_component(int64_t n, int64_t b_s);
+    explicit Expression_component(std::variant<int64_t, double> n, int64_t b_s);
     std::set<qualified_identifier> get_dependencies()const;
     bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value);
     void propagate_function(HDL_function_def def);

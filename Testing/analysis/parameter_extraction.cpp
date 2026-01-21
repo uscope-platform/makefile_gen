@@ -67,12 +67,11 @@ TEST(parameter_extraction, float_parameter) {
     auto defaults = resource.get_default_parameters();
     std::map<qualified_identifier, resolved_parameter> check_defaults = {
         {{"", "LUT_DEPTH"}, 9},
-        {{"", "STEP"}, 0.174533f}
+        {{"", "STEP"}, 0.17453292519943295f}
     };
-    for(const auto& [name, value]:check_defaults){
-        ASSERT_TRUE(defaults.contains(name));
-        ASSERT_EQ(value, defaults.at(name));
-    }
+
+    ASSERT_EQ(9, std::get<int64_t>(defaults.at({"", "LUT_DEPTH"})));
+    ASSERT_FLOAT_EQ(0.17453292519943295, std::get<double>(defaults.at({"", "STEP"})));
 }
 
 
