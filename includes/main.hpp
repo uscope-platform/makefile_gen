@@ -22,7 +22,7 @@
 #include <CLI/CLI.hpp>
 
 #include "frontend/Repository_walker.hpp"
-#include "analysis/HDL_ast_builder.hpp"
+#include "analysis/HDL_ast_builder_v2.hpp"
 #include "analysis/control_bus_analysis.hpp"
 #include "analysis/proxy_bus_analysis.hpp"
 #include "analysis/data_acquisition_analysis.hpp"

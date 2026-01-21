@@ -160,13 +160,13 @@ int main(int argc, char *argv[]){
 
 
     // BUILD ASTs FOR TOP LEVEL AND ADDITIONAL MODULES
-    HDL_ast_builder b(s_store, d_store, dep);
-    auto synth_ast = b.build_ast(dep.get_synth_tl(), {});
-    auto additional_synth_modules = b.build_ast(dep.get_additional_synth_modules(), {});
+    HDL_ast_builder_v2 b(s_store, d_store, dep);
+    auto synth_ast = b.build_ast(std::vector({dep.get_synth_tl()}))[0];
+    auto additional_synth_modules = b.build_ast(dep.get_additional_synth_modules());
     additional_synth_modules.insert(additional_synth_modules.end(), synth_ast);
 
-    auto sim_ast = b.build_ast(dep.get_sim_tl(), {});
-    auto additional_sim_modules = b.build_ast(dep.get_additional_sim_modules(), {});
+    auto sim_ast = b.build_ast(std::vector({dep.get_sim_tl()}))[0];
+    auto additional_sim_modules = b.build_ast(dep.get_additional_sim_modules());
     additional_sim_modules.insert(additional_sim_modules.end(), sim_ast);
 
 
