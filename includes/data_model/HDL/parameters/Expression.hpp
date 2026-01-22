@@ -54,6 +54,8 @@ public:
     std::variant<int64_t, double> evaluate_binary_expression(resolved_parameter op_a, resolved_parameter op_b, const std::string &operation);
     std::variant<int64_t, double> evaluate_unary_expression(resolved_parameter operand, const std::string &operation);
 
+    std::variant<int64_t, double> evaluate_cast(resolved_parameter operand, const std::string &operation);
+
     int64_t get_depth() override { return 1;}
 
 

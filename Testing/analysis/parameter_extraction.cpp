@@ -68,8 +68,6 @@ TEST(parameter_extraction, strings_dafault_init) {
 }
 
 
-
-
 TEST(parameter_extraction, strings_array) {
     std::string test_pattern = R"(
         module test_mod #(
@@ -184,6 +182,103 @@ TEST(parameter_extraction, float_parameter) {
     ASSERT_FLOAT_EQ(0.17453292519943295, std::get<double>(defaults.at({"", "STEP"})));
 }
 
+TEST(parameter_extraction, simple_cast) {
+    std::string test_pattern = R"(
+
+    module test_mod #(
+    )();
+
+        localparam CAST_1 = $rtoi(16.8);
+
+    endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("CAST");
+    p->add_component(Expression_component("$rtoi", Expression_component::function));
+    p->add_component(Expression_component("(", Expression_component::parenthesis));
+    p->add_component(Expression_component("16.8", Expression_component::number));
+    p->add_component(Expression_component(")", Expression_component::parenthesis));
+    check_params.insert(p);
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+    std::map<qualified_identifier, resolved_parameter> check_defaults = {
+        {{"", "CAST"}, 17},
+    };
+
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+TEST(parameter_extraction, complex_cast) {
+    std::string test_pattern = R"(
+
+    module test_mod #(
+        parameter PARAMETER_1 = 46
+    )();
+
+        localparam CAST = $rtoi($ceil(PARAMETER_1/16.0));
+
+    endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("CHECKSUM_PARTITIONS");
+    p->add_component(Expression_component("$rtoi", Expression_component::function));
+    p->add_component(Expression_component("(", Expression_component::parenthesis));
+    p->add_component(Expression_component("$ceil", Expression_component::function));
+    p->add_component(Expression_component("(", Expression_component::parenthesis));
+    p->add_component(Expression_component("PARAMETER_1", Expression_component::identifier));
+    p->add_component(Expression_component("/", Expression_component::operation));
+    p->add_component(Expression_component("16.0", Expression_component::number));
+    p->add_component(Expression_component(")", Expression_component::parenthesis));
+    p->add_component(Expression_component(")", Expression_component::parenthesis));
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("PARAMETER_1");
+    p->add_component(Expression_component("46", Expression_component::identifier));
+    check_params.insert(p);
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+    std::map<qualified_identifier, resolved_parameter> check_defaults = {
+        {{"", "LUT_DEPTH"}, 9},
+        {{"", "STEP"}, 0.17453292519943295f}
+    };
+
+    ASSERT_EQ(9, std::get<int64_t>(defaults.at({"", "LUT_DEPTH"})));
+    ASSERT_FLOAT_EQ(0.17453292519943295, std::get<double>(defaults.at({"", "STEP"})));
+}
 
 TEST(parameter_extraction, package_parameters) {
     std::string test_pattern = R"(

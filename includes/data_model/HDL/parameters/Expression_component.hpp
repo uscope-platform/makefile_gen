@@ -151,7 +151,7 @@ private:
 
     static constexpr bool is_string_function(std::string_view op) {
         constexpr std::string_view operators[] = {
-            "$clog2","$ceil", "$floor","$pow"
+            "$clog2","$ceil", "$floor","$pow", "$rtoi", "$itor",
         };
 
         return std::ranges::any_of(operators, [op](std::string_view valid_op) {
@@ -164,6 +164,8 @@ private:
             {"$clog2", unary_operator},
             {"$ceil", unary_operator},
             {"$floor", unary_operator},
+            {"$rtoi", unary_operator},
+            {"$itor", unary_operator},
             {"$pow", binary_operator},
             {"!", unary_operator},
             {"~", unary_operator},
@@ -187,6 +189,8 @@ private:
             {"$clog2", 0},
             {"$ceil",  0},
             {"$floor", 0},
+            {"$rtoi",  0},
+            {"$itor",  0},
             {"$pow",   0},
             {"!",      1},
             {"~",      1},
@@ -206,7 +210,7 @@ private:
     };
 
     std::set<std::string> right_associative_set = {
-            "$clog2","$ceil", "$floor","$pow", "!", "~"
+           "$itor","$rtoi", "$clog2","$ceil", "$floor","$pow", "!", "~"
     };
 
 

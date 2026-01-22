@@ -110,12 +110,16 @@ void Repository_walker::collect_analysis_results() {
 /// \param dir Target directory
 /// \return true if the directory needs to be skipped
 bool Repository_walker::is_excluded_directory(const std::filesystem::path& dir) {
-
     auto norm_dir = dir.lexically_normal();
 
     for (const auto& excl_dir : excluded_directories) {
-        if (norm_dir == std::filesystem::path(excl_dir).lexically_normal())
-            return true;
+        if(excl_dir.starts_with('*')) {
+            auto excl_name = excl_dir.substr(1, excl_dir.size() -1);
+            if(norm_dir.filename() == excl_name) return true;
+        }  else {
+            if(norm_dir == std::filesystem::path(excl_dir).lexically_normal()) return true;
+        }
+
     }
     return false;
 
@@ -160,6 +164,7 @@ void Repository_walker::analyze_file(std::filesystem::path &file) {
 
     if(cache_mgr.is_cached(file)) updated_file = cache_mgr.is_changed(file);
     if(updated_file) {
+        spdlog::trace("Analizing file: {}", file.string());
         cache_mgr.add_file(file);
         if(file_is_verilog(file)){
             hdl_futures.push_back(pool.submit(analyze_verilog, file));

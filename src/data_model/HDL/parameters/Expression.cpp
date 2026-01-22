@@ -226,6 +226,7 @@ std::variant<int64_t, double> Expression::evaluate_binary_expression(resolved_pa
 }
 
 std::variant<int64_t, double> Expression::evaluate_unary_expression(resolved_parameter operand, const std::string &operation) {
+    if(operation == "$rtoi" || operation == "$itor") return evaluate_cast(operand, operation);
     if( !std::holds_alternative<int64_t>(operand) || std::holds_alternative<double>(operand)) {
         spdlog::warn("Attempted evaluation of operant of unsupported type");
         return  0;
@@ -273,7 +274,18 @@ std::variant<int64_t, double> Expression::evaluate_unary_expression(resolved_par
         );
     }
 
-    throw std::runtime_error("Error: Attempted evaluation of an unsupported unary expression expression " + operation);
+    throw std::runtime_error("Error: Attempted evaluation of an unsupported unary expression " + operation);
+}
+
+std::variant<int64_t, double> Expression::evaluate_cast(resolved_parameter operand, const std::string &operation) {
+    if(operation == "$itor") {
+        if(std::holds_alternative<int64_t>(operand)) return static_cast<double>(std::get<int64_t>(operand));
+        throw std::runtime_error("Error: Attempted cast of an unsupported type");
+    } else if(operation == "$rtoi") {
+        if(std::holds_alternative<double>(operand)) return static_cast<int64_t>(round(std::get<double>(operand)));
+        throw std::runtime_error("Error: Attempted cast of an unsupported type");
+    }
+    throw std::runtime_error("Error: Attempted evaluation of an unsupported cast expression " + operation);
 }
 
 Expression Expression::clone()  const{
