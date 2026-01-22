@@ -280,12 +280,15 @@ std::variant<int64_t, double> Expression::evaluate_unary_expression(resolved_par
 std::variant<int64_t, double> Expression::evaluate_cast(resolved_parameter operand, const std::string &operation) {
     if(operation == "$itor") {
         if(std::holds_alternative<int64_t>(operand)) return static_cast<double>(std::get<int64_t>(operand));
-        throw std::runtime_error("Error: Attempted cast of an unsupported type");
+        spdlog::warn("Attempted cast of an unsupported type");
+        return 0;
     } else if(operation == "$rtoi") {
         if(std::holds_alternative<double>(operand)) return static_cast<int64_t>(round(std::get<double>(operand)));
-        throw std::runtime_error("Error: Attempted cast of an unsupported type");
+        spdlog::warn("Attempted cast of an unsupported type");
+        return 0;
     }
-    throw std::runtime_error("Error: Attempted evaluation of an unsupported cast expression " + operation);
+    spdlog::warn("Attempted evaluation of an unsupported cast expression {}", operation);
+    return 0;
 }
 
 Expression Expression::clone()  const{
