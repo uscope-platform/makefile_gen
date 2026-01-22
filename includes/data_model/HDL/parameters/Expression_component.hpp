@@ -103,7 +103,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(value, array_index, package_prefix, binary_size);
+        ar(value,type, array_index, package_prefix, binary_size);
     }
 
     nlohmann::json dump();
