@@ -25,7 +25,10 @@ HDL_function_def HDL_function_def::clone() {
     for(auto &a:assignments) {
         def.assignments.push_back(a.clone());
     }
-    def.loop_metadata = loop_metadata->clone();
+    if( loop_metadata.has_value())
+        def.loop_metadata =  loop_metadata->clone();
+    else
+        def.loop_metadata = std::nullopt;
     return def;
 }
 

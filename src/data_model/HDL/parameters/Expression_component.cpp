@@ -101,6 +101,17 @@ bool Expression_component::propagate_constant(const qualified_identifier &consta
                         type = number;
                         value = 0; // if the array value is not found (because of some dimensional issue) substitute with a 0 rather than crashing
                     }
+                }else if(std::holds_alternative<mdarray<std::string>>(const_value)){
+                    auto values = std::get<mdarray<std::string>>(const_value);
+                    auto array_val = values.get_value(indices);
+                    if (array_val.has_value()) {
+                        type = string;
+                        value = array_val.value();
+                    }
+                    else {
+                        type = string;
+                        value = ""; // if the array value is not found (because of some dimensional issue) substitute with a 0 rather than crashing
+                    }
                 } else {
                     std::bitset<64> bits(std::get<int64_t>(const_value));
                     type = number;

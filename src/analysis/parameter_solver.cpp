@@ -182,7 +182,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
                     }else if(node_defaults.contains({"", dep.name})){
                         value = node_defaults[{"", dep.name}];
                     } else {
-                        throw std::runtime_error("Parameter " + dep.prefix +"::" +dep.name + " is not defined in the design");
+                        spdlog::warn("Parameter {}::{} is not defined in the design", dep.prefix, dep.name);
                     }
 
                     bool propagation_done = false;
