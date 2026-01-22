@@ -21,6 +21,8 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
+#include <cereal/types/vector.hpp>
+
 template<typename T>
 class mdarray {
 public:
@@ -269,7 +271,7 @@ md_2d_array get_2d_slice(std::vector<int64_t> idx) {
 
     template<class Archive>
     void serialize(Archive & ar ) {
-        ar(data);
+        ar(data, order);
     }
 
     static std::string stringify(const T& item) {

@@ -54,7 +54,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(function_name, arguments);
+        ar(function_name, arguments, assignments, loop_metadata);
     }
 
 private:
