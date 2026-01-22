@@ -128,7 +128,6 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    d_store->lock_resources();
 
     // Parse depfile
     if(opts.target.empty()) opts.target = std::filesystem::current_path().string() + "/Depfile";

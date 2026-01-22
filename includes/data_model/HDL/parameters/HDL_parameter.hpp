@@ -36,7 +36,6 @@ public:
     HDL_parameter();
 
     void set_name(const std::string &n) {
-        locking_violation_check();
         name  = n;
     };
     std::shared_ptr<HDL_parameter> clone() const;
@@ -94,7 +93,6 @@ public:
 
     void add_component(const Expression_component &component);
     void set_expression(const std::shared_ptr<Parameter_value_base>  &e) {
-        locking_violation_check();
         i_l.set_scalar(e);
     };
     std::shared_ptr<Parameter_value_base> get_expression() {
@@ -103,7 +101,6 @@ public:
         return exp.value();
     }
     void clear_expression() {
-        locking_violation_check();
         i_l.clear_scalar();
     }
 
@@ -118,8 +115,6 @@ public:
     std::set<qualified_identifier> get_dependencies();
 
     void add_initialization_list(const Initialization_list &i){
-        locking_violation_check();
-        //type = array_parameter;
         i_l = i;
     }
     Initialization_list get_i_l() {return i_l;}
@@ -130,23 +125,14 @@ public:
     }
 
     void set_loop_index() {
-        locking_violation_check();
         loop_index = true;
     }
     bool is_loop_index() const {return loop_index;}
     nlohmann::json dump();
 
-    void lock_parameter(){lock = true;}
 
-    void locking_violation_check() {
-        if(lock) {
-            spdlog::error("Attempting to modify a locked parameter {}",name);
-            exit(1);
-        }
-    }
+
 private:
-
-    bool lock = false;
 
     std::string name;
     std::variant<mdarray<int64_t>, mdarray<std::string>::md_1d_array> value;

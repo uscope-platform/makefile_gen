@@ -32,8 +32,8 @@ data_store::data_store(bool e, std::string cache_dir_path) {
 }
 
 HDL_Resource data_store::get_HDL_resource(const std::string& name) {
-    if(cache.interfaces.contains(name)) return cache.interfaces[name];
-    else return cache.hdl[name];
+    if(cache.interfaces.contains(name)) return cache.interfaces[name].clone();
+    return cache.hdl[name].clone();
 }
 
 void data_store::store_hdl_entity(HDL_Resource& entity) {
@@ -97,12 +97,6 @@ void data_store::store_data_file(const std::vector<DataFile> &vect) {
 
 bool data_store::is_primitive(const std::string &name) {
     return xilinx_primitives.find(name) != xilinx_primitives.end();
-}
-
-void data_store::lock_resources() {
-    for(auto &[res_name, res]: cache.hdl) {
-        res.lock_resource();
-    }
 }
 
 data_store::~data_store() {

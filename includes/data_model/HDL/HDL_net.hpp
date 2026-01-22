@@ -107,31 +107,24 @@ public:
     void propagate_constant(const qualified_identifier &id, const resolved_parameter &param);
 
     void set_name(const std::string &s) {
-        locking_violation_check();
         name = s;
     }
     void set_index(Expression i) {
-        locking_violation_check();
         index = i;
     }
     void add_index_component(const std::string &ec) {
-        locking_violation_check();
         index.emplace_back(ec, Expression_component::get_type(ec));
     }
     void set_range(HDL_range r) {
-        locking_violation_check();
         range = r;
     }
     void add_relication_size(const std::string &ec) {
-        locking_violation_check();
         replication.size.emplace_back(ec, Expression_component::get_type(ec));
     }
     void add_relication_target(const std::string &ec) {
-        locking_violation_check();
         replication.target.emplace_back(ec, Expression_component::get_type(ec));
     }
     void set_replication(HDL_replication r) {
-        locking_violation_check();
         replication = r;
     }
 
@@ -139,19 +132,8 @@ public:
         return !(lhs == rhs);
     }
 
-    void lock() {
-        locked = true;
-    }
-    void locking_violation_check() {
-        if(locked) {
-            spdlog::error("Attempting to modify a locked net {}", name);
-            exit(1);
-        }
-    }
-
     virtual nlohmann::json dump();
 private:
-    bool locked = false;
     std::string name;
     Expression index;
     HDL_range range;

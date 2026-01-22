@@ -57,6 +57,7 @@ public:
 
     HDL_loop_metadata(const HDL_loop_metadata &other);
 
+    HDL_loop_metadata clone();
 
     HDL_loop_metadata(HDL_loop_metadata &&other) noexcept;
 
@@ -66,7 +67,6 @@ public:
     std::set<qualified_identifier> get_dependencies() const;
     bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value);
 
-    void lock();
 
     void set_init(const HDL_parameter &p);
     void set_end_c(const Expression &e);
@@ -87,13 +87,12 @@ public:
         archive( init, end_c, iter, assignments);
     }
 
-    void locking_violation_check();
 
     bool operator==(const HDL_loop_metadata &rhs) const;
 
 
 private:
-    bool locked = false;
+
     std::shared_ptr<HDL_parameter> init;
     std::unique_ptr<Expression> end_c;
     std::unique_ptr<Expression> iter;

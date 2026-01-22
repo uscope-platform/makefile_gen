@@ -27,6 +27,8 @@ class Expression;
 class HDL_function_def {
 public:
 
+    HDL_function_def clone();
+
     void set_name(const std::string &s) { name = s;}
     void start_assignment(const std::string &n, Expression idx);
     void close_assignment(Expression val);

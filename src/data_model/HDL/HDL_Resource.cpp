@@ -65,11 +65,6 @@ void HDL_Resource::process_calls() {
 }
 
 
-void HDL_Resource::lock_resource() {
-    lock = true;
-    for(auto &dep:dependencies) dep.lock_dependency();
-}
-
 bool HDL_Resource::is_empty() {
     bool ret = true;
 
@@ -88,12 +83,35 @@ bool HDL_Resource::is_empty() {
 }
 
 void HDL_Resource::add_dependency(const HDL_instance &dep) {
-    locking_violation_check();
     dependencies.push_back(dep);
 }
 
+std::unordered_map<std::string, HDL_Resource>::mapped_type HDL_Resource::clone() {
+    HDL_Resource ret;
+
+    ret.name = name;
+    ret.path = path;
+    ret.hdl_type = hdl_type;
+    ret.ports = ports;
+    ret.if_specs  = if_specs;
+    ret.default_values = default_values;
+    ret.processor_docs = processor_docs;
+    ret.doc = doc;
+    ret.parameters_spec  = parameters_spec.clone();
+
+    for(auto &[function_name,  function_def]:functions) {
+        ret.functions.insert({function_name, function_def.clone()});
+    }
+
+    for(auto &d:dependencies) {
+        ret.dependencies.push_back(d.clone());
+    }
+
+    return ret;
+
+}
+
 void HDL_Resource::add_dependencies(std::vector<HDL_instance> deps) {
-    locking_violation_check();
     dependencies.insert(dependencies.begin(), deps.begin(), deps.end());
 }
 
@@ -121,7 +139,6 @@ bool operator<(const HDL_Resource &lhs, const HDL_Resource &rhs) {
 }
 
 void HDL_Resource::add_if_port_specs(const std::string &p_n, const std::string &if_name, const std::string &modport) {
-    locking_violation_check();
     if_specs[p_n] = {if_name, modport};
 }
 
@@ -130,7 +147,6 @@ std::unordered_map<std::string, std::array<std::string, 2>> HDL_Resource::get_if
 }
 
 void HDL_Resource::set_parameters(Parameters_map p) {
-    locking_violation_check();
     parameters_spec = std::move(p);
 }
 

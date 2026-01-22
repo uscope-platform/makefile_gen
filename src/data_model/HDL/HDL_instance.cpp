@@ -27,6 +27,24 @@ HDL_instance::HDL_instance(const HDL_instance &c) {
 }
 
 
+HDL_instance HDL_instance::clone() {
+    HDL_instance  c;
+    c.parameters = parameters.clone();
+    c.dep_class = dep_class;
+    c.type = type;
+    c.name = name;
+    c.groups = groups;
+    c.array_quantifier = array_quantifier;
+
+    for(auto &s:loop_specs) {
+        c.loop_specs.push_back(s.clone());
+    }
+
+    c.ports_map = ports_map;
+
+    return c;
+}
+
 HDL_instance::HDL_instance(std::string dep_name, std::string dep_type, dependency_class d_c) {
     dep_class = d_c;
     name = std::move(dep_name);
@@ -34,12 +52,10 @@ HDL_instance::HDL_instance(std::string dep_name, std::string dep_type, dependenc
 }
 
 void HDL_instance::add_parameter(const std::shared_ptr<HDL_parameter> &p) {
-    locking_violation_check();
     parameters.insert(p);
 }
 
 void HDL_instance::add_port_connection(const std::string& port_name, std::vector<HDL_net> value) {
-    locking_violation_check();
     ports_map[port_name] = std::move(value);
 }
 
@@ -67,20 +83,11 @@ bool operator==(const HDL_instance &lhs, const HDL_instance &rhs) {
 }
 
 void HDL_instance::add_parameters(Parameters_map &p) {
-    locking_violation_check();
     parameters.insert(p.begin(), p.end());
 }
 
 void HDL_instance::set_parameters(Parameters_map &p) {
-    locking_violation_check();
     parameters = std::move(p);
-}
-
-void HDL_instance::lock_dependency() {
-    lock = true;
-    for(auto &p:parameters) p->lock_parameter();
-    for(auto &val: ports_map | std::views::values) for(auto n:val) n.lock();
-    for(auto &ls:loop_specs) ls.lock();
 }
 
 nlohmann::json HDL_instance::dump() {

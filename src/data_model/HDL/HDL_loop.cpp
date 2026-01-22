@@ -19,7 +19,7 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
 assignment::assignment(const std::string &n, const std::optional<std::shared_ptr<Expression>> &idx,
-    const std::shared_ptr<Expression> &val) {
+                       const std::shared_ptr<Expression> &val) {
     name = n;
     index = idx;
     value = val;
@@ -57,23 +57,33 @@ assignment assignment::clone() const {
     assignment a;
     a.name = name;
     if(index.has_value()) a.set_index(std::make_shared<Expression>(*index.value()));
-    a.set_value(std::make_shared<Expression>(*value));
+    if(value!= nullptr) a.set_value(std::make_shared<Expression>(*value));
     return a;
 }
 
 HDL_loop_metadata::~HDL_loop_metadata() = default;
 
 HDL_loop_metadata::HDL_loop_metadata(const HDL_loop_metadata &other)
-        : locked(other.locked),
-          init(other.init),
+        : init(other.init),
           assignments(other.assignments) {
 
     end_c = other.end_c ? std::make_unique<Expression>(*other.end_c): nullptr;
     iter = other.iter ? std::make_unique<Expression>(*other.iter): nullptr;
 }
 
+HDL_loop_metadata HDL_loop_metadata::clone() {
+    HDL_loop_metadata ret_val;
+    ret_val.init = init ? init->clone(): nullptr;
+    ret_val.end_c = end_c ? std::make_unique<Expression>(*end_c): nullptr;
+    ret_val.iter = iter ? std::make_unique<Expression>(*iter): nullptr;
+    for(auto &a:assignments) {
+        assignments.push_back(a.clone());
+    }
+    return ret_val;
+}
+
 HDL_loop_metadata::HDL_loop_metadata(HDL_loop_metadata &&other) noexcept
-        : locked(other.locked),
+        :
           init(std::move(other.init)),
           end_c(std::move(other.end_c)),
           iter(std::move(other.iter)),
@@ -83,7 +93,6 @@ HDL_loop_metadata::HDL_loop_metadata(HDL_loop_metadata &&other) noexcept
 HDL_loop_metadata & HDL_loop_metadata::operator=(const HDL_loop_metadata &other) {
     if(this == &other)
         return *this;
-    locked = other.locked;
     init = other.init;
     end_c = other.end_c ? std::make_unique<Expression>(*other.end_c): nullptr;
     iter = other.iter ? std::make_unique<Expression>(*other.iter): nullptr;
@@ -94,7 +103,6 @@ HDL_loop_metadata & HDL_loop_metadata::operator=(const HDL_loop_metadata &other)
 HDL_loop_metadata & HDL_loop_metadata::operator=(HDL_loop_metadata &&other) noexcept {
     if(this == &other)
         return *this;
-    locked = other.locked;
     init = std::move(other.init);
     end_c = std::move(other.end_c);
     iter = std::move(other.iter);
@@ -132,18 +140,13 @@ bool HDL_loop_metadata::propagate_constant(const qualified_identifier &constant_
 }
 
 
-void HDL_loop_metadata::lock() {locked = true;}
-
 void HDL_loop_metadata::set_init(const HDL_parameter &p) {
-    locking_violation_check();
     init = std::make_shared<HDL_parameter>(p);
 }
 void HDL_loop_metadata::set_end_c(const Expression &e) {
-    locking_violation_check();
     end_c = std::make_unique<Expression>(e);
 }
 void HDL_loop_metadata::set_iter(const Expression &i) {
-    locking_violation_check();
     iter = std::make_unique<Expression>(i);
 }
 
@@ -163,23 +166,14 @@ Expression HDL_loop_metadata::get_iter() const {
 }
 
 void HDL_loop_metadata::add_assignment(const assignment &a) {
-    locking_violation_check();
     assignments.push_back(a);
 }
 void HDL_loop_metadata::set_assignments(const std::vector<assignment> &a) {
-    locking_violation_check();
     assignments = a;
 }
 
 std::vector<assignment> HDL_loop_metadata::get_assignments() const {
     return assignments;
-}
-
-void HDL_loop_metadata::locking_violation_check() {
-    if(locked) {
-        spdlog::error("Attempting to modify a locked loop with index {}",init->get_name());
-        exit(1);
-    }
 }
 
 
@@ -190,6 +184,5 @@ bool HDL_loop_metadata::operator==(const HDL_loop_metadata &rhs) const {
     retval &= *end_c == *rhs.end_c;
     retval &= *iter == *rhs.iter;
     retval &= assignments == rhs.assignments;
-    retval &= locked == rhs.locked;
     return retval;
 }

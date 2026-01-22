@@ -57,7 +57,6 @@ bool HDL_parameter::is_empty() {
 }
 
 void HDL_parameter::set_value(const resolved_parameter &val) {
-    locking_violation_check();
     if(std::holds_alternative<std::string>(val)) {
         type = string_parameter;
         std::get<std::vector<std::string>>(value)[0] = std::get<std::string>(val);
@@ -108,7 +107,6 @@ HDL_parameter::operator std::string() {
 }
 
 void HDL_parameter::add_component(const Expression_component& component) {
-    locking_violation_check();
     i_l.push_scalar_component(component);
 }
 

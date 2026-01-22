@@ -19,6 +19,16 @@
 #include "analysis/loop_solver.hpp"
 #include "data_model/HDL/parameters/Expression.hpp"
 
+HDL_function_def HDL_function_def::clone() {
+    HDL_function_def def;
+    def.name = name;
+    for(auto &a:assignments) {
+        def.assignments.push_back(a.clone());
+    }
+    def.loop_metadata = loop_metadata->clone();
+    return def;
+}
+
 void HDL_function_def::start_assignment(const std::string &n, Expression idx) {
     if(idx.empty())
         assignments.push_back({name, {}, {}});
