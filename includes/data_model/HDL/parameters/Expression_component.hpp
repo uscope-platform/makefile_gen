@@ -28,6 +28,7 @@
 #include "data_model/HDL/parameters/qualified_identifier.hpp"
 
 #include <cereal/types/vector.hpp>
+#include <cereal/types/variant.hpp>
 
 #include "HDL_function_def.hpp"
 

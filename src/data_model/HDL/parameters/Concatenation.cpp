@@ -15,6 +15,11 @@
 
 
 #include "data_model/HDL/parameters/Concatenation.hpp"
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/archives/binary.hpp>
+
+CEREAL_REGISTER_TYPE(Concatenation)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(Parameter_value_base, Concatenation)
 
 Concatenation::Concatenation(const Concatenation &other) {
     for(auto &item: other.components) {

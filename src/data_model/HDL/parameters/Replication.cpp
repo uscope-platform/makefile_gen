@@ -17,6 +17,12 @@
 #include "data_model/HDL/parameters/Expression.hpp"
 #include "data_model/HDL/parameters/Concatenation.hpp"
 
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/archives/binary.hpp>
+
+CEREAL_REGISTER_TYPE(Replication)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(Parameter_value_base, Replication)
+
 Replication::Replication(const Expression &size, std::shared_ptr<Parameter_value_base> item)  {
     repeated_item = std::move(item);
     repetition_size = size;

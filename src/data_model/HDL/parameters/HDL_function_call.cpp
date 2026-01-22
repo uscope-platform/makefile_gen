@@ -18,6 +18,12 @@
 #include "analysis/loop_solver.hpp"
 #include "data_model/HDL/parameters/Expression.hpp"
 
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/archives/binary.hpp>
+
+CEREAL_REGISTER_TYPE(HDL_function_call)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(Parameter_value_base, HDL_function_call)
+
 void HDL_function_call::add_argument(const std::shared_ptr<Parameter_value_base> &p) {
     arguments.push_back(p);
 }

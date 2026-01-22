@@ -15,6 +15,12 @@
 
 
 #include "data_model/HDL/parameters/Expression.hpp"
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/archives/binary.hpp>
+
+CEREAL_REGISTER_TYPE(Expression)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(Parameter_value_base, Expression)
+
 
 std::string Expression::print() const {
     std::string ret_val;
