@@ -51,12 +51,18 @@ public:
     int64_t  get_numeric_value() const {
         return std::get<mdarray<int64_t>>(value).get_scalar();
     }
-    mdarray<int64_t> get_array_value() const{
+    mdarray<int64_t> get_int_array_value() const{
         return std::get<mdarray<int64_t>>(value);
     };
     resolved_parameter get_value() const {
         if(is_array()) {
-            return get_array_value();
+            if(std::holds_alternative<mdarray<int64_t>>(value)) {
+                return get_int_array_value();
+            } else {
+                mdarray<std::string> ret_val;
+                ret_val.set_1d_slice({0,0}, std::get<std::vector<std::string>>(value));
+                return ret_val;
+            }
         } else {
             if(std::holds_alternative<std::vector<std::string>>(value)){
                 return get_string_value();

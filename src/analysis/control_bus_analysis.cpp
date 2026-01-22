@@ -71,7 +71,7 @@ void control_bus_analysis::analize_node(const std::vector<analysis_context> &n) 
 std::vector<analysis_context> control_bus_analysis::process_interconnect(const analysis_context &inst) {
     std::vector<analysis_context> ret_val;
     auto ic = inst.node;
-    auto addresses = ic->get_parameter_value("SLAVE_ADDR")->get_array_value().get_1d_slice({0,0});
+    auto addresses = ic->get_parameter_value("SLAVE_ADDR")->get_int_array_value().get_1d_slice({0,0});
     auto masters_ifs = ic->get_ports()[specs_manager.get_interconnect_source_port(ic->get_type())];
 
     auto masters = expand_bus_array(masters_ifs, addresses);

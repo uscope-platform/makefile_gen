@@ -76,8 +76,8 @@ HDL_loop_metadata HDL_loop_metadata::clone() {
     ret_val.init = init ? init->clone(): nullptr;
     ret_val.end_c = end_c ? std::make_unique<Expression>(*end_c): nullptr;
     ret_val.iter = iter ? std::make_unique<Expression>(*iter): nullptr;
-    for(auto &a:assignments) {
-        assignments.push_back(a.clone());
+    for(const auto &a:assignments) {
+        ret_val.assignments.push_back(a.clone());
     }
     return ret_val;
 }

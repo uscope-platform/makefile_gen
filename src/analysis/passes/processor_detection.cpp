@@ -35,7 +35,7 @@ void processor_detection::process_node(const std::shared_ptr<HDL_instance_AST> &
 
             if(addr_vals->is_array()){
                 auto addr_idx = proc.get_address_idx();
-                address = addr_vals->get_array_value().get_value({0,0,addr_idx}).value();
+                address = addr_vals->get_int_array_value().get_value({0,0,addr_idx}).value();
             } else {
                 address = addr_vals->get_numeric_value();
             }
