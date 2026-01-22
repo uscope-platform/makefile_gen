@@ -86,7 +86,7 @@ private:
     void load_cache();
     void store_cache();
 
-    struct cache_t cache;
+    cache_t cache;
     bool ephemeral;
 
     std::string store_path;

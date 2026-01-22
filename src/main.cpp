@@ -125,7 +125,7 @@ int main(int argc, char *argv[]){
     Repository_walker walker(s_store, d_store, opts.no_cache, s_store->get_setting_list("excluded_paths"));
 
     if(opts.refresh_cache) {
-        exit(0);
+        return 0;
     }
 
     d_store->lock_resources();

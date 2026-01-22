@@ -188,7 +188,7 @@ TEST(parameter_extraction, simple_cast) {
     module test_mod #(
     )();
 
-        localparam CAST_1 = $rtoi(16.8);
+        localparam CAST = $rtoi(16.8);
 
     endmodule
     )";
