@@ -176,7 +176,12 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
             spdlog::warn("parameter named {} not found on module : {}.{}", addr_param_name, node->get_type(), node->get_name());
             return;
         }
-        addresses = node->get_parameter_value(addr_param_name)->get_int_array_value().get_1d_slice({0,0});
+        auto addr_value_opt = node->get_parameter_value(addr_param_name)->get_int_array_value();
+        if(!addr_value_opt.has_value()) {
+            spdlog::warn("data source in module  {}.{}, does not have a valid address", node->get_type(), node->get_name());
+            return;
+        }
+        addresses = addr_value_opt.value().get_1d_slice({0,0});
     } else{
         for(int i =0; i<n_params; i++){
             addresses.push_back(i);

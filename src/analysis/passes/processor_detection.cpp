@@ -35,7 +35,12 @@ void processor_detection::process_node(const std::shared_ptr<HDL_instance_AST> &
 
             if(addr_vals->is_array()){
                 auto addr_idx = proc.get_address_idx();
-                address = addr_vals->get_int_array_value().get_value({0,0,addr_idx}).value();
+                auto addr_opt = addr_vals->get_int_array_value();
+                if(!addr_opt.has_value()) {
+                    spdlog::warn("Processor {} does not have a valid address, thus it will be omitted from the application file", proc.get_name());
+                    continue;
+                }
+                address = addr_opt.value().get_value({0,0,addr_idx}).value();
             } else {
                 auto addr = addr_vals->get_numeric_value();
                 if(!addr.has_value()) {

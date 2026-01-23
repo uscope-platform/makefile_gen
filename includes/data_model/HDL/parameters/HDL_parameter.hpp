@@ -48,13 +48,15 @@ public:
         else
             return "";
     }
-    std::optional<int64_t>  get_numeric_value() const {
+    [[nodiscard]] std::optional<int64_t>  get_numeric_value() const {
         return std::get<mdarray<int64_t>>(value).get_scalar();
     }
-    mdarray<int64_t> get_int_array_value() const{
-        return std::get<mdarray<int64_t>>(value);
+    [[nodiscard]] std::optional<mdarray<int64_t>> get_int_array_value() const{
+        if(std::holds_alternative<mdarray<int64_t>>(value))
+            return std::get<mdarray<int64_t>>(value);
+        return std::nullopt;
     };
-    std::optional<resolved_parameter> get_value() const {
+    [[nodiscard]] std::optional<resolved_parameter> get_value() const {
         if(is_array()) {
             if(std::holds_alternative<mdarray<int64_t>>(value)) {
                 return get_int_array_value();
