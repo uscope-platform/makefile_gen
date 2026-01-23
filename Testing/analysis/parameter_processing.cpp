@@ -21,907 +21,907 @@
 #include "analysis/HDL_ast_builder_v2.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
-//
-//
-// TEST(parameter_processing, package_parameters_use) {
-//     std::string test_pattern = R"(
-//
-//         package test_package;
-//             parameter bus_base = 67;
-//         endpackage
-//
-//         module test_mod #(
-//              parameter package_param = test_package::bus_base
-//         )();
-//
-//         endmodule
-//     )";
-//
-//
-//     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-//
-//     analyzer.cleanup_content("`(.*)");
-//     auto resources = analyzer.analyze();
-//     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-//     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
-//
-//     d_store->store_hdl_entity(resources[0]);
-//     d_store->store_hdl_entity(resources[1]);
-//
-//
-//     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-//     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
-//
-//     auto dependency_parameters = ast_v2->get_parameters();
-//
-//     Parameters_map check_params;
-//
-//     auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
-//     p->set_name("package_param");
-//     Expression_component ec(67, 0);
-//     ec.set_package_prefix("test_package");
-//     p->add_component(ec);
-//     p->set_value(67);
-//
-//     check_params.insert(p);
-//
-//     ASSERT_EQ(check_params.size(), dependency_parameters.size());
-//
-//     for(const auto& item:check_params){
-//         ASSERT_TRUE(dependency_parameters.contains(item->get_name()));
-//         ASSERT_EQ(*item, *dependency_parameters.get(item->get_name()));
-//     }
-//
-// }
-//
-//
-// TEST(parameter_processing, array_instance_parameter_override) {
-//     std::string test_pattern = R"(
-//         module dependency #(
-//             parameter param_1 = 4,
-//             parameter param_2 [1:0]= '{0,0},
-//             param_3 = 6
-//         )();
-//
-//             parameter p1_t = param_2[0];
-//             parameter p2_t = param_2[1];
-//
-//         endmodule
-//
-//         module test_mod #(
-//             parameter test_param = 4
-//         )();
-//
-//             localparam override_array [1:0] = '{8,9};
-//
-//             dependency #(
-//                 .param_1(test_param),
-//                 .param_2(override_array),
-//                 .param_3((test_param + 7)*1)
-//             ) test_instance ();
-//
-//         endmodule
-//     )";
-//
-//
-//     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-//
-//     analyzer.cleanup_content("`(.*)");
-//     auto resources = analyzer.analyze();
-//     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-//     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
-//
-//     d_store->store_hdl_entity(resources[0]);
-//     d_store->store_hdl_entity(resources[1]);
-//
-//
-//     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-//     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
-//
-//     auto dependency_parameters = ast_v2->get_dependencies()[0]->get_parameters();
-//
-//     Parameters_map check_params;
-//
-//     auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
-//     p->set_name("param_1");
-//     p->add_component(Expression_component(4, 0));
-//     p->set_value(4);
-//
-//     check_params.insert(p);
-//
-//     p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
-//     p->set_name("param_2");
-//     Initialization_list il;
-//     il.add_dimension({
-//         {Expression_component("1", Expression_component::number)},
-//         {Expression_component("0", Expression_component::number)},
-//         false
-//     });
-//     mdarray<int64_t> av;
-//     av.set_1d_slice({0,0}, {9,8});
-//     auto ec = Expression_component(0, 0);
-//     ec.set_value(av);
-//     il.set_scalar(std::make_shared<Expression>(Expression({ec})));
-//     p->add_initialization_list(il);
-//
-//     p->set_value(av);
-//     check_params.insert(p);
-//
-//     p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
-//     p->set_name("param_3");
-//     p->add_component(Expression_component("(", Expression_component::parenthesis));
-//     p->add_component(Expression_component(4, 0));
-//     p->add_component(Expression_component("+", Expression_component::operation));
-//     p->add_component(Expression_component(7, 3));
-//     p->add_component(Expression_component(")", Expression_component::parenthesis));
-//     p->add_component(Expression_component("*", Expression_component::operation));
-//     p->add_component(Expression_component(1, 1));
-//     p->set_value(11);
-//     check_params.insert(p);
-//
-//     p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
-//     p->set_name("p1_t");
-//     ec = Expression_component("param_2", Expression_component::identifier);
-//     ec.add_array_index({Expression_component(0, 1)});
-//     p->add_component(ec);
-//     p->set_value(9);
-//     check_params.insert(p);
-//
-//
-//     p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
-//     p->set_name("p2_t");
-//     ec = Expression_component("param_2", Expression_component::identifier);
-//     ec.add_array_index({Expression_component(1, 1)});
-//     p->add_component(ec);
-//     p->set_value(8);
-//     check_params.insert(p);
-//
-//     ASSERT_EQ(check_params.size(), dependency_parameters.size());
-//
-//     for(const auto& item:check_params){
-//         ASSERT_TRUE(dependency_parameters.contains(item->get_name()));
-//         ASSERT_EQ(*item, *dependency_parameters.get(item->get_name()));
-//     }
-//
-// }
-//
-//
-// TEST(parameter_processing, packed_array_initialization_expression_override) {
-//     std::string test_pattern = R"(
-//
-//         module dependency #(
-//             N_TRIGGER_REGISTERS = 1,
-//             parameter [31:0] TRIGGER_REGISTERS_IDX [N_TRIGGER_REGISTERS-1:0] = '{N_TRIGGER_REGISTERS{0}}
-//         )();
-//             parameter p1_t = TRIGGER_REGISTERS_IDX[0];
-//         endmodule
-//
-//         module test_mod #(
-//         )();
-//
-//             parameter TAP_ADDR_REG = 5;
-//             dependency #(
-//                 .TRIGGER_REGISTERS_IDX('{TAP_ADDR_REG})
-//             ) d ();
-//         endmodule
-//     )";
-//
-//
-//     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-//
-//     analyzer.cleanup_content("`(.*)");
-//     auto resources = analyzer.analyze();
-//     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
-//     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-//     d_store->store_hdl_entity(resources[0]);
-//     d_store->store_hdl_entity(resources[1]);
-//
-//     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-//     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
-//
-//     auto dependency_parameters = ast_v2->get_dependencies()[0]->get_parameters();
-//
-//     auto array_val = dependency_parameters.get("TRIGGER_REGISTERS_IDX")->get_array_value();
-//     ASSERT_EQ(array_val.get_value({0,0,0}), 5);
-//
-// }
-//
-//
-// TEST(parameter_processing, simple_for_array_parameter) {
-//     std::string test_pattern = R"(
-//
-//         module dependency #(
-//             N_TRIGGER_REGISTERS = 1
-//         )();
-//         endmodule
-//
-//         module test_mod #(
-//         )();
-//
-//             parameter  [31:0] TAP_ADDR_REG [2:0] = '{6,2,4};
-//             genvar n;
-//             generate
-//                 for(n = 0; n<3; n=n+1)begin
-//                     dependency #(
-//                         .N_TRIGGER_REGISTERS(TAP_ADDR_REG[n])
-//                     ) d ();
-//                 end
-//             endgenerate
-//         endmodule
-//     )";
-//
-//
-//     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-//
-//     analyzer.cleanup_content("`(.*)");
-//     auto resources = analyzer.analyze();
-//     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-//     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
-//
-//     d_store->store_hdl_entity(resources[0]);
-//     d_store->store_hdl_entity(resources[1]);
-//
-//
-//     Depfile df;
-//
-//     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-//     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
-//
-//     auto deps = ast_v2->get_dependencies();
-//
-//     ASSERT_EQ(deps.size(), 3);
-//     ASSERT_EQ(deps[0]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 4);
-//     ASSERT_EQ(deps[1]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 2);
-//     ASSERT_EQ(deps[2]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 6);
-//
-// }
-//
-//
-// TEST(parameter_processing, complex_for_array_parameter) {
-//     std::string test_pattern = R"(
-//
-//         module dependency #(
-//             N_TRIGGER_REGISTERS = 1
-//         )();
-//         endmodule
-//
-//         module test_mod #(
-//         )();
-//
-//             parameter  [31:0] TAP_ADDR_REG [2:0] = '{6,2,4};
-//
-//             parameter  TEST_PARAM = 1;
-//             genvar n;
-//             generate
-//                 for(n = 0; n<3; n=n+1)begin
-//                     dependency #(
-//                         .N_TRIGGER_REGISTERS(TAP_ADDR_REG[(TEST_PARAM+1)-n])
-//                     ) d ();
-//                 end
-//             endgenerate
-//         endmodule
-//     )";
-//
-//
-//     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-//
-//     analyzer.cleanup_content("`(.*)");
-//     auto resources = analyzer.analyze();
-//     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-//     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
-//
-//     d_store->store_hdl_entity(resources[0]);
-//     d_store->store_hdl_entity(resources[1]);
-//
-//
-//     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-//     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
-//     auto deps = ast_v2->get_dependencies();
-//
-//     ASSERT_EQ(deps.size(), 3);
-//     ASSERT_EQ(deps[0]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 6);
-//     ASSERT_EQ(deps[1]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 2);
-//     ASSERT_EQ(deps[2]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 4);
-//
-// }
-//
-//
-//
-// TEST(parameter_processing, complex_vector_function_parameter) {
-//     std::string test_pattern = R"(
-//         module test_mod #(
-//             N_CORES = 3
-//         )();
-//
-//             parameter ADDR_WIDTH = 32;
-//             parameter N_AXI_LITE = N_CORES + 2;
-//
-//
-//             typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE-1:0];
-//             function ctrl_addr_init_t CTRL_ADDR_CALC();
-//                 CTRL_ADDR_CALC[0] = 44;
-//                 for(int i = 1; i<N_CORES+1; i++)begin
-//                     CTRL_ADDR_CALC[i] = 100*i;
-//                 end
-//                 CTRL_ADDR_CALC[4] = 667;
-//             endfunction
-//
-//             parameter [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
-//
-//         endmodule
-//     )";
-//
-//
-//     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-//     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
-//
-//     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-//     analyzer.cleanup_content("`(.*)");
-//     auto resource = analyzer.analyze()[0];
-//
-//     d_store->store_hdl_entity(resource);
-//
-//     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-//     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
-//
-//
-//     auto param = ast_v2->get_parameters().get("AXI_ADDRESSES");
-//     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-//     mdarray<int64_t>::md_1d_array reference = {44, 100, 200, 300, 667};
-//     ASSERT_EQ(param_value, reference);
-//
-// }
-//
-// /*
-//  *TODO: FIX THIS ENDIANNESS CRAP
-// TEST(parameter_processing, complex_vector_function_parameter_endiannes_mismatch) {
-//     std::string test_pattern = R"(
-//         module test_mod #(
-//             N_CORES = 3
-//         )();
-//
-//             parameter ADDR_WIDTH = 32;
-//             parameter N_AXI_LITE = N_CORES + 2;
-//
-//
-//             typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [0:N_AXI_LITE-1];
-//             function ctrl_addr_init_t CTRL_ADDR_CALC();
-//                 CTRL_ADDR_CALC[0] = 44;
-//                 for(int i = 1; i<N_CORES+1; i++)begin
-//                     CTRL_ADDR_CALC[i] = 100*i;
-//                 end
-//                 CTRL_ADDR_CALC[4] = 667;
-//             endfunction
-//
-//             parameter [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
-//
-//         endmodule
-//     )";
-//
-//
-//     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-//     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
-//
-//     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-//     analyzer.cleanup_content("`(.*)");
-//     auto resource = analyzer.analyze()[0];
-//
-//     d_store->store_hdl_entity(resource);
-//
-//     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-//     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
-//
-//
-//     auto param = ast_v2->get_parameters().get("AXI_ADDRESSES");
-//     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-//     mdarray<int64_t>::md_1d_array reference = {667, 300, 200, 100, 44};
-//     ASSERT_EQ(param_value, reference);
-//
-// }
-// */
-//
-// TEST(parameter_processing, simple_package_in_function_initialization) {
-//     std::string test_pattern = R"(
-//
-//
-//
-//         package hil_address_space;
-//
-//             parameter bus_base = 32'h43c00000;
-//
-//         endpackage
-//
-//
-//         module test_mod #(
-//             parameter ADDR_WIDTH = 32,
-//             parameter N_CORES =2
-//         )();
-//
-//             localparam N_AXI_LITE = N_CORES;
-//             localparam BASE_ADDR = 32'h43c00000 + 'h30000;
-//
-//           typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE-1:0];
-//             function automatic ctrl_addr_init_t CTRL_ADDR_CALC();
-//                 CTRL_ADDR_CALC[0] = hil_address_space::bus_base;
-//                 CTRL_ADDR_CALC[1] = BASE_ADDR + 4;
-//             endfunction
-//
-//             localparam ctrl_addr_init_t AXI_ADDRESSES = CTRL_ADDR_CALC();
-//
-//         endmodule
-//
-//
-//     )";
-//
-//
-//     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-//     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
-//
-//
-//     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-//     analyzer.cleanup_content("`(.*)");
-//
-//     auto resources = analyzer.analyze();
-//     d_store->store_hdl_entity(resources[0]);
-//     d_store->store_hdl_entity(resources[1]);
-//
-//     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-//     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
-//
-//     auto param = ast_v2->get_parameters().get("AXI_ADDRESSES");
-//     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-//     mdarray<int64_t>::md_1d_array reference = {0x43c00000,0x43c30004};
-//     ASSERT_EQ(param_value, reference);
-// }
-//
-//
-// TEST(parameter_processing, nested_package_in_function_initialization) {
-//     std::string test_pattern = R"(
-//
-//         package hil_address_space;
-//             parameter bus_base = 32'h43c00000;
-//         endpackage
-//
-//
-//         module test_mod #(
-//             parameter ADDR_WIDTH = 32,
-//             parameter N_CORES = 3
-//         )();
-//
-//             localparam N_AXI_LITE = N_CORES+3;
-//             localparam BASE_ADDR = hil_address_space::bus_base + 'h30000;
-//
-//             typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE];
-//             function ctrl_addr_init_t CTRL_ADDR_CALC();
-//                 CTRL_ADDR_CALC[0] = hil_address_space::bus_base;
-//                 CTRL_ADDR_CALC[1] = BASE_ADDR + 4;
-//             endfunction
-//
-//             localparam [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
-//
-//         endmodule
-//
-//
-//     )";
-//
-//     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-//     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
-//
-//     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-//     analyzer.cleanup_content("`(.*)");
-//
-//     auto resources = analyzer.analyze();
-//     d_store->store_hdl_entity(resources[0]);
-//     d_store->store_hdl_entity(resources[1]);
-//
-//     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-//     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
-//
-//     auto param = ast_v2->get_parameters().get("AXI_ADDRESSES");
-//     auto param_value = param->get_array_value().get_1d_slice({0, 0});
-//     mdarray<int64_t>::md_1d_array reference = {0x43c00000,0x43c30004};
-//     ASSERT_EQ(param_value, reference);
-// }
-//
-//
-// TEST(parameter_processing, override_with_package_parameter) {
-//     std::string test_pattern = R"(
-//         package test_package;
-//             parameter base = 33;
-//         endpackage
-//
-//         module dependency #(
-//             parameter param_1 = 4
-//         )();
-//
-//             parameter p1_t = param_1+2;
-//
-//         endmodule
-//
-//         module test_mod #(
-//         )();
-//
-//             dependency #(
-//                 .param_1(test_package::base)
-//             ) dep ();
-//
-//         endmodule
-//     )";
-//
-//
-//
-//     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-//     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
-//
-//     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-//     analyzer.cleanup_content("`(.*)");
-//     auto resources = analyzer.analyze();
-//
-//     d_store->store_hdl_entity(resources[0]);
-//     d_store->store_hdl_entity(resources[1]);
-//     d_store->store_hdl_entity(resources[2]);
-//
-//     nlohmann::json df_content;
-//
-//     Depfile df;
-//     df.set_content(df_content);
-//
-//     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-//     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
-//
-//
-//     auto params = ast_v2->get_dependencies()[0]->get_parameters();
-//     auto param_1 = params.get("param_1");
-//     EXPECT_EQ(param_1->get_numeric_value(), 33);
-//     auto p1_t = params.get("p1_t");
-//     EXPECT_EQ(p1_t->get_numeric_value(), 35);
-// }
-//
-//
-// TEST(parameter_processing, override_with_function_parameter) {
-//     std::string test_pattern = R"(
-//
-//         module dependency #(
-//             parameter param_1 = 4
-//         )();
-//
-//             parameter p1_t = param_1+2;
-//
-//         endmodule
-//
-//         module test_mod #(
-//         )();
-//
-//             parameter ADDR_WIDTH = 32;
-//             parameter N_AXI_LITE = 3;
-//
-//
-//             typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE-1:0];
-//             function ctrl_addr_init_t CTRL_ADDR_CALC();
-//                 CTRL_ADDR_CALC[0] = 100;
-//                 CTRL_ADDR_CALC[1] = 130;
-//                 CTRL_ADDR_CALC[2] = 356;
-//             endfunction
-//
-//             parameter logic [ADDR_WIDTH-1:0] FUNCTION_PARAM [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
-//
-//
-//             dependency #(
-//                 .param_1(FUNCTION_PARAM[2])
-//             ) dep ();
-//
-//         endmodule
-//     )";
-//
-//
-//
-//     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-//     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
-//
-//     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-//     analyzer.cleanup_content("`(.*)");
-//     auto resources = analyzer.analyze();
-//
-//     d_store->store_hdl_entity(resources[0]);
-//     d_store->store_hdl_entity(resources[1]);
-//
-//     nlohmann::json df_content;
-//
-//     Depfile df;
-//     df.set_content(df_content);
-//
-//     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-//     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
-//
-//     auto fcn_param = ast_v2->get_parameters().get("FUNCTION_PARAM");
-//     mdarray<int64_t>::md_1d_array reference = {100, 130, 356};
-//     EXPECT_EQ(fcn_param->get_array_value().get_1d_slice({0, 0}), reference);
-//
-//     auto params = ast_v2->get_dependencies()[0]->get_parameters();
-//     auto param_1 = params.get("param_1");
-//     EXPECT_EQ(param_1->get_numeric_value(), 356);
-//     auto p1_t = params.get("p1_t");
-//     EXPECT_EQ(p1_t->get_numeric_value(), 358);
-// }
-//
-//
-// /*
-// TEST(parameter_processing, parameter_with_for_loop) {
-//     std::string test_pattern = R"(
-//
-//         module dependency #(
-//             parameter DMA_BASE_ADDRESS = 4
-//         )();
-//
-//             parameter p1_t = DMA_BASE_ADDRESS+2;
-//
-//         endmodule
-//
-//         module test_mod #(
-//             parameter N_CORES = 2
-//         )();
-//           	localparam N_REGISTERS = 4;
-//
-//             typedef logic [31:0] ctrl_addr_init_t [N_REGISTERS-1:0];
-//             function ctrl_addr_init_t CTRL_ADDR_CALC();
-//                 CTRL_ADDR_CALC[0] = 100;
-//                 CTRL_ADDR_CALC[1] = 130;
-//                 CTRL_ADDR_CALC[2] = 356;
-//                 CTRL_ADDR_CALC[3] = 62;
-//             endfunction
-//
-//             parameter ctrl_addr_init_t AXI_ADDRESSES = CTRL_ADDR_CALC();
-//             genvar n;
-//             for(n = 0; n<N_CORES; n=n+1)begin
-//                 dependency #(
-//                     .DMA_BASE_ADDRESS(AXI_ADDRESSES[(N_CORES+1)-n])
-//                 ) dep ();
-//             end
-//         endmodule
-//     )";
-//
-//
-//
-//     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-//     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
-//
-//     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-//     analyzer.cleanup_content("`(.*)");
-//     auto resources = analyzer.analyze();
-//
-//     d_store->store_hdl_entity(resources[0]);
-//     d_store->store_hdl_entity(resources[1]);
-//
-//     nlohmann::json df_content;
-//
-//     Depfile df;
-//     df.set_content(df_content);
-//
-//
-//     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-//     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
-//     auto deps = ast_v2->get_dependencies();
-//
-//     std::vector<uint32_t> param_1;
-//     std::vector<uint32_t> p1_t;
-//
-//     for(auto dep : deps) {
-//         auto p = dep->get_parameters();
-//         param_1.push_back(p.get("DMA_BASE_ADDRESS")->get_numeric_value());
-//         p1_t.push_back(p.get("p1_t")->get_numeric_value());
-//     }
-//
-//     std::vector<uint32_t> expected_param_1 = {62, 356};
-//     EXPECT_EQ(param_1, expected_param_1);
-//     std::vector<uint32_t> expected_p1_t = {64, 358};
-//     EXPECT_EQ(p1_t, expected_p1_t);
-//
-// }
-// */
-//
-//
-// TEST(parameter_processing, parent_parameter_collision) {
-//     std::string test_pattern = R"(
-//
-//         module inner_dep();
-//
-//         endmodule
-//
-//         module dependency #(
-//             INNER_PARAMETER = 1
-//         )();
-//             genvar n;
-//             for(n = 0; n<INNER_PARAMETER; n=n+1)begin
-//                 inner_dep #() dep ();
-//             end
-//         endmodule
-//
-//         module test_mod #(
-//         )();
-//
-//             parameter  [31:0] INNER_PARAMETER = 5;
-//             dependency #(
-//                 .INNER_PARAMETER(2)
-//             ) d ();
-//         endmodule
-//     )";
-//
-//
-//     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-//
-//     analyzer.cleanup_content("`(.*)");
-//     auto resources = analyzer.analyze();
-//     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-//     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
-//
-//     d_store->store_hdl_entity(resources[0]);
-//     d_store->store_hdl_entity(resources[1]);
-//     d_store->store_hdl_entity(resources[2]);
-//
-//
-//     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-//     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
-//
-//     auto deps = ast_v2->get_dependencies();
-//     ASSERT_EQ(deps[0]->get_parameters().get("INNER_PARAMETER")->get_numeric_value(), 2);
-//
-// }
-//
-//
-// TEST(parameter_processing, override_after_function_localparam) {
-//     std::string test_pattern = R"(
-//
-//     module PwmControlUnit #(
-//         INITIAL_STOPPED_STATE = 0
-//     )();
-//
-//     endmodule
-//
-//     module PwmGenerator #(
-//         parameter INITIAL_STOPPED_STATE = 52
-//     )();
-//
-//         localparam [31:0] AXI_ADDRESSES [1:0] = ADDR_CALC();
-//
-//         PwmControlUnit #(
-//             .INITIAL_STOPPED_STATE(INITIAL_STOPPED_STATE)
-//         ) pwm_cu();
-//
-//     endmodule
-//
-//
-//     )";
-//
-//     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-//
-//     analyzer.cleanup_content("`(.*)");
-//     auto resources = analyzer.analyze();
-//     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-//     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
-//
-//     d_store->store_hdl_entity(resources[0]);
-//     d_store->store_hdl_entity(resources[1]);
-//
-//
-//     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-//     auto ast_v2 = b2.build_ast(std::vector<std::string>({"PwmGenerator"}))[0];
-//
-//     auto deps = ast_v2->get_dependencies();
-//     ASSERT_EQ(deps[0]->get_parameters().get("INITIAL_STOPPED_STATE")->get_numeric_value(), 52);
-//     auto i_l = deps[0]->get_parameters().get("INITIAL_STOPPED_STATE")->get_i_l().get_scalar();
-//     ASSERT_FALSE(i_l.value()->as<Expression>().empty());
-// }
-//
-//
-//
-//
-// TEST(parameter_processing, test) {
-//     std::string test_pattern = R"(
-//
-//     module axil_crossbar_interface #(
-//         parameter NS = 8,
-//         parameter [31:0] SLAVE_ADDR [NS-1:0] = '{NS{0}},
-//         parameter [31:0] SLAVE_MASK [NS-1:0] =  '{NS{0}}
-//     ) (
-//     );
-//
-//
-//     endmodule
-//
-//     module top_module #(
-//         parameter BASE_ADDRESS = 32'h43c00000
-//     )();
-//
-//         localparam CONTROLLER_ADDRESS = BASE_ADDRESS;
-//         localparam SPI_ADDRESS = BASE_ADDRESS+'h40;
-//
-//         axil_crossbar_interface #(
-//             .NS(2),
-//             .SLAVE_ADDR('{CONTROLLER_ADDRESS, SPI_ADDRESS}),
-//             .SLAVE_MASK('{2{32'h040}})
-//         ) axi_xbar (
-//         );
-//
-//     endmodule
-// )";
-//
-//     sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-//
-//     analyzer.cleanup_content("`(.*)");
-//     auto resources = analyzer.analyze();
-//     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
-//     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
-//
-//     d_store->store_hdl_entity(resources[0]);
-//     d_store->store_hdl_entity(resources[1]);
-//
-//
-//     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
-//     auto ast_v2 = b2.build_ast(std::vector<std::string>({"top_module"}))[0];
-//
-//     auto dependency_parameters = ast_v2->get_dependencies()[0]->get_parameters();
-//
-//     Parameters_map check_params;
-//     HDL_parameter p;
-//     p.set_name("NS");
-//     p.set_expression(std::make_shared<Expression>(Expression({Expression_component("2", Expression_component::number)})));
-//     p.set_value(2);
-//     check_params.insert(std::make_shared<HDL_parameter>(p));
-//     p = HDL_parameter();
-//     p.set_name("SLAVE_ADDR");
-//     Initialization_list il;
-//     il.add_dimension({
-//         {Expression_component("NS", Expression_component::identifier),Expression_component("-", Expression_component::operation),Expression_component("1", Expression_component::number),},
-//         {Expression_component("0", Expression_component::number)},
-//         false});
-//     il.add_dimension({
-//     {Expression_component("31", Expression_component::number),},
-//     {Expression_component("0", Expression_component::number)},
-//     true});
-//     il.add_item(std::make_shared<Expression>(Expression({
-//         Expression_component(1136656384, 0)
-//     })));
-//     il.add_item(std::make_shared<Expression>(Expression({
-//           Expression_component(1136656448, 0)
-//       })));
-//     p.add_initialization_list(il);
-//
-//
-//     mdarray<int64_t> av;
-//     av.set_1d_slice({0,0}, {1136656448,1136656384});
-//     p.set_value(av);
-//
-//     check_params.insert(std::make_shared<HDL_parameter>(p));
-//     p = HDL_parameter();
-//     p.set_name("SLAVE_MASK");
-//     il = Initialization_list();
-//     Replication r;
-//     r.set_item(std::make_shared<Expression>(Expression({Expression_component(64, 32)})));
-//     r.set_size({Expression_component(2, 1)});
-//     il.add_dimension({
-//     {Expression_component("NS", Expression_component::identifier),Expression_component("-", Expression_component::operation),Expression_component("1", Expression_component::number),},
-//     {Expression_component("0", Expression_component::number)},
-//     false});
-//     il.add_dimension({
-//     {Expression_component("31", Expression_component::number),},
-//     {Expression_component("0", Expression_component::number)},
-//     true});
-//     il.set_scalar(std::make_shared<Replication>(r));
-//     p.add_initialization_list(il);
-//
-//     av.set_1d_slice({0,0}, {64,64});
-//     p.set_value(av);
-//
-//     check_params.insert(std::make_shared<HDL_parameter>(p));
-//
-//
-//     ASSERT_EQ(check_params.size(), dependency_parameters.size());
-//
-//     for(const auto& item:check_params){
-//         ASSERT_TRUE(dependency_parameters.contains(item->get_name()));
-//         ASSERT_EQ(*item, *dependency_parameters.get(item->get_name()));
-//     }
-// }
-//
-//
-//
+
+
+TEST(parameter_processing, package_parameters_use) {
+    std::string test_pattern = R"(
+
+        package test_package;
+            parameter bus_base = 67;
+        endpackage
+
+        module test_mod #(
+             parameter package_param = test_package::bus_base
+        )();
+
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto dependency_parameters = ast_v2->get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("package_param");
+    Expression_component ec("bus_base", Expression_component::identifier);
+    ec.set_package_prefix("test_package");
+    p->add_component(ec);
+    p->set_value(67);
+
+    check_params.insert(p);
+
+    ASSERT_EQ(check_params.size(), dependency_parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(dependency_parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *dependency_parameters.get(item->get_name()));
+    }
+
+}
+
+
+TEST(parameter_processing, array_instance_parameter_override) {
+    std::string test_pattern = R"(
+        module dependency #(
+            parameter param_1 = 4,
+            parameter param_2 [1:0]= '{0,0},
+            param_3 = 6
+        )();
+
+            parameter p1_t = param_2[0];
+            parameter p2_t = param_2[1];
+
+        endmodule
+
+        module test_mod #(
+            parameter test_param = 4
+        )();
+
+            localparam override_array [1:0] = '{8,9};
+
+            dependency #(
+                .param_1(test_param),
+                .param_2(override_array),
+                .param_3((test_param + 7)*1)
+            ) test_instance ();
+
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto dependency_parameters = ast_v2->get_dependencies()[0]->get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("param_1");
+    p->add_component(Expression_component(4, 0));
+    p->set_value(4);
+
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("param_2");
+    Initialization_list il;
+    il.add_dimension({
+        {Expression_component("1", Expression_component::number)},
+        {Expression_component("0", Expression_component::number)},
+        false
+    });
+    mdarray<int64_t> av;
+    av.set_1d_slice({0,0}, {9,8});
+    auto ec = Expression_component(0, 0);
+    ec.set_value(av);
+    il.set_scalar(std::make_shared<Expression>(Expression({ec})));
+    p->add_initialization_list(il);
+
+    p->set_value(av);
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("param_3");
+    p->add_component(Expression_component("(", Expression_component::parenthesis));
+    p->add_component(Expression_component(4, 0));
+    p->add_component(Expression_component("+", Expression_component::operation));
+    p->add_component(Expression_component(7, 3));
+    p->add_component(Expression_component(")", Expression_component::parenthesis));
+    p->add_component(Expression_component("*", Expression_component::operation));
+    p->add_component(Expression_component(1, 1));
+    p->set_value(11);
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("p1_t");
+    ec = Expression_component("param_2", Expression_component::identifier);
+    ec.add_array_index({Expression_component(0, 1)});
+    p->add_component(ec);
+    p->set_value(9);
+    check_params.insert(p);
+
+
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("p2_t");
+    ec = Expression_component("param_2", Expression_component::identifier);
+    ec.add_array_index({Expression_component(1, 1)});
+    p->add_component(ec);
+    p->set_value(8);
+    check_params.insert(p);
+
+    ASSERT_EQ(check_params.size(), dependency_parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(dependency_parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *dependency_parameters.get(item->get_name()));
+    }
+
+}
+
+
+TEST(parameter_processing, packed_array_initialization_expression_override) {
+    std::string test_pattern = R"(
+
+        module dependency #(
+            N_TRIGGER_REGISTERS = 1,
+            parameter [31:0] TRIGGER_REGISTERS_IDX [N_TRIGGER_REGISTERS-1:0] = '{N_TRIGGER_REGISTERS{0}}
+        )();
+            parameter p1_t = TRIGGER_REGISTERS_IDX[0];
+        endmodule
+
+        module test_mod #(
+        )();
+
+            parameter TAP_ADDR_REG = 5;
+            dependency #(
+                .TRIGGER_REGISTERS_IDX('{TAP_ADDR_REG})
+            ) d ();
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto dependency_parameters = ast_v2->get_dependencies()[0]->get_parameters();
+
+    auto array_val = dependency_parameters.get("TRIGGER_REGISTERS_IDX")->get_int_array_value();
+    ASSERT_EQ(array_val.get_value({0,0,0}), 5);
+
+}
+
+
+TEST(parameter_processing, simple_for_array_parameter) {
+    std::string test_pattern = R"(
+
+        module dependency #(
+            N_TRIGGER_REGISTERS = 1
+        )();
+        endmodule
+
+        module test_mod #(
+        )();
+
+            parameter  [31:0] TAP_ADDR_REG [2:0] = '{6,2,4};
+            genvar n;
+            generate
+                for(n = 0; n<3; n=n+1)begin
+                    dependency #(
+                        .N_TRIGGER_REGISTERS(TAP_ADDR_REG[n])
+                    ) d ();
+                end
+            endgenerate
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+
+    Depfile df;
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto deps = ast_v2->get_dependencies();
+
+    ASSERT_EQ(deps.size(), 3);
+    ASSERT_EQ(deps[0]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 4);
+    ASSERT_EQ(deps[1]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 2);
+    ASSERT_EQ(deps[2]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 6);
+
+}
+
+
+TEST(parameter_processing, complex_for_array_parameter) {
+    std::string test_pattern = R"(
+
+        module dependency #(
+            N_TRIGGER_REGISTERS = 1
+        )();
+        endmodule
+
+        module test_mod #(
+        )();
+
+            parameter  [31:0] TAP_ADDR_REG [2:0] = '{6,2,4};
+
+            parameter  TEST_PARAM = 1;
+            genvar n;
+            generate
+                for(n = 0; n<3; n=n+1)begin
+                    dependency #(
+                        .N_TRIGGER_REGISTERS(TAP_ADDR_REG[(TEST_PARAM+1)-n])
+                    ) d ();
+                end
+            endgenerate
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+    auto deps = ast_v2->get_dependencies();
+
+    ASSERT_EQ(deps.size(), 3);
+    ASSERT_EQ(deps[0]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 6);
+    ASSERT_EQ(deps[1]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 2);
+    ASSERT_EQ(deps[2]->get_parameters().get("N_TRIGGER_REGISTERS")->get_numeric_value(), 4);
+
+}
+
+
+
+TEST(parameter_processing, complex_vector_function_parameter) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            N_CORES = 3
+        )();
+
+            parameter ADDR_WIDTH = 32;
+            parameter N_AXI_LITE = N_CORES + 2;
+
+
+            typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE-1:0];
+            function ctrl_addr_init_t CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = 44;
+                for(int i = 1; i<N_CORES+1; i++)begin
+                    CTRL_ADDR_CALC[i] = 100*i;
+                end
+                CTRL_ADDR_CALC[4] = 667;
+            endfunction
+
+            parameter [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
+
+        endmodule
+    )";
+
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    d_store->store_hdl_entity(resource);
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+
+    auto param = ast_v2->get_parameters().get("AXI_ADDRESSES");
+    auto param_value = param->get_int_array_value().get_1d_slice({0, 0});
+    mdarray<int64_t>::md_1d_array reference = {44, 100, 200, 300, 667};
+    ASSERT_EQ(param_value, reference);
+
+}
+
+/*
+ *TODO: FIX THIS ENDIANNESS CRAP
+TEST(parameter_processing, complex_vector_function_parameter_endiannes_mismatch) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            N_CORES = 3
+        )();
+
+            parameter ADDR_WIDTH = 32;
+            parameter N_AXI_LITE = N_CORES + 2;
+
+
+            typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [0:N_AXI_LITE-1];
+            function ctrl_addr_init_t CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = 44;
+                for(int i = 1; i<N_CORES+1; i++)begin
+                    CTRL_ADDR_CALC[i] = 100*i;
+                end
+                CTRL_ADDR_CALC[4] = 667;
+            endfunction
+
+            parameter [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
+
+        endmodule
+    )";
+
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    d_store->store_hdl_entity(resource);
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+
+    auto param = ast_v2->get_parameters().get("AXI_ADDRESSES");
+    auto param_value = param->get_array_value().get_1d_slice({0, 0});
+    mdarray<int64_t>::md_1d_array reference = {667, 300, 200, 100, 44};
+    ASSERT_EQ(param_value, reference);
+
+}
+*/
+
+TEST(parameter_processing, simple_package_in_function_initialization) {
+    std::string test_pattern = R"(
+
+
+
+        package hil_address_space;
+
+            parameter bus_base = 32'h43c00000;
+
+        endpackage
+
+
+        module test_mod #(
+            parameter ADDR_WIDTH = 32,
+            parameter N_CORES =2
+        )();
+
+            localparam N_AXI_LITE = N_CORES;
+            localparam BASE_ADDR = 32'h43c00000 + 'h30000;
+
+          typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE-1:0];
+            function automatic ctrl_addr_init_t CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = hil_address_space::bus_base;
+                CTRL_ADDR_CALC[1] = BASE_ADDR + 4;
+            endfunction
+
+            localparam ctrl_addr_init_t AXI_ADDRESSES = CTRL_ADDR_CALC();
+
+        endmodule
+
+
+    )";
+
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+
+    auto resources = analyzer.analyze();
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto param = ast_v2->get_parameters().get("AXI_ADDRESSES");
+    auto param_value = param->get_int_array_value().get_1d_slice({0, 0});
+    mdarray<int64_t>::md_1d_array reference = {0x43c00000,0x43c30004};
+    ASSERT_EQ(param_value, reference);
+}
+
+
+TEST(parameter_processing, nested_package_in_function_initialization) {
+    std::string test_pattern = R"(
+
+        package hil_address_space;
+            parameter bus_base = 32'h43c00000;
+        endpackage
+
+
+        module test_mod #(
+            parameter ADDR_WIDTH = 32,
+            parameter N_CORES = 3
+        )();
+
+            localparam N_AXI_LITE = N_CORES+3;
+            localparam BASE_ADDR = hil_address_space::bus_base + 'h30000;
+
+            typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE];
+            function ctrl_addr_init_t CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = hil_address_space::bus_base;
+                CTRL_ADDR_CALC[1] = BASE_ADDR + 4;
+            endfunction
+
+            localparam [ADDR_WIDTH-1:0] AXI_ADDRESSES [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
+
+        endmodule
+
+
+    )";
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+
+    auto resources = analyzer.analyze();
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto param = ast_v2->get_parameters().get("AXI_ADDRESSES");
+    auto param_value = param->get_int_array_value().get_1d_slice({0, 0});
+    mdarray<int64_t>::md_1d_array reference = {0x43c00000,0x43c30004};
+    ASSERT_EQ(param_value, reference);
+}
+
+
+TEST(parameter_processing, override_with_package_parameter) {
+    std::string test_pattern = R"(
+        package test_package;
+            parameter base = 33;
+        endpackage
+
+        module dependency #(
+            parameter param_1 = 4
+        )();
+
+            parameter p1_t = param_1+2;
+
+        endmodule
+
+        module test_mod #(
+        )();
+
+            dependency #(
+                .param_1(test_package::base)
+            ) dep ();
+
+        endmodule
+    )";
+
+
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+    d_store->store_hdl_entity(resources[2]);
+
+    nlohmann::json df_content;
+
+    Depfile df;
+    df.set_content(df_content);
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+
+    auto params = ast_v2->get_dependencies()[0]->get_parameters();
+    auto param_1 = params.get("param_1");
+    EXPECT_EQ(param_1->get_numeric_value(), 33);
+    auto p1_t = params.get("p1_t");
+    EXPECT_EQ(p1_t->get_numeric_value(), 35);
+}
+
+
+TEST(parameter_processing, override_with_function_parameter) {
+    std::string test_pattern = R"(
+
+        module dependency #(
+            parameter param_1 = 4
+        )();
+
+            parameter p1_t = param_1+2;
+
+        endmodule
+
+        module test_mod #(
+        )();
+
+            parameter ADDR_WIDTH = 32;
+            parameter N_AXI_LITE = 3;
+
+
+            typedef logic [ADDR_WIDTH-1:0] ctrl_addr_init_t [N_AXI_LITE-1:0];
+            function ctrl_addr_init_t CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = 100;
+                CTRL_ADDR_CALC[1] = 130;
+                CTRL_ADDR_CALC[2] = 356;
+            endfunction
+
+            parameter logic [ADDR_WIDTH-1:0] FUNCTION_PARAM [N_AXI_LITE-1:0] = CTRL_ADDR_CALC();
+
+
+            dependency #(
+                .param_1(FUNCTION_PARAM[2])
+            ) dep ();
+
+        endmodule
+    )";
+
+
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+    nlohmann::json df_content;
+
+    Depfile df;
+    df.set_content(df_content);
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto fcn_param = ast_v2->get_parameters().get("FUNCTION_PARAM");
+    mdarray<int64_t>::md_1d_array reference = {100, 130, 356};
+    EXPECT_EQ(fcn_param->get_int_array_value().get_1d_slice({0, 0}), reference);
+
+    auto params = ast_v2->get_dependencies()[0]->get_parameters();
+    auto param_1 = params.get("param_1");
+    EXPECT_EQ(param_1->get_numeric_value(), 356);
+    auto p1_t = params.get("p1_t");
+    EXPECT_EQ(p1_t->get_numeric_value(), 358);
+}
+
+
+
+TEST(parameter_processing, parameter_with_for_loop) {
+    std::string test_pattern = R"(
+
+        module dependency #(
+            parameter DMA_BASE_ADDRESS = 4
+        )();
+
+            parameter p1_t = DMA_BASE_ADDRESS+2;
+
+        endmodule
+
+        module test_mod #(
+            parameter N_CORES = 2
+        )();
+          	localparam N_REGISTERS = 4;
+
+            typedef logic [31:0] ctrl_addr_init_t [N_REGISTERS-1:0];
+            function ctrl_addr_init_t CTRL_ADDR_CALC();
+                CTRL_ADDR_CALC[0] = 100;
+                CTRL_ADDR_CALC[1] = 130;
+                CTRL_ADDR_CALC[2] = 356;
+                CTRL_ADDR_CALC[3] = 62;
+            endfunction
+
+            parameter ctrl_addr_init_t AXI_ADDRESSES = CTRL_ADDR_CALC();
+            genvar n;
+            for(n = 0; n<N_CORES; n=n+1)begin
+                dependency #(
+                    .DMA_BASE_ADDRESS(AXI_ADDRESSES[(N_CORES+1)-n])
+                ) dep ();
+            end
+        endmodule
+    )";
+
+
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+    nlohmann::json df_content;
+
+    Depfile df;
+    df.set_content(df_content);
+
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+    auto deps = ast_v2->get_dependencies();
+
+    std::vector<uint32_t> param_1;
+    std::vector<uint32_t> p1_t;
+
+    for(auto dep : deps) {
+        auto p = dep->get_parameters();
+        param_1.push_back(p.get("DMA_BASE_ADDRESS")->get_numeric_value());
+        p1_t.push_back(p.get("p1_t")->get_numeric_value());
+    }
+
+    std::vector<uint32_t> expected_param_1 = {62, 356};
+    EXPECT_EQ(param_1, expected_param_1);
+    std::vector<uint32_t> expected_p1_t = {64, 358};
+    EXPECT_EQ(p1_t, expected_p1_t);
+
+}
+
+
+
+TEST(parameter_processing, parent_parameter_collision) {
+    std::string test_pattern = R"(
+
+        module inner_dep();
+
+        endmodule
+
+        module dependency #(
+            INNER_PARAMETER = 1
+        )();
+            genvar n;
+            for(n = 0; n<INNER_PARAMETER; n=n+1)begin
+                inner_dep #() dep ();
+            end
+        endmodule
+
+        module test_mod #(
+        )();
+
+            parameter  [31:0] INNER_PARAMETER = 5;
+            dependency #(
+                .INNER_PARAMETER(2)
+            ) d ();
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+    d_store->store_hdl_entity(resources[2]);
+
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto deps = ast_v2->get_dependencies();
+    ASSERT_EQ(deps[0]->get_parameters().get("INNER_PARAMETER")->get_numeric_value(), 2);
+
+}
+
+
+TEST(parameter_processing, override_after_function_localparam) {
+    std::string test_pattern = R"(
+
+    module PwmControlUnit #(
+        INITIAL_STOPPED_STATE = 0
+    )();
+
+    endmodule
+
+    module PwmGenerator #(
+        parameter INITIAL_STOPPED_STATE = 52
+    )();
+
+        localparam [31:0] AXI_ADDRESSES [1:0] = ADDR_CALC();
+
+        PwmControlUnit #(
+            .INITIAL_STOPPED_STATE(INITIAL_STOPPED_STATE)
+        ) pwm_cu();
+
+    endmodule
+
+
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"PwmGenerator"}))[0];
+
+    auto deps = ast_v2->get_dependencies();
+    ASSERT_EQ(deps[0]->get_parameters().get("INITIAL_STOPPED_STATE")->get_numeric_value(), 52);
+    auto i_l = deps[0]->get_parameters().get("INITIAL_STOPPED_STATE")->get_i_l().get_scalar();
+    ASSERT_FALSE(i_l.value()->as<Expression>().empty());
+}
+
+
+
+
+TEST(parameter_processing, test) {
+    std::string test_pattern = R"(
+
+    module axil_crossbar_interface #(
+        parameter NS = 8,
+        parameter [31:0] SLAVE_ADDR [NS-1:0] = '{NS{0}},
+        parameter [31:0] SLAVE_MASK [NS-1:0] =  '{NS{0}}
+    ) (
+    );
+
+
+    endmodule
+
+    module top_module #(
+        parameter BASE_ADDRESS = 32'h43c00000
+    )();
+
+        localparam CONTROLLER_ADDRESS = BASE_ADDRESS;
+        localparam SPI_ADDRESS = BASE_ADDRESS+'h40;
+
+        axil_crossbar_interface #(
+            .NS(2),
+            .SLAVE_ADDR('{CONTROLLER_ADDRESS, SPI_ADDRESS}),
+            .SLAVE_MASK('{2{32'h040}})
+        ) axi_xbar (
+        );
+
+    endmodule
+)";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"top_module"}))[0];
+
+    auto dependency_parameters = ast_v2->get_dependencies()[0]->get_parameters();
+
+    Parameters_map check_params;
+    HDL_parameter p;
+    p.set_name("NS");
+    p.set_expression(std::make_shared<Expression>(Expression({Expression_component("2", Expression_component::number)})));
+    p.set_value(2);
+    check_params.insert(std::make_shared<HDL_parameter>(p));
+    p = HDL_parameter();
+    p.set_name("SLAVE_ADDR");
+    Initialization_list il;
+    il.add_dimension({
+        {Expression_component("NS", Expression_component::identifier),Expression_component("-", Expression_component::operation),Expression_component("1", Expression_component::number),},
+        {Expression_component("0", Expression_component::number)},
+        false});
+    il.add_dimension({
+    {Expression_component("31", Expression_component::number),},
+    {Expression_component("0", Expression_component::number)},
+    true});
+    il.add_item(std::make_shared<Expression>(Expression({
+        Expression_component(1136656384, 0)
+    })));
+    il.add_item(std::make_shared<Expression>(Expression({
+          Expression_component(1136656448, 0)
+      })));
+    p.add_initialization_list(il);
+
+
+    mdarray<int64_t> av;
+    av.set_1d_slice({0,0}, {1136656448,1136656384});
+    p.set_value(av);
+
+    check_params.insert(std::make_shared<HDL_parameter>(p));
+    p = HDL_parameter();
+    p.set_name("SLAVE_MASK");
+    il = Initialization_list();
+    Replication r;
+    r.set_item(std::make_shared<Expression>(Expression({Expression_component(64, 32)})));
+    r.set_size({Expression_component(2, 1)});
+    il.add_dimension({
+    {Expression_component("NS", Expression_component::identifier),Expression_component("-", Expression_component::operation),Expression_component("1", Expression_component::number),},
+    {Expression_component("0", Expression_component::number)},
+    false});
+    il.add_dimension({
+    {Expression_component("31", Expression_component::number),},
+    {Expression_component("0", Expression_component::number)},
+    true});
+    il.set_scalar(std::make_shared<Replication>(r));
+    p.add_initialization_list(il);
+
+    av.set_1d_slice({0,0}, {64,64});
+    p.set_value(av);
+
+    check_params.insert(std::make_shared<HDL_parameter>(p));
+
+
+    ASSERT_EQ(check_params.size(), dependency_parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(dependency_parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *dependency_parameters.get(item->get_name()));
+    }
+}
+
+
+
