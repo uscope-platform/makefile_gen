@@ -34,7 +34,8 @@ class parameter_solver {
 public:
     static std::map<qualified_identifier, resolved_parameter> process_parameters(
         const Parameters_map &map,
-        const std::string_view &parent_module
+        const std::string_view &parent_module,
+        const std::map<qualified_identifier, resolved_parameter> &package_parameters
     );
     static void update_parameters_map(
         std::map<qualified_identifier, resolved_parameter> parameters,

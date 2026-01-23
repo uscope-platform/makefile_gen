@@ -16,7 +16,10 @@
 #include "analysis/parameter_solver.hpp"
 
 std::map<qualified_identifier, resolved_parameter> parameter_solver::process_parameters(
-    const Parameters_map &map_in, const std::string_view &parent_module) {
+    const Parameters_map &map_in,
+    const std::string_view &parent_module,
+    const std::map<qualified_identifier, resolved_parameter> &package_parameters
+) {
     auto map = map_in.clone();
 
     std::map<qualified_identifier, resolved_parameter> solved_parameters;
@@ -36,7 +39,9 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
 
                 } else {
                     for(const auto&[prefix, name]:dependencies) {
-                        if(!prefix.empty()) {
+                        if(package_parameters.contains({prefix, name})) {
+                            solved_parameters.insert({param_id, package_parameters.at({prefix, name})});
+                        } else if(!prefix.empty()) {
                             // Package parameters can only be evaluated during_ast_construction, thus use a placeholder
                             solved_parameters.insert({param_id, "__RUNTIME_ONLY_PARAMETER__"});
                         }
@@ -122,6 +127,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
             }
         }
     }
+    auto package_parameters =solved_parameters;
 
     // Handle overridden parameters
     deps_map = get_dependency_map(node_overrides);
@@ -199,7 +205,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
             ++solution_rounds;
         }
 
-        solved_parameters = process_parameters(to_solve, work.node->get_name());
+        solved_parameters = process_parameters(to_solve, work.node->get_name(), package_parameters);
         for(auto &param:solved_parameters) {
             node_defaults[param.first] = param.second;
         }
@@ -248,5 +254,5 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::specialize_
     }
 
     // Substitute runtime only parameters
-    return process_parameters(runtime_to_eval, parent_module);
+    return process_parameters(runtime_to_eval, parent_module, {});
 }
