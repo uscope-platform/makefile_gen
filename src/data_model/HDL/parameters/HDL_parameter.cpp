@@ -21,7 +21,6 @@ HDL_parameter::HDL_parameter(const HDL_parameter &c) {
     value = c.value;
     type = c.type;
     i_l = c.i_l.clone();
-    loop_index = c.loop_index;
 }
 
 HDL_parameter::HDL_parameter() {
@@ -36,7 +35,6 @@ bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
     ret_val &= lhs.value == rhs.value;
     ret_val &= lhs.type == rhs.type;
     ret_val &= lhs.i_l == rhs.i_l;
-    ret_val &= lhs.loop_index == rhs.loop_index;
     return ret_val;
 }
 

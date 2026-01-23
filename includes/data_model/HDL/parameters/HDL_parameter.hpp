@@ -127,13 +127,9 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, value,type, i_l);
+        ar(name ,type, i_l);
     }
 
-    void set_loop_index() {
-        loop_index = true;
-    }
-    bool is_loop_index() const {return loop_index;}
     nlohmann::json dump();
 
 
@@ -143,7 +139,6 @@ private:
     std::string name;
     std::variant<mdarray<int64_t>, mdarray<std::string>::md_1d_array> value;
     parameter_type type;
-    bool loop_index = false;
 
     Initialization_list i_l;
 };
