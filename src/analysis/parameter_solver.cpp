@@ -172,11 +172,11 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
                 for(auto &dep:deps) {
                     resolved_parameter value;
                     bool internal_dependency = false;
-                    if (!dep.prefix.empty()) {
-                       auto package = d_store->get_HDL_resource(dep.prefix);
-                       value = package.get_default_parameters()[{"", dep.name}];
-                    }else if(work.parent_parameters.contains(dep)) {
+                    if (work.parent_parameters.contains(dep)) {
                         value = work.parent_parameters[dep];
+                    }else if(!dep.prefix.empty()) {
+                        auto package = d_store->get_HDL_resource(dep.prefix);
+                        value = package.get_default_parameters()[{"", dep.name}];
                     }else if(node_overrides.contains(dep.name)) {
                         internal_dependency = true;
                     }else if(node_defaults.contains({"", dep.name})){

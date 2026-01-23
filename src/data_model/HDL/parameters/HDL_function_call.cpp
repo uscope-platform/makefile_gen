@@ -158,11 +158,13 @@ bool HDL_function_call::empty() const {
 std::shared_ptr<Parameter_value_base> HDL_function_call::clone_ptr() const {
     HDL_function_call c;
     for (auto &arg:arguments) {
-        c.add_argument(arg->clone_ptr());
+        c.arguments.push_back(arg->clone_ptr());
     }
-    c.set_name(function_name);
-    c.loop_metadata = loop_metadata;
-    c.assignments = assignments;
+    c.function_name = function_name;
+    if(loop_metadata) c.loop_metadata = loop_metadata.value().clone();
+    for (auto &ass:assignments) {
+        c.assignments.push_back(ass.clone());
+    }
     return std::make_shared<HDL_function_call>(c);
 }
 

@@ -57,7 +57,7 @@ public:
 
     HDL_loop_metadata(const HDL_loop_metadata &other);
 
-    HDL_loop_metadata clone();
+    HDL_loop_metadata clone() const;
 
     HDL_loop_metadata(HDL_loop_metadata &&other) noexcept;
 

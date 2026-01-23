@@ -2492,7 +2492,7 @@ TEST(parameter_extraction, parametric_loop_function_parameter) {
     "CTRL_ADDR_CALC",
         std::make_shared<Expression>(Expression({Expression_component("i", Expression_component::identifier)})),
         std::make_shared<Expression>(Expression({
-            Expression_component(100, 0),
+            Expression_component("OFFSET", Expression_component::identifier),
             Expression_component("*", Expression_component::operation),
             Expression_component("i", Expression_component::identifier)
         }))

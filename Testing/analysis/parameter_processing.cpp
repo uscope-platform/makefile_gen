@@ -646,6 +646,72 @@ TEST(parameter_processing, override_with_function_parameter) {
 
 
 
+TEST(parameter_processing, override_package_function) {
+    std::string test_pattern = R"(
+        package  test_pack;
+            parameter test_param = 100;
+        endpackage
+
+        module dependency #(
+            parameter param_1 = 4
+        )();
+
+            parameter ADDR_WIDTH = 32;
+            parameter N_AXI_LITE = 3;
+
+            typedef logic [31:0] ctrl_addr_init_t [2:0];
+            function ctrl_addr_init_t CTRL_ADDR_CALC();
+                for(int i = 0; i<3; i++)begin
+                    CTRL_ADDR_CALC[i] = param_1*i;
+                end
+            endfunction
+
+            parameter [31:0] p1_t [2:0] = CTRL_ADDR_CALC();
+
+        endmodule
+
+        module test_mod #(
+        )();
+
+            parameter ADDR_WIDTH = 32;
+            parameter N_AXI_LITE = 3;
+
+
+            dependency #(
+                .param_1(test_pack::test_param)
+            ) dep ();
+
+        endmodule
+    )";
+
+
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+    d_store->store_hdl_entity(resources[2]);
+
+    nlohmann::json df_content;
+
+    Depfile df;
+    df.set_content(df_content);
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto p = ast_v2->get_dependencies()[0]->get_parameters().get("p1_t");
+    mdarray<int64_t>av;
+    av.set_1d_slice({0,0}, {0, 100, 200});
+    EXPECT_EQ(p->get_int_array_value(), av);
+}
+
+
 TEST(parameter_processing, parameter_with_for_loop) {
     std::string test_pattern = R"(
 
@@ -815,7 +881,7 @@ TEST(parameter_processing, override_after_function_localparam) {
 
 
 
-TEST(parameter_processing, test) {
+TEST(parameter_processing, init_list_override) {
     std::string test_pattern = R"(
 
     module axil_crossbar_interface #(
