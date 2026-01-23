@@ -37,7 +37,12 @@ void processor_detection::process_node(const std::shared_ptr<HDL_instance_AST> &
                 auto addr_idx = proc.get_address_idx();
                 address = addr_vals->get_int_array_value().get_value({0,0,addr_idx}).value();
             } else {
-                address = addr_vals->get_numeric_value();
+                auto addr = addr_vals->get_numeric_value();
+                if(!addr.has_value()) {
+                    spdlog::warn("Processor {} does not have a defined address, thus it will be omitted from the application file", proc.get_name());
+                    continue;
+                }
+                address = addr.value();
             }
             proc.set_address_value(address);
         }

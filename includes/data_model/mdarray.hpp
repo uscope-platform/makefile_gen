@@ -157,7 +157,8 @@ public:
         data[0][0][0] = val;
     }
 
-    T get_scalar() const {
+    std::optional<T> get_scalar() const {
+        if(data.empty() || data[0].empty() || data[0][0].empty()) return std::nullopt;
         return data[0][0][0];
     }
 

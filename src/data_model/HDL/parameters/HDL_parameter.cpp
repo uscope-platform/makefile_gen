@@ -88,18 +88,17 @@ void HDL_parameter::propagate_function(const HDL_function_def &def) {
 
 HDL_parameter::operator std::string() {
     std::string ret_val;
-    switch (type) {
-        case string_parameter:
-            ret_val = std::get<std::vector<std::string>>(value)[0];
-            break;
-        case numeric_parameter:
-            ret_val =  std::to_string(std::get<mdarray<int64_t>>(value).get_scalar());
-            break;
-        case array_parameter:
-            ret_val = "array value";
-        case expression_parameter:
-            break;
+    if(type == string_parameter) {
+        ret_val = std::get<std::vector<std::string>>(value)[0];
     }
+    if(type == numeric_parameter) {
+        auto val = std::get<mdarray<int64_t>>(value).get_scalar();
+        if(val.has_value()) ret_val =  std::to_string(val.value());
+    }
+    if(type == array_parameter) {
+        ret_val = "array value";
+    }
+
     return ret_val;
 
 }
@@ -118,7 +117,9 @@ std::string HDL_parameter::value_as_string() const {
         return std::get<std::vector<std::string>>(value)[0];
     }
     if(type == numeric_parameter) {
-        return std::to_string(std::get<mdarray<int64_t>>(value).get_scalar());
+        auto val = std::get<mdarray<int64_t>>(value).get_scalar();
+        if(val.has_value()) return std::to_string(val.value());
+        else return "";
     }
     if(type == array_parameter) {
         return std::get<mdarray<int64_t>>(value).to_string();
@@ -131,7 +132,9 @@ std::string HDL_parameter::to_string() const {
                          "\n  TYPE: " + parameter_type_to_string(type);
 
     if(type == numeric_parameter){
-        result += "\n  VALUE: " + std::to_string(std::get<mdarray<int64_t>>(value).get_scalar());
+        auto val = std::get<mdarray<int64_t>>(value).get_scalar();
+        if(val.has_value()) result += "\n  VALUE: " + std::to_string(val.value());
+        else result += "\n  VALUE: xxx";
     }
 
 
@@ -160,8 +163,10 @@ nlohmann::json HDL_parameter::dump() {
         }
         ret["value"] = values_s;
     } else if(type == numeric_parameter){
+        ret["value"]= std::vector<int64_t>();
+        auto val = std::get<mdarray<int64_t>>(value).get_scalar();
+        if(val.has_value()) ret["value"].push_back(val.value());
 
-        ret["value"]= std::vector<int64_t>({std::get<mdarray<int64_t>>(value).get_scalar()});
     } else if(type == array_parameter){
         ret["value"] = std::get<mdarray<int64_t>>(value).dump();
     }

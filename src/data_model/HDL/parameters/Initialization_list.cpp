@@ -97,7 +97,7 @@ bool Initialization_list::empty() const {
 }
 
 
-resolved_parameter Initialization_list::get_values() {
+std::optional<resolved_parameter>Initialization_list::get_values() {
     mdarray<int64_t> ret;
     mdarray<std::string> ret_s;
     if(default_initialization){

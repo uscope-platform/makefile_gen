@@ -135,7 +135,13 @@ std::vector<analysis_context> control_bus_analysis::process_nested_module(const 
     modules_array_size.clear();
     for(auto &d:inst.node->get_dependencies()) {
         if(d->get_array_quantifier() != nullptr) {
-            modules_array_size[d->get_name()] = d->get_array_quantifier()->get_numeric_value();
+            auto val = d->get_array_quantifier()->get_numeric_value();
+            if(val.has_value())
+                modules_array_size[d->get_name()] = val.value();
+            else {
+                spdlog::warn("Invalid array quantifier value when processing module: {}, defaulting to 1", d->get_name());
+                modules_array_size[d->get_name()] = 1;
+            }
         } else {
             modules_array_size[d->get_name()] = 1;
         }

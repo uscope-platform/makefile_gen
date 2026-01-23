@@ -238,14 +238,26 @@ application_definition_generator::get_parameters(const json &spec, std::shared_p
         if(item.contains("n_registers")){
             std::vector<std::string> parameters = item["n_registers"];
             if(node->get_parameters().contains(parameters[0])){
-                ret_map[parameters[0]] = node->get_parameter_value(parameters[0])->get_numeric_value();
+                auto val = node->get_parameter_value(parameters[0])->get_numeric_value();
+                if(!val.has_value()) {
+                    spdlog::warn("The parameter defining the number of registers in peripheral {} is undefined, setting it to 1 out of precaution", node->get_name());
+                    ret_map[parameters[0]] = 1;
+                } else {
+                    ret_map[parameters[0]] = val.value();
+                }
             }
         }
         for(auto &f:item["fields"]){
             if(f.contains("n_fields")){
                 std::vector<std::string> parameters = f["n_fields"];
                 if(node->get_parameters().contains(parameters[0])){
-                    ret_map[parameters[0]] = node->get_parameter_value(parameters[0])->get_numeric_value();
+                    auto val = node->get_parameter_value(parameters[0])->get_numeric_value();
+                    if(!val.has_value()) {
+                        spdlog::warn("The parameter defining the number of fields in peripheral {} is undefined, setting it to 1 out of precaution", node->get_name());
+                        ret_map[parameters[0]] = 1;
+                    } else {
+                        ret_map[parameters[0]] = val.value();
+                    }
                 }
             }
         }

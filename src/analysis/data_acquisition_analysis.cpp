@@ -188,7 +188,14 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
 
     std::bitset<1024> output_signs;
     if(node->has_parameter("OUTPUT_SIGNED")){
-        output_signs = std::bitset<1024>(node->get_parameter_value("OUTPUT_SIGNED")->get_numeric_value());
+        auto val = node->get_parameter_value("OUTPUT_SIGNED")->get_numeric_value();
+        if(!val.has_value()) {
+            spdlog::warn("The OUTPUT_SIGNED parameter for data source {}, does not have a valid value, assuming unsigned data",node->get_name());
+            output_signs = std::bitset<1024>(val.value());
+        } else {
+            output_signs =  std::bitset<1024>(0);
+        }
+
     } else {
         output_signs.set();
     }
@@ -214,7 +221,14 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
         c.set_channel_number(0);
 
        uint32_t addr_base = 0;
-       if(node->has_parameter("OUTPUT_DESTINATION_BASE")) addr_base = node->get_parameter_value("OUTPUT_DESTINATION_BASE")->get_numeric_value();
+       if(node->has_parameter("OUTPUT_DESTINATION_BASE")){
+           auto val = node->get_parameter_value("OUTPUT_DESTINATION_BASE")->get_numeric_value();
+           if(val.has_value()) {
+               addr_base = node->get_parameter_value("OUTPUT_DESTINATION_BASE")->get_numeric_value().value();
+           } else {
+               spdlog::warn("The OUTPUT_DESTINATION_BASE parameter for data source {}, does not have a valid value, assuming it to be 0",node->get_name());
+           }
+       }
 
         if(in_stream.static_remap){
             c.set_mux_setting(in_stream.address_offset + addr_base);
@@ -277,7 +291,13 @@ data_acquisition_analysis::process_1_to_1_node(const std::shared_ptr<HDL_instanc
     std::string remapping_type;
     if(specs_manager.get_component_spec(node->get_type(), "remapping") == "true"){
         remapping_type = node->get_parameter_value("REMAP_TYPE")->get_string_value();
-        remapping_addr = node->get_parameter_value("REMAP_OFFSET")->get_numeric_value();
+        auto val = node->get_parameter_value("REMAP_OFFSET")->get_numeric_value();
+        if(val.has_value()) {
+            remapping_addr = node->get_parameter_value("REMAP_OFFSET")->get_numeric_value().value();
+        } else {
+            spdlog::warn("The REMAP_OFFSET parameter for data source {}, does not have a valid value, assuming it to be 0", node->get_name());
+        }
+
     }
 
     for(auto &[port_name, nets]:node->get_ports()){
@@ -303,7 +323,14 @@ uint64_t
 data_acquisition_analysis::find_datapoint_width(const std::shared_ptr<HDL_instance_AST> &node, std::string name) {
     for(auto &item:node->get_dependencies()){
         if(item->get_name() == name){
-            return item->get_parameter_value("DATA_WIDTH")->get_numeric_value();
+            auto val = item->get_parameter_value("DATA_WIDTH")->get_numeric_value();
+            if(val.has_value()) {
+                return val.value();
+            } else {
+                spdlog::warn("The DATA_WIDTH parameter for data source {}, does not have a valid value, assuming it to be 32", node->get_name());
+                return 32;
+            }
+
         }
     }
     return 32;
