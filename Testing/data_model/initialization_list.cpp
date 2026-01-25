@@ -140,8 +140,8 @@ TEST(Initialization_list, packed_concatenation) {
     auto res = il.get_values();
 
 
-    auto values = std::get<int64_t>(res);
-
+    ASSERT_TRUE(res.has_value());
+    auto values = std::get<int64_t>(res.value());
     ASSERT_EQ(169, values);
 
 }

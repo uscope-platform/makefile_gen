@@ -222,7 +222,8 @@ TEST(parameter_processing, packed_array_initialization_expression_override) {
     auto dependency_parameters = ast_v2->get_dependencies()[0]->get_parameters();
 
     auto array_val = dependency_parameters.get("TRIGGER_REGISTERS_IDX")->get_int_array_value();
-    ASSERT_EQ(array_val.get_value({0,0,0}), 5);
+    ASSERT_TRUE(array_val.has_value());
+    ASSERT_EQ(array_val.value().get_value({0,0,0}), 5);
 
 }
 
@@ -366,7 +367,8 @@ TEST(parameter_processing, complex_vector_function_parameter) {
 
 
     auto param = ast_v2->get_parameters().get("AXI_ADDRESSES");
-    auto param_value = param->get_int_array_value().get_1d_slice({0, 0});
+    ASSERT_TRUE(param->get_int_array_value().has_value());
+    auto param_value = param->get_int_array_value().value().get_1d_slice({0, 0});
     mdarray<int64_t>::md_1d_array reference = {44, 100, 200, 300, 667};
     ASSERT_EQ(param_value, reference);
 
@@ -469,7 +471,8 @@ TEST(parameter_processing, simple_package_in_function_initialization) {
     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
 
     auto param = ast_v2->get_parameters().get("AXI_ADDRESSES");
-    auto param_value = param->get_int_array_value().get_1d_slice({0, 0});
+    ASSERT_TRUE(param->get_int_array_value().has_value());
+    auto param_value = param->get_int_array_value().value().get_1d_slice({0, 0});
     mdarray<int64_t>::md_1d_array reference = {0x43c00000,0x43c30004};
     ASSERT_EQ(param_value, reference);
 }
@@ -518,7 +521,8 @@ TEST(parameter_processing, nested_package_in_function_initialization) {
     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
 
     auto param = ast_v2->get_parameters().get("AXI_ADDRESSES");
-    auto param_value = param->get_int_array_value().get_1d_slice({0, 0});
+    ASSERT_TRUE(param->get_int_array_value().has_value());
+    auto param_value = param->get_int_array_value().value().get_1d_slice({0, 0});
     mdarray<int64_t>::md_1d_array reference = {0x43c00000,0x43c30004};
     ASSERT_EQ(param_value, reference);
 }
@@ -635,7 +639,8 @@ TEST(parameter_processing, override_with_function_parameter) {
 
     auto fcn_param = ast_v2->get_parameters().get("FUNCTION_PARAM");
     mdarray<int64_t>::md_1d_array reference = {100, 130, 356};
-    EXPECT_EQ(fcn_param->get_int_array_value().get_1d_slice({0, 0}), reference);
+    ASSERT_TRUE(fcn_param->get_int_array_value().has_value());
+    EXPECT_EQ(fcn_param->get_int_array_value().value().get_1d_slice({0, 0}), reference);
 
     auto params = ast_v2->get_dependencies()[0]->get_parameters();
     auto param_1 = params.get("param_1");
@@ -772,9 +777,12 @@ TEST(parameter_processing, parameter_with_for_loop) {
     std::vector<uint32_t> p1_t;
 
     for(auto dep : deps) {
-        auto p = dep->get_parameters();
-        param_1.push_back(p.get("DMA_BASE_ADDRESS")->get_numeric_value());
-        p1_t.push_back(p.get("p1_t")->get_numeric_value());
+        auto val_1 = dep->get_parameters().get("DMA_BASE_ADDRESS")->get_numeric_value();
+        auto val_2 =  dep->get_parameters().get("p1_t")->get_numeric_value();
+        ASSERT_TRUE(val_1.has_value());
+        param_1.push_back(val_1.value());
+        ASSERT_TRUE(val_2.has_value());
+        p1_t.push_back(val_2.value());
     }
 
     std::vector<uint32_t> expected_param_1 = {62, 356};
