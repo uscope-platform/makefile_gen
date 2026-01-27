@@ -20,6 +20,7 @@
 #include "data_model/HDL/parameters/Initialization_list.hpp"
 #include "data_model/HDL/parameters/HDL_function_call.hpp"
 #include "resource_factory_base.hpp"
+#include "data_model/HDL/factories/parameters/replication_factory.hpp"
 
 
 class HDL_parameters_factory : protected resources_factory_base<HDL_parameter> {
@@ -78,7 +79,7 @@ public:
     void start_function_assignment(const std::string &f_name);
     void stop_function_assignment();
 
-    bool in_replication_assignment_context() const {return in_replication_assignment;};
+    bool in_replication_assignment_context() const {return repl_factory.is_assignment_context();};
     bool in_packed_context() const {return in_packed_assignment; };
     bool is_component_relevant() const { return in_initialization_list || in_expression_new || in_unpacked_declaration || in_packed_assignment ; };
 
@@ -94,6 +95,7 @@ public:
     void stop_param_override() { in_param_override = false;}
 
 private:
+    replication_factory repl_factory;
     bool in_param_override = false;
     bool in_bit_selection = false;
     bool in_ternary_operator = false;
@@ -101,19 +103,15 @@ private:
     bool in_initialization_list = false;
     bool in_expression_new = false;
     bool in_unpacked_declaration = false;
-    bool in_replication = false;
     bool in_packed_assignment = false;
     bool in_concatenation = false;
     bool in_packed_dimension = false;
-    bool in_replication_assignment = false;
     bool in_bus_array_quantifier = false;
     bool in_function_assignment = false;
-    bool in_replication_size = false;
     bool skip_call_name = false;
 
     std::stack<Concatenation> concatenations_stack;
     std::stack<Expression> expression_stack;
-    std::stack<Replication> replication_stack;
     std::stack<HDL_function_call> calls_stack;
 
 
@@ -122,7 +120,6 @@ private:
 
     Expression new_expression;
     Concatenation new_concatenation;
-    Replication new_replication;
     HDL_function_call new_call;
     int expression_level=0;
     std::stack<int> expression_level_stack;

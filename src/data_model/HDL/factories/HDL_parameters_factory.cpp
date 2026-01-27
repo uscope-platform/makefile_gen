@@ -49,7 +49,7 @@ void HDL_parameters_factory::start_initialization_list() {
 
 
 void HDL_parameters_factory::stop_initialization_list(bool default_assignment) {
-    if (in_replication) {
+    if (repl_factory.in_replication()) {
         stop_replication();
     }
     in_initialization_list = false;
@@ -75,7 +75,7 @@ void HDL_parameters_factory::stop_bit_selection() {
 }
 
 void HDL_parameters_factory::close_array_index() {
-    if(in_bit_selection & (in_param_assignment || in_packed_assignment || in_replication_assignment|| in_param_override)){
+    if(in_bit_selection & (in_param_assignment || in_packed_assignment || repl_factory.is_assignment_context() || in_param_override)){
         in_bit_selection = false;
         new_expression.components.back().add_array_index(bit_selection);
     }
@@ -97,21 +97,18 @@ void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
 }
 
 void HDL_parameters_factory::stop_replication() {
-    if(in_replication){
-        in_replication = false;
-        init_list.add_item(std::make_shared<Replication>(new_replication));
+    if(repl_factory.in_replication()){
+        init_list.add_item(repl_factory.finish());
     expression_level++;
     }
 }
 
 void HDL_parameters_factory::start_replication_assignment() {
-    in_replication_assignment = true;
-    in_replication_size = true;
+    repl_factory.start_replication(false);
 }
 
 void HDL_parameters_factory::stop_replication_assignment() {
-    in_replication_assignment = false;
-    init_list.set_scalar(std::make_shared<Replication>(new_replication));
+    init_list.set_scalar(repl_factory.finish());
 }
 
 void HDL_parameters_factory::stop_packed_assignment() {
@@ -123,8 +120,6 @@ void HDL_parameters_factory::stop_packed_assignment() {
 }
 
 void HDL_parameters_factory::close_replication_size() {
-    in_replication_size = false;
-
 }
 
 void HDL_parameters_factory::start_expression_new() {
@@ -137,11 +132,9 @@ void HDL_parameters_factory::stop_expression_new() {
     expression_level--;
     if(expression_level == 0){
         if(!new_expression.empty()){
-            if(in_replication || in_replication_assignment) {
-                if (in_replication_size)
-                    new_replication.set_size(new_expression);
-                else
-                    new_replication.set_item(std::make_shared<Expression>(new_expression));
+
+            if(repl_factory.in_replication()) {
+                repl_factory.add_expression(new_expression);
             } else if(in_unpacked_declaration || in_packed_dimension){
                 expression_stack.push(new_expression);
             } else if(in_concatenation) {
@@ -195,8 +188,7 @@ void HDL_parameters_factory::stop_concatenation() {
 
 void HDL_parameters_factory::start_replication() {
     if(in_param_assignment || in_initialization_list || in_packed_assignment){
-        in_replication = true;
-        in_replication_size = true;
+        repl_factory.start_replication(true);
         expression_level--;
     }
 }
