@@ -618,10 +618,6 @@ void sv_visitor::exitConcatenation_item(sv2017::Concatenation_itemContext *ctx) 
     }
 }
 
-void sv_visitor::exitFirst_range_identifier(sv2017::First_range_identifierContext *ctx) {
-    params_factory.close_first_range();
-}
-
 
 void sv_visitor::enterReplication(sv2017::ReplicationContext *ctx) {
     params_factory.start_replication();
@@ -631,10 +627,6 @@ void sv_visitor::enterReplication(sv2017::ReplicationContext *ctx) {
 }
 
 
-
-void sv_visitor::exitReplication_size(sv2017::Replication_sizeContext *ctx) {
-    params_factory.close_replication_size();
-}
 
 void sv_visitor::exitReplication(sv2017::ReplicationContext *ctx) {
     params_factory.stop_replication();

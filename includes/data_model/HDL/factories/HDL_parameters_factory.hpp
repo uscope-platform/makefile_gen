@@ -21,6 +21,7 @@
 #include "data_model/HDL/parameters/HDL_function_call.hpp"
 #include "resource_factory_base.hpp"
 #include "data_model/HDL/factories/parameters/replication_factory.hpp"
+#include "data_model/HDL/factories/parameters/concatenation_factory.hpp"
 
 
 class HDL_parameters_factory : protected resources_factory_base<HDL_parameter> {
@@ -45,7 +46,6 @@ public:
     void start_unpacked_dimension_declaration();
     void stop_unpacked_dimension_declaration();
 
-    void close_first_range();
     void close_array_index();
 
     void start_param_assignment() {
@@ -56,7 +56,6 @@ public:
     };
 
     void start_replication();
-    void close_replication_size();
     void stop_replication();
 
     void start_replication_assignment();
@@ -96,6 +95,8 @@ public:
 
 private:
     replication_factory repl_factory;
+    concatenation_factory concat_factory;
+
     bool in_param_override = false;
     bool in_bit_selection = false;
     bool in_ternary_operator = false;
@@ -104,22 +105,19 @@ private:
     bool in_expression_new = false;
     bool in_unpacked_declaration = false;
     bool in_packed_assignment = false;
-    bool in_concatenation = false;
     bool in_packed_dimension = false;
     bool in_bus_array_quantifier = false;
     bool in_function_assignment = false;
     bool skip_call_name = false;
 
-    std::stack<Concatenation> concatenations_stack;
     std::stack<Expression> expression_stack;
     std::stack<HDL_function_call> calls_stack;
 
 
     Expression bit_selection;
-    std::vector<Expression> concat_components;
+
 
     Expression new_expression;
-    Concatenation new_concatenation;
     HDL_function_call new_call;
     int expression_level=0;
     std::stack<int> expression_level_stack;

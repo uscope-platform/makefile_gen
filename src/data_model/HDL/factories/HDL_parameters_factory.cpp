@@ -81,9 +81,6 @@ void HDL_parameters_factory::close_array_index() {
     }
 }
 
-void HDL_parameters_factory::close_first_range() {
-}
-
 void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
     if(in_unpacked_declaration){
         in_unpacked_declaration = false;
@@ -119,9 +116,6 @@ void HDL_parameters_factory::stop_packed_assignment() {
     }
 }
 
-void HDL_parameters_factory::close_replication_size() {
-}
-
 void HDL_parameters_factory::start_expression_new() {
     in_expression_new = true;
     expression_level++;
@@ -137,8 +131,8 @@ void HDL_parameters_factory::stop_expression_new() {
                 repl_factory.add_expression(new_expression);
             } else if(in_unpacked_declaration || in_packed_dimension){
                 expression_stack.push(new_expression);
-            } else if(in_concatenation) {
-                new_concatenation.add_component(std::make_shared<Expression>(new_expression));
+            } else if(concat_factory.in_concatenation()) {
+                concat_factory.add_component(std::make_shared<Expression>(new_expression));
             } else if(in_function_assignment) {
                 new_call.add_argument(std::make_shared<Expression>(new_expression));
             } else if(in_initialization_list) {
@@ -160,29 +154,22 @@ void HDL_parameters_factory::start_concatenation() {
     if(in_param_assignment || in_packed_assignment || in_initialization_list){
         expression_level_stack.push(expression_level);
         expression_level = 0;
-        if (in_concatenation) concatenations_stack.push(new_concatenation);
-        in_concatenation = true;
-        new_concatenation = Concatenation();
+        concat_factory.start_concatenation();
     }
 
 }
 
 void HDL_parameters_factory::stop_concatenation() {
-    if(in_concatenation){
+    if(concat_factory.in_concatenation()){
         expression_level = expression_level_stack.top();
         expression_level_stack.pop();
-        Concatenation closed_concat = new_concatenation;
-        if (!concatenations_stack.empty()) {
-            new_concatenation = concatenations_stack.top();
-            concatenations_stack.pop();
-            new_concatenation.add_component(std::make_shared<Concatenation>(closed_concat));
-        } else {
+        if (!concat_factory.in_nested()) {
             if(in_initialization_list)
-                init_list.add_item(std::make_shared<Concatenation>(closed_concat));
+                init_list.add_item(concat_factory.get_concatenation());
             else
-                init_list.set_scalar(std::make_shared<Concatenation>(closed_concat));
-            in_concatenation = false;
+                init_list.set_scalar(concat_factory.get_concatenation());
         }
+        concat_factory.stop_concatenation();
     }
 }
 
