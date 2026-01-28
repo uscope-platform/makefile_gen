@@ -133,8 +133,8 @@ void HDL_parameters_factory::stop_expression_new() {
                 expression_stack.push(new_expression);
             } else if(concat_factory.in_concatenation()) {
                 concat_factory.add_component(std::make_shared<Expression>(new_expression));
-            } else if(in_function_assignment) {
-                new_call.add_argument(std::make_shared<Expression>(new_expression));
+            } else if(calls_factory.in_function_call()) {
+                calls_factory.add_argument(std::make_shared<Expression>(new_expression));
             } else if(in_initialization_list) {
                 init_list.add_item(std::make_shared<Expression>(new_expression));
             } else {
@@ -226,31 +226,22 @@ void HDL_parameters_factory::stop_array_quantifier() {
 }
 
 void HDL_parameters_factory::start_function_assignment(const std::string &f_name) {
-    if (in_function_assignment) {
-        calls_stack.push(new_call);
-        new_call = HDL_function_call();
-    }
-    new_call.set_name(f_name);
-    in_function_assignment = true;
-    skip_call_name = true;
+    calls_factory.start_function(f_name);
+    skip_call_name= true;
     expression_level_stack.push(expression_level);
     expression_level = 0;
 }
 
 void HDL_parameters_factory::stop_function_assignment() {
-    if (!calls_stack.empty()) {
-        auto inner_call = new_call;
-        new_call = calls_stack.top();
-        calls_stack.pop();
-        new_call.add_argument(std::make_shared<HDL_function_call>(inner_call));
-    } else {
+    if (!calls_factory.is_nested()) {
         if (in_initialization_list) {
-            init_list.add_item(std::make_shared<HDL_function_call>(new_call));
+            init_list.add_item(calls_factory.get_function());
         } else {
-            current_resource.set_expression(std::make_shared<HDL_function_call>(new_call));
+            current_resource.set_expression(calls_factory.get_function());
         }
-        in_function_assignment = false;
     }
+
+    calls_factory.finish();
     expression_level = expression_level_stack.top();
     expression_level_stack.pop();
 }

@@ -48,6 +48,7 @@ target_sources(makefile_gen_lib
     data_model/HDL/factories/nets/HDL_repetition_factory.cpp
     data_model/HDL/factories/parameters/concatenation_factory.cpp
     data_model/HDL/factories/parameters/replication_factory.cpp
+    data_model/HDL/factories/parameters/function_calls_factory.cpp
     data_model/HDL/HDL_loop.cpp
     data_model/HDL/HDL_net.cpp
     data_model/bus_mapping/bus_specs_manager.cpp

@@ -22,6 +22,7 @@
 #include "resource_factory_base.hpp"
 #include "data_model/HDL/factories/parameters/replication_factory.hpp"
 #include "data_model/HDL/factories/parameters/concatenation_factory.hpp"
+#include "data_model/HDL/factories/parameters/function_calls_factory.hpp"
 
 
 class HDL_parameters_factory : protected resources_factory_base<HDL_parameter> {
@@ -96,6 +97,7 @@ public:
 private:
     replication_factory repl_factory;
     concatenation_factory concat_factory;
+    function_calls_factory calls_factory;
 
     bool in_param_override = false;
     bool in_bit_selection = false;
@@ -107,18 +109,14 @@ private:
     bool in_packed_assignment = false;
     bool in_packed_dimension = false;
     bool in_bus_array_quantifier = false;
-    bool in_function_assignment = false;
+
     bool skip_call_name = false;
 
     std::stack<Expression> expression_stack;
-    std::stack<HDL_function_call> calls_stack;
-
-
+    Expression new_expression;
     Expression bit_selection;
 
 
-    Expression new_expression;
-    HDL_function_call new_call;
     int expression_level=0;
     std::stack<int> expression_level_stack;
 
