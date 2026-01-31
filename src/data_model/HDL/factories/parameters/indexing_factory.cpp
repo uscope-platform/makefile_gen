@@ -19,7 +19,9 @@
 void indexing_factory::start_index(bool r) {
     active = true;
     range = r;
+    first_bound = true;
     index = Expression();
+    dim = dimension_t();
 }
 
 void indexing_factory::stop_index() {

@@ -82,7 +82,7 @@ public:
 
     bool in_replication_assignment_context() const {return repl_factory.is_assignment_context();};
     bool in_packed_context() const {return in_packed_assignment; };
-    bool is_component_relevant() const { return in_initialization_list || in_expression_new || in_unpacked_declaration || in_packed_assignment ; };
+    bool is_component_relevant() const { return in_initialization_list || in_expression_new || index_factory.is_range() && index_factory.is_active() || in_packed_assignment ; };
 
     void start_instance_parameter_assignment(const std::string& parameter_name);
 
@@ -99,14 +99,13 @@ private:
     replication_factory repl_factory;
     concatenation_factory concat_factory;
     function_calls_factory calls_factory;
-    indexing_factory index_Factory;
+    indexing_factory index_factory;
 
     bool in_param_override = false;
     bool in_ternary_operator = false;
     bool in_param_assignment = false;
     bool in_initialization_list = false;
     bool in_expression_new = false;
-    bool in_unpacked_declaration = false;
     bool in_packed_assignment = false;
     bool in_bus_array_quantifier = false;
 

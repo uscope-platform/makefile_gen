@@ -36,8 +36,8 @@ void HDL_parameters_factory::set_value(const std::string &s) {
 }
 
 void HDL_parameters_factory::add_component(const Expression_component &c) {
-    if (index_Factory.is_active() && !index_Factory.is_range()) {
-        index_Factory.add_component(c);
+    if (index_factory.is_active() && !index_factory.is_range()) {
+        index_factory.add_component(c);
     } else {
         if(in_expression_new && !skip_call_name){
             new_expression.push_back(c);
@@ -67,31 +67,26 @@ void HDL_parameters_factory::stop_initialization_list(bool default_assignment) {
 
 
 void HDL_parameters_factory::start_bit_selection() {
-    index_Factory.start_index(false);
+    index_factory.start_index(false);
 }
 
 void HDL_parameters_factory::stop_bit_selection() {
-    if(!new_expression.components.empty()) new_expression.components.back().add_array_index(index_Factory.get_index());
-    index_Factory.stop_index();
+    if(!new_expression.components.empty()) new_expression.components.back().add_array_index(index_factory.get_index());
+    index_factory.stop_index();
 
 }
 
 void HDL_parameters_factory::close_array_index() {
-    if(index_Factory.is_active() & (in_param_assignment || in_packed_assignment || repl_factory.is_assignment_context() || in_param_override)){
-        index_Factory.stop_index();
-        new_expression.components.back().add_array_index(index_Factory.get_index());
+    if(index_factory.is_active() & (in_param_assignment || in_packed_assignment || repl_factory.is_assignment_context() || in_param_override)){
+        index_factory.stop_index();
+        new_expression.components.back().add_array_index(index_factory.get_index());
     }
 }
 
 void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
-    if(in_unpacked_declaration){
-        in_unpacked_declaration = false;
-        auto second_expr = expression_stack.top();
-        expression_stack.pop();
-        auto first_expr = expression_stack.top();
-        expression_stack.pop();
-        dimension_t dim = {first_expr, second_expr, false};
-        init_list.add_dimension(dim);
+    if (index_factory.is_active() && index_factory.is_range()) {
+        index_factory.stop_index();
+        init_list.add_dimension(index_factory.get_dimension(false));
     }
 }
 
@@ -131,10 +126,8 @@ void HDL_parameters_factory::stop_expression_new() {
 
             if(repl_factory.in_replication()) {
                 repl_factory.add_expression(new_expression);
-            } else if(in_unpacked_declaration){
-                expression_stack.push(new_expression);
-            } else if (index_Factory.is_range()){
-                index_Factory.add_expression(new_expression);
+            } else if (index_factory.is_range()){
+                index_factory.add_expression(new_expression);
             } else if(concat_factory.in_concatenation()) {
                 concat_factory.add_component(std::make_shared<Expression>(new_expression));
             } else if(calls_factory.in_function_call()) {
@@ -186,18 +179,18 @@ void HDL_parameters_factory::start_replication() {
 
 void HDL_parameters_factory::start_unpacked_dimension_declaration() {
     if(in_param_assignment & !in_bus_array_quantifier){
-        in_unpacked_declaration = true;
+        index_factory.start_index(true);
     }
 }
 
 void HDL_parameters_factory::start_packed_dimension() {
-    index_Factory.start_index(true);
+    index_factory.start_index(true);
 }
 
 void HDL_parameters_factory::stop_packed_dimension() {
-    if (index_Factory.is_active()) {
-        index_Factory.stop_index();
-        packed_dimensions.push_back(index_Factory.get_dimension(true));
+    if (index_factory.is_active()) {
+        index_factory.stop_index();
+        packed_dimensions.push_back(index_factory.get_dimension(true));
     }
 }
 
