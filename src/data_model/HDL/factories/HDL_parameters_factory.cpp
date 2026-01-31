@@ -36,7 +36,7 @@ void HDL_parameters_factory::add_component(const Expression_component &c) {
     if (index_factory.is_active() && !index_factory.is_range()) {
         index_factory.add_component(c);
     } else {
-        if(in_expression_new && !skip_call_name){
+        if(expr_factory.is_active() && !skip_call_name){
             new_expression.push_back(c);
         }
         skip_call_name = false;
@@ -45,7 +45,7 @@ void HDL_parameters_factory::add_component(const Expression_component &c) {
 
 void HDL_parameters_factory::start_initialization_list() {
     in_initialization_list = true;
-    expression_level--; // This is needed because in the grammar there is an expression before the list initialization;
+    expr_factory.decrease_level(); // This is needed because in the grammar there is an expression before the list initialization;
 }
 
 
@@ -60,7 +60,7 @@ void HDL_parameters_factory::stop_initialization_list(bool default_assignment) {
     init_list.set_dimensions(index_factory.get_dimensions(), false);
     current_resource.add_initialization_list(init_list);
     init_list = Initialization_list();
-    expression_level++;
+    expr_factory.increase_level();
 }
 
 
@@ -90,7 +90,7 @@ void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
 void HDL_parameters_factory::stop_replication() {
     if(repl_factory.in_replication()){
         init_list.add_item(repl_factory.finish());
-    expression_level++;
+        expr_factory.increase_level();
     }
 }
 
@@ -112,14 +112,12 @@ void HDL_parameters_factory::stop_packed_assignment() {
 }
 
 void HDL_parameters_factory::start_expression_new() {
-    in_expression_new = true;
-    expression_level++;
+    expr_factory.start_expression();
 }
 
 void HDL_parameters_factory::stop_expression_new() {
-
-    expression_level--;
-    if(expression_level == 0){
+    expr_factory.stop_expression();
+    if(expr_factory.get_level() == 0){
         if(!new_expression.empty()){
 
             if(repl_factory.in_replication()) {
@@ -137,7 +135,6 @@ void HDL_parameters_factory::stop_expression_new() {
             }
         }
         new_expression.clear();
-        in_expression_new = false;
     }
 }
 
@@ -147,8 +144,7 @@ void HDL_parameters_factory::start_packed_assignment() {
 
 void HDL_parameters_factory::start_concatenation() {
     if(in_param_assignment || in_packed_assignment || in_initialization_list){
-        expression_level_stack.push(expression_level);
-        expression_level = 0;
+        expr_factory.push_level();
         concat_factory.start_concatenation();
     }
 
@@ -156,8 +152,7 @@ void HDL_parameters_factory::start_concatenation() {
 
 void HDL_parameters_factory::stop_concatenation() {
     if(concat_factory.in_concatenation()){
-        expression_level = expression_level_stack.top();
-        expression_level_stack.pop();
+        expr_factory.pop_level();
         if (!concat_factory.in_nested()) {
             if(in_initialization_list)
                 init_list.add_item(concat_factory.get_concatenation());
@@ -171,7 +166,7 @@ void HDL_parameters_factory::stop_concatenation() {
 void HDL_parameters_factory::start_replication() {
     if(in_param_assignment || in_initialization_list || in_packed_assignment){
         repl_factory.start_replication(true);
-        expression_level--;
+        expr_factory.decrease_level();
     }
 }
 
@@ -201,7 +196,7 @@ void HDL_parameters_factory::start_instance_parameter_assignment(const std::stri
 
 void HDL_parameters_factory::clear_expression() {
     expression_stack = std::stack<Expression>();
-    expression_level = 0;
+    expr_factory.clear_level();
 }
 
 void HDL_parameters_factory::start_ternary_operator() {
@@ -219,8 +214,7 @@ void HDL_parameters_factory::stop_array_quantifier() {
 void HDL_parameters_factory::start_function_assignment(const std::string &f_name) {
     calls_factory.start_function(f_name);
     skip_call_name= true;
-    expression_level_stack.push(expression_level);
-    expression_level = 0;
+    expr_factory.push_level();
 }
 
 void HDL_parameters_factory::stop_function_assignment() {
@@ -233,6 +227,5 @@ void HDL_parameters_factory::stop_function_assignment() {
     }
 
     calls_factory.finish();
-    expression_level = expression_level_stack.top();
-    expression_level_stack.pop();
+    expr_factory.pop_level();
 }
