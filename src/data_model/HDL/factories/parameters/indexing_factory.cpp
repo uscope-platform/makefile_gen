@@ -17,11 +17,13 @@
 #include "data_model/HDL/factories/parameters/indexing_factory.hpp"
 
 void indexing_factory::start_index(bool r) {
-    active = true;
-    range = r;
-    first_bound = true;
-    index = Expression();
-    dim = dimension_t();
+    if (!quantifier) {
+        active = true;
+        range = r;
+        first_bound = true;
+        index = Expression();
+        dim.emplace_back();
+    }
 }
 
 void indexing_factory::stop_index() {
@@ -29,17 +31,27 @@ void indexing_factory::stop_index() {
 }
 
 void indexing_factory::add_expression(const Expression &e) {
-    if (active && range) {
+    if (active && range && !quantifier) {
         if (first_bound) {
-            dim.first_bound = e;
+            dim.back().first_bound = e;
             first_bound = false;
         } else {
-            dim.second_bound = e;
+            dim.back().second_bound = e;
         }
     }
 }
 
-dimension_t indexing_factory::get_dimension(bool p) {
-    dim.packed = p;
-    return dim;
+
+void indexing_factory::set_packed(bool p) {
+    dim.back().packed = p;
+}
+
+std::vector<dimension_t> indexing_factory::get_dimensions() {
+    auto ret = dim;
+    dim.clear();
+    return ret;
+}
+
+void indexing_factory::set_quantifier(bool q) {
+    quantifier = q;
 }

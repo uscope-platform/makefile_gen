@@ -107,7 +107,6 @@ private:
     bool in_initialization_list = false;
     bool in_expression_new = false;
     bool in_packed_assignment = false;
-    bool in_bus_array_quantifier = false;
 
     bool skip_call_name = false;
 
@@ -120,7 +119,6 @@ private:
 
     Initialization_list init_list;
 
-    std::vector<dimension_t> packed_dimensions{};
 };
 
 

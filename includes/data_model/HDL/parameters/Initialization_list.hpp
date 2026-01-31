@@ -51,6 +51,7 @@ public:
     Initialization_list clone() const;
     explicit Initialization_list(const std::shared_ptr<Parameter_value_base> &e);
     void add_dimension(const dimension_t &d);
+    void set_dimensions(const std::vector<dimension_t> &d, bool packed);
     void add_item(const std::shared_ptr<Parameter_value_base> &e);
     bool empty() const;
     bool is_array() const{return !scalar;}

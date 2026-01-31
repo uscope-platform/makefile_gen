@@ -19,10 +19,7 @@
 void HDL_parameters_factory::new_parameter() {
       new_basic_resource();
       current_resource.set_type(HDL_parameter::expression_parameter);
-      for(auto &dim:packed_dimensions){
-          init_list.add_dimension(dim);
-      }
-      packed_dimensions.clear();
+      init_list.set_dimensions(index_factory.get_dimensions(), true);
 
 }
 
@@ -60,6 +57,7 @@ void HDL_parameters_factory::stop_initialization_list(bool default_assignment) {
     if (default_assignment){
         init_list.set_default();
     }
+    init_list.set_dimensions(index_factory.get_dimensions(), false);
     current_resource.add_initialization_list(init_list);
     init_list = Initialization_list();
     expression_level++;
@@ -86,7 +84,6 @@ void HDL_parameters_factory::close_array_index() {
 void HDL_parameters_factory::stop_unpacked_dimension_declaration() {
     if (index_factory.is_active() && index_factory.is_range()) {
         index_factory.stop_index();
-        init_list.add_dimension(index_factory.get_dimension(false));
     }
 }
 
@@ -107,6 +104,7 @@ void HDL_parameters_factory::stop_replication_assignment() {
 
 void HDL_parameters_factory::stop_packed_assignment() {
     if(in_packed_assignment && !in_initialization_list){
+        init_list.set_dimensions(index_factory.get_dimensions(), false);
         current_resource.add_initialization_list(init_list);
         init_list = Initialization_list();
         in_packed_assignment = false;
@@ -178,7 +176,7 @@ void HDL_parameters_factory::start_replication() {
 }
 
 void HDL_parameters_factory::start_unpacked_dimension_declaration() {
-    if(in_param_assignment & !in_bus_array_quantifier){
+    if(in_param_assignment){
         index_factory.start_index(true);
     }
 }
@@ -190,7 +188,7 @@ void HDL_parameters_factory::start_packed_dimension() {
 void HDL_parameters_factory::stop_packed_dimension() {
     if (index_factory.is_active()) {
         index_factory.stop_index();
-        packed_dimensions.push_back(index_factory.get_dimension(true));
+        index_factory.set_packed(true);
     }
 }
 
@@ -211,11 +209,11 @@ void HDL_parameters_factory::start_ternary_operator() {
 }
 
 void HDL_parameters_factory::start_array_quantifier() {
-    in_bus_array_quantifier = true;
+    index_factory.set_quantifier(true);
 }
 
 void HDL_parameters_factory::stop_array_quantifier() {
-    in_bus_array_quantifier = false;
+    index_factory.set_quantifier(false);
 }
 
 void HDL_parameters_factory::start_function_assignment(const std::string &f_name) {

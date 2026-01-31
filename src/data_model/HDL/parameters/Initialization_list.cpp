@@ -52,6 +52,14 @@ void Initialization_list::add_dimension(const dimension_t &d) {
 
 }
 
+void Initialization_list::set_dimensions(const std::vector<dimension_t> &d, bool packed) {
+    if (packed) {
+        packed_dimensions = d;
+    } else {
+        unpacked_dimensions = d;
+    }
+}
+
 void Initialization_list::add_item(const std::shared_ptr<Parameter_value_base> &e) {
     scalar = false;
     expression_leaves.push_back(e);

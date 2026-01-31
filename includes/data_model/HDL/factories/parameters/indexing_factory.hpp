@@ -28,13 +28,16 @@ public:
     [[nodiscard]] bool is_range() const {return active && range;}
     void add_expression(const Expression &e);
     void add_component(const Expression_component &c){index.push_back(c);}
-    dimension_t get_dimension(bool p);
+    void set_packed(bool p);
+    std::vector<dimension_t> get_dimensions();
+    void set_quantifier(bool q);
 private:
+    bool quantifier = false;
     bool active = false;
     bool range = false;
     Expression index;
     bool first_bound = true;
-    dimension_t dim = {};
+    std::vector<dimension_t> dim{};
 };
 
 
