@@ -23,14 +23,17 @@ class expressions_factory {
 public:
     void increase_level() {expression_level++;}
     void decrease_level() {expression_level--;}
-    void push_level() {levels_stack.push(expression_level); expression_level = 0;}
-    void pop_level() {expression_level = levels_stack.top(); levels_stack.pop();}
+    void push_level();
+    void pop_level();
     void clear_level() {expression_level = 0;}
     void start_expression();
     void stop_expression();
-    Expression get_expression();
+    void clear_expression() {current.clear();}
+    std::optional<Expression> get_expression();
     [[nodiscard]] bool is_active() const {return active;}
     [[nodiscard]] int get_level() const {return expression_level;}
+    void add_component(const Expression_component &ec) {current.push_back(ec);}
+    void add_index(const Expression &idx);
 private:
     bool active = false;
     int expression_level = 0;

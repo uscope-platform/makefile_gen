@@ -111,8 +111,6 @@ private:
 
     bool skip_call_name = false;
 
-    std::stack<Expression> expression_stack;
-    Expression new_expression;
 
 
     Initialization_list init_list;

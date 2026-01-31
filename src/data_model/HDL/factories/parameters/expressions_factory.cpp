@@ -15,6 +15,16 @@
 
 #include "data_model/HDL/factories/parameters/expressions_factory.hpp"
 
+void expressions_factory::push_level() {
+    levels_stack.push(expression_level);
+    expression_level = 0;
+}
+
+void expressions_factory::pop_level() {
+    expression_level = levels_stack.top();
+    levels_stack.pop();
+}
+
 void expressions_factory::start_expression() {
     active = true;
     expression_level++;
@@ -27,6 +37,11 @@ void expressions_factory::stop_expression() {
     }
 }
 
-Expression expressions_factory::get_expression() {
+std::optional<Expression> expressions_factory::get_expression() {
+    if (current.empty()) return std::nullopt;
     return current;
+}
+
+void expressions_factory::add_index(const Expression &idx) {
+    if (!current.components.empty()) current.components.back().add_array_index(idx);
 }

@@ -37,7 +37,7 @@ void HDL_parameters_factory::add_component(const Expression_component &c) {
         index_factory.add_component(c);
     } else {
         if(expr_factory.is_active() && !skip_call_name){
-            new_expression.push_back(c);
+        expr_factory.add_component(c);
         }
         skip_call_name = false;
     }
@@ -69,7 +69,7 @@ void HDL_parameters_factory::start_bit_selection() {
 }
 
 void HDL_parameters_factory::stop_bit_selection() {
-    if(!new_expression.components.empty()) new_expression.components.back().add_array_index(index_factory.get_index());
+    expr_factory.add_index(index_factory.get_index());
     index_factory.stop_index();
 
 }
@@ -77,7 +77,7 @@ void HDL_parameters_factory::stop_bit_selection() {
 void HDL_parameters_factory::close_array_index() {
     if(index_factory.is_active() & (in_param_assignment || in_packed_assignment || repl_factory.is_assignment_context() || in_param_override)){
         index_factory.stop_index();
-        new_expression.components.back().add_array_index(index_factory.get_index());
+        expr_factory.add_index(index_factory.get_index());
     }
 }
 
@@ -118,23 +118,23 @@ void HDL_parameters_factory::start_expression_new() {
 void HDL_parameters_factory::stop_expression_new() {
     expr_factory.stop_expression();
     if(expr_factory.get_level() == 0){
-        if(!new_expression.empty()){
-
+        auto expr = expr_factory.get_expression();
+        if (expr.has_value()) {
             if(repl_factory.in_replication()) {
-                repl_factory.add_expression(new_expression);
+                repl_factory.add_expression(expr.value());
             } else if (index_factory.is_range()){
-                index_factory.add_expression(new_expression);
+                index_factory.add_expression(expr.value());
             } else if(concat_factory.in_concatenation()) {
-                concat_factory.add_component(std::make_shared<Expression>(new_expression));
+                concat_factory.add_component(std::make_shared<Expression>(expr.value()));
             } else if(calls_factory.in_function_call()) {
-                calls_factory.add_argument(std::make_shared<Expression>(new_expression));
+                calls_factory.add_argument(std::make_shared<Expression>(expr.value()));
             } else if(in_initialization_list) {
-                init_list.add_item(std::make_shared<Expression>(new_expression));
+                init_list.add_item(std::make_shared<Expression>(expr.value()));
             } else {
-                current_resource.set_expression(std::make_shared<Expression>(new_expression));
+                current_resource.set_expression(std::make_shared<Expression>(expr.value()));
             }
         }
-        new_expression.clear();
+        expr_factory.clear_expression();
     }
 }
 
@@ -195,7 +195,7 @@ void HDL_parameters_factory::start_instance_parameter_assignment(const std::stri
 }
 
 void HDL_parameters_factory::clear_expression() {
-    expression_stack = std::stack<Expression>();
+
     expr_factory.clear_level();
 }
 
