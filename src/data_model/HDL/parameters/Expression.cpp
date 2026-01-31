@@ -297,6 +297,10 @@ std::variant<int64_t, double> Expression::evaluate_cast(resolved_parameter opera
     return 0;
 }
 
+void Expression::add_index(const Expression &idx) {
+    if (!components.empty()) components.back().add_array_index(idx);
+}
+
 Expression Expression::clone()  const{
     Expression ret;
     ret.components = components;

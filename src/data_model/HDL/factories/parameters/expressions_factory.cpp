@@ -55,5 +55,5 @@ void expressions_factory::add_component(const Expression_component &ec) {
 
 
 void expressions_factory::add_index(const Expression &idx) {
-    if (!current.components.empty()) current.components.back().add_array_index(idx);
+    current.add_index(idx);
 }
