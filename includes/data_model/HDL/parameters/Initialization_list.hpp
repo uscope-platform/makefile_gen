@@ -25,6 +25,7 @@
 #include "data_model/HDL/parameters/Replication.hpp"
 #include "data_model/HDL/parameters/Concatenation.hpp"
 #include "data_model/mdarray.hpp"
+#include  "data_model/HDL/parameters/dimension.hpp"
 
 
 // FORWARD DECLARATIONS
@@ -33,17 +34,6 @@ class HDL_function_def;
 class data_store;
 class Parameters_map;
 
-typedef struct dims_struct{
-    Expression first_bound;
-    Expression second_bound;
-    bool packed;
-
-    template<class Archive>
-    void serialize( Archive & ar ) {
-        ar(first_bound, second_bound, packed);
-    }
-
-} dimension_t;
 
 // This class manages the recursive construction and evaluation of multi-dimensional HDL initializers.
 // It processes nested levels, handles expression repetitions, and resolves complex parameter

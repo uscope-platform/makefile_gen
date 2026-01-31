@@ -23,6 +23,7 @@
 #include "data_model/HDL/factories/parameters/replication_factory.hpp"
 #include "data_model/HDL/factories/parameters/concatenation_factory.hpp"
 #include "data_model/HDL/factories/parameters/function_calls_factory.hpp"
+#include "data_model/HDL/factories/parameters/indexing_factory.hpp"
 
 
 class HDL_parameters_factory : protected resources_factory_base<HDL_parameter> {
@@ -98,23 +99,21 @@ private:
     replication_factory repl_factory;
     concatenation_factory concat_factory;
     function_calls_factory calls_factory;
+    indexing_factory index_Factory;
 
     bool in_param_override = false;
-    bool in_bit_selection = false;
     bool in_ternary_operator = false;
     bool in_param_assignment = false;
     bool in_initialization_list = false;
     bool in_expression_new = false;
     bool in_unpacked_declaration = false;
     bool in_packed_assignment = false;
-    bool in_packed_dimension = false;
     bool in_bus_array_quantifier = false;
 
     bool skip_call_name = false;
 
     std::stack<Expression> expression_stack;
     Expression new_expression;
-    Expression bit_selection;
 
 
     int expression_level=0;
