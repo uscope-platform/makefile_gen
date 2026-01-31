@@ -36,10 +36,7 @@ void HDL_parameters_factory::add_component(const Expression_component &c) {
     if (index_factory.is_active() && !index_factory.is_range()) {
         index_factory.add_component(c);
     } else {
-        if(expr_factory.is_active() && !skip_call_name){
         expr_factory.add_component(c);
-        }
-        skip_call_name = false;
     }
 }
 
@@ -213,7 +210,7 @@ void HDL_parameters_factory::stop_array_quantifier() {
 
 void HDL_parameters_factory::start_function_assignment(const std::string &f_name) {
     calls_factory.start_function(f_name);
-    skip_call_name= true;
+    expr_factory.pause();
     expr_factory.push_level();
 }
 

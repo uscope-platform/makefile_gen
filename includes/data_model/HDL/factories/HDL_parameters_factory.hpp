@@ -109,9 +109,6 @@ private:
     bool in_initialization_list = false;
     bool in_packed_assignment = false;
 
-    bool skip_call_name = false;
-
-
 
     Initialization_list init_list;
 

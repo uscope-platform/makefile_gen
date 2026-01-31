@@ -32,10 +32,12 @@ public:
     std::optional<Expression> get_expression();
     [[nodiscard]] bool is_active() const {return active;}
     [[nodiscard]] int get_level() const {return expression_level;}
-    void add_component(const Expression_component &ec) {current.push_back(ec);}
+    void add_component(const Expression_component &ec);
+    void pause();
     void add_index(const Expression &idx);
 private:
     bool active = false;
+    bool paused = false;
     int expression_level = 0;
     Expression current;
     std::stack<int> levels_stack;
