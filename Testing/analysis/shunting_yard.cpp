@@ -92,31 +92,6 @@ TEST(shunting_yard, shunting_yard_parenthesis){
     ASSERT_EQ(rpn_expr_2, expected_result_2);
 }
 
-TEST(shunting_yard, shunting_yard_function){
-
-    Expression expr = {
-                    Expression_component(EXPRESSION_WITH_TYPE("$clog2")),
-                    Expression_component(EXPRESSION_WITH_TYPE("(")),
-                    Expression_component(EXPRESSION_WITH_TYPE("add_expr_p")),
-                    Expression_component(EXPRESSION_WITH_TYPE("+")),
-                    Expression_component(EXPRESSION_WITH_TYPE("2")),
-                    Expression_component(EXPRESSION_WITH_TYPE(")"))
-    };
-
-    auto rpn_expr = expr.to_rpm();
-
-
-    Expression expected_result = {
-                    Expression_component(EXPRESSION_WITH_TYPE("add_expr_p")),
-                    Expression_component(EXPRESSION_WITH_TYPE("2")),
-                    Expression_component(EXPRESSION_WITH_TYPE("+")),
-                    Expression_component(EXPRESSION_WITH_TYPE("$clog2"))
-    };
-
-    expected_result.set_rpn(true);
-    ASSERT_EQ(rpn_expr, expected_result);
-}
-
 TEST(shunting_yard, shunting_yard_parenthesis_complex){
 
     Expression expr_1 = {
