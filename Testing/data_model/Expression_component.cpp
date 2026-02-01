@@ -26,7 +26,7 @@ TEST(Expression_component, sized_binary_sv_constant_parsing){
     Expression_component ec(EXPRESSION_WITH_TYPE("8'b10110"));
 
     ASSERT_TRUE(ec.is_numeric());
-    ASSERT_EQ(std::get<int64_t>(ec.get_value()), 22);
+    ASSERT_EQ(std::get<int64_t>(ec.get_value().value()), 22);
     ASSERT_EQ(ec.get_binary_size(), 8);
 }
 
@@ -35,7 +35,7 @@ TEST(Expression_component, sized_octal_sv_constant_parsing){
     Expression_component ec(EXPRESSION_WITH_TYPE("12'o547"));
 
     ASSERT_TRUE(ec.is_numeric());
-    ASSERT_EQ(std::get<int64_t>(ec.get_value()), 359);
+    ASSERT_EQ(std::get<int64_t>(ec.get_value().value()), 359);
     ASSERT_EQ(ec.get_binary_size(), 12);
 }
 
@@ -44,7 +44,7 @@ TEST(Expression_component, sized_decimal_sv_constant_parsing){
     Expression_component ec(EXPRESSION_WITH_TYPE("14'd1542"));
 
     ASSERT_TRUE(ec.is_numeric());
-    ASSERT_EQ(std::get<int64_t>(ec.get_value()), 1542);
+    ASSERT_EQ(std::get<int64_t>(ec.get_value().value()), 1542);
     ASSERT_EQ(ec.get_binary_size(), 14);
 }
 
@@ -53,7 +53,7 @@ TEST(Expression_component, sized_hexadecimal_sv_constant_parsing){
     Expression_component ec(EXPRESSION_WITH_TYPE("20'hCA54"));
 
     ASSERT_TRUE(ec.is_numeric());
-    ASSERT_EQ(std::get<int64_t>(ec.get_value()), 51796);
+    ASSERT_EQ(std::get<int64_t>(ec.get_value().value()), 51796);
     ASSERT_EQ(ec.get_binary_size(), 20);
 }
 
@@ -63,7 +63,7 @@ TEST(Expression_component, unsized_binary_sv_constant_parsing){
     Expression_component ec(EXPRESSION_WITH_TYPE("'b10110"));
 
     ASSERT_TRUE(ec.is_numeric());
-    ASSERT_EQ(std::get<int64_t>(ec.get_value()), 22);
+    ASSERT_EQ(std::get<int64_t>(ec.get_value().value()), 22);
     ASSERT_EQ(ec.get_binary_size(), 5);
 }
 
@@ -72,7 +72,7 @@ TEST(Expression_component, unsized_octal_sv_constant_parsing){
     Expression_component ec(EXPRESSION_WITH_TYPE("'o547"));
 
     ASSERT_TRUE(ec.is_numeric());
-    ASSERT_EQ(std::get<int64_t>(ec.get_value()), 359);
+    ASSERT_EQ(std::get<int64_t>(ec.get_value().value()), 359);
     ASSERT_EQ(ec.get_binary_size(), 9);
 }
 
@@ -81,7 +81,7 @@ TEST(Expression_component, unsized_decimal_sv_constant_parsing){
     Expression_component ec(EXPRESSION_WITH_TYPE("'d1542"));
 
     ASSERT_TRUE(ec.is_numeric());
-    ASSERT_EQ(std::get<int64_t>(ec.get_value()), 1542);
+    ASSERT_EQ(std::get<int64_t>(ec.get_value().value()), 1542);
     ASSERT_EQ(ec.get_binary_size(), 11);
 }
 
@@ -90,7 +90,7 @@ TEST(Expression_component, unsized_hexadecimal_sv_constant_parsing){
     Expression_component ec(EXPRESSION_WITH_TYPE("'hCA54"));
 
     ASSERT_TRUE(ec.is_numeric());
-    ASSERT_EQ(std::get<int64_t>(ec.get_value()), 51796);
+    ASSERT_EQ(std::get<int64_t>(ec.get_value().value()), 51796);
     ASSERT_EQ(ec.get_binary_size(), 16);
 }
 
@@ -100,7 +100,7 @@ TEST(Expression_component, string){
 
     ASSERT_TRUE(ec.is_string());
     ASSERT_FALSE(ec.is_identifier());
-    ASSERT_EQ(std::get<std::string>(ec.get_value()), "\"FALSE\"");
+    ASSERT_EQ(std::get<std::string>(ec.get_value().value()), "\"FALSE\"");
 }
 
 
@@ -109,6 +109,6 @@ TEST(Expression_component, identifier){
 
     ASSERT_TRUE(ec.is_identifier());
     ASSERT_FALSE(ec.is_string());
-    ASSERT_EQ(std::get<std::string>(ec.get_value()), "FALSE");
+    ASSERT_EQ(std::get<std::string>(ec.get_value().value()), "FALSE");
 }
 

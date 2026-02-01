@@ -260,11 +260,126 @@ TEST(parameter_extraction, simple_cast) {
 
     auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
     p->set_name("CAST");
-    p->add_component(Expression_component("$rtoi", Expression_component::function));
-    p->add_component(Expression_component("(", Expression_component::parenthesis));
-    p->add_component(Expression_component("16.8", Expression_component::number));
-    p->add_component(Expression_component(")", Expression_component::parenthesis));
+    HDL_function_call call("$rtoi");
+    call.add_argument(std::make_shared<Expression>(Expression({Expression_component("16.8", Expression_component::number)})));
+    Initialization_list i_l;
+    i_l.set_scalar(std::make_shared<HDL_function_call>(call));
+    p->add_initialization_list(i_l);
     check_params.insert(p);
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+    std::map<qualified_identifier, resolved_parameter> check_defaults = {
+        {{"", "CAST"}, 17},
+    };
+
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+TEST(parameter_extraction, multiple_casts) {
+    std::string test_pattern = R"(
+
+    module test_mod #(
+    )();
+
+        localparam CAST = $rtoi(14.8+2);
+        localparam CAST_2 = $rtoi(12.2);
+
+    endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("CAST");
+    HDL_function_call call("$rtoi");
+    call.add_argument(std::make_shared<Expression>(Expression({
+        Expression_component("14.8", Expression_component::number),
+        Expression_component("+", Expression_component::operation),
+        Expression_component("2", Expression_component::number)
+    })));
+    Initialization_list i_l;
+    i_l.set_scalar(std::make_shared<HDL_function_call>(call));
+    p->add_initialization_list(i_l);
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("CAST_2");
+    call = HDL_function_call("$rtoi");
+    call.add_argument(std::make_shared<Expression>(Expression({Expression_component("12.2", Expression_component::number)})));
+    i_l = Initialization_list();
+    i_l.set_scalar(std::make_shared<HDL_function_call>(call));
+    p->add_initialization_list(i_l);
+    check_params.insert(p);
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+    std::map<qualified_identifier, resolved_parameter> check_defaults = {
+        {{"", "CAST"}, 17},
+        {{"", "CAST_2"}, 12},
+    };
+
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+TEST(parameter_extraction, cast_propagation) {
+    std::string test_pattern = R"(
+
+    module test_mod #(
+        parameter PARAMETER_1 = 5;
+    )();
+
+        localparam CAST = $rtoi(11.8 + PARAMETER_1);
+
+    endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("CAST");
+    HDL_function_call call("$rtoi");
+    call.add_argument(std::make_shared<Expression>(Expression({
+        Expression_component("11.8", Expression_component::number),
+        Expression_component("+", Expression_component::operation),
+        Expression_component("PARAMETER_1", Expression_component::identifier)
+    })));
+    Initialization_list i_l;
+    i_l.set_scalar(std::make_shared<HDL_function_call>(call));
+    p->add_initialization_list(i_l);
+    check_params.insert(p);
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("PARAMETER_1");
+    p->add_component(Expression_component("5", Expression_component:: number));
+    check_params.insert(p);
+
 
     ASSERT_EQ(check_params.size(), parameters.size());
 
@@ -302,23 +417,24 @@ TEST(parameter_extraction, complex_cast) {
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
-
     auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
-    p->set_name("CHECKSUM_PARTITIONS");
-    p->add_component(Expression_component("$rtoi", Expression_component::function));
-    p->add_component(Expression_component("(", Expression_component::parenthesis));
-    p->add_component(Expression_component("$ceil", Expression_component::function));
-    p->add_component(Expression_component("(", Expression_component::parenthesis));
-    p->add_component(Expression_component("PARAMETER_1", Expression_component::identifier));
-    p->add_component(Expression_component("/", Expression_component::operation));
-    p->add_component(Expression_component("16.0", Expression_component::number));
-    p->add_component(Expression_component(")", Expression_component::parenthesis));
-    p->add_component(Expression_component(")", Expression_component::parenthesis));
+    p->set_name("PARAMETER_1");
+    p->add_component(Expression_component("46", Expression_component:: number));
     check_params.insert(p);
 
     p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
-    p->set_name("PARAMETER_1");
-    p->add_component(Expression_component("46", Expression_component::identifier));
+    p->set_name("CAST");
+    auto inner_call = std::make_shared<HDL_function_call>("$ceil");
+    Expression e;
+    e.push_back(Expression_component("PARAMETER_1", Expression_component::identifier));
+    e.push_back(Expression_component("/", Expression_component::operation));
+    e.push_back(Expression_component("16.0", Expression_component::number));
+    inner_call->add_argument(std::make_shared<Expression>(e));
+    auto outer_call = std::make_shared<HDL_function_call>("$rtoi");
+    outer_call->add_argument(inner_call);
+    Initialization_list i_l;
+    i_l.set_scalar(outer_call);
+    p->add_initialization_list(i_l);
     check_params.insert(p);
 
     ASSERT_EQ(check_params.size(), parameters.size());
@@ -330,12 +446,14 @@ TEST(parameter_extraction, complex_cast) {
 
     auto defaults = resource.get_default_parameters();
     std::map<qualified_identifier, resolved_parameter> check_defaults = {
-        {{"", "LUT_DEPTH"}, 9},
-        {{"", "STEP"}, 0.17453292519943295f}
+        {{"", "PARAMETER_1"}, 46},
+        {{"", "CAST"}, 3}
     };
 
-    ASSERT_EQ(9, std::get<int64_t>(defaults.at({"", "LUT_DEPTH"})));
-    ASSERT_FLOAT_EQ(0.17453292519943295, std::get<double>(defaults.at({"", "STEP"})));
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
 }
 
 TEST(parameter_extraction, package_parameters) {
@@ -581,22 +699,30 @@ TEST(parameter_extraction, simple_expressions) {
     p->add_component(Expression_component("5", Expression_component::number));
     check_params.insert(p);
 
+
     p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
     p->set_name("complex_log_expr_p");
-    p->add_component(Expression_component("$clog2", Expression_component::function));
-    p->add_component(Expression_component("(", Expression_component::parenthesis));
-    p->add_component(Expression_component("add_expr_p", Expression_component::identifier));
-    p->add_component(Expression_component("+", Expression_component::operation));
-    p->add_component(Expression_component("2", Expression_component::number));
-    p->add_component(Expression_component(")", Expression_component::parenthesis));
+    HDL_function_call call("$clog2");
+    call.add_argument(std::make_shared<Expression>(Expression({
+        Expression_component("add_expr_p", Expression_component::identifier),
+        Expression_component("+", Expression_component::operation),
+        Expression_component("2", Expression_component::number)
+    })));
+    Initialization_list i_l;
+    i_l.set_scalar(std::make_shared<HDL_function_call>(call));
+    p->add_initialization_list(i_l);
     check_params.insert(p);
+
 
     p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
     p->set_name("simple_log_expr_p");
-    p->add_component(Expression_component("$clog2", Expression_component::function));
-    p->add_component(Expression_component("(", Expression_component::parenthesis));
-    p->add_component(Expression_component("add_expr_p", Expression_component::identifier));
-    p->add_component(Expression_component(")", Expression_component::parenthesis));
+    call = HDL_function_call("$clog2");
+    call.add_argument(std::make_shared<Expression>(Expression({
+        Expression_component("add_expr_p", Expression_component::identifier),
+    })));
+    i_l = Initialization_list();
+    i_l.set_scalar(std::make_shared<HDL_function_call>(call));
+    p->add_initialization_list(i_l);
     check_params.insert(p);
 
     p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
@@ -615,7 +741,7 @@ TEST(parameter_extraction, simple_expressions) {
 
     for(const auto& item:check_params){
         EXPECT_TRUE(parameters.contains(item->get_name()));
-        EXPECT_EQ(*item, *parameters.get(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 
     auto defaults = resource.get_default_parameters();

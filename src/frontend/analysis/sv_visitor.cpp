@@ -78,7 +78,7 @@ void sv_visitor::exitName_of_instance(sv2017::Name_of_instanceContext *ctx) {
         params_factory.stop_array_quantifier();
         deps_factory.add_array_quantifier(params_factory.get_parameter());
     }
-    }
+}
 
 void sv_visitor::exitInterface_header(sv2017::Interface_headerContext *ctx) {
     std::string interface_name = ctx->identifier()->getText();
@@ -96,8 +96,7 @@ std::vector<HDL_Resource> sv_visitor::get_entities() {
 void sv_visitor::enterPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
     if(params_factory.is_component_relevant()){
         std::string call_name = ctx->any_system_tf_identifier()->getText();
-        params_factory.add_component(Expression_component(call_name, Expression_component::get_type(call_name)));
-        params_factory.add_component(Expression_component("(", Expression_component::parenthesis));
+        params_factory.start_function_call(call_name);
         if(ctx->data_type() != nullptr){
             if(!package_prefix.empty()){
                 Expression_component ec(package_item, Expression_component::get_type(package_item));
@@ -107,7 +106,7 @@ void sv_visitor::enterPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
                 package_item.clear();
             } else{
                 auto text = ctx->data_type()->getText();
-                params_factory.add_component(Expression_component(text, Expression_component::get_type(text)));
+                params_factory.add_component(Expression_component(text, Expression_component::get_type(text)), true);
             }
 
         }
@@ -126,7 +125,7 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
         }
     }
     if(params_factory.is_component_relevant()) {
-        params_factory.add_component(Expression_component(")", Expression_component::parenthesis));
+        params_factory.stop_function_call();
     }
 }
 

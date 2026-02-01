@@ -40,6 +40,8 @@ void function_calls_factory::finish() {
 }
 
 std::shared_ptr<HDL_function_call> function_calls_factory::get_function() {
-    return std::make_shared<HDL_function_call>(new_call);
+    auto call = std::make_shared<HDL_function_call>(new_call);
+    new_call = HDL_function_call();
+    return call;
 }
 

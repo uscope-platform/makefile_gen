@@ -24,6 +24,10 @@
 CEREAL_REGISTER_TYPE(HDL_function_call)
 CEREAL_REGISTER_POLYMORPHIC_RELATION(Parameter_value_base, HDL_function_call)
 
+HDL_function_call::HDL_function_call() {
+    type = function;
+}
+
 void HDL_function_call::add_argument(const std::shared_ptr<Parameter_value_base> &p) {
     arguments.push_back(p);
 }
@@ -70,6 +74,9 @@ void HDL_function_call::propagate_function(const HDL_function_def &def) {
 }
 
 std::optional<resolved_parameter> HDL_function_call::evaluate(bool pack_result) {
+    if (function_name.starts_with("$")) {
+        return evaluate_system_task();
+    }
     if( !loop_metadata.has_value() && assignments.size() == 1) {
         return evaluate_scalar();
     } else {
@@ -121,7 +128,61 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_vector() {
     return result;
 }
 
+std::optional<resolved_parameter> HDL_function_call::evaluate_system_task() {
+    std::string task_name = function_name.substr(1, function_name.size()-1);
+    std::vector<resolved_parameter> resolved_arguments;
+    for (auto &arg:arguments) {
+        auto resolved_val = arg->evaluate(true);
+        if (!resolved_val.has_value()) return std::nullopt;
+        resolved_arguments.push_back(resolved_val.value());
+    }
+    if (task_name == "rtoi") {
+        if (std::holds_alternative<double>(resolved_arguments[0])) {
+            return static_cast<int64_t>(std::round(std::get<double>(resolved_arguments[0])));
+        }
+        if (std::holds_alternative<int64_t>(resolved_arguments[0])) {
+            return std::get<int64_t>(resolved_arguments[0]);
+        }
+        spdlog::warn("Encountered an invalid argument for a $rtoi call");
+        return  0;
+    }
+    if (task_name == "itor") {
+        if (std::holds_alternative<double>(resolved_arguments[0])) {
+            return std::get<double>(resolved_arguments[0]);
+        } else if (std::holds_alternative<int64_t>(resolved_arguments[0])) {
+            return static_cast<double>(std::get<int64_t>(resolved_arguments[0]));
+        }
+        spdlog::warn("Encountered an invalid argument for a $itor call");
+        return  0;
+    }
+    if (task_name == "ceil") {
+        if (std::holds_alternative<double>(resolved_arguments[0])) {
+            return std::ceil(std::get<double>(resolved_arguments[0]));
+        } else if (std::holds_alternative<int64_t>(resolved_arguments[0])) {
+            return std::get<int64_t>(resolved_arguments[0]);
+        }
+        spdlog::warn("Encountered an invalid argument for a $ceil call");
+    }
+    if (task_name == "floor") {
+        if (std::holds_alternative<double>(resolved_arguments[0])) {
+            return std::floor(std::get<double>(resolved_arguments[0]));
+        } else if (std::holds_alternative<int64_t>(resolved_arguments[0])) {
+            return std::get<int64_t>(resolved_arguments[0]);
+        }
+        spdlog::warn("Encountered an invalid argument for a $floor call");
 
+    }
+    if (task_name == "clog2") {
+        if (std::holds_alternative<double>(resolved_arguments[0])) {
+            return static_cast<int64_t>(std::ceil(std::log2(std::get<double>(resolved_arguments[0]))));
+        } else if (std::holds_alternative<int64_t>(resolved_arguments[0])) {
+            return static_cast<int64_t>(std::ceil(std::log2(std::get<int64_t>(resolved_arguments[0]))));
+        }
+        spdlog::warn("Encountered an invalid argument for a $floor call");
+    }
+    spdlog::warn("Unsupported system task {} encountered while parsing a parameter", function_name);
+    return 0;
+}
 
 
 std::string HDL_function_call::print() const {

@@ -31,8 +31,10 @@
 #include <cereal/types/variant.hpp>
 
 #include "HDL_function_def.hpp"
+#include "Parameter_value_base.hpp"
 
 class Expression;
+class HDL_function_call;
 
 class Expression_component {
 public:
@@ -52,6 +54,7 @@ public:
 
     explicit Expression_component(const std::string &s,const component_type &t);
     explicit Expression_component(std::variant<int64_t, double> n, int64_t b_s);
+    explicit Expression_component(const std::shared_ptr<Parameter_value_base> &param);
     std::set<qualified_identifier> get_dependencies()const;
     bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value);
     void propagate_function(HDL_function_def def);
@@ -71,7 +74,8 @@ public:
         return type == number;
     }
 
-    resolved_parameter get_value()const {return value;}
+    std::optional<resolved_parameter> get_value()const;
+
     void set_value(const resolved_parameter &v) {
         value = v;
     }
@@ -117,6 +121,8 @@ private:
     component_type type = number;
 
     resolved_parameter value;
+
+    std::shared_ptr<HDL_function_call> call;
 
     std::string package_prefix;
 

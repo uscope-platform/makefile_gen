@@ -32,8 +32,12 @@ void HDL_parameters_factory::set_value(const std::string &s) {
     current_resource.set_value(s);
 }
 
-void HDL_parameters_factory::add_component(const Expression_component &c) {
-    if (index_factory.is_active() && !index_factory.is_range()) {
+void HDL_parameters_factory::add_component(const Expression_component &c, bool is_call_argument) {
+    if (is_call_argument) {
+        calls_factory.add_argument(std::make_shared<Expression>(Expression({c})));
+        expr_factory.increase_level();//this is a hack but it should work
+        expr_factory.stop_expression();
+    } else if (index_factory.is_active() && !index_factory.is_range()) {
         index_factory.add_component(c);
     } else {
         expr_factory.add_component(c);
@@ -75,6 +79,17 @@ void HDL_parameters_factory::close_array_index() {
     if(index_factory.is_active() & (in_param_assignment || in_packed_assignment || repl_factory.is_assignment_context() || in_param_override)){
         index_factory.stop_index();
         expr_factory.add_index(index_factory.get_index());
+    }
+}
+
+void HDL_parameters_factory::start_param_assignment() {
+    in_param_assignment = true;
+}
+
+void HDL_parameters_factory::stop_param_assignment() {
+    in_param_assignment = false;
+    if (!init_list.empty()  && current_resource.get_i_l().empty()) {
+        current_resource.add_initialization_list(init_list);
     }
 }
 
@@ -225,4 +240,32 @@ void HDL_parameters_factory::stop_function_assignment() {
 
     calls_factory.finish();
     expr_factory.pop_level();
+}
+
+void HDL_parameters_factory::start_function_call(const std::string &f_name) {
+    calls_factory.start_function(f_name);
+    expr_factory.push_level();
+}
+
+void HDL_parameters_factory::stop_function_call() {
+    bool nested = calls_factory.is_nested();
+    calls_factory.finish();
+    auto call = calls_factory.get_function();
+    expr_factory.pop_level();
+    if (!nested) {
+        Expression_component ec(call);
+         if (expr_factory.is_active()) {
+            expr_factory.add_component(ec);
+        } else if (index_factory.is_active()) {
+            index_factory.add_component(ec);
+        } else if (concat_factory.in_concatenation()) {
+            concat_factory.add_component(std::make_shared<Expression>(Expression({ec})));
+        } else if (repl_factory.in_replication()) {
+            repl_factory.add_expression(Expression({ec}));
+        } else if (in_packed_assignment || in_param_assignment) {
+            init_list.set_scalar(call);
+        } else if (in_initialization_list) {
+            init_list.add_item(call);
+        }
+    }
 }

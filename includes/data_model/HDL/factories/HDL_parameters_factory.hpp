@@ -38,7 +38,8 @@ public:
 
     void set_parmeter_name(const std::string &s) { set_name(s); };
 
-    void add_component(const Expression_component &c);
+    void add_component(const Expression_component &c){add_component(c, false);}
+    void add_component(const Expression_component &c, bool is_call_argument);
 
     void start_initialization_list();
     void stop_initialization_list(bool default_assignment);
@@ -51,12 +52,8 @@ public:
 
     void close_array_index();
 
-    void start_param_assignment() {
-        in_param_assignment = true;
-    };
-    void stop_param_assignment() {
-        in_param_assignment = false;
-    };
+    void start_param_assignment();
+    void stop_param_assignment();
 
     void start_replication();
     void stop_replication();
@@ -81,9 +78,17 @@ public:
     void start_function_assignment(const std::string &f_name);
     void stop_function_assignment();
 
+    void start_function_call(const std::string &f_name);
+    void stop_function_call();
+
     bool in_replication_assignment_context() const {return repl_factory.is_assignment_context();};
     bool in_packed_context() const {return in_packed_assignment; };
-    bool is_component_relevant() const { return in_initialization_list || expr_factory.is_active() || index_factory.is_range() && index_factory.is_active() || in_packed_assignment ; };
+    bool is_component_relevant() const {
+        return in_initialization_list ||
+            expr_factory.is_active() ||
+            index_factory.is_range() && index_factory.is_active() ||
+            in_packed_assignment || calls_factory.in_function_call();
+    };
 
     void start_instance_parameter_assignment(const std::string& parameter_name);
 

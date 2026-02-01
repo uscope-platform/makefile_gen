@@ -175,7 +175,8 @@ std::set<qualified_identifier> Initialization_list::get_dependencies() {
 
 void PrintTo(const Initialization_list &il, std::ostream *os) {
     if (il.scalar) {
-        *os << il.expression_leaves[0]->print();
+        if (il.expression_leaves.empty()) *os << "!!EMPTY SCALAR!!";
+        else *os << il.expression_leaves[0]->print();
     }
     std::string result = "-----------------------------\n";
     result += "-----------------------------\n";
@@ -203,7 +204,7 @@ void PrintTo(const Initialization_list &il, std::ostream *os) {
 std::optional<resolved_parameter> Initialization_list::evaluate() {
     std::optional<resolved_parameter> result;
     if (scalar) {
-        if(expression_leaves[0]->is_expression()) {
+        if(expression_leaves[0]->is_expression() || expression_leaves[0]->is_function()) {
             result = expression_leaves[0]->evaluate(false);
         } else if(expression_leaves[0]->is_concatenation() || expression_leaves[0]->is_replication()) {
             bool packed_concat = unpacked_dimensions.empty();

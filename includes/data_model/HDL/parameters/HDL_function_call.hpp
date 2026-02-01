@@ -19,13 +19,17 @@
 
 #include "data_model/HDL/parameters/Parameter_value_base.hpp"
 #include "data_model/HDL/parameters/Expression_component.hpp"
+#include "data_model/HDL/parameters/HDL_function_call.hpp"
 #include "data_model/HDL/HDL_loop.hpp"
 
 
 class HDL_function_call : public Parameter_value_base{
 public:
-    HDL_function_call() = default;
-    explicit HDL_function_call(const std::string &n){function_name = n;}
+    HDL_function_call();
+    explicit HDL_function_call(const std::string &n) {
+        function_name = n;
+        type = function;
+    }
     void set_name(const std::string &n){function_name = n;}
     std::string get_name(){return function_name;}
     void add_argument(const std::shared_ptr<Parameter_value_base> &p);
@@ -37,6 +41,7 @@ public:
 
     std::optional<resolved_parameter> evaluate_scalar();
     std::optional<resolved_parameter> evaluate_vector();
+    std::optional<resolved_parameter> evaluate_system_task();
 
     std::string print() const  override;
     int64_t get_size()  override;

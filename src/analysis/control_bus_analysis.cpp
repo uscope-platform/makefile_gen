@@ -102,8 +102,9 @@ std::vector<analysis_context> control_bus_analysis::process_interconnect(const a
                             ret_val.push_back(ctx);
                         } else {
                             auto port_index = nets[0].get_index_at(0).get_value();
-                            if(std::holds_alternative<std::string>(port_index)) throw std::runtime_error("The port index cannot be a string during control bus analysis");
-                            if(std::get<int64_t>(port_index) == master.idx) {
+                            if (!port_index.has_value()) throw std::runtime_error("The port index must have a deefined value");
+                            if(std::holds_alternative<std::string>(port_index.value())) throw std::runtime_error("The port index cannot be a string during control bus analysis");
+                            if(std::get<int64_t>(port_index.value()) == master.idx) {
                                 int32_t index = master.in_array && inst.array_index == -1 ? master.idx : inst.array_index;
                                 dep->set_array_index(index);
                                 analysis_context ctx = {dep, port_name, master.address,

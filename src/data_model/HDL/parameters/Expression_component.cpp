@@ -16,6 +16,8 @@
 #include "data_model/HDL/parameters/Expression.hpp"
 #include "data_model/HDL/parameters/Expression_component.hpp"
 
+#include "data_model/HDL/parameters/HDL_function_call.hpp"
+
 const std::regex Expression_component::sv_constant_regex(R"(^\d*'(s)?(h|d|o|b)([0-9a-fA-F]+))");
 const std::regex Expression_component::number_regex(R"(^\d+$)");
 const std::regex Expression_component::float_regex(R"(^[+-]?(\d+\.\d*|\.\d+)([eE][+-]?\d+)?$|^[+-]?\d+[eE][+-]?\d+$)");
@@ -28,6 +30,7 @@ Expression_component::Expression_component(const Expression_component &c) {
     package_prefix = c.package_prefix;
     binary_size = c.binary_size;
     type = c.type;
+    if (call) call = std::make_shared<HDL_function_call>(*c.call);
 }
 
 
@@ -55,6 +58,14 @@ Expression_component::Expression_component(std::variant<int64_t, double> n, int6
     type = number;
 }
 
+Expression_component::Expression_component(const std::shared_ptr<Parameter_value_base> &param) {
+    if (!param->is_function()) {
+        throw std::invalid_argument("Only functions are supported as expression components");
+    }
+    call = std::make_shared<HDL_function_call>(param->as<HDL_function_call>());
+    type = function;
+}
+
 std::set<qualified_identifier> Expression_component::get_dependencies()const {
     std::set<qualified_identifier> result;
     if (is_identifier()){
@@ -63,6 +74,10 @@ std::set<qualified_identifier> Expression_component::get_dependencies()const {
     for (const auto &idx:array_index) {
         auto idx_deps = idx.get_dependencies();
         result.insert(idx_deps.begin(), idx_deps.end());
+    }
+    if (type == function) {
+        auto call_deps = call->get_dependencies();
+        result.insert(call_deps.begin(), call_deps.end());
     }
     return result;
 }
@@ -141,6 +156,8 @@ bool operator==(const Expression_component &lhs, const Expression_component &rhs
     ret_val &= lhs.array_index == rhs.array_index;
     ret_val &= lhs.package_prefix == rhs.package_prefix;
     ret_val &= lhs.binary_size == rhs.binary_size;
+    if (lhs.call == nullptr ^ rhs.call == nullptr) return false;
+    if (!(lhs.call == nullptr && rhs.call == nullptr)) ret_val &= *lhs.call == *rhs.call;
     return ret_val;
 }
 
@@ -233,6 +250,15 @@ int64_t Expression_component::get_operator_precedence() {
         throw std::runtime_error("Error: attempted to get the precedence of a non operator/function expression component");
     }
     return operators_precedence[string_value];
+}
+
+std::optional<resolved_parameter> Expression_component::get_value() const {
+    if (type == function) {
+        if (call) return call->evaluate(false);
+        else return std::nullopt;
+    } else {
+        return value;
+    }
 }
 
 bool Expression_component::is_right_associative() {

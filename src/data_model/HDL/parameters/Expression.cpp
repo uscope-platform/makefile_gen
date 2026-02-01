@@ -25,22 +25,25 @@ CEREAL_REGISTER_POLYMORPHIC_RELATION(Parameter_value_base, Expression)
 std::string Expression::print() const {
     std::string ret_val;
     for(auto &item:components){
-        if(item.is_array()) {
-            auto arr = std::get<mdarray<int64_t>>(item.get_value());
-            ret_val += "{xxxxxxx}";
-        } else if(item.is_numeric()){
-            if(std::holds_alternative<int64_t>(item.get_value()))
-                ret_val += std::to_string(std::get<int64_t>(item.get_value()));
-            else if(std::holds_alternative<double>(item.get_value())) {
-                ret_val += std::to_string(std::get<double>(item.get_value()));
+        auto val = item.get_value();
+        if (val.has_value()) {
+            if(item.is_array()) {
+                auto arr = std::get<mdarray<int64_t>>(val.value());
+                ret_val += "{xxxxxxx}";
+            } else if(item.is_numeric()){
+                if(std::holds_alternative<int64_t>(val.value()))
+                    ret_val += std::to_string(std::get<int64_t>(val.value()));
+                else if(std::holds_alternative<double>(val.value())) {
+                    ret_val += std::to_string(std::get<double>(val.value()));
+                }
+            } else if(item.is_identifier()){
+                if(!item.get_package_prefix().empty()){
+                    ret_val += item.get_package_prefix() + "::";
+                }
+                ret_val += std::get<std::string>(val.value());
+            } else if(item.is_operator()) {
+                ret_val += std::get<std::string>(val.value());
             }
-        } else if(item.is_identifier()){
-            if(!item.get_package_prefix().empty()){
-                ret_val += item.get_package_prefix() + "::";
-            }
-            ret_val += std::get<std::string>(item.get_value());
-        } else if(item.is_operator()) {
-            ret_val += std::get<std::string>(item.get_value());
         }
     }
     return ret_val;
@@ -66,7 +69,7 @@ Expression Expression::to_rpm() const {
         } else if(item.is_operator()){
             while (
                     !shunting_stack.empty() &&
-                    std::get<std::string>(shunting_stack.top().get_value())!="(" &&
+                    std::get<std::string>(shunting_stack.top().get_value().value())!="(" &&
                     (
                         shunting_stack.top().is_function() ||
                         shunting_stack.top().get_operator_precedence()<item.get_operator_precedence() ||
@@ -78,10 +81,10 @@ Expression Expression::to_rpm() const {
                 shunting_stack.pop();
             }
             shunting_stack.push(item);
-        } else if(std::get<std::string>(item.get_value()) == "(" || item.is_function()){
+        } else if(std::get<std::string>(item.get_value().value()) == "(" || item.is_function()){
             shunting_stack.push(item);
-        } else if(std::get<std::string>(item.get_value())  == ")"){
-            while (std::get<std::string>(shunting_stack.top().get_value()) != "(") {
+        } else if(std::get<std::string>(item.get_value().value())  == ")"){
+            while (std::get<std::string>(shunting_stack.top().get_value().value()) != "(") {
                 rpn_exp.push_back(shunting_stack.top());
                 shunting_stack.pop();
                 if(shunting_stack.top().is_function()){
@@ -120,7 +123,7 @@ std::optional<resolved_parameter> Expression::evaluate(bool pack_result) {
             if (!i.is_operator() && !i.is_function()) return std::nullopt;
             if(i.get_operator_type() == Expression_component::unary_operator){
                 auto op = evaluator_stack.top().get_value();
-                result = evaluate_unary_expression(op, std::get<std::string>(i.get_value()));
+                result = evaluate_unary_expression(op.value(), std::get<std::string>(i.get_value().value()));
                 evaluator_stack.pop();
             } else if(i.get_operator_type() == Expression_component::binary_operator){
                 resolved_parameter op_a;
@@ -129,10 +132,10 @@ std::optional<resolved_parameter> Expression::evaluate(bool pack_result) {
                 if(expr_stack.components.size()==2)
                     op_a = 0;
                 else {
-                    op_a = evaluator_stack.top().get_value();
+                    op_a = evaluator_stack.top().get_value().value();
                     evaluator_stack.pop();
                 }
-                result = evaluate_binary_expression(op_a, op_b, std::get<std::string>(i.get_value()));
+                result = evaluate_binary_expression(op_a, op_b.value(), std::get<std::string>(i.get_value().value()));
             }
             evaluator_stack.emplace(result, Expression_component::number);
         }
