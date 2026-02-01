@@ -35,7 +35,7 @@ void HDL_parameters_factory::set_value(const std::string &s) {
 void HDL_parameters_factory::add_component(const Expression_component &c, bool is_call_argument) {
     if (is_call_argument) {
         calls_factory.add_argument(std::make_shared<Expression>(Expression({c})));
-        expr_factory.increase_level();//this is a hack but it should work
+        expr_factory.increase_level();//this is a ugly hack, why is it needed?
         expr_factory.stop_expression();
     } else if (index_factory.is_active() && !index_factory.is_range()) {
         index_factory.add_component(c);
@@ -250,9 +250,9 @@ void HDL_parameters_factory::start_function_call(const std::string &f_name) {
 void HDL_parameters_factory::stop_function_call() {
     bool nested = calls_factory.is_nested();
     calls_factory.finish();
-    auto call = calls_factory.get_function();
     expr_factory.pop_level();
     if (!nested) {
+        auto call = calls_factory.get_function();
         Expression_component ec(call);
          if (expr_factory.is_active()) {
             expr_factory.add_component(ec);
