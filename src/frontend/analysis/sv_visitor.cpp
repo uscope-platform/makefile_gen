@@ -425,8 +425,8 @@ void sv_visitor::enterNamed_parameter_assignment(sv2017::Named_parameter_assignm
 }
 
 void sv_visitor::exitNamed_parameter_assignment(sv2017::Named_parameter_assignmentContext *ctx) {
-    auto param = params_factory.get_parameter();
     params_factory.stop_param_override();
+    auto param = params_factory.get_parameter();
     if(deps_factory.is_valid_dependency()){
         deps_factory.add_parameter(param);
     }

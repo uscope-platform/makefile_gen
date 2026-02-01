@@ -20,7 +20,6 @@ void HDL_parameters_factory::new_parameter() {
       new_basic_resource();
       current_resource.set_type(HDL_parameter::expression_parameter);
       init_list.set_dimensions(index_factory.get_dimensions(), true);
-
 }
 
 std::shared_ptr<HDL_parameter> HDL_parameters_factory::get_parameter() {
@@ -215,6 +214,17 @@ void HDL_parameters_factory::start_ternary_operator() {
     //in_ternary_operator = true;
 }
 
+void HDL_parameters_factory::start_param_override()  {
+    in_param_override = true;
+}
+
+void HDL_parameters_factory::stop_param_override() {
+    in_param_override = false;
+    if (!init_list.empty()  && current_resource.get_i_l().empty()) {
+        current_resource.add_initialization_list(init_list);
+    }
+}
+
 void HDL_parameters_factory::start_array_quantifier() {
     index_factory.set_quantifier(true);
 }
@@ -262,7 +272,7 @@ void HDL_parameters_factory::stop_function_call() {
             concat_factory.add_component(std::make_shared<Expression>(Expression({ec})));
         } else if (repl_factory.in_replication()) {
             repl_factory.add_expression(Expression({ec}));
-        } else if (in_packed_assignment || in_param_assignment) {
+        } else if (in_packed_assignment || in_param_assignment || in_param_override) {
             init_list.set_scalar(call);
         } else if (in_initialization_list) {
             init_list.add_item(call);

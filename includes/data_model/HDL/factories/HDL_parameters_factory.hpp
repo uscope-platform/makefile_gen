@@ -96,10 +96,8 @@ public:
 
     void start_ternary_operator();
 
-    void start_param_override() {
-        in_param_override = true;
-    }
-    void stop_param_override() { in_param_override = false;}
+    void start_param_override();
+    void stop_param_override();
 
 private:
     replication_factory repl_factory;
