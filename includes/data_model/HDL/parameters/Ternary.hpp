@@ -33,7 +33,6 @@ public:
     bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) override;
     std::optional<resolved_parameter> evaluate(bool pack_result) override;
     [[nodiscard]] std::string print() const override;
-    int64_t get_size() override;
 
     int64_t get_depth() override;
 

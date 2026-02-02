@@ -21,27 +21,45 @@ Ternary::Ternary() {
 }
 
 std::set<qualified_identifier> Ternary::get_dependencies() const {
-    return Parameter_value_base::get_dependencies();
+    std::set<qualified_identifier> ret_val;
+    auto cond_deps = condition.get_dependencies();
+    ret_val.insert(cond_deps.begin(), cond_deps.end());
+
+    auto true_deps = true_value->get_dependencies();
+    ret_val.insert(true_deps.begin(), true_deps.end());
+
+    auto false_deps = false_value->get_dependencies();
+    ret_val.insert(false_deps.begin(), false_deps.end());
+    return ret_val;
 }
 
 bool Ternary::propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) {
-    return Parameter_value_base::propagate_constant(constant_id, value);
+    bool ret = true;
+    ret &= condition.propagate_constant(constant_id, value);
+    ret &= true_value->propagate_constant(constant_id, value);
+    ret &= false_value->propagate_constant(constant_id, value);
+    return ret;
 }
 
 std::optional<resolved_parameter> Ternary::evaluate(bool pack_result) {
-    return Parameter_value_base::evaluate(pack_result);
+    auto condition_value = condition.evaluate(true);
+    if (!condition_value.has_value()) return std::nullopt;
+    auto int_val = std::get<int64_t>(condition_value.value());
+    if (int_val == 0) {
+        return false_value->evaluate(true);
+    } else {
+        return true_value->evaluate(true);
+    }
 }
 
 std::string Ternary::print() const {
     return Parameter_value_base::print();
 }
 
-int64_t Ternary::get_size() {
-    return Parameter_value_base::get_size();
-}
-
 int64_t Ternary::get_depth() {
-    return Parameter_value_base::get_depth();
+    auto true_depth = true_value->get_depth();
+    auto false_depth = false_value->get_depth();
+    return std::max(true_depth, false_depth) +1;
 }
 
 std::shared_ptr<Parameter_value_base> Ternary::clone_ptr() const {
