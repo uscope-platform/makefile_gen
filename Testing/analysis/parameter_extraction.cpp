@@ -2815,8 +2815,6 @@ TEST(parameter_extraction, generate_for) {
 
 
 
-/**
-
 
 TEST(parameter_extraction, param_ternary_conditional) {
     std::string test_pattern = R"(
@@ -2844,4 +2842,3 @@ TEST(parameter_extraction, param_ternary_conditional) {
         ASSERT_EQ(*item, *parameters.get(item->get_name()));
     }
 }
- **/

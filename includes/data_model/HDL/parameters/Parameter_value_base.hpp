@@ -30,7 +30,8 @@ public:
         concatenation,
         expression,
         replication,
-        function
+        function,
+        ternary
     };
 
     virtual ~Parameter_value_base() = default;
@@ -50,6 +51,7 @@ public:
     [[nodiscard]] bool is_replication() const {return type == replication;}
     [[nodiscard]] bool is_concatenation() const {return type == concatenation;}
     [[nodiscard]] bool is_function() const {return type == function;}
+    [[nodiscard]] bool is_ternary() const {return type == ternary;}
 
     virtual std::shared_ptr<Parameter_value_base> clone_ptr() const = 0;
 
