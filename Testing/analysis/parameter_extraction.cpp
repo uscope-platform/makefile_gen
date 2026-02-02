@@ -2898,3 +2898,78 @@ TEST(parameter_extraction, param_ternary_conditional) {
         ASSERT_EQ(value, defaults.at(name));
     }
 }
+
+
+
+TEST(parameter_extraction, nested_ternary_conditional) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            parameter condition = 2,
+            parameter test_positive = condition > 1 ?  condition > 65 ? 12 : 96 : 34
+        )();
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("condition");
+    p->add_component(Expression_component("2", Expression_component::number));
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("test_positive");
+    Ternary t;
+    t.set_condition(Expression({
+        Expression_component("condition", Expression_component::identifier),
+        Expression_component(">", Expression_component::operation),
+        Expression_component("1", Expression_component::number),
+    }));
+    t.set_false_value(
+        std::make_shared<Expression>(Expression({Expression_component("34", Expression_component::number)}))
+        );
+
+    Ternary inner_t;
+    inner_t.set_condition(Expression({
+        Expression_component("condition", Expression_component::identifier),
+        Expression_component(">", Expression_component::operation),
+        Expression_component("65", Expression_component::number),
+    }));
+    inner_t.set_true_value(
+        std::make_shared<Expression>(Expression({Expression_component("12", Expression_component::number)}))
+        );
+
+    inner_t.set_false_value(
+        std::make_shared<Expression>(Expression({Expression_component("96", Expression_component::number)}))
+        );
+    t.set_true_value(std::make_shared<Ternary>(inner_t));
+    p->set_expression(std::make_shared<Ternary>(t));
+    check_params.insert(p);
+
+
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+
+    std::map<qualified_identifier, resolved_parameter> check_defaults  = {
+        {{"", "condition"}, 2},
+        {{"", "test_positive"}, 96},
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}

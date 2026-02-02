@@ -53,7 +53,13 @@ std::optional<resolved_parameter> Ternary::evaluate(bool pack_result) {
 }
 
 std::string Ternary::print() const {
-    return Parameter_value_base::print();
+    std::ostringstream oss;
+    oss << condition.print();
+    oss << " ? ";
+    if (true_value) oss << true_value->print();
+    oss << " : ";
+    if (false_value) oss << false_value->print();
+    return oss.str();
 }
 
 int64_t Ternary::get_depth() {
@@ -63,7 +69,12 @@ int64_t Ternary::get_depth() {
 }
 
 std::shared_ptr<Parameter_value_base> Ternary::clone_ptr() const {
-    return std::make_shared<Ternary>(*this);
+    Ternary t;
+    t.condition = condition.clone();
+    t.true_value = true_value->clone_ptr();
+    t.false_value = false_value->clone_ptr();
+
+    return std::make_shared<Ternary>(t);
 }
 
 bool Ternary::isEqual(const Parameter_value_base &other) const {
@@ -71,7 +82,7 @@ bool Ternary::isEqual(const Parameter_value_base &other) const {
 
     bool ret_val = true;
     ret_val &= condition == rhs.condition;
-    ret_val &= *true_value == *rhs.true_value;
-    ret_val &= *false_value == *rhs.false_value;
+    ret_val &= (true_value && rhs.true_value) && *true_value == *rhs.true_value;
+    ret_val &= (false_value && rhs.false_value) && *false_value == *rhs.false_value;
     return ret_val;
 }

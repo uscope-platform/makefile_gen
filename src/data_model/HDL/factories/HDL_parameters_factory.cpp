@@ -225,7 +225,10 @@ void HDL_parameters_factory::stop_ternary(){
         } else {
             current_resource.set_expression(t_factory.finish());
         }
-    }}
+    }else {
+        t_factory.add_component(t_factory.finish());
+    }
+}
 
 void HDL_parameters_factory::start_param_override()  {
     in_param_override = true;

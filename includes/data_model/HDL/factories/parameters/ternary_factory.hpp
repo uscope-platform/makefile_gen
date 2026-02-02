@@ -37,7 +37,7 @@ private:
     };
     Ternary current;
     build_phase state = build_phase::inactive;
-    std::stack<Ternary> ternary_stack;
+    std::stack<std::pair<Ternary, build_phase>> ternary_stack;
 };
 
 

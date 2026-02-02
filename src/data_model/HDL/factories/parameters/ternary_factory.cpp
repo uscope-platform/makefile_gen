@@ -17,6 +17,10 @@
 #include "data_model/HDL/factories/parameters/ternary_factory.hpp"
 
 void ternary_factory::start_conditional() {
+    if (state != build_phase::inactive) {
+        ternary_stack.emplace(current, state);
+        current = Ternary();
+    }
     state = build_phase::condition;
 }
 
@@ -35,7 +39,14 @@ void ternary_factory::add_component(const std::shared_ptr<Parameter_value_base> 
 
 std::shared_ptr<Ternary> ternary_factory::finish() {
     auto ret = std::make_shared<Ternary>(current);
-    state = build_phase::inactive;
-    current = Ternary();
-    return ret;
+    if (!ternary_stack.empty()) {
+        auto top = ternary_stack.top();
+        ternary_stack.pop();
+        state = top.second;
+        current = top.first;
+    } else {
+        current = Ternary();
+        state = build_phase::inactive;
+    }
+        return ret;
 }
