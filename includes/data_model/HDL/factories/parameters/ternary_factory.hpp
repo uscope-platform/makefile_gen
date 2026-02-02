@@ -27,7 +27,7 @@ public:
     std::shared_ptr<Ternary> finish();
 
     [[nodiscard]] bool in_ternary() const {return state != build_phase::inactive;};
-
+    bool is_nested() {return !ternary_stack.empty();}
 private:
     enum class build_phase {
         inactive,
@@ -37,6 +37,7 @@ private:
     };
     Ternary current;
     build_phase state = build_phase::inactive;
+    std::stack<Ternary> ternary_stack;
 };
 
 

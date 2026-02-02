@@ -44,11 +44,16 @@ int64_t Ternary::get_depth() {
     return Parameter_value_base::get_depth();
 }
 
-bool Ternary::empty() const {
-}
-
 std::shared_ptr<Parameter_value_base> Ternary::clone_ptr() const {
+    return std::make_shared<Ternary>(*this);
 }
 
 bool Ternary::isEqual(const Parameter_value_base &other) const {
+        const auto& rhs = static_cast<const Ternary&>(other);
+
+    bool ret_val = true;
+    ret_val &= condition == rhs.condition;
+    ret_val &= *true_value == *rhs.true_value;
+    ret_val &= *false_value == *rhs.false_value;
+    return ret_val;
 }

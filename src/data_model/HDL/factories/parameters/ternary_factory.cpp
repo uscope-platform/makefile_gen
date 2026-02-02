@@ -25,12 +25,10 @@ void ternary_factory::add_component(const std::shared_ptr<Parameter_value_base> 
         if (!component->is_expression()) throw std::invalid_argument("Only valid expressions can be the condition of a ternary assignments");
         current.set_condition(component->as<Expression>());
         state = build_phase::true_assignment;
-    }
-    if (state == build_phase::true_assignment) {
+    }else if (state == build_phase::true_assignment) {
         current.set_true_value(component);
         state = build_phase::false_assignment;
-    }
-    if (state == build_phase::false_assignment) {
+    }else if (state == build_phase::false_assignment) {
         current.set_false_value(component);
     }
 }

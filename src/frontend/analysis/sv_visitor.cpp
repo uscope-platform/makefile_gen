@@ -176,7 +176,7 @@ void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
     } else {
         std::string type;
         if(ctx->QUESTIONMARK() != nullptr){
-            type = "ternary";
+            params_factory.stop_ternary();
         }
         params_factory.stop_expression_new();
     }

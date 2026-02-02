@@ -131,7 +131,9 @@ void HDL_parameters_factory::stop_expression_new() {
     if(expr_factory.get_level() == 0){
         auto expr = expr_factory.get_expression();
         if (expr.has_value()) {
-            if(repl_factory.in_replication()) {
+            if (t_factory.in_ternary()) {
+                t_factory.add_component(std::make_shared<Expression>(expr.value()));
+            } else if(repl_factory.in_replication()) {
                 repl_factory.add_expression(expr.value());
             } else if (index_factory.is_range()){
                 index_factory.add_expression(expr.value());
@@ -211,8 +213,19 @@ void HDL_parameters_factory::clear_expression() {
 }
 
 void HDL_parameters_factory::start_ternary_operator() {
-    //in_ternary_operator = true;
+    expr_factory.push_level();
+    t_factory.start_conditional();
 }
+
+void HDL_parameters_factory::stop_ternary(){
+    expr_factory.pop_level();
+    if (!t_factory.is_nested()) {
+        if (in_initialization_list) {
+            init_list.add_item(t_factory.finish());
+        } else {
+            current_resource.set_expression(t_factory.finish());
+        }
+    }}
 
 void HDL_parameters_factory::start_param_override()  {
     in_param_override = true;

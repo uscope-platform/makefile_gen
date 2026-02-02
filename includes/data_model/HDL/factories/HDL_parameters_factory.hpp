@@ -25,6 +25,7 @@
 #include "data_model/HDL/factories/parameters/function_calls_factory.hpp"
 #include "data_model/HDL/factories/parameters/expressions_factory.hpp"
 #include "data_model/HDL/factories/parameters/indexing_factory.hpp"
+#include "data_model/HDL/factories/parameters/ternary_factory.hpp"
 
 
 class HDL_parameters_factory : protected resources_factory_base<HDL_parameter> {
@@ -84,10 +85,9 @@ public:
     bool in_replication_assignment_context() const {return repl_factory.is_assignment_context();};
     bool in_packed_context() const {return in_packed_assignment; };
     bool is_component_relevant() const {
-        return in_initialization_list ||
-            expr_factory.is_active() ||
+        return in_initialization_list || expr_factory.is_active() ||
             index_factory.is_range() && index_factory.is_active() ||
-            in_packed_assignment || calls_factory.in_function_call();
+            in_packed_assignment || calls_factory.in_function_call() || t_factory.in_ternary();
     };
 
     void start_instance_parameter_assignment(const std::string& parameter_name);
@@ -95,6 +95,7 @@ public:
     void clear_expression();
 
     void start_ternary_operator();
+    void stop_ternary();
 
     void start_param_override();
     void stop_param_override();
@@ -105,9 +106,9 @@ private:
     function_calls_factory calls_factory;
     indexing_factory index_factory;
     expressions_factory expr_factory;
+    ternary_factory t_factory;
 
     bool in_param_override = false;
-    bool in_ternary_operator = false;
     bool in_param_assignment = false;
     bool in_initialization_list = false;
     bool in_packed_assignment = false;
