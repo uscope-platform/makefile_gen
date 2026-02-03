@@ -75,7 +75,7 @@ std::set<qualified_identifier> Expression_component::get_dependencies()const {
         auto idx_deps = idx.get_dependencies();
         result.insert(idx_deps.begin(), idx_deps.end());
     }
-    if (type == function) {
+    if (type == function && call) {
         auto call_deps = call->get_dependencies();
         result.insert(call_deps.begin(), call_deps.end());
     }

@@ -280,7 +280,9 @@ void HDL_parameters_factory::stop_function_call() {
     if (!nested) {
         auto call = calls_factory.get_function();
         Expression_component ec(call);
-         if (expr_factory.is_active()) {
+        if(t_factory.in_ternary()) {
+            t_factory.add_component(call);
+        } else if(expr_factory.is_active()) {
             expr_factory.add_component(ec);
         } else if (index_factory.is_active()) {
             index_factory.add_component(ec);
