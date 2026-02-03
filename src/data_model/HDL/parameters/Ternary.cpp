@@ -19,8 +19,8 @@
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/archives/binary.hpp>
 
-CEREAL_REGISTER_TYPE(Expression)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(Parameter_value_base, Expression)
+CEREAL_REGISTER_TYPE(Ternary)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(Parameter_value_base, Ternary)
 
 Ternary::Ternary() {
     type = ternary;
