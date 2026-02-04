@@ -124,7 +124,7 @@ std::set<qualified_identifier> HDL_loop_metadata::get_dependencies() const {
         auto a_deps = a.get_value()->get_dependencies();
         deps.insert(a_deps.begin(), a_deps.end());
     }
-    deps.erase({"", loop_var});
+    deps.erase({"","",  loop_var});
     return deps;
 
 }

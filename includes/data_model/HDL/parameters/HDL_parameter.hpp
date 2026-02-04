@@ -83,6 +83,7 @@ public:
     bool is_packed_array() {return i_l.is_packed();}
 
     std::string get_name() const {return name;};
+    qualified_identifier get_identifier(){return {"", "", name};}
 
     enum parameter_type {
         string_parameter=0,

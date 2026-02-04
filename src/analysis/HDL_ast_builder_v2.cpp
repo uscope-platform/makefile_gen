@@ -153,7 +153,7 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::specialize_instance(const 
     }
     specialized_d.set_ports(new_ports);
     for(auto &p: specialized_d.get_parameters()) {
-         p->propagate_constant({"", idx_name}, idx);
+         p->propagate_constant({"","", idx_name}, idx);
     }
     return std::make_shared<HDL_instance_AST>(specialized_d);
 }

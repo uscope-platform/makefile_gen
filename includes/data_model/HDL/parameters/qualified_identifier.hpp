@@ -27,11 +27,23 @@
 using resolved_parameter = std::variant<int64_t, std::string, mdarray<int64_t>,  double, mdarray<std::string>>;
 
 struct qualified_identifier {
+    qualified_identifier() = default;
+    qualified_identifier(const std::string &p,const std::string &i, const std::string &n) {
+        prefix = p;
+        instance = i;
+        name = n;
+    }
+    qualified_identifier(std::array<std::string, 3> il) {
+        prefix = il[0];
+        instance = il[1];
+        name = il[2];
+    }
     std::string prefix;
+    std::string instance;
     std::string name;
 
     friend bool operator==(const qualified_identifier &lhs, const qualified_identifier &rhs) {
-        return std::tie(lhs.prefix, lhs.name) == std::tie(rhs.prefix, rhs.name);
+        return std::tie(lhs.prefix, lhs.name, lhs.instance) == std::tie(rhs.prefix, rhs.name, rhs.instance);
     }
 
     friend bool operator!=(const qualified_identifier &lhs, const qualified_identifier &rhs) {
@@ -39,12 +51,12 @@ struct qualified_identifier {
     }
 
     bool operator<(const qualified_identifier& other) const {
-        return std::tie(prefix, name) < std::tie(other.prefix, other.name);
+        return std::tie(prefix,instance, name) < std::tie(other.prefix,instance, other.name);
     }
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, prefix);
+        ar(name, instance, prefix);
     }
 };
 

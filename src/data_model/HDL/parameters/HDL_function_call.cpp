@@ -93,7 +93,7 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_vector() {
     if(loop_metadata.has_value()) {
         loop_indexes = loop_solver::solve_loop(loop_metadata.value());
 
-        qualified_identifier loop_var = {"", loop_metadata.value().get_init().get_name()};
+        qualified_identifier loop_var = loop_metadata.value().get_init().get_identifier();
     } else {
         loop_indexes = {};
     }
@@ -109,7 +109,7 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_vector() {
     }
 
     if(loop_metadata.has_value()) {
-        qualified_identifier loop_var = {"", loop_metadata.value().get_init().get_name()};
+        qualified_identifier loop_var =  loop_metadata.value().get_init().get_identifier();
         auto loop_assignments = loop_metadata.value().get_assignments();
         for(int i = 0; i<loop_assignments.size(); i++) {
             for(auto &l:loop_indexes) {

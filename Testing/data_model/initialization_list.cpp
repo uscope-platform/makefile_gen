@@ -423,8 +423,8 @@ TEST(Initialization_list, get_array_dependencies) {
     auto deps_b = params.get("FIXED_REGISTER_VALUES")->get_dependencies();
     auto deps_c = params.get("VARIABLE_INITIAL_VALUES")->get_dependencies();
 
-    std::set<qualified_identifier> check_a = {{"","VARIABLE_INITIAL_VALUES"}, {"", "N_REGISTERS"}, {"", "FIXED_REGISTER_VALUES"}};
-    std::set<qualified_identifier> check_b = {{"", "SS_POLARITY_DEFAULT"}};
+    std::set<qualified_identifier> check_a = {{"","","VARIABLE_INITIAL_VALUES"}, {"","", "N_REGISTERS"}, {"","", "FIXED_REGISTER_VALUES"}};
+    std::set<qualified_identifier> check_b = {{"","", "SS_POLARITY_DEFAULT"}};
     EXPECT_EQ(deps_a, check_a);
     EXPECT_EQ(deps_b, check_b);
     EXPECT_TRUE(deps_c.empty());
@@ -459,7 +459,7 @@ TEST(Initialization_list, concatenation_of_packed_arrays) {
     auto resource = analyzer.analyze()[0];
 
     auto p = resource.get_default_parameters();
-    auto param = p[{"", "INITIAL_REGISTER_VALUES"}];
+    auto param = p[{"","", "INITIAL_REGISTER_VALUES"}];
     mdarray<int64_t>::md_1d_array check_array = {224,1,0,0,2,2,2};
     auto result = std::get<mdarray<int64_t>>(param).get_1d_slice({0,0});
 

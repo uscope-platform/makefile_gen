@@ -63,8 +63,8 @@ TEST(parameter_extraction, strings_dafault_init) {
     mdarray<std::string> tti_val;
     tti_val.set_1d_slice({0, 0}, {"\"FILE\"", "\"FILE\"", "\"FILE\"", "\"FILE\""});
 
-    ASSERT_EQ(3, std::get<int64_t>(defaults.at({"", "N_CORES"})));
-    ASSERT_EQ(tti_val, std::get<mdarray<std::string>>(defaults.at({"", "TRANSLATION_TABLE_INIT"})));
+    ASSERT_EQ(3, std::get<int64_t>(defaults.at({"","", "N_CORES"})));
+    ASSERT_EQ(tti_val, std::get<mdarray<std::string>>(defaults.at({"","", "TRANSLATION_TABLE_INIT"})));
 }
 
 
@@ -122,8 +122,8 @@ TEST(parameter_extraction, string_array_selection) {
     mdarray<std::string> tti_val;
     tti_val.set_1d_slice({0, 0}, {"\"FILE\"", "\"FILE\"", "\"FILE\"", "\"FILE\""});
 
-    ASSERT_EQ(3, std::get<int64_t>(defaults.at({"", "N_CORES"})));
-    ASSERT_EQ(tti_val, std::get<mdarray<std::string>>(defaults.at({"", "TRANSLATION_TABLE_INIT"})));
+    ASSERT_EQ(3, std::get<int64_t>(defaults.at({"","", "N_CORES"})));
+    ASSERT_EQ(tti_val, std::get<mdarray<std::string>>(defaults.at({"","", "TRANSLATION_TABLE_INIT"})));
 }
 
 TEST(parameter_extraction, strings_array) {
@@ -182,8 +182,8 @@ TEST(parameter_extraction, strings_array) {
     mdarray<std::string> tti_val;
     tti_val.set_1d_slice({0, 0}, {"\"FILE\"", "\"FILE\"", "\"FILE\""});
 
-    ASSERT_EQ(3, std::get<int64_t>(defaults.at({"", "N_CORES"})));
-    ASSERT_EQ(tti_val, std::get<mdarray<std::string>>(defaults.at({"", "TRANSLATION_TABLE_INIT"})));
+    ASSERT_EQ(3, std::get<int64_t>(defaults.at({"","", "N_CORES"})));
+    ASSERT_EQ(tti_val, std::get<mdarray<std::string>>(defaults.at({"","", "TRANSLATION_TABLE_INIT"})));
 }
 
 
@@ -232,12 +232,12 @@ TEST(parameter_extraction, float_parameter) {
 
     auto defaults = resource.get_default_parameters();
     std::map<qualified_identifier, resolved_parameter> check_defaults = {
-        {{"", "LUT_DEPTH"}, 9},
-        {{"", "STEP"}, 0.17453292519943295f}
+        {{"","", "LUT_DEPTH"}, 9},
+        {{"","", "STEP"}, 0.17453292519943295f}
     };
 
-    ASSERT_EQ(9, std::get<int64_t>(defaults.at({"", "LUT_DEPTH"})));
-    ASSERT_FLOAT_EQ(0.17453292519943295, std::get<double>(defaults.at({"", "STEP"})));
+    ASSERT_EQ(9, std::get<int64_t>(defaults.at({"","", "LUT_DEPTH"})));
+    ASSERT_FLOAT_EQ(0.17453292519943295, std::get<double>(defaults.at({"","", "STEP"})));
 }
 
 TEST(parameter_extraction, simple_cast) {
@@ -276,7 +276,7 @@ TEST(parameter_extraction, simple_cast) {
 
     auto defaults = resource.get_default_parameters();
     std::map<qualified_identifier, resolved_parameter> check_defaults = {
-        {{"", "CAST"}, 17},
+        {{"","", "CAST"}, 17},
     };
 
     for(const auto& [name, value]:check_defaults){
@@ -334,8 +334,8 @@ TEST(parameter_extraction, multiple_casts) {
 
     auto defaults = resource.get_default_parameters();
     std::map<qualified_identifier, resolved_parameter> check_defaults = {
-        {{"", "CAST"}, 17},
-        {{"", "CAST_2"}, 12},
+        {{"","", "CAST"}, 17},
+        {{"","", "CAST_2"}, 12},
     };
 
     for(const auto& [name, value]:check_defaults){
@@ -390,7 +390,7 @@ TEST(parameter_extraction, cast_propagation) {
 
     auto defaults = resource.get_default_parameters();
     std::map<qualified_identifier, resolved_parameter> check_defaults = {
-        {{"", "CAST"}, 17},
+        {{"","", "CAST"}, 17},
     };
 
     for(const auto& [name, value]:check_defaults){
@@ -446,8 +446,8 @@ TEST(parameter_extraction, complex_cast) {
 
     auto defaults = resource.get_default_parameters();
     std::map<qualified_identifier, resolved_parameter> check_defaults = {
-        {{"", "PARAMETER_1"}, 46},
-        {{"", "CAST"}, 3}
+        {{"","", "PARAMETER_1"}, 46},
+        {{"","", "CAST"}, 3}
     };
 
     for(const auto& [name, value]:check_defaults){
@@ -528,11 +528,11 @@ TEST(parameter_extraction, package_parameters) {
 
     auto defaults = resource.get_default_parameters();
     std::map<qualified_identifier, resolved_parameter> check_defaults = {
-        {{"", "bus_base"}, 0x43c00000},
-        {{"", "timebase"}, 0x43c00000},
-        {{"", "gpio"}, 0x43c01001},
-        {{"", "modulo_parameter"}, 1},
-        {{"", "subtraction_parameter"}, 2}
+        {{"","", "bus_base"}, 0x43c00000},
+        {{"","", "timebase"}, 0x43c00000},
+        {{"","", "gpio"}, 0x43c01001},
+        {{"","", "modulo_parameter"}, 1},
+        {{"","", "subtraction_parameter"}, 2}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -599,12 +599,12 @@ TEST(parameter_extraction, simple_parameters) {
 
     auto defaults = resource.get_default_parameters();
     std::map<qualified_identifier, resolved_parameter> check_defaults = {
-        {{"", "simple_numeric_p"}, 32},
-        {{"", "local_p"}, 74},
-        {{"", "sv_numeric_p"}, 8},
-        {{"", "dimensionless_sv_numeric_p"}, 63},
-        {{"", "string_p"}, R"("423")"},
-        {{"", "nested_p"}, R"("423")"}
+        {{"","", "simple_numeric_p"}, 32},
+        {{"","", "local_p"}, 74},
+        {{"","", "sv_numeric_p"}, 8},
+        {{"","", "dimensionless_sv_numeric_p"}, 63},
+        {{"","", "string_p"}, R"("423")"},
+        {{"","", "nested_p"}, R"("423")"}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -746,18 +746,18 @@ TEST(parameter_extraction, simple_expressions) {
 
     auto defaults = resource.get_default_parameters();
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "simple_numeric_p"}, 32},
-        {{"", "sv_numeric_p"}, 8},
-        {{"", "dimensionless_sv_numeric_p"}, 63},
-        {{"", "simple_log_expr_p"},6},
-        {{"", "add_expr_p"}, 40},
-        {{"", "sub_expr_p"}, 24},
-        {{"", "mul_expr_p"}, 256},
-        {{"", "div_expr_p"}, 4},
-        {{"", "chained_expression"}, 1320},
-        {{"", "modulo_expr_p"}, 0},
-        {{"", "complex_log_expr_p"}, 6},
-        {{"", "parenthesised_expr_p"}, 1480}
+        {{"", "", "simple_numeric_p"}, 32},
+        {{"", "", "sv_numeric_p"}, 8},
+        {{"", "", "dimensionless_sv_numeric_p"}, 63},
+        {{"", "", "simple_log_expr_p"},6},
+        {{"", "", "add_expr_p"}, 40},
+        {{"", "", "sub_expr_p"}, 24},
+        {{"", "", "mul_expr_p"}, 256},
+        {{"", "", "div_expr_p"}, 4},
+        {{"", "", "chained_expression"}, 1320},
+        {{"", "", "modulo_expr_p"}, 0},
+        {{"", "", "complex_log_expr_p"}, 6},
+        {{"", "", "parenthesised_expr_p"}, 1480}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -827,9 +827,9 @@ TEST(parameter_extraction, assay_assignment) {
     av.set_1d_slice({0, 0}, {8, 32});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "simple_numeric_p"}, 32},
-        {{"", "sv_numeric_p"}, 8},
-        {{"", "concatenation"}, av}
+        {{"", "", "simple_numeric_p"}, 32},
+        {{"", "", "sv_numeric_p"}, 8},
+        {{"", "", "concatenation"}, av}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -885,7 +885,7 @@ TEST(parameter_extraction, default_assign) {
     av.set_1d_slice({0, 0}, {5, 5});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "test_array"}, av}
+        {{"", "", "test_array"}, av}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -953,9 +953,9 @@ TEST(parameter_extraction, array_concatenation) {
     av.set_1d_slice({0, 0}, {8,32});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "simple_numeric_p"}, 32},
-        {{"", "sv_numeric_p"}, 8},
-        {{"", "concatenation"}, av}
+        {{"", "", "simple_numeric_p"}, 32},
+        {{"", "", "sv_numeric_p"}, 8},
+        {{"", "", "concatenation"}, av}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -1013,8 +1013,7 @@ TEST(parameter_extraction, array_parameter) {
     mdarray<int64_t> array_value;
     array_value.set_1d_slice({0, 0}, {5, 32});
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "array_parameter"}, array_value}
-
+        {{"","", "array_parameter"}, array_value}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -1064,8 +1063,8 @@ TEST(parameter_extraction, integer_localparams) {
 
     auto defaults = resource.get_default_parameters();
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "serial_msb_out_first"}, 0},
-        {{"", "serial_lsb_out_first"}, 1},
+        {{"","", "serial_msb_out_first"}, 0},
+        {{"","", "serial_lsb_out_first"}, 1},
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -1141,8 +1140,8 @@ TEST(parameter_extraction, simple_array_propagation) {
     mdarray<int64_t> array_value;
     array_value.set_1d_slice({0, 0}, {5, 32});
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "array_parameter"}, array_value},
-        {{"", "array_parameter_expr_p"}, 37},
+        {{"","", "array_parameter"}, array_value},
+        {{"","", "array_parameter_expr_p"}, 37},
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -1223,9 +1222,9 @@ TEST(parameter_extraction, array_expression) {
     mdarray<int64_t> array_value;
     array_value.set_1d_slice({0, 0}, {5, 32});
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "array_parameter"}, array_value},
-        {{"", "array_parameter_expr_p"}, 37},
-        {{"", "sv_numeric_p"}, 1},
+        {{"","", "array_parameter"}, array_value},
+        {{"","", "array_parameter_expr_p"}, 37},
+        {{"","", "sv_numeric_p"}, 1},
 
     };
     for(const auto& [name, value]:check_defaults){
@@ -1376,8 +1375,8 @@ TEST(parameter_extraction, simple_repetition_initialization) {
     av.set_2d_slice({0}, {{1,1}});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "repetition_size"}, 2},
-        {{"", "repetition_parameter_1"}, av}
+        {{"","", "repetition_size"}, 2},
+        {{"","", "repetition_parameter_1"}, av}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -1436,8 +1435,8 @@ TEST(parameter_extraction, packed_repetition_initialization) {
     auto defaults = resource.get_default_parameters();
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "repetition_size"}, 2},
-        {{"", "repetition_parameter_1"}, 3}
+        {{"","", "repetition_size"}, 2},
+        {{"", "","repetition_parameter_1"}, 3}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -1556,11 +1555,11 @@ TEST(parameter_extraction, repetition_initialization) {
     av4.set_2d_slice({0}, {{4, 4, 2, 1}});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "repetition_size"}, 2},
-        {{"", "repetition_parameter_1"}, av},
-        {{"", "repetition_parameter_2"}, av2},
-        {{"", "multi_repetition_parameter"}, av3},
-        {{"", "mixed_repetition_parameter"}, av4}
+        {{"","", "repetition_size"}, 2},
+        {{"","", "repetition_parameter_1"}, av},
+        {{"","", "repetition_parameter_2"}, av2},
+        {{"","", "multi_repetition_parameter"}, av3},
+        {{"","", "mixed_repetition_parameter"}, av4}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -1620,7 +1619,7 @@ TEST(parameter_extraction, packed_array) {
 
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "packed_param"}, 169}
+        {{"","", "packed_param"}, 169}
     };
 
     for(const auto& [name, value]:check_defaults){
@@ -1693,7 +1692,7 @@ TEST(parameter_extraction, multpidim_packed_array) {
     mdarray<int64_t> av;
     av.set_1d_slice({0, 0}, {201, 169});
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "packed_param"}, av }
+        {{"","", "packed_param"}, av }
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -1741,7 +1740,7 @@ TEST(parameter_extraction, package_parameters_use) {
 
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "package_param"}, "__RUNTIME_ONLY_PARAMETER__"}
+        {{"","", "package_param"}, "__RUNTIME_ONLY_PARAMETER__"}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -1783,7 +1782,7 @@ TEST(parameter_extraction, negative_number_parameters) {
     av.set_1d_slice({0, 0}, {8, 32});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "negative_param"}, -32767}
+        {{"","", "negative_param"}, -32767}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -1837,8 +1836,8 @@ TEST(parameter_extraction, packed_bit_access) {
     av.set_1d_slice({0, 0}, {8, 32});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "param_a"}, -1},
-        {{"", "param_b"}, 1}
+        {{"","", "param_a"}, -1},
+        {{"","", "param_b"}, 1}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -1888,7 +1887,7 @@ TEST(parameter_extraction, negative_number_array_init) {
     av.set_1d_slice({0, 0}, {32767, -32767});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "negative_array_param"}, av}
+        {{"","", "negative_array_param"}, av}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -1949,7 +1948,7 @@ TEST(parameter_extraction, expression_array_init) {
     av.set_1d_slice({0, 0}, {42, 9});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "expression_array_param"}, av}
+        {{"","", "expression_array_param"}, av}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -2049,8 +2048,8 @@ TEST(parameter_extraction, combined_packed_unpacked_init) {
     av2.set_1d_slice({0, 0}, {0, 255});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "param_a"}, av},
-        {{"", "param_a"}, av2}
+        {{"", "", "param_a"}, av},
+        {{"", "", "param_a"}, av2}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -2216,8 +2215,8 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
     av.set_1d_slice({0, 0}, {0x27e0, 0xe0, 3 , 3, 3});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "SS_POLARITY_DEFAULT"}, 0},
-        {{"", "FIXED_REGISTER_VALUES"}, av}
+        {{"","", "SS_POLARITY_DEFAULT"}, 0},
+        {{"", "", "FIXED_REGISTER_VALUES"}, av}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -2324,7 +2323,7 @@ TEST(parameter_extraction, multidimensional_packed_array) {
     av.set_1d_slice({0, 1}, {29, 226});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "param_a"}, av}
+        {{"", "", "param_a"}, av}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -2375,7 +2374,7 @@ TEST(parameter_extraction, packed_replication_init) {
     auto defaults = resource.get_default_parameters();
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "test_parameter"}, 31}
+        {{"","", "test_parameter"}, 31}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -2435,7 +2434,7 @@ TEST(parameter_extraction, array_initialization_default) {
     av.set_1d_slice({0, 2}, {3, 3});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "test_parameter"}, av}
+        {{"","", "test_parameter"}, av}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -2481,7 +2480,7 @@ TEST(parameter_extraction, simple_function_parameter) {
     auto defaults = resource.get_default_parameters();
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "TEST_PARAM"}, 100}
+        {{"","", "TEST_PARAM"}, 100}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -2557,7 +2556,7 @@ TEST(parameter_extraction, loop_function_parameter) {
     av.set_1d_slice({0, 0}, {0, 100, 200});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "TEST_PARAM"}, av}
+        {{"","", "TEST_PARAM"}, av}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -2635,7 +2634,7 @@ TEST(parameter_extraction, parametric_loop_function_parameter) {
     av.set_1d_slice({0, 0}, {0, 100, 200});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "TEST_PARAM"}, av}
+        {{"","", "TEST_PARAM"}, av}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -2681,7 +2680,7 @@ TEST(parameter_extraction, function_with_arguments) {
 
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "TEST_PARAM"}, 12}
+        {{"", "", "TEST_PARAM"}, 12}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -2756,9 +2755,9 @@ TEST(parameter_extraction, interface_parameters) {
     av.set_1d_slice({0, 0}, {8, 32});
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "DATA_WIDTH"}, 32},
-        {{"", "USER_WIDTH"}, 24},
-        {{"", "DEST_WIDTH"}, 8}
+        {{"","", "DATA_WIDTH"}, 32},
+        {{"","", "USER_WIDTH"}, 24},
+        {{"", "", "DEST_WIDTH"}, 8}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -2889,9 +2888,9 @@ TEST(parameter_extraction, param_ternary_conditional) {
     auto defaults = resource.get_default_parameters();
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "condition"}, 2},
-        {{"", "test_positive"}, 12},
-        {{"", "test_negative"}, 34},
+        {{"","", "condition"}, 2},
+        {{"","", "test_positive"}, 12},
+        {{"","", "test_negative"}, 34},
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -2964,8 +2963,8 @@ TEST(parameter_extraction, nested_ternary_conditional) {
     auto defaults = resource.get_default_parameters();
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "condition"}, 2},
-        {{"", "test_positive"}, 96},
+        {{"","", "condition"}, 2},
+        {{"","", "test_positive"}, 96},
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -3027,8 +3026,8 @@ TEST(parameter_extraction, complex_ternary_conditional) {
     auto defaults = resource.get_default_parameters();
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"", "NM"}, 4},
-        {{"", "LGNM"}, 2},
+        {{"","", "NM"}, 4},
+        {{"","", "LGNM"}, 2},
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));

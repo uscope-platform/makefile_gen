@@ -243,7 +243,7 @@ TEST(function_processing, parametric_loop_function) {
     call.add_body(functions["CTRL_ADDR_CALC"].get_assignments(), functions["CTRL_ADDR_CALC"].get_loop());
 
 
-    auto res= call.propagate_constant({"", "N_CORES"}, 3);
+    auto res= call.propagate_constant({"","", "N_CORES"}, 3);
     auto values = call.evaluate(false);
     ASSERT_TRUE(values.has_value());
     EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
@@ -328,7 +328,7 @@ TEST(function_processing, complex_loop_function) {
 
     mdarray<int64_t> check_val;
     check_val.set_1d_slice({0,0}, {44, 100,200,300, 667});
-    call.propagate_constant({"", "N_CORES"}, 3);
+    call.propagate_constant({"","", "N_CORES"}, 3);
     auto values = call.evaluate(false);
     ASSERT_TRUE(values.has_value());
     EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
@@ -384,7 +384,7 @@ TEST(function_processing, parametrized_function) {
     call.add_body(functions["CTRL_ADDR_CALC"].get_assignments(), functions["CTRL_ADDR_CALC"].get_loop());
 
 
-    call.propagate_constant({"", "N_CORES"}, 1);
+    call.propagate_constant({"","", "N_CORES"}, 1);
     auto values = call.evaluate(false);
     ASSERT_TRUE(values.has_value());
     EXPECT_TRUE(std::holds_alternative<mdarray<int64_t>>(values.value()));
@@ -432,7 +432,7 @@ TEST(function_processing, package_assignment) {
 
     auto call = HDL_function_call("CTRL_ADDR_CALC");
     call.add_body(functions["CTRL_ADDR_CALC"].get_assignments(), functions["CTRL_ADDR_CALC"].get_loop());
-    call.propagate_constant({"hil_address_space", "bus_base"}, 21);
+    call.propagate_constant({"hil_address_space","", "bus_base"}, 21);
     auto values = call.evaluate(false);
     ASSERT_TRUE(values.has_value());
     ASSERT_TRUE(std::holds_alternative<int64_t>(values.value()));

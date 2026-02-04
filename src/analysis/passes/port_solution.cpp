@@ -24,7 +24,7 @@ void port_solution::process_node(const std::shared_ptr<HDL_instance_AST> &node) 
             for(auto &n:nets) {
                 for(const auto param:parameters) {
                     auto val = param->get_value();
-                    if(val.has_value()) n.propagate_constant({"", param->get_name()}, val.value());
+                    if(val.has_value()) n.propagate_constant( param->get_identifier(), val.value());
                 }
                 n.evaluate();
             }

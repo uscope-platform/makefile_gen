@@ -577,6 +577,64 @@ TEST(parameter_processing, override_with_system_task) {
     EXPECT_EQ(p1_t->get_numeric_value(), 8);
 }
 
+/*
+TEST(parameter_processing, override_with_interface_param) {
+    std::string test_pattern = R"(
+
+
+    interface test_if #(DATA_WIDTH = 32);
+    endinterface
+
+        module dependency #(
+            parameter param_1 = 4
+        )();
+
+            parameter p1_t = param_1+2;
+
+        endmodule
+
+        module test_mod #(
+        )();
+
+            test_if iface();
+
+            dependency #(
+                .param_1(˙)
+            ) dep ();
+
+        endmodule
+    )";
+
+
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+    d_store->store_hdl_entity(resources[2]);
+
+
+    nlohmann::json df_content;
+
+    Depfile df;
+    df.set_content(df_content);
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+
+    auto params = ast_v2->get_dependencies()[0]->get_parameters();
+    auto param_1 = params.get("param_1");
+    EXPECT_EQ(param_1->get_numeric_value(), 6);
+    auto p1_t = params.get("p1_t");
+    EXPECT_EQ(p1_t->get_numeric_value(), 8);
+}
+*/
 TEST(parameter_processing, override_with_package_parameter) {
     std::string test_pattern = R"(
         package test_package;
