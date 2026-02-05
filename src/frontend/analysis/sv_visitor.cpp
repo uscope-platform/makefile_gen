@@ -216,14 +216,18 @@ void sv_visitor::enterPrimaryPath(sv2017::PrimaryPathContext *ctx) {
 
 
 void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
-
     Expression_component ec;
 
-    if(!package_prefix.empty()){
+    if(!package_prefix.empty()) {
         ec = Expression_component(package_item, Expression_component::get_type(package_item));
         ec.set_package_prefix(package_prefix);
         package_prefix.clear();
         package_item.clear();
+    } else if (!instance_prefix.empty()){
+        ec = Expression_component(instance_item, Expression_component::get_type(instance_item));
+        ec.set_instance_prefix(instance_prefix);
+        instance_item.clear();
+        instance_prefix.clear();
     } else {
         ec = Expression_component(ctx->getText(), Expression_component::get_type(ctx->getText()));
     }
@@ -523,6 +527,10 @@ void sv_visitor::enterPrimaryDot(sv2017::PrimaryDotContext *ctx) {
                 deps_factory.start_scalar_net(ctx->getText());
             }
         }
+    }
+    if(params_factory.is_component_relevant()) {
+        instance_prefix = ctx->primary()->getText();
+        instance_item = ctx->identifier()->getText();
     }
 
 }

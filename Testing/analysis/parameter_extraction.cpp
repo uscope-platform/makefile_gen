@@ -1748,6 +1748,45 @@ TEST(parameter_extraction, package_parameters_use) {
     }
 }
 
+
+TEST(parameter_extraction, interface_parameter_use) {
+    std::string test_pattern = R"(
+
+
+    interface test_if #(DATA_WIDTH = 32);
+    endinterface
+
+    module test_mod #(
+         parameter package_param = test_package::bus_base
+    )();
+        test_if test_interface();
+        dependency_dep #(.TEST_PARAM(test_interface.DATA_WIDTH)) dep();
+    endmodule
+    )";
+
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    auto res = resources[1].get_dependencies()[2];
+    auto parameters = res.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("TEST_PARAM");
+    Expression_component ec("DATA_WIDTH", Expression_component::identifier);
+    ec.set_package_prefix("test_interface");
+    p->add_component(ec);
+    check_params.insert(p);
+
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+}
+
 TEST(parameter_extraction, negative_number_parameters) {
     std::string test_pattern = R"(
         module test_mod #(

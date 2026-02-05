@@ -577,7 +577,6 @@ TEST(parameter_processing, override_with_system_task) {
     EXPECT_EQ(p1_t->get_numeric_value(), 8);
 }
 
-/*
 TEST(parameter_processing, override_with_interface_param) {
     std::string test_pattern = R"(
 
@@ -599,7 +598,7 @@ TEST(parameter_processing, override_with_interface_param) {
             test_if iface();
 
             dependency #(
-                .param_1(˙)
+                .param_1(iface.DATA_WIDTH)
             ) dep ();
 
         endmodule
@@ -618,6 +617,7 @@ TEST(parameter_processing, override_with_interface_param) {
     d_store->store_hdl_entity(resources[1]);
     d_store->store_hdl_entity(resources[2]);
 
+    auto raw_param = resources[2].get_dependencies()[1].get_parameters();
 
     nlohmann::json df_content;
 
@@ -628,13 +628,14 @@ TEST(parameter_processing, override_with_interface_param) {
     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
 
 
-    auto params = ast_v2->get_dependencies()[0]->get_parameters();
-    auto param_1 = params.get("param_1");
-    EXPECT_EQ(param_1->get_numeric_value(), 6);
-    auto p1_t = params.get("p1_t");
-    EXPECT_EQ(p1_t->get_numeric_value(), 8);
+    auto dep = ast_v2->get_dependencies()[0];
+    //auto param_1 = params.get("param_1");
+    //EXPECT_EQ(param_1->get_numeric_value(), 6);
+    //auto p1_t = params.get("p1_t");
+    //EXPECT_EQ(p1_t->get_numeric_value(), 8);
+    EXPECT_TRUE(false);
 }
-*/
+
 TEST(parameter_processing, override_with_package_parameter) {
     std::string test_pattern = R"(
         package test_package;

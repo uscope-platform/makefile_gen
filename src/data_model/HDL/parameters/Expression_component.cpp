@@ -28,6 +28,7 @@ Expression_component::Expression_component(const Expression_component &c) {
     value = c.value;
     array_index = c.array_index;
     package_prefix = c.package_prefix;
+    instance_prefix = c.instance_prefix;
     binary_size = c.binary_size;
     type = c.type;
     if (call) call = std::make_shared<HDL_function_call>(*c.call);
@@ -155,6 +156,7 @@ bool operator==(const Expression_component &lhs, const Expression_component &rhs
     ret_val &= lhs.value == rhs.value;
     ret_val &= lhs.array_index == rhs.array_index;
     ret_val &= lhs.package_prefix == rhs.package_prefix;
+    ret_val &= lhs.instance_prefix == rhs.instance_prefix;
     ret_val &= lhs.binary_size == rhs.binary_size;
     if (lhs.call == nullptr ^ rhs.call == nullptr) return false;
     if (!(lhs.call == nullptr && rhs.call == nullptr)) ret_val &= *lhs.call == *rhs.call;

@@ -204,7 +204,9 @@ private:
     HDL_functions_factory functions_factory;
 
     std::string package_prefix;
+    std::string instance_prefix;
     std::string package_item;
+    std::string instance_item;
 };
 
 

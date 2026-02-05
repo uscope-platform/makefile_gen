@@ -80,6 +80,9 @@ public:
         value = v;
     }
 
+    void set_instance_prefix(const std::string &p){instance_prefix = p;}
+    std::string get_instance_prefix() {return instance_prefix;};
+
     void set_package_prefix(const std::string &s) {package_prefix = s;}
     std::string get_package_prefix() const {return package_prefix;};
 
@@ -107,7 +110,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(value,type, array_index, package_prefix, binary_size);
+        ar(value,type, array_index, instance_prefix, package_prefix, binary_size);
     }
 
     nlohmann::json dump();
@@ -125,6 +128,7 @@ private:
     std::shared_ptr<HDL_function_call> call;
 
     std::string package_prefix;
+    std::string instance_prefix;
 
     int64_t binary_size = 0;
 
