@@ -70,7 +70,7 @@ Expression_component::Expression_component(const std::shared_ptr<Parameter_value
 std::set<qualified_identifier> Expression_component::get_dependencies()const {
     std::set<qualified_identifier> result;
     if (is_identifier()){
-        result.insert({package_prefix, "", std::get<std::string>(value)});
+        result.insert({package_prefix, instance_prefix, std::get<std::string>(value)});
     }
     for (const auto &idx:array_index) {
         auto idx_deps = idx.get_dependencies();

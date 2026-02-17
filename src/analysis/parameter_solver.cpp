@@ -183,9 +183,28 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
                     }else if(!dep.prefix.empty()) {
                         auto package = d_store->get_HDL_resource(dep.prefix);
                         value = package.get_default_parameters()[{"", "", dep.name}];
+                    }else if (!dep.instance.empty()){
+                        bool inst_param_found = false;
+                        for (const auto &brother_inst:work.node->get_parent()->get_dependencies()) {
+                            if (brother_inst->get_name() == dep.instance) {
+                                auto inst_param = brother_inst->get_parameters().get(dep.name)->get_numeric_value();
+                                if (!inst_param.has_value()) {
+                                    spdlog::warn("The instance parameter {}::{} has no value, using 0 as a default", dep.instance, dep.name);
+                                    value = 0;
+                                } else {
+                                    value = inst_param.value();
+                                }
+                                inst_param_found = true;
+                                break;
+                            }
+                        }
+                        if (!inst_param_found) {
+                            spdlog::warn("The instance parameter {}::{} was not found, using 0 as a default", dep.instance, dep.name);
+                            value = 0;
+                        }
                     }else if(node_overrides.contains(dep.name)) {
                         internal_dependency = true;
-                    }else if(node_defaults.contains({"", "", dep.name})){
+                    }else if(node_defaults.contains({"", "", dep.name})) {
                         value = node_defaults[{"", "", dep.name}];
                     } else {
                         spdlog::warn("Parameter {}::{} is not defined in the design", dep.prefix, dep.name);

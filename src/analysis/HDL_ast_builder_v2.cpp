@@ -71,6 +71,7 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
                 spdlog::trace("Processing dependency {} in module {}",working_instance->get_name(), type);
                 auto current_param_values = parameter_solver::override_parameters(wo, d_store);
 
+                std::vector<work_order> child_wo;
                 for (auto &dep: res.get_dependencies()) {
                     if(dep.get_dependency_class() == interface || dep.get_dependency_class() == module) {
                         auto child = std::make_shared<HDL_instance_AST>(dep);
@@ -87,7 +88,7 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
                                 auto new_child = std::make_shared<HDL_instance_AST>(*child);
                                 auto specialized_child = specialize_instance(*new_child, idx, child->get_inner_loop().get_init().get_name());
                                 working_instance->add_child(specialized_child);
-                                working_stack.push({
+                                child_wo.push_back({
                                     specialized_child,
                                     current_param_values,
                                     wo.path + "." + working_instance->get_name()
@@ -95,7 +96,7 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
                             }
                         } else {
                             working_instance->add_child(child);
-                            working_stack.push({
+                            child_wo.push_back({
                                 child,
                                 current_param_values,
                                 wo.path + "." + working_instance->get_name()
@@ -108,6 +109,9 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
                         auto path = d_store->get_data_file(dep.get_type()).get_path();
                         working_instance->add_data_dependency(path);
                     }
+                }
+                for (const auto &c:child_wo| std::views::reverse) {
+                    working_stack.push(c);
                 }
             }
         }
