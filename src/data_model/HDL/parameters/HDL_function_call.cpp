@@ -70,6 +70,7 @@ void HDL_function_call::propagate_function(const HDL_function_def &def) {
     if(def.name == function_name) {
         assignments = def.get_assignments();
         loop_metadata = def.get_loop();
+        //TODO: do actual argument inlining
     }
 }
 

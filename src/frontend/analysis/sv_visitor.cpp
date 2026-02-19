@@ -80,6 +80,20 @@ void sv_visitor::exitName_of_instance(sv2017::Name_of_instanceContext *ctx) {
     }
 }
 
+void sv_visitor::enterTf_port_item(sv2017::Tf_port_itemContext *ctx) {
+    auto dbg = ctx->getText();
+    auto identifier = ctx->identifier();
+    if (identifier != nullptr) {
+        functions_factory.add_argument(identifier->getText());
+    } else if (ctx->data_type_or_implicit()!= nullptr) {
+        auto name = ctx->data_type_or_implicit()->getText();
+        functions_factory.add_argument(name);
+    } else {
+        int i =0;
+    }
+
+}
+
 void sv_visitor::exitInterface_header(sv2017::Interface_headerContext *ctx) {
     std::string interface_name = ctx->identifier()->getText();
     if(modules_factory.is_current_valid()){

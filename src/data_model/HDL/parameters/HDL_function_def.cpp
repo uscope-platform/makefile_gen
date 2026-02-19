@@ -52,6 +52,7 @@ bool HDL_function_def::operator==(const HDL_function_def &rhs) const {
     retval &= name == rhs.name;
     retval &= assignments == rhs.assignments;
     retval &= loop_metadata == rhs.loop_metadata;
+    retval &= argument_names == rhs.argument_names;
     return retval;
 }
 

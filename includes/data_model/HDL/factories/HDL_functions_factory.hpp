@@ -30,6 +30,7 @@ public:
         f.set_name(s);
     }
     void start_assignment(const std::string &n) {current_assigned_variable = n;}
+    void add_argument(const std::string &a);
     void add_component(const Expression_component &c);
     void close_lvalue();
     void close_assignment();

@@ -15,6 +15,10 @@
 
 #include "data_model/HDL/factories/HDL_functions_factory.hpp"
 
+void HDL_functions_factory::add_argument(const std::string &a) {
+    f.add_argument(a);
+}
+
 void HDL_functions_factory::add_component(const Expression_component &c) {
     new_expression.push_back(c);
 }

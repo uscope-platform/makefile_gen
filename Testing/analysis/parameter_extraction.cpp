@@ -2528,6 +2528,38 @@ TEST(parameter_extraction, simple_function_parameter) {
 }
 
 
+TEST(parameter_extraction, function_with_parameters) {
+    std::string test_pattern = R"(
+
+
+        module test_mod #(
+        )();
+
+            function logic [ADDR_WIDTH-1:0] CTRL_ADDR_CALC(int i, reg [5:0] b [1:0]);
+            endfunction
+
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    auto func = resource.get_functions()["CTRL_ADDR_CALC"];
+
+
+
+    HDL_function_def f;
+    f.set_name("CTRL_ADDR_CALC");
+    f.add_argument("i");
+    f.add_argument("b");
+
+    ASSERT_EQ(f,  func);
+
+}
+
+
 
 TEST(parameter_extraction, loop_function_parameter) {
     std::string test_pattern = R"(

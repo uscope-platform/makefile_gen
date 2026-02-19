@@ -15,6 +15,7 @@
 
 #ifndef HDL_FUNCTION_HPP
 #define HDL_FUNCTION_HPP
+
 #include <string>
 #include <vector>
 #include<set>
@@ -30,24 +31,27 @@ public:
     HDL_function_def clone();
 
     void set_name(const std::string &s) { name = s;}
+    void add_argument(const std::string &s){argument_names.push_back(s);}
     void start_assignment(const std::string &n, Expression idx);
     void close_assignment(Expression val);
     void add_assignment(const assignment &a){assignments.push_back(a);}
     void add_loop_metadata(const HDL_loop_metadata &l){loop_metadata = l;}
     bool is_scalar() const;
-    std::vector<assignment> get_assignments()const{ return assignments;};
-    std::optional<HDL_loop_metadata> get_loop()const{ return loop_metadata;};
+    std::vector<assignment> get_assignments()const{ return assignments;}
+    std::vector<std::string> get_arguments_names(){return  argument_names;}
+    std::optional<HDL_loop_metadata> get_loop()const{ return loop_metadata;}
     bool operator==(const HDL_function_def &rhs) const;
 
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, assignments, loop_metadata);
+        ar(name, assignments, loop_metadata, argument_names);
     }
     std::string name;
 private:
     std::vector<assignment> assignments;
     std::optional<HDL_loop_metadata> loop_metadata;
+    std::vector<std::string> argument_names;
 };
 
 

@@ -184,6 +184,9 @@ public:
 
     void enterName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
     void exitName_of_instance(sv2017::Name_of_instanceContext *ctx) override;
+
+    void enterTf_port_item(sv2017::Tf_port_itemContext *ctx) override;
+
 private:
 
     bool in_param_declaration = false;
