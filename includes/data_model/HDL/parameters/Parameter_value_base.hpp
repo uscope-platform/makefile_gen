@@ -38,6 +38,7 @@ public:
 
     virtual std::set<qualified_identifier> get_dependencies()const {return {};}
     virtual bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) {return true;}
+    virtual void propagate_expression(const qualified_identifier &constant_id, const std::shared_ptr<Parameter_value_base> &value){}
     virtual void propagate_function(const HDL_function_def &def) {}
     virtual std::optional<resolved_parameter> evaluate(bool pack_result) {return std::nullopt;}
     virtual std::string print() const {return "";}

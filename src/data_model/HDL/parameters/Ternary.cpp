@@ -47,6 +47,13 @@ bool Ternary::propagate_constant(const qualified_identifier &constant_id, const 
     return ret;
 }
 
+void Ternary::propagate_expression(const qualified_identifier &constant_id,
+    const std::shared_ptr<Parameter_value_base> &value) {
+    condition.propagate_expression(constant_id, value);
+    true_value->propagate_expression(constant_id, value);
+    false_value->propagate_expression(constant_id, value);
+}
+
 std::optional<resolved_parameter> Ternary::evaluate(bool pack_result) {
     auto condition_value = condition.evaluate(true);
     if (!condition_value.has_value()) return std::nullopt;

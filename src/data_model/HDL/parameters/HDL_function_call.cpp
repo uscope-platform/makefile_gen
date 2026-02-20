@@ -68,8 +68,14 @@ bool HDL_function_call::propagate_constant(const qualified_identifier &constant_
 
 void HDL_function_call::propagate_function(const HDL_function_def &def) {
     if(def.name == function_name) {
+        auto arg_names = def.get_arguments_names();
         assignments = def.get_assignments();
         loop_metadata = def.get_loop();
+        for (int i =0;i<arg_names.size(); i++) {
+            for (auto &a:assignments) {
+                a.propagate_argument(arg_names[i], arguments[i]);
+            }
+        }
         //TODO: do actual argument inlining
     }
 }

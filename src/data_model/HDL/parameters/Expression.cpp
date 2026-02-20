@@ -330,6 +330,27 @@ bool Expression::propagate_constant(const qualified_identifier &constant_id, con
     return retval;
 }
 
+void Expression::propagate_expression(const qualified_identifier &constant_id,
+    const std::shared_ptr<Parameter_value_base> &value) {
+    std::vector<Expression_component> new_expr;
+
+    for (auto & component : components) {
+        if (component.is_identifier()) {
+            if (std::get<std::string>(component.get_value().value()) == constant_id.name) {
+                if (value->is_expression()) {
+                    auto expr = value->as<Expression>();
+                    if (expr.components.size() == 1) {
+                        new_expr.push_back(expr.components[0]);
+                        continue;
+                    }
+                }
+            }
+        }
+        new_expr.push_back(component);
+    }
+    components = new_expr;
+}
+
 void Expression::propagate_function(const HDL_function_def &def) {
     for (auto & component : components) {
         component.propagate_function(def);

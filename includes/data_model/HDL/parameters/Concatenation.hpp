@@ -63,6 +63,8 @@ public:
     std::set<qualified_identifier> get_dependencies()const override;
     bool empty() const {return components.empty();}
     bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) override;
+    void propagate_expression(const qualified_identifier &constant_id, const std::shared_ptr<Parameter_value_base> &value) override;
+
     void propagate_function(const HDL_function_def &def) override;
     std::optional<resolved_parameter> evaluate(bool pack_result) override;
     std::string print() const override;

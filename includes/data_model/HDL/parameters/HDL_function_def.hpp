@@ -38,7 +38,7 @@ public:
     void add_loop_metadata(const HDL_loop_metadata &l){loop_metadata = l;}
     bool is_scalar() const;
     std::vector<assignment> get_assignments()const{ return assignments;}
-    std::vector<std::string> get_arguments_names(){return  argument_names;}
+    std::vector<std::string> get_arguments_names()const{return  argument_names;}
     std::optional<HDL_loop_metadata> get_loop()const{ return loop_metadata;}
     bool operator==(const HDL_function_def &rhs) const;
 

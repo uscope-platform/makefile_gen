@@ -33,7 +33,8 @@ public:
     void set_name(const std::string &n){function_name = n;}
     std::string get_name(){return function_name;}
     void add_argument(const std::shared_ptr<Parameter_value_base> &p);
-
+    void add_assignment(const assignment &a) {assignments.push_back(a);}
+    void set_loop(const HDL_loop_metadata &l){loop_metadata = l;}
     std::set<qualified_identifier> get_dependencies()const  override;
     bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) override;
     void propagate_function(const HDL_function_def &def) override;

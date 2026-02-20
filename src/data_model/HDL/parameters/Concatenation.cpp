@@ -60,6 +60,13 @@ bool Concatenation::propagate_constant(const qualified_identifier &constant_id, 
     return retval;
 }
 
+void Concatenation::propagate_expression(const qualified_identifier &constant_id,
+    const std::shared_ptr<Parameter_value_base> &value) {
+    for (auto &comp:components) {
+        comp->propagate_expression(constant_id, value);
+    }
+}
+
 void Concatenation::propagate_function(const HDL_function_def &def) {
     for (auto &comp:components) {
         comp->propagate_function(def);

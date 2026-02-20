@@ -2742,7 +2742,11 @@ TEST(parameter_extraction, function_with_arguments) {
     HDL_function_call call("add");
     call.add_argument(std::make_shared<Expression>(Expression({Expression_component("5", Expression_component::component_type::number)})));
     call.add_argument(std::make_shared<Expression>(Expression({Expression_component("7", Expression_component::component_type::number)})));
-
+    call.add_assignment({"add",std::nullopt, std::make_shared<Expression>(Expression({
+        Expression_component(5, 3),
+        Expression_component("+", Expression_component::operation),
+        Expression_component(7, 3),
+    })) });
     p.set_expression(std::make_shared<HDL_function_call>(call));
 
     ASSERT_EQ(p, *param);

@@ -53,6 +53,14 @@ std::shared_ptr<Expression> assignment::get_value() const {
     return value;
 }
 
+void assignment::propagate_argument(const std::string &name, const std::shared_ptr<Parameter_value_base> &arg_value) {
+
+    if (index.has_value()) {
+        index.value()->propagate_expression({"", "", name},arg_value);
+    }
+    value->propagate_expression({"", "", name}, arg_value);
+}
+
 assignment assignment::clone() const {
     assignment a;
     a.name = name;

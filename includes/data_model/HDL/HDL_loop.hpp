@@ -23,6 +23,7 @@
 #include <spdlog/spdlog.h>
 
 #include "data_model/HDL/parameters/qualified_identifier.hpp"
+#include "data_model/HDL/parameters/Parameter_value_base.hpp"
 
 class HDL_parameter;
 class Expression;
@@ -42,6 +43,7 @@ struct assignment {
     void set_value(const std::shared_ptr<Expression> &val);
     std::optional<std::shared_ptr<Expression>> get_index() const;
     std::shared_ptr<Expression> get_value() const;
+    void propagate_argument(const std::string &name, const std::shared_ptr<Parameter_value_base> &value);
 private:
     std::string name;
     std::optional<std::shared_ptr<Expression>> index;
