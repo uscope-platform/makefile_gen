@@ -92,7 +92,7 @@
             parameters_spec.insert(p);
         }
         void set_parameters(Parameters_map p);
-        Parameters_map get_parameters() {return parameters_spec;};
+        Parameters_map get_parameters() const {return parameters_spec;};
 
         void add_function(const HDL_function_def &f) {
             functions[f.name] = f;

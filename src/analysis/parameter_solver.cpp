@@ -131,6 +131,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
     auto node_parameters = node_spec.get_parameters();
 
     std::map<qualified_identifier, resolved_parameter> solved_parameters;
+    bool stop = false;
 
     //retreive default package parameters
     auto deps_map = get_dependency_map(node_parameters);
@@ -153,7 +154,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
                 if(std::get<std::string>(value) != "__RUNTIME_ONLY_PARAMETER__") {
                     solved_parameters.insert({name, value});
                 } else {
-                    auto raw_param = node_parameters.get(name.name);
+                    stop = true;
                 }
             } else {
                 solved_parameters.insert({name, value});
@@ -287,7 +288,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::specialize_
             }
         }
     }
-
+    if(runtime_to_eval.empty()) return {};
     // Substitute runtime only parameters
     return process_parameters(runtime_to_eval, parent_module, {} ,{});
 }

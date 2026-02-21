@@ -64,6 +64,78 @@ TEST(parameter_processing, mixed_dep_override) {
     EXPECT_EQ(dependency_parameters.get("OPT_NONESEL")->get_numeric_value(), 1);
 }
 
+
+TEST(parameter_processing, package_parameters_in_array_init) {
+    std::string test_pattern = R"(
+
+    package test_package;
+
+        parameter bus_base = 1;
+        parameter timebase = 2;
+        parameter gpio = 3;
+
+    endpackage
+
+
+    module dependency #(
+        parameter integer TEST_PARAM [2:0] = '{0, 0, 0} )(
+    );
+    endmodule
+
+    module test_mod #()(
+    );
+
+        localparam [31:0] AXI_ADDRESSES [2:0] = '{
+            test_package::bus_base,
+            test_package::timebase,
+            test_package::gpio
+        };
+
+        dependency #(
+            .TEST_PARAM(AXI_ADDRESSES)
+        ) test_instance ();
+
+    endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+    d_store->store_hdl_entity(resources[2]);
+
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto dependency_parameters = ast_v2->get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("package_param");
+    Expression_component ec("bus_base", Expression_component::identifier);
+    ec.set_package_prefix("test_package");
+    p->add_component(ec);
+    p->set_value(67);
+
+    check_params.insert(p);
+
+    ASSERT_EQ(check_params.size(), dependency_parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(dependency_parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *dependency_parameters.get(item->get_name()));
+    }
+}
+
+
 TEST(parameter_processing, package_parameters_use) {
     std::string test_pattern = R"(
 

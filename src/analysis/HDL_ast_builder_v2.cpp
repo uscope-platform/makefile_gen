@@ -68,8 +68,14 @@ std::shared_ptr<HDL_instance_AST> HDL_ast_builder_v2::build_ast(const std::strin
                     std::cerr << "ERROR:\n HDL entity: " + type + " Not found\n";
                 }
                 auto res = d_store->get_HDL_resource(type);
+
                 spdlog::trace("Processing dependency {} in module {}",working_instance->get_name(), type);
+
                 auto current_param_values = parameter_solver::override_parameters(wo, d_store);
+
+                for (auto &[name, value]: process_runtime_parameters(current_param_values, res)) {
+                    current_param_values[name] = value;
+                }
 
                 std::vector<work_order> child_wo;
                 for (auto &dep: res.get_dependencies()) {
@@ -173,4 +179,25 @@ void HDL_ast_builder_v2::process_quantifier(const std::shared_ptr<HDL_parameter>
         auto value = quantifier->get_i_l().evaluate();
         quantifier->set_value(value.value());
     }
+}
+
+std::map<qualified_identifier, resolved_parameter> HDL_ast_builder_v2::process_runtime_parameters(const std::map<qualified_identifier, resolved_parameter> &parameters, const HDL_Resource &res) {
+    std::map<qualified_identifier, resolved_parameter> runtime_parameters;
+    for ( auto &[name, value]: parameters) {
+        if (std::holds_alternative<std::string>(value)) {
+            if (std::get<std::string>(value) == "__RUNTIME_ONLY_PARAMETER__") {
+                auto raw_param = res.get_parameters().get(name.name);
+                for (const auto dep: raw_param->get_dependencies()) {
+                    if (!dep.prefix.empty()) {
+                        auto package_params= d_store->get_HDL_resource(dep.prefix).get_default_parameters();
+                        auto pv = package_params[{"", "", dep.name}];
+                        raw_param->propagate_constant(dep, pv);
+                    }
+                }
+                auto val = raw_param->get_i_l().evaluate();
+                if (val.has_value()) runtime_parameters.insert({name, val.value()});
+            }
+        }
+    }
+    return runtime_parameters;
 }
