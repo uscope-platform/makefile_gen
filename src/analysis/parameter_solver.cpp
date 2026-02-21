@@ -18,7 +18,8 @@
 std::map<qualified_identifier, resolved_parameter> parameter_solver::process_parameters(
     const Parameters_map &map_in,
     const std::string_view &parent_module,
-    const std::map<qualified_identifier, resolved_parameter> &package_parameters
+    const std::map<qualified_identifier, resolved_parameter> &package_parameters,
+    const std::map<qualified_identifier, resolved_parameter> &default_parameters
 ) {
     auto map = map_in.clone();
 
@@ -59,6 +60,21 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
                     }
                 }
                     dependencies_map.erase(param_id);
+            }
+            std::map<qualified_identifier, qualified_identifier> to_erase;
+            for (auto &[param_id, dependencies] : dependencies_map ) {
+
+                for (auto &dep: dependencies) {
+                    if (!dependencies_map.contains(dep)) {
+                        auto target = map.get(param_id.name);
+                        target->propagate_constant(dep, default_parameters.at(dep));
+                        to_erase.insert({param_id, dep});
+                    }
+                }
+
+            }
+            for (auto&e: to_erase) {
+                dependencies_map[e.first].erase(e.second);
             }
             rounds_counter++;
         }
@@ -224,7 +240,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
             ++solution_rounds;
         }
 
-        solved_parameters = process_parameters(to_solve, work.node->get_name(), package_parameters);
+        solved_parameters = process_parameters(to_solve, work.node->get_name(), package_parameters, node_defaults);
         for(auto &param:solved_parameters) {
             node_defaults[param.first] = param.second;
         }
@@ -273,5 +289,5 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::specialize_
     }
 
     // Substitute runtime only parameters
-    return process_parameters(runtime_to_eval, parent_module, {});
+    return process_parameters(runtime_to_eval, parent_module, {} ,{});
 }

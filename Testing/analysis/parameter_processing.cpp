@@ -23,6 +23,47 @@
 
 
 
+TEST(parameter_processing, mixed_dep_override) {
+    std::string test_pattern = R"(
+        module dependency #(
+            parameter [7:0] ACCESS_ALLOWED = -1,
+            parameter [31:0] SLAVE_MASK [7:0] =  '{8{'hffff}}
+        )();
+
+            localparam [0:0] OPT_NONESEL = (!ACCESS_ALLOWED[0]) || (SLAVE_MASK[0] != 0);
+        endmodule
+
+        module test_mod #(
+            parameter [31:0] SLAVE_MASK [7:0] =  '{8{'hffff}}
+        ) ();
+
+            dependency #(
+                .SLAVE_MASK(SLAVE_MASK)
+            ) test_instance ();
+
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto dependency_parameters = ast_v2->get_dependencies()[0]->get_parameters();
+    ASSERT_TRUE(dependency_parameters.contains("OPT_NONESEL"));
+    EXPECT_EQ(dependency_parameters.get("OPT_NONESEL")->get_numeric_value(), 1);
+}
+
 TEST(parameter_processing, package_parameters_use) {
     std::string test_pattern = R"(
 
