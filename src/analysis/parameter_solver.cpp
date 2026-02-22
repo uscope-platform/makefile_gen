@@ -65,7 +65,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
             for (auto &[param_id, dependencies] : dependencies_map ) {
 
                 for (auto &dep: dependencies) {
-                    if (!dependencies_map.contains(dep)) {
+                    if (!dependencies_map.contains(dep) && !parent_module.starts_with("module::")) {
                         auto target = map.get(param_id.name);
                         target->propagate_constant(dep, default_parameters.at(dep));
                         to_erase.insert({param_id, dep});

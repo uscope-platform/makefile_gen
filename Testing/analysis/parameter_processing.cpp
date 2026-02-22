@@ -114,25 +114,12 @@ TEST(parameter_processing, package_parameters_in_array_init) {
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
     auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
 
-    auto dependency_parameters = ast_v2->get_parameters();
+    auto param_val = ast_v2->get_parameters().get("AXI_ADDRESSES")->get_int_array_value();
+    ASSERT_TRUE(param_val.has_value());
 
-    Parameters_map check_params;
-
-    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
-    p->set_name("package_param");
-    Expression_component ec("bus_base", Expression_component::identifier);
-    ec.set_package_prefix("test_package");
-    p->add_component(ec);
-    p->set_value(67);
-
-    check_params.insert(p);
-
-    ASSERT_EQ(check_params.size(), dependency_parameters.size());
-
-    for(const auto& item:check_params){
-        ASSERT_TRUE(dependency_parameters.contains(item->get_name()));
-        ASSERT_EQ(*item, *dependency_parameters.get(item->get_name()));
-    }
+    mdarray<int64_t> av;
+    av.set_1d_slice({0,0}, {3,2,1});
+    ASSERT_EQ(param_val.value(), av);
 }
 
 
