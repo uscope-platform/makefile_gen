@@ -19,6 +19,47 @@
 #include "frontend/analysis/sv_analyzer.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
+TEST(parameter_extraction, size_cast) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            )();
+
+            parameter integer TEST_PARAM = 4'(31'h100003);
+
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("TEST_PARAM");
+    Initialization_list il;
+    Cast c;
+    c.set_size(Expression({Expression_component("4", Expression_component::number)}));
+    c.set_content(std::make_shared<Expression>(Expression({Expression_component("31'h100003", Expression_component::number)})));
+    il.set_scalar(std::make_shared<Cast>(c));
+    p->add_initialization_list(il);
+    check_params.insert(p);
+
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+
+    ASSERT_EQ(3, std::get<int64_t>(defaults.at({"","", "TEST_PARAM"})));
+}
+
+
 TEST(parameter_extraction, strings_dafault_init) {
     std::string test_pattern = R"(
         module test_mod #(
@@ -2495,6 +2536,52 @@ TEST(parameter_extraction, simple_function_parameter) {
             endfunction
 
             parameter [ADDR_WIDTH-1:0] TEST_PARAM = CTRL_ADDR_CALC();
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    auto param =  resource.get_parameters().get("TEST_PARAM");
+
+    HDL_parameter p;
+    p.set_name("TEST_PARAM");
+    p.set_type(HDL_parameter::expression_parameter);
+    p.add_component(Expression_component("CTRL_ADDR_CALC", Expression_component::identifier));
+    HDL_function_call call("CTRL_ADDR_CALC");
+    assignment a("CTRL_ADDR_CALC", std::nullopt, std::make_shared<Expression>(Expression({Expression_component("100", Expression_component::number)})));
+    call.add_body({a},std::nullopt);
+    p.set_expression(std::make_shared<HDL_function_call>(call));
+
+    ASSERT_EQ(p, *param);
+
+    auto defaults = resource.get_default_parameters();
+
+    std::map<qualified_identifier, resolved_parameter> check_defaults  = {
+        {{"","", "TEST_PARAM"}, 100}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+
+TEST(parameter_extraction, concat_in_function) {
+    std::string test_pattern = R"(
+
+
+        module test_mod #(
+        )();
+            function [15:0] get_axis_metadata (input [4:0] size,input is_signed, input is_float);
+              begin
+                get_axis_metadata = { 10'h0, is_float, is_signed, 4'(size - 8)};
+              end
+            endfunction
+
+            parameter integer TEST_PARAM = get_axis_metadata(11, 1'b1, 1'b0);
         endmodule
     )";
 

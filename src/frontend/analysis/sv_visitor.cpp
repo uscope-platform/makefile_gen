@@ -126,6 +126,19 @@ void sv_visitor::enterPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
         }
     }
 }
+
+void sv_visitor::enterCast_separator(sv2017::Cast_separatorContext *ctx) {
+    params_factory.advance_cast();
+}
+
+void sv_visitor::enterPrimaryCast2(sv2017::PrimaryCast2Context *ctx) {
+    params_factory.start_cast();
+}
+
+void sv_visitor::exitPrimaryCast2(sv2017::PrimaryCast2Context *ctx) {
+    params_factory.stop_cast();
+}
+
 void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
     std::string call_name = ctx->any_system_tf_identifier()->getText();
     if(call_name=="$readmemh" || call_name=="$readmemb"){
@@ -173,6 +186,7 @@ void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext 
 }
 
 void sv_visitor::enterExpression(sv2017::ExpressionContext *ctx) {
+    auto dbg = ctx->getText();
     if(in_function_declaration) {
 
     } else {

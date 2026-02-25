@@ -26,9 +26,10 @@
 #include "data_model/HDL/factories/parameters/expressions_factory.hpp"
 #include "data_model/HDL/factories/parameters/indexing_factory.hpp"
 #include "data_model/HDL/factories/parameters/ternary_factory.hpp"
+#include "parameters/cast_factory.hpp"
 
 
-class HDL_parameters_factory : protected resources_factory_base<HDL_parameter> {
+class  HDL_parameters_factory : protected resources_factory_base<HDL_parameter> {
 
 public:
     void new_parameter();
@@ -76,6 +77,10 @@ public:
     void start_array_quantifier();
     void stop_array_quantifier();
 
+    void start_cast();
+    void stop_cast();
+    void advance_cast();
+
     void start_function_assignment(const std::string &f_name);
     void stop_function_assignment();
 
@@ -86,7 +91,7 @@ public:
     bool in_packed_context() const {return in_packed_assignment; };
     bool is_component_relevant() const {
         return in_initialization_list || expr_factory.is_active() ||
-            index_factory.is_range() && index_factory.is_active() ||
+            index_factory.is_range() && index_factory.is_active() || c_factory.in_cast() ||
             in_packed_assignment || calls_factory.in_function_call() || t_factory.in_ternary();
     };
 
@@ -101,6 +106,7 @@ public:
     void stop_param_override();
 
 private:
+    cast_factory c_factory;
     replication_factory repl_factory;
     concatenation_factory concat_factory;
     function_calls_factory calls_factory;

@@ -37,6 +37,7 @@ target_sources(makefile_gen_lib
     data_model/HDL/parameters/Concatenation.cpp
     data_model/HDL/parameters/Ternary.cpp
     data_model/HDL/parameters/Replication.cpp
+    data_model/HDL/parameters/Cast.cpp
     data_model/HDL/parameters/Expression_evaluator.cpp
     data_model/HDL/parameters/Expression_component.cpp
     data_model/HDL/parameters/Initialization_list.cpp
@@ -47,6 +48,7 @@ target_sources(makefile_gen_lib
     data_model/HDL/factories/nets/HDL_concat_factory.cpp
     data_model/HDL/factories/nets/HDL_net_factory.cpp
     data_model/HDL/factories/nets/HDL_repetition_factory.cpp
+    data_model/HDL/factories/parameters/cast_factory.cpp
     data_model/HDL/factories/parameters/concatenation_factory.cpp
     data_model/HDL/factories/parameters/replication_factory.cpp
     data_model/HDL/factories/parameters/expressions_factory.cpp

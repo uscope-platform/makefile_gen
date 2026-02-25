@@ -1,5 +1,5 @@
 
-// Generated from /home/fils/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.2
+// Generated from /home/vivado/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.1
 
 #pragma once
 
@@ -1238,6 +1238,10 @@ public:
   }
 
   virtual std::any visitPrimaryCast2(sv2017::PrimaryCast2Context *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitCast_separator(sv2017::Cast_separatorContext *ctx) override {
     return visitChildren(ctx);
   }
 

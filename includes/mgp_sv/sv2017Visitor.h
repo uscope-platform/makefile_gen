@@ -1,5 +1,5 @@
 
-// Generated from /home/fils/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.2
+// Generated from /home/vivado/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.1
 
 #pragma once
 
@@ -631,6 +631,8 @@ public:
     virtual std::any visitPrimaryConcat(sv2017::PrimaryConcatContext *context) = 0;
 
     virtual std::any visitPrimaryCast2(sv2017::PrimaryCast2Context *context) = 0;
+
+    virtual std::any visitCast_separator(sv2017::Cast_separatorContext *context) = 0;
 
     virtual std::any visitConstant_expression(sv2017::Constant_expressionContext *context) = 0;
 

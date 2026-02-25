@@ -14,20 +14,21 @@
 //  limitations under the License.
 
 
-#ifndef MAKEFILEGEN_V2_TERNARY_HPP
-#define MAKEFILEGEN_V2_TERNARY_HPP
+#ifndef MAKEFILEGEN_V2_CAST_HPP
+#define MAKEFILEGEN_V2_CAST_HPP
 
-#include <memory>
+
+#include "Expression.hpp"
 #include "data_model/HDL/parameters/Parameter_value_base.hpp"
-#include "data_model/HDL/parameters/Expression.hpp"
 
-
-class Ternary : public Parameter_value_base{
+class Cast : public Parameter_value_base{
 public:
-    Ternary();
-    void set_condition(const Expression &c) {condition = c;}
-    void set_true_value(const std::shared_ptr<Parameter_value_base> &v) {true_value = v;}
-    void set_false_value(const std::shared_ptr<Parameter_value_base> &v) {false_value =v;}
+    Cast();
+
+    void add_size_component(const Expression_component &c) {size.components.push_back(c);}
+    void add_content_component(const Expression_component &c){content = nullptr;}
+    void set_size(const Expression &expr){size = expr;}
+    void set_content(const std::shared_ptr<Parameter_value_base> &c){content = c;}
 
     [[nodiscard]] std::set<qualified_identifier> get_dependencies()const override;
     bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value) override;
@@ -42,19 +43,18 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(condition, true_value, false_value);
+        ar(content, size);
     }
 
 protected:
-    param_value_type type = ternary;
+    param_value_type type = cast;
     [[nodiscard]] bool isEqual(const Parameter_value_base& other) const override;
 
 private:
-    Expression condition;
-    std::shared_ptr<Parameter_value_base> true_value;
-    std::shared_ptr<Parameter_value_base> false_value;
+    std::shared_ptr<Parameter_value_base> content;
+    Expression size;
 
 };
 
 
-#endif //MAKEFILEGEN_V2_TERNARY_HPP
+#endif //MAKEFILEGEN_V2_CAST_HPP

@@ -1,5 +1,5 @@
 
-// Generated from /home/fils/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.2
+// Generated from /home/vivado/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.1
 
 #pragma once
 
@@ -97,8 +97,8 @@ public:
     DECR = 351, DIST_WEIGHT_ASSIGN = 352, OVERLAPPING_IMPL = 353, NONOVERLAPPING_IMPL = 354, 
     IMPLIES = 355, IMPLIES_P = 356, IMPLIES_N = 357, PATH_FULL = 358, HASH_MINUS_HASH = 359, 
     HASH_EQ_HASH = 360, AT = 361, DOUBLE_AT = 362, HASH = 363, DOUBLE_HASH = 364, 
-    TRIPLE_AND = 365, ONE_LINE_COMMENT = 366, BLOCK_COMMENT = 367, WHITE_SPACE = 368, 
-    LEVEL_SYMBOL = 369, EDGE_SYMBOL = 370
+    TRIPLE_AND = 365, ONE_LINE_COMMENT = 366, DOCUMENTATION_COMMENT = 367, 
+    BLOCK_COMMENT = 368, WHITE_SPACE = 369, LEVEL_SYMBOL = 370, EDGE_SYMBOL = 371
   };
 
   enum {
@@ -204,102 +204,102 @@ public:
     RuleFirst_range_identifier = 280, RuleSecond_range_identifier = 281, 
     RuleRange_expression = 282, RuleConstant_range_expression = 283, RuleConstant_mintypmax_expression = 284, 
     RuleMintypmax_expression = 285, RuleNamed_parameter_assignment = 286, 
-    RulePrimary = 287, RuleConstant_expression = 288, RuleInc_or_dec_expression = 289, 
-    RuleExpression = 290, RuleReplication = 291, RuleReplication_size = 292, 
-    RuleReplication_value = 293, RuleConcatenation = 294, RuleDynamic_array_new = 295, 
-    RuleConst_or_range_expression = 296, RuleVariable_decl_assignment = 297, 
-    RuleAssignment_pattern_variable_lvalue = 298, RuleStream_operator = 299, 
-    RuleSlice_size = 300, RuleStreaming_concatenation = 301, RuleStream_concatenation = 302, 
-    RuleStream_expression = 303, RuleArray_range_expression = 304, RuleRange_separator = 305, 
-    RuleOpen_range_list = 306, RulePattern = 307, RuleAssignment_pattern = 308, 
-    RuleReplication_assignment = 309, RuleStructure_pattern_key = 310, RuleArray_pattern_key = 311, 
-    RuleAssignment_pattern_key = 312, RuleStruct_union_member = 313, RuleData_type_or_void = 314, 
-    RuleEnum_name_declaration = 315, RuleAssignment_pattern_expression = 316, 
-    RuleAssignment_pattern_expression_type = 317, RuleNet_lvalue = 318, 
-    RuleVariable_lvalue = 319, RuleSolve_before_list = 320, RuleConstraint_block_item = 321, 
-    RuleConstraint_expression = 322, RuleUniqueness_constraint = 323, RuleConstraint_set = 324, 
-    RuleRandomize_call = 325, RuleModule_header_common = 326, RuleModule_declaration = 327, 
-    RuleModule_keyword = 328, RuleNet_port_type = 329, RuleVar_data_type = 330, 
-    RuleNet_or_var_data_type = 331, RuleList_of_defparam_assignments = 332, 
-    RuleList_of_net_decl_assignments = 333, RuleList_of_specparam_assignments = 334, 
-    RuleList_of_variable_decl_assignments = 335, RuleList_of_variable_identifiers_item = 336, 
-    RuleList_of_variable_identifiers = 337, RuleList_of_variable_port_identifiers = 338, 
-    RuleDefparam_assignment = 339, RuleNet_decl_assignment = 340, RuleSpecparam_assignment = 341, 
-    RuleError_limit_value = 342, RuleReject_limit_value = 343, RulePulse_control_specparam = 344, 
-    RuleIdentifier_doted_index_at_end = 345, RuleSpecify_terminal_descriptor = 346, 
-    RuleSpecify_input_terminal_descriptor = 347, RuleSpecify_output_terminal_descriptor = 348, 
-    RuleSpecify_item = 349, RulePulsestyle_declaration = 350, RuleShowcancelled_declaration = 351, 
-    RulePath_declaration = 352, RuleSimple_path_declaration = 353, RulePath_delay_value = 354, 
-    RuleList_of_path_outputs = 355, RuleList_of_path_inputs = 356, RuleList_of_paths = 357, 
-    RuleList_of_path_delay_expressions = 358, RuleT_path_delay_expression = 359, 
-    RuleTrise_path_delay_expression = 360, RuleTfall_path_delay_expression = 361, 
-    RuleTz_path_delay_expression = 362, RuleT01_path_delay_expression = 363, 
-    RuleT10_path_delay_expression = 364, RuleT0z_path_delay_expression = 365, 
-    RuleTz1_path_delay_expression = 366, RuleT1z_path_delay_expression = 367, 
-    RuleTz0_path_delay_expression = 368, RuleT0x_path_delay_expression = 369, 
-    RuleTx1_path_delay_expression = 370, RuleT1x_path_delay_expression = 371, 
-    RuleTx0_path_delay_expression = 372, RuleTxz_path_delay_expression = 373, 
-    RuleTzx_path_delay_expression = 374, RuleParallel_path_description = 375, 
-    RuleFull_path_description = 376, RuleIdentifier_list = 377, RuleSpecparam_declaration = 378, 
-    RuleEdge_sensitive_path_declaration = 379, RuleParallel_edge_sensitive_path_description = 380, 
-    RuleFull_edge_sensitive_path_description = 381, RuleData_source_expression = 382, 
-    RuleData_declaration = 383, RuleModule_path_expression = 384, RuleState_dependent_path_declaration = 385, 
-    RulePackage_export_declaration = 386, RuleGenvar_declaration = 387, 
-    RuleNet_declaration = 388, RuleParameter_port_list = 389, RuleParameter_port_declaration = 390, 
-    RuleList_of_port_declarations_ansi_item = 391, RuleList_of_port_declarations = 392, 
-    RuleNonansi_port_declaration = 393, RuleNonansi_port = 394, RuleNonansi_port__expr = 395, 
-    RulePort_identifier = 396, RuleAnsi_port_declaration = 397, RuleSystem_timing_check = 398, 
-    RuleDolar_setup_timing_check = 399, RuleDolar_hold_timing_check = 400, 
-    RuleDolar_setuphold_timing_check = 401, RuleDolar_recovery_timing_check = 402, 
-    RuleDolar_removal_timing_check = 403, RuleDolar_recrem_timing_check = 404, 
-    RuleDolar_skew_timing_check = 405, RuleDolar_timeskew_timing_check = 406, 
-    RuleDolar_fullskew_timing_check = 407, RuleDolar_period_timing_check = 408, 
-    RuleDolar_width_timing_check = 409, RuleDolar_nochange_timing_check = 410, 
-    RuleTimecheck_condition = 411, RuleControlled_reference_event = 412, 
-    RuleDelayed_reference = 413, RuleEnd_edge_offset = 414, RuleEvent_based_flag = 415, 
-    RuleNotifier = 416, RuleRemain_active_flag = 417, RuleTimestamp_condition = 418, 
-    RuleStart_edge_offset = 419, RuleThreshold = 420, RuleTiming_check_limit = 421, 
-    RuleTiming_check_event = 422, RuleTiming_check_condition = 423, RuleScalar_timing_check_condition = 424, 
-    RuleControlled_timing_check_event = 425, RuleFunction_data_type_or_implicit = 426, 
-    RuleExtern_tf_declaration = 427, RuleFunction_declaration = 428, RuleUntyped_function_declaration = 429, 
-    RuleTask_prototype = 430, RuleFunction_prototype = 431, RuleDpi_import_export = 432, 
-    RuleDpi_function_import_property = 433, RuleDpi_task_import_property = 434, 
-    RuleTask_and_function_declaration_common = 435, RuleTask_declaration = 436, 
-    RuleMethod_prototype = 437, RuleExtern_constraint_declaration = 438, 
-    RuleConstraint_block = 439, RuleChecker_port_list = 440, RuleChecker_port_item = 441, 
-    RuleChecker_port_direction = 442, RuleChecker_declaration = 443, RuleClass_declaration = 444, 
-    RuleAlways_construct = 445, RuleInterface_class_type = 446, RuleInterface_class_declaration = 447, 
-    RuleInterface_class_item = 448, RuleInterface_class_method = 449, RulePackage_declaration = 450, 
-    RulePackage_item = 451, RuleProgram_declaration = 452, RuleProgram_header = 453, 
-    RuleProgram_item = 454, RuleNon_port_program_item = 455, RuleAnonymous_program = 456, 
-    RuleAnonymous_program_item = 457, RuleSequence_declaration = 458, RuleSequence_port_list = 459, 
-    RuleSequence_port_item = 460, RuleProperty_declaration = 461, RuleProperty_port_list = 462, 
-    RuleProperty_port_item = 463, RuleContinuous_assign = 464, RuleChecker_or_generate_item = 465, 
-    RuleConstraint_prototype = 466, RuleClass_constraint = 467, RuleConstraint_declaration = 468, 
-    RuleClass_constructor_declaration = 469, RuleClass_property = 470, RuleClass_method = 471, 
-    RuleClass_constructor_prototype = 472, RuleClass_item = 473, RuleParameter_override = 474, 
-    RuleGate_instantiation = 475, RuleEnable_gate_or_mos_switch_or_cmos_switch_instance = 476, 
-    RuleN_input_gate_instance = 477, RuleN_output_gate_instance = 478, RulePass_switch_instance = 479, 
-    RulePass_enable_switch_instance = 480, RulePull_gate_instance = 481, 
-    RulePulldown_strength = 482, RulePullup_strength = 483, RuleEnable_terminal = 484, 
-    RuleInout_terminal = 485, RuleInput_terminal = 486, RuleOutput_terminal = 487, 
-    RuleUdp_instantiation = 488, RuleUdp_instance = 489, RuleUdp_instance_body = 490, 
-    RuleModule_or_interface_or_program_or_udp_instantiation = 491, RuleHierarchical_instance = 492, 
-    RuleList_of_port_connections = 493, RuleOrdered_port_connection = 494, 
-    RuleNamed_port_connection = 495, RulePort_expression_connection = 496, 
-    RulePort_concatenation_connection = 497, RuleConcatenation_item = 498, 
-    RulePort_replication_connection = 499, RuleBind_directive = 500, RuleBind_target_instance = 501, 
-    RuleBind_target_instance_list = 502, RuleBind_instantiation = 503, RuleConfig_declaration = 504, 
-    RuleDesign_statement = 505, RuleConfig_rule_statement = 506, RuleInst_clause = 507, 
-    RuleInst_name = 508, RuleCell_clause = 509, RuleLiblist_clause = 510, 
-    RuleUse_clause = 511, RuleNet_alias = 512, RuleSpecify_block = 513, 
-    RuleGenerate_region = 514, RuleGenvar_expression = 515, RuleLoop_generate_construct = 516, 
-    RuleGenvar_initialization = 517, RuleGenvar_iteration = 518, RuleConditional_generate_construct = 519, 
-    RuleIf_generate_construct = 520, RuleCase_generate_construct = 521, 
-    RuleCase_generate_item = 522, RuleGenerate_begin_end_block = 523, RuleGenerate_item = 524, 
-    RuleProgram_generate_item = 525, RuleModule_or_generate_or_interface_or_checker_item = 526, 
-    RuleModule_or_generate_or_interface_item = 527, RuleModule_or_generate_item = 528, 
-    RuleElaboration_system_task = 529, RuleModule_item_item = 530, RuleModule_item = 531
+    RulePrimary = 287, RuleCast_separator = 288, RuleConstant_expression = 289, 
+    RuleInc_or_dec_expression = 290, RuleExpression = 291, RuleReplication = 292, 
+    RuleReplication_size = 293, RuleReplication_value = 294, RuleConcatenation = 295, 
+    RuleDynamic_array_new = 296, RuleConst_or_range_expression = 297, RuleVariable_decl_assignment = 298, 
+    RuleAssignment_pattern_variable_lvalue = 299, RuleStream_operator = 300, 
+    RuleSlice_size = 301, RuleStreaming_concatenation = 302, RuleStream_concatenation = 303, 
+    RuleStream_expression = 304, RuleArray_range_expression = 305, RuleRange_separator = 306, 
+    RuleOpen_range_list = 307, RulePattern = 308, RuleAssignment_pattern = 309, 
+    RuleReplication_assignment = 310, RuleStructure_pattern_key = 311, RuleArray_pattern_key = 312, 
+    RuleAssignment_pattern_key = 313, RuleStruct_union_member = 314, RuleData_type_or_void = 315, 
+    RuleEnum_name_declaration = 316, RuleAssignment_pattern_expression = 317, 
+    RuleAssignment_pattern_expression_type = 318, RuleNet_lvalue = 319, 
+    RuleVariable_lvalue = 320, RuleSolve_before_list = 321, RuleConstraint_block_item = 322, 
+    RuleConstraint_expression = 323, RuleUniqueness_constraint = 324, RuleConstraint_set = 325, 
+    RuleRandomize_call = 326, RuleModule_header_common = 327, RuleModule_declaration = 328, 
+    RuleModule_keyword = 329, RuleNet_port_type = 330, RuleVar_data_type = 331, 
+    RuleNet_or_var_data_type = 332, RuleList_of_defparam_assignments = 333, 
+    RuleList_of_net_decl_assignments = 334, RuleList_of_specparam_assignments = 335, 
+    RuleList_of_variable_decl_assignments = 336, RuleList_of_variable_identifiers_item = 337, 
+    RuleList_of_variable_identifiers = 338, RuleList_of_variable_port_identifiers = 339, 
+    RuleDefparam_assignment = 340, RuleNet_decl_assignment = 341, RuleSpecparam_assignment = 342, 
+    RuleError_limit_value = 343, RuleReject_limit_value = 344, RulePulse_control_specparam = 345, 
+    RuleIdentifier_doted_index_at_end = 346, RuleSpecify_terminal_descriptor = 347, 
+    RuleSpecify_input_terminal_descriptor = 348, RuleSpecify_output_terminal_descriptor = 349, 
+    RuleSpecify_item = 350, RulePulsestyle_declaration = 351, RuleShowcancelled_declaration = 352, 
+    RulePath_declaration = 353, RuleSimple_path_declaration = 354, RulePath_delay_value = 355, 
+    RuleList_of_path_outputs = 356, RuleList_of_path_inputs = 357, RuleList_of_paths = 358, 
+    RuleList_of_path_delay_expressions = 359, RuleT_path_delay_expression = 360, 
+    RuleTrise_path_delay_expression = 361, RuleTfall_path_delay_expression = 362, 
+    RuleTz_path_delay_expression = 363, RuleT01_path_delay_expression = 364, 
+    RuleT10_path_delay_expression = 365, RuleT0z_path_delay_expression = 366, 
+    RuleTz1_path_delay_expression = 367, RuleT1z_path_delay_expression = 368, 
+    RuleTz0_path_delay_expression = 369, RuleT0x_path_delay_expression = 370, 
+    RuleTx1_path_delay_expression = 371, RuleT1x_path_delay_expression = 372, 
+    RuleTx0_path_delay_expression = 373, RuleTxz_path_delay_expression = 374, 
+    RuleTzx_path_delay_expression = 375, RuleParallel_path_description = 376, 
+    RuleFull_path_description = 377, RuleIdentifier_list = 378, RuleSpecparam_declaration = 379, 
+    RuleEdge_sensitive_path_declaration = 380, RuleParallel_edge_sensitive_path_description = 381, 
+    RuleFull_edge_sensitive_path_description = 382, RuleData_source_expression = 383, 
+    RuleData_declaration = 384, RuleModule_path_expression = 385, RuleState_dependent_path_declaration = 386, 
+    RulePackage_export_declaration = 387, RuleGenvar_declaration = 388, 
+    RuleNet_declaration = 389, RuleParameter_port_list = 390, RuleParameter_port_declaration = 391, 
+    RuleList_of_port_declarations_ansi_item = 392, RuleList_of_port_declarations = 393, 
+    RuleNonansi_port_declaration = 394, RuleNonansi_port = 395, RuleNonansi_port__expr = 396, 
+    RulePort_identifier = 397, RuleAnsi_port_declaration = 398, RuleSystem_timing_check = 399, 
+    RuleDolar_setup_timing_check = 400, RuleDolar_hold_timing_check = 401, 
+    RuleDolar_setuphold_timing_check = 402, RuleDolar_recovery_timing_check = 403, 
+    RuleDolar_removal_timing_check = 404, RuleDolar_recrem_timing_check = 405, 
+    RuleDolar_skew_timing_check = 406, RuleDolar_timeskew_timing_check = 407, 
+    RuleDolar_fullskew_timing_check = 408, RuleDolar_period_timing_check = 409, 
+    RuleDolar_width_timing_check = 410, RuleDolar_nochange_timing_check = 411, 
+    RuleTimecheck_condition = 412, RuleControlled_reference_event = 413, 
+    RuleDelayed_reference = 414, RuleEnd_edge_offset = 415, RuleEvent_based_flag = 416, 
+    RuleNotifier = 417, RuleRemain_active_flag = 418, RuleTimestamp_condition = 419, 
+    RuleStart_edge_offset = 420, RuleThreshold = 421, RuleTiming_check_limit = 422, 
+    RuleTiming_check_event = 423, RuleTiming_check_condition = 424, RuleScalar_timing_check_condition = 425, 
+    RuleControlled_timing_check_event = 426, RuleFunction_data_type_or_implicit = 427, 
+    RuleExtern_tf_declaration = 428, RuleFunction_declaration = 429, RuleUntyped_function_declaration = 430, 
+    RuleTask_prototype = 431, RuleFunction_prototype = 432, RuleDpi_import_export = 433, 
+    RuleDpi_function_import_property = 434, RuleDpi_task_import_property = 435, 
+    RuleTask_and_function_declaration_common = 436, RuleTask_declaration = 437, 
+    RuleMethod_prototype = 438, RuleExtern_constraint_declaration = 439, 
+    RuleConstraint_block = 440, RuleChecker_port_list = 441, RuleChecker_port_item = 442, 
+    RuleChecker_port_direction = 443, RuleChecker_declaration = 444, RuleClass_declaration = 445, 
+    RuleAlways_construct = 446, RuleInterface_class_type = 447, RuleInterface_class_declaration = 448, 
+    RuleInterface_class_item = 449, RuleInterface_class_method = 450, RulePackage_declaration = 451, 
+    RulePackage_item = 452, RuleProgram_declaration = 453, RuleProgram_header = 454, 
+    RuleProgram_item = 455, RuleNon_port_program_item = 456, RuleAnonymous_program = 457, 
+    RuleAnonymous_program_item = 458, RuleSequence_declaration = 459, RuleSequence_port_list = 460, 
+    RuleSequence_port_item = 461, RuleProperty_declaration = 462, RuleProperty_port_list = 463, 
+    RuleProperty_port_item = 464, RuleContinuous_assign = 465, RuleChecker_or_generate_item = 466, 
+    RuleConstraint_prototype = 467, RuleClass_constraint = 468, RuleConstraint_declaration = 469, 
+    RuleClass_constructor_declaration = 470, RuleClass_property = 471, RuleClass_method = 472, 
+    RuleClass_constructor_prototype = 473, RuleClass_item = 474, RuleParameter_override = 475, 
+    RuleGate_instantiation = 476, RuleEnable_gate_or_mos_switch_or_cmos_switch_instance = 477, 
+    RuleN_input_gate_instance = 478, RuleN_output_gate_instance = 479, RulePass_switch_instance = 480, 
+    RulePass_enable_switch_instance = 481, RulePull_gate_instance = 482, 
+    RulePulldown_strength = 483, RulePullup_strength = 484, RuleEnable_terminal = 485, 
+    RuleInout_terminal = 486, RuleInput_terminal = 487, RuleOutput_terminal = 488, 
+    RuleUdp_instantiation = 489, RuleUdp_instance = 490, RuleUdp_instance_body = 491, 
+    RuleModule_or_interface_or_program_or_udp_instantiation = 492, RuleHierarchical_instance = 493, 
+    RuleList_of_port_connections = 494, RuleOrdered_port_connection = 495, 
+    RuleNamed_port_connection = 496, RulePort_expression_connection = 497, 
+    RulePort_concatenation_connection = 498, RuleConcatenation_item = 499, 
+    RulePort_replication_connection = 500, RuleBind_directive = 501, RuleBind_target_instance = 502, 
+    RuleBind_target_instance_list = 503, RuleBind_instantiation = 504, RuleConfig_declaration = 505, 
+    RuleDesign_statement = 506, RuleConfig_rule_statement = 507, RuleInst_clause = 508, 
+    RuleInst_name = 509, RuleCell_clause = 510, RuleLiblist_clause = 511, 
+    RuleUse_clause = 512, RuleNet_alias = 513, RuleSpecify_block = 514, 
+    RuleGenerate_region = 515, RuleGenvar_expression = 516, RuleLoop_generate_construct = 517, 
+    RuleGenvar_initialization = 518, RuleGenvar_iteration = 519, RuleConditional_generate_construct = 520, 
+    RuleIf_generate_construct = 521, RuleCase_generate_construct = 522, 
+    RuleCase_generate_item = 523, RuleGenerate_begin_end_block = 524, RuleGenerate_item = 525, 
+    RuleProgram_generate_item = 526, RuleModule_or_generate_or_interface_or_checker_item = 527, 
+    RuleModule_or_generate_or_interface_item = 528, RuleModule_or_generate_item = 529, 
+    RuleElaboration_system_task = 530, RuleModule_item_item = 531, RuleModule_item = 532
   };
 
   explicit sv2017(antlr4::TokenStream *input);
@@ -607,6 +607,7 @@ public:
   class Mintypmax_expressionContext;
   class Named_parameter_assignmentContext;
   class PrimaryContext;
+  class Cast_separatorContext;
   class Constant_expressionContext;
   class Inc_or_dec_expressionContext;
   class ExpressionContext;
@@ -6715,8 +6716,7 @@ public:
     PrimaryCast2Context(PrimaryContext *ctx);
 
     PrimaryContext *primary();
-    antlr4::tree::TerminalNode *APOSTROPHE();
-    antlr4::tree::TerminalNode *LPAREN();
+    Cast_separatorContext *cast_separator();
     ExpressionContext *expression();
     antlr4::tree::TerminalNode *RPAREN();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -6727,6 +6727,22 @@ public:
 
   PrimaryContext* primary();
   PrimaryContext* primary(int precedence);
+  class  Cast_separatorContext : public antlr4::ParserRuleContext {
+  public:
+    Cast_separatorContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *APOSTROPHE();
+    antlr4::tree::TerminalNode *LPAREN();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Cast_separatorContext* cast_separator();
+
   class  Constant_expressionContext : public antlr4::ParserRuleContext {
   public:
     Constant_expressionContext(antlr4::ParserRuleContext *parent, size_t invokingState);

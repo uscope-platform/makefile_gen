@@ -31,7 +31,8 @@ public:
         expression,
         replication,
         function,
-        ternary
+        ternary,
+        cast
     };
 
     virtual ~Parameter_value_base() = default;

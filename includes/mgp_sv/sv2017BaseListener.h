@@ -1,5 +1,5 @@
 
-// Generated from /home/fils/git/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.2
+// Generated from /home/vivado/makefile_gen/grammars/sv2017.g4 by ANTLR 4.13.1
 
 #pragma once
 
@@ -935,6 +935,9 @@ public:
 
   virtual void enterPrimaryCast2(sv2017::PrimaryCast2Context * /*ctx*/) override { }
   virtual void exitPrimaryCast2(sv2017::PrimaryCast2Context * /*ctx*/) override { }
+
+  virtual void enterCast_separator(sv2017::Cast_separatorContext * /*ctx*/) override { }
+  virtual void exitCast_separator(sv2017::Cast_separatorContext * /*ctx*/) override { }
 
   virtual void enterConstant_expression(sv2017::Constant_expressionContext * /*ctx*/) override { }
   virtual void exitConstant_expression(sv2017::Constant_expressionContext * /*ctx*/) override { }

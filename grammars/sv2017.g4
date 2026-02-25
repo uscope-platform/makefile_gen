@@ -1270,7 +1270,7 @@ primary:
         | non_integer_type
         | signing
         ) APOSTROPHE LPAREN expression RPAREN     #PrimaryCast
-    | primary APOSTROPHE LPAREN expression RPAREN #PrimaryCast2
+    | primary cast_separator expression RPAREN #PrimaryCast2
     | primary bit_select                          #PrimaryBitSelect
     | primary DOT identifier                      #PrimaryDot
     | primary LSQUARE_BR array_range_expression RSQUARE_BR #PrimaryIndex
@@ -1292,6 +1292,8 @@ primary:
     | primary ( DOT array_method_name )? ( attribute_instance )*
              KW_WITH LPAREN expression RPAREN     #PrimaryCallWith
 ;
+
+cast_separator: APOSTROPHE LPAREN;
 /************************************************** expression ********************************************************/
 constant_expression: expression;
 inc_or_dec_expression:

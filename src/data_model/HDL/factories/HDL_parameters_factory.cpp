@@ -131,7 +131,9 @@ void HDL_parameters_factory::stop_expression_new() {
     if(expr_factory.get_level() == 0){
         auto expr = expr_factory.get_expression();
         if (expr.has_value()) {
-            if (t_factory.in_ternary()) {
+            if (c_factory.in_cast()){
+                c_factory.set_content(std::make_shared<Expression>(expr.value()));
+            }else if (t_factory.in_ternary()) {
                 t_factory.add_component(std::make_shared<Expression>(expr.value()));
             } else if(repl_factory.in_replication()) {
                 repl_factory.add_expression(expr.value());
@@ -247,6 +249,25 @@ void HDL_parameters_factory::start_array_quantifier() {
 
 void HDL_parameters_factory::stop_array_quantifier() {
     index_factory.set_quantifier(false);
+}
+
+void HDL_parameters_factory::start_cast() {
+    c_factory.start();
+    expr_factory.decrease_level();
+}
+
+void HDL_parameters_factory::stop_cast() {
+    if(c_factory.in_cast()){
+        init_list.set_scalar( c_factory.get_cast());
+        expr_factory.increase_level();
+    }
+}
+
+void HDL_parameters_factory::advance_cast() {
+    auto expr = expr_factory.get_expression();
+    c_factory.set_content(std::make_shared<Expression>(expr.value()));
+    c_factory.advance_cast();
+    expr_factory.clear_expression();
 }
 
 void HDL_parameters_factory::start_function_assignment(const std::string &f_name) {
