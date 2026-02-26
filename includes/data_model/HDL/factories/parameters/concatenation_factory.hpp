@@ -25,14 +25,14 @@ class concatenation_factory {
 public:
     void start_concatenation();
     void stop_concatenation();
-    void add_component(const std::shared_ptr<Expression> &expr);
+    void add_component(const std::shared_ptr<Parameter_value_base> &expr);
     std::shared_ptr<Concatenation> get_concatenation() {return  std::make_shared<Concatenation>(new_concatenation);}
     [[nodiscard]] bool in_concatenation() const { return active;}
     [[nodiscard]] bool in_nested() const {return !concatenations_stack.empty();}
 private:
     bool active = false;
     std::stack<Concatenation> concatenations_stack;
-    std::vector<Expression> concat_components;
+    std::vector<Parameter_value_base> concat_components;
     Concatenation new_concatenation;
 };
 

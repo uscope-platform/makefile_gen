@@ -258,7 +258,11 @@ void HDL_parameters_factory::start_cast() {
 
 void HDL_parameters_factory::stop_cast() {
     if(c_factory.in_cast()){
-        init_list.set_scalar( c_factory.get_cast());
+        if (concat_factory.in_concatenation()) {
+            concat_factory.add_component(c_factory.get_cast());
+        } else {
+            init_list.set_scalar( c_factory.get_cast());
+        }
         expr_factory.increase_level();
     }
 }

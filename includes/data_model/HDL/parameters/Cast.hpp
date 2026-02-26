@@ -35,7 +35,7 @@ public:
     void propagate_expression(const qualified_identifier &constant_id, const std::shared_ptr<Parameter_value_base> &value) override;
     std::optional<resolved_parameter> evaluate(bool pack_result) override;
     [[nodiscard]] std::string print() const override;
-
+    int64_t get_size();
     int64_t get_depth() override;
 
     [[nodiscard]] std::shared_ptr<Parameter_value_base> clone_ptr() const override;

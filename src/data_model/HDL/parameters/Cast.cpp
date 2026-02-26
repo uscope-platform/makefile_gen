@@ -69,6 +69,10 @@ std::string Cast::print() const {
     return size.print() + "'(" + content->print() + ")";
 }
 
+int64_t Cast::get_size() {
+    return std::get<int64_t>(size.evaluate(true).value());
+}
+
 int64_t Cast::get_depth() {
     return std::max(content->get_depth(), size.get_depth()) + 1;
 }

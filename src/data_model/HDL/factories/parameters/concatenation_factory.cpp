@@ -35,7 +35,7 @@ void concatenation_factory::stop_concatenation() {
     }
 }
 
-void concatenation_factory::add_component(const std::shared_ptr<Expression> &expr) {
+void concatenation_factory::add_component(const std::shared_ptr<Parameter_value_base> &expr) {
     new_concatenation.add_component(expr);
 }
 

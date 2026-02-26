@@ -59,6 +59,54 @@ TEST(parameter_extraction, size_cast) {
     ASSERT_EQ(3, std::get<int64_t>(defaults.at({"","", "TEST_PARAM"})));
 }
 
+TEST(parameter_extraction, cast_in_concat  ) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            )();
+
+            parameter integer TEST_PARAM = { 10'h0, 1'b1, 1'b0, 4'(31'h100003)};
+
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("TEST_PARAM");
+    Initialization_list il;
+    Concatenation concat;
+    concat.add_component(std::make_shared<Expression>(Expression({Expression_component("10'h0", Expression_component::number)})));
+    concat.add_component(std::make_shared<Expression>(Expression({Expression_component("1'h1", Expression_component::number)})));
+    concat.add_component(std::make_shared<Expression>(Expression({Expression_component("1'h0", Expression_component::number)})));
+    Cast c;
+    c.set_size(Expression({Expression_component("4", Expression_component::number)}));
+    c.set_content(std::make_shared<Expression>(Expression({Expression_component("31'h100003", Expression_component::number)})));
+    concat.add_component(std::make_shared<Cast>(c));
+    il.set_scalar(std::make_shared<Concatenation>(concat));
+
+
+    p->add_initialization_list(il);
+    check_params.insert(p);
+
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+
+    ASSERT_EQ(35, std::get<int64_t>(defaults.at({"","", "TEST_PARAM"})));
+}
+
 
 TEST(parameter_extraction, strings_dafault_init) {
     std::string test_pattern = R"(
