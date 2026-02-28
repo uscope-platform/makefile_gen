@@ -26,6 +26,18 @@ Cast::Cast() {
     type = cast;
 }
 
+Cast::Cast(const Cast &other) {
+    size = other.size;
+    type = other.type;
+    content = other.content->clone_ptr();
+}
+
+Cast::Cast(Cast &&other) noexcept {
+    size = other.size;
+    type = other.type;
+    content = other.content->clone_ptr();
+}
+
 std::set<qualified_identifier> Cast::get_dependencies() const {
     std::set<qualified_identifier> deps;
     auto content_deps = content->get_dependencies();

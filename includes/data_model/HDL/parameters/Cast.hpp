@@ -25,6 +25,31 @@ class Cast : public Parameter_value_base{
 public:
     Cast();
 
+    Cast & operator=(const Cast &other) {
+        if (this == &other)
+            return *this;
+        Parameter_value_base::operator =(other);
+        type = other.type;
+        content = other.content->clone_ptr();
+        size = other.size;
+        return *this;
+    }
+
+    Cast & operator=(Cast &&other) noexcept {
+        if (this == &other)
+            return *this;
+        Parameter_value_base::operator =(std::move(other));
+        type = other.type;
+        if (other.content != nullptr)
+            content = std::move(other.content->clone_ptr());
+        size = std::move(other.size);
+        return *this;
+    }
+
+    Cast(const Cast &other);
+    Cast(Cast &&other) noexcept;
+
+
     void add_size_component(const Expression_component &c) {size.components.push_back(c);}
     void add_content_component(const Expression_component &c){content = nullptr;}
     void set_size(const Expression &expr){size = expr;}

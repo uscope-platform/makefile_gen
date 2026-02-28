@@ -263,7 +263,7 @@ void HDL_parameters_factory::start_cast() {
 void HDL_parameters_factory::stop_cast() {
     if(c_factory.in_cast()){
         auto expr = expr_factory.get_expression();
-        c_factory.set_content(std::make_shared<Expression>(expr.value()));
+        if (expr.has_value()) c_factory.set_content(std::make_shared<Expression>(expr.value()));
         if (concat_factory.in_concatenation()) {
             concat_factory.add_component(c_factory.get_cast());
         } else {
