@@ -252,12 +252,18 @@ void HDL_parameters_factory::stop_array_quantifier() {
 }
 
 void HDL_parameters_factory::start_cast() {
+    if (concat_factory.in_concatenation()) {
+        expr_factory.start_expression();
+    } else {
+        expr_factory.decrease_level();
+    }
     c_factory.start();
-    expr_factory.decrease_level();
 }
 
 void HDL_parameters_factory::stop_cast() {
     if(c_factory.in_cast()){
+        auto expr = expr_factory.get_expression();
+        c_factory.set_content(std::make_shared<Expression>(expr.value()));
         if (concat_factory.in_concatenation()) {
             concat_factory.add_component(c_factory.get_cast());
         } else {
