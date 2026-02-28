@@ -193,7 +193,6 @@ public:
 private:
 
     bool in_param_declaration = false;
-    bool in_function_declaration = false;
     std::string path;
     std::vector<HDL_Resource> entities;
 

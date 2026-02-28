@@ -28,6 +28,7 @@ public:
     HDL_functions_factory() = default;
     void set_name(const std::string  &s) {
         f.set_name(s);
+        active = true;
     }
     void start_assignment(const std::string &n) {current_assigned_variable = n;}
     void add_argument(const std::string &a);
@@ -36,8 +37,9 @@ public:
     void close_assignment();
     void add_loop(const HDL_loop_metadata &md){f.add_loop_metadata(md);}
     HDL_function_def get_function();
+    bool is_active(){return active;}
 private:
-
+    bool active = false;
     HDL_function_def f;
     bool ignore_assignment = false;
     Expression new_expression;

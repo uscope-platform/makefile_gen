@@ -43,5 +43,6 @@ HDL_function_def HDL_functions_factory::get_function() {
     auto current_function = f;
     f = HDL_function_def();
     new_expression.clear();
+    active = false;
     return current_function;
 }
