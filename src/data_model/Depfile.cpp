@@ -111,7 +111,8 @@ Depfile::Depfile() {
 }
 
 bool Depfile::has_mappable_bus() {
-    return content.contains("bus");
+    if(content.contains("bus")) return !content["bus"].empty();
+    return false;
 }
 
 std::string Depfile::get_board_def() {
