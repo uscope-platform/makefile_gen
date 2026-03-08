@@ -209,10 +209,11 @@ void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
 
 void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
     auto text  = ctx->getText();
+    if(params_factory.is_component_relevant()){
+        params_factory.add_component(Expression_component(text, Expression_component::get_type(text)));
+    }
     if(loops_factory.in_loop()) {
         loops_factory.add_component(Expression_component(text, Expression_component::get_type(text)));
-    }else if(params_factory.is_component_relevant()){
-        params_factory.add_component(Expression_component(text, Expression_component::get_type(text)));
     }
     if(deps_factory.is_valid_dependency()){
         if(deps_factory.is_in_port()) {
