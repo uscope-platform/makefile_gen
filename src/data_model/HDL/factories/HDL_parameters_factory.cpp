@@ -32,7 +32,9 @@ void HDL_parameters_factory::set_value(const std::string &s) {
 }
 
 void HDL_parameters_factory::add_component(const Expression_component &c, bool is_call_argument) {
-    if (is_call_argument) {
+    if (f_factory.is_active()) {
+        f_factory.add_component(c);
+    }else if (is_call_argument) {
         calls_factory.add_argument(std::make_shared<Expression>(Expression({c})));
         expr_factory.increase_level();//this is a ugly hack, why is it needed?
         expr_factory.stop_expression();
@@ -241,6 +243,15 @@ void HDL_parameters_factory::stop_param_override() {
     if (!init_list.empty()  && current_resource.get_i_l().empty()) {
         current_resource.add_initialization_list(init_list);
     }
+}
+
+void HDL_parameters_factory::start_function_decl(const std::string &name) {
+    f_factory.set_name(name);
+}
+
+HDL_function_def HDL_parameters_factory::stop_function_decl() {
+    auto f =   f_factory.get_function();
+    return f;
 }
 
 void HDL_parameters_factory::start_array_quantifier() {
