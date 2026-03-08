@@ -37,7 +37,7 @@ public:
     void close_assignment();
     void add_loop(const HDL_loop_metadata &md){f.add_loop_metadata(md);}
     HDL_function_def get_function();
-    bool is_active(){return active;}
+    bool is_active()const{return active;}
 private:
     bool active = false;
     HDL_function_def f;

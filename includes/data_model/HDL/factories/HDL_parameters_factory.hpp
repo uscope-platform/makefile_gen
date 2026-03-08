@@ -19,6 +19,7 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/parameters/Initialization_list.hpp"
 #include "data_model/HDL/parameters/HDL_function_call.hpp"
+#include "data_model/HDL/factories/HDL_functions_factory.hpp"
 #include "resource_factory_base.hpp"
 #include "data_model/HDL/factories/parameters/replication_factory.hpp"
 #include "data_model/HDL/factories/parameters/concatenation_factory.hpp"
@@ -88,11 +89,13 @@ public:
     void stop_function_call();
 
     bool in_replication_assignment_context() const {return repl_factory.is_assignment_context();};
-    bool in_packed_context() const {return in_packed_assignment; };
+    bool in_packed_context() const {return in_packed_assignment; }
+    bool is_param_assignment() const {return in_param_assignment;}
+    bool is_param_override() const {return in_param_override;}
     bool is_component_relevant() const {
         return in_initialization_list || expr_factory.is_active() ||
             index_factory.is_range() && index_factory.is_active() || c_factory.in_cast() ||
-            in_packed_assignment || calls_factory.in_function_call() || t_factory.in_ternary();
+            in_packed_assignment || calls_factory.in_function_call() || t_factory.in_ternary() || f_factory.is_active();
     };
 
     void start_instance_parameter_assignment(const std::string& parameter_name);
@@ -105,7 +108,16 @@ public:
     void start_param_override();
     void stop_param_override();
 
+    void start_function_decl(const std::string &name);
+    void start_function_decl_assignment(const std::string &name){f_factory.start_assignment(name);}
+    void close_decl_assignment() {f_factory.close_assignment();}
+    void close_decl_lvalue() {f_factory.close_lvalue();}
+    HDL_function_def stop_function_decl();
+    bool function_declaration_active()const{return f_factory.is_active();}
+    void add_delc_loop(HDL_loop_metadata &m) {f_factory.add_loop(m);}
+    void add_decl_argument(const std::string &a) {f_factory.add_argument(a);}
 private:
+    HDL_functions_factory f_factory;
     cast_factory c_factory;
     replication_factory repl_factory;
     concatenation_factory concat_factory;
