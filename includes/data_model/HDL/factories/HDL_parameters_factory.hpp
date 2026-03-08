@@ -88,11 +88,12 @@ public:
     void start_function_call(const std::string &f_name);
     void stop_function_call();
 
-    bool in_replication_assignment_context() const {return repl_factory.is_assignment_context();};
-    bool in_packed_context() const {return in_packed_assignment; }
-    bool is_param_assignment() const {return in_param_assignment;}
-    bool is_param_override() const {return in_param_override;}
+    bool in_replication_assignment_context() const {return repl_factory.is_assignment_context();}
+    bool in_packed_context() const {return in_packed_assignment && ~paused; }
+    bool is_param_assignment() const {return in_param_assignment&& ~paused;}
+    bool is_param_override() const {return in_param_override && ~paused;}
     bool is_component_relevant() const {
+        if (paused) return false;
         return in_initialization_list || expr_factory.is_active() ||
             index_factory.is_range() && index_factory.is_active() || c_factory.in_cast() ||
             in_packed_assignment || calls_factory.in_function_call() || t_factory.in_ternary() || f_factory.is_active();
@@ -114,8 +115,11 @@ public:
     void close_decl_lvalue() {f_factory.close_lvalue();}
     HDL_function_def stop_function_decl();
     bool function_declaration_active()const{return f_factory.is_active();}
-    void add_delc_loop(HDL_loop_metadata &m) {f_factory.add_loop(m);}
+    void add_decl_loop(HDL_loop_metadata &m) {f_factory.add_loop(m);}
     void add_decl_argument(const std::string &a) {f_factory.add_argument(a);}
+
+    void pause_activity() { paused = true; }
+    void resume_activity() { paused = false; }
 private:
     HDL_functions_factory f_factory;
     cast_factory c_factory;
@@ -130,6 +134,7 @@ private:
     bool in_param_assignment = false;
     bool in_initialization_list = false;
     bool in_packed_assignment = false;
+    bool paused = false;
 
 
     Initialization_list init_list;

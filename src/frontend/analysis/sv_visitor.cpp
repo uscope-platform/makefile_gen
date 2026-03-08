@@ -744,6 +744,7 @@ void sv_visitor::exitFunction_declaration(sv2017::Function_declarationContext *c
 
 void sv_visitor::enterLoop_statement(sv2017::Loop_statementContext *ctx) {
     if(params_factory.function_declaration_active()) {
+        params_factory.pause_activity();
         loops_factory.new_loop();
     }
 }
@@ -752,9 +753,10 @@ void sv_visitor::enterLoop_statement(sv2017::Loop_statementContext *ctx) {
 void sv_visitor::exitLoop_statement(sv2017::Loop_statementContext *ctx) {
     if(params_factory.function_declaration_active()) {
         auto spec = loops_factory.get_loop_specs();
-        params_factory.add_delc_loop(spec);
+        params_factory.add_decl_loop(spec);
+        loops_factory.clear();
+        params_factory.resume_activity();
     }
-    loops_factory.clear();
 }
 
 void sv_visitor::exitStatement_item(sv2017::Statement_itemContext *ctx) {
