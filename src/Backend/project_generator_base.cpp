@@ -114,9 +114,40 @@ void project_generator_base::write_makefile(std::ostream &output) {
     output << "update_compile_order\n";
 }
 
+ void project_generator_base::generate_sim_script(std::ostream &output) {
+
+    output << "PROJ_ROOT=$(pwd)"<< std::endl;
+    output << "BUILD_DIR=\"$PROJ_ROOT/sim\""<< std::endl;
+    output << "TOP=\"" + data.tb_tl + "\""<< std::endl;
+
+    output << "INC_DIR=$(realpath \"../../Common/\")"<< std::endl;
+    output << "SIM_FILE=$(realpath \"tb/sim.tcl\")"<< std::endl;
+    output << "FILES=(" << "" << ")" << std::endl;
+
+    const auto sim_template = R"(
+        mkdir -p $BUILD_DIR
+        (
+            cd "$BUILD_DIR" || exit
+
+            xvlog -sv $FILES_EXPANDED -i $INC_DIR
+
+            xelab -debug typical -top $TOP -snapshot sim_snapshot  -timescale 10ns/1ps
+
+            xsim sim_snapshot -tclbatch $SIM_FILE
+
+        )
+
+        mv $BUILD_DIR/dump.vcd .
+        rm -r $BUILD_DIR
+    )";
+
+    output << sim_template;
 
 
-void project_generator_base::set_project_name(const std::string &name) {
+ }
+
+
+ void project_generator_base::set_project_name(const std::string &name) {
     data.name = name;
 }
 

@@ -22,7 +22,6 @@
 class xilinx_project_generator: public project_generator_base{
 public:
     xilinx_project_generator() : project_generator_base("make_project_xlnx.j2") {};
-
 };
 
 

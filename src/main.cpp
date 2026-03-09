@@ -23,6 +23,7 @@ int main(int argc, char *argv[]){
     typedef struct __CLI_opt{
         std::string target;
         bool generate_xilinx = false;
+        bool generate_sim_script = false;
         bool generate_app_definition = false;
         bool generate_periph_definition = false;
         bool generate_lattice = false;
@@ -65,6 +66,8 @@ int main(int argc, char *argv[]){
     app.add_flag("--trace", opts.trace, "Enable extended internal state tracing");
     app.add_option("--cache_dir", opts.cache_dir, "Specify a non-default repository cache file");
     app.add_flag("--no_open", opts.no_open, "Do not open the generated project");
+    app.add_flag("--sim_script", opts.generate_sim_script, "Generate simulation script for the chosen platform");
+
     CLI11_PARSE(app, argc, argv);
 
     if(opts.trace) {
@@ -203,6 +206,10 @@ int main(int argc, char *argv[]){
 
         Vivado_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
         manager.create_project("makefile.tcl",  !opts.no_open);
+        if (opts.generate_sim_script) {
+            std::ofstream simfile("sim.tcl");
+            generator.generate_sim_script(simfile);
+        }
     }
 
     if(opts.generate_lattice){
