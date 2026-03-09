@@ -424,7 +424,7 @@ TEST(function_processing, package_assignment) {
         std::make_shared<Expression>(Expression({Expression_component("0", Expression_component::number)})),
         std::make_shared<Expression>(Expression({Expression_component("bus_base", Expression_component::identifier)}))
     };
-    a.get_value()->components[0].set_package_prefix("hil_address_space");
+    a.get_value()->as<Expression>().components[0].set_package_prefix("hil_address_space");
     check_f.add_assignment(a);
 
     EXPECT_EQ(check_f,result);

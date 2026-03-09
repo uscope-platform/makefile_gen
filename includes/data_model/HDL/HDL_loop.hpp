@@ -40,14 +40,14 @@ struct assignment {
     }
     assignment clone() const;
     void set_index(const std::shared_ptr<Expression> &idx);
-    void set_value(const std::shared_ptr<Expression> &val);
+    void set_value(const std::shared_ptr<Parameter_value_base> &val);
     std::optional<std::shared_ptr<Expression>> get_index() const;
-    std::shared_ptr<Expression> get_value() const;
+    std::shared_ptr<Parameter_value_base> get_value() const;
     void propagate_argument(const std::string &name, const std::shared_ptr<Parameter_value_base> &value);
 private:
     std::string name;
     std::optional<std::shared_ptr<Expression>> index;
-    std::shared_ptr<Expression> value;
+    std::shared_ptr<Parameter_value_base> value;
 };
 
 class HDL_loop_metadata {

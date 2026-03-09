@@ -207,7 +207,7 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<HDL_instanc
 
     for(int i = 0; i<n_params; i++){
         std::string channel_name;
-        if(names.size() == 1 & n_params>1){
+        if((names.size() == 1 )& n_params>1){
             channel_name = names[0] + "_" + std::to_string(i);
         } else{
             channel_name = names[i];

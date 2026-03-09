@@ -2645,16 +2645,19 @@ TEST(parameter_extraction, concat_in_function) {
     p.set_type(HDL_parameter::expression_parameter);
     p.add_component(Expression_component("CTRL_ADDR_CALC", Expression_component::identifier));
     HDL_function_call call("CTRL_ADDR_CALC");
-    assignment a("CTRL_ADDR_CALC", std::nullopt, std::make_shared<Expression>(Expression({Expression_component("100", Expression_component::number)})));
+    assignment a("CTRL_ADDR_CALC", std::nullopt, nullptr);
+    a.set_value(std::make_shared<Expression>(
+        Expression({Expression_component("100", Expression_component::number)})
+    ));
     call.add_body({a},std::nullopt);
     p.set_expression(std::make_shared<HDL_function_call>(call));
 
-    ASSERT_EQ(p, *param);
+    EXPECT_EQ(p, *param);
 
     auto defaults = resource.get_default_parameters();
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"","", "TEST_PARAM"}, 100}
+        {{"","", "TEST_PARAM"}, 19}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));

@@ -41,7 +41,7 @@ void assignment::set_index(const std::shared_ptr<Expression> &idx) {
     index = idx;
 }
 
-void assignment::set_value(const std::shared_ptr<Expression> &val) {
+void assignment::set_value(const std::shared_ptr<Parameter_value_base> &val) {
     value = val;
 }
 
@@ -49,7 +49,7 @@ std::optional<std::shared_ptr<Expression>> assignment::get_index() const {
     return index;
 }
 
-std::shared_ptr<Expression> assignment::get_value() const {
+std::shared_ptr<Parameter_value_base> assignment::get_value() const {
     return value;
 }
 
@@ -65,7 +65,7 @@ assignment assignment::clone() const {
     assignment a;
     a.name = name;
     if(index.has_value()) a.set_index(std::make_shared<Expression>(*index.value()));
-    if(value!= nullptr) a.set_value(std::make_shared<Expression>(*value));
+    if(value!= nullptr) a.set_value(value->clone_ptr());
     return a;
 }
 

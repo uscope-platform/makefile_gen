@@ -45,7 +45,7 @@ public:
     void set_item(std::shared_ptr<Parameter_value_base> item){ repeated_item = std::move(item);}
     void set_size(const Expression &size);
 
-    std::set<qualified_identifier> get_dependencies()const;
+    std::set<qualified_identifier> get_dependencies()const override;
     bool propagate_constant(const qualified_identifier &constant_id, const resolved_parameter &value)override;
     void propagate_expression(const qualified_identifier &constant_id, const std::shared_ptr<Parameter_value_base> &value) override;
     void propagate_function(const HDL_function_def &def) override;
