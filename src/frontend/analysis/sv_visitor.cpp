@@ -94,6 +94,10 @@ void sv_visitor::enterTf_port_item(sv2017::Tf_port_itemContext *ctx) {
 
 }
 
+void sv_visitor::exitTf_port_list(sv2017::Tf_port_listContext *ctx) {
+    params_factory.start_function_body();
+}
+
 void sv_visitor::exitInterface_header(sv2017::Interface_headerContext *ctx) {
     std::string interface_name = ctx->identifier()->getText();
     if(modules_factory.is_current_valid()){

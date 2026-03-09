@@ -39,8 +39,8 @@ void HDL_function_def::start_assignment(const std::string &n, Expression idx) {
         assignments.push_back({name, std::make_shared<Expression>(idx), {}});
 }
 
-void HDL_function_def::close_assignment(Expression val) {
-    assignments.back().set_value(std::make_shared<Expression>(val));
+void HDL_function_def::close_assignment(const std::shared_ptr<Parameter_value_base> &val) {
+    assignments.back().set_value(val);
 }
 
 bool HDL_function_def::is_scalar() const {

@@ -2616,8 +2616,64 @@ TEST(parameter_extraction, simple_function_parameter) {
     }
 }
 
-
 TEST(parameter_extraction, concat_in_function) {
+    std::string test_pattern = R"(
+
+
+        module test_mod #(
+        )();
+            function [15:0] get_axis_metadata (input [4:0] size,input is_signed, input is_float);
+              begin
+                get_axis_metadata = { 10'h0, is_float, is_signed, 1'b1};
+              end
+            endfunction
+
+            parameter integer TEST_PARAM = get_axis_metadata(11, 1'b1, 1'b0);
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+
+    auto param =  resource.get_parameters().get("TEST_PARAM");
+
+    HDL_parameter p;
+    p.set_name("TEST_PARAM");
+    p.set_type(HDL_parameter::expression_parameter);
+    p.add_component(Expression_component("CTRL_ADDR_CALC", Expression_component::identifier));
+    HDL_function_call call("get_axis_metadata");
+    call.add_argument(std::make_shared<Expression>(Expression({Expression_component("11", Expression_component::number)})));
+    call.add_argument(std::make_shared<Expression>(Expression({Expression_component("1'b1", Expression_component::number)})));
+    call.add_argument(std::make_shared<Expression>(Expression({Expression_component("1'b0", Expression_component::number)})));
+    assignment a("get_axis_metadata", std::nullopt, nullptr);
+
+    Concatenation concat;
+    concat.add_component(std::make_shared<Expression>(Expression({Expression_component("10'h0", Expression_component::number)})));
+    concat.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0", Expression_component::number)})));
+    concat.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1", Expression_component::number)})));
+    concat.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1", Expression_component::number)})));
+
+    a.set_value(std::make_shared<Concatenation>(concat));
+    call.add_body({a},std::nullopt);
+    p.set_expression(std::make_shared<HDL_function_call>(call));
+
+    EXPECT_EQ(p, *param);
+
+    auto defaults = resource.get_default_parameters();
+
+    std::map<qualified_identifier, resolved_parameter> check_defaults  = {
+        {{"","", "TEST_PARAM"}, 19}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+
+TEST(parameter_extraction, cast_in_concat_in_function) {
     std::string test_pattern = R"(
 
 
@@ -2644,11 +2700,24 @@ TEST(parameter_extraction, concat_in_function) {
     p.set_name("TEST_PARAM");
     p.set_type(HDL_parameter::expression_parameter);
     p.add_component(Expression_component("CTRL_ADDR_CALC", Expression_component::identifier));
-    HDL_function_call call("CTRL_ADDR_CALC");
-    assignment a("CTRL_ADDR_CALC", std::nullopt, nullptr);
-    a.set_value(std::make_shared<Expression>(
-        Expression({Expression_component("100", Expression_component::number)})
-    ));
+    HDL_function_call call("get_axis_metadata");
+    call.add_argument(std::make_shared<Expression>(Expression({Expression_component("11", Expression_component::number)})));
+    call.add_argument(std::make_shared<Expression>(Expression({Expression_component("1'b1", Expression_component::number)})));
+    call.add_argument(std::make_shared<Expression>(Expression({Expression_component("1'b0", Expression_component::number)})));
+    assignment a("get_axis_metadata", std::nullopt, nullptr);
+    Cast c;
+    c.set_size(Expression({Expression_component("4", Expression_component::number)}));
+    c.set_content(std::make_shared<Expression>(Expression({
+        Expression_component("size", Expression_component::identifier),
+        Expression_component("8", Expression_component::number)
+    })));
+    Concatenation concat;
+    concat.add_component(std::make_shared<Expression>(Expression({Expression_component("10'h0", Expression_component::number)})));
+    concat.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b0", Expression_component::number)})));
+    concat.add_component(std::make_shared<Expression>(Expression({Expression_component("1'b1", Expression_component::number)})));
+    concat.add_component(std::make_shared<Cast>(c));
+
+    a.set_value(std::make_shared<Concatenation>(concat));
     call.add_body({a},std::nullopt);
     p.set_expression(std::make_shared<HDL_function_call>(call));
 

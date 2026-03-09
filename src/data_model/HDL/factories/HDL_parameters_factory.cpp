@@ -32,7 +32,7 @@ void HDL_parameters_factory::set_value(const std::string &s) {
 }
 
 void HDL_parameters_factory::add_component(const Expression_component &c, bool is_call_argument) {
-    if (f_factory.is_active()) {
+    if (f_factory.is_active() && !concat_factory.in_concatenation()) {
         f_factory.add_component(c);
     }else if (is_call_argument) {
         calls_factory.add_argument(std::make_shared<Expression>(Expression({c})));
@@ -160,7 +160,7 @@ void HDL_parameters_factory::start_packed_assignment() {
 }
 
 void HDL_parameters_factory::start_concatenation() {
-    if(in_param_assignment || in_packed_assignment || in_initialization_list){
+    if(in_param_assignment || in_packed_assignment || in_initialization_list || f_factory.is_active()){
         expr_factory.push_level();
         concat_factory.start_concatenation();
     }
@@ -171,10 +171,14 @@ void HDL_parameters_factory::stop_concatenation() {
     if(concat_factory.in_concatenation()){
         expr_factory.pop_level();
         if (!concat_factory.in_nested()) {
-            if(in_initialization_list)
+            if (f_factory.is_active()) {
+                f_factory.add_value(concat_factory.get_concatenation());
+            }else if(in_initialization_list) {
                 init_list.add_item(concat_factory.get_concatenation());
-            else
+            } else {
                 init_list.set_scalar(concat_factory.get_concatenation());
+            }
+
         }
         concat_factory.stop_concatenation();
     }

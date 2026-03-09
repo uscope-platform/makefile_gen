@@ -20,7 +20,9 @@ void HDL_functions_factory::add_argument(const std::string &a) {
 }
 
 void HDL_functions_factory::add_component(const Expression_component &c) {
-    new_expression.push_back(c);
+    if (phase == body) {
+        new_expression.push_back(c);
+    }
 }
 
 void HDL_functions_factory::close_lvalue() {
@@ -33,8 +35,14 @@ void HDL_functions_factory::close_lvalue() {
 }
 
 void HDL_functions_factory::close_assignment() {
-    if(!ignore_assignment)
-        f.close_assignment(new_expression);
+    if(!ignore_assignment) {
+        if (assignment_value != nullptr) {
+            f.close_assignment(assignment_value);
+        } else {
+            f.close_assignment(std::make_shared<Expression>(new_expression));
+        }
+    }
+
     ignore_assignment = false;
     new_expression.clear();
 }

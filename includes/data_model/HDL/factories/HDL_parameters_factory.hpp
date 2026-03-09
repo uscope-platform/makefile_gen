@@ -44,6 +44,8 @@ public:
     void add_component(const Expression_component &c){add_component(c, false);}
     void add_component(const Expression_component &c, bool is_call_argument);
 
+    void start_function_body(){f_factory.start_body();}
+
     void start_initialization_list();
     void stop_initialization_list(bool default_assignment);
 

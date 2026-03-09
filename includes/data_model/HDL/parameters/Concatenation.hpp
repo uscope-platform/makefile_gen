@@ -106,7 +106,8 @@ private:
             components, rhs.components,
             [](const std::shared_ptr<Parameter_value_base>& a,
                const std::shared_ptr<Parameter_value_base>& b) {
-                return *a == *b; // Triggers the polymorphic equality check
+                auto resp = *a == *b;
+                return resp; // Triggers the polymorphic equality check
             }
         );
     }

@@ -28,12 +28,15 @@ public:
     HDL_functions_factory() = default;
     void set_name(const std::string  &s) {
         f.set_name(s);
+        phase = arguments;
         active = true;
     }
     void start_assignment(const std::string &n) {current_assigned_variable = n;}
     void add_argument(const std::string &a);
     void add_component(const Expression_component &c);
+    void add_value(const std::shared_ptr<Parameter_value_base> &v){assignment_value = v;}
     void close_lvalue();
+    void start_body(){phase = body;}
     void close_assignment();
     void add_loop(const HDL_loop_metadata &md){f.add_loop_metadata(md);}
     HDL_function_def get_function();
@@ -41,8 +44,14 @@ public:
 private:
     bool active = false;
     HDL_function_def f;
+
+    enum{
+        arguments,
+        body
+    }phase;
     bool ignore_assignment = false;
     Expression new_expression;
+    std::shared_ptr<Parameter_value_base> assignment_value;
     std::string current_assigned_variable;
 };
 
