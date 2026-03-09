@@ -2618,8 +2618,6 @@ TEST(parameter_extraction, simple_function_parameter) {
 
 TEST(parameter_extraction, concat_in_function) {
     std::string test_pattern = R"(
-
-
         module test_mod #(
         )();
             function [15:0] get_axis_metadata (input [4:0] size,input is_signed, input is_float);
@@ -2664,7 +2662,7 @@ TEST(parameter_extraction, concat_in_function) {
     auto defaults = resource.get_default_parameters();
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
-        {{"","", "TEST_PARAM"}, 19}
+        {{"","", "TEST_PARAM"}, 3}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));

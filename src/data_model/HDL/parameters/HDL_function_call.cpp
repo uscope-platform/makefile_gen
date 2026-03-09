@@ -92,7 +92,7 @@ std::optional<resolved_parameter> HDL_function_call::evaluate(bool pack_result) 
 }
 
 std::optional<resolved_parameter> HDL_function_call::evaluate_scalar() {
-    return assignments[0].get_value()->evaluate(false);
+    return assignments[0].get_value()->evaluate(true);
 }
 
 std::optional<resolved_parameter> HDL_function_call::evaluate_vector() {
