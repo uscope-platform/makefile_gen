@@ -46,7 +46,7 @@ void HDL_parameters_factory::add_component(const Expression_component &c, bool i
 }
 
 void HDL_parameters_factory::start_initialization_list() {
-    if (in_param_assignment || in_packed_assignment ||f_factory.is_active()) {
+    if (in_param_assignment || in_packed_assignment ||f_factory.is_active() || in_param_override) {
         in_initialization_list = true;
         expr_factory.decrease_level(); // This is needed because in the grammar there is an expression before the list initialization;
     }
