@@ -23,6 +23,59 @@
 
 
 
+
+TEST(parameter_processing, override_after_fatal) {
+    std::string test_pattern = R"(
+
+        module dependency #(
+            PARAM_1 = 5
+        )();
+
+        endmodule
+
+        module test_module #(
+           ENABLE_ASSERTIONS = "false"
+        )(
+            input wire core_clock,
+            input wire start
+        );
+
+
+
+        start_request_pulse: assert property(@(posedge core_clock) start |=> !start) else begin
+            $fatal();
+        end
+
+        dependency #(
+            .PARAM_1(256)
+        )dep();
+
+
+        endmodule
+    )";
+
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+
+    analyzer.cleanup_content("`(.*)");
+    auto resources = analyzer.analyze();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    d_store->store_hdl_entity(resources[0]);
+    d_store->store_hdl_entity(resources[1]);
+
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_module"}))[0];
+
+    auto dependency_parameters = ast_v2->get_dependencies()[0]->get_parameters();
+    ASSERT_TRUE(dependency_parameters.contains("PARAM_1"));
+    EXPECT_EQ(dependency_parameters.get("PARAM_1")->get_numeric_value(), 256);
+}
+
+
+
 TEST(parameter_processing, mixed_dep_override) {
     std::string test_pattern = R"(
         module dependency #(
