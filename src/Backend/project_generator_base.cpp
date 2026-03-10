@@ -122,23 +122,31 @@ void project_generator_base::write_makefile(std::ostream &output) {
 
     output << "INC_DIR=$(realpath \"../../Common/\")"<< std::endl;
     output << "SIM_FILE=$(realpath \"tb/sim.tcl\")"<< std::endl;
-    output << "FILES=(" << "" << ")" << std::endl;
-
+    output << "FILES=( ";
+    for (auto &f:data.synth_sources) {
+        std::string abs_path = std::regex_replace(f, std::regex(R"(\$\{base_dir\})"), base_dir);
+        output << abs_path << " ";
+    }
+    for (auto &f:data.sim_sources) {
+        std::string abs_path = std::regex_replace(f, std::regex(R"(\$\{base_dir\})"), base_dir);
+        output << abs_path << " ";
+    }
+    output << ")" << std::endl;
     const auto sim_template = R"(
-        mkdir -p $BUILD_DIR
-        (
-            cd "$BUILD_DIR" || exit
+mkdir -p $BUILD_DIR
+(
+    cd "$BUILD_DIR" || exit
 
-            xvlog -sv $FILES_EXPANDED -i $INC_DIR
+    xvlog -sv "${FILES[@]}" -i $INC_DIR
 
-            xelab -debug typical -top $TOP -snapshot sim_snapshot  -timescale 10ns/1ps
+    xelab -debug typical -top $TOP -snapshot sim_snapshot  -timescale 10ns/1ps
 
-            xsim sim_snapshot -tclbatch $SIM_FILE
+    xsim sim_snapshot -tclbatch $SIM_FILE
 
-        )
+)
 
-        mv $BUILD_DIR/dump.vcd .
-        rm -r $BUILD_DIR
+mv $BUILD_DIR/dump.vcd .
+rm -r $BUILD_DIR
     )";
 
     output << sim_template;

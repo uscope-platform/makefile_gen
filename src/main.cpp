@@ -188,6 +188,7 @@ int main(int argc, char *argv[]){
     proxy_analyzer.analyze(synth_ast);
         //Generate makefile
     if(opts.generate_xilinx){
+
         xilinx_project_generator generator;
         generator.set_project_name(dep.get_project_name());
 
@@ -201,13 +202,15 @@ int main(int argc, char *argv[]){
             generator.set_board_part(dep.get_board_def());
         }
         generator.set_synth_tl(dep.get_synth_tl());
+
+        if (opts.generate_sim_script) {
+            std::ofstream simfile("sim.sh");
+            generator.generate_sim_script(simfile);
+        }
+
         std::ofstream makefile("makefile.tcl");
         generator.write_makefile(makefile);
 
-        if (opts.generate_sim_script) {
-            std::ofstream simfile("sim.tcl");
-            generator.generate_sim_script(simfile);
-        }
 
         Vivado_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
         manager.create_project("makefile.tcl",  !opts.no_open);
