@@ -204,12 +204,14 @@ int main(int argc, char *argv[]){
         std::ofstream makefile("makefile.tcl");
         generator.write_makefile(makefile);
 
-        Vivado_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
-        manager.create_project("makefile.tcl",  !opts.no_open);
         if (opts.generate_sim_script) {
             std::ofstream simfile("sim.tcl");
             generator.generate_sim_script(simfile);
         }
+
+        Vivado_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
+        manager.create_project("makefile.tcl",  !opts.no_open);
+
     }
 
     if(opts.generate_lattice){

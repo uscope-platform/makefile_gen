@@ -499,7 +499,6 @@ void sv_visitor::exitPrimaryPar(sv2017::PrimaryParContext *ctx) {
 
 void sv_visitor::enterAssignment_pattern(sv2017::Assignment_patternContext *ctx) {
     params_factory.start_initialization_list();
-
 }
 
 void sv_visitor::exitAssignment_pattern(sv2017::Assignment_patternContext *ctx) {

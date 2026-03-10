@@ -46,23 +46,27 @@ void HDL_parameters_factory::add_component(const Expression_component &c, bool i
 }
 
 void HDL_parameters_factory::start_initialization_list() {
-    in_initialization_list = true;
-    expr_factory.decrease_level(); // This is needed because in the grammar there is an expression before the list initialization;
+    if (in_param_assignment || in_packed_assignment ||f_factory.is_active()) {
+        in_initialization_list = true;
+        expr_factory.decrease_level(); // This is needed because in the grammar there is an expression before the list initialization;
+    }
 }
 
 
 void HDL_parameters_factory::stop_initialization_list(bool default_assignment) {
-    if (repl_factory.in_replication()) {
-        stop_replication();
+    if (in_initialization_list) {
+        if (repl_factory.in_replication()) {
+            stop_replication();
+        }
+        in_initialization_list = false;
+        if (default_assignment){
+            init_list.set_default();
+        }
+        init_list.set_dimensions(index_factory.get_dimensions(), false);
+        current_resource.add_initialization_list(init_list);
+        init_list = Initialization_list();
+        expr_factory.increase_level();
     }
-    in_initialization_list = false;
-    if (default_assignment){
-        init_list.set_default();
-    }
-    init_list.set_dimensions(index_factory.get_dimensions(), false);
-    current_resource.add_initialization_list(init_list);
-    init_list = Initialization_list();
-    expr_factory.increase_level();
 }
 
 

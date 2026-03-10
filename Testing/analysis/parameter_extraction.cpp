@@ -19,6 +19,60 @@
 #include "frontend/analysis/sv_analyzer.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
+
+TEST(parameter_extraction, init_list_after_reg) {
+std::string test_pattern = R"(
+
+    module test_module ();
+
+        reg [5:0] low_data_n [2:0] = '{
+            'b101011, //D.31.y
+            'b011110, //D.30.y
+            'b101110 //D.29.y
+        };
+
+
+        localparam low_control_p = 'b001111;
+        localparam low_control_n = 'b110000;
+    endmodule
+)";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("low_control_p");
+    p->add_component(Expression_component("'b001111", Expression_component::number));
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("low_control_n");
+    p->add_component(Expression_component("'b110000", Expression_component::number));
+    check_params.insert(p);
+
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+    std::map<qualified_identifier, resolved_parameter> check_defaults = {
+        {{"","", "low_control_p"}, 15},
+        {{"","", "low_control_n"}, 48}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
 TEST(parameter_extraction, size_cast) {
     std::string test_pattern = R"(
         module test_mod #(
