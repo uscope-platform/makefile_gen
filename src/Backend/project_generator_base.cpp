@@ -15,10 +15,13 @@
 
 #include "../includes/Backend/project_generator_base.hpp"
 
-project_generator_base::project_generator_base(const std::string& template_f) {
+#include <fmt/format.h>
+
+project_generator_base::project_generator_base(const std::string& template_f, const std::shared_ptr<settings_store> &s_store) {
     std::string templates_dir = TEMPLATES_FOLDER;
     template_file = templates_dir + "/" + template_f;
     data.board_part = "";
+    settings = s_store;
 }
 
 void project_generator_base::write_makefile(std::ostream &output) {
@@ -96,7 +99,6 @@ void project_generator_base::write_makefile(std::ostream &output) {
         output<< "set_property top " <<tl<<" [get_filesets sources_1]"<< std::endl;
     }
 
-
     output << "set_property include_dirs $commons_dir [get_filesets sources_1]\n";
     output << "set_property SOURCE_SET sources_1 [get_filesets sim_1]\n";
 
@@ -114,62 +116,90 @@ void project_generator_base::write_makefile(std::ostream &output) {
     output << "update_compile_order\n";
 }
 
- void project_generator_base::generate_sim_script(std::ostream &output) {
+void project_generator_base::generate_sim_script(std::ostream &output) {
 
-    output << "PROJ_ROOT=$(pwd)"<< std::endl;
-    output << "BUILD_DIR=\"$PROJ_ROOT/sim\""<< std::endl;
-    output << "TOP=\"" + data.tb_tl + "\""<< std::endl;
+    auto sim_dir = data.repo_dir + "/sim";
 
-    output << "INC_DIR=$(realpath \"../../Common/\")"<< std::endl;
-    output << "SIM_FILE=$(realpath \"tb/sim.tcl\")"<< std::endl;
+    auto [synth_code, synth_data] = get_script_sim_sources(data.synth_sources);
+    auto [sim_code, sim_data] = get_script_sim_sources(data.sim_sources);
+
     output << "FILES=( ";
-    for (auto &f:data.synth_sources) {
+    for (auto &f:synth_code) {
         std::string abs_path = std::regex_replace(f, std::regex(R"(\$\{base_dir\})"), base_dir);
-        output << abs_path << " ";
+        output << "\n    " << abs_path;
     }
-    for (auto &f:data.sim_sources) {
+    for (auto &f:sim_code) {
         std::string abs_path = std::regex_replace(f, std::regex(R"(\$\{base_dir\})"), base_dir);
-        output << abs_path << " ";
+        output << "\n    "  << abs_path;
     }
+    output << "\n)\n" << std::endl;
+
+    output << "mkdir -p " << sim_dir << std::endl;
+
+    for (auto &f:synth_data) {
+        std::string abs_path = std::regex_replace(f, std::regex(R"(\$\{base_dir\})"), base_dir);
+        output << "cp "<< abs_path << " "<< sim_dir + "/" + std::filesystem::path(f).filename().string() << std::endl;
+    }
+    output<< std::endl;
+
+    for (auto &f:sim_data) {
+        std::string abs_path = std::regex_replace(f, std::regex(R"(\$\{base_dir\})"), base_dir);
+        output << "cp "<< abs_path << " "<< sim_dir + "/" + std::filesystem::path(f).filename().string() << std::endl;
+    }
+
+    output<< std::endl;
+
+    output << "(" << std::endl;
+    output << "    cd "<< sim_dir<<"|| exit" << std::endl<< std::endl;
+
+    output << open_phase("PHASE 1: XVLOG (Analysis)");
+
+    output << "    xvlog -sv \"${FILES[@]}\" ";
+    for (const auto& d: data.commons_dir) {
+        output<< "-i " << d;
+    }
+    // add includes for xilinx interface definitions
+    output << " -i " << settings->get_setting("vivado_path") + "data/rsb/busdef"<< std::endl;
+
+    output << check_result("XVLOG FAILED");
+
+
+    output << open_phase("PHASE 2: XELAB (Elaboration)");
+    output << "    xelab -debug typical -top "<<data.tb_tl<<" -snapshot sim_snapshot  -timescale 10ns/1ps" << std::endl;
+    output << check_result("XELAB FAILED");
+
+
+    output <<open_phase("PHASE 3: XSIM (Simulation)");
+    output << "    xsim sim_snapshot -tclbatch " << sim_dir + "/sim.tcl"  << std::endl;
+    output << check_result("XSIM FAILED");
+
+
     output << ")" << std::endl;
-    const auto sim_template = R"(
-mkdir -p $BUILD_DIR
-(
-    cd "$BUILD_DIR" || exit
+    auto res_file = sim_dir + "/dump.vcd";
+    output << fmt::format("[[ -f {0} ]] && mv {0} .",res_file)<< std::endl;
 
-    xvlog -sv "${FILES[@]}" -i $INC_DIR
+    output << "rm -r " << sim_dir << std::endl;
 
-    xelab -debug typical -top $TOP -snapshot sim_snapshot  -timescale 10ns/1ps
-
-    xsim sim_snapshot -tclbatch $SIM_FILE
-
-)
-
-mv $BUILD_DIR/dump.vcd .
-rm -r $BUILD_DIR
-    )";
-
-    output << sim_template;
-
-
- }
+}
 
 
  void project_generator_base::set_project_name(const std::string &name) {
     data.name = name;
 }
 
-void project_generator_base::set_directories(const std::string &base, const std::vector<std::string> &commons) {
+void project_generator_base::set_directories(const std::string &base, const std::string& project_base, const std::vector<std::string> &commons) {
     base_dir = base;
+    base_dir.replace(base_dir.size()-1, 1, "");
     std::vector<std::string> include_dirs;
     include_dirs.reserve(commons.size());
 
     for(const auto& item:commons){
-        include_dirs.push_back(base +item);
+        include_dirs.push_back(base_dir +item);
     }
 
     data.base_dir = "set base_dir " + base;
     data.commons_dir = include_dirs;
+    data.repo_dir = project_base;
 }
 
 void project_generator_base::set_synth_sources(const std::set<std::string> &paths) {
@@ -212,12 +242,32 @@ std::vector<std::string> project_generator_base::process_sources_set(const std::
     srcs.reserve(paths.size());
 
     for(const auto& source :paths){
-        std::string replaced = base_dir;
-        if(replaced.ends_with("/")){
-            replaced.pop_back();
-        }
-        srcs.push_back(std::regex_replace(source, std::regex(replaced), "${base_dir}"));
+        srcs.push_back(std::regex_replace(source, std::regex(base_dir), "${base_dir}"));
 
     }
     return srcs;
 }
+
+ std::string project_generator_base::open_phase(const std::string &phase_name) {
+    return fmt::format(R"(    echo -e "\n\033[1;33m>>> {} <<<\033[0m")", phase_name)+ "\n";
+ }
+
+ std::string project_generator_base::check_result(const std::string &error_message) {
+    std::ostringstream oss;
+    oss << "    if [ $? -ne 0 ]; then"<< std::endl;
+    oss << fmt::format(R"(        echo -e "\033[1;31m!!! {} !!!\033[0m")", error_message)<< std::endl;
+    oss << "        exit 1"<< std::endl;
+    oss << "    fi\n"<< std::endl;
+    return oss.str();
+ }
+
+std::pair<std::vector<std::string>, std::vector<std::string>> project_generator_base::get_script_sim_sources(const std::span<std::string> &sources) {
+    std::vector<std::string> code_sources, data_sources;
+    for (auto &f:sources) {
+        auto ext = std::filesystem::path(f).extension();
+        if (ext != ".mem"&& ext != ".dat") code_sources.push_back(f);
+        else data_sources.push_back(f);
+    }
+    return {code_sources, data_sources};
+ }
+

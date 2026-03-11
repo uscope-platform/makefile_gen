@@ -189,10 +189,10 @@ int main(int argc, char *argv[]){
         //Generate makefile
     if(opts.generate_xilinx){
 
-        xilinx_project_generator generator;
+        xilinx_project_generator generator(s_store);
         generator.set_project_name(dep.get_project_name());
 
-        generator.set_directories(s_store->get_setting("hdl_store"), dep.get_include_directories());
+        generator.set_directories(s_store->get_setting("hdl_store"), std::filesystem::current_path(),  dep.get_include_directories());
         generator.set_synth_sources(synth_sources);
         generator.set_sim_sources(sim_sources);
         generator.set_script_sources(script_deps);
@@ -206,22 +206,21 @@ int main(int argc, char *argv[]){
         if (opts.generate_sim_script) {
             std::ofstream simfile("sim.sh");
             generator.generate_sim_script(simfile);
+        } else {
+            std::ofstream makefile("makefile.tcl");
+            generator.write_makefile(makefile);
+
+
+            Vivado_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
+            manager.create_project("makefile.tcl",  !opts.no_open);
         }
-
-        std::ofstream makefile("makefile.tcl");
-        generator.write_makefile(makefile);
-
-
-        Vivado_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
-        manager.create_project("makefile.tcl",  !opts.no_open);
-
     }
 
     if(opts.generate_lattice){
-        lattice_project_generator generator;
+        lattice_project_generator generator(s_store);
         generator.set_project_name(dep.get_project_name());
 
-        generator.set_directories(s_store->get_setting("hdl_store"), dep.get_include_directories());
+        generator.set_directories(s_store->get_setting("hdl_store"), std::filesystem::current_path(), dep.get_include_directories());
         generator.set_synth_sources(synth_sources);
         generator.set_sim_sources(sim_sources);
         generator.set_script_sources(script_deps);

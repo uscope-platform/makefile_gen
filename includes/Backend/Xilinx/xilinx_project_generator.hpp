@@ -21,7 +21,7 @@
 
 class xilinx_project_generator: public project_generator_base{
 public:
-    xilinx_project_generator() : project_generator_base("make_project_xlnx.j2") {};
+    xilinx_project_generator(const std::shared_ptr<settings_store> &s_store) : project_generator_base("make_project_xlnx.j2", s_store) {};
 };
 
 
