@@ -154,14 +154,12 @@ void project_generator_base::generate_sim_script(std::ostream &output) {
     output << "mkdir -p " << sim_dir << std::endl;
     output << "cp sim.tcl " << sim_dir + "/sim.tcl"<< std::endl;
     for (auto &f:data.data_synth_sources) {
-        std::string abs_path = std::regex_replace(f, std::regex(R"(\$\{base_dir\})"), base_dir);
-        output << "cp "<< abs_path << " "<< sim_dir + "/" + std::filesystem::path(f).filename().string() << std::endl;
+        output << "cp "<< f << " "<< sim_dir + "/" + std::filesystem::path(f).filename().string() << std::endl;
     }
     output<< std::endl;
 
     for (auto &f:data.data_sim_sources) {
-        std::string abs_path = std::regex_replace(f, std::regex(R"(\$\{base_dir\})"), base_dir);
-        output << "cp "<< abs_path << " "<< sim_dir + "/" + std::filesystem::path(f).filename().string() << std::endl;
+        output << "cp "<< f << " "<< sim_dir + "/" + std::filesystem::path(f).filename().string() << std::endl;
     }
 
     output<< std::endl;

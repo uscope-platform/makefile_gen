@@ -216,7 +216,8 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
                             }
                         }
                         if (!inst_param_found) {
-                            spdlog::warn("The instance parameter {}::{} was not found, using 0 as a default", dep.instance, dep.name);
+                            auto path = get_full_path(work.node);
+                            spdlog::warn("The instance parameter {}.{}::{} was not found, using 0 as a default", path, dep.instance, dep.name);
                             value = 0;
                         }
                     }else if(node_overrides.contains(dep.name)) {
@@ -291,4 +292,18 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::specialize_
     if(runtime_to_eval.empty()) return {};
     // Substitute runtime only parameters
     return process_parameters(runtime_to_eval, parent_module, {} ,{});
+}
+
+std::string parameter_solver::get_full_path(const std::shared_ptr<HDL_instance_AST> &node) {
+    std::string res = "";
+
+    std::shared_ptr<HDL_instance_AST> current_node = node;
+
+    while (current_node != nullptr) {
+        res = current_node->get_name() + "." + res;
+        current_node = current_node->get_parent();
+    }
+    res.erase(res.size()-1, 1);
+
+    return res;
 }

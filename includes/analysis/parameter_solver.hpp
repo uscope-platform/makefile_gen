@@ -51,6 +51,8 @@ public:
         const std::map<qualified_identifier, resolved_parameter> &solved_parameters,
         Parameters_map &node_parameters,const std::string_view &parent_module
     );
+
+    static std::string get_full_path(const std::shared_ptr<HDL_instance_AST> &node);
 };
 
 
