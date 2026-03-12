@@ -51,7 +51,6 @@ void Dependency_resolver_v2::solve_dep(std::shared_ptr<HDL_instance_AST> &i) {
             if(!path.empty()) modules.insert(path);
         }
         solve_dep(dep);
-        modules.insert(dep_set.begin(), dep_set.end());
     }
 
     for(auto &item:i->get_package_dependencies()){
