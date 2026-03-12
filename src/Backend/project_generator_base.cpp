@@ -39,13 +39,26 @@ void project_generator_base::write_makefile(std::ostream &output) {
 
     output << "set synth_sources [list ";
     for(const auto& str:data.synth_sources){
-        output << "\""<< str << "\" ";
+
+        output << "\""<< std::regex_replace(str, std::regex(base_dir), "${base_dir}") << "\" ";
+    }
+    for(const auto& str:data.package_synth_sources){
+        output << "\""<< std::regex_replace(str, std::regex(base_dir), "${base_dir}") << "\" ";
+    }
+    for(const auto& str:data.data_synth_sources){
+        output << "\""<< std::regex_replace(str, std::regex(base_dir), "${base_dir}") << "\" ";
     }
     output << "]"<< std::endl;
 
     output << "set sim_sources [list ";
     for(const auto& str:data.sim_sources){
-        output << "\""<< str << "\" ";
+        output << "\""<< std::regex_replace(str, std::regex(base_dir), "${base_dir}") << "\" ";
+    }
+    for(const auto& str:data.package_sim_sources){
+        output << "\""<< std::regex_replace(str, std::regex(base_dir), "${base_dir}") << "\" ";
+    }
+    for(const auto& str:data.data_sim_sources){
+        output << "\""<< std::regex_replace(str, std::regex(base_dir), "${base_dir}") << "\" ";
     }
     output << "]"<< std::endl;
 
@@ -117,32 +130,36 @@ void project_generator_base::write_makefile(std::ostream &output) {
 }
 
 void project_generator_base::generate_sim_script(std::ostream &output) {
-
+    auto vivado_dir = settings->get_setting("vivado_path");
     auto sim_dir = data.repo_dir + "/sim";
 
-    auto [synth_code, synth_data] = get_script_sim_sources(data.synth_sources);
-    auto [sim_code, sim_data] = get_script_sim_sources(data.sim_sources);
-
     output << "FILES=( ";
-    for (auto &f:synth_code) {
-        std::string abs_path = std::regex_replace(f, std::regex(R"(\$\{base_dir\})"), base_dir);
-        output << "\n    " << abs_path;
+    for (auto &f:data.package_synth_sources) {
+        output << "\n    " << f;
     }
-    for (auto &f:sim_code) {
-        std::string abs_path = std::regex_replace(f, std::regex(R"(\$\{base_dir\})"), base_dir);
-        output << "\n    "  << abs_path;
+    for (auto &f:data.synth_sources) {
+        output << "\n    " << f;
+    }
+    output << "\n    " << vivado_dir << "data/verilog/src/glbl.v";
+
+    for (auto &f:data.package_sim_sources) {
+        if (!data.package_synth_sources.contains(f)) output << "\n    "  << f;
+    }
+
+    for (auto &f:data.sim_sources) {
+        if (!data.synth_sources.contains(f)) output << "\n    "  << f;
     }
     output << "\n)\n" << std::endl;
 
     output << "mkdir -p " << sim_dir << std::endl;
-
-    for (auto &f:synth_data) {
+    output << "cp sim.tcl " << sim_dir + "/sim.tcl"<< std::endl;
+    for (auto &f:data.data_synth_sources) {
         std::string abs_path = std::regex_replace(f, std::regex(R"(\$\{base_dir\})"), base_dir);
         output << "cp "<< abs_path << " "<< sim_dir + "/" + std::filesystem::path(f).filename().string() << std::endl;
     }
     output<< std::endl;
 
-    for (auto &f:sim_data) {
+    for (auto &f:data.data_sim_sources) {
         std::string abs_path = std::regex_replace(f, std::regex(R"(\$\{base_dir\})"), base_dir);
         output << "cp "<< abs_path << " "<< sim_dir + "/" + std::filesystem::path(f).filename().string() << std::endl;
     }
@@ -165,12 +182,12 @@ void project_generator_base::generate_sim_script(std::ostream &output) {
 
 
     output << open_phase("PHASE 2: XELAB (Elaboration)");
-    output << "    xelab -debug typical -top "<<data.tb_tl<<" -snapshot sim_snapshot  -timescale 10ns/1ps" << std::endl;
+    output << "    xelab -debug typical --relax -top "<<data.tb_tl<<" -top glbl -L xil_defaultlib -L unisims_ver -L unimacro_ver -L xpm  -snapshot sim_snapshot  -timescale 10ns/1ps" << std::endl;
     output << check_result("XELAB FAILED");
 
 
     output <<open_phase("PHASE 3: XSIM (Simulation)");
-    output << "    xsim sim_snapshot -tclbatch " << sim_dir + "/sim.tcl"  << std::endl;
+    output << "    xsim sim_snapshot -tclbatch sim.tcl"  << std::endl;
     output << check_result("XSIM FAILED");
 
 
@@ -180,6 +197,21 @@ void project_generator_base::generate_sim_script(std::ostream &output) {
 
     output << "rm -r " << sim_dir << std::endl;
 
+
+    std::ofstream sim_tcl( "sim.tcl");
+    sim_tcl<< R"(
+    open_vcd dump.vcd
+
+    log_vcd [get_objects -recursive /*]
+
+    run 2ms
+
+    flush_vcd
+    close_vcd
+    exit
+)";
+    sim_tcl.flush();
+    sim_tcl.close();
 }
 
 
@@ -203,21 +235,34 @@ void project_generator_base::set_directories(const std::string &base, const std:
 }
 
 void project_generator_base::set_synth_sources(const std::set<std::string> &paths) {
-    data.synth_sources = this->process_sources_set(paths);
+    data.synth_sources = paths;
 }
 
 void project_generator_base::set_sim_sources(const std::set<std::string> &paths) {
-    std::vector<std::string> synth_sources = data.synth_sources;
-    std::vector<std::string> raw_sim_sources = this->process_sources_set(paths);
-    std::vector<std::string> diff;
-
-    std::set_difference(raw_sim_sources.begin(), raw_sim_sources.end(), synth_sources.begin(), synth_sources.end(),
+    std::set<std::string> diff;
+    std::set_difference(paths.begin(), paths.end(), data.synth_sources.begin(), data.synth_sources.end(),
                         std::inserter(diff, diff.begin()));
 
     data.sim_sources = diff;
 }
 
-void project_generator_base::set_synth_tl(const std::string &tl) {
+ void project_generator_base::set_synth_packages(const std::set<std::string> &paths) {
+    data.package_synth_sources = paths;
+ }
+
+ void project_generator_base::set_synth_data(const std::set<std::string> &paths) {
+    data.data_synth_sources =paths;
+ }
+
+ void project_generator_base::set_sim_data(const std::set<std::string> &paths) {
+    data.data_sim_sources = paths;
+ }
+
+ void project_generator_base::set_sim_packages(const std::set<std::string> &paths) {
+    data.package_sim_sources = paths;
+ }
+
+ void project_generator_base::set_synth_tl(const std::string &tl) {
     data.synth_tl= tl;
 }
 void project_generator_base::set_board_part(const std::string &bp) {
@@ -237,16 +282,6 @@ void project_generator_base::set_script_sources(const std::vector<script_source>
     data.scripts = paths;
 }
 
-std::vector<std::string> project_generator_base::process_sources_set(const std::set<std::string> &paths) {
-    std::vector<std::string> srcs;
-    srcs.reserve(paths.size());
-
-    for(const auto& source :paths){
-        srcs.push_back(std::regex_replace(source, std::regex(base_dir), "${base_dir}"));
-
-    }
-    return srcs;
-}
 
  std::string project_generator_base::open_phase(const std::string &phase_name) {
     return fmt::format(R"(    echo -e "\n\033[1;33m>>> {} <<<\033[0m")", phase_name)+ "\n";

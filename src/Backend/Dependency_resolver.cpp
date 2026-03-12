@@ -20,22 +20,27 @@
 Dependency_resolver_v2::Dependency_resolver_v2(const std::vector<std::shared_ptr<HDL_instance_AST>> &i, std::shared_ptr<data_store> store) {
     AST = i;
     d_store = std::move(store);
+    for(auto &a:AST){
+        solve_dep(a);
+        auto path = d_store->get_HDL_resource(a->get_type()).get_path();
+        modules.insert(path);
+    }
+
 }
 
 std::set<std::string> Dependency_resolver_v2::get_dependencies() {
-    std::set<std::string> ret_val;
-    for(auto &a:AST){
-        auto deps = solve_dep(a);
-        auto path = d_store->get_HDL_resource(a->get_type()).get_path();
-        deps.insert(path);
-        ret_val.insert(deps.begin(), deps.end());
-    }
-
-    return ret_val;
+    return modules;
 }
 
-std::set<std::string> Dependency_resolver_v2::solve_dep(std::shared_ptr<HDL_instance_AST> &i) {
-    std::set<std::string> ret_val;
+std::set<std::string> Dependency_resolver_v2::get_packages() {
+    return packages;
+}
+
+std::set<std::string> Dependency_resolver_v2::get_data() {
+    return data;
+}
+
+void Dependency_resolver_v2::solve_dep(std::shared_ptr<HDL_instance_AST> &i) {
 
     auto type = i->get_type();
 
@@ -43,19 +48,18 @@ std::set<std::string> Dependency_resolver_v2::solve_dep(std::shared_ptr<HDL_inst
         if(d_store->contains_hdl_entity(dep->get_type())){
 
             auto path = d_store->get_HDL_resource(dep->get_type()).get_path();
-            if(!path.empty()) ret_val.insert(path);
+            if(!path.empty()) modules.insert(path);
         }
-        auto dep_set = solve_dep(dep);
-        ret_val.insert(dep_set.begin(), dep_set.end());
+        solve_dep(dep);
+        modules.insert(dep_set.begin(), dep_set.end());
     }
 
     for(auto &item:i->get_package_dependencies()){
-        ret_val.insert(item);
+        packages.insert(item);
     }
 
     for(auto &item:i->get_data_dependencies()){
-        ret_val.insert(item);
+        data.insert(item);
     }
 
-    return ret_val;
 }

@@ -175,9 +175,13 @@ int main(int argc, char *argv[]){
     // RESOLVE DEPENDENCIES
     Dependency_resolver_v2 synth_r(additional_synth_modules, d_store);
     auto synth_sources = synth_r.get_dependencies();
+    auto synth_packages = synth_r.get_packages();
+    auto synth_data = synth_r.get_data();
 
     Dependency_resolver_v2 sim_r(additional_sim_modules, d_store);
     auto sim_sources = sim_r.get_dependencies();
+    auto sim_packages = sim_r.get_packages();
+    auto sim_data = sim_r.get_data();
 
     // BUS MAPPING
 
@@ -194,7 +198,11 @@ int main(int argc, char *argv[]){
 
         generator.set_directories(s_store->get_setting("hdl_store"), std::filesystem::current_path(),  dep.get_include_directories());
         generator.set_synth_sources(synth_sources);
+        generator.set_synth_packages(synth_packages);
+        generator.set_synth_data(synth_data);
         generator.set_sim_sources(sim_sources);
+        generator.set_sim_packages(sim_packages);
+        generator.set_sim_data(sim_data);
         generator.set_script_sources(script_deps);
         generator.set_constraint_sources(constr_deps);
         generator.set_sim_tl(dep.get_sim_tl());
@@ -212,7 +220,7 @@ int main(int argc, char *argv[]){
 
 
             Vivado_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
-            manager.create_project("makefile.tcl",  !opts.no_open);
+            //manager.create_project("makefile.tcl",  !opts.no_open);
         }
     }
 

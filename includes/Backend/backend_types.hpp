@@ -17,6 +17,7 @@
 #define MAKEFILEGEN_V2_BACKEND_TYPES_HPP
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 #include <unordered_set>
@@ -37,8 +38,12 @@ struct project_data {
     std::string base_dir;
     std::string repo_dir;
     std::vector<std::string> commons_dir;
-    std::vector<std::string> synth_sources;
-    std::vector<std::string> sim_sources;
+    std::set<std::string> synth_sources;
+    std::set<std::string> package_synth_sources;
+    std::set<std::string> package_sim_sources;
+    std::set<std::string> data_synth_sources;
+    std::set<std::string> data_sim_sources;
+    std::set<std::string> sim_sources;
     std::string synth_tl;
     std::string board_part;
     std::string tb_tl;

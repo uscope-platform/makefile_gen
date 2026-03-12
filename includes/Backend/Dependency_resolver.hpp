@@ -31,12 +31,15 @@ public:
     Dependency_resolver_v2(const std::vector<std::shared_ptr<HDL_instance_AST>> &i, std::shared_ptr<data_store> store);
 
     std::set<std::string> get_dependencies();
-
+    std::set<std::string> get_packages();
+    std::set<std::string> get_data();
 
 private:
+    std::set<std::string> modules;
+    std::set<std::string> packages;
+    std::set<std::string> data;
 
-
-    std::set<std::string> solve_dep(std::shared_ptr<HDL_instance_AST> &i);
+    void solve_dep(std::shared_ptr<HDL_instance_AST> &i);
     std::vector<std::shared_ptr<HDL_instance_AST>> AST;
     std::shared_ptr<data_store> d_store;
 };

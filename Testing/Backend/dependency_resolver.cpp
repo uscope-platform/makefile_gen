@@ -26,7 +26,8 @@ protected:
         HDL_instance d1("inst", "test_dep", module);
         HDL_instance d2("mem_init", "test_mem_init", memory_init);
         HDL_instance d3("exm", "excluded_module", module);
-        std::vector<HDL_instance> deps = {d1, d2, d3};
+        HDL_instance d4("pkg", "test_package", package);
+        std::vector<HDL_instance> deps = {d1, d2, d3, d4};
         HDL_Resource mod_entity(module, "test_module", "test/mod.sv");
         mod_entity.add_dependencies(deps);
         d_store->store_hdl_entity(mod_entity);
@@ -37,6 +38,8 @@ protected:
         d_store->store_hdl_entity(expl_dep);
         HDL_Resource dep_entity(module, "test_dep", "test/dep.sv");
         d_store->store_hdl_entity(dep_entity);
+        HDL_Resource pkg_entity(package, "test_package", "test/pkg.sv");
+        d_store->store_hdl_entity(pkg_entity);
     }
 
     virtual void TearDown() {
@@ -60,7 +63,10 @@ TEST_F(dep_resolver , dependency_resolver) {
     auto synth_sources = synth_r.get_dependencies();
 
     Dependency_resolver_v2 res(additional_synth_modules, d_store);
-    std::set<std::string> result = res.get_dependencies();
-    std::set<std::string> check = {"test/mod.sv", "test/dep.sv", "test/mem_init.mem", "test/explicit/dep.sv"};
-    ASSERT_EQ(result, check);
+    std::set<std::string> check = {"test/mod.sv", "test/dep.sv", "test/explicit/dep.sv"};
+    std::set<std::string> check_mem = {"test/mem_init.mem"};
+    std::set<std::string> check_pkg = {"test/pkg.sv"};
+    ASSERT_EQ(res.get_dependencies(), check);
+    ASSERT_EQ(res.get_data(), check_mem);
+    ASSERT_EQ(res.get_packages(), check_pkg);
 }
