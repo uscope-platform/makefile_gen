@@ -191,9 +191,12 @@ void project_generator_base::generate_sim_script(std::ostream &output) {
 
 
     output << ")" << std::endl;
-    auto res_file = sim_dir + "/dump.vcd";
-    output << fmt::format("[[ -f {0} ]] && mv {0} .",res_file)<< std::endl;
 
+
+    output << fmt::format("if [ -f {0}/dump.vcd  ]; then",sim_dir) << std::endl;
+    output << fmt::format("    vcd2fst {0}/dump.vcd dump.fst",sim_dir) << std::endl;
+    output << fmt::format("    rm {0}/dump.vcd", sim_dir) << std::endl;
+    output <<"fi" <<std::endl;
     output << "rm -r " << sim_dir << std::endl;
 
 
