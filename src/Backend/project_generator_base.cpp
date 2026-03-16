@@ -131,6 +131,7 @@ void project_generator_base::write_makefile(std::ostream &output) {
 
 void project_generator_base::generate_sim_script(std::ostream &output) {
     auto vivado_dir = settings->get_setting("vivado_path");
+    if (!vivado_dir.ends_with("/")) vivado_dir.push_back('/');
     auto sim_dir = data.repo_dir + "/sim";
 
     output << "FILES=( ";

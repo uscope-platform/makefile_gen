@@ -48,7 +48,7 @@ public:
     void set_sim_tl(const std::string& tl);
     void set_board_part(const std::string & bp);
     void set_constraint_sources(const std::unordered_set<std::string>& paths);
-    void set_script_sources(const std::vector<script_source>& paths);protected:
+    void set_script_sources(const std::vector<script_source>& paths);
 private:
     std::shared_ptr<settings_store> settings;
     std::string base_dir;
