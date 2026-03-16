@@ -220,7 +220,7 @@ void project_generator_base::generate_sim_script(std::ostream &output) {
 
 void project_generator_base::set_directories(const std::string &base, const std::string& project_base, const std::vector<std::string> &commons) {
     base_dir = base;
-    base_dir.replace(base_dir.size()-1, 1, "");
+    if (base_dir.ends_with("/")) base_dir.replace(base_dir.size()-1, 1, "");
     std::vector<std::string> include_dirs;
     include_dirs.reserve(commons.size());
 
