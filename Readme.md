@@ -127,7 +127,7 @@ When building from source the following additional dependencies are necessary
 
 To install on Ubuntu (22.04) use
 ```shell
-sudo apt install libssl-dev libgtest-dev build-essential pkg-config uuid-dev libgmock-dev python3-jinja2
+sudo apt install libssl-dev libgtest-dev build-essential pkg-config uuid-dev libgmock-dev
 ```
 
 To build from source the following command can be used:
@@ -135,8 +135,8 @@ To build from source the following command can be used:
 ```shell
 cd makefile_gen
 mkdir build && cd build
-cmake ..
-cmake --build . --parallel 4
+cmake .. -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=conan_provider.cmake -DCMAKE_BUILD_TYPE=Release
+cmake --build . --parallel 8
 sudo cmake --install .
 ```
 To generate a distributable DEB package use the following command:
