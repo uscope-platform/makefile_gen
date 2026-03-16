@@ -175,7 +175,7 @@ void project_generator_base::generate_sim_script(std::ostream &output) {
         output<< "-i " << d;
     }
     // add includes for xilinx interface definitions
-    output << " -i " << settings->get_setting("vivado_path") + "data/rsb/busdef"<< std::endl;
+    output << " -i " << vivado_dir + "data/rsb/busdef"<< std::endl;
 
     output << check_result("XVLOG FAILED");
 
