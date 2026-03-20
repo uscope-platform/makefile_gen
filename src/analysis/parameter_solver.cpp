@@ -173,9 +173,11 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
 
         for(auto &param:node_overrides) {
             auto i_l = param->get_i_l();
-            i_l.set_packed_dimensions(node_parameters.get(param->get_name())->get_i_l().get_packed_dimensions());
-            i_l.set_unpacked_dimensions(node_parameters.get(param->get_name())->get_i_l().get_unpacked_dimensions());
-            param->add_initialization_list(i_l);
+            if (node_parameters.contains(param->get_name())) {
+                i_l.set_packed_dimensions(node_parameters.get(param->get_name())->get_i_l().get_packed_dimensions());
+                i_l.set_unpacked_dimensions(node_parameters.get(param->get_name())->get_i_l().get_unpacked_dimensions());
+                param->add_initialization_list(i_l);
+            }
         }
 
         int solution_rounds = 0;

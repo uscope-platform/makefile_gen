@@ -214,6 +214,11 @@ int main(int argc, char *argv[]){
         if (opts.generate_sim_script) {
             std::ofstream simfile("sim.sh");
             generator.generate_sim_script(simfile);
+            if (!std::filesystem::exists("sim.tcl")) {
+                std::ofstream ofs("sim.tcl");
+
+                generator.write_sim_control_script(ofs);
+            }
         } else {
             std::ofstream makefile("makefile.tcl");
             generator.write_makefile(makefile);

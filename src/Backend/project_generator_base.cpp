@@ -199,22 +199,25 @@ void project_generator_base::generate_sim_script(std::ostream &output) {
     output <<"fi" <<std::endl;
     output << "rm -r " << sim_dir << std::endl;
 
+;
+}
+
+ void project_generator_base::write_sim_control_script(std::ostream &output) {
 
     std::ofstream sim_tcl( "sim.tcl");
-    sim_tcl<< R"(
-    open_vcd dump.vcd
+    output << R"(
+open_vcd dump.vcd
 
-    log_vcd [get_objects -recursive /*]
+log_vcd [get_objects -recursive /*]
 
-    run 2ms
+run 2ms
 
-    flush_vcd
-    close_vcd
-    exit
+flush_vcd
+close_vcd
+exit
 )";
-    sim_tcl.flush();
-    sim_tcl.close();
-}
+    output.flush();
+ }
 
 
  void project_generator_base::set_project_name(const std::string &name) {
