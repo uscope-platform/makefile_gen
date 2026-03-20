@@ -21,23 +21,62 @@
 #include "Backend/Dependency_resolver.hpp"
 
 TEST(xilinx_project_gen, simple_gen){
-    xilinx_project_generator gen(nullptr);
 
-    gen.set_project_name("proj_name");
 
-    gen.set_directories("/test/dir/", "/test/base", {"/include"});
-    gen.set_synth_sources({"/test/synth/source.sv"});
-    gen.set_sim_sources({"/test/sim/source.sv"});
-    gen.set_script_sources({{"source","/test/script/source.sv", {}}});
-    gen.set_constraint_sources({"/test/constr/source.sv"});
-    gen.set_sim_tl("sim_tl");
-    gen.set_synth_tl("synth_tl");
-    std::stringstream test_stream;
-    gen.write_makefile(test_stream);
-    auto result = test_stream.str();
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
 
-    std::string check = "set project_name proj_name\nset origin_dir \".\"\nset base_dir /test/dir/\nset commons_dir [list \"/test/dir/include\" ]\nset synth_sources [list \"/test/synth/source.sv\" ]\nset sim_sources [list \"/test/sim/source.sv\" ]\nset constraints_sources [list \"/test/constr/source.sv\" ]\n# Create project\ncreate_project ${project_name} ./${project_name}\nset_property part xc7z020clg400-1 [current_project]\n# Set the directory path for the new project\nset proj_dir [get_property directory [current_project]]\nset obj [current_project]\nsource /test/script/source.sv\nadd_files -norecurse $synth_sources\nset_property top synth_tl [get_filesets sources_1]\nset_property include_dirs $commons_dir [get_filesets sources_1]\nset_property SOURCE_SET sources_1 [get_filesets sim_1]\nadd_files -fileset constrs_1 -norecurse  $constraints_sources\nadd_files -fileset sim_1 -norecurse $sim_sources\nset_property top sim_tl [get_filesets sim_1]\nupdate_compile_order\n";
-    ASSERT_EQ(result, check);
+    std::vector<std::string> paths = {
+            "Components/Common",
+            "Components/ExternalDrivers/AD2S1210/rtl",
+            "Components/ExternalDrivers/AD2S1210/tb",
+            "Components/ExternalDrivers/AD2S1210/tb",
+            "Components/system/axi_stream/combiner/rtl",
+            "Components/comms/SPI/rtl/master",
+            "Components/system/EnableGenerator/rtl",
+            "Components/comms/SPI/rtl",
+            "Components/system/axi_lite/crossbar/rtl/",
+            "Components/system/axi_lite/simple_register_cu/rtl",
+            "Components/system/axi_lite/skid_buffer/rtl"
+    };
+
+    auto prefix = "check_files/test_data/";
+    for(auto &p:paths){
+        for(auto &f:std::filesystem::directory_iterator(prefix + p)){
+            if(f.path().extension() == ".v" || f.path().extension() == ".sv" || f.path().extension() == ".svh"){
+                sv_analyzer analyzer(f.path());
+                analyzer.cleanup_content("`(.*)");
+
+                for(auto &entity:analyzer.analyze()){
+                    d_store->store_hdl_entity(entity);
+                }
+            }
+        }
+    }
+
+
+    HDL_ast_builder_v2 b(s_store, d_store, Depfile());
+    auto ast_v2 = b.build_ast(std::vector<std::string>({"AD2S1210_tb"}))[0];
+
+
+    xilinx_project_generator generator(s_store);
+    generator.set_project_name("test_proj");
+
+    Dependency_resolver_v2 sim_r({ast_v2}, d_store);
+    auto sources = sim_r.get_dependencies();
+
+    generator.set_directories("/tmp/rb", "/tmp/tb",{});
+    generator.set_synth_sources({});
+    generator.set_sim_sources(sources);
+    generator.set_sim_tl("AD2S1210_tb");
+
+
+    std::ostringstream result_tcl;
+    generator.write_makefile(result_tcl);
+
+    std::string expected_tcl = "set project_name test_proj\nset origin_dir \".\"\nset base_dir /tmp/rb\nset commons_dir [list ]\nset synth_sources [list ]\nset sim_sources [list \"check_files/test_data/Components/Common/interfaces.sv\" \"check_files/test_data/Components/ExternalDrivers/AD2S1210/rtl/AD2S1210.sv\" \"check_files/test_data/Components/ExternalDrivers/AD2S1210/rtl/ad2s1210_CU.sv\" \"check_files/test_data/Components/ExternalDrivers/AD2S1210/rtl/ad2s1210_configurator.sv\" \"check_files/test_data/Components/ExternalDrivers/AD2S1210/rtl/ad2s1210_fault_handler.sv\" \"check_files/test_data/Components/ExternalDrivers/AD2S1210/rtl/ad2s1210_reader.sv\" \"check_files/test_data/Components/ExternalDrivers/AD2S1210/tb/AD2S1210_tb.sv\" \"check_files/test_data/Components/ExternalDrivers/AD2S1210/tb/ad2s1210_tl_test.sv\" \"check_files/test_data/Components/comms/SPI/rtl/Spi.sv\" \"check_files/test_data/Components/comms/SPI/rtl/master/ClockGen.sv\" \"check_files/test_data/Components/comms/SPI/rtl/master/SpiControlUnit.sv\" \"check_files/test_data/Components/comms/SPI/rtl/master/SpiRegister.sv\" \"check_files/test_data/Components/comms/SPI/rtl/master/Spi_master.sv\" \"check_files/test_data/Components/comms/SPI/rtl/master/TransferEngine.sv\" \"check_files/test_data/Components/system/EnableGenerator/rtl/Enable_Generator_2.sv\" \"check_files/test_data/Components/system/EnableGenerator/rtl/enable_comparator.v\" \"check_files/test_data/Components/system/EnableGenerator/rtl/enable_generator_core.v\" \"check_files/test_data/Components/system/EnableGenerator/rtl/enable_generator_counter.v\" \"check_files/test_data/Components/system/axi_lite/crossbar/rtl/address_decoder.sv\" \"check_files/test_data/Components/system/axi_lite/crossbar/rtl/axil_crossbar.sv\" \"check_files/test_data/Components/system/axi_lite/crossbar/rtl/axil_crossbar_wrapper.sv\" \"check_files/test_data/Components/system/axi_lite/simple_register_cu/rtl/axil_simple_register_cu.sv\" \"check_files/test_data/Components/system/axi_lite/skid_buffer/rtl/axil_skid_buffer.sv\" \"check_files/test_data/Components/system/axi_stream/combiner/rtl/axi_stream_combiner_3.sv\" ]\nset constraints_sources [list ]\n# Create project\ncreate_project ${project_name} ./${project_name}\nset_property part xc7z020clg400-1 [current_project]\n# Set the directory path for the new project\nset proj_dir [get_property directory [current_project]]\nset obj [current_project]\nadd_files -norecurse $synth_sources\nset_property include_dirs $commons_dir [get_filesets sources_1]\nset_property SOURCE_SET sources_1 [get_filesets sim_1]\nadd_files -fileset sim_1 -norecurse $sim_sources\nset_property top AD2S1210_tb [get_filesets sim_1]\nupdate_compile_order\n";
+
+    EXPECT_EQ(expected_tcl, result_tcl.str());
 }
 
 TEST(xilinx_project_gen, argumented_script_gen){
@@ -67,7 +106,7 @@ TEST(xilinx_project_gen, argumented_script_gen){
 
 
 
-TEST( xilinx_project_gen, pwm_sim_script) {
+TEST( xilinx_project_gen, sim_script) {
 
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
