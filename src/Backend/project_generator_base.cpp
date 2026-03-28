@@ -199,7 +199,6 @@ void project_generator_base::generate_sim_script(std::ostream &output) {
     output <<"fi" <<std::endl;
     output << "rm -r " << sim_dir << std::endl;
 
-;
 }
 
  void project_generator_base::write_sim_control_script(std::ostream &output) {
@@ -220,9 +219,6 @@ exit
  }
 
 
- void project_generator_base::set_project_name(const std::string &name) {
-    data.name = name;
-}
 
 void project_generator_base::set_directories(const std::string &base, const std::string& project_base, const std::vector<std::string> &commons) {
     base_dir = base;
@@ -239,53 +235,16 @@ void project_generator_base::set_directories(const std::string &base, const std:
     data.repo_dir = project_base;
 }
 
-void project_generator_base::set_synth_sources(const std::set<std::string> &paths) {
-    data.synth_sources = paths;
-}
 
-void project_generator_base::set_sim_sources(const std::set<std::string> &paths) {
+void project_generator_base::set_data(const project_data &d) {
+    data = d;
     std::set<std::string> diff;
-    std::set_difference(paths.begin(), paths.end(), data.synth_sources.begin(), data.synth_sources.end(),
+    std::set_difference(data.sim_sources.begin(), data.sim_sources.end(), data.synth_sources.begin(), data.synth_sources.end(),
                         std::inserter(diff, diff.begin()));
 
     data.sim_sources = diff;
 }
 
- void project_generator_base::set_synth_packages(const std::set<std::string> &paths) {
-    data.package_synth_sources = paths;
- }
-
- void project_generator_base::set_synth_data(const std::set<std::string> &paths) {
-    data.data_synth_sources =paths;
- }
-
- void project_generator_base::set_sim_data(const std::set<std::string> &paths) {
-    data.data_sim_sources = paths;
- }
-
- void project_generator_base::set_sim_packages(const std::set<std::string> &paths) {
-    data.package_sim_sources = paths;
- }
-
- void project_generator_base::set_synth_tl(const std::string &tl) {
-    data.synth_tl= tl;
-}
-void project_generator_base::set_board_part(const std::string &bp) {
-    data.board_part = bp;
-}
-
-void project_generator_base::set_sim_tl(const std::string &tl) {
-    data.tb_tl = tl;
-}
-
-
-void project_generator_base::set_constraint_sources(const std::unordered_set<std::string> &paths) {
-    data.constraints_sources = paths;
-}
-
-void project_generator_base::set_script_sources(const std::vector<script_source> &paths) {
-    data.scripts = paths;
-}
 
 
  std::string project_generator_base::open_phase(const std::string &phase_name) {

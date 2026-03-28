@@ -59,17 +59,19 @@ TEST(xilinx_project_gen, simple_gen){
     auto ast_v2 = b.build_ast(std::vector<std::string>({"AD2S1210_tb"}))[0];
 
 
-    xilinx_project_generator generator(s_store);
-    generator.set_project_name("test_proj");
-
     Dependency_resolver_v2 sim_r({ast_v2}, d_store);
     auto sources = sim_r.get_dependencies();
 
-    generator.set_directories("/tmp/rb", "/tmp/tb",{});
-    generator.set_synth_sources({});
-    generator.set_sim_sources(sources);
-    generator.set_sim_tl("AD2S1210_tb");
+    xilinx_project_generator generator(s_store);
 
+    project_data d;
+    d.name = "test_proj";
+    d.synth_sources = {};
+    d.sim_sources = sources;
+    d.tb_tl = "AD2S1210_tb";
+    generator.set_data(d);
+
+    generator.set_directories("/tmp/rb", "/tmp/tb",{});
 
     std::ostringstream result_tcl;
     generator.write_makefile(result_tcl);
@@ -80,22 +82,29 @@ TEST(xilinx_project_gen, simple_gen){
 }
 
 TEST(xilinx_project_gen, argumented_script_gen){
-    xilinx_project_generator gen(nullptr);
 
-    gen.set_project_name("proj_name");
-
-    gen.set_directories("/test/dir/", "/test/root_dir", {"/include"});
-    gen.set_synth_sources({"/test/synth/source.sv"});
-    gen.set_sim_sources({"/test/sim/source.sv"});
     script_source s;
     s.name = "scr_name";
     s.path = "/test/script/source.sv";
     s.function_mode = true;
     s.variables = {{"A","1"}};
-    gen.set_script_sources({s, s});
-    gen.set_constraint_sources({"/test/constr/source.sv"});
-    gen.set_sim_tl("sim_tl");
-    gen.set_synth_tl("synth_tl");
+
+    xilinx_project_generator gen(nullptr);
+
+    project_data d;
+    d.name = "proj_name";
+    d.synth_sources = {"/test/synth/source.sv"};
+    d.sim_sources = {"/test/sim/source.sv"};
+    d.scripts = {s, s};
+    d.constraints_sources = {"/test/constr/source.sv"};
+    d.tb_tl = "sim_tl";
+    d.synth_tl = "synth_tl";
+
+    gen.set_data(d);
+    gen.set_directories("/test/dir/", "/test/root_dir", {"/include"});
+
+
+
     std::stringstream test_stream;
     gen.write_makefile(test_stream);
     auto result = test_stream.str();
@@ -145,16 +154,19 @@ TEST( xilinx_project_gen, sim_script) {
     auto ast_v2 = b.build_ast(std::vector<std::string>({"AD2S1210_tb"}))[0];
 
 
-    xilinx_project_generator generator(s_store);
-    generator.set_project_name("test_proj");
-
     Dependency_resolver_v2 sim_r({ast_v2}, d_store);
     auto sources = sim_r.get_dependencies();
 
+    xilinx_project_generator generator(s_store);
+
+    project_data d;
+    d.name = "test_proj";
+    d.synth_sources = {};
+    d.sim_sources = sources;
+    d.tb_tl = "AD2S1210_tb";
+    generator.set_data(d);
+
     generator.set_directories("/tmp/rb", "/tmp/tb",{});
-    generator.set_synth_sources({});
-    generator.set_sim_sources(sources);
-    generator.set_sim_tl("AD2S1210_tb");
 
     std::ostringstream result_sh;
     generator.generate_sim_script(result_sh);

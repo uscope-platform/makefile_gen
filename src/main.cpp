@@ -194,23 +194,27 @@ int main(int argc, char *argv[]){
     if(opts.generate_xilinx){
 
         xilinx_project_generator generator(s_store);
-        generator.set_project_name(dep.get_project_name());
+
+        project_data data;
+
+        data.name = dep.get_project_name();
+        data.synth_sources = synth_sources;
+        data.package_synth_sources = synth_packages;
+        data.data_synth_sources = synth_data;
+        data.sim_sources = sim_sources;
+        data.package_sim_sources = sim_packages;
+        data.data_sim_sources = sim_data;
+        data.scripts = script_deps;
+        data.constraints_sources = constr_deps;
+        data.tb_tl = dep.get_sim_tl();
+        data.synth_tl = dep.get_sim_tl();
+        if(dep.has_board_def()){
+            data.board_part = dep.get_board_def();
+        }
 
         generator.set_directories(s_store->get_setting("hdl_store"), std::filesystem::current_path(),  dep.get_include_directories());
-        generator.set_synth_sources(synth_sources);
-        generator.set_synth_packages(synth_packages);
-        generator.set_synth_data(synth_data);
-        generator.set_sim_sources(sim_sources);
-        generator.set_sim_packages(sim_packages);
-        generator.set_sim_data(sim_data);
-        generator.set_script_sources(script_deps);
-        generator.set_constraint_sources(constr_deps);
-        generator.set_sim_tl(dep.get_sim_tl());
-        if(dep.has_board_def()){
-            generator.set_board_part(dep.get_board_def());
-        }
-        generator.set_synth_tl(dep.get_synth_tl());
 
+        generator.set_data(data);
         if (opts.generate_sim_script) {
             std::ofstream simfile("sim.sh");
             generator.generate_sim_script(simfile);
@@ -231,15 +235,20 @@ int main(int argc, char *argv[]){
 
     if(opts.generate_lattice){
         lattice_project_generator generator(s_store);
-        generator.set_project_name(dep.get_project_name());
+        project_data data;
 
-        generator.set_directories(s_store->get_setting("hdl_store"), std::filesystem::current_path(), dep.get_include_directories());
-        generator.set_synth_sources(synth_sources);
-        generator.set_sim_sources(sim_sources);
-        generator.set_script_sources(script_deps);
-        generator.set_constraint_sources(constr_deps);
-        generator.set_sim_tl(dep.get_sim_tl());
-        generator.set_synth_tl(dep.get_synth_tl());
+        data.name = dep.get_project_name();
+        data.synth_sources = synth_sources;
+        data.package_synth_sources = synth_packages;
+        data.data_synth_sources = synth_data;
+        data.sim_sources = sim_sources;
+        data.package_sim_sources = sim_packages;
+        data.data_sim_sources = sim_data;
+        data.scripts = script_deps;
+        data.constraints_sources = constr_deps;
+        data.tb_tl = dep.get_sim_tl();
+        data.synth_tl = dep.get_sim_tl();
+
         std::ofstream makefile("makefile.tcl");
         generator.write_makefile(makefile);
 

@@ -35,21 +35,11 @@ class project_generator_base {
 public:
     explicit project_generator_base(const std::string& template_f, const std::shared_ptr<settings_store> &s_store);
     void write_makefile(std::ostream &output);
+    void set_data(const project_data &d);
     void generate_sim_script(std::ostream &output);
     void write_sim_control_script(std::ostream &output);
-    void set_project_name(const std::string& name);
     void set_directories(const std::string& repo_base, const std::string& project_base, const std::vector<std::string>& commons);
-    void set_synth_sources(const std::set<std::string>& paths);
-    void set_sim_sources(const std::set<std::string>& paths);
-    void set_synth_packages(const std::set<std::string>& paths);
-    void set_synth_data(const std::set<std::string>& paths);
-    void set_sim_packages(const std::set<std::string>& paths);
-    void set_sim_data(const std::set<std::string>& paths);
-    void set_synth_tl(const std::string& tl);
-    void set_sim_tl(const std::string& tl);
-    void set_board_part(const std::string & bp);
-    void set_constraint_sources(const std::unordered_set<std::string>& paths);
-    void set_script_sources(const std::vector<script_source>& paths);
+
 private:
     std::shared_ptr<settings_store> settings;
     std::string base_dir;
