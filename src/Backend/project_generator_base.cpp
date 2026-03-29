@@ -28,8 +28,7 @@ void project_generator_base::write_makefile(std::ostream &output) {
 
     output << "set project_name " <<  data.name <<std::endl;
     output << "set origin_dir \".\""<<std::endl;
-    std::string bd = data.base_dir;
-    output << bd << std::endl;
+    output << "set base_dir " + data.base_dir << std::endl;
 
     output << "set commons_dir [list ";
     for(const auto& str:data.commons_dir){
@@ -140,7 +139,7 @@ void project_generator_base::generate_sim_script(std::ostream &output) {
     for (auto &f:data.synth_sources) {
         output << "\n    " << f;
     }
-    output << "\n    " << vivado_dir << "data/verilog/src/glbl.v";
+    output << "\n    " << vivado_dir << "/data/verilog/src/glbl.v";
 
     for (auto &f:data.package_sim_sources) {
         if (!data.package_synth_sources.contains(f)) output << "\n    "  << f;
@@ -174,7 +173,7 @@ void project_generator_base::generate_sim_script(std::ostream &output) {
         output<< "-i " << d;
     }
     // add includes for xilinx interface definitions
-    output << " -i " << vivado_dir + "data/rsb/busdef"<< std::endl;
+    output << " -i " << vivado_dir + "/data/rsb/busdef"<< std::endl;
 
     output << check_result("XVLOG FAILED");
 
@@ -228,7 +227,7 @@ void project_generator_base::set_directories(const std::string &base, const std:
         include_dirs.push_back(base_dir +item);
     }
 
-    data.base_dir = "set base_dir " + base;
+    data.base_dir = base;
     data.commons_dir = include_dirs;
     data.repo_dir = project_base;
 }

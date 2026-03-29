@@ -212,9 +212,10 @@ int main(int argc, char *argv[]){
             data.board_part = dep.get_board_def();
         }
 
+        generator.set_data(data);
+
         generator.set_directories(s_store->get_path("hdl_store"), std::filesystem::current_path(),  dep.get_include_directories());
 
-        generator.set_data(data);
         if (opts.generate_sim_script) {
             std::ofstream simfile("sim.sh");
             generator.generate_sim_script(simfile);
@@ -229,7 +230,7 @@ int main(int argc, char *argv[]){
 
 
             Vivado_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
-            //manager.create_project("makefile.tcl",  !opts.no_open);
+            manager.create_project("makefile.tcl",  !opts.no_open);
         }
     }
 
