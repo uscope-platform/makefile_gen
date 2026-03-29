@@ -17,11 +17,19 @@
 #define MAKEFILEGEN_V2_XILINX_PROJECT_GENERATOR_HPP
 
 #include "../project_generator_base.hpp"
+#include <spdlog/spdlog.h>
 
 
 class xilinx_project_generator: public project_generator_base{
 public:
-    xilinx_project_generator(const std::shared_ptr<settings_store> &s_store) : project_generator_base("make_project_xlnx.j2", s_store) {};
+    xilinx_project_generator(const std::shared_ptr<settings_store> &s_store) : project_generator_base(s_store) {};
+    void write_makefile(std::ostream &output) override;
+    void generate_sim_script(std::ostream &output) override;
+
+    void write_sim_control_script(std::ostream &output);
+private:
+    auto check_result(const std::string &error_message) -> std::string;
+    auto open_phase(const std::string &phase_name) -> std::string;
 };
 
 

@@ -17,9 +17,11 @@ target_sources(makefile_gen_lib
     Backend/uplatform/application_definition_generator.cpp
     Backend/uplatform/peripheral_definition_generator.cpp
     Backend/Xilinx/Vivado_manager.cpp
+    Backend/Xilinx/xilinx_project_generator.cpp
     Backend/new_app_generator.cpp
     Backend/Auxiliary_resolver.cpp
     Backend/project_generator_base.cpp
+    Backend/Lattice/lattice_project_generator.cpp
     Backend/Lattice/Radiant_manager.cpp
     Backend/Toolchain_manager.cpp
     Backend/python_script_runner.cpp

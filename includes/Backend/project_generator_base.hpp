@@ -33,21 +33,15 @@ using json = nlohmann::json;
 
 class project_generator_base {
 public:
-    explicit project_generator_base(const std::string& template_f, const std::shared_ptr<settings_store> &s_store);
-    void write_makefile(std::ostream &output);
+    virtual ~project_generator_base() = default;
+    explicit project_generator_base(const std::shared_ptr<settings_store> &s_store);
+    virtual void write_makefile(std::ostream &output) = 0;
     void set_data(const project_data &d);
-    void generate_sim_script(std::ostream &output);
-    void write_sim_control_script(std::ostream &output);
-
-private:
+    virtual void generate_sim_script(std::ostream &output) = 0;
+protected:
     std::shared_ptr<settings_store> settings;
     std::string base_dir;
-    std::string template_file;
     project_data data;
-
-    std::string open_phase(const std::string &phase_name);
-    std::string check_result(const std::string &error_message);
-    std::pair<std::vector<std::string>, std::vector<std::string>> get_script_sim_sources(const std::span<std::string> &sources);
 };
 
 
