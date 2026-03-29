@@ -25,8 +25,8 @@ public:
     xilinx_project_generator(const std::shared_ptr<settings_store> &s_store) : project_generator_base(s_store) {};
     void write_makefile(std::ostream &output) override;
     void generate_sim_script(std::ostream &output) override;
-
     void write_sim_control_script(std::ostream &output);
+    void generate_synth_script(std::ostream &output) override;
 private:
     auto check_result(const std::string &error_message) -> std::string;
     auto open_phase(const std::string &phase_name) -> std::string;

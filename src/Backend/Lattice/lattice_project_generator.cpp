@@ -20,3 +20,6 @@ void lattice_project_generator::write_makefile(std::ostream &output) {
 
 void lattice_project_generator::generate_sim_script(std::ostream &output) {
 }
+
+void lattice_project_generator::generate_synth_script(std::ostream &output) {
+}

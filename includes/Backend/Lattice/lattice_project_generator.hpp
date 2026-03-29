@@ -24,6 +24,7 @@ public:
     lattice_project_generator(const std::shared_ptr<settings_store> &s_store): project_generator_base(s_store) {};
     void write_makefile(std::ostream &output) override;
     void generate_sim_script(std::ostream &output) override;
+    void generate_synth_script(std::ostream &output) override;
 };
 
 #endif //MAKEFILEGEN_V2_LATTICE_PROJECT_GENERATOR_HPP

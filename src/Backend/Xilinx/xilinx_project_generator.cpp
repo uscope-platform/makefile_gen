@@ -205,6 +205,44 @@ exit
     output.flush();
 }
 
+void xilinx_project_generator::generate_synth_script(std::ostream &output) {
+
+
+    output << "set outputDir ./project_output" << std::endl;
+    output << "file mkdir $outputDir" << std::endl;
+    output << "set sources_set {" << std::endl;
+    for (const auto &file:data.synth_sources) {
+        output << "\t" << file <<std::endl;
+    }
+    output << "}" << std::endl;
+    output << "set inc_dirs {" << std::endl;
+        for (const auto &file:data.commons_dir) {
+            output << "\t" << file <<std::endl;
+        }
+    output << "}" << std::endl;
+    output << "set constr_dirs {" << std::endl;
+    for (const auto &file:data.constraints_sources) {
+        output << "\t" << file <<std::endl;
+    }
+    output << "}" << std::endl;
+
+    output << "read_verilog $sources_set" << std::endl;
+    output << "read_xdc constr_dirs" << std::endl;
+
+    output << "synth_design -top "+data.synth_tl+" -part xc7s25ftgb196-1 -include_dirs $inc_dirs" << std::endl;
+    output << "write_checkpoint -force $outputDir/post_synth.dcp" << std::endl;
+
+    output << "opt_design" << std::endl;
+    output << "place_design" << std::endl;
+    output << "write_checkpoint  -force $outputDir/post_place.dcp" << std::endl;
+
+
+    output << "route_design" << std::endl;
+    output << "write_checkpoint  -force $outputDir/post_route.dcp" << std::endl;
+
+    output << "write_bitstream -force $outputDir/top_module.bit" << std::endl;
+}
+
 std::string xilinx_project_generator::check_result(const std::string &error_message) {
     std::ostringstream oss;
     oss << "    if [ $? -ne 0 ]; then"<< std::endl;

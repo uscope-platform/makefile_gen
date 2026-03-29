@@ -33,10 +33,11 @@ using json = nlohmann::json;
 
 class project_generator_base {
 public:
-    virtual ~project_generator_base() = default;
     explicit project_generator_base(const std::shared_ptr<settings_store> &s_store);
-    virtual void write_makefile(std::ostream &output) = 0;
+    virtual ~project_generator_base() = default;
     void set_data(const project_data &d);
+    virtual void write_makefile(std::ostream &output) = 0;
+    virtual void generate_synth_script(std::ostream &output) = 0;
     virtual void generate_sim_script(std::ostream &output) = 0;
 protected:
     std::shared_ptr<settings_store> settings;
