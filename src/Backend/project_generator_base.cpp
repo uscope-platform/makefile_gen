@@ -22,17 +22,18 @@ project_generator_base::project_generator_base(const std::string& template_f, co
     template_file = templates_dir + "/" + template_f;
     data.board_part = "";
     settings = s_store;
+    base_dir = settings->get_path("hdl_store");
 }
 
 void project_generator_base::write_makefile(std::ostream &output) {
 
     output << "set project_name " <<  data.name <<std::endl;
     output << "set origin_dir \".\""<<std::endl;
-    output << "set base_dir " + data.base_dir << std::endl;
+    output << "set base_dir " + base_dir << std::endl;
 
     output << "set commons_dir [list ";
     for(const auto& str:data.commons_dir){
-        output << "\""<< str << "\" ";
+        output << "\""<< base_dir + str << "\" ";
     }
     output << "]"<< std::endl;
 
@@ -170,7 +171,7 @@ void project_generator_base::generate_sim_script(std::ostream &output) {
 
     output << "    xvlog -sv \"${FILES[@]}\" ";
     for (const auto& d: data.commons_dir) {
-        output<< "-i " << d;
+        output<< "-i " << base_dir + d;
     }
     // add includes for xilinx interface definitions
     output << " -i " << vivado_dir + "/data/rsb/busdef"<< std::endl;
@@ -199,7 +200,7 @@ void project_generator_base::generate_sim_script(std::ostream &output) {
 
 }
 
- void project_generator_base::write_sim_control_script(std::ostream &output) {
+void project_generator_base::write_sim_control_script(std::ostream &output) {
 
     std::ofstream sim_tcl( "sim.tcl");
     output << R"(
@@ -214,24 +215,7 @@ close_vcd
 exit
 )";
     output.flush();
- }
-
-
-
-void project_generator_base::set_directories(const std::string &base, const std::string& project_base, const std::vector<std::string> &commons) {
-    base_dir = base;
-    std::vector<std::string> include_dirs;
-    include_dirs.reserve(commons.size());
-
-    for(const auto& item:commons){
-        include_dirs.push_back(base_dir +item);
-    }
-
-    data.base_dir = base;
-    data.commons_dir = include_dirs;
-    data.repo_dir = project_base;
 }
-
 
 void project_generator_base::set_data(const project_data &d) {
     data = d;

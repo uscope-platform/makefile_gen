@@ -35,7 +35,6 @@ struct script_source {
 
 struct project_data {
     std::string name;
-    std::string base_dir;
     std::string repo_dir;
     std::vector<std::string> commons_dir;
     std::set<std::string> synth_sources;

@@ -54,6 +54,7 @@ TEST(xilinx_project_gen, simple_gen){
         }
     }
 
+    s_store->set_setting("hdl_store", "/tmp/rb");
 
     HDL_ast_builder_v2 b(s_store, d_store, Depfile());
     auto ast_v2 = b.build_ast(std::vector<std::string>({"AD2S1210_tb"}))[0];
@@ -69,9 +70,10 @@ TEST(xilinx_project_gen, simple_gen){
     d.synth_sources = {};
     d.sim_sources = sources;
     d.tb_tl = "AD2S1210_tb";
+    d.commons_dir = {};
+    d.repo_dir = "/tmp/tb";
     generator.set_data(d);
 
-    generator.set_directories("/tmp/rb", "/tmp/tb",{});
 
     std::ostringstream result_tcl;
     generator.write_makefile(result_tcl);
@@ -89,7 +91,10 @@ TEST(xilinx_project_gen, argumented_script_gen){
     s.function_mode = true;
     s.variables = {{"A","1"}};
 
-    xilinx_project_generator gen(nullptr);
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    s_store->set_setting("hdl_store", "/test/dir");
+    xilinx_project_generator gen(s_store);
 
     project_data d;
     d.name = "proj_name";
@@ -99,10 +104,10 @@ TEST(xilinx_project_gen, argumented_script_gen){
     d.constraints_sources = {"/test/constr/source.sv"};
     d.tb_tl = "sim_tl";
     d.synth_tl = "synth_tl";
+    d.commons_dir = {"/include"};
+    d.repo_dir = "/test/root_dir";
 
     gen.set_data(d);
-    gen.set_directories("/test/dir", "/test/root_dir", {"/include"});
-
 
 
     std::stringstream test_stream;
@@ -149,6 +154,7 @@ TEST( xilinx_project_gen, sim_script) {
         }
     }
 
+    s_store->set_setting("hdl_store", "/tmp/rb");
 
     HDL_ast_builder_v2 b(s_store, d_store, Depfile());
     auto ast_v2 = b.build_ast(std::vector<std::string>({"AD2S1210_tb"}))[0];
@@ -164,9 +170,9 @@ TEST( xilinx_project_gen, sim_script) {
     d.synth_sources = {};
     d.sim_sources = sources;
     d.tb_tl = "AD2S1210_tb";
+    d.commons_dir = {};
+    d.repo_dir = "/tmp/tb";
     generator.set_data(d);
-
-    generator.set_directories("/tmp/rb", "/tmp/tb",{});
 
     std::ostringstream result_sh;
     generator.generate_sim_script(result_sh);

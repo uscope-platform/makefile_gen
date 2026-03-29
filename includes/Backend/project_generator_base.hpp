@@ -38,7 +38,6 @@ public:
     void set_data(const project_data &d);
     void generate_sim_script(std::ostream &output);
     void write_sim_control_script(std::ostream &output);
-    void set_directories(const std::string& repo_base, const std::string& project_base, const std::vector<std::string>& commons);
 
 private:
     std::shared_ptr<settings_store> settings;

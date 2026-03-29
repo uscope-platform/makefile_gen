@@ -208,13 +208,14 @@ int main(int argc, char *argv[]){
         data.constraints_sources = constr_deps;
         data.tb_tl = dep.get_sim_tl();
         data.synth_tl = dep.get_sim_tl();
+        data.commons_dir = dep.get_include_directories();
+        data.repo_dir = std::filesystem::current_path();
         if(dep.has_board_def()){
             data.board_part = dep.get_board_def();
         }
 
         generator.set_data(data);
 
-        generator.set_directories(s_store->get_path("hdl_store"), std::filesystem::current_path(),  dep.get_include_directories());
 
         if (opts.generate_sim_script) {
             std::ofstream simfile("sim.sh");
