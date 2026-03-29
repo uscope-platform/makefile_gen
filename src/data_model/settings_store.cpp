@@ -33,6 +33,12 @@ std::string settings_store::get_setting(const std::string& setting) {
     return settings_backend[setting];
 }
 
+std::string settings_store::get_path(const std::string &setting) {
+    auto ret_val = settings_backend[setting];
+    if (ret_val.ends_with("/")) ret_val.replace(ret_val.size()-1, 1, "");
+    return ret_val;
+}
+
 std::set<std::string> settings_store::get_setting_list(const std::string &setting) const{
     std::set<std::string> ret_val;
     if (!settings_backend.contains(setting)) return ret_val;

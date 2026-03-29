@@ -212,7 +212,7 @@ int main(int argc, char *argv[]){
             data.board_part = dep.get_board_def();
         }
 
-        generator.set_directories(s_store->get_setting("hdl_store"), std::filesystem::current_path(),  dep.get_include_directories());
+        generator.set_directories(s_store->get_path("hdl_store"), std::filesystem::current_path(),  dep.get_include_directories());
 
         generator.set_data(data);
         if (opts.generate_sim_script) {

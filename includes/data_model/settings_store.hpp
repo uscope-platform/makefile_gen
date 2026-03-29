@@ -29,6 +29,7 @@ public:
     settings_store(bool e, std::string cache_dir_path);
 
     std::string get_setting(const std::string& setting);
+    std::string get_path(const std::string& setting);
     std::set<std::string> get_setting_list(const std::string& setting) const;
     void set_setting(const std::string& name, const std::string& value);
     void remove_setting(const std::string& setting);

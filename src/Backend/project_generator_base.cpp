@@ -130,8 +130,7 @@ void project_generator_base::write_makefile(std::ostream &output) {
 }
 
 void project_generator_base::generate_sim_script(std::ostream &output) {
-    auto vivado_dir = settings->get_setting("vivado_path");
-    if (!vivado_dir.ends_with("/")) vivado_dir.push_back('/');
+    auto vivado_dir = settings->get_path("vivado_path");
     auto sim_dir = data.repo_dir + "/sim";
 
     output << "FILES=( ";
@@ -222,7 +221,6 @@ exit
 
 void project_generator_base::set_directories(const std::string &base, const std::string& project_base, const std::vector<std::string> &commons) {
     base_dir = base;
-    if (base_dir.ends_with("/")) base_dir.replace(base_dir.size()-1, 1, "");
     std::vector<std::string> include_dirs;
     include_dirs.reserve(commons.size());
 
