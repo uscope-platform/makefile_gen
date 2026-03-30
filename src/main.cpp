@@ -24,6 +24,7 @@ int main(int argc, char *argv[]){
         std::string target;
         bool generate_xilinx = false;
         bool generate_sim_script = false;
+        bool generate_synth_script = false;
         bool generate_app_definition = false;
         bool generate_periph_definition = false;
         bool generate_lattice = false;
@@ -67,6 +68,7 @@ int main(int argc, char *argv[]){
     app.add_option("--cache_dir", opts.cache_dir, "Specify a non-default repository cache file");
     app.add_flag("--no_open", opts.no_open, "Do not open the generated project");
     app.add_flag("--sim_script", opts.generate_sim_script, "Generate simulation script for the chosen platform");
+    app.add_flag("--synth_script", opts.generate_synth_script, "Generate Synthesis script for the chosen platform");
 
     CLI11_PARSE(app, argc, argv);
 
@@ -207,7 +209,7 @@ int main(int argc, char *argv[]){
         data.scripts = script_deps;
         data.constraints_sources = constr_deps;
         data.tb_tl = dep.get_sim_tl();
-        data.synth_tl = dep.get_sim_tl();
+        data.synth_tl = dep.get_synth_tl();
         data.commons_dir = dep.get_include_directories();
         data.repo_dir = std::filesystem::current_path();
         if(dep.has_board_def()){
@@ -225,6 +227,9 @@ int main(int argc, char *argv[]){
 
                 generator.write_sim_control_script(ofs);
             }
+        } else if (opts.generate_synth_script) {
+            std::ofstream simfile("synth.tcl");
+            generator.generate_synth_script(simfile);
         } else {
             std::ofstream makefile("makefile.tcl");
             generator.write_makefile(makefile);

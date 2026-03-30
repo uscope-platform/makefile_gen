@@ -211,13 +211,19 @@ void xilinx_project_generator::generate_synth_script(std::ostream &output) {
     output << "set outputDir ./project_output" << std::endl;
     output << "file mkdir $outputDir" << std::endl;
     output << "set sources_set {" << std::endl;
+    for (const auto &file:data.package_synth_sources) {
+        output << "\t" << file <<std::endl;
+    }
+    for (const auto &file:data.data_synth_sources) {
+        output << "\t" << file <<std::endl;
+    }
     for (const auto &file:data.synth_sources) {
         output << "\t" << file <<std::endl;
     }
     output << "}" << std::endl;
     output << "set inc_dirs {" << std::endl;
         for (const auto &file:data.commons_dir) {
-            output << "\t" << file <<std::endl;
+            output << "\t" <<  base_dir + file <<std::endl;
         }
     output << "}" << std::endl;
     output << "set constr_dirs {" << std::endl;
@@ -227,7 +233,7 @@ void xilinx_project_generator::generate_synth_script(std::ostream &output) {
     output << "}" << std::endl;
 
     output << "read_verilog $sources_set" << std::endl;
-    output << "read_xdc constr_dirs" << std::endl;
+    output << "read_xdc $constr_dirs" << std::endl;
 
     output << "synth_design -top "+data.synth_tl+" -part xc7s25ftgb196-1 -include_dirs $inc_dirs" << std::endl;
     output << "write_checkpoint -force $outputDir/post_synth.dcp" << std::endl;
