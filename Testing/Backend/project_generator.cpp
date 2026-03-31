@@ -189,7 +189,7 @@ TEST( xilinx_project_gen, sim_script) {
 
 
 
-TEST( xilinx_project_gen, synth_script) {
+TEST( xilinx_project_gen, fpga_synth_script) {
 
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
@@ -249,6 +249,135 @@ TEST( xilinx_project_gen, synth_script) {
     generator.generate_synth_script(result_tcl);
 
     const std::string expected_tcl = "set outputDir ./project_output\nfile mkdir $outputDir\nset data_files_set {\n}\nset sources_set {\n\tcheck_files/test_data/Components/Common/interfaces.sv\n\tcheck_files/test_data/Components/ExternalDrivers/AD2S1210/rtl/AD2S1210.sv\n\tcheck_files/test_data/Components/ExternalDrivers/AD2S1210/rtl/ad2s1210_CU.sv\n\tcheck_files/test_data/Components/ExternalDrivers/AD2S1210/rtl/ad2s1210_configurator.sv\n\tcheck_files/test_data/Components/ExternalDrivers/AD2S1210/rtl/ad2s1210_fault_handler.sv\n\tcheck_files/test_data/Components/ExternalDrivers/AD2S1210/rtl/ad2s1210_reader.sv\n\tcheck_files/test_data/Components/ExternalDrivers/AD2S1210/rtl/ad2s1210_tl.sv\n\tcheck_files/test_data/Components/comms/SPI/rtl/Spi.sv\n\tcheck_files/test_data/Components/comms/SPI/rtl/master/ClockGen.sv\n\tcheck_files/test_data/Components/comms/SPI/rtl/master/SpiControlUnit.sv\n\tcheck_files/test_data/Components/comms/SPI/rtl/master/SpiRegister.sv\n\tcheck_files/test_data/Components/comms/SPI/rtl/master/Spi_master.sv\n\tcheck_files/test_data/Components/comms/SPI/rtl/master/TransferEngine.sv\n\tcheck_files/test_data/Components/system/EnableGenerator/rtl/Enable_Generator_2.sv\n\tcheck_files/test_data/Components/system/EnableGenerator/rtl/enable_comparator.v\n\tcheck_files/test_data/Components/system/EnableGenerator/rtl/enable_generator_core.v\n\tcheck_files/test_data/Components/system/EnableGenerator/rtl/enable_generator_counter.v\n\tcheck_files/test_data/Components/system/axi_lite/crossbar/rtl/address_decoder.sv\n\tcheck_files/test_data/Components/system/axi_lite/crossbar/rtl/axil_crossbar.sv\n\tcheck_files/test_data/Components/system/axi_lite/crossbar/rtl/axil_crossbar_wrapper.sv\n\tcheck_files/test_data/Components/system/axi_lite/simple_register_cu/rtl/axil_simple_register_cu.sv\n\tcheck_files/test_data/Components/system/axi_lite/skid_buffer/rtl/axil_skid_buffer.sv\n\tcheck_files/test_data/Components/system/axi_stream/combiner/rtl/axi_stream_combiner_3.sv\n}\nset inc_dirs {\n}\nset constr_dirs {\n}\nset_part xc7s25ftgb196-1\nread_verilog $sources_set\nif {[llength $constr_dirs] > 0} { read_xdc $constr_dirs }\nsynth_design -top ad2s1210_tl -part xc7s25ftgb196-1 -include_dirs $inc_dirs\nwrite_checkpoint -force $outputDir/post_synth.dcp\nopt_design\nplace_design\nwrite_checkpoint  -force $outputDir/post_place.dcp\nroute_design\nwrite_checkpoint  -force $outputDir/post_route.dcp\nwrite_bitstream -force $outputDir/top_module.bit\n";
+
+    EXPECT_EQ(expected_tcl, result_tcl.str());
+}
+
+
+
+TEST( xilinx_project_gen, soc_synth_script) {
+
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store");
+
+    std::vector<std::string> paths = {
+            "Components/Common",
+            "Components/comms/SPI/rtl/master",
+            "Components/system/EnableGenerator/rtl",
+            "Components/system/axi_lite/crossbar/rtl/",
+            "Components/comms/SPI/rtl",
+            "Components/comms/SPI/rtl/master",
+            "Components/system/axi_stream/combiner/rtl",
+            "Components/PS_interfaces/zynqmp",
+            "Components/system/axi_lite/external_registers_cu/rtl",
+            "Components/system/axi_terminator/rtl",
+            "Components/system/axi_lite/simple_register_cu/rtl",
+            "Components/system/axi_lite/skid_buffer/rtl",
+            "Applications/simple_vsi_base/rtl",
+            "Components/system/axi_stream/fifo/rtl",
+            "Components/system/interrupt_controller/rtl",
+            "Components/controls/gpio/rtl",
+            "Components/controls/PwmGenerator/rtl",
+            "Components/signal_chain/encoder_interface/rtl",
+            "Components/signal_chain/spi_adc_interface/rtl",
+            "Components/signal_chain/AdcProcessing/rtl",
+            "Components/signal_chain/fir_filter/rtl",
+            "Components/signal_chain/decimator/standard_decimator"
+
+    };
+
+    auto prefix = "check_files/test_data/";
+    for(auto &p:paths){
+        for(auto &f:std::filesystem::directory_iterator(prefix + p)){
+            if(f.path().extension() == ".v" || f.path().extension() == ".sv" || f.path().extension() == ".svh"){
+                sv_analyzer analyzer(f.path());
+                analyzer.cleanup_content("`(.*)");
+
+                for(auto &entity:analyzer.analyze()){
+                    d_store->store_hdl_entity(entity);
+                }
+            }
+        }
+    }
+
+    s_store->set_setting("hdl_store", "/tmp/rb");
+
+    nlohmann::json d_f = nlohmann::json::parse(R"(
+        {
+            "general":{
+                "project_name":"simple_vsi_base",
+                "target_part":"xc7s25ftgb196-1",
+                "synth_modules":[],
+                "synth_tl": "simple_vsi_base",
+                "sim_modules":[],
+                "sim_tl":"",
+                "include_paths":[]
+            },
+            "scripts":[
+                {
+                    "name":"base_zynqmp_xvc.tcl",
+                    "type": "tcl",
+                    "arguments":[]
+                },
+                {
+                    "name":"adder.tcl",
+                    "type": "tcl",
+                    "function_mode": true,
+                    "arguments":[
+                        {"name":"name","value":"adder"},
+                        {"name":"value","value":"5"}
+                    ]
+                }
+            ],
+            "excluded_modules":["ps"],
+            "constraints": []
+        }
+    )");
+
+
+    Depfile dep_file(d_f);
+    HDL_ast_builder_v2 b(s_store, d_store, dep_file);
+    auto ast_v2 = b.build_ast(std::vector<std::string>({"simple_vsi_base"}))[0];
+
+
+    Dependency_resolver_v2 sim_r({ast_v2}, d_store);
+    auto sources = sim_r.get_dependencies();
+
+    xilinx_project_generator generator(s_store);
+
+    project_data d;
+    d.name = dep_file.get_project_name();
+    d.synth_sources = sources;
+    d.sim_sources = {};
+    d.synth_tl = dep_file.get_synth_tl();
+    d.commons_dir = {};
+    d.scripts = {
+        {
+            "function_script",
+            "/tmp/function_script.tcl",
+            true,
+            {
+                {"name", "fcn"},
+                {"value", "1"}
+            }
+        },
+        {
+            "simple_script",
+            "/tmp/simple_script.tcl",
+            false
+        }
+    };
+    d.target_part = "xc7s25ftgb196-1";
+    d.board_part = "xilinx.com:kd240_som:part0:1.1";
+    d.repo_dir = "/tmp/tb";
+    generator.set_data(d);
+
+
+    std::ostringstream result_tcl;
+    generator.generate_synth_script(result_tcl);
+
+    const std::string expected_tcl = "set outputDir ./project_output\nfile mkdir $outputDir\nset data_files_set {\n}\nset sources_set {\n\tcheck_files/test_data/Applications/simple_vsi_base/rtl/simple_vsi_base.sv\n\tcheck_files/test_data/Applications/simple_vsi_base/rtl/simple_vsi_logic.sv\n\tcheck_files/test_data/Applications/simple_vsi_base/rtl/simple_vsi_mmio.sv\n\tcheck_files/test_data/Components/Common/DP_RAM.sv\n\tcheck_files/test_data/Components/Common/interfaces.sv\n\tcheck_files/test_data/Components/Common/saturating_adder.v\n\tcheck_files/test_data/Components/PS_interfaces/zynqmp/Zynq_us_axis_wrapper.sv\n\tcheck_files/test_data/Components/comms/SPI/rtl/Spi.sv\n\tcheck_files/test_data/Components/comms/SPI/rtl/master/ClockGen.sv\n\tcheck_files/test_data/Components/comms/SPI/rtl/master/SpiControlUnit.sv\n\tcheck_files/test_data/Components/comms/SPI/rtl/master/SpiRegister.sv\n\tcheck_files/test_data/Components/comms/SPI/rtl/master/Spi_master.sv\n\tcheck_files/test_data/Components/comms/SPI/rtl/master/TransferEngine.sv\n\tcheck_files/test_data/Components/controls/PwmGenerator/rtl/ChainControlUnit.sv\n\tcheck_files/test_data/Components/controls/PwmGenerator/rtl/CompareUnit.sv\n\tcheck_files/test_data/Components/controls/PwmGenerator/rtl/Counter.sv\n\tcheck_files/test_data/Components/controls/PwmGenerator/rtl/CounterCore.sv\n\tcheck_files/test_data/Components/controls/PwmGenerator/rtl/CounterEnableDelayCore.sv\n\tcheck_files/test_data/Components/controls/PwmGenerator/rtl/DeadTimeGenerator.sv\n\tcheck_files/test_data/Components/controls/PwmGenerator/rtl/PinControl.sv\n\tcheck_files/test_data/Components/controls/PwmGenerator/rtl/PwmControlUnit.sv\n\tcheck_files/test_data/Components/controls/PwmGenerator/rtl/PwmGenerator.sv\n\tcheck_files/test_data/Components/controls/PwmGenerator/rtl/ResolutionEnhancer.sv\n\tcheck_files/test_data/Components/controls/PwmGenerator/rtl/SyncEngine.sv\n\tcheck_files/test_data/Components/controls/PwmGenerator/rtl/TimebaseGenerator.sv\n\tcheck_files/test_data/Components/controls/PwmGenerator/rtl/pwmChain.sv\n\tcheck_files/test_data/Components/controls/gpio/rtl/gpio.sv\n\tcheck_files/test_data/Components/signal_chain/AdcProcessing/rtl/AdcProcessing.sv\n\tcheck_files/test_data/Components/signal_chain/AdcProcessing/rtl/AdcProcessingControlUnit.sv\n\tcheck_files/test_data/Components/signal_chain/AdcProcessing/rtl/calibration.sv\n\tcheck_files/test_data/Components/signal_chain/AdcProcessing/rtl/comparator.sv\n\tcheck_files/test_data/Components/signal_chain/AdcProcessing/rtl/denoiser.sv\n\tcheck_files/test_data/Components/signal_chain/AdcProcessing/rtl/linearizer.sv\n\tcheck_files/test_data/Components/signal_chain/decimator/standard_decimator/standard_decimator.sv\n\tcheck_files/test_data/Components/signal_chain/encoder_interface/rtl/angle_sensing.sv\n\tcheck_files/test_data/Components/signal_chain/encoder_interface/rtl/encoder_interface.sv\n\tcheck_files/test_data/Components/signal_chain/encoder_interface/rtl/speed_sensing.sv\n\tcheck_files/test_data/Components/signal_chain/fir_filter/rtl/fir_filter_serial.sv\n\tcheck_files/test_data/Components/signal_chain/spi_adc_interface/rtl/spi_adc_interface.sv\n\tcheck_files/test_data/Components/system/EnableGenerator/rtl/EnableGenerator.sv\n\tcheck_files/test_data/Components/system/EnableGenerator/rtl/Enable_Generator_2.sv\n\tcheck_files/test_data/Components/system/EnableGenerator/rtl/enable_comparator.v\n\tcheck_files/test_data/Components/system/EnableGenerator/rtl/enable_generator_core.v\n\tcheck_files/test_data/Components/system/EnableGenerator/rtl/enable_generator_counter.v\n\tcheck_files/test_data/Components/system/axi_lite/crossbar/rtl/address_decoder.sv\n\tcheck_files/test_data/Components/system/axi_lite/crossbar/rtl/axil_crossbar.sv\n\tcheck_files/test_data/Components/system/axi_lite/crossbar/rtl/axil_crossbar_wrapper.sv\n\tcheck_files/test_data/Components/system/axi_lite/external_registers_cu/rtl/axil_external_registers_cu.sv\n\tcheck_files/test_data/Components/system/axi_lite/simple_register_cu/rtl/axil_simple_register_cu.sv\n\tcheck_files/test_data/Components/system/axi_lite/skid_buffer/rtl/axil_skid_buffer.sv\n\tcheck_files/test_data/Components/system/axi_stream/combiner/rtl/axi_stream_combiner.sv\n\tcheck_files/test_data/Components/system/axi_stream/fifo/rtl/axis_fifo.sv\n\tcheck_files/test_data/Components/system/axi_stream/fifo/rtl/axis_fifo_xpm.sv\n\tcheck_files/test_data/Components/system/axi_terminator/rtl/axi_terminator.sv\n\tcheck_files/test_data/Components/system/interrupt_controller/rtl/interrupt_controller.sv\n}\nset inc_dirs {\n}\nset constr_dirs {\n}\nset_part xc7s25ftgb196-1\nset board_part xilinx.com:kd240_som:part0:1.1\nsource /tmp/function_script.tcl\nfunction_script fcn 1\nsynth_ip [get_ips fcn]\nsource /tmp/simple_script.tcl\nread_verilog $sources_set\nif {[llength $constr_dirs] > 0} { read_xdc $constr_dirs }\nsynth_design -top simple_vsi_base -part xc7s25ftgb196-1 -include_dirs $inc_dirs\nwrite_checkpoint -force $outputDir/post_synth.dcp\nopt_design\nplace_design\nwrite_checkpoint  -force $outputDir/post_place.dcp\nroute_design\nwrite_checkpoint  -force $outputDir/post_route.dcp\nwrite_bitstream -force $outputDir/top_module.bit\n";
 
     EXPECT_EQ(expected_tcl, result_tcl.str());
 }

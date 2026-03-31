@@ -30,7 +30,7 @@ using json = nlohmann::json;
 class Depfile {
 public:
     Depfile();
-
+    explicit Depfile(const nlohmann::json &c) {content = c;}
     Depfile(const Depfile &other) = default;
     Depfile(Depfile &&other) noexcept = default;
     Depfile & operator=(const Depfile &other) = default;
