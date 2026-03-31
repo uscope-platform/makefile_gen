@@ -44,6 +44,7 @@ public:
     std::string get_bus_defining_package();
     std::string get_project_name();
     std::string get_board_def();
+    std::string get_target();
     json get_bus_section();
     std::vector<std::string> get_additional_synth_modules();
     std::vector<std::string> get_additional_sim_modules();

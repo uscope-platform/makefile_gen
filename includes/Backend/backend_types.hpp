@@ -45,6 +45,7 @@ struct project_data {
     std::set<std::string> sim_sources;
     std::string synth_tl;
     std::string board_part;
+    std::string target_part;
     std::string tb_tl;
     std::unordered_set<std::string> constraints_sources;
     std::vector<script_source> scripts;

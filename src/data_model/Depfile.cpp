@@ -119,6 +119,10 @@ std::string Depfile::get_board_def() {
     return content["general"]["board"];
 }
 
+std::string Depfile::get_target() {
+    return content["general"]["target_part"];
+}
+
 bool Depfile::has_board_def() {
     return content["general"].contains("board");
 }

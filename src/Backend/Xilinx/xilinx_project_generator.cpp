@@ -210,11 +210,14 @@ void xilinx_project_generator::generate_synth_script(std::ostream &output) {
 
     output << "set outputDir ./project_output" << std::endl;
     output << "file mkdir $outputDir" << std::endl;
-    output << "set sources_set {" << std::endl;
-    for (const auto &file:data.package_synth_sources) {
+    output << "set data_files_set {" << std::endl;
+    for (const auto &file:data.data_synth_sources) {
         output << "\t" << file <<std::endl;
     }
-    for (const auto &file:data.data_synth_sources) {
+    output << "}" << std::endl;
+
+    output << "set sources_set {" << std::endl;
+    for (const auto &file:data.package_synth_sources) {
         output << "\t" << file <<std::endl;
     }
     for (const auto &file:data.synth_sources) {
@@ -232,10 +235,46 @@ void xilinx_project_generator::generate_synth_script(std::ostream &output) {
     }
     output << "}" << std::endl;
 
-    output << "read_verilog $sources_set" << std::endl;
-    output << "read_xdc $constr_dirs" << std::endl;
+    output << "set_part " << data.target_part << std::endl;
+    if (!data.board_part.empty()) output << "set board_part " << data.board_part << std::endl;
 
-    output << "synth_design -top "+data.synth_tl+" -part xc7s25ftgb196-1 -include_dirs $inc_dirs" << std::endl;
+    std::set<std::string> sourced_scripts;
+
+    for(const auto& scr:data.scripts){
+        if(scr.name.empty() || scr.path.empty()) {
+            continue;
+        }
+        if(scr.function_mode) {
+            if(!sourced_scripts.contains(scr.path)) {
+                output << "source " << scr.path << std::endl;
+            }
+            if(!scr.name.empty()) {
+                output << scr.name;
+                for(const auto &val: scr.variables | std::views::values) {
+                    output << " " << val ;
+                }
+                output << std::endl;
+            }
+            output << "synth_ip [get_ips " << scr.variables.at("name") <<"]" << std::endl;
+        } else {
+            if(!sourced_scripts.contains(scr.path)) {
+                output << "source " << scr.path << std::endl;
+            }
+        }
+        sourced_scripts.insert(scr.path);
+    }
+
+    for (const auto &prefix:soc_prefixes) {
+        if (data.target_part.starts_with(prefix)) {
+            output << "generate_target all [get_files ps.bd]"<< std::endl;
+            output << "export_ip_user_files -of_objects [get_files ps.bd] -no_script -force"<< std::endl;
+        }
+    }
+
+    output << "read_verilog $sources_set" << std::endl;
+    output << "if {[llength $constr_dirs] > 0} { read_xdc $constr_dirs }" << std::endl;
+
+    output << "synth_design -top "+data.synth_tl+" -part " + data.target_part + " -include_dirs $inc_dirs" << std::endl;
     output << "write_checkpoint -force $outputDir/post_synth.dcp" << std::endl;
 
     output << "opt_design" << std::endl;

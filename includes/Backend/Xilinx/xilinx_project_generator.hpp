@@ -30,6 +30,7 @@ public:
 private:
     auto check_result(const std::string &error_message) -> std::string;
     auto open_phase(const std::string &phase_name) -> std::string;
+    std::unordered_set<std::string> soc_prefixes = {"xck26", "xck24", "xc7z"};
 };
 
 

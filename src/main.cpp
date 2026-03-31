@@ -212,6 +212,7 @@ int main(int argc, char *argv[]){
         data.synth_tl = dep.get_synth_tl();
         data.commons_dir = dep.get_include_directories();
         data.repo_dir = std::filesystem::current_path();
+        data.target_part = dep.get_target();
         if(dep.has_board_def()){
             data.board_part = dep.get_board_def();
         }
