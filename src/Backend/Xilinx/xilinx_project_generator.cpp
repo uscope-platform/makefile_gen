@@ -236,6 +236,11 @@ void xilinx_project_generator::generate_synth_script(std::ostream &output) {
     }
     output << "}" << std::endl;
 
+
+    output << "foreach f $data_files_set {" << std::endl;
+    output << "    file copy -force $f ." << std::endl;
+    output << "}" << std::endl;
+
     output << "set_part " << data.target_part << std::endl;
     if (!data.board_part.empty()) output << "set board_part " << data.board_part << std::endl;
 
