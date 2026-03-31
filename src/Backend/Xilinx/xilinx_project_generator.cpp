@@ -210,6 +210,7 @@ void xilinx_project_generator::generate_synth_script(std::ostream &output) {
 
     output << "set outputDir ./project_output" << std::endl;
     output << "file mkdir $outputDir" << std::endl;
+    output << "cd $outputDir" << std::endl;
     output << "set data_files_set {" << std::endl;
     for (const auto &file:data.data_synth_sources) {
         output << "\t" << file <<std::endl;
