@@ -113,6 +113,42 @@ TEST(parameter_extraction, size_cast) {
     ASSERT_EQ(3, std::get<int64_t>(defaults.at({"","", "TEST_PARAM"})));
 }
 
+
+TEST(parameter_extraction,time_literal) {
+    std::string test_pattern = R"(
+        module test_mod #(
+            )();
+
+            parameter integer TEST_PARAM = 10ns;
+
+        endmodule
+    )";
+
+    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
+    analyzer.cleanup_content("`(.*)");
+    auto resource = analyzer.analyze()[0];
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>(); p->set_type(HDL_parameter::expression_parameter);
+    p->set_name("TEST_PARAM");
+    p->add_component(Expression_component("10ns", Expression_component::string));
+    check_params.insert(p);
+
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& item:check_params){
+        ASSERT_TRUE(parameters.contains(item->get_name()));
+        ASSERT_EQ(*item, *parameters.get(item->get_name()));
+    }
+
+    auto defaults = resource.get_default_parameters();
+
+    ASSERT_EQ("10ns", std::get<std::string>(defaults.at({"","", "TEST_PARAM"})));
+}
+
 TEST(parameter_extraction, cast_in_concat  ) {
     std::string test_pattern = R"(
         module test_mod #(

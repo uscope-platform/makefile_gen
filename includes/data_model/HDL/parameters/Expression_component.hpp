@@ -136,6 +136,7 @@ private:
     static const std::regex number_regex;
     static const std::regex float_regex;
     static const std::regex size_regex;
+    static const std::regex time_lit_regex;
 
     std::vector<Expression> array_index;
 

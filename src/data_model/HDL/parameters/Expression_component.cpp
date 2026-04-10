@@ -22,7 +22,7 @@ const std::regex Expression_component::sv_constant_regex(R"(^\d*'(s)?(h|d|o|b)([
 const std::regex Expression_component::number_regex(R"(^\d+$)");
 const std::regex Expression_component::float_regex(R"(^[+-]?(\d+\.\d*|\.\d+)([eE][+-]?\d+)?$|^[+-]?\d+[eE][+-]?\d+$)");
 const std::regex Expression_component::size_regex(R"(^(\d*)'[0-9a-zA-Z]+)");
-
+const std::regex Expression_component::time_lit_regex(R"(\d+(\.\d+)?(s|ms|us|ns|ps|fs))");
 
 Expression_component::Expression_component(const Expression_component &c) {
     value = c.value;
@@ -312,6 +312,6 @@ Expression_component::component_type Expression_component::get_type(const std::s
     if(is_string_operator(s)) return operation;
     if(is_string_function(s)) return function;
     if(is_string_parenthesis(s)) return parenthesis;
-    if(s.starts_with("\"")) return string;
+    if(s.starts_with("\"") | test_parameter_type(time_lit_regex, s)) return string;
     return identifier;
 }
