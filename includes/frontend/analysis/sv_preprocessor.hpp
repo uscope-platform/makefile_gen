@@ -27,6 +27,9 @@ public:
     std::string preprocess(const std::filesystem::path &in);
     std::string preprocess(std::istream& in);
 private:
+    std::string get_define_replacement(const std::string_view &v);
+    uint64_t line_number;
+    std::unordered_map<std::string, std::string> simple_defines;
     std::string path;
 };
 

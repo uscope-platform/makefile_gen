@@ -27,12 +27,13 @@ std::string sv_preprocessor::preprocess(const std::filesystem::path &in) {
 }
 
 std::string sv_preprocessor::preprocess(std::istream &in) {
-    std::unordered_map<std::string, std::string> simple_defines;
+    static constexpr auto identifier_pattern = ctre::search<R"(`([a-zA-Z_][a-zA-Z0-9_]*))">;
+    simple_defines = {};
 
     std::ostringstream out;
 
     std::string line;
-    uint64_t line_number = 1;
+    line_number = 1;
     while (std::getline(in, line)) {
         std::string_view trimmed_line = line;
         // If it starts with whitespace, find where the whitespace ends
@@ -75,27 +76,19 @@ std::string sv_preprocessor::preprocess(std::istream &in) {
         } else if (trimmed_line.starts_with("`undefineall")) {
 
         } else if (!skipped_directive) {
-            auto result = line;
-            if (auto [whole, name] = ctre::search<R"(`([a-zA-Z_][a-zA-Z0-9_]*))">(line); whole) {
-                if (name) {
-                    std::string_view identifier = name;
-                    std::string replacement;
-                    if (identifier == "__FILE__") {
-                        replacement = "\"" + path + "\"";
 
-                    } else if (identifier == "__LINE__"){
-                        replacement = std::to_string(line_number);
-                    } else {
-                        replacement = simple_defines.at(std::string(identifier));
-                    }
-                    result = "";
-                    std::string_view prefix{line.begin(), whole.begin()};
-                    std::string_view suffix{whole.end(), line.end()};
+            std::string result;
+            std::string_view remaining = line;
 
-                    result.reserve(prefix.size() + path.size() + suffix.size());
-                    result.append(prefix).append(replacement).append(suffix);
-                }
+            while (auto match = identifier_pattern(remaining)) {
+                result.append(remaining.begin(), match.begin());
+                result.append(get_define_replacement(match));
+
+                remaining = std::string_view{match.end(), remaining.end()};
             }
+
+            result.append(remaining);
+
             out << result << std::endl;
         }
         line_number++;
@@ -103,4 +96,18 @@ std::string sv_preprocessor::preprocess(std::istream &in) {
     auto retval = out.str();
     retval.pop_back();
     return retval;
+}
+
+std::string sv_preprocessor::get_define_replacement(const std::string_view &identifier) {
+    std::string_view purged_identifier = {identifier.begin()+1, identifier.end()};
+    std::string replacement;
+    if (purged_identifier == "__FILE__") {
+        replacement = "\"" + path + "\"";
+
+    } else if (purged_identifier == "__LINE__"){
+        replacement = std::to_string(line_number);
+    } else {
+        replacement = simple_defines.at(std::string(purged_identifier));
+    }
+    return replacement;
 }
