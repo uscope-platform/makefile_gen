@@ -16,6 +16,7 @@
 
 #include "frontend/analysis/sv_preprocessor.hpp"
 
+#include <variant>
 #include <fmt/format.h>
 
 sv_preprocessor::sv_preprocessor(const std::filesystem::path &in) {
@@ -30,7 +31,7 @@ std::string sv_preprocessor::preprocess(const std::filesystem::path &in) {
 
 std::string sv_preprocessor::preprocess(std::istream &in) {
     static constexpr auto identifier_pattern = ctre::search<R"(`([a-zA-Z_][a-zA-Z0-9_]*))">;
-    simple_defines = {};
+    definitions = {};
 
     std::ostringstream out;
 
@@ -52,8 +53,7 @@ std::string sv_preprocessor::preprocess(std::istream &in) {
         || trimmed_line.starts_with("`line");
 
         if (trimmed_line.starts_with("`define")) {
-            auto [identifier, value] = parse_two_arg_directive(trimmed_line, 7);
-            simple_defines[std::string(identifier)] =  value;
+          parse_definition(trimmed_line, 7);
         } else if (trimmed_line.starts_with("`else")) {
 
         } else if (trimmed_line.starts_with("`elsif")) {
@@ -68,9 +68,9 @@ std::string sv_preprocessor::preprocess(std::istream &in) {
 
         } else if (trimmed_line.starts_with("`undef")) {
             auto identifier = parse_one_arg_directive(trimmed_line, 6);
-            simple_defines.erase(std::string(identifier));
+            definitions.erase(std::string(identifier));
         } else if (trimmed_line.starts_with("`undefineall")) {
-            simple_defines.clear();
+            definitions.clear();
         } else if (!skipped_directive) {
 
             std::string result;
@@ -104,10 +104,13 @@ std::string sv_preprocessor::get_define_replacement(const std::string_view &iden
         replacement = std::to_string(line_number);
     } else {
         auto id = std::string(purged_identifier);
-        if (!simple_defines.contains(id)) {
+        if (!definitions.contains(id)) {
             throw std::runtime_error(fmt::format("{}:{} MACRO {} is not defined", path, line_number, id));
         }
-        replacement = simple_defines.at(id);
+        auto def = definitions.at(id);
+        if (std::holds_alternative<std::string>(def)) {
+            replacement = std::get<std::string>(def);
+        }
     }
     return replacement;
 }
@@ -123,14 +126,23 @@ std::string_view sv_preprocessor::ltrim(const std::string_view &in) {
     return in.substr(start);
 }
 
-std::pair<std::string_view, std::string_view> sv_preprocessor::parse_two_arg_directive(const std::string_view &sv, int prefix_length) {
+void sv_preprocessor::parse_definition(const std::string_view &sv, int prefix_length) {
     auto trimmed_view = sv.substr(prefix_length);
     trimmed_view = trimmed_view.substr(trimmed_view.find_first_not_of("\t "));
     auto id_last = trimmed_view.find_first_of("\t ");
     auto identifier = trimmed_view.substr(0, id_last);
+    if (id_last == std::string_view::npos) {
+        definitions[std::string(identifier)] = "";
+        return;
+    }
     auto remaining_view = trimmed_view.substr(id_last+1);
-    auto value = remaining_view.substr(remaining_view.find_first_not_of("\t "));
-    return {identifier, value};
+    if (remaining_view.front() == '(') {
+
+    } else {
+        auto value = remaining_view.substr(remaining_view.find_first_not_of("\t "));
+        definitions[std::string(identifier)] =  std::string{value};
+    }
+
 }
 
 std::string_view sv_preprocessor::parse_one_arg_directive(const std::string_view &sv, int prefix_length) {

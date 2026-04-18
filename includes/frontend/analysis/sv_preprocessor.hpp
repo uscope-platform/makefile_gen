@@ -20,6 +20,22 @@
 #include <filesystem>
 #include <fstream>
 #include <unordered_map>
+#include <set>
+#include <variant>
+
+struct function_macro {
+
+    std::set<std::string> arguments;
+    std::string value;
+     friend bool operator==(const function_macro &lhs, const function_macro &rhs) {
+            return lhs.arguments == rhs.arguments && lhs.value == rhs.value;
+     }
+
+     friend bool operator!=(const function_macro &lhs, const function_macro &rhs) {
+        return !(lhs == rhs);
+    }
+};
+
 
 class sv_preprocessor {
 public:
@@ -29,10 +45,10 @@ public:
 private:
     std::string get_define_replacement(const std::string_view &v);
     std::string_view ltrim(const std::string_view &in);
-    std::pair<std::string_view, std::string_view> parse_two_arg_directive(const std::string_view &sv, int prefix_length);
+    void parse_definition(const std::string_view &sv, int prefix_length);
     std::string_view parse_one_arg_directive(const std::string_view &sv, int prefix_length);
     uint64_t line_number;
-    std::unordered_map<std::string, std::string> simple_defines;
+    std::unordered_map<std::string, std::variant<std::string, function_macro>> definitions;
     std::string path;
 };
 

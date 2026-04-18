@@ -59,6 +59,27 @@ TEST(preprocessor, line_directive) {
     EXPECT_EQ(result, check_string);
 }
 
+
+TEST(preprocessor, empty_define) {
+    auto test_pattern = std::istringstream(R"(
+        `define  a
+        module test_module ();
+            parameter TEST_PARAM = `a;
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = ;
+        endmodule
+    )";
+    EXPECT_EQ(result, check_string);
+}
+
+
 TEST(preprocessor, simple_define) {
     auto test_pattern = std::istringstream(R"(
         `define  a  12
