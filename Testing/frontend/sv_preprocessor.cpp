@@ -155,3 +155,78 @@ TEST(preprocessor, undef) {
     EXPECT_THROW(preproc.preprocess(test_pattern), std::runtime_error);
 }
 
+
+TEST(preprocessor, invalid_continuation) {
+    auto test_pattern = R"(
+        // This is a comment \
+           that should stay a comment!
+        wire a;
+    )";
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto res = preproc.flatten_source(test_pattern);
+    auto check_string = R"(
+        // This is a comment \
+           that should stay a comment!
+        wire a;
+    )";
+    EXPECT_EQ(check_string, res);
+}
+
+
+TEST(preprocessor, string_continuation) {
+    auto test_pattern = R"(
+module test;
+parameter string ML_STRING = "TEST \
+  parameter";
+endmodule
+    )";
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto res = preproc.flatten_source(test_pattern);
+    auto check_string = R"(
+module test;
+parameter string ML_STRING = "TEST   parameter";
+endmodule
+    )";
+    EXPECT_EQ(check_string, res);
+}
+
+
+TEST(preprocessor, macro_continuation) {
+    auto test_pattern = R"(
+module test;
+`define SUM(a,b) a + \
+b
+endmodule
+    )";
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto res = preproc.flatten_source(test_pattern);
+    auto check_string = R"(
+module test;
+`define SUM(a,b) a + b
+endmodule
+    )";
+    EXPECT_EQ(check_string, res);
+}
+
+
+TEST(preprocessor, multiline_macro_continuation) {
+    auto test_pattern = R"(
+module test;
+`define SUM(a,b) a \
++ \
+b
+endmodule
+    )";
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto res = preproc.flatten_source(test_pattern);
+    auto check_string = R"(
+module test;
+`define SUM(a,b) a + b
+endmodule
+    )";
+    EXPECT_EQ(check_string, res);
+}

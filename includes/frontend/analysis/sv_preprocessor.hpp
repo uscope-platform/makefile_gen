@@ -42,6 +42,7 @@ public:
     sv_preprocessor(const std::filesystem::path &in);
     std::string preprocess(const std::filesystem::path &in);
     std::string preprocess(std::istream& in);
+    std::string flatten_source(const std::string_view &in);
 private:
     std::string get_define_replacement(const std::string_view &v);
     std::string_view ltrim(const std::string_view &in);

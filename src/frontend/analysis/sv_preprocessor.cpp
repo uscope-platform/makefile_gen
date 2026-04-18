@@ -94,6 +94,8 @@ std::string sv_preprocessor::preprocess(std::istream &in) {
     return retval;
 }
 
+
+
 std::string sv_preprocessor::get_define_replacement(const std::string_view &identifier) {
     std::string_view purged_identifier = {identifier.begin()+1, identifier.end()};
     std::string replacement;
@@ -149,3 +151,99 @@ std::string_view sv_preprocessor::parse_one_arg_directive(const std::string_view
     auto trimmed_line = sv.substr(prefix_length);
     return trimmed_line.substr( trimmed_line.find_first_not_of(' '));
 }
+
+std::string sv_preprocessor::flatten_source(const std::string_view &in) {
+
+    std::string result;
+    result.reserve(in.size());
+    size_t cursor = 0;
+    bool in_string = false;
+    bool in_macro = false;
+
+    // Source flattening uses a search and append approach to be cache and SIMD friendly
+    // The main loop keeps searching for potentially problematic characters and appends as needed
+    while (cursor < in.size()) {
+
+        size_t next = in.find_first_of("/\"\\`\n\r", cursor);
+
+        if (next == std::string_view::npos) {
+            result.append(in.substr(cursor));
+            break;
+        }
+
+        if (next > cursor) {
+            result.append(in.substr(cursor, next - cursor));
+        }
+        cursor = next;
+        char trigger = in[cursor];
+
+        if (trigger == '\n' || trigger == '\r') {
+            in_macro = false;
+            result.push_back(trigger);
+            cursor++;
+        } else if (trigger == '`') {
+            auto directive = in.substr(cursor);
+            if (directive.starts_with("`define")) {
+                in_macro = true;
+            }
+            result.push_back('`');
+            cursor++;
+        } else if (trigger == '/') {
+         if (cursor != in.size()-1) {
+             if (in[cursor + 1] == '/') {
+                 size_t end = in.find('\n', cursor + 2);
+                 if (end == std::string_view::npos) end = in.size();
+                 result.append(in.substr(cursor, end - cursor));
+                 cursor = end;
+             } else if (in[cursor + 1] == '*') {
+                 size_t end = in.find("*/", cursor + 2);
+                 if (end == std::string_view::npos) end = in.size() - 2;
+                 result.append(in.substr(cursor, (end + 2) - cursor));
+                 cursor = end + 2;
+             }
+             else {
+                 result.push_back('/');
+                 cursor++;
+             }
+         } else {
+             result.push_back('/');
+             cursor++;
+         }
+        } else if (trigger == '"') {
+            if (in_string) {
+                in_string = false;
+            } else {
+                in_string = true;
+            }
+            result.push_back('"');
+            cursor++;
+        } else if (trigger == '\\') {
+            if (cursor + 1 < in.size()) {
+                char next = in[cursor + 1];
+
+                // skip backslash and newline when necessary
+                if (next == '\n' || next == '\r') {
+                    if (in_macro || in_string) {
+                        cursor += (next == '\r' && in[cursor+2] == '\n') ? 3 : 2;
+
+                        continue;
+                    }
+                }
+
+                //keep escaped quotes as is
+                if (in_string && next == '"') {
+                    result.push_back('\\');
+                    result.push_back('"');
+                    cursor += 2;
+                    continue;
+                }
+            }
+            // pass through normal backslashes
+            result.push_back('\\');
+            cursor++;
+        }
+    }
+
+    return result;
+}
+
