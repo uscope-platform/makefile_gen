@@ -28,6 +28,9 @@ public:
     std::string preprocess(std::istream& in);
 private:
     std::string get_define_replacement(const std::string_view &v);
+    std::string_view ltrim(const std::string_view &in);
+    std::pair<std::string_view, std::string_view> parse_two_arg_directive(const std::string_view &sv, int prefix_length);
+    std::string_view parse_one_arg_directive(const std::string_view &sv, int prefix_length);
     uint64_t line_number;
     std::unordered_map<std::string, std::string> simple_defines;
     std::string path;

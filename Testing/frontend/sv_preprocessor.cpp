@@ -61,7 +61,26 @@ TEST(preprocessor, line_directive) {
 
 TEST(preprocessor, simple_define) {
     auto test_pattern = std::istringstream(R"(
-        `define a 12
+        `define  a  12
+        module test_module ();
+            parameter TEST_PARAM = `a;
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = 12;
+        endmodule
+    )";
+    EXPECT_EQ(result, check_string);
+}
+
+TEST(preprocessor, simple_define_with_tabs) {
+    auto test_pattern = std::istringstream(R"(
+        `define  a	 	 12
         module test_module ();
             parameter TEST_PARAM = `a;
         endmodule
@@ -97,5 +116,21 @@ TEST(preprocessor, multiple_defines) {
         endmodule
     )";
     EXPECT_EQ(result, check_string);
+}
+
+
+
+TEST(preprocessor, undef) {
+    auto test_pattern = std::istringstream(R"(
+        `define  a  12
+        `undef   a
+        module test_module ();
+            parameter TEST_PARAM = `a;
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    EXPECT_THROW(preproc.preprocess(test_pattern), std::runtime_error);
 }
 
