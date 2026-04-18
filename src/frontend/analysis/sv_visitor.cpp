@@ -182,6 +182,9 @@ void sv_visitor::exitPackage_or_class_scoped_path(sv2017::Package_or_class_scope
 
 void sv_visitor::enterParameter_declaration(sv2017::Parameter_declarationContext *ctx) {
     in_param_declaration = true;
+    if (ctx->list_of_param_assignments() == nullptr) {
+        throw std::runtime_error("Encountered non existent list of parameter declarations");
+    }
     current_parameter = ctx->list_of_param_assignments()[0].param_assignment()[0]->identifier()->getText();
 }
 
@@ -415,6 +418,9 @@ void sv_visitor::enterNamed_port_connection(sv2017::Named_port_connectionContext
 }
 
 void sv_visitor::exitNamed_port_connection(sv2017::Named_port_connectionContext *ctx) {
+    if (ctx->identifier()== nullptr) {
+        throw std::runtime_error("Encountered a named port connection without an identifier, this is not supported yet");
+    }
     auto port_name = ctx->identifier()->getText();
 
     deps_factory.stop_port();

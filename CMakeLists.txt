@@ -16,6 +16,7 @@ find_package(spdlog REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(cereal)
 find_package(GTest REQUIRED)
+find_package(ctre REQUIRED)
 
 include_directories(includes)
 

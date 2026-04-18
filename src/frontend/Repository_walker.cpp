@@ -227,9 +227,15 @@ bool Repository_walker::file_is_data(const std::filesystem::path &file) {
 /// Analyze the target verilog-type file to extract declared and used instantiated design elements
 /// \param file Target file
 std::vector<HDL_Resource> analyze_verilog(const std::filesystem::path &file) {
+    spdlog::trace("PARSING: {}", file.c_str());
     sv_analyzer file_processor(file);
     file_processor.cleanup_content("`(.*)");
-    return file_processor.analyze();
+    try {
+        return file_processor.analyze();
+    } catch (std::runtime_error &err) {
+        spdlog::error(err.what());
+        return {};
+    }
 }
 
 /// Analyze the target vhdl-type file to extract declared and used instantiated design elements

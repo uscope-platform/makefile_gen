@@ -40,6 +40,9 @@ void HDL_function_def::start_assignment(const std::string &n, Expression idx) {
 }
 
 void HDL_function_def::close_assignment(const std::shared_ptr<Parameter_value_base> &val) {
+    if (assignments.empty()) {
+        throw std::runtime_error(fmt::format("parsing of the {} function definition lead to an inconsistent state, report it as a possible bug", name));
+    }
     assignments.back().set_value(val);
 }
 

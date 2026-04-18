@@ -38,6 +38,7 @@ set(MAKEFILEGEN_TESTS
         Backend/Peripheral_definition_generator.cpp
         Backend/toolchain_manager.cpp
         frontend/cache_manager.cpp
+        frontend/sv_preprocessor.cpp
         frontend/repository_walker.cpp
         Backend/python_script_runner.cpp
         Backend/auxiliary_resolver.cpp

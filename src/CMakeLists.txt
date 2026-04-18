@@ -79,6 +79,7 @@ target_sources(makefile_gen_lib
     frontend/analysis/vhdl_analyzer.cpp
     frontend/analysis/documentation_analyzer.cpp
     frontend/analysis/vhdl_visitor.cpp
+    frontend/analysis/sv_preprocessor.cpp
     frontend/cache_manager.cpp
 )
 
@@ -87,6 +88,7 @@ target_link_libraries(makefile_gen_lib PUBLIC
         mgp_vh_lib
         antlr4_static
         spdlog::spdlog
+        ctre::ctre
         Threads::Threads
         cereal
         nlohmann_json::nlohmann_json
