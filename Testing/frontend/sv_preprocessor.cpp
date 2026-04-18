@@ -38,12 +38,32 @@ TEST(preprocessor, file_directive) {
     EXPECT_EQ(result, check_string);
 }
 
-TEST(preprocessor, multiple_defines) {
+TEST(preprocessor, line_directive) {
+    auto test_pattern = std::istringstream(
+    R"(module test_module ();
+
+            parameter LINE_NUMBER = `__LINE__;
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    std::ostringstream oss;
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string =
+        R"(module test_module ();
+
+            parameter LINE_NUMBER = 3;
+        endmodule
+    )";
+    EXPECT_EQ(result, check_string);
+}
+
+TEST(preprocessor, simple_define) {
     auto test_pattern = std::istringstream(R"(
         `define a 12
-        `define b 15
         module test_module ();
-            parameter string TEST_PARAM = `a + `b;
+            parameter TEST_PARAM = `a;
         endmodule
     )");
 
@@ -51,10 +71,29 @@ TEST(preprocessor, multiple_defines) {
 
     auto result = preproc.preprocess(test_pattern);
     auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = 12;
+        endmodule
+    )";
+    EXPECT_EQ(result, check_string);
+}
+
+
+TEST(preprocessor, multiple_defines) {
+    auto test_pattern = std::istringstream(R"(
         `define a 12
         `define b 15
         module test_module ();
-            parameter string TEST_PARAM = 12 + 15;
+            parameter TEST_PARAM = `a + `b;
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = 12 + 15;
         endmodule
     )";
     EXPECT_EQ(result, check_string);

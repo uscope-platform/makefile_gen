@@ -19,6 +19,7 @@
 #include <ctre.hpp>
 #include <filesystem>
 #include <fstream>
+#include <unordered_map>
 
 class sv_preprocessor {
 public:

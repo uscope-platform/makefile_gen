@@ -27,10 +27,12 @@ std::string sv_preprocessor::preprocess(const std::filesystem::path &in) {
 }
 
 std::string sv_preprocessor::preprocess(std::istream &in) {
+    std::unordered_map<std::string, std::string> simple_defines;
 
     std::ostringstream out;
 
     std::string line;
+    uint64_t line_number = 1;
     while (std::getline(in, line)) {
         std::string_view trimmed_line = line;
         // If it starts with whitespace, find where the whitespace ends
@@ -51,10 +53,11 @@ std::string sv_preprocessor::preprocess(std::istream &in) {
         || trimmed_line.starts_with("`begin_keywords")
         || trimmed_line.starts_with("`line");
 
-        if (trimmed_line.starts_with("`__LINE__")) {
-
-        } else if (trimmed_line.starts_with("`define")) {
-
+        if (trimmed_line.starts_with("`define")) {
+            trimmed_line = trimmed_line.substr(8);
+            auto identifier = trimmed_line.substr(0, trimmed_line.find_first_of(" "));
+            auto value = trimmed_line.substr(trimmed_line.find_first_of(" ")+1);
+            simple_defines[std::string(identifier)] =  value;
         } else if (trimmed_line.starts_with("`else")) {
 
         } else if (trimmed_line.starts_with("`elsif")) {
@@ -76,21 +79,26 @@ std::string sv_preprocessor::preprocess(std::istream &in) {
             if (auto [whole, name] = ctre::search<R"(`([a-zA-Z_][a-zA-Z0-9_]*))">(line); whole) {
                 if (name) {
                     std::string_view identifier = name;
+                    std::string replacement;
                     if (identifier == "__FILE__") {
-                        result = "";
-                        std::string_view prefix{line.begin(), whole.begin()};
-                        std::string_view suffix{whole.end(), line.end()};
+                        replacement = "\"" + path + "\"";
 
-                        result.reserve(prefix.size() + path.size() + suffix.size());
-                        result.append(prefix).append("\"").append(path).append("\"").append(suffix);
+                    } else if (identifier == "__LINE__"){
+                        replacement = std::to_string(line_number);
                     } else {
-                        int i = 0;
+                        replacement = simple_defines.at(std::string(identifier));
                     }
-                }
+                    result = "";
+                    std::string_view prefix{line.begin(), whole.begin()};
+                    std::string_view suffix{whole.end(), line.end()};
 
+                    result.reserve(prefix.size() + path.size() + suffix.size());
+                    result.append(prefix).append(replacement).append(suffix);
+                }
             }
             out << result << std::endl;
         }
+        line_number++;
     }
     auto retval = out.str();
     retval.pop_back();
