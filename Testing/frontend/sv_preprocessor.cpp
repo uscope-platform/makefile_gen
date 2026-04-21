@@ -640,3 +640,42 @@ endmodule
     )";
     EXPECT_EQ(check_string, result);
 }
+
+
+TEST(preprocessor, triple_nested_ifdef) {
+    auto test_pattern = std::istringstream(R"(
+`define LEVEL_1
+`define LEVEL_3
+module test;
+`ifdef LEVEL_1
+    parameter L1 = 1;
+    `ifdef LEVEL_2
+        parameter L2 = 1;
+        `ifdef LEVEL_3
+            parameter L3_FAIL = 1;
+        `endif
+    `else
+        parameter L2_ELSE = 1;
+        `ifdef LEVEL_3
+            parameter L3_SUCCESS = 1;
+        `endif
+    `endif
+`else
+    parameter L1_FAIL = 1;
+`endif
+endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto result = preproc.preprocess(test_pattern);
+
+    auto check_string = R"(
+module test;
+    parameter L1 = 1;
+        parameter L2_ELSE = 1;
+            parameter L3_SUCCESS = 1;
+endmodule
+    )";
+
+    EXPECT_EQ(result, check_string);
+}
