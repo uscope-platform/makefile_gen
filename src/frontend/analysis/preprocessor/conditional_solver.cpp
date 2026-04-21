@@ -20,59 +20,69 @@ void conditional_solver::close_loop() {
     taken_level.erase(loop_level);
     loop_level--;
     if (loop_level == 0) {
-        phase = inactive;
+        solver_active = false;
         in_taken_branch = false;
         already_taken = false;
     } else {
         already_taken = already_taken_stack.back();
         already_taken_stack.pop_back();
+       if (!in_taken_branch_stack.empty()) {
+           in_taken_branch = in_taken_branch_stack.back();
+           in_taken_branch_stack.pop_back();
+       }
     }
 }
 
 void conditional_solver::start_loop(bool if_taken) {
-    loop_level++;
-    if (loop_level>1) already_taken_stack.push_back(already_taken);
-    if (loop_level == 1 || in_taken_branch) {
-        phase = if_phase;
-        if (if_taken) {
-            taken_level.insert(loop_level);
-            in_taken_branch = true;
-            already_taken = true;
-        } else {
-            in_taken_branch = false;
-            already_taken = false;
-        }
+    if (loop_level > 0) {
+        already_taken_stack.push_back(already_taken);
+        in_taken_branch_stack.push_back(in_taken_branch);
     }
+
+    loop_level++;
+
+    bool parent_active = (loop_level == 1) ? true : in_taken_branch_stack.back();
+
+    if (parent_active && if_taken) {
+        in_taken_branch = true;
+        already_taken = true;
+        taken_level.insert(loop_level);
+    } else {
+        in_taken_branch = false;
+        already_taken = parent_active && if_taken;
+    }
+    solver_active = true;
 }
 
 void conditional_solver::advance_elseif(bool if_taken) {
-    if (loop_level == 1 || in_taken_branch|| taken_level.contains(loop_level-1)) {
-        phase = elseif_phase;
-        if (!in_taken_branch) {
-            if (if_taken) {
-                taken_level.insert(loop_level);
-                in_taken_branch = true;
-                already_taken = true;
-            }
-        }else {
+    bool parent_active = (loop_level <= 1) ? true : in_taken_branch_stack.back();
+
+    if (parent_active && !already_taken) {
+        if (if_taken) {
+            in_taken_branch = true;
+            already_taken = true;
+            taken_level.insert(loop_level);
+        } else {
             in_taken_branch = false;
         }
+    } else {
+        in_taken_branch = false;
     }
 }
 
 void conditional_solver::advance_else() {
-    if (loop_level == 1 || in_taken_branch|| taken_level.contains(loop_level-1)) {
-        phase = else_phase;
-        if (!already_taken) {
-            taken_level.insert(loop_level);
-            in_taken_branch = true;
-        }
-        else {
-            in_taken_branch = false;
-        }
+    bool parent_active = (loop_level <= 1) ? true : in_taken_branch_stack.back();
+
+    if (parent_active && !already_taken) {
+        in_taken_branch = true;
+        already_taken = true;
+        taken_level.insert(loop_level);
+    } else {
+        in_taken_branch = false;
     }
 }
 
 bool conditional_solver::is_active() const {
-    return phase == inactive || (in_taken_branch && taken_level.contains(loop_level));
+    if (loop_level == 0) return true;
+    return in_taken_branch;
 }

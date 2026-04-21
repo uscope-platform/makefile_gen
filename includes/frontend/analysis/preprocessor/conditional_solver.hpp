@@ -30,16 +30,12 @@ public:
     void advance_else();
     [[nodiscard]] bool is_active() const;
 private:
-    enum {
-        inactive,
-        if_phase,
-        elseif_phase,
-        else_phase
-    } phase = inactive;
+    bool solver_active = false;
     bool already_taken = false;
     bool in_taken_branch = false;
     unsigned int loop_level = 0;
     std::vector<bool> already_taken_stack;
+    std::vector<bool> in_taken_branch_stack;
     std::set<unsigned int> taken_level;
 };
 
