@@ -178,13 +178,25 @@ std::optional<function_macro> sv_preprocessor::parse_function_macro(const std::s
         const auto c = raw_arguments[i];
         if (c == '(' || c == '[' || c == '{') nesting_level++;
         if (c == ')' || c == ']' || c == '}') nesting_level--;
-        if (c==',' && nesting_level == 0) {
-            auto arg_text = raw_arguments.substr(current_arg_start, i-current_arg_start);
+        if (c==',' && nesting_level == 0||i == raw_arguments.size()-1) {
+            auto string_length = i-current_arg_start+1;
+            if (c==',') string_length--;
+            auto arg_text = raw_arguments.substr(current_arg_start, string_length);
             current_arg_start = i+1;
-            macro.arguments.emplace_back(ltrim(arg_text));
+            function_macro_argument arg;
+            arg.name = ltrim(arg_text);
+            macro.arguments.emplace_back(arg);
         }
     }
-    macro.arguments.emplace_back(ltrim(raw_arguments.substr(current_arg_start, raw_arguments.size()-current_arg_start)));
+    for (auto &m:macro.arguments) {
+        if (m.name.contains('=')) {
+            m.has_default = true;
+            m.default_value = ltrim(m.name.substr(m.name.find_first_of('=')+1));
+            m.name = m.name.substr(0, m.name.find_first_of('='));
+        } else {
+            m.has_default = false;
+        }
+    }
     macro.value = ltrim(in.substr(args_last+1));
     return macro;
 }

@@ -694,7 +694,49 @@ TEST(preprocessor, simple_macro_with_args) {
     auto result = preproc.preprocess(test_pattern);
     auto check_string = R"(
         module test_module ();
-            parameter TEST_PARAM = 12;
+            parameter TEST_PARAM = 5+7;
+        endmodule
+    )";
+    EXPECT_EQ(result, check_string);
+}
+
+
+
+
+
+TEST(preprocessor, simple_macro_with_default_args) {
+    auto test_pattern = std::istringstream(R"(
+        `define  ADD(a=5, b=7)  a+b
+        module test_module ();
+            parameter TEST_PARAM = `ADD(,);
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = 5+7;
+        endmodule
+    )";
+    EXPECT_EQ(result, check_string);
+}
+
+TEST(preprocessor, simple_macro_with_default_args_overriden) {
+    auto test_pattern = std::istringstream(R"(
+        `define  ADD(a=5, b=7)  a+b
+        module test_module ();
+            parameter TEST_PARAM = `ADD(,3);
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = 5+3;
         endmodule
     )";
     EXPECT_EQ(result, check_string);

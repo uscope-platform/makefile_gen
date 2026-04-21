@@ -25,10 +25,27 @@
 #include <fmt/format.h>
 #include "frontend/analysis/preprocessor/conditional_solver.hpp"
 
+struct function_macro_argument {
+    std::string name;
+    std::string default_value;
+    bool has_default;
+
+    friend bool operator==(const function_macro_argument &lhs, const function_macro_argument &rhs) {
+        return lhs.name == rhs.name
+               && lhs.default_value == rhs.default_value
+               && lhs.has_default == rhs.has_default;
+    }
+
+    friend bool operator!=(const function_macro_argument &lhs, const function_macro_argument &rhs) {
+        return !(lhs == rhs);
+    }
+};
+
 struct function_macro {
 
-    std::vector<std::string> arguments;
+    std::vector<function_macro_argument> arguments;
     std::string value;
+
      friend bool operator==(const function_macro &lhs, const function_macro &rhs) {
             return lhs.arguments == rhs.arguments && lhs.value == rhs.value;
      }
@@ -37,6 +54,7 @@ struct function_macro {
         return !(lhs == rhs);
     }
 };
+
 
 
 class sv_preprocessor {
