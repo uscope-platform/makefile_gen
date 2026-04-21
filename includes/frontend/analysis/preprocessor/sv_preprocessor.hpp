@@ -21,14 +21,13 @@
 #include <vector>
 #include <fstream>
 #include <unordered_map>
-#include <set>
 #include <variant>
 #include <fmt/format.h>
 #include "frontend/analysis/preprocessor/conditional_solver.hpp"
 
 struct function_macro {
 
-    std::set<std::string> arguments;
+    std::vector<std::string> arguments;
     std::string value;
      friend bool operator==(const function_macro &lhs, const function_macro &rhs) {
             return lhs.arguments == rhs.arguments && lhs.value == rhs.value;
@@ -51,7 +50,7 @@ private:
     std::string_view ltrim(const std::string_view &in);
     void parse_definition(const std::string_view &sv, int prefix_length);
     std::string_view parse_one_arg_directive(const std::string_view &sv, int prefix_length);
-
+    std::optional<function_macro> parse_function_macro(const std::string_view &in);
     uint64_t line_number;
     std::unordered_map<std::string, std::variant<std::string, function_macro>> definitions;
     std::string path;

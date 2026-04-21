@@ -679,3 +679,23 @@ endmodule
 
     EXPECT_EQ(result, check_string);
 }
+
+
+TEST(preprocessor, simple_macro_with_args) {
+    auto test_pattern = std::istringstream(R"(
+        `define  ADD(a, b)  a+b
+        module test_module ();
+            parameter TEST_PARAM = `ADD(5,7);
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = 12;
+        endmodule
+    )";
+    EXPECT_EQ(result, check_string);
+}

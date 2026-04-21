@@ -132,15 +132,19 @@ std::string_view sv_preprocessor::ltrim(const std::string_view &in) {
 void sv_preprocessor::parse_definition(const std::string_view &sv, int prefix_length) {
     auto trimmed_view = sv.substr(prefix_length);
     trimmed_view = trimmed_view.substr(trimmed_view.find_first_not_of("\t "));
-    auto id_last = trimmed_view.find_first_of("\t ");
+    auto id_last = trimmed_view.find_first_of("\t (");
     auto identifier = trimmed_view.substr(0, id_last);
     if (id_last == std::string_view::npos) {
         definitions[std::string(identifier)] = "";
         return;
     }
     auto remaining_view = trimmed_view.substr(id_last+1);
-    if (remaining_view.front() == '(') {
-
+    if (trimmed_view[id_last] == '(') {
+        auto macro = parse_function_macro(trimmed_view.substr(id_last+1));
+        if (!macro.has_value()) {
+            throw std::runtime_error(fmt::format("The arguments list in macro {} is never closed [{}]", identifier, path));
+        }
+        definitions[std::string(identifier)] = macro.value();
     } else {
         auto value = remaining_view.substr(remaining_view.find_first_not_of("\t "));
         definitions[std::string(identifier)] =  std::string{value};
@@ -151,6 +155,38 @@ void sv_preprocessor::parse_definition(const std::string_view &sv, int prefix_le
 std::string_view sv_preprocessor::parse_one_arg_directive(const std::string_view &sv, int prefix_length) {
     auto trimmed_line = sv.substr(prefix_length);
     return trimmed_line.substr( trimmed_line.find_first_not_of(' '));
+}
+
+std::optional<function_macro> sv_preprocessor::parse_function_macro(const std::string_view &in) {
+    function_macro macro;
+    int nesting_level = 0;
+    int args_last = 0;
+    for (; args_last< in.size(); args_last++) {
+        if (in[args_last] == '(') nesting_level++;
+        if (in[args_last] == ')') {
+            if (nesting_level>0) nesting_level--;
+            else break;
+        }
+    }
+    if (args_last == in.size()-1) {
+        return {};
+    }
+    auto raw_arguments = in.substr(0, args_last);
+    nesting_level = 0;
+    int current_arg_start = 0;
+    for (int i = 0; i< raw_arguments.size(); i++) {
+        const auto c = raw_arguments[i];
+        if (c == '(' || c == '[' || c == '{') nesting_level++;
+        if (c == ')' || c == ']' || c == '}') nesting_level--;
+        if (c==',' && nesting_level == 0) {
+            auto arg_text = raw_arguments.substr(current_arg_start, i-current_arg_start);
+            current_arg_start = i+1;
+            macro.arguments.emplace_back(ltrim(arg_text));
+        }
+    }
+    macro.arguments.emplace_back(ltrim(raw_arguments.substr(current_arg_start, raw_arguments.size()-current_arg_start)));
+    macro.value = ltrim(in.substr(args_last+1));
+    return macro;
 }
 
 std::string sv_preprocessor::flatten_source(const std::string_view &in) {
