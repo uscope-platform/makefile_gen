@@ -569,11 +569,47 @@ endmodule
 }
 
 
-TEST(preprocessor, nested_else_taken_with_outer_else) {
+TEST(preprocessor, nested_else_taken_with_outer_elseif) {
     auto test_pattern = std::istringstream(R"(
 module test;
 `define A
 `define D
+`define E
+`ifdef A
+    `ifdef B
+        parameter TEST_PARAM = 3;
+    `elsif C
+        parameter TEST_PARAM = 5;
+    `else
+        parameter TEST_PARAM = 7;
+    `endif
+`else
+    `ifdef D
+        parameter TEST_PARAM = 9;
+    `elsif E
+        parameter TEST_PARAM = 11;
+    `else
+        parameter TEST_PARAM = 15;
+    `endif
+`endif
+endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+module test;
+        parameter TEST_PARAM = 7;
+endmodule
+    )";
+    EXPECT_EQ(check_string, result);
+}
+
+
+TEST(preprocessor, nested_else_taken_with_outer_else) {
+    auto test_pattern = std::istringstream(R"(
+module test;
+`define A
 `define E
 `ifdef A
     `ifdef B
