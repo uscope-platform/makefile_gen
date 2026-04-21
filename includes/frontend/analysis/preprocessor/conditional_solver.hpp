@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <string>
+#include <set>
 #include <cstdint>
 
 class conditional_solver {
@@ -27,9 +28,7 @@ public:
     void close_loop();
     void advance_elseif(bool if_taken);
     void advance_else();
-    [[nodiscard]] bool is_active() const {
-        return phase == inactive || in_taken_branch;
-    }
+    [[nodiscard]] bool is_active() const;
 private:
     enum {
         inactive,
@@ -40,6 +39,8 @@ private:
     bool already_taken = false;
     bool in_taken_branch = false;
     unsigned int loop_level = 0;
+    std::vector<bool> already_taken_stack;
+    std::set<unsigned int> taken_level;
 };
 
 

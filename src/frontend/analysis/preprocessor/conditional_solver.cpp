@@ -17,34 +17,62 @@
 
 
 void conditional_solver::close_loop() {
+    taken_level.erase(loop_level);
     loop_level--;
     if (loop_level == 0) {
         phase = inactive;
         in_taken_branch = false;
         already_taken = false;
+    } else {
+        already_taken = already_taken_stack.back();
+        already_taken_stack.pop_back();
     }
 }
 
 void conditional_solver::start_loop(bool if_taken) {
-    phase = if_phase;
-    in_taken_branch = if_taken;
-    already_taken = if_taken;
     loop_level++;
+    if (loop_level>1) already_taken_stack.push_back(already_taken);
+    if (loop_level == 1 || in_taken_branch) {
+        phase = if_phase;
+        if (if_taken) {
+            taken_level.insert(loop_level);
+            in_taken_branch = true;
+            already_taken = true;
+        } else {
+            in_taken_branch = false;
+            already_taken = false;
+        }
+    }
 }
 
 void conditional_solver::advance_elseif(bool if_taken) {
-    phase = elseif_phase;
-    if (!in_taken_branch) {
-        already_taken = if_taken;
-        in_taken_branch = if_taken;
-    }else {
-        in_taken_branch = false;
+    if (loop_level == 1 || in_taken_branch|| taken_level.contains(loop_level-1)) {
+        phase = elseif_phase;
+        if (!in_taken_branch) {
+            if (if_taken) {
+                taken_level.insert(loop_level);
+                in_taken_branch = true;
+                already_taken = true;
+            }
+        }else {
+            in_taken_branch = false;
+        }
     }
 }
 
 void conditional_solver::advance_else() {
-    phase = else_phase;
-    if (!already_taken) in_taken_branch = true;
-    else in_taken_branch = false;
+    if (loop_level == 1 || in_taken_branch|| taken_level.contains(loop_level-1)) {
+        phase = else_phase;
+        if (!already_taken) {
+            taken_level.insert(loop_level);
+            in_taken_branch = true;
+        }
+        else {
+            in_taken_branch = false;
+        }
+    }
+}
 
+bool conditional_solver::is_active() const {
+    return phase == inactive || (in_taken_branch && taken_level.contains(loop_level));
 }

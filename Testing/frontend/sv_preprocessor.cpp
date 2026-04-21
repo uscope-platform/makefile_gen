@@ -391,9 +391,10 @@ endmodule
 }
 
 
-TEST(preprocessor, nested_ifdefs) {
+TEST(preprocessor, nested_ifdefs_skipped) {
     auto test_pattern = std::istringstream(R"(
 module test;
+`define B
 `ifdef A
     `ifdef B
         parameter TEST_PARAM = 3;
@@ -406,6 +407,162 @@ endmodule
     auto result = preproc.preprocess(test_pattern);
     auto check_string = R"(
 module test;
+endmodule
+    )";
+    EXPECT_EQ(check_string, result);
+}
+
+
+TEST(preprocessor, nested_ifdef_else_skipped) {
+    auto test_pattern = std::istringstream(R"(
+module test;
+`define B
+`define C
+`ifdef A
+    `ifdef B
+        parameter TEST_PARAM = 3;
+    `elsif C
+        parameter TEST_PARAM = 5;
+    `else
+        parameter TEST_PARAM = 7;
+    `endif
+`endif
+endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+module test;
+endmodule
+    )";
+    EXPECT_EQ(check_string, result);
+}
+
+
+TEST(preprocessor, nested_ifdefs_outer_taken) {
+    auto test_pattern = std::istringstream(R"(
+module test;
+`define A
+`ifdef A
+    `ifdef B
+        parameter TEST_PARAM = 3;
+    `endif
+`endif
+endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+module test;
+endmodule
+    )";
+    EXPECT_EQ(check_string, result);
+}
+
+
+TEST(preprocessor, nested_ifdefs_fully_taken) {
+    auto test_pattern = std::istringstream(R"(
+module test;
+`define A
+`define B
+`ifdef A
+    `ifdef B
+        parameter TEST_PARAM = 3;
+    `endif
+`endif
+endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+module test;
+        parameter TEST_PARAM = 3;
+endmodule
+    )";
+    EXPECT_EQ(check_string, result);
+}
+
+
+
+TEST(preprocessor, nested_ifdefs_fully_taken_repeat) {
+    auto test_pattern = std::istringstream(R"(
+module test;
+`define A
+`define B
+`ifdef A
+    `ifdef B
+        parameter TEST_PARAM = 3;
+    `endif
+    `ifdef C
+        parameter TEST_PARAM2 = 7;
+    `endif
+`endif
+endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+module test;
+        parameter TEST_PARAM = 3;
+endmodule
+    )";
+    EXPECT_EQ(check_string, result);
+}
+
+
+TEST(preprocessor, nested_elsif_taken) {
+    auto test_pattern = std::istringstream(R"(
+module test;
+`define C
+`define A
+`ifdef A
+    `ifdef B
+        parameter TEST_PARAM = 3;
+    `elsif C
+        parameter TEST_PARAM = 5;
+    `else
+        parameter TEST_PARAM = 7;
+    `endif
+`endif
+endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+module test;
+        parameter TEST_PARAM = 5;
+endmodule
+    )";
+    EXPECT_EQ(check_string, result);
+}
+
+
+TEST(preprocessor, nested_else_taken) {
+    auto test_pattern = std::istringstream(R"(
+module test;
+`define A
+`ifdef A
+    `ifdef B
+        parameter TEST_PARAM = 3;
+    `elsif C
+        parameter TEST_PARAM = 5;
+    `else
+        parameter TEST_PARAM = 7;
+    `endif
+`endif
+endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+module test;
+        parameter TEST_PARAM = 7;
 endmodule
     )";
     EXPECT_EQ(check_string, result);
