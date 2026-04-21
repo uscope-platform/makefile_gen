@@ -18,10 +18,13 @@
 
 #include <ctre.hpp>
 #include <filesystem>
+#include <vector>
 #include <fstream>
 #include <unordered_map>
 #include <set>
 #include <variant>
+#include <fmt/format.h>
+#include "frontend/analysis/preprocessor/conditional_solver.hpp"
 
 struct function_macro {
 
@@ -48,9 +51,11 @@ private:
     std::string_view ltrim(const std::string_view &in);
     void parse_definition(const std::string_view &sv, int prefix_length);
     std::string_view parse_one_arg_directive(const std::string_view &sv, int prefix_length);
+
     uint64_t line_number;
     std::unordered_map<std::string, std::variant<std::string, function_macro>> definitions;
     std::string path;
+    conditional_solver c_solver;
 };
 
 

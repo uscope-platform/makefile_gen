@@ -14,12 +14,10 @@
 //  limitations under the License.
 
 
-#include "frontend/analysis/sv_preprocessor.hpp"
+#include "frontend/analysis/preprocessor/sv_preprocessor.hpp"
 
-#include <variant>
-#include <fmt/format.h>
 
-sv_preprocessor::sv_preprocessor(const std::filesystem::path &in) {
+sv_preprocessor:: sv_preprocessor(const std::filesystem::path &in) {
     path = in;
 }
 
@@ -38,7 +36,7 @@ std::string sv_preprocessor::preprocess(std::istream &in) {
     std::string line;
     line_number = 1;
     while (std::getline(in, line)) {
-        std::string_view trimmed_line = ltrim(line);
+       std::string_view trimmed_line = ltrim(line);
 
         bool skipped_directive = trimmed_line.starts_with("`resetall")
         || trimmed_line.starts_with("`timescale")
@@ -52,26 +50,29 @@ std::string sv_preprocessor::preprocess(std::istream &in) {
         || trimmed_line.starts_with("`begin_keywords")
         || trimmed_line.starts_with("`line");
 
-        if (trimmed_line.starts_with("`define")) {
+        if (trimmed_line.starts_with("`define") && c_solver.is_active()) {
           parse_definition(trimmed_line, 7);
-        } else if (trimmed_line.starts_with("`else")) {
-
-        } else if (trimmed_line.starts_with("`elsif")) {
-
-        } else if (trimmed_line.starts_with("`endif")) {
+        } else if (trimmed_line.starts_with("`include")&& c_solver.is_active()) {
 
         } else if (trimmed_line.starts_with("`ifdef")) {
-
+            auto condition = parse_one_arg_directive(trimmed_line, 6);
+            c_solver.start_loop(definitions.contains(std::string(condition)));
         } else if (trimmed_line.starts_with("`ifndef")) {
-
-        } else if (trimmed_line.starts_with("`include")) {
-
-        } else if (trimmed_line.starts_with("`undef")) {
+            auto condition = parse_one_arg_directive(trimmed_line, 7);
+            c_solver.start_loop(!definitions.contains(std::string(condition)));
+        } else if (trimmed_line.starts_with("`elsif")) {
+            auto condition = parse_one_arg_directive(trimmed_line, 6);
+            c_solver.advance_elseif(definitions.contains(std::string(condition)));
+        } else if (trimmed_line.starts_with("`else")) {
+            c_solver.advance_else();
+        } else if (trimmed_line.starts_with("`endif")) {
+            c_solver.close_loop();
+        } else if (trimmed_line.starts_with("`undef") && c_solver.is_active()) {
             auto identifier = parse_one_arg_directive(trimmed_line, 6);
             definitions.erase(std::string(identifier));
-        } else if (trimmed_line.starts_with("`undefineall")) {
+        } else if (trimmed_line.starts_with("`undefineall") && c_solver.is_active()) {
             definitions.clear();
-        } else if (!skipped_directive) {
+        } else if (!skipped_directive && c_solver.is_active()) {
 
             std::string result;
             std::string_view remaining = line;

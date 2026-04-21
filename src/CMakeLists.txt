@@ -79,7 +79,8 @@ target_sources(makefile_gen_lib
     frontend/analysis/vhdl_analyzer.cpp
     frontend/analysis/documentation_analyzer.cpp
     frontend/analysis/vhdl_visitor.cpp
-    frontend/analysis/sv_preprocessor.cpp
+    frontend/analysis/preprocessor/sv_preprocessor.cpp
+    frontend/analysis/preprocessor/conditional_solver.cpp
     frontend/cache_manager.cpp
 )
 
