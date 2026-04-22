@@ -161,7 +161,7 @@ std::optional<function_macro> sv_preprocessor::parse_function_macro(const std::s
         }
         macro.arguments.emplace_back(arg);
     }
-    macro.value = body;
+    macro.value = ltrim(body);
     return macro;
 }
 
@@ -193,7 +193,7 @@ std::pair<std::vector<std::string_view>, std::string_view> sv_preprocessor::get_
             arguments.push_back(ltrim(arg_text));
         }
     }
-    auto value =  ltrim(in.substr(args_last+1));
+    auto value =  in.substr(args_last+1);
     return {arguments, value};
 }
 
@@ -347,9 +347,10 @@ std::string sv_preprocessor::process_macro_usage(const std::string_view &in) {
     std::string_view remaining = in;
 
     while (auto match = identifier_pattern(remaining)) {
+        result.append(remaining.begin(), match.begin());
         if (match.view().back() == '(') {
             auto id = std::string(match.view().substr(1, match.size()-2));
-            size_t start_pos = (match.data() + match.size()) - in.data();
+            size_t start_pos = (match.data() + match.size()) - remaining.data();
             auto args_text = remaining.substr(start_pos);
             auto [args, rest_of_line] = get_call_arguments(args_text);
             if (!definitions.contains(id)) {
@@ -364,13 +365,9 @@ std::string sv_preprocessor::process_macro_usage(const std::string_view &in) {
                 );
             }
 
-            std::string replaced_line = std::string(remaining.substr(0, remaining.find_first_of('`')));
-            replaced_line += replace_function_macro(args,std::get<function_macro>(macro));
-            replaced_line += std::string(rest_of_line);
-            result = replaced_line;
-            remaining = "";
+            result.append(replace_function_macro(args,std::get<function_macro>(macro)));
+            remaining = rest_of_line;
         } else{
-            result.append(remaining.begin(), match.begin());
             result.append(get_define_replacement(match));
 
             remaining = std::string_view{match.end(), remaining.end()};
