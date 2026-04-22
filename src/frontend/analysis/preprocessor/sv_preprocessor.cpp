@@ -292,14 +292,19 @@ std::string sv_preprocessor::flatten_source(const std::string_view &in) {
     return result;
 }
 
-std::string sv_preprocessor::replace_function_macro(const std::vector<std::string_view> &args, const function_macro &macro) {
+std::optional<std::string> sv_preprocessor::replace_function_macro(const std::vector<std::string_view> &args, const function_macro &macro) {
     std::unordered_map<std::string_view, std::string> arguments_map;
+    bool full_default = true;
     for (int i = 0; i<macro.arguments.size(); i++) {
-        if (args[i].empty()) {
+        full_default &= macro.arguments[i].has_default;
+        if (args.empty() || args[i].empty()) {
             arguments_map[macro.arguments[i].name] = macro.arguments[i].default_value;
         } else {
             arguments_map[macro.arguments[i].name] = std::string(args[i]);
         }
+    }
+    if (args.empty() && !full_default) {
+        return std::nullopt;
     }
 
     std::string_view body = macro.value;
@@ -364,8 +369,13 @@ std::string sv_preprocessor::process_macro_usage(const std::string_view &in) {
                     fmt::format("Attempted to pass arguments to a macro {} that does not need them", id)
                 );
             }
-
-            result.append(replace_function_macro(args,std::get<function_macro>(macro)));
+            auto macro_text = replace_function_macro(args,std::get<function_macro>(macro));
+            if (!macro_text.has_value()) {
+                throw std::runtime_error(
+                    fmt::format("Attempted to call a macro [{}] without enough parameters ", id)
+                );
+            }
+            result.append(macro_text.value());
             remaining = rest_of_line;
         } else{
             result.append(get_define_replacement(match));

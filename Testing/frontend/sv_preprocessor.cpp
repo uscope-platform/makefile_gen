@@ -761,3 +761,42 @@ TEST(preprocessor, multiple_macros) {
     )";
     EXPECT_EQ(result, check_string);
 }
+
+
+TEST(preprocessor, simple_macro_full_defaults) {
+    auto test_pattern = std::istringstream(R"(
+        `define  ADD(a=5, b=7)  a+b
+        module test_module ();
+            parameter TEST_PARAM = `ADD(,);
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = 5+7;
+        endmodule
+    )";
+    EXPECT_EQ(result, check_string);
+}
+
+TEST(preprocessor, simple_macro_full_defaults_no_comma) {
+    auto test_pattern = std::istringstream(R"(
+        `define  ADD(a=5, b=7)  a+b
+        module test_module ();
+            parameter TEST_PARAM = `ADD();
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = 5+7;
+        endmodule
+    )";
+    EXPECT_EQ(result, check_string);
+}

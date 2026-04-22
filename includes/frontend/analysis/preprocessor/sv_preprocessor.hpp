@@ -64,7 +64,7 @@ public:
     std::string preprocess(const std::filesystem::path &in);
     std::string preprocess(std::istream& in);
     std::string flatten_source(const std::string_view &in);
-    std::string replace_function_macro(const std::vector<std::string_view> &args, const function_macro &macro);
+    std::optional<std::string> replace_function_macro(const std::vector<std::string_view> &args, const function_macro &macro);
 private:
     std::string process_macro_usage(const std::string_view &in);
     std::string get_define_replacement(const std::string_view &v);
