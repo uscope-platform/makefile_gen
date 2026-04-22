@@ -800,3 +800,24 @@ TEST(preprocessor, simple_macro_full_defaults_no_comma) {
     )";
     EXPECT_EQ(result, check_string);
 }
+
+
+
+TEST(preprocessor, simple_macro_empty_without_defaults) {
+    auto test_pattern = std::istringstream(R"(
+        `define  ADD(a, b)  a 2+b 1
+        module test_module ();
+            parameter TEST_PARAM = `ADD(,);
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM =  2+ 1;
+        endmodule
+    )";
+    EXPECT_EQ(result, check_string);
+}
