@@ -20,6 +20,8 @@
 #include <filesystem>
 #include <vector>
 #include <fstream>
+#include <set>
+#include <string>
 #include <unordered_map>
 #include <variant>
 #include <fmt/format.h>
@@ -56,15 +58,15 @@ struct function_macro {
 };
 
 
-
 class sv_preprocessor {
 public:
     sv_preprocessor(const std::filesystem::path &in);
     std::string preprocess(const std::filesystem::path &in);
     std::string preprocess(std::istream& in);
     std::string flatten_source(const std::string_view &in);
-    std::string_view replace_function_macro(const std::vector<std::string_view> &args, const function_macro &macro);
+    std::string replace_function_macro(const std::vector<std::string_view> &args, const function_macro &macro);
 private:
+    std::string process_macro_usage(const std::string_view &in);
     std::string get_define_replacement(const std::string_view &v);
     std::string_view ltrim(const std::string_view &in);
     void parse_definition(const std::string_view &sv, int prefix_length);
@@ -75,6 +77,8 @@ private:
     std::unordered_map<std::string, std::variant<std::string, function_macro>> definitions;
     std::string path;
     conditional_solver c_solver;
+
+    static constexpr auto identifier_pattern = ctre::search<R"(`([a-zA-Z_][a-zA-Z0-9_]*)(\s*\()*)">;
 };
 
 

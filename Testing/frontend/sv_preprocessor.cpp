@@ -741,3 +741,23 @@ TEST(preprocessor, simple_macro_with_default_args_overriden) {
     )";
     EXPECT_EQ(result, check_string);
 }
+
+
+TEST(preprocessor, multiple_macros) {
+    auto test_pattern = std::istringstream(R"(
+        `define  ADD(a=5, b=7)  a+b
+        module test_module ();
+            parameter TEST_PARAM = `ADD(,3) * `ADD(7,);
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = 5+3 * 7+7;
+        endmodule
+    )";
+    EXPECT_EQ(result, check_string);
+}

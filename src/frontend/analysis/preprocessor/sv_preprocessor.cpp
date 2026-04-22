@@ -29,7 +29,6 @@ std::string sv_preprocessor::preprocess(const std::filesystem::path &in) {
 }
 
 std::string sv_preprocessor::preprocess(std::istream &in) {
-    static constexpr auto identifier_pattern = ctre::search<R"(`([a-zA-Z_][a-zA-Z0-9_]*)(\s*\()*)">;
     definitions = {};
 
     std::ostringstream out;
@@ -75,39 +74,7 @@ std::string sv_preprocessor::preprocess(std::istream &in) {
             definitions.clear();
         } else if (!skipped_directive && c_solver.is_active()) {
 
-            std::string result;
-            std::string_view remaining = line;
-
-            while (auto match = identifier_pattern(remaining)) {
-                if (match.view().back() == '(') {
-                    auto id = std::string(match.view().substr(1, match.size()-2));
-                    size_t start_pos = (match.data() + match.size()) - line.data();
-                    auto args_text = remaining.substr(start_pos);
-                    auto [args, unused] = get_call_arguments(args_text);
-                    if (!definitions.contains(id)) {
-                        throw std::runtime_error(
-                           fmt::format("Attempted to use undefined macro {}", id)
-                       );
-                    }
-                    auto macro = definitions[id];
-                    if (std::holds_alternative<std::string>(macro)) {
-                        throw std::runtime_error(
-                            fmt::format("Attempted to pass arguments to a macro {} that does not need them", id)
-                        );
-                    }
-                    remaining = replace_function_macro(args,std::get<function_macro>(macro));
-                } else{
-                    result.append(remaining.begin(), match.begin());
-                    result.append(get_define_replacement(match));
-
-                    remaining = std::string_view{match.end(), remaining.end()};
-                }
-
-            }
-
-            result.append(remaining);
-
-            out << result << std::endl;
+            out << process_macro_usage(line) << std::endl;
         }
         line_number++;
     }
@@ -325,7 +292,93 @@ std::string sv_preprocessor::flatten_source(const std::string_view &in) {
     return result;
 }
 
-std::string_view sv_preprocessor::replace_function_macro(const std::vector<std::string_view> &args, const function_macro &macro) {
-    return "";
+std::string sv_preprocessor::replace_function_macro(const std::vector<std::string_view> &args, const function_macro &macro) {
+    std::unordered_map<std::string_view, std::string> arguments_map;
+    for (int i = 0; i<macro.arguments.size(); i++) {
+        if (args[i].empty()) {
+            arguments_map[macro.arguments[i].name] = macro.arguments[i].default_value;
+        } else {
+            arguments_map[macro.arguments[i].name] = std::string(args[i]);
+        }
+    }
+
+    std::string_view body = macro.value;
+    if (body.empty()) return "";
+    std::vector<std::string_view> tokens;
+
+    auto is_valid_id_char = [](char c) {
+        return std::isalnum(static_cast<unsigned char>(c)) || c == '_' || c == '$';
+    };
+
+    bool in_token = is_valid_id_char(body[0]);
+    int current_token_start = 0;
+    for (int i = 0; i<body.size(); i++){
+        bool current_char_valid = is_valid_id_char(body[i]);
+
+
+        if (in_token & !current_char_valid) {
+            in_token = false;
+            tokens.push_back(body.substr(current_token_start, i-current_token_start));
+            current_token_start = i;
+        } else if (!in_token & current_char_valid) {
+            in_token = true;
+            tokens.push_back(body.substr(current_token_start, i-current_token_start));
+            current_token_start = i;
+        }
+    }
+
+    if (in_token) {
+        tokens.push_back(body.substr(current_token_start));
+    }
+    std::string result;
+    for (const auto &t: tokens) {
+        if (arguments_map.contains(t)) {
+            result.append(arguments_map[t]);
+        } else {
+            result.append(t);
+        }
+    }
+    return result;
+}
+
+std::string sv_preprocessor::process_macro_usage(const std::string_view &in) {
+    std::string result;
+
+    std::string_view remaining = in;
+
+    while (auto match = identifier_pattern(remaining)) {
+        if (match.view().back() == '(') {
+            auto id = std::string(match.view().substr(1, match.size()-2));
+            size_t start_pos = (match.data() + match.size()) - in.data();
+            auto args_text = remaining.substr(start_pos);
+            auto [args, rest_of_line] = get_call_arguments(args_text);
+            if (!definitions.contains(id)) {
+                throw std::runtime_error(
+                   fmt::format("Attempted to use undefined macro {}", id)
+               );
+            }
+            auto macro = definitions[id];
+            if (std::holds_alternative<std::string>(macro)) {
+                throw std::runtime_error(
+                    fmt::format("Attempted to pass arguments to a macro {} that does not need them", id)
+                );
+            }
+
+            std::string replaced_line = std::string(remaining.substr(0, remaining.find_first_of('`')));
+            replaced_line += replace_function_macro(args,std::get<function_macro>(macro));
+            replaced_line += std::string(rest_of_line);
+            result = replaced_line;
+            remaining = "";
+        } else{
+            result.append(remaining.begin(), match.begin());
+            result.append(get_define_replacement(match));
+
+            remaining = std::string_view{match.end(), remaining.end()};
+        }
+
+    }
+
+    result.append(remaining);
+    return result;
 }
 
