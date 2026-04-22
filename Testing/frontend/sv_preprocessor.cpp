@@ -821,3 +821,36 @@ TEST(preprocessor, simple_macro_empty_without_defaults) {
     )";
     EXPECT_EQ(result, check_string);
 }
+
+
+TEST(preprocessor, comma_in_string_argument) {
+    auto test_pattern = std::istringstream(R"(
+        `define DISPLAY_MSG( msg, suffix) initial $display("%s %s", msg, suffix);
+        `DISPLAY_MSG("Hello, World", "!!!")
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        initial $display("%s %s", "Hello, World", "!!!");
+    )";
+    EXPECT_EQ(result, check_string);
+}
+
+
+
+TEST(preprocessor, parenthesis_in_string_argument) {
+    auto test_pattern = std::istringstream(R"(
+        `define DISPLAY_MSG( msg, suffix) initial $display("%s %s", msg, suffix);
+        `DISPLAY_MSG("Hello( World", "!!!")
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        initial $display("%s %s", "Hello( World", "!!!");
+    )";
+    EXPECT_EQ(result, check_string);
+}

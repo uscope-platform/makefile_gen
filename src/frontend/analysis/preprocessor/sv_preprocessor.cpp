@@ -169,28 +169,39 @@ std::pair<std::vector<std::string_view>, std::string_view> sv_preprocessor::get_
     std::vector<std::string_view> arguments;
     int nesting_level = 0;
     int args_last = 0;
+    bool in_string_literal = false;
     for (; args_last< in.size(); args_last++) {
-        if (in[args_last] == '(') nesting_level++;
-        if (in[args_last] == ')') {
+        if (in[args_last]=='"') {
+            in_string_literal = !in_string_literal;
+        }
+        if (in[args_last] == '(' && !in_string_literal) nesting_level++;
+        if (in[args_last] == ')'&& !in_string_literal) {
             if (nesting_level>0) nesting_level--;
             else break;
         }
     }
-    if (args_last == in.size()-1) {
+
+    if (args_last == in.size()) {
         return {};
     }
+    in_string_literal = false;
     auto raw_arguments = in.substr(0, args_last);
     int current_arg_start = 0;
     for (int i = 0; i< raw_arguments.size(); i++) {
         const auto c = raw_arguments[i];
-        if (c == '(' || c == '[' || c == '{') nesting_level++;
-        if (c == ')' || c == ']' || c == '}') nesting_level--;
+        if (c=='"') {
+            in_string_literal = !in_string_literal;
+        }
+        if ((c == '(' || c == '[' || c == '{') && !in_string_literal) nesting_level++;
+        if ((c == ')' || c == ']' || c == '}') && !in_string_literal) nesting_level--;
         if (c==',' && nesting_level == 0||i == raw_arguments.size()-1) {
-            auto string_length = i-current_arg_start+1;
-            if (c==',') string_length--;
-            auto arg_text = raw_arguments.substr(current_arg_start, string_length);
-            current_arg_start = i+1;
-            arguments.push_back(ltrim(arg_text));
+            if (!in_string_literal) {
+                auto string_length = i-current_arg_start+1;
+                if (c==',') string_length--;
+                auto arg_text = raw_arguments.substr(current_arg_start, string_length);
+                current_arg_start = i+1;
+                arguments.push_back(ltrim(arg_text));
+            }
         }
     }
     auto value =  in.substr(args_last+1);
@@ -332,7 +343,7 @@ std::optional<std::string> sv_preprocessor::replace_function_macro(const std::ve
         }
     }
 
-    if (in_token) {
+    if (current_token_start < body.size()) {
         tokens.push_back(body.substr(current_token_start));
     }
     std::string result;
