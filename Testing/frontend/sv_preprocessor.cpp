@@ -854,3 +854,25 @@ TEST(preprocessor, parenthesis_in_string_argument) {
     )";
     EXPECT_EQ(result, check_string);
 }
+
+
+TEST(preprocessor, nested_macros) {
+    auto test_pattern = std::istringstream(R"(
+        `define A 12
+        `define B 57
+        `define  ADD(a=5, b=7)  a+b
+        module test_module ();
+            parameter TEST_PARAM = `ADD(`A,`B);
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = 12+57;
+        endmodule
+    )";
+    EXPECT_EQ(result, check_string);
+}
