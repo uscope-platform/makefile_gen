@@ -17,8 +17,9 @@
 #include "frontend/analysis/preprocessor/sv_preprocessor.hpp"
 
 
-sv_preprocessor:: sv_preprocessor(const std::filesystem::path &in) {
+sv_preprocessor::sv_preprocessor(const std::filesystem::path &in) {
     path = in;
+    line_number = 1;
 }
 
 std::string sv_preprocessor::preprocess(const std::filesystem::path &in) {
@@ -28,7 +29,7 @@ std::string sv_preprocessor::preprocess(const std::filesystem::path &in) {
 }
 
 std::string sv_preprocessor::preprocess(std::istream &in) {
-    static constexpr auto identifier_pattern = ctre::search<R"(`([a-zA-Z_][a-zA-Z0-9_]*))">;
+    static constexpr auto identifier_pattern = ctre::search<R"(`([a-zA-Z_][a-zA-Z0-9_]*)(\s*\()*)">;
     definitions = {};
 
     std::ostringstream out;
@@ -78,10 +79,30 @@ std::string sv_preprocessor::preprocess(std::istream &in) {
             std::string_view remaining = line;
 
             while (auto match = identifier_pattern(remaining)) {
-                result.append(remaining.begin(), match.begin());
-                result.append(get_define_replacement(match));
+                if (match.view().back() == '(') {
+                    auto id = std::string(match.view().substr(1, match.size()-2));
+                    size_t start_pos = (match.data() + match.size()) - line.data();
+                    auto args_text = remaining.substr(start_pos);
+                    auto [args, unused] = get_call_arguments(args_text);
+                    if (!definitions.contains(id)) {
+                        throw std::runtime_error(
+                           fmt::format("Attempted to use undefined macro {}", id)
+                       );
+                    }
+                    auto macro = definitions[id];
+                    if (std::holds_alternative<std::string>(macro)) {
+                        throw std::runtime_error(
+                            fmt::format("Attempted to pass arguments to a macro {} that does not need them", id)
+                        );
+                    }
+                    remaining = replace_function_macro(args,std::get<function_macro>(macro));
+                } else{
+                    result.append(remaining.begin(), match.begin());
+                    result.append(get_define_replacement(match));
 
-                remaining = std::string_view{match.end(), remaining.end()};
+                    remaining = std::string_view{match.end(), remaining.end()};
+                }
+
             }
 
             result.append(remaining);
@@ -159,6 +180,26 @@ std::string_view sv_preprocessor::parse_one_arg_directive(const std::string_view
 
 std::optional<function_macro> sv_preprocessor::parse_function_macro(const std::string_view &in) {
     function_macro macro;
+    auto [arguments, body] = get_call_arguments(in);
+
+    for (auto &m:arguments) {
+            function_macro_argument arg;
+        if (m.contains('=')) {
+            arg.has_default = true;
+            arg.default_value = ltrim(m.substr(m.find_first_of('=')+1));
+            arg.name = m.substr(0, m.find_first_of('='));
+        } else {
+            arg.name = m;
+            arg.has_default = false;
+        }
+        macro.arguments.emplace_back(arg);
+    }
+    macro.value = body;
+    return macro;
+}
+
+std::pair<std::vector<std::string_view>, std::string_view> sv_preprocessor::get_call_arguments(const std::string_view &in) {
+    std::vector<std::string_view> arguments;
     int nesting_level = 0;
     int args_last = 0;
     for (; args_last< in.size(); args_last++) {
@@ -172,7 +213,6 @@ std::optional<function_macro> sv_preprocessor::parse_function_macro(const std::s
         return {};
     }
     auto raw_arguments = in.substr(0, args_last);
-    nesting_level = 0;
     int current_arg_start = 0;
     for (int i = 0; i< raw_arguments.size(); i++) {
         const auto c = raw_arguments[i];
@@ -183,22 +223,11 @@ std::optional<function_macro> sv_preprocessor::parse_function_macro(const std::s
             if (c==',') string_length--;
             auto arg_text = raw_arguments.substr(current_arg_start, string_length);
             current_arg_start = i+1;
-            function_macro_argument arg;
-            arg.name = ltrim(arg_text);
-            macro.arguments.emplace_back(arg);
+            arguments.push_back(ltrim(arg_text));
         }
     }
-    for (auto &m:macro.arguments) {
-        if (m.name.contains('=')) {
-            m.has_default = true;
-            m.default_value = ltrim(m.name.substr(m.name.find_first_of('=')+1));
-            m.name = m.name.substr(0, m.name.find_first_of('='));
-        } else {
-            m.has_default = false;
-        }
-    }
-    macro.value = ltrim(in.substr(args_last+1));
-    return macro;
+    auto value =  ltrim(in.substr(args_last+1));
+    return {arguments, value};
 }
 
 std::string sv_preprocessor::flatten_source(const std::string_view &in) {
@@ -213,17 +242,17 @@ std::string sv_preprocessor::flatten_source(const std::string_view &in) {
     // The main loop keeps searching for potentially problematic characters and appends as needed
     while (cursor < in.size()) {
 
-        size_t next = in.find_first_of("/\"\\`\n\r", cursor);
+        size_t next_identifier = in.find_first_of("/\"\\`\n\r", cursor);
 
-        if (next == std::string_view::npos) {
+        if (next_identifier == std::string_view::npos) {
             result.append(in.substr(cursor));
             break;
         }
 
-        if (next > cursor) {
-            result.append(in.substr(cursor, next - cursor));
+        if (next_identifier > cursor) {
+            result.append(in.substr(cursor, next_identifier - cursor));
         }
-        cursor = next;
+        cursor = next_identifier;
         char trigger = in[cursor];
 
         if (trigger == '\n' || trigger == '\r') {
@@ -294,5 +323,9 @@ std::string sv_preprocessor::flatten_source(const std::string_view &in) {
     }
 
     return result;
+}
+
+std::string_view sv_preprocessor::replace_function_macro(const std::vector<std::string_view> &args, const function_macro &macro) {
+    return "";
 }
 
