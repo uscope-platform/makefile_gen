@@ -25,45 +25,51 @@ std::unordered_map<std::string, std::variant<std::string, function_macro>> &d,
 }
 
 std::string macro_processor::process_macro(const std::string_view &in) {
-    if (in.find_first_of('`')==std::string_view::npos) return std::string(in);
+    if (!in.contains('`')) return std::string(in);
+    bool  expansion_needed = true;
     std::string result;
+    std::string remaining = std::string(in);
+    while (expansion_needed) {
+        result.clear();
+        while (auto match = identifier_pattern(remaining)) {
+            result.append(remaining.begin(), match.begin());
+            if (match.view().back() == '(') {
+                auto id = std::string(match.view().substr(1, match.size()-2));
+                size_t start_pos = (match.data() + match.size()) - remaining.data();
+                auto args_text = remaining.substr(start_pos);
+                auto [args, rest_of_line] = get_call_arguments(args_text);
+                if (!definitions.contains(id)) {
+                    throw std::runtime_error(
+                       fmt::format("Attempted to use undefined macro {}", id)
+                   );
+                }
+                auto macro = definitions.at(id);
+                if (std::holds_alternative<std::string>(macro)) {
+                    throw std::runtime_error(
+                        fmt::format("Attempted to pass arguments to a macro {} that does not need them", id)
+                    );
+                }
+                auto macro_text = replace_function_macro(args,std::get<function_macro>(macro));
+                if (!macro_text.has_value()) {
+                    throw std::runtime_error(
+                        fmt::format("Attempted to call a macro [{}] without enough parameters ", id)
+                    );
+                }
+                result.append(macro_text.value());
+                remaining = rest_of_line;
+            } else{
+                result.append(get_define_replacement(match));
 
-    std::string_view remaining = in;
-    while (auto match = identifier_pattern(remaining)) {
-        result.append(remaining.begin(), match.begin());
-        if (match.view().back() == '(') {
-            auto id = std::string(match.view().substr(1, match.size()-2));
-            size_t start_pos = (match.data() + match.size()) - remaining.data();
-            auto args_text = remaining.substr(start_pos);
-            auto [args, rest_of_line] = get_call_arguments(args_text);
-            if (!definitions.contains(id)) {
-                throw std::runtime_error(
-                   fmt::format("Attempted to use undefined macro {}", id)
-               );
+                remaining = std::string_view{match.end(), remaining.end()};
             }
-            auto macro = definitions.at(id);
-            if (std::holds_alternative<std::string>(macro)) {
-                throw std::runtime_error(
-                    fmt::format("Attempted to pass arguments to a macro {} that does not need them", id)
-                );
-            }
-            auto macro_text = replace_function_macro(args,std::get<function_macro>(macro));
-            if (!macro_text.has_value()) {
-                throw std::runtime_error(
-                    fmt::format("Attempted to call a macro [{}] without enough parameters ", id)
-                );
-            }
-            result.append(macro_text.value());
-            remaining = rest_of_line;
-        } else{
-            result.append(get_define_replacement(match));
-
-            remaining = std::string_view{match.end(), remaining.end()};
         }
+
+        result.append(remaining);
+        expansion_needed = result.contains('`');
+        remaining = result;
     }
 
-    result.append(remaining);
-    return process_macro(result);
+    return result;
 }
 
 
