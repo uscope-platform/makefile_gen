@@ -876,3 +876,25 @@ TEST(preprocessor, nested_macros) {
     )";
     EXPECT_EQ(result, check_string);
 }
+
+
+
+TEST(preprocessor, nested_macros_with_arguments) {
+    auto test_pattern = std::istringstream(R"(
+        `define  MUL(c, d)  c*d
+        `define  ADD(a=5, b=7)  `MUL(a, b)+`MUL(a, b)
+        module test_module ();
+            parameter TEST_PARAM = `ADD(12,32);
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = 12*32+12*32;
+        endmodule
+    )";
+    EXPECT_EQ(result, check_string);
+}
