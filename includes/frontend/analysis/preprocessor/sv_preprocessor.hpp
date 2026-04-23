@@ -24,6 +24,7 @@
 #include <string>
 #include <unordered_map>
 #include <variant>
+#include <iterator>
 #include <fmt/format.h>
 #include "frontend/analysis/preprocessor/conditional_solver.hpp"
 #include "frontend/analysis/preprocessor/macro_processor.hpp"
@@ -33,7 +34,7 @@ public:
     sv_preprocessor(const std::filesystem::path &in);
     std::string preprocess(const std::filesystem::path &in);
     std::string preprocess(std::istream& in);
-    std::string flatten_source(const std::string_view &in);
+    std::string flatten_source(std::istream &in);
     void set_include_directories(const std::vector<std::string> &i_d){include_directories = i_d;}
 private:
     typedef std::unordered_map<std::string, std::variant<std::string, function_macro>> definitions_map;

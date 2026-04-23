@@ -17,7 +17,6 @@
 
 
 void conditional_solver::close_loop() {
-    taken_level.erase(loop_level);
     loop_level--;
     if (loop_level == 0) {
         solver_active = false;
@@ -46,7 +45,6 @@ void conditional_solver::start_loop(bool if_taken) {
     if (parent_active && if_taken) {
         in_taken_branch = true;
         already_taken = true;
-        taken_level.insert(loop_level);
     } else {
         in_taken_branch = false;
         already_taken = parent_active && if_taken;
@@ -61,7 +59,6 @@ void conditional_solver::advance_elseif(bool if_taken) {
         if (if_taken) {
             in_taken_branch = true;
             already_taken = true;
-            taken_level.insert(loop_level);
         } else {
             in_taken_branch = false;
         }
@@ -76,7 +73,6 @@ void conditional_solver::advance_else() {
     if (parent_active && !already_taken) {
         in_taken_branch = true;
         already_taken = true;
-        taken_level.insert(loop_level);
     } else {
         in_taken_branch = false;
     }

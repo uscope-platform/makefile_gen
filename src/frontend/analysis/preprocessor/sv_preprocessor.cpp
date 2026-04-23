@@ -31,6 +31,8 @@ std::string sv_preprocessor::preprocess(const std::filesystem::path &in) {
 std::string sv_preprocessor::preprocess(std::istream &in) {
     macro_processor macro_engine(definitions , line_number, path);
 
+
+
     std::ostringstream out;
 
     std::string line;
@@ -161,53 +163,55 @@ std::string_view sv_preprocessor::parse_one_arg_directive(const std::string_view
 }
 
 
-std::string sv_preprocessor::flatten_source(const std::string_view &in) {
+std::string sv_preprocessor::flatten_source(std::istream &in) {
+    std::string content((std::istreambuf_iterator(in)),
+                             std::istreambuf_iterator<char>());
 
     std::string result;
-    result.reserve(in.size());
+    result.reserve(content.size());
     size_t cursor = 0;
     bool in_string = false;
     bool in_macro = false;
 
     // Source flattening uses a search and append approach to be cache and SIMD friendly
     // The main loop keeps searching for potentially problematic characters and appends as needed
-    while (cursor < in.size()) {
+    while (cursor < content.size()) {
 
-        size_t next_identifier = in.find_first_of("/\"\\`\n\r", cursor);
+        size_t next_identifier = content.find_first_of("/\"\\`\n\r", cursor);
 
         if (next_identifier == std::string_view::npos) {
-            result.append(in.substr(cursor));
+            result.append(content.substr(cursor));
             break;
         }
 
         if (next_identifier > cursor) {
-            result.append(in.substr(cursor, next_identifier - cursor));
+            result.append(content.substr(cursor, next_identifier - cursor));
         }
         cursor = next_identifier;
-        char trigger = in[cursor];
+        char trigger = content[cursor];
 
         if (trigger == '\n' || trigger == '\r') {
             in_macro = false;
             result.push_back(trigger);
             cursor++;
         } else if (trigger == '`') {
-            auto directive = in.substr(cursor);
+            auto directive = content.substr(cursor);
             if (directive.starts_with("`define")) {
                 in_macro = true;
             }
             result.push_back('`');
             cursor++;
         } else if (trigger == '/') {
-         if (cursor != in.size()-1) {
-             if (in[cursor + 1] == '/') {
-                 size_t end = in.find('\n', cursor + 2);
-                 if (end == std::string_view::npos) end = in.size();
-                 result.append(in.substr(cursor, end - cursor));
+         if (cursor != content.size()-1) {
+             if (content[cursor + 1] == '/') {
+                 size_t end = content.find('\n', cursor + 2);
+                 if (end == std::string_view::npos) end = content.size();
+                 result.append(content.substr(cursor, end - cursor));
                  cursor = end;
-             } else if (in[cursor + 1] == '*') {
-                 size_t end = in.find("*/", cursor + 2);
-                 if (end == std::string_view::npos) end = in.size() - 2;
-                 result.append(in.substr(cursor, (end + 2) - cursor));
+             } else if (content[cursor + 1] == '*') {
+                 size_t end = content.find("*/", cursor + 2);
+                 if (end == std::string_view::npos) end = content.size() - 2;
+                 result.append(content.substr(cursor, (end + 2) - cursor));
                  cursor = end + 2;
              }
              else {
@@ -227,13 +231,13 @@ std::string sv_preprocessor::flatten_source(const std::string_view &in) {
             result.push_back('"');
             cursor++;
         } else if (trigger == '\\') {
-            if (cursor + 1 < in.size()) {
-                char next = in[cursor + 1];
+            if (cursor + 1 < content.size()) {
+                char next = content[cursor + 1];
 
                 // skip backslash and newline when necessary
                 if (next == '\n' || next == '\r') {
                     if (in_macro || in_string) {
-                        cursor += (next == '\r' && in[cursor+2] == '\n') ? 3 : 2;
+                        cursor += (next == '\r' && content[cursor+2] == '\n') ? 3 : 2;
 
                         continue;
                     }

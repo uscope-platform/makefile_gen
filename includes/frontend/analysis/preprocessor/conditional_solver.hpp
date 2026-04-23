@@ -36,7 +36,6 @@ private:
     unsigned int loop_level = 0;
     std::vector<bool> already_taken_stack;
     std::vector<bool> in_taken_branch_stack;
-    std::set<unsigned int> taken_level;
 };
 
 

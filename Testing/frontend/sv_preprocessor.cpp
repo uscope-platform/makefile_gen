@@ -157,11 +157,11 @@ TEST(preprocessor, undef) {
 
 
 TEST(preprocessor, invalid_continuation) {
-    auto test_pattern = R"(
+    auto test_pattern = std::istringstream(R"(
         // This is a comment \
            that should stay a comment!
         wire a;
-    )";
+    )");
 
     sv_preprocessor preproc("/tmp/file.sv");
     auto res = preproc.flatten_source(test_pattern);
@@ -175,12 +175,12 @@ TEST(preprocessor, invalid_continuation) {
 
 
 TEST(preprocessor, string_continuation) {
-    auto test_pattern = R"(
+    auto test_pattern = std::istringstream(R"(
 module test;
 parameter string ML_STRING = "TEST \
   parameter";
 endmodule
-    )";
+    )");
 
     sv_preprocessor preproc("/tmp/file.sv");
     auto res = preproc.flatten_source(test_pattern);
@@ -194,12 +194,12 @@ endmodule
 
 
 TEST(preprocessor, macro_continuation) {
-    auto test_pattern = R"(
+    auto test_pattern = std::istringstream(R"(
 module test;
 `define SUM(a,b) a + \
 b
 endmodule
-    )";
+    )");
 
     sv_preprocessor preproc("/tmp/file.sv");
     auto res = preproc.flatten_source(test_pattern);
@@ -213,13 +213,13 @@ endmodule
 
 
 TEST(preprocessor, multiline_macro_continuation) {
-    auto test_pattern = R"(
+    auto test_pattern = std::istringstream(R"(
 module test;
 `define SUM(a,b) a \
 + \
 b
 endmodule
-    )";
+    )");
 
     sv_preprocessor preproc("/tmp/file.sv");
     auto res = preproc.flatten_source(test_pattern);
