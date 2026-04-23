@@ -210,12 +210,13 @@ std::string sv_preprocessor::flatten_source(std::istream &in) {
              if (content[cursor + 1] == '/') {
                  size_t end = content.find('\n', cursor + 2);
                  if (end == std::string_view::npos) end = content.size();
-                 result.append(content.substr(cursor, end - cursor));
                  cursor = end;
+                 if (content[end-1] =='\\') {
+                     cursor = content.find('\n', end+1);
+                 }
              } else if (content[cursor + 1] == '*') {
                  size_t end = content.find("*/", cursor + 2);
                  if (end == std::string_view::npos) end = content.size() - 2;
-                 result.append(content.substr(cursor, (end + 2) - cursor));
                  cursor = end + 2;
              }
              else {

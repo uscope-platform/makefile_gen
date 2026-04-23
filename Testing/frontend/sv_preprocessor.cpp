@@ -156,20 +156,42 @@ TEST(preprocessor, undef) {
 }
 
 
-TEST(preprocessor, invalid_continuation) {
+TEST(preprocessor, line_comment_elimination) {
     auto test_pattern = std::istringstream(R"(
-        // This is a comment \
-           that should stay a comment!
-        wire a;
+        wire a;// This is a comment needs to go
     )");
 
     sv_preprocessor preproc("/tmp/file.sv");
     auto res = preproc.flatten_source(test_pattern);
     auto check_string = R"(
-        // This is a comment \
-           that should stay a comment!
         wire a;
     )";
+    EXPECT_EQ(check_string, res);
+}
+
+TEST(preprocessor, comment_continuation_elimination) {
+    auto test_pattern = std::istringstream(R"(
+        // This is a comment \
+           that should also go away!
+        wire a;)");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto res = preproc.flatten_source(test_pattern);
+    auto check_string ="\n        \n        wire a;";
+    EXPECT_EQ(check_string, res);
+}
+
+TEST(preprocessor, block_comment_elimination) {
+    auto test_pattern = std::istringstream(R"(
+        /*
+           This is a block comment \
+           that should also go away!
+        */
+        wire a;)");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto res = preproc.flatten_source(test_pattern);
+    auto check_string ="\n        \n        wire a;";
     EXPECT_EQ(check_string, res);
 }
 
@@ -723,9 +745,31 @@ endmodule
 
 
 
-TEST(preprocessor, macro_pattern_in_comment) {
+TEST(preprocessor, macro_pattern_in_line_comment) {
     auto test_pattern = std::istringstream(R"(
 // `UNDEFINED macro in a commend
+module test_module ();
+    parameter TEST_PARAM = 5;
+endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto res = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+
+module test_module ();
+    parameter TEST_PARAM = 5;
+endmodule
+    )";
+    EXPECT_EQ(check_string, res);
+}
+
+
+TEST(preprocessor, macro_pattern_in_block_comment) {
+    auto test_pattern = std::istringstream(R"(
+/*
+ `UNDEFINED macro in a commend
+*/
 module test_module ();
     parameter TEST_PARAM = 5;
 endmodule
