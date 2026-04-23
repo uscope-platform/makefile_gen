@@ -898,3 +898,24 @@ TEST(preprocessor, nested_macros_with_arguments) {
     )";
     EXPECT_EQ(result, check_string);
 }
+
+
+TEST(preprocessor, self_nested_macro) {
+    auto test_pattern = std::istringstream(R"(
+        `define TOP(a,b) a + b
+        module test_module ();
+            parameter TEST_PARAM = `TOP( `TOP(b,1), `TOP(42,a));
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = b + 1 + 42 + a;
+        endmodule
+    )";
+    EXPECT_EQ(result, check_string);
+}
+
