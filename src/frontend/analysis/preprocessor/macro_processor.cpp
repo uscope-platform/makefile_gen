@@ -16,7 +16,6 @@
 
 #include "frontend/analysis/preprocessor/macro_processor.hpp"
 
-#include <utility>
 
 macro_processor::macro_processor(
 std::unordered_map<std::string, std::variant<std::string, function_macro>> &d,
@@ -26,6 +25,7 @@ std::unordered_map<std::string, std::variant<std::string, function_macro>> &d,
 }
 
 std::string macro_processor::process_macro(const std::string_view &in) {
+    if (in.find_first_of('`')==std::string_view::npos) return std::string(in);
     std::string result;
 
     std::string_view remaining = in;
@@ -63,7 +63,7 @@ std::string macro_processor::process_macro(const std::string_view &in) {
     }
 
     result.append(remaining);
-    return result;
+    return process_macro(result);
 }
 
 
