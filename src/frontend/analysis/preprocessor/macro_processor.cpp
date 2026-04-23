@@ -108,10 +108,15 @@ std::pair<std::vector<std::string_view>, std::string_view> macro_processor::get_
                 if (c==',') string_length--;
                 auto arg_text = raw_arguments.substr(current_arg_start, string_length);
                 current_arg_start = i+1;
-                arguments.push_back(ltrim(arg_text));
+                arguments.emplace_back(ltrim(arg_text));
             }
         }
     }
+
+    if (!raw_arguments.empty() && raw_arguments.back() == ',') {
+        arguments.emplace_back("");
+    }
+
     auto value =  in.substr(args_last+1);
     return {arguments, value};
 }
