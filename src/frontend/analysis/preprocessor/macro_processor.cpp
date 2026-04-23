@@ -29,7 +29,8 @@ std::string macro_processor::process_macro(const std::string_view &in) {
     bool  expansion_needed = true;
     std::string result;
     std::string remaining = std::string(in);
-    while (expansion_needed) {
+    int nesting_counter = 0;
+    while (expansion_needed && nesting_counter <1000) {
         result.clear();
         while (auto match = identifier_pattern(remaining)) {
             result.append(remaining.begin(), match.begin());
@@ -67,6 +68,7 @@ std::string macro_processor::process_macro(const std::string_view &in) {
         result.append(remaining);
         expansion_needed = result.contains('`');
         remaining = result;
+        nesting_counter++;
     }
 
     return result;
