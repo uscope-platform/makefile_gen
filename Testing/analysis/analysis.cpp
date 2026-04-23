@@ -24,9 +24,10 @@
 #define EXPRESSION_WITH_TYPE(str) str, Expression_component::get_type(str)
 
 TEST( analysis_test , package) {
+    std::unique_ptr<std::istream> test_file = std::make_unique<std::ifstream>("check_files/test_package.sv");
+    sv_analyzer analyzer("", test_file);
 
-    sv_analyzer analyzer("check_files/test_package.sv");
-    analyzer.cleanup_content("`(.*)");
+    
     auto resource = analyzer.analyze()[0];
 
     Parameters_map parameters = resource.get_parameters();
@@ -100,10 +101,10 @@ TEST( analysis_test , package) {
 
 
 TEST( analysis_test , sv_module) {
-
-    sv_analyzer analyzer("check_files/test_sv_module.sv");
-    analyzer.cleanup_content("`(.*)");
-    auto resource = analyzer.analyze()[0];
+    std::unique_ptr<std::istream> test_file = std::make_unique<std::ifstream>("check_files/test_sv_module.sv");
+    sv_analyzer analyzer("check_files/test_sv_module.sv", test_file);
+    auto res = analyzer.analyze();
+    auto resource = res[0];
 
     HDL_instance d3("SC", "SyndromeCalculator", module);
     d3.add_port_connection("clock", {HDL_net("clock")});
@@ -128,7 +129,7 @@ TEST( analysis_test , sv_module) {
     p->set_expression(std::make_shared<Expression>(e));
     p->set_type(HDL_parameter::expression_parameter);
     d0.add_array_quantifier(p);
-    std::vector<HDL_instance> deps = {d0, d1, d2, d3};
+    std::vector deps = {d0, d1, d2, d3};
 
 
     std::unordered_map<std::string, port_direction_t> test_ports;
@@ -164,7 +165,7 @@ TEST( analysis_test , sv_module) {
     check_res.set_default_parameters(check_defaults);
 
     ASSERT_EQ(resource, check_res);
-    resource = analyzer.analyze()[1];
+    resource = res[1];
     check_res = HDL_Resource(interface, "test_if", "check_files/test_sv_module.sv");
     ASSERT_EQ(resource, check_res);
 }
@@ -182,7 +183,7 @@ TEST( analysis_test , vhdl_module) {
 
 
 TEST(analysis_test, port_concat_assignment) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
     module test_mod ();
 
 
@@ -194,10 +195,10 @@ TEST(analysis_test, port_concat_assignment) {
 
 
     endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -216,16 +217,16 @@ TEST(analysis_test, port_concat_assignment) {
 
 
 TEST(analysis_test, interfaces_array) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
     module test_mod ();
 
         axi_lite  cores_control[3]();
 
     endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -246,7 +247,7 @@ TEST(analysis_test, interfaces_array) {
 
 
 TEST(analysis_test, parameter_array_assignment) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
     module test_mod ();
         integer i;
 
@@ -257,10 +258,10 @@ TEST(analysis_test, parameter_array_assignment) {
             );
 
     endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 

@@ -32,11 +32,11 @@
 namespace preprocessor {
     class sv_preprocessor {
     public:
-        sv_preprocessor(const std::filesystem::path &in);
-        std::string preprocess(const std::filesystem::path &in);
-        std::string preprocess(std::istream& in);
-        static std::string flatten_source(std::istream &in);
+        sv_preprocessor() = default;
+        std::string preprocess(const std::unique_ptr<std::istream> &in);
+        static std::string flatten_source(const std::unique_ptr<std::istream> &in);
         void set_include_directories(const std::vector<std::string> &i_d){include_directories = i_d;}
+        void set_path(const std::string &s){path = s;}
     private:
         typedef std::unordered_map<std::string, std::variant<std::string, function_macro>> definitions_map;
         std::string parse_include_path(const std::string_view &v);

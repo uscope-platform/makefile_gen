@@ -44,8 +44,8 @@ TEST(xilinx_project_gen, simple_gen){
     for(auto &p:paths){
         for(auto &f:std::filesystem::directory_iterator(prefix + p)){
             if(f.path().extension() == ".v" || f.path().extension() == ".sv" || f.path().extension() == ".svh"){
-                sv_analyzer analyzer(f.path());
-                analyzer.cleanup_content("`(.*)");
+                std::unique_ptr<std::istream> test_file = std::make_unique<std::ifstream>(f.path());
+                sv_analyzer analyzer(f.path(), test_file);
 
                 for(auto &entity:analyzer.analyze()){
                     d_store->store_hdl_entity(entity);
@@ -144,8 +144,10 @@ TEST( xilinx_project_gen, sim_script) {
     for(auto &p:paths){
         for(auto &f:std::filesystem::directory_iterator(prefix + p)){
             if(f.path().extension() == ".v" || f.path().extension() == ".sv" || f.path().extension() == ".svh"){
-                sv_analyzer analyzer(f.path());
-                analyzer.cleanup_content("`(.*)");
+                std::unique_ptr<std::istream> test_file = std::make_unique<std::ifstream>(f.path());
+                sv_analyzer analyzer(f.path(), test_file);
+
+                
 
                 for(auto &entity:analyzer.analyze()){
                     d_store->store_hdl_entity(entity);
@@ -213,8 +215,9 @@ TEST( xilinx_project_gen, fpga_synth_script) {
     for(auto &p:paths){
         for(auto &f:std::filesystem::directory_iterator(prefix + p)){
             if(f.path().extension() == ".v" || f.path().extension() == ".sv" || f.path().extension() == ".svh"){
-                sv_analyzer analyzer(f.path());
-                analyzer.cleanup_content("`(.*)");
+                std::unique_ptr<std::istream> test_file = std::make_unique<std::ifstream>(f.path());
+                sv_analyzer analyzer(f.path(), test_file);
+
 
                 for(auto &entity:analyzer.analyze()){
                     d_store->store_hdl_entity(entity);
@@ -291,8 +294,9 @@ TEST( xilinx_project_gen, soc_synth_script) {
     for(auto &p:paths){
         for(auto &f:std::filesystem::directory_iterator(prefix + p)){
             if(f.path().extension() == ".v" || f.path().extension() == ".sv" || f.path().extension() == ".svh"){
-                sv_analyzer analyzer(f.path());
-                analyzer.cleanup_content("`(.*)");
+                std::unique_ptr<std::istream> test_file = std::make_unique<std::ifstream>(f.path());
+                sv_analyzer analyzer(f.path(), test_file);
+
 
                 for(auto &entity:analyzer.analyze()){
                     d_store->store_hdl_entity(entity);

@@ -35,7 +35,7 @@ static constexpr auto doc_comment_pattern = ctre::search<R"(/\*\*.*?\*\*/)">;
 
 class documentation_analyzer {
 public:
-    explicit documentation_analyzer(const std::string &s);
+    explicit documentation_analyzer(std::istream &stream);
     void parse_documentation(std::istream &stream);
     void set_source_path(std::string &f_path) {path = f_path;};
     void process_documentation(Parameters_map parameters);

@@ -399,7 +399,7 @@ TEST(Initialization_list, get_values_1d_mixed_packed_unpacked) {
 
 
 TEST(Initialization_list, get_array_dependencies) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module dependency #(
             parameter SS_POLARITY_DEFAULT = 0
         )();
@@ -411,11 +411,10 @@ TEST(Initialization_list, get_array_dependencies) {
 
         endmodule
 
-    )";
+    )");
 
+    sv_analyzer analyzer("", test_pattern);
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze()[0];
 
     auto params = resource.get_parameters();
@@ -432,7 +431,7 @@ TEST(Initialization_list, get_array_dependencies) {
 }
 
 TEST(Initialization_list, concatenation_of_packed_arrays) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module dependency #(
             parameter SS_POLARITY_DEFAULT = 0,
             N_CHANNELS=3
@@ -451,11 +450,11 @@ TEST(Initialization_list, concatenation_of_packed_arrays) {
 
         endmodule
 
-    )";
+    )");
 
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+
     auto resource = analyzer.analyze()[0];
 
     auto p = resource.get_default_parameters();

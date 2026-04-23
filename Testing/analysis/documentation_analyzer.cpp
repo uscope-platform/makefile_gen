@@ -22,7 +22,7 @@
 TEST( documentation_analyzer , simple_peripheral) {
 
 
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 module Decoder (
     input wire clock,
     input wire reset,
@@ -70,11 +70,11 @@ endmodule
         ]
        }
     **/
-)";
+)");
 
     Parameters_map params;
 
-    documentation_analyzer doc(test_pattern);
+    documentation_analyzer doc(*test_pattern);
     doc.process_documentation(params);
     std::unordered_map<std::string, module_documentation> results = doc.get_modules_documentation();
 
@@ -101,60 +101,11 @@ endmodule
 
 TEST( documentation_analyzer , parametric_peripheral) {
 
-    std::string test_pattern = R"(
-module Decoder (
-    input wire clock,
-    input wire reset,
-    axi_stream.slave data_in,
-    axi_stream.master data_out
-);
-endmodule
-    /**
-       {
-        "name": "Decoder",
-        "type": "peripheral",
-        "registers":[
-            {
-                "name": "simple_register_r",
-                "offset": "0x0",
-                "description": "Single word read only register",
-                "direction": "R"
-            },
-            {
-                "name": "simple_register_w",
-                "offset": "4",
-                "description": "Single word write only register",
-                "direction": "W"
-            },
-            {
-                "name": "field_registers",
-                "offset": "0x20",
-                "description": "register with multiple fields",
-                "direction": "RW",
-                "fields": [
-                    {
-                        "name":"field_1",
-                        "description": "First field",
-                        "start_position": 0,
-                        "length": 8
-                    },
-                    {
-                        "name":"field_2",
-                        "description": "Second Field",
-                        "start_position": 8,
-                        "length": 8
-                    }
-                ]
-            }
-        ]
-       }
-    **/
-)";
     std::ifstream is("check_files/test_data/Components/controls/PwmGenerator/rtl/ChainControlUnit.sv");
     Parameters_map params;
     std::stringstream iss;
     iss << is.rdbuf();
-    documentation_analyzer doc(iss.str());
+    documentation_analyzer doc(iss);
     doc.process_documentation(params);
     std::unordered_map<std::string, module_documentation> results = doc.get_modules_documentation();
 
@@ -199,7 +150,7 @@ endmodule
 
 TEST( documentation_analyzer , processor_doc) {
 
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 
 module SicDriveMasterCurrentControl (
     input wire clock,
@@ -244,10 +195,10 @@ endmodule
         }
     **/
 
-)";
+)");
     Parameters_map params;
 
-    documentation_analyzer doc(test_pattern);
+    documentation_analyzer doc(*test_pattern);
     doc.process_documentation(params);
     std::unordered_map<std::string, processor_instance> results = doc.get_processors_documentation();
 

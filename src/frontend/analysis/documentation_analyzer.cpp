@@ -18,10 +18,9 @@
 
 
 
-documentation_analyzer::documentation_analyzer(const std::string &s) {
+documentation_analyzer::documentation_analyzer(std::istream &stream) {
 
-    std::istringstream istream(s);
-    parse_documentation(istream);
+    parse_documentation(stream);
 
 }
 

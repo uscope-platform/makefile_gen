@@ -21,7 +21,7 @@
 
 
 TEST(parameter_extraction, init_list_after_reg) {
-std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 
     module test_module ();
 
@@ -35,10 +35,10 @@ std::string test_pattern = R"(
         localparam low_control_p = 'b001111;
         localparam low_control_n = 'b110000;
     endmodule
-)";
+)");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -74,17 +74,17 @@ std::string test_pattern = R"(
 }
 
 TEST(parameter_extraction, size_cast) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             )();
 
             parameter integer TEST_PARAM = 4'(31'h100003);
 
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -115,17 +115,17 @@ TEST(parameter_extraction, size_cast) {
 
 
 TEST(parameter_extraction,time_literal) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             )();
 
             parameter integer TEST_PARAM = 10ns;
 
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -150,18 +150,18 @@ TEST(parameter_extraction,time_literal) {
 }
 
 TEST(parameter_extraction, cast_in_concat  ) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             )();
 
             parameter integer TEST_PARAM = { 10'h0, 1'b1, 1'b0, 4'(31'h100003)};
 
         endmodule
-    )";
+    )");
 
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -199,7 +199,7 @@ TEST(parameter_extraction, cast_in_concat  ) {
 
 
 TEST(parameter_extraction, strings_dafault_init) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             )();
 
@@ -207,10 +207,10 @@ TEST(parameter_extraction, strings_dafault_init) {
             parameter string TRANSLATION_TABLE_INIT[3:0] = '{default:"FILE"};
 
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -248,7 +248,7 @@ TEST(parameter_extraction, strings_dafault_init) {
 
 
 TEST(parameter_extraction, string_array_selection) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             )();
 
@@ -257,10 +257,10 @@ TEST(parameter_extraction, string_array_selection) {
 
             parameter string SEL = TRANSLATION_TABLE_INIT[2];
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -306,7 +306,7 @@ TEST(parameter_extraction, string_array_selection) {
 }
 
 TEST(parameter_extraction, strings_array) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             )();
 
@@ -318,10 +318,10 @@ TEST(parameter_extraction, strings_array) {
             };
 
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -367,7 +367,7 @@ TEST(parameter_extraction, strings_array) {
 
 
 TEST(parameter_extraction, float_parameter) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter LUT_DEPTH   = 9
             )();
@@ -375,10 +375,10 @@ TEST(parameter_extraction, float_parameter) {
             localparam STEP   = (2*3.14159265358979323846/4.0) / LUT_DEPTH;
 
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -420,7 +420,7 @@ TEST(parameter_extraction, float_parameter) {
 }
 
 TEST(parameter_extraction, simple_cast) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 
     module test_mod #(
     )();
@@ -428,10 +428,10 @@ TEST(parameter_extraction, simple_cast) {
         localparam CAST = $rtoi(16.8);
 
     endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -465,7 +465,7 @@ TEST(parameter_extraction, simple_cast) {
 }
 
 TEST(parameter_extraction, multiple_casts) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 
     module test_mod #(
     )();
@@ -474,10 +474,10 @@ TEST(parameter_extraction, multiple_casts) {
         localparam CAST_2 = $rtoi(12.2);
 
     endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -524,7 +524,7 @@ TEST(parameter_extraction, multiple_casts) {
 }
 
 TEST(parameter_extraction, cast_propagation) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 
     module test_mod #(
         parameter PARAMETER_1 = 5;
@@ -533,10 +533,10 @@ TEST(parameter_extraction, cast_propagation) {
         localparam CAST = $rtoi(11.8 + PARAMETER_1);
 
     endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -579,7 +579,7 @@ TEST(parameter_extraction, cast_propagation) {
 }
 
 TEST(parameter_extraction, complex_cast) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 
     module test_mod #(
         parameter PARAMETER_1 = 46
@@ -588,10 +588,10 @@ TEST(parameter_extraction, complex_cast) {
         localparam CAST = $rtoi($ceil(PARAMETER_1/16.0));
 
     endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -636,7 +636,7 @@ TEST(parameter_extraction, complex_cast) {
 }
 
 TEST(parameter_extraction, package_parameters) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 
         package test_package;
 
@@ -649,10 +649,10 @@ TEST(parameter_extraction, package_parameters) {
 
         endpackage
 
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -720,7 +720,7 @@ TEST(parameter_extraction, package_parameters) {
 }
 
 TEST(parameter_extraction, simple_parameters) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter simple_numeric_p = 32,
             sv_numeric_p = 5'o10,
@@ -730,10 +730,10 @@ TEST(parameter_extraction, simple_parameters) {
         )();
         localparam local_p = 74;
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -792,7 +792,7 @@ TEST(parameter_extraction, simple_parameters) {
 }
 
 TEST(parameter_extraction, simple_expressions) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter simple_numeric_p = 32,
             sv_numeric_p = 5'o10,
@@ -809,10 +809,10 @@ TEST(parameter_extraction, simple_expressions) {
             parameter simple_log_expr_p = $clog2(add_expr_p);
             parameter parenthesised_expr_p = ( add_expr_p + mul_expr_p ) * 5;
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -946,7 +946,7 @@ TEST(parameter_extraction, simple_expressions) {
 
 
 TEST(parameter_extraction, assay_assignment) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter simple_numeric_p = 32,
             sv_numeric_p = 5'o10
@@ -954,10 +954,10 @@ TEST(parameter_extraction, assay_assignment) {
             parameter logic [31:0] concatenation [1:0] = '{simple_numeric_p, sv_numeric_p};
 
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -1018,16 +1018,16 @@ TEST(parameter_extraction, assay_assignment) {
 
 
 TEST(parameter_extraction, default_assign) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
         )();
             parameter logic [31:0] test_array [1:0] = '{default:5};
 
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -1073,7 +1073,7 @@ TEST(parameter_extraction, default_assign) {
 }
 
 TEST(parameter_extraction, array_concatenation) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter simple_numeric_p = 32,
             sv_numeric_p = 5'o10
@@ -1081,10 +1081,10 @@ TEST(parameter_extraction, array_concatenation) {
             parameter logic [31:0] concatenation [1:0] = {simple_numeric_p, sv_numeric_p};
 
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -1143,16 +1143,16 @@ TEST(parameter_extraction, array_concatenation) {
 }
 
 TEST(parameter_extraction, array_parameter) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter [31:0] array_parameter [1:0] = '{32, 5}
         )();
 
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -1201,15 +1201,15 @@ TEST(parameter_extraction, array_parameter) {
 }
 
 TEST(parameter_extraction, integer_localparams) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
         )();
             localparam serial_msb_out_first = 0, serial_lsb_out_first = 1;
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -1252,16 +1252,16 @@ TEST(parameter_extraction, integer_localparams) {
 }
 
 TEST(parameter_extraction, simple_array_propagation) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter [31:0] array_parameter [1:0] = '{32, 5}
         )();
             parameter array_parameter_expr_p = array_parameter[0] + array_parameter[1];
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -1329,17 +1329,17 @@ TEST(parameter_extraction, simple_array_propagation) {
 }
 
 TEST(parameter_extraction, array_expression) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter sv_numeric_p = 1,
             parameter [31:0] array_parameter [1:0] = '{32, 5}
         )();
             parameter array_parameter_expr_p = array_parameter[sv_numeric_p*0] + array_parameter[1];
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -1413,17 +1413,17 @@ TEST(parameter_extraction, array_expression) {
 }
 /*
 TEST(parameter_extraction, multidimensional_array_expression) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter repetition_size = 2,
             parameter [31:0] multidim_array_parameter [repetition_size-1:0][1:0] = '{{32,32}, {5,6}}
         )();
             parameter multidim_array_access = multidim_array_parameter[1][0];
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -1501,17 +1501,17 @@ TEST(parameter_extraction, multidimensional_array_expression) {
 */
 
 TEST(parameter_extraction, simple_repetition_initialization) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter repetition_size = 2,
             parameter int repetition_parameter_1 [1:0]  = '{repetition_size{1}}
         )();
 
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -1565,17 +1565,17 @@ TEST(parameter_extraction, simple_repetition_initialization) {
 }
 
 TEST(parameter_extraction, packed_repetition_initialization) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter repetition_size = 2,
             parameter int repetition_parameter_1  = {repetition_size{1}}
         )();
 
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -1625,7 +1625,7 @@ TEST(parameter_extraction, packed_repetition_initialization) {
 }
 
 TEST(parameter_extraction, repetition_initialization) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter repetition_size = 2,
             parameter bit repetition_parameter_1 [1:0]  = '{repetition_size{1}},
@@ -1635,10 +1635,10 @@ TEST(parameter_extraction, repetition_initialization) {
         )();
 
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -1748,15 +1748,15 @@ TEST(parameter_extraction, repetition_initialization) {
 }
 
 TEST(parameter_extraction, packed_array) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
              parameter logic [7:0] packed_param = {1'b1,1'b0,1'b1,1'b0,1'b1,1'b0,1'b0,1'b1}
         )();
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -1809,15 +1809,15 @@ TEST(parameter_extraction, packed_array) {
 
 
 TEST(parameter_extraction, multpidim_packed_array) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
              parameter logic [7:0] packed_param [1:0] = '{{1'b1,1'b0,1'b1,1'b0,1'b1,1'b0,1'b0,1'b1},{1'b1,1'b1,1'b0,1'b0,1'b1,1'b0,1'b0,1'b1}}
         )();
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -1880,7 +1880,7 @@ TEST(parameter_extraction, multpidim_packed_array) {
 }
 
 TEST(parameter_extraction, package_parameters_use) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 
         package test_package;
             parameter bus_base = 67;
@@ -1891,10 +1891,10 @@ TEST(parameter_extraction, package_parameters_use) {
         )();
 
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[1];
     auto parameters = resource.get_parameters();
 
@@ -1929,7 +1929,7 @@ TEST(parameter_extraction, package_parameters_use) {
 
 
 TEST(parameter_extraction, interface_parameter_use) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 
 
     interface test_if #(DATA_WIDTH = 32);
@@ -1941,12 +1941,12 @@ TEST(parameter_extraction, interface_parameter_use) {
         test_if test_interface();
         dependency_dep #(.TEST_PARAM(test_interface.DATA_WIDTH)) dep();
     endmodule
-    )";
+    )");
 
 
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resources = analyzer.analyze();
     auto res = resources[1].get_dependencies()[2];
     auto parameters = res.get_parameters();
@@ -1967,15 +1967,15 @@ TEST(parameter_extraction, interface_parameter_use) {
 }
 
 TEST(parameter_extraction, negative_number_parameters) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
              parameter negative_param = -16'sd32767
         )();
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -2010,16 +2010,16 @@ TEST(parameter_extraction, negative_number_parameters) {
 
 
 TEST(parameter_extraction, packed_bit_access) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter [31:0] param_a = -1,
             parameter [5:0] param_b = param_a[3]
         )();
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -2065,15 +2065,15 @@ TEST(parameter_extraction, packed_bit_access) {
 
 
 TEST(parameter_extraction, negative_number_array_init) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
              parameter negative_array_param [1:0] = '{-16'sd32767, 16'sd32767}
         )();
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -2114,15 +2114,15 @@ TEST(parameter_extraction, negative_number_array_init) {
 }
 
 TEST(parameter_extraction, expression_array_init) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
              parameter expression_array_param [1:0] = '{5+4, 7*6}
         )();
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -2175,16 +2175,16 @@ TEST(parameter_extraction, expression_array_init) {
 }
 
 TEST(parameter_extraction, combined_packed_unpacked_init) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
     module test_mod #(
       parameter reg [7:0] param_a [1:0] = '{{1'b1,1'b1,1'b1,1'b0,1'b0,1'b0,1'b1,1'b0}, {1'b0,1'b0,1'b0,1'b1,1'b1,1'b1,1'b0,1'b1}},
       parameter reg [7:0] param_b [1:0] = '{{8{1'b1}},{8{1'b0}}}
     )();
     endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -2276,7 +2276,7 @@ TEST(parameter_extraction, combined_packed_unpacked_init) {
 }
 
 TEST(parameter_extraction, instance_parameter) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
     module test_mod #(
         parameter test_param = 4
     )();
@@ -2288,10 +2288,10 @@ TEST(parameter_extraction, instance_parameter) {
     ) test_instance ();
 
     endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto def_parameters = resource.get_parameters();
 
@@ -2352,7 +2352,7 @@ TEST(parameter_extraction, instance_parameter) {
 
 
 TEST(parameter_extraction, mixed_packed_unpacked_init) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
     module test_mod #(
         SS_POLARITY_DEFAULT = 0
     )();
@@ -2366,10 +2366,10 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
             {2'h2,2'b1,2'h3,4'hE,4'b0}
         };
     endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -2444,7 +2444,7 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
 
 
 TEST(parameter_extraction, multidimensional_packed_array) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
     module test_mod #(
         parameter reg [7:0] param_a [1:0][1:0] = '{
             {
@@ -2458,10 +2458,10 @@ TEST(parameter_extraction, multidimensional_packed_array) {
         }
     )();
     endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -2551,15 +2551,15 @@ TEST(parameter_extraction, multidimensional_packed_array) {
 
 
 TEST(parameter_extraction, packed_replication_init) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
              parameter [4:0] test_parameter = {5{1'b1}}
         )();
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -2603,15 +2603,15 @@ TEST(parameter_extraction, packed_replication_init) {
 
 
 TEST(parameter_extraction, array_initialization_default) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
              parameter [4:0] test_parameter [2:0][1:0] = '{default:3}
         )();
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -2663,7 +2663,7 @@ TEST(parameter_extraction, array_initialization_default) {
 
 
 TEST(parameter_extraction, simple_function_parameter) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 
 
         module test_mod #(
@@ -2675,11 +2675,11 @@ TEST(parameter_extraction, simple_function_parameter) {
 
             parameter [ADDR_WIDTH-1:0] TEST_PARAM = CTRL_ADDR_CALC();
         endmodule
-    )";
+    )");
 
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
 
     auto param =  resource.get_parameters().get("TEST_PARAM");
@@ -2707,7 +2707,7 @@ TEST(parameter_extraction, simple_function_parameter) {
 }
 
 TEST(parameter_extraction, concat_in_function) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
         )();
             function [15:0] get_axis_metadata (input [4:0] size,input is_signed, input is_float);
@@ -2718,11 +2718,11 @@ TEST(parameter_extraction, concat_in_function) {
 
             parameter integer TEST_PARAM = get_axis_metadata(11, 1'b1, 1'b0);
         endmodule
-    )";
+    )");
 
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
 
     auto param =  resource.get_parameters().get("TEST_PARAM");
@@ -2762,7 +2762,7 @@ TEST(parameter_extraction, concat_in_function) {
 
 
 TEST(parameter_extraction, replication_in_function) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 
 
         module test_mod #(
@@ -2775,11 +2775,11 @@ TEST(parameter_extraction, replication_in_function) {
 
             parameter integer TEST_PARAM = get_axis_metadata(11, 1'b1, 1'b0);
         endmodule
-    )";
+    )");
 
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
 
     auto param =  resource.get_parameters().get("TEST_PARAM");
@@ -2821,7 +2821,7 @@ TEST(parameter_extraction, replication_in_function) {
 }
 
 TEST(parameter_extraction, cast_in_concat_in_function) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 
 
         module test_mod #(
@@ -2834,11 +2834,11 @@ TEST(parameter_extraction, cast_in_concat_in_function) {
 
             parameter integer TEST_PARAM = get_axis_metadata(11, 1'b1, 1'b0);
         endmodule
-    )";
+    )");
 
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
 
     auto param =  resource.get_parameters().get("TEST_PARAM");
@@ -2884,7 +2884,7 @@ TEST(parameter_extraction, cast_in_concat_in_function) {
 
 
 TEST(parameter_extraction, function_with_parameters) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 
 
         module test_mod #(
@@ -2894,11 +2894,11 @@ TEST(parameter_extraction, function_with_parameters) {
             endfunction
 
         endmodule
-    )";
+    )");
 
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
 
     auto func = resource.get_functions()["CTRL_ADDR_CALC"];
@@ -2917,7 +2917,7 @@ TEST(parameter_extraction, function_with_parameters) {
 
 
 TEST(parameter_extraction, loop_function_parameter) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 
 
         module test_mod #(
@@ -2931,11 +2931,11 @@ TEST(parameter_extraction, loop_function_parameter) {
 
             parameter [ADDR_WIDTH-1:0] TEST_PARAM = CTRL_ADDR_CALC();
         endmodule
-    )";
+    )");
 
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
 
     auto param = resource.get_parameters().get("TEST_PARAM");
@@ -2993,7 +2993,7 @@ TEST(parameter_extraction, loop_function_parameter) {
 
 
 TEST(parameter_extraction, parametric_loop_function_parameter) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
 
 
         module test_mod #(
@@ -3009,11 +3009,11 @@ TEST(parameter_extraction, parametric_loop_function_parameter) {
 
             parameter [ADDR_WIDTH-1:0] TEST_PARAM = CTRL_ADDR_CALC();
         endmodule
-    )";
+    )");
 
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
 
     auto param = resource.get_parameters().get("TEST_PARAM");
@@ -3071,7 +3071,7 @@ TEST(parameter_extraction, parametric_loop_function_parameter) {
 
 
 TEST(parameter_extraction, function_with_arguments) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
         )();
 
@@ -3082,11 +3082,11 @@ TEST(parameter_extraction, function_with_arguments) {
           parameter [31:0] TEST_PARAM = add(5, 7);
 
         endmodule
-    )";
+    )");
 
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
 
     auto param = resource.get_parameters().get("TEST_PARAM");
@@ -3119,7 +3119,7 @@ TEST(parameter_extraction, function_with_arguments) {
 }
 
 TEST(parameter_extraction, unrelated_wire_dependency_conflict) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
     module test_mod #(
         DECIMATE = 1
     )();
@@ -3129,10 +3129,10 @@ TEST(parameter_extraction, unrelated_wire_dependency_conflict) {
             .DECIMATED(DECIMATE)
         ) dep();
     endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
 
     HDL_instance i = resource.get_dependencies()[0];
@@ -3149,13 +3149,13 @@ TEST(parameter_extraction, unrelated_wire_dependency_conflict) {
 
 
 TEST(parameter_extraction, interface_parameters) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         interface axi_stream #(DATA_WIDTH = 32, USER_WIDTH = 24,  DEST_WIDTH = 8);
         endinterface
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -3197,7 +3197,7 @@ TEST(parameter_extraction, interface_parameters) {
 
 
 TEST(parameter_extraction, generate_for) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
     module test_mod #(
         N_REPETITION = 2
     )();
@@ -3215,10 +3215,10 @@ TEST(parameter_extraction, generate_for) {
         endgenerate
 
     endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
 
     auto dep = resource.get_dependencies()[0];
@@ -3247,17 +3247,17 @@ TEST(parameter_extraction, generate_for) {
 
 
 TEST(parameter_extraction, param_ternary_conditional) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter condition = 2,
             parameter test_positive = condition > 1 ? 12 : 34,
             parameter test_negative = condition > 65 ? 12 : 34
         )();
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -3330,16 +3330,16 @@ TEST(parameter_extraction, param_ternary_conditional) {
 
 
 TEST(parameter_extraction, nested_ternary_conditional) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter condition = 2,
             parameter test_positive = condition > 1 ?  condition > 65 ? 12 : 96 : 34
         )();
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 
@@ -3404,16 +3404,16 @@ TEST(parameter_extraction, nested_ternary_conditional) {
 
 
 TEST(parameter_extraction, complex_ternary_conditional) {
-    std::string test_pattern = R"(
+    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
         module test_mod #(
             parameter NM = 4
         )();
             localparam	LGNM = NM>1 ? $clog2(NM) : 1;
         endmodule
-    )";
+    )");
 
-    sv_analyzer analyzer(std::make_shared<std::istringstream>(test_pattern));
-    analyzer.cleanup_content("`(.*)");
+    sv_analyzer analyzer("", test_pattern);
+    
     auto resource = analyzer.analyze()[0];
     auto parameters = resource.get_parameters();
 

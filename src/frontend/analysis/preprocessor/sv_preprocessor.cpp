@@ -18,18 +18,9 @@
 
 
 namespace preprocessor {
-    sv_preprocessor::sv_preprocessor(const std::filesystem::path &in) {
-        path = in;
-        line_number = 1;
-    }
 
-    std::string sv_preprocessor::preprocess(const std::filesystem::path &in) {
-        path = in;
-        std::ifstream ifs(in);
-        return preprocess(ifs);
-    }
 
-    std::string sv_preprocessor::preprocess(std::istream &in) {
+    std::string sv_preprocessor::preprocess(const std::unique_ptr<std::istream> &in) {
         macro_processor macro_engine(definitions , line_number, path);
 
         auto flat_source= flatten_source(in);
@@ -64,7 +55,7 @@ namespace preprocessor {
                 auto current_line =line_number;
                 auto current_path = path;
                 path = included_file;
-                preprocess(included_file);
+                preprocess(std::make_unique<std::ifstream>(included_file));
                 line_number = current_line;
                 path = current_path;
             } else if (trimmed_line.starts_with("`ifdef")) {
@@ -168,8 +159,8 @@ namespace preprocessor {
     }
 
 
-    std::string sv_preprocessor::flatten_source(std::istream &in) {
-        std::string content((std::istreambuf_iterator(in)),
+    std::string sv_preprocessor::flatten_source(const std::unique_ptr<std::istream> &in) {
+        std::string content((std::istreambuf_iterator(*in)),
                                  std::istreambuf_iterator<char>());
 
         std::string result;

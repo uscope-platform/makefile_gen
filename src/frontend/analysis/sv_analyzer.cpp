@@ -17,38 +17,30 @@
 
 #include "frontend/analysis/sv_analyzer.hpp"
 
-sv_analyzer::sv_analyzer(const std::string& file_path) : sv_modules_explorer(file_path){
-    path = file_path;
-    input = std::make_shared<std::ifstream>(path);
+#include "frontend/analysis/preprocessor/sv_preprocessor.hpp"
+
+sv_analyzer::sv_analyzer(const std::string &p, std::unique_ptr<std::istream> &iss) : sv_modules_explorer(p) {
+    path = p;
+    input = std::move(iss);
 }
 
-sv_analyzer::sv_analyzer(const std::shared_ptr<std::istringstream> &iss) : sv_modules_explorer(""){
-    input = iss;
+void sv_analyzer::preprocess() {
+
+    preprocessor::sv_preprocessor preproc;
+    preproc.set_path(path);
+    processed_content = preproc.preprocess(input);
 }
 
-void sv_analyzer::cleanup_content(const std::string& regex) {
-
-    std::string raw_content;
-
-    input->seekg(0, std::ios::end);
-    raw_content.reserve(input->tellg());
-    input->seekg(0, std::ios::beg);
-
-    raw_content.assign((std::istreambuf_iterator<char>(*input)),
-                       std::istreambuf_iterator<char>());
-
-    std::regex e (regex);
-    processed_content = std::regex_replace(raw_content,e,"");
-
-}
 
 std::vector<HDL_Resource> sv_analyzer::analyze() {
+    preprocess();
     process_hdl();
 
     auto entities = sv_modules_explorer.get_entities();
 
-
-    documentation_analyzer doc(processed_content);
+    input->clear();
+    input->seekg(0, std::ios::beg);
+    documentation_analyzer doc(*input);
     doc.set_source_path(path);
 
     doc.process_documentation(parameters);

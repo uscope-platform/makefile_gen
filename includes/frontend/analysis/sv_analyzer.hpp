@@ -26,6 +26,7 @@
 #include "data_model/HDL/HDL_Resource.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
+#include "frontend/analysis/preprocessor/sv_preprocessor.hpp"
 #include "frontend/analysis/documentation_analyzer.hpp"
 
 #include "mgp_sv/sv2017Lexer.h"
@@ -35,9 +36,8 @@
 
 class sv_analyzer {
 public:
-    explicit sv_analyzer(const std::string& file_path);
-    explicit sv_analyzer(const std::shared_ptr<std::istringstream>  &iss);
-    void cleanup_content(const std::string& regex);
+    sv_analyzer(const std::string &path, std::unique_ptr<std::istream> &iss);
+    void preprocess();
     std::vector<HDL_Resource> analyze();
 
 private:
@@ -45,8 +45,8 @@ private:
     void process_hdl();
 
     Parameters_map parameters;
-
-    std::shared_ptr<std::istream> input;
+    std::string raw_content;
+    std::unique_ptr<std::istream> input;
     std::string path;
     std::string processed_content;
     sv_visitor sv_modules_explorer;
