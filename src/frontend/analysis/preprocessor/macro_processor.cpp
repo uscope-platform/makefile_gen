@@ -82,7 +82,9 @@ std::pair<std::vector<std::string_view>, std::string_view> macro_processor::get_
     bool in_string_literal = false;
     for (; args_last< in.size(); args_last++) {
         if (in[args_last]=='"') {
-            in_string_literal = !in_string_literal;
+            if (in[args_last] == 0 || in[args_last-1] != '\\') {
+                in_string_literal = !in_string_literal;
+            }
         }
         if (in[args_last] == '(' && !in_string_literal) nesting_level++;
         if (in[args_last] == ')'&& !in_string_literal) {
@@ -100,8 +102,11 @@ std::pair<std::vector<std::string_view>, std::string_view> macro_processor::get_
     for (int i = 0; i< raw_arguments.size(); i++) {
         const auto c = raw_arguments[i];
         if (c=='"') {
-            in_string_literal = !in_string_literal;
+            if (c == 0 || raw_arguments[i-1] != '\\') {
+                in_string_literal = !in_string_literal;
+            }
         }
+
         if ((c == '(' || c == '[' || c == '{') && !in_string_literal) nesting_level++;
         if ((c == ')' || c == ']' || c == '}') && !in_string_literal) nesting_level--;
         if (c==',' && nesting_level == 0||i == raw_arguments.size()-1) {

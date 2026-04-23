@@ -919,3 +919,23 @@ TEST(preprocessor, self_nested_macro) {
     EXPECT_EQ(result, check_string);
 }
 
+TEST(preprocessor, escaped_quotes_in_macro_args) {
+    auto test_pattern = std::istringstream(R"(
+        `define DISPLAY_VAL(prefix, msg) initial $display("%s: %s", prefix, msg);
+        module test_module ();
+            `DISPLAY_VAL("DEBUG", "Value is \"hidden in quotes")
+        endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+
+    auto check_string = R"(
+        module test_module ();
+            initial $display("%s: %s", "DEBUG", "Value is \"hidden in quotes");
+        endmodule
+    )";
+
+    EXPECT_EQ(result, check_string);
+}
