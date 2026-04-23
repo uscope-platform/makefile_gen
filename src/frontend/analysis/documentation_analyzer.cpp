@@ -18,23 +18,10 @@
 
 
 
-documentation_analyzer::documentation_analyzer(std::istream &stream) {
-
-    parse_documentation(stream);
-
+documentation_analyzer::documentation_analyzer(const std::vector<std::string> &comments) {
+    raw_documentation_comments = comments;
 }
 
-void documentation_analyzer::parse_documentation(std::istream &stream) {
-
-    std:: stringstream ss;
-    ss<< stream.rdbuf();
-    auto file_c = ss.str();
-    for (auto &match: ctre::search_all<R"(/\*\*.*?\*\*/)">(file_c)) {
-        auto purged_str = match.str().substr(3, match.view().size()-6);
-        raw_documentation_comments.push_back(purged_str);
-    }
-
-}
 
 
 void documentation_analyzer::process_documentation(Parameters_map parameters) {

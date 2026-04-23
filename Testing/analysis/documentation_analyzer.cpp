@@ -22,16 +22,9 @@
 TEST( documentation_analyzer , simple_peripheral) {
 
 
-    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
-module Decoder (
-    input wire clock,
-    input wire reset,
-    axi_stream.slave data_in,
-    axi_stream.master data_out
-);
-endmodule
-    /**
-       {
+    std::vector<std::string> test_pattern = {
+       R"(
+    {
         "name": "Decoder",
         "type": "peripheral",
         "registers":[
@@ -69,12 +62,11 @@ endmodule
             }
         ]
        }
-    **/
-)");
+)"};
 
     Parameters_map params;
 
-    documentation_analyzer doc(*test_pattern);
+    documentation_analyzer doc(test_pattern);
     doc.process_documentation(params);
     std::unordered_map<std::string, module_documentation> results = doc.get_modules_documentation();
 
@@ -101,11 +93,104 @@ endmodule
 
 TEST( documentation_analyzer , parametric_peripheral) {
 
-    std::ifstream is("check_files/test_data/Components/controls/PwmGenerator/rtl/ChainControlUnit.sv");
+    std::string doc_comment = R"par(
+       {
+        "name": "ChainControlUnit",
+        "type": "parametric_peripheral",
+        "registers":[
+            {
+                "name": "tresh_$L",
+                "n_regs": ["N_CHANNELS"],
+                "description": "Comparator $ treshold low",
+                "fields":[],
+                "direction": "RW"
+            },
+            {
+                "name": "tresh_$H",
+                "n_regs": ["N_CHANNELS"],
+                "description": "Comparator $ treshold high",
+                "fields":[],
+                "direction": "RW"
+            },
+            {
+                "name": "deadtime_$",
+                "n_regs": ["N_CHANNELS"],
+                "description": "Length of deadtime automatically inserted in pair A (if enabled)",
+                "fields":[],
+                "direction": "RW"
+            },
+            {
+                "name": "counter_start",
+                "n_regs": ["1"],
+                "description": "Start Value for the PWM generator",
+                "fields":[],
+                "direction": "RW"
+            },
+            {
+                "name": "counter_stop",
+                "n_regs": ["1"],
+                "description": "Stop Value for the PWM generator",
+                "fields":[],
+                "direction": "RW"
+            },
+            {
+                "name": "tb_shift",
+                "n_regs": ["1"],
+                "description": "Carrier phase shift",
+                "fields":[],
+                "direction": "RW"
+            },
+            {
+                "name": "out_en",
+                "n_regs": ["1"],
+                "description": "Output enable register",
+                "fields":[],
+                "direction": "RW",
+                "fields":[
+                    {
+                        "name":"out_$",
+                        "description": "enable output pair $",
+                        "start_position": 0,
+                        "length": 2,
+                        "n_fields": ["N_CHANNELS"]
+                    }
+                ]
+            },
+            {
+                "name": "dt_en",
+                "n_regs": ["1"],
+                "description": "Deadtime insertion enable register",
+                "direction": "RW",
+                "fields":[
+                    {
+                        "name":"pair_$",
+                        "description": "Enable deadtime insertion pair $",
+                        "start_position": 0,
+                        "length": 1,
+                        "n_fields": ["N_CHANNELS"]
+                    }
+                ]
+            },
+            {
+                "name": "ctrl",
+                "n_regs": ["1"],
+                "description": "Chain control register",
+                "direction": "RW",
+                "fields":[
+                    {
+                        "name":"mode",
+                        "description": "Chain counter mode",
+                        "start_position": 0,
+                        "length": 3
+                    }
+                ]
+            }
+        ]
+       }
+)par";
     Parameters_map params;
-    std::stringstream iss;
-    iss << is.rdbuf();
-    documentation_analyzer doc(iss);
+    std::vector<std::string> comm = {doc_comment};
+    documentation_analyzer doc(comm);
     doc.process_documentation(params);
     std::unordered_map<std::string, module_documentation> results = doc.get_modules_documentation();
 
@@ -150,23 +235,8 @@ TEST( documentation_analyzer , parametric_peripheral) {
 
 TEST( documentation_analyzer , processor_doc) {
 
-    std::unique_ptr<std::istream> test_pattern = std::make_unique<std::stringstream>(R"(
-
-module SicDriveMasterCurrentControl (
-    input wire clock,
-    input wire reset
-);
-
-    localparam PROCESSOR_BASE_ADDRESS = 'h83c00000;
-
-    fCore processor (
-        .clock(clock),
-        .reset(reset)
-    );
-
-endmodule
-
-    /**
+    std::vector<std::string> test_pattern = {
+        R"(
         {
             "name": "current_controller",
             "type": "processor_instance",
@@ -193,12 +263,10 @@ endmodule
                 }
             ]
         }
-    **/
-
-)");
+)"};
     Parameters_map params;
 
-    documentation_analyzer doc(*test_pattern);
+    documentation_analyzer doc(test_pattern);
     doc.process_documentation(params);
     std::unordered_map<std::string, processor_instance> results = doc.get_processors_documentation();
 

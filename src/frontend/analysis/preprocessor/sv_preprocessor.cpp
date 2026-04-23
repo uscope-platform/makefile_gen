@@ -207,7 +207,11 @@ namespace preprocessor {
                             cursor = content.find('\n', end+1);
                         }
                     } else if (content[cursor + 1] == '*') {
+
                         size_t end = content.find("*/", cursor + 2);
+                        if (content[cursor + 2] == '*') {
+                            documentation_comments.push_back( std::string(content.substr(cursor+3, end - cursor-4)));
+                        }
                         if (end == std::string_view::npos) end = content.size() - 2;
                         cursor = end + 2;
                     }

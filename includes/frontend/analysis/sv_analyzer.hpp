@@ -49,6 +49,7 @@ private:
     std::unique_ptr<std::istream> input;
     std::string path;
     std::string processed_content;
+    std::vector<std::string> documentation_comments;
     sv_visitor sv_modules_explorer;
 };
 

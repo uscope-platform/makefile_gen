@@ -170,7 +170,8 @@ TEST(preprocessor, line_comment_elimination) {
         wire a;// This is a comment needs to go
     )");
 
-    auto res = sv_preprocessor::flatten_source(test_pattern);
+    sv_preprocessor proc;
+    auto res = proc.preprocess(test_pattern);
     auto check_string = R"(
         wire a;
     )";
@@ -183,7 +184,8 @@ TEST(preprocessor, comment_continuation_elimination) {
            that should also go away!
         wire a;)");
 
-    auto res = sv_preprocessor::flatten_source(test_pattern);
+    sv_preprocessor proc;
+    auto res = proc.flatten_source(test_pattern);
     auto check_string ="\n        \n        wire a;";
     EXPECT_EQ(check_string, res);
 }
@@ -195,8 +197,8 @@ TEST(preprocessor, block_comment_elimination) {
            that should also go away!
         */
         wire a;)");
-
-    auto res = sv_preprocessor::flatten_source(test_pattern);
+    sv_preprocessor proc;
+    auto res = proc.flatten_source(test_pattern);
     auto check_string ="\n        \n        wire a;";
     EXPECT_EQ(check_string, res);
 }
@@ -209,8 +211,8 @@ parameter string ML_STRING = "TEST \
   parameter";
 endmodule
     )");
-    
-    auto res = sv_preprocessor::flatten_source(test_pattern);
+    sv_preprocessor proc;
+    auto res = proc.flatten_source(test_pattern);
     auto check_string = R"(
 module test;
 parameter string ML_STRING = "TEST   parameter";
@@ -227,8 +229,8 @@ module test;
 b
 endmodule
     )");
-
-    auto res = sv_preprocessor::flatten_source(test_pattern);
+    sv_preprocessor proc;
+    auto res = proc.flatten_source(test_pattern);
     auto check_string = R"(
 module test;
 `define SUM(a,b) a + b
@@ -246,8 +248,8 @@ module test;
 b
 endmodule
     )");
-
-    auto res = sv_preprocessor::flatten_source(test_pattern);
+    sv_preprocessor proc;
+    auto res = proc.flatten_source(test_pattern);
     auto check_string = R"(
 module test;
 `define SUM(a,b) a + b

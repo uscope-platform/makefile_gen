@@ -34,9 +34,10 @@ namespace preprocessor {
     public:
         sv_preprocessor() = default;
         std::string preprocess(const std::unique_ptr<std::istream> &in);
-        static std::string flatten_source(const std::unique_ptr<std::istream> &in);
+        std::string flatten_source(const std::unique_ptr<std::istream> &in);
         void set_include_directories(const std::vector<std::string> &i_d){include_directories = i_d;}
         void set_path(const std::string &s){path = s;}
+        std::vector<std::string> get_documentation_comments() {return documentation_comments;}
     private:
         typedef std::unordered_map<std::string, std::variant<std::string, function_macro>> definitions_map;
         std::string parse_include_path(const std::string_view &v);
@@ -45,6 +46,7 @@ namespace preprocessor {
         static std::string_view parse_one_arg_directive(const std::string_view &sv, int prefix_length);
         uint64_t line_number;
         definitions_map definitions;
+        std::vector<std::string> documentation_comments;
         std::string path;
         conditional_solver c_solver;
         std::vector<std::string> include_directories;

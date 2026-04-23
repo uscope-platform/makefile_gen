@@ -29,6 +29,7 @@ void sv_analyzer::preprocess() {
     preprocessor::sv_preprocessor preproc;
     preproc.set_path(path);
     processed_content = preproc.preprocess(input);
+    documentation_comments = preproc.get_documentation_comments();
 }
 
 
@@ -38,9 +39,7 @@ std::vector<HDL_Resource> sv_analyzer::analyze() {
 
     auto entities = sv_modules_explorer.get_entities();
 
-    input->clear();
-    input->seekg(0, std::ios::beg);
-    documentation_analyzer doc(*input);
+    documentation_analyzer doc(documentation_comments);
     doc.set_source_path(path);
 
     doc.process_documentation(parameters);
