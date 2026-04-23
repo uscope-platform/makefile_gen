@@ -701,7 +701,25 @@ TEST(preprocessor, simple_macro_with_args) {
 }
 
 
+TEST(preprocessor, multiline_macro_preprocessing) {
+    auto test_pattern = std::istringstream(R"(
+`define SUM(a,b) a \
++ \
+b
+module test_module ();
+    parameter TEST_PARAM = `SUM(5,7);
+endmodule
+    )");
 
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto res = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+module test_module ();
+    parameter TEST_PARAM = 5 + 7;
+endmodule
+    )";
+    EXPECT_EQ(check_string, res);
+}
 
 
 TEST(preprocessor, simple_macro_with_default_args) {

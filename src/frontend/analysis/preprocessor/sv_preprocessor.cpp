@@ -31,13 +31,13 @@ std::string sv_preprocessor::preprocess(const std::filesystem::path &in) {
 std::string sv_preprocessor::preprocess(std::istream &in) {
     macro_processor macro_engine(definitions , line_number, path);
 
-
-
+    auto flat_source= flatten_source(in);
+    std::istringstream iss(flat_source);
     std::ostringstream out;
 
     std::string line;
     line_number = 1;
-    while (std::getline(in, line)) {
+    while (std::getline(iss, line)) {
        std::string_view trimmed_line = macro_processor::ltrim(line);
 
         bool skipped_directive = trimmed_line.starts_with("`resetall")
