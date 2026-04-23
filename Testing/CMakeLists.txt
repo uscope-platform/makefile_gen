@@ -72,8 +72,6 @@ set(CHECK_FILES_DIR ${CMAKE_CURRENT_BINARY_DIR}/check_files/documentation_analyz
 file(MAKE_DIRECTORY ${CHECK_FILES_DIR})
 configure_file(check_files/documentation_analyzer/test_bus_hierarchy.sv ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/documentation_analyzer/test_module_hierarchy.sv ${CHECK_FILES_DIR} COPYONLY)
-configure_file(check_files/documentation_analyzer/test_peripheral_definition.sv ${CHECK_FILES_DIR} COPYONLY)
-configure_file(check_files/documentation_analyzer/test_processor_doc.sv ${CHECK_FILES_DIR} COPYONLY)
 
 
 set(REPO_WALKER_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR}/repository_walker)

@@ -18,11 +18,7 @@
 #include <spdlog/spdlog.h>
 
 
-documentation_analyzer::documentation_analyzer(std::istream &s) {
-    parse_documentation(s);
-}
-
-documentation_analyzer::documentation_analyzer(std::string &s) {
+documentation_analyzer::documentation_analyzer(const std::string &s) {
 
     std::istringstream istream(s);
     parse_documentation(istream);

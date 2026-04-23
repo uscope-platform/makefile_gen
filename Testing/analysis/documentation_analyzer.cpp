@@ -21,11 +21,60 @@
 
 TEST( documentation_analyzer , simple_peripheral) {
 
-    std::ifstream is("check_files/documentation_analyzer/test_peripheral_definition.sv");
+
+    std::string test_pattern = R"(
+module Decoder (
+    input wire clock,
+    input wire reset,
+    axi_stream.slave data_in,
+    axi_stream.master data_out
+);
+endmodule
+    /**
+       {
+        "name": "Decoder",
+        "type": "peripheral",
+        "registers":[
+            {
+                "name": "simple_register_r",
+                "offset": "0x0",
+                "description": "Single word read only register",
+                "direction": "R"
+            },
+            {
+                "name": "simple_register_w",
+                "offset": "4",
+                "description": "Single word write only register",
+                "direction": "W"
+            },
+            {
+                "name": "field_registers",
+                "offset": "0x20",
+                "description": "register with multiple fields",
+                "direction": "RW",
+                "fields": [
+                    {
+                        "name":"field_1",
+                        "description": "First field",
+                        "start_position": 0,
+                        "length": 8
+                    },
+                    {
+                        "name":"field_2",
+                        "description": "Second Field",
+                        "start_position": 8,
+                        "length": 8
+                    }
+                ]
+            }
+        ]
+       }
+    **/
+)";
 
     Parameters_map params;
 
-    documentation_analyzer doc(is);
+    documentation_analyzer doc(test_pattern);
     doc.process_documentation(params);
     std::unordered_map<std::string, module_documentation> results = doc.get_modules_documentation();
 
@@ -52,10 +101,60 @@ TEST( documentation_analyzer , simple_peripheral) {
 
 TEST( documentation_analyzer , parametric_peripheral) {
 
+    std::string test_pattern = R"(
+module Decoder (
+    input wire clock,
+    input wire reset,
+    axi_stream.slave data_in,
+    axi_stream.master data_out
+);
+endmodule
+    /**
+       {
+        "name": "Decoder",
+        "type": "peripheral",
+        "registers":[
+            {
+                "name": "simple_register_r",
+                "offset": "0x0",
+                "description": "Single word read only register",
+                "direction": "R"
+            },
+            {
+                "name": "simple_register_w",
+                "offset": "4",
+                "description": "Single word write only register",
+                "direction": "W"
+            },
+            {
+                "name": "field_registers",
+                "offset": "0x20",
+                "description": "register with multiple fields",
+                "direction": "RW",
+                "fields": [
+                    {
+                        "name":"field_1",
+                        "description": "First field",
+                        "start_position": 0,
+                        "length": 8
+                    },
+                    {
+                        "name":"field_2",
+                        "description": "Second Field",
+                        "start_position": 8,
+                        "length": 8
+                    }
+                ]
+            }
+        ]
+       }
+    **/
+)";
     std::ifstream is("check_files/test_data/Components/controls/PwmGenerator/rtl/ChainControlUnit.sv");
     Parameters_map params;
-
-    documentation_analyzer doc(is);
+    std::stringstream iss;
+    iss << is.rdbuf();
+    documentation_analyzer doc(iss.str());
     doc.process_documentation(params);
     std::unordered_map<std::string, module_documentation> results = doc.get_modules_documentation();
 
@@ -100,11 +199,55 @@ TEST( documentation_analyzer , parametric_peripheral) {
 
 TEST( documentation_analyzer , processor_doc) {
 
-    std::ifstream is("check_files/documentation_analyzer/test_processor_doc.sv");
+    std::string test_pattern = R"(
 
+module SicDriveMasterCurrentControl (
+    input wire clock,
+    input wire reset
+);
+
+    localparam PROCESSOR_BASE_ADDRESS = 'h83c00000;
+
+    fCore processor (
+        .clock(clock),
+        .reset(reset)
+    );
+
+endmodule
+
+    /**
+        {
+            "name": "current_controller",
+            "type": "processor_instance",
+            "target": "processor",
+            "address": {
+                "parameter":"PROCESSOR_BASE_ADDRESS"
+            },
+            "parent": "SicDriveMasterCurrentControl",
+            "dma_io": [
+                {
+                    "name": "Current",
+                    "type": "input",
+                    "address": "1"
+                },
+                {
+                    "name": "Speed",
+                    "type": "input",
+                    "address": "2"
+                },
+                {
+                    "name": "duty",
+                    "type": "output",
+                    "address": "15"
+                }
+            ]
+        }
+    **/
+
+)";
     Parameters_map params;
 
-    documentation_analyzer doc(is);
+    documentation_analyzer doc(test_pattern);
     doc.process_documentation(params);
     std::unordered_map<std::string, processor_instance> results = doc.get_processors_documentation();
 
