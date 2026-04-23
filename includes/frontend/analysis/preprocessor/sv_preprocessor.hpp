@@ -26,37 +26,7 @@
 #include <variant>
 #include <fmt/format.h>
 #include "frontend/analysis/preprocessor/conditional_solver.hpp"
-
-struct function_macro_argument {
-    std::string name;
-    std::string default_value;
-    bool has_default;
-
-    friend bool operator==(const function_macro_argument &lhs, const function_macro_argument &rhs) {
-        return lhs.name == rhs.name
-               && lhs.default_value == rhs.default_value
-               && lhs.has_default == rhs.has_default;
-    }
-
-    friend bool operator!=(const function_macro_argument &lhs, const function_macro_argument &rhs) {
-        return !(lhs == rhs);
-    }
-};
-
-struct function_macro {
-
-    std::vector<function_macro_argument> arguments;
-    std::string value;
-
-     friend bool operator==(const function_macro &lhs, const function_macro &rhs) {
-            return lhs.arguments == rhs.arguments && lhs.value == rhs.value;
-     }
-
-     friend bool operator!=(const function_macro &lhs, const function_macro &rhs) {
-        return !(lhs == rhs);
-    }
-};
-
+#include "frontend/analysis/preprocessor/macro_processor.hpp"
 
 class sv_preprocessor {
 public:
@@ -64,17 +34,13 @@ public:
     std::string preprocess(const std::filesystem::path &in);
     std::string preprocess(std::istream& in);
     std::string flatten_source(const std::string_view &in);
-    std::optional<std::string> replace_function_macro(const std::vector<std::string_view> &args, const function_macro &macro);
 private:
-    std::string process_macro_usage(const std::string_view &in);
+    typedef std::unordered_map<std::string, std::variant<std::string, function_macro>> definitions_map;
     std::string get_define_replacement(const std::string_view &v);
-    std::string_view ltrim(const std::string_view &in);
     void parse_definition(const std::string_view &sv, int prefix_length);
     std::string_view parse_one_arg_directive(const std::string_view &sv, int prefix_length);
-    std::optional<function_macro> parse_function_macro(const std::string_view &in);
-    std::pair<std::vector<std::string_view>, std::string_view>get_call_arguments(const std::string_view &in);
     uint64_t line_number;
-    std::unordered_map<std::string, std::variant<std::string, function_macro>> definitions;
+    definitions_map definitions;
     std::string path;
     conditional_solver c_solver;
 
