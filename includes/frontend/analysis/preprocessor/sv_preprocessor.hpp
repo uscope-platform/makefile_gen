@@ -34,8 +34,10 @@ public:
     std::string preprocess(const std::filesystem::path &in);
     std::string preprocess(std::istream& in);
     std::string flatten_source(const std::string_view &in);
+    void set_include_directories(const std::vector<std::string> &i_d){include_directories = i_d;}
 private:
     typedef std::unordered_map<std::string, std::variant<std::string, function_macro>> definitions_map;
+    std::string parse_include_path(const std::string_view &v);
     std::string get_define_replacement(const std::string_view &v);
     void parse_definition(const std::string_view &sv, int prefix_length);
     std::string_view parse_one_arg_directive(const std::string_view &sv, int prefix_length);
@@ -43,6 +45,7 @@ private:
     definitions_map definitions;
     std::string path;
     conditional_solver c_solver;
+    std::vector<std::string> include_directories;
 
     static constexpr auto identifier_pattern = ctre::search<R"(`([a-zA-Z_][a-zA-Z0-9_]*)(\s*\()*)">;
 };

@@ -939,3 +939,114 @@ TEST(preprocessor, escaped_quotes_in_macro_args) {
 
     EXPECT_EQ(result, check_string);
 }
+
+
+TEST(preprocessor, include_absolute_path) {
+    auto test_pattern = std::istringstream(R"(
+        `include "/tmp/include_test.svh"
+        module test_module ();
+            parameter TEST_PARAM = `A + `B;
+        endmodule
+    )");
+
+    std::ofstream ofs("/tmp/include_test.svh");
+
+    ofs<< "`define A 5\n`define B 6\n";
+    ofs.close();
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    std::filesystem::remove("/tmp/include_test.svh");
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = 5 + 6;
+        endmodule
+    )";
+
+    EXPECT_EQ(result, check_string);
+}
+
+
+
+TEST(preprocessor, include_relative_path) {
+    auto test_pattern = std::istringstream(R"(
+        `include "include_test.svh"
+        module test_module ();
+            parameter TEST_PARAM = `A + `B;
+        endmodule
+    )");
+
+    std::ofstream ofs("/tmp/include_test.svh");
+
+    ofs<< "`define A 5\n`define B 6\n";
+    ofs.close();
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    std::filesystem::remove("/tmp/include_test.svh");
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = 5 + 6;
+        endmodule
+    )";
+
+    EXPECT_EQ(result, check_string);
+}
+
+
+
+TEST(preprocessor, include_with_comment) {
+    auto test_pattern = std::istringstream(R"(
+        `include "include_test.svh" // COMMENT
+        module test_module ();
+            parameter TEST_PARAM = `A + `B;
+        endmodule
+    )");
+
+    std::ofstream ofs("/tmp/include_test.svh");
+
+    ofs<< "`define A 5\n`define B 6\n";
+    ofs.close();
+
+    sv_preprocessor preproc("/tmp/file.sv");
+
+    auto result = preproc.preprocess(test_pattern);
+    std::filesystem::remove("/tmp/include_test.svh");
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = 5 + 6;
+        endmodule
+    )";
+
+    EXPECT_EQ(result, check_string);
+}
+
+
+
+TEST(preprocessor, absolute_include) {
+    auto test_pattern = std::istringstream(R"(
+        `include <include_test.svh>
+        module test_module ();
+            parameter TEST_PARAM = `A + `B;
+        endmodule
+    )");
+
+    std::ofstream ofs("/tmp/include_test.svh");
+
+    ofs<< "`define A 5\n`define B 6\n";
+    ofs.close();
+
+    sv_preprocessor preproc("/tmp/test/file.sv");
+    preproc.set_include_directories({"/tmp"});
+    auto result = preproc.preprocess(test_pattern);
+    std::filesystem::remove("/tmp/include_test.svh");
+    auto check_string = R"(
+        module test_module ();
+            parameter TEST_PARAM = 5 + 6;
+        endmodule
+    )";
+
+    EXPECT_EQ(result, check_string);
+}

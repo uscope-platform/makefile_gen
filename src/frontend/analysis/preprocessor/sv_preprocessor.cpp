@@ -30,7 +30,6 @@ std::string sv_preprocessor::preprocess(const std::filesystem::path &in) {
 
 std::string sv_preprocessor::preprocess(std::istream &in) {
     macro_processor macro_engine(definitions , line_number, path);
-    definitions = {};
 
     std::ostringstream out;
 
@@ -54,7 +53,13 @@ std::string sv_preprocessor::preprocess(std::istream &in) {
         if (trimmed_line.starts_with("`define") && c_solver.is_active()) {
           parse_definition(trimmed_line, 7);
         } else if (trimmed_line.starts_with("`include")&& c_solver.is_active()) {
-
+            auto included_file = parse_include_path(trimmed_line);
+            auto current_line =line_number;
+            auto current_path = path;
+            path = included_file;
+            preprocess(included_file);
+            line_number = current_line;
+            path = current_path;
         } else if (trimmed_line.starts_with("`ifdef")) {
             auto condition = parse_one_arg_directive(trimmed_line, 6);
             c_solver.start_loop(definitions.contains(std::string(condition)));
@@ -85,6 +90,26 @@ std::string sv_preprocessor::preprocess(std::istream &in) {
 }
 
 
+std::string sv_preprocessor::parse_include_path(const std::string_view &line) {
+    auto start_identifier = line.find_first_of("\"<");
+    std::string file_path;
+    if (start_identifier == std::string_view::npos) {
+        throw std::runtime_error(fmt::format("Malformed include [{}] at line {} in file: {}", line,line_number, path));
+    }else if (line[start_identifier] == '\"') {
+        auto end_identifier = line.substr(start_identifier+1).find_first_of('"');
+        auto name = line.substr(start_identifier+1, end_identifier);
+        if (name.starts_with('/')) return std::string(name);
+        auto dir = std::string(std::filesystem::path(path).parent_path()/name);
+        return dir;
+    } else {
+        auto filename = std::string(line.substr(start_identifier+1, line.find_first_of('>')- start_identifier-1));
+        for (std::filesystem::path dir: include_directories) {
+            auto full_path = dir/ filename;
+            if (std::filesystem::exists(full_path)) return full_path;
+        }
+        throw std::runtime_error(fmt::format("included file not found: {}", filename));
+    }
+}
 
 std::string sv_preprocessor::get_define_replacement(const std::string_view &identifier) {
     std::string_view purged_identifier = {identifier.begin()+1, identifier.end()};
