@@ -19,6 +19,8 @@
 #include "../../includes/frontend/analysis/preprocessor/sv_preprocessor.hpp"
 
 
+using namespace preprocessor;
+
 TEST(preprocessor, file_directive) {
     auto test_pattern = std::istringstream(R"(
         module test_module ();
@@ -161,8 +163,7 @@ TEST(preprocessor, line_comment_elimination) {
         wire a;// This is a comment needs to go
     )");
 
-    sv_preprocessor preproc("/tmp/file.sv");
-    auto res = preproc.flatten_source(test_pattern);
+    auto res = sv_preprocessor::flatten_source(test_pattern);
     auto check_string = R"(
         wire a;
     )";
@@ -175,8 +176,7 @@ TEST(preprocessor, comment_continuation_elimination) {
            that should also go away!
         wire a;)");
 
-    sv_preprocessor preproc("/tmp/file.sv");
-    auto res = preproc.flatten_source(test_pattern);
+    auto res = sv_preprocessor::flatten_source(test_pattern);
     auto check_string ="\n        \n        wire a;";
     EXPECT_EQ(check_string, res);
 }
@@ -189,8 +189,7 @@ TEST(preprocessor, block_comment_elimination) {
         */
         wire a;)");
 
-    sv_preprocessor preproc("/tmp/file.sv");
-    auto res = preproc.flatten_source(test_pattern);
+    auto res = sv_preprocessor::flatten_source(test_pattern);
     auto check_string ="\n        \n        wire a;";
     EXPECT_EQ(check_string, res);
 }
@@ -204,8 +203,7 @@ parameter string ML_STRING = "TEST \
 endmodule
     )");
 
-    sv_preprocessor preproc("/tmp/file.sv");
-    auto res = preproc.flatten_source(test_pattern);
+    auto res = sv_preprocessor::flatten_source(test_pattern);
     auto check_string = R"(
 module test;
 parameter string ML_STRING = "TEST   parameter";
@@ -223,8 +221,7 @@ b
 endmodule
     )");
 
-    sv_preprocessor preproc("/tmp/file.sv");
-    auto res = preproc.flatten_source(test_pattern);
+    auto res = sv_preprocessor::flatten_source(test_pattern);
     auto check_string = R"(
 module test;
 `define SUM(a,b) a + b
@@ -243,8 +240,7 @@ b
 endmodule
     )");
 
-    sv_preprocessor preproc("/tmp/file.sv");
-    auto res = preproc.flatten_source(test_pattern);
+    auto res = sv_preprocessor::flatten_source(test_pattern);
     auto check_string = R"(
 module test;
 `define SUM(a,b) a + b

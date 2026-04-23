@@ -22,22 +22,23 @@
 #include <set>
 #include <cstdint>
 
-class conditional_solver {
-public:
-    void start_loop(bool if_taken);
-    void close_loop();
-    void advance_elseif(bool if_taken);
-    void advance_else();
-    [[nodiscard]] bool is_active() const;
-private:
-    bool solver_active = false;
-    bool already_taken = false;
-    bool in_taken_branch = false;
-    unsigned int loop_level = 0;
-    std::vector<bool> already_taken_stack;
-    std::vector<bool> in_taken_branch_stack;
-};
-
+namespace preprocessor {
+    class conditional_solver {
+    public:
+        void start_loop(bool if_taken);
+        void close_loop();
+        void advance_elseif(bool if_taken);
+        void advance_else();
+        [[nodiscard]] bool is_active() const;
+    private:
+        bool solver_active = false;
+        bool already_taken = false;
+        bool in_taken_branch = false;
+        unsigned int loop_level = 0;
+        std::vector<bool> already_taken_stack;
+        std::vector<bool> in_taken_branch_stack;
+    };
+}
 
 
 #endif //MAKEFILEGEN_V2_CONDITIONAL_SOLVER_HPP

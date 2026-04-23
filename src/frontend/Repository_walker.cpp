@@ -229,6 +229,7 @@ bool Repository_walker::file_is_data(const std::filesystem::path &file) {
 std::vector<HDL_Resource> analyze_verilog(const std::filesystem::path &file) {
     spdlog::trace("PARSING: {}", file.c_str());
     sv_analyzer file_processor(file);
+
     file_processor.cleanup_content("`(.*)");
     try {
         return file_processor.analyze();

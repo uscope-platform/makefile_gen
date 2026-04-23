@@ -29,27 +29,29 @@
 #include "frontend/analysis/preprocessor/conditional_solver.hpp"
 #include "frontend/analysis/preprocessor/macro_processor.hpp"
 
-class sv_preprocessor {
-public:
-    sv_preprocessor(const std::filesystem::path &in);
-    std::string preprocess(const std::filesystem::path &in);
-    std::string preprocess(std::istream& in);
-    static std::string flatten_source(std::istream &in);
-    void set_include_directories(const std::vector<std::string> &i_d){include_directories = i_d;}
-private:
-    typedef std::unordered_map<std::string, std::variant<std::string, function_macro>> definitions_map;
-    std::string parse_include_path(const std::string_view &v);
-    std::string get_define_replacement(const std::string_view &v);
-    void parse_definition(const std::string_view &sv, int prefix_length);
-    static std::string_view parse_one_arg_directive(const std::string_view &sv, int prefix_length);
-    uint64_t line_number;
-    definitions_map definitions;
-    std::string path;
-    conditional_solver c_solver;
-    std::vector<std::string> include_directories;
+namespace preprocessor {
+    class sv_preprocessor {
+    public:
+        sv_preprocessor(const std::filesystem::path &in);
+        std::string preprocess(const std::filesystem::path &in);
+        std::string preprocess(std::istream& in);
+        static std::string flatten_source(std::istream &in);
+        void set_include_directories(const std::vector<std::string> &i_d){include_directories = i_d;}
+    private:
+        typedef std::unordered_map<std::string, std::variant<std::string, function_macro>> definitions_map;
+        std::string parse_include_path(const std::string_view &v);
+        std::string get_define_replacement(const std::string_view &v);
+        void parse_definition(const std::string_view &sv, int prefix_length);
+        static std::string_view parse_one_arg_directive(const std::string_view &sv, int prefix_length);
+        uint64_t line_number;
+        definitions_map definitions;
+        std::string path;
+        conditional_solver c_solver;
+        std::vector<std::string> include_directories;
 
-    static constexpr auto identifier_pattern = ctre::search<R"(`([a-zA-Z_][a-zA-Z0-9_]*)(\s*\()*)">;
-};
+        static constexpr auto identifier_pattern = ctre::search<R"(`([a-zA-Z_][a-zA-Z0-9_]*)(\s*\()*)">;
+    };
+}
 
 
 

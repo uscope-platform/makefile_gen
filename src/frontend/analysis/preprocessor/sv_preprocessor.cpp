@@ -17,250 +17,252 @@
 #include "frontend/analysis/preprocessor/sv_preprocessor.hpp"
 
 
-sv_preprocessor::sv_preprocessor(const std::filesystem::path &in) {
-    path = in;
-    line_number = 1;
-}
-
-std::string sv_preprocessor::preprocess(const std::filesystem::path &in) {
-    path = in;
-    std::ifstream ifs(in);
-    return preprocess(ifs);
-}
-
-std::string sv_preprocessor::preprocess(std::istream &in) {
-    macro_processor macro_engine(definitions , line_number, path);
-
-    auto flat_source= flatten_source(in);
-    std::istringstream iss(flat_source);
-    std::ostringstream out;
-
-    std::string line;
-    line_number = 1;
-    while (std::getline(iss, line)) {
-       std::string_view trimmed_line = macro_processor::ltrim(line);
-
-        bool skipped_directive = trimmed_line.starts_with("`resetall")
-        || trimmed_line.starts_with("`timescale")
-        || trimmed_line.starts_with("`default_nettype")
-        || trimmed_line.starts_with("`nounconnected_drive")
-        || trimmed_line.starts_with("`unconnected_drive")
-        || trimmed_line.starts_with("`endcelldefine")
-        || trimmed_line.starts_with("`celldefine")
-        || trimmed_line.starts_with("`pragma")
-        || trimmed_line.starts_with("`end_keywords")
-        || trimmed_line.starts_with("`begin_keywords")
-        || trimmed_line.starts_with("`line");
-        std::string uncommented_line = line;
-        if (line.contains("//")) {
-            uncommented_line = line.substr(0, line.find("//"));
-        }
-
-        if (trimmed_line.starts_with("`define") && c_solver.is_active()) {
-          parse_definition(trimmed_line, 7);
-        } else if (trimmed_line.starts_with("`include")&& c_solver.is_active()) {
-            auto included_file = parse_include_path(trimmed_line);
-            auto current_line =line_number;
-            auto current_path = path;
-            path = included_file;
-            preprocess(included_file);
-            line_number = current_line;
-            path = current_path;
-        } else if (trimmed_line.starts_with("`ifdef")) {
-            auto condition = parse_one_arg_directive(trimmed_line, 6);
-            c_solver.start_loop(definitions.contains(std::string(condition)));
-        } else if (trimmed_line.starts_with("`ifndef")) {
-            auto condition = parse_one_arg_directive(trimmed_line, 7);
-            c_solver.start_loop(!definitions.contains(std::string(condition)));
-        } else if (trimmed_line.starts_with("`elsif")) {
-            auto condition = parse_one_arg_directive(trimmed_line, 6);
-            c_solver.advance_elseif(definitions.contains(std::string(condition)));
-        } else if (trimmed_line.starts_with("`else")) {
-            c_solver.advance_else();
-        } else if (trimmed_line.starts_with("`endif")) {
-            c_solver.close_loop();
-        } else if (trimmed_line.starts_with("`undef") && c_solver.is_active()) {
-            auto identifier = parse_one_arg_directive(trimmed_line, 6);
-            definitions.erase(std::string(identifier));
-        } else if (trimmed_line.starts_with("`undefineall") && c_solver.is_active()) {
-            definitions.clear();
-        } else if (!skipped_directive && c_solver.is_active()) {
-
-            out << macro_engine.process_macro(uncommented_line) << std::endl;
-        }
-        line_number++;
-    }
-    auto retval = out.str();
-    retval.pop_back();
-    return retval;
-}
-
-
-std::string sv_preprocessor::parse_include_path(const std::string_view &line) {
-    auto start_identifier = line.find_first_of("\"<");
-    std::string file_path;
-    if (start_identifier == std::string_view::npos) {
-        throw std::runtime_error(fmt::format("Malformed include [{}] at line {} in file: {}", line,line_number, path));
-    }else if (line[start_identifier] == '\"') {
-        auto end_identifier = line.substr(start_identifier+1).find_first_of('"');
-        auto name = line.substr(start_identifier+1, end_identifier);
-        if (name.starts_with('/')) return std::string(name);
-        auto dir = std::string(std::filesystem::path(path).parent_path()/name);
-        return dir;
-    } else {
-        auto filename = std::string(line.substr(start_identifier+1, line.find_first_of('>')- start_identifier-1));
-        for (std::filesystem::path dir: include_directories) {
-            auto full_path = dir/ filename;
-            if (std::filesystem::exists(full_path)) return full_path;
-        }
-        throw std::runtime_error(fmt::format("included file not found: {}", filename));
-    }
-}
-
-std::string sv_preprocessor::get_define_replacement(const std::string_view &identifier) {
-    std::string_view purged_identifier = {identifier.begin()+1, identifier.end()};
-    std::string replacement;
-    if (purged_identifier == "__FILE__") {
-        replacement = "\"" + path + "\"";
-
-    } else if (purged_identifier == "__LINE__"){
-        replacement = std::to_string(line_number);
-    } else {
-        auto id = std::string(purged_identifier);
-        if (!definitions.contains(id)) {
-            throw std::runtime_error(fmt::format("{}:{} MACRO {} is not defined", path, line_number, id));
-        }
-        auto def = definitions.at(id);
-        if (std::holds_alternative<std::string>(def)) {
-            replacement = std::get<std::string>(def);
-        }
-    }
-    return replacement;
-}
-
-void sv_preprocessor::parse_definition(const std::string_view &sv, int prefix_length) {
-    auto trimmed_view = sv.substr(prefix_length);
-    trimmed_view = trimmed_view.substr(trimmed_view.find_first_not_of("\t "));
-    auto id_last = trimmed_view.find_first_of("\t (");
-    auto identifier = trimmed_view.substr(0, id_last);
-    if (id_last == std::string_view::npos) {
-        definitions[std::string(identifier)] = "";
-        return;
-    }
-    auto remaining_view = trimmed_view.substr(id_last+1);
-    if (trimmed_view[id_last] == '(') {
-        auto macro = macro_processor::parse_function_macro(trimmed_view.substr(id_last+1));
-        if (!macro.has_value()) {
-            throw std::runtime_error(fmt::format("The arguments list in macro {} is never closed [{}]", identifier, path));
-        }
-        definitions[std::string(identifier)] = macro.value();
-    } else {
-        auto value = remaining_view.substr(remaining_view.find_first_not_of("\t "));
-        definitions[std::string(identifier)] =  std::string{value};
+namespace preprocessor {
+    sv_preprocessor::sv_preprocessor(const std::filesystem::path &in) {
+        path = in;
+        line_number = 1;
     }
 
-}
+    std::string sv_preprocessor::preprocess(const std::filesystem::path &in) {
+        path = in;
+        std::ifstream ifs(in);
+        return preprocess(ifs);
+    }
 
-std::string_view sv_preprocessor::parse_one_arg_directive(const std::string_view &sv, int prefix_length) {
-    auto trimmed_line = sv.substr(prefix_length);
-    return trimmed_line.substr( trimmed_line.find_first_not_of(' '));
-}
+    std::string sv_preprocessor::preprocess(std::istream &in) {
+        macro_processor macro_engine(definitions , line_number, path);
 
+        auto flat_source= flatten_source(in);
+        std::istringstream iss(flat_source);
+        std::ostringstream out;
 
-std::string sv_preprocessor::flatten_source(std::istream &in) {
-    std::string content((std::istreambuf_iterator(in)),
-                             std::istreambuf_iterator<char>());
+        std::string line;
+        line_number = 1;
+        while (std::getline(iss, line)) {
+            std::string_view trimmed_line = macro_processor::ltrim(line);
 
-    std::string result;
-    result.reserve(content.size());
-    size_t cursor = 0;
-    bool in_string = false;
-    bool in_macro = false;
-
-    // Source flattening uses a search and append approach to be cache and SIMD friendly
-    // The main loop keeps searching for potentially problematic characters and appends as needed
-    while (cursor < content.size()) {
-
-        size_t next_identifier = content.find_first_of("/\"\\`\n\r", cursor);
-
-        if (next_identifier == std::string_view::npos) {
-            result.append(content.substr(cursor));
-            break;
-        }
-
-        if (next_identifier > cursor) {
-            result.append(content.substr(cursor, next_identifier - cursor));
-        }
-        cursor = next_identifier;
-        char trigger = content[cursor];
-
-        if (trigger == '\n' || trigger == '\r') {
-            in_macro = false;
-            result.push_back(trigger);
-            cursor++;
-        } else if (trigger == '`') {
-            auto directive = content.substr(cursor);
-            if (directive.starts_with("`define")) {
-                in_macro = true;
+            bool skipped_directive = trimmed_line.starts_with("`resetall")
+            || trimmed_line.starts_with("`timescale")
+            || trimmed_line.starts_with("`default_nettype")
+            || trimmed_line.starts_with("`nounconnected_drive")
+            || trimmed_line.starts_with("`unconnected_drive")
+            || trimmed_line.starts_with("`endcelldefine")
+            || trimmed_line.starts_with("`celldefine")
+            || trimmed_line.starts_with("`pragma")
+            || trimmed_line.starts_with("`end_keywords")
+            || trimmed_line.starts_with("`begin_keywords")
+            || trimmed_line.starts_with("`line");
+            std::string uncommented_line = line;
+            if (line.contains("//")) {
+                uncommented_line = line.substr(0, line.find("//"));
             }
-            result.push_back('`');
-            cursor++;
-        } else if (trigger == '/') {
-         if (cursor != content.size()-1) {
-             if (content[cursor + 1] == '/') {
-                 size_t end = content.find('\n', cursor + 2);
-                 if (end == std::string_view::npos) end = content.size();
-                 cursor = end;
-                 if (content[end-1] =='\\') {
-                     cursor = content.find('\n', end+1);
-                 }
-             } else if (content[cursor + 1] == '*') {
-                 size_t end = content.find("*/", cursor + 2);
-                 if (end == std::string_view::npos) end = content.size() - 2;
-                 cursor = end + 2;
-             }
-             else {
-                 result.push_back('/');
-                 cursor++;
-             }
-         } else {
-             result.push_back('/');
-             cursor++;
-         }
-        } else if (trigger == '"') {
-            if (in_string) {
-                in_string = false;
-            } else {
-                in_string = true;
+
+            if (trimmed_line.starts_with("`define") && c_solver.is_active()) {
+                parse_definition(trimmed_line, 7);
+            } else if (trimmed_line.starts_with("`include")&& c_solver.is_active()) {
+                auto included_file = parse_include_path(trimmed_line);
+                auto current_line =line_number;
+                auto current_path = path;
+                path = included_file;
+                preprocess(included_file);
+                line_number = current_line;
+                path = current_path;
+            } else if (trimmed_line.starts_with("`ifdef")) {
+                auto condition = parse_one_arg_directive(trimmed_line, 6);
+                c_solver.start_loop(definitions.contains(std::string(condition)));
+            } else if (trimmed_line.starts_with("`ifndef")) {
+                auto condition = parse_one_arg_directive(trimmed_line, 7);
+                c_solver.start_loop(!definitions.contains(std::string(condition)));
+            } else if (trimmed_line.starts_with("`elsif")) {
+                auto condition = parse_one_arg_directive(trimmed_line, 6);
+                c_solver.advance_elseif(definitions.contains(std::string(condition)));
+            } else if (trimmed_line.starts_with("`else")) {
+                c_solver.advance_else();
+            } else if (trimmed_line.starts_with("`endif")) {
+                c_solver.close_loop();
+            } else if (trimmed_line.starts_with("`undef") && c_solver.is_active()) {
+                auto identifier = parse_one_arg_directive(trimmed_line, 6);
+                definitions.erase(std::string(identifier));
+            } else if (trimmed_line.starts_with("`undefineall") && c_solver.is_active()) {
+                definitions.clear();
+            } else if (!skipped_directive && c_solver.is_active()) {
+
+                out << macro_engine.process_macro(uncommented_line) << std::endl;
             }
-            result.push_back('"');
-            cursor++;
-        } else if (trigger == '\\') {
-            if (cursor + 1 < content.size()) {
-                char next = content[cursor + 1];
+            line_number++;
+        }
+        auto retval = out.str();
+        retval.pop_back();
+        return retval;
+    }
 
-                // skip backslash and newline when necessary
-                if (next == '\n' || next == '\r') {
-                    if (in_macro || in_string) {
-                        cursor += (next == '\r' && content[cursor+2] == '\n') ? 3 : 2;
 
+    std::string sv_preprocessor::parse_include_path(const std::string_view &line) {
+        auto start_identifier = line.find_first_of("\"<");
+        std::string file_path;
+        if (start_identifier == std::string_view::npos) {
+            throw std::runtime_error(fmt::format("Malformed include [{}] at line {} in file: {}", line,line_number, path));
+        }else if (line[start_identifier] == '\"') {
+            auto end_identifier = line.substr(start_identifier+1).find_first_of('"');
+            auto name = line.substr(start_identifier+1, end_identifier);
+            if (name.starts_with('/')) return std::string(name);
+            auto dir = std::string(std::filesystem::path(path).parent_path()/name);
+            return dir;
+        } else {
+            auto filename = std::string(line.substr(start_identifier+1, line.find_first_of('>')- start_identifier-1));
+            for (std::filesystem::path dir: include_directories) {
+                auto full_path = dir/ filename;
+                if (std::filesystem::exists(full_path)) return full_path;
+            }
+            throw std::runtime_error(fmt::format("included file not found: {}", filename));
+        }
+    }
+
+    std::string sv_preprocessor::get_define_replacement(const std::string_view &identifier) {
+        std::string_view purged_identifier = {identifier.begin()+1, identifier.end()};
+        std::string replacement;
+        if (purged_identifier == "__FILE__") {
+            replacement = "\"" + path + "\"";
+
+        } else if (purged_identifier == "__LINE__"){
+            replacement = std::to_string(line_number);
+        } else {
+            auto id = std::string(purged_identifier);
+            if (!definitions.contains(id)) {
+                throw std::runtime_error(fmt::format("{}:{} MACRO {} is not defined", path, line_number, id));
+            }
+            auto def = definitions.at(id);
+            if (std::holds_alternative<std::string>(def)) {
+                replacement = std::get<std::string>(def);
+            }
+        }
+        return replacement;
+    }
+
+    void sv_preprocessor::parse_definition(const std::string_view &sv, int prefix_length) {
+        auto trimmed_view = sv.substr(prefix_length);
+        trimmed_view = trimmed_view.substr(trimmed_view.find_first_not_of("\t "));
+        auto id_last = trimmed_view.find_first_of("\t (");
+        auto identifier = trimmed_view.substr(0, id_last);
+        if (id_last == std::string_view::npos) {
+            definitions[std::string(identifier)] = "";
+            return;
+        }
+        auto remaining_view = trimmed_view.substr(id_last+1);
+        if (trimmed_view[id_last] == '(') {
+            auto macro = macro_processor::parse_function_macro(trimmed_view.substr(id_last+1));
+            if (!macro.has_value()) {
+                throw std::runtime_error(fmt::format("The arguments list in macro {} is never closed [{}]", identifier, path));
+            }
+            definitions[std::string(identifier)] = macro.value();
+        } else {
+            auto value = remaining_view.substr(remaining_view.find_first_not_of("\t "));
+            definitions[std::string(identifier)] =  std::string{value};
+        }
+
+    }
+
+    std::string_view sv_preprocessor::parse_one_arg_directive(const std::string_view &sv, int prefix_length) {
+        auto trimmed_line = sv.substr(prefix_length);
+        return trimmed_line.substr( trimmed_line.find_first_not_of(' '));
+    }
+
+
+    std::string sv_preprocessor::flatten_source(std::istream &in) {
+        std::string content((std::istreambuf_iterator(in)),
+                                 std::istreambuf_iterator<char>());
+
+        std::string result;
+        result.reserve(content.size());
+        size_t cursor = 0;
+        bool in_string = false;
+        bool in_macro = false;
+
+        // Source flattening uses a search and append approach to be cache and SIMD friendly
+        // The main loop keeps searching for potentially problematic characters and appends as needed
+        while (cursor < content.size()) {
+
+            size_t next_identifier = content.find_first_of("/\"\\`\n\r", cursor);
+
+            if (next_identifier == std::string_view::npos) {
+                result.append(content.substr(cursor));
+                break;
+            }
+
+            if (next_identifier > cursor) {
+                result.append(content.substr(cursor, next_identifier - cursor));
+            }
+            cursor = next_identifier;
+            char trigger = content[cursor];
+
+            if (trigger == '\n' || trigger == '\r') {
+                in_macro = false;
+                result.push_back(trigger);
+                cursor++;
+            } else if (trigger == '`') {
+                auto directive = content.substr(cursor);
+                if (directive.starts_with("`define")) {
+                    in_macro = true;
+                }
+                result.push_back('`');
+                cursor++;
+            } else if (trigger == '/') {
+                if (cursor != content.size()-1) {
+                    if (content[cursor + 1] == '/') {
+                        size_t end = content.find('\n', cursor + 2);
+                        if (end == std::string_view::npos) end = content.size();
+                        cursor = end;
+                        if (content[end-1] =='\\') {
+                            cursor = content.find('\n', end+1);
+                        }
+                    } else if (content[cursor + 1] == '*') {
+                        size_t end = content.find("*/", cursor + 2);
+                        if (end == std::string_view::npos) end = content.size() - 2;
+                        cursor = end + 2;
+                    }
+                    else {
+                        result.push_back('/');
+                        cursor++;
+                    }
+                } else {
+                    result.push_back('/');
+                    cursor++;
+                }
+            } else if (trigger == '"') {
+                if (in_string) {
+                    in_string = false;
+                } else {
+                    in_string = true;
+                }
+                result.push_back('"');
+                cursor++;
+            } else if (trigger == '\\') {
+                if (cursor + 1 < content.size()) {
+                    char next = content[cursor + 1];
+
+                    // skip backslash and newline when necessary
+                    if (next == '\n' || next == '\r') {
+                        if (in_macro || in_string) {
+                            cursor += (next == '\r' && content[cursor+2] == '\n') ? 3 : 2;
+
+                            continue;
+                        }
+                    }
+
+                    //keep escaped quotes as is
+                    if (in_string && next == '"') {
+                        result.push_back('\\');
+                        result.push_back('"');
+                        cursor += 2;
                         continue;
                     }
                 }
-
-                //keep escaped quotes as is
-                if (in_string && next == '"') {
-                    result.push_back('\\');
-                    result.push_back('"');
-                    cursor += 2;
-                    continue;
-                }
+                // pass through normal backslashes
+                result.push_back('\\');
+                cursor++;
             }
-            // pass through normal backslashes
-            result.push_back('\\');
-            cursor++;
         }
-    }
 
-    return result;
+        return result;
+    }
 }

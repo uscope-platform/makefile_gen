@@ -33,6 +33,7 @@
 #include "data_model/data_store.hpp"
 #include "data_model/DataFile.hpp"
 #include "analysis/sv_analyzer.hpp"
+#include "analysis/preprocessor/sv_preprocessor.hpp"
 #include "analysis/vhdl_analyzer.hpp"
 #include "third_party/thread_pool.hpp"
 
