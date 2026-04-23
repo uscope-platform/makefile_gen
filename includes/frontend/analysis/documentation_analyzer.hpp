@@ -18,8 +18,9 @@
 
 #include <sstream>
 #include <utility>
-#include <antlr4-runtime.h>
 #include <regex>
+#include <spdlog/spdlog.h>
+#include <ctre.hpp>
 #include <nlohmann/json.hpp>
 
 #include "data_model/documentation/module_documentation.hpp"
@@ -29,8 +30,8 @@
 
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/parameters/Parameters_map.hpp"
-#include "mgp_sv/sv2017Lexer.h"
-#include "mgp_sv/sv2017.h"
+
+static constexpr auto doc_comment_pattern = ctre::search<R"(/\*\*.*?\*\*/)">;
 
 class documentation_analyzer {
 public:

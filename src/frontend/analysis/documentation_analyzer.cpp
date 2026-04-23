@@ -15,7 +15,7 @@
 
 #include "frontend/analysis/documentation_analyzer.hpp"
 
-#include <spdlog/spdlog.h>
+
 
 
 documentation_analyzer::documentation_analyzer(const std::string &s) {
@@ -26,16 +26,15 @@ documentation_analyzer::documentation_analyzer(const std::string &s) {
 }
 
 void documentation_analyzer::parse_documentation(std::istream &stream) {
-    antlr4::ANTLRInputStream antlr_istream(stream);
-    mgp_sv::sv2017Lexer lexer(&antlr_istream);
-    antlr4::CommonTokenStream documentation_stream(&lexer,mgp_sv::sv2017Lexer::DOCUMENTATION_CHANNEL);
 
-    while(true){
-        size_t current_tok = documentation_stream.LA(1);
-        if(current_tok ==mgp_sv::sv2017::EOF) break;
-        raw_documentation_comments.push_back(documentation_stream.LT(1)->getText());
-        documentation_stream.consume();
+    std:: stringstream ss;
+    ss<< stream.rdbuf();
+    auto file_c = ss.str();
+    for (auto &match: ctre::search_all<R"(/\*\*.*?\*\*/)">(file_c)) {
+        auto purged_str = match.str().substr(3, match.view().size()-6);
+        raw_documentation_comments.push_back(purged_str);
     }
+
 }
 
 
@@ -43,9 +42,7 @@ void documentation_analyzer::process_documentation(Parameters_map parameters) {
     parameters_dict = std::move(parameters);
     std::vector<nlohmann::json> documentation_comments;
 
-    for(auto &str:raw_documentation_comments){
-        std::regex comment_boundaries(R"((\/\*\*|\*\*\/))");
-        std::string content = std::regex_replace(str, comment_boundaries, "");
+    for(auto &content:raw_documentation_comments){
 
         nlohmann::json obj;
         std::istringstream ss(content);

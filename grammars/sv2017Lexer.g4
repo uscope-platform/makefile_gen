@@ -6,7 +6,6 @@
  **/
 lexer grammar sv2017Lexer;
 
-channels { DOCUMENTATION_CHANNEL}
 
 KW_DOLAR_ERROR: '$error';
 KW_DOLAR_FATAL: '$fatal';
@@ -401,7 +400,7 @@ ONE_LINE_COMMENT:
                        ) -> channel(HIDDEN);
 
 
-DOCUMENTATION_COMMENT: '/**' .*? '**/' -> channel(DOCUMENTATION_CHANNEL);
+DOCUMENTATION_COMMENT: '/**' .*? '**/' -> channel(HIDDEN);
 
 BLOCK_COMMENT: '/*' .*? '*/' -> channel(HIDDEN);
 

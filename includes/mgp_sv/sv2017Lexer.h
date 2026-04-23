@@ -102,10 +102,6 @@ public:
   };
 
   enum {
-    DOCUMENTATION_CHANNEL = 2
-  };
-
-  enum {
     TABLE_MODE = 1
   };
 
