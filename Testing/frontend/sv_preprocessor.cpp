@@ -722,6 +722,27 @@ endmodule
 }
 
 
+
+TEST(preprocessor, macro_pattern_in_comment) {
+    auto test_pattern = std::istringstream(R"(
+// `UNDEFINED macro in a commend
+module test_module ();
+    parameter TEST_PARAM = 5;
+endmodule
+    )");
+
+    sv_preprocessor preproc("/tmp/file.sv");
+    auto res = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+
+module test_module ();
+    parameter TEST_PARAM = 5;
+endmodule
+    )";
+    EXPECT_EQ(check_string, res);
+}
+
+
 TEST(preprocessor, simple_macro_with_default_args) {
     auto test_pattern = std::istringstream(R"(
         `define  ADD(a=5, b=7)  a+b

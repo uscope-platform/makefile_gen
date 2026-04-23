@@ -51,6 +51,10 @@ std::string sv_preprocessor::preprocess(std::istream &in) {
         || trimmed_line.starts_with("`end_keywords")
         || trimmed_line.starts_with("`begin_keywords")
         || trimmed_line.starts_with("`line");
+        std::string uncommented_line = line;
+        if (line.contains("//")) {
+            uncommented_line = line.substr(0, line.find("//"));
+        }
 
         if (trimmed_line.starts_with("`define") && c_solver.is_active()) {
           parse_definition(trimmed_line, 7);
@@ -82,7 +86,7 @@ std::string sv_preprocessor::preprocess(std::istream &in) {
             definitions.clear();
         } else if (!skipped_directive && c_solver.is_active()) {
 
-            out << macro_engine.process_macro(line) << std::endl;
+            out << macro_engine.process_macro(uncommented_line) << std::endl;
         }
         line_number++;
     }
