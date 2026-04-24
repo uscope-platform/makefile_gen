@@ -29,11 +29,13 @@ int main(int argc, char *argv[]){
         bool generate_periph_definition = false;
         bool generate_lattice = false;
         bool synth_design = false;
+        bool dump_ast = false;
         bool keep_makefile = false;
         std::string get_setting;
         std::string set_setting;
         std::string new_app_name;
         std::string new_app_lang;
+        std::vector<std::string> parse_targets;
         bool measure_runtime = true;
         bool no_cache = false;
         bool trace = false;
@@ -69,6 +71,8 @@ int main(int argc, char *argv[]){
     app.add_flag("--no_open", opts.no_open, "Do not open the generated project");
     app.add_flag("--sim_script", opts.generate_sim_script, "Generate simulation script for the chosen platform");
     app.add_flag("--synth_script", opts.generate_synth_script, "Generate Synthesis script for the chosen platform");
+    app.add_flag("--dump_ast", opts.dump_ast, "Dump AST to /tmp/ast.json");
+    app.add_option("--parse",opts.parse_targets, "Specify a list of files to parse");
 
     CLI11_PARSE(app, argc, argv);
 
@@ -125,6 +129,23 @@ int main(int argc, char *argv[]){
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(opts.no_cache, opts.cache_dir);
 
+    if (!opts.parse_targets.empty()) {
+        for (auto &target :opts.parse_targets) {
+            if (!std::filesystem::exists(target)) {
+                return -1;
+            }
+            std::unique_ptr<std::istream> is = std::make_unique<std::ifstream>(target);
+            try {
+                sv_analyzer analyzer(target, is);
+                analyzer.preprocess();
+                auto resources = analyzer.analyze();
+            } catch (std::runtime_error &err) {
+                return -1;
+            }
+
+        }
+        return 0;
+    }
 
     // analyze repository content and update cache
     Repository_walker walker(s_store, d_store, opts.no_cache, s_store->get_setting_list("excluded_paths"));
@@ -136,168 +157,166 @@ int main(int argc, char *argv[]){
 
     // Parse depfile
     if(opts.target.empty()) opts.target = std::filesystem::current_path().string() + "/Depfile";
-    if(!std::filesystem::exists(opts.target)){
-        spdlog::error("Depfile not found: {} does not exist", opts.target);
-        exit(1);
-    }
+    if(std::filesystem::exists(opts.target)) {
+        Depfile dep(opts.target);
 
-    Depfile dep(opts.target);
-
-    // Resolve auxiliary files (scripts and constraints)
-    Auxiliary_resolver aux_resolver(d_store);
+        // Resolve auxiliary files (scripts and constraints)
+        Auxiliary_resolver aux_resolver(d_store);
 
 
-    auto scripts = dep.get_scripts();
+        auto scripts = dep.get_scripts();
 
-    python_script_runner py_runner;
-    py_runner.run_python_scripts(aux_resolver.get_python_objects(scripts));
-    auto script_deps = aux_resolver.get_tcl_script_paths(scripts);
+        python_script_runner py_runner;
+        py_runner.run_python_scripts(aux_resolver.get_python_objects(scripts));
+        auto script_deps = aux_resolver.get_tcl_script_paths(scripts);
 
-    auto additional_script_deps = py_runner.get_script_dependencies();
-    script_deps.insert(script_deps.end(), additional_script_deps.begin(), additional_script_deps.end());
+        auto additional_script_deps = py_runner.get_script_dependencies();
+        script_deps.insert(script_deps.end(), additional_script_deps.begin(), additional_script_deps.end());
 
-    std::set<std::string> additional_constr_deps = py_runner.get_constraints_dependencies();
-    std::unordered_set<std::string> constr_deps = aux_resolver.get_constraints(dep.get_constraints());
-    constr_deps.insert(additional_constr_deps.begin(), additional_constr_deps.end());
+        std::set<std::string> additional_constr_deps = py_runner.get_constraints_dependencies();
+        std::unordered_set<std::string> constr_deps = aux_resolver.get_constraints(dep.get_constraints());
+        constr_deps.insert(additional_constr_deps.begin(), additional_constr_deps.end());
 
-    walker.analyze_dir();
-
-
-    // BUILD ASTs FOR TOP LEVEL AND ADDITIONAL MODULES
-    HDL_ast_builder_v2 b(s_store, d_store, dep);
-    auto synth_ast = b.build_ast(std::vector({dep.get_synth_tl()}))[0];
-    auto additional_synth_modules = b.build_ast(dep.get_additional_synth_modules());
-    additional_synth_modules.insert(additional_synth_modules.end(), synth_ast);
-
-    auto sim_ast = b.build_ast(std::vector({dep.get_sim_tl()}))[0];
-    auto additional_sim_modules = b.build_ast(dep.get_additional_sim_modules());
-    additional_sim_modules.insert(additional_sim_modules.end(), sim_ast);
+        walker.analyze_dir();
 
 
-    // RESOLVE DEPENDENCIES
-    Dependency_resolver_v2 synth_r(additional_synth_modules, d_store);
-    auto synth_sources = synth_r.get_dependencies();
-    auto synth_packages = synth_r.get_packages();
-    auto synth_data = synth_r.get_data();
+        // BUILD ASTs FOR TOP LEVEL AND ADDITIONAL MODULES
+        HDL_ast_builder_v2 b(s_store, d_store, dep);
+        auto synth_ast = b.build_ast(std::vector({dep.get_synth_tl()}))[0];
+        auto additional_synth_modules = b.build_ast(dep.get_additional_synth_modules());
+        additional_synth_modules.insert(additional_synth_modules.end(), synth_ast);
 
-    Dependency_resolver_v2 sim_r(additional_sim_modules, d_store);
-    auto sim_sources = sim_r.get_dependencies();
-    auto sim_packages = sim_r.get_packages();
-    auto sim_data = sim_r.get_data();
+        auto sim_ast = b.build_ast(std::vector({dep.get_sim_tl()}))[0];
+        auto additional_sim_modules = b.build_ast(dep.get_additional_sim_modules());
+        additional_sim_modules.insert(additional_sim_modules.end(), sim_ast);
 
-    // BUS MAPPING
 
-    control_bus_analysis bus_analyzer(dep);
-    bus_analyzer.analyze_bus(synth_ast);
+        // RESOLVE DEPENDENCIES
+        Dependency_resolver_v2 synth_r(additional_synth_modules, d_store);
+        auto synth_sources = synth_r.get_dependencies();
+        auto synth_packages = synth_r.get_packages();
+        auto synth_data = synth_r.get_data();
 
-    proxy_bus_analysis proxy_analyzer(s_store, d_store, dep);
-    proxy_analyzer.analyze(synth_ast);
+        Dependency_resolver_v2 sim_r(additional_sim_modules, d_store);
+        auto sim_sources = sim_r.get_dependencies();
+        auto sim_packages = sim_r.get_packages();
+        auto sim_data = sim_r.get_data();
+
+        // BUS MAPPING
+
+        control_bus_analysis bus_analyzer(dep);
+        bus_analyzer.analyze_bus(synth_ast);
+
+        proxy_bus_analysis proxy_analyzer(s_store, d_store, dep);
+        proxy_analyzer.analyze(synth_ast);
         //Generate makefile
-    if(opts.generate_xilinx){
+        if(opts.generate_xilinx){
 
-        xilinx_project_generator generator(s_store);
+            xilinx_project_generator generator(s_store);
 
-        project_data data;
+            project_data data;
 
-        data.name = dep.get_project_name();
-        data.synth_sources = synth_sources;
-        data.package_synth_sources = synth_packages;
-        data.data_synth_sources = synth_data;
-        data.sim_sources = sim_sources;
-        data.package_sim_sources = sim_packages;
-        data.data_sim_sources = sim_data;
-        data.scripts = script_deps;
-        data.constraints_sources = constr_deps;
-        data.tb_tl = dep.get_sim_tl();
-        data.synth_tl = dep.get_synth_tl();
-        data.commons_dir = dep.get_include_directories();
-        data.repo_dir = std::filesystem::current_path();
-        data.target_part = dep.get_target();
-        if(dep.has_board_def()){
-            data.board_part = dep.get_board_def();
+            data.name = dep.get_project_name();
+            data.synth_sources = synth_sources;
+            data.package_synth_sources = synth_packages;
+            data.data_synth_sources = synth_data;
+            data.sim_sources = sim_sources;
+            data.package_sim_sources = sim_packages;
+            data.data_sim_sources = sim_data;
+            data.scripts = script_deps;
+            data.constraints_sources = constr_deps;
+            data.tb_tl = dep.get_sim_tl();
+            data.synth_tl = dep.get_synth_tl();
+            data.commons_dir = dep.get_include_directories();
+            data.repo_dir = std::filesystem::current_path();
+            data.target_part = dep.get_target();
+            if(dep.has_board_def()){
+                data.board_part = dep.get_board_def();
+            }
+
+            generator.set_data(data);
+
+
+            if (opts.generate_sim_script) {
+                std::ofstream simfile("sim.sh");
+                generator.generate_sim_script(simfile);
+                if (!std::filesystem::exists("sim.tcl")) {
+                    std::ofstream ofs("sim.tcl");
+
+                    generator.write_sim_control_script(ofs);
+                }
+            } else if (opts.generate_synth_script) {
+                std::ofstream simfile("synth.tcl");
+                generator.generate_synth_script(simfile);
+            } else {
+                std::ofstream makefile("makefile.tcl");
+                generator.write_makefile(makefile);
+
+
+                Vivado_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
+                manager.create_project("makefile.tcl",  !opts.no_open);
+            }
         }
 
-        generator.set_data(data);
+        if(opts.generate_lattice){
+            lattice_project_generator generator(s_store);
+            project_data data;
 
+            data.name = dep.get_project_name();
+            data.synth_sources = synth_sources;
+            data.package_synth_sources = synth_packages;
+            data.data_synth_sources = synth_data;
+            data.sim_sources = sim_sources;
+            data.package_sim_sources = sim_packages;
+            data.data_sim_sources = sim_data;
+            data.scripts = script_deps;
+            data.constraints_sources = constr_deps;
+            data.tb_tl = dep.get_sim_tl();
+            data.synth_tl = dep.get_sim_tl();
 
-        if (opts.generate_sim_script) {
-            std::ofstream simfile("sim.sh");
-            generator.generate_sim_script(simfile);
-            if (!std::filesystem::exists("sim.tcl")) {
-                std::ofstream ofs("sim.tcl");
-
-                generator.write_sim_control_script(ofs);
-            }
-        } else if (opts.generate_synth_script) {
-            std::ofstream simfile("synth.tcl");
-            generator.generate_synth_script(simfile);
-        } else {
             std::ofstream makefile("makefile.tcl");
             generator.write_makefile(makefile);
 
-
-            Vivado_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
+            Radiant_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
             manager.create_project("makefile.tcl",  !opts.no_open);
+        }
+
+        peripheral_definition_generator periph_def_gen(d_store, synth_ast);
+        application_definition_generator app_def_gen(
+                synth_ast,
+                periph_def_gen.get_peripheral_definitions(),
+                periph_def_gen.get_alias_map(),
+                periph_def_gen.get_variant_peripherals()
+                );
+
+        data_acquisition_analysis daq_analyzer(true);
+        daq_analyzer.analyze(synth_ast);
+        app_def_gen.add_datapoints(daq_analyzer.get_datapoints());
+        app_def_gen.add_channel_groups(daq_analyzer.get_channel_groups());
+        app_def_gen.add_scope(daq_analyzer.get_scope_data());
+
+        app_def_gen.construct_application(dep.get_project_name());
+
+
+        if(opts.generate_periph_definition){
+            periph_def_gen.write_definition_file(dep.get_project_name() + "_periph_def.json");
+        }
+
+        if(opts.generate_app_definition){
+            app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
+        }
+        if (opts.dump_ast) {
+            auto ast_dump = synth_ast->dump().dump(4);
+            std::ofstream ast_file("/tmp/ast.json");
+            ast_file << ast_dump;
+            ast_file.close();
         }
     }
 
-    if(opts.generate_lattice){
-        lattice_project_generator generator(s_store);
-        project_data data;
-
-        data.name = dep.get_project_name();
-        data.synth_sources = synth_sources;
-        data.package_synth_sources = synth_packages;
-        data.data_synth_sources = synth_data;
-        data.sim_sources = sim_sources;
-        data.package_sim_sources = sim_packages;
-        data.data_sim_sources = sim_data;
-        data.scripts = script_deps;
-        data.constraints_sources = constr_deps;
-        data.tb_tl = dep.get_sim_tl();
-        data.synth_tl = dep.get_sim_tl();
-
-        std::ofstream makefile("makefile.tcl");
-        generator.write_makefile(makefile);
-
-        Radiant_manager manager(s_store, !opts.keep_makefile, dep.get_project_name());
-        manager.create_project("makefile.tcl",  !opts.no_open);
-    }
-
-    peripheral_definition_generator periph_def_gen(d_store, synth_ast);
-    application_definition_generator app_def_gen(
-            synth_ast,
-            periph_def_gen.get_peripheral_definitions(),
-            periph_def_gen.get_alias_map(),
-            periph_def_gen.get_variant_peripherals()
-            );
-
-    data_acquisition_analysis daq_analyzer(true);
-    daq_analyzer.analyze(synth_ast);
-    app_def_gen.add_datapoints(daq_analyzer.get_datapoints());
-    app_def_gen.add_channel_groups(daq_analyzer.get_channel_groups());
-    app_def_gen.add_scope(daq_analyzer.get_scope_data());
-
-    app_def_gen.construct_application(dep.get_project_name());
-
-
-    if(opts.generate_periph_definition){
-        periph_def_gen.write_definition_file(dep.get_project_name() + "_periph_def.json");
-    }
-
-    if(opts.generate_app_definition){
-        app_def_gen.write_definition_file(dep.get_project_name() + "_app_def.json");
-    }
-
-    auto ast_dump = synth_ast->dump().dump(4);
-    std::ofstream ast_file("/tmp/ast.json");
-    ast_file << ast_dump;
-    ast_file.close();
     if(opts.measure_runtime){
         auto t2 = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> ms_double = t2 - t1;
         spdlog::info("The Program runtime was : {} ms", std::to_string(ms_double.count()));
     }
-
     return 0;
 }
