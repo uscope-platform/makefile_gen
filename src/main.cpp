@@ -127,25 +127,26 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(opts.no_cache, opts.cache_dir);
-
     if (!opts.parse_targets.empty()) {
         for (auto &target :opts.parse_targets) {
             if (!std::filesystem::exists(target)) {
-                return -1;
+                std::cout << "Target: " << target << " not found" << std::endl;
+                return 50;
             }
             std::unique_ptr<std::istream> is = std::make_unique<std::ifstream>(target);
             try {
                 sv_analyzer analyzer(target, is);
-                analyzer.preprocess();
                 auto resources = analyzer.analyze();
             } catch (std::runtime_error &err) {
-                return -1;
+                std::cout << err.what();
+                return 51;
             }
 
         }
         return 0;
     }
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(opts.no_cache, opts.cache_dir);
 
     // analyze repository content and update cache
     Repository_walker walker(s_store, d_store, opts.no_cache, s_store->get_setting_list("excluded_paths"));
