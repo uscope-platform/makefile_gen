@@ -14,8 +14,8 @@
 //  limitations under the License.
 
 
-#ifndef HDL_NET_FACTORY_HPP
-#define HDL_NET_FACTORY_HPP
+#ifndef ANANKE_HDL_NET_FACTORY_HPP
+#define ANANKE_HDL_NET_FACTORY_HPP
 
 #include "data_model/HDL/HDL_net.hpp"
 #include "data_model/HDL/factories/nets/HDL_repetition_factory.hpp"
@@ -62,4 +62,4 @@ private:
 
 
 
-#endif //HDL_NET_FACTORY_HPP
+#endif //ANANKE_HDL_NET_FACTORY_HPP

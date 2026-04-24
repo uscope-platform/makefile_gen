@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef HDL_FUNCTION_HPP
-#define HDL_FUNCTION_HPP
+#ifndef ANANKE_HDL_FUNCTION_HPP
+#define ANANKE_HDL_FUNCTION_HPP
 
 #include <string>
 #include <vector>
@@ -56,4 +56,4 @@ private:
 
 
 
-#endif //HDL_FUNCTION_HPP
+#endif //ANANKE_HDL_FUNCTION_HPP

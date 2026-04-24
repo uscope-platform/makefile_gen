@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_CONSTRAINTS_HPP
-#define MAKEFILEGEN_V2_CONSTRAINTS_HPP
+#ifndef ANANKE_CONSTRAINTS_HPP
+#define ANANKE_CONSTRAINTS_HPP
 
 #include <string>
 #include <vector>
@@ -47,4 +47,4 @@ private:
 
 
 
-#endif //MAKEFILEGEN_V2_CONSTRAINTS_HPP
+#endif //ANANKE_CONSTRAINTS_HPP

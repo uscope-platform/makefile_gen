@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_PROXY_BUS_ANALYSIS_HPP
-#define MAKEFILEGEN_V2_PROXY_BUS_ANALYSIS_HPP
+#ifndef ANANKE_PROXY_BUS_ANALYSIS_HPP
+#define ANANKE_PROXY_BUS_ANALYSIS_HPP
 
 #include "data_model/HDL/HDL_instance_AST.hpp"
 #include "analysis/HDL_ast_builder_v2.hpp"
@@ -32,4 +32,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_PROXY_BUS_ANALYSIS_HPP
+#endif //ANANKE_PROXY_BUS_ANALYSIS_HPP

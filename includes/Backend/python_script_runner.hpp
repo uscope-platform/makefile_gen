@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_PYTHON_SCRIPT_RUNNER_HPP
-#define MAKEFILEGEN_V2_PYTHON_SCRIPT_RUNNER_HPP
+#ifndef ANANKE_PYTHON_SCRIPT_RUNNER_HPP
+#define ANANKE_PYTHON_SCRIPT_RUNNER_HPP
 
 #include <set>
 #include <string>
@@ -38,4 +38,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_PYTHON_SCRIPT_RUNNER_HPP
+#endif //ANANKE_PYTHON_SCRIPT_RUNNER_HPP

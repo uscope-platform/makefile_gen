@@ -13,12 +13,9 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//
-// Created by vivado on 1/17/26.
-//
 
-#ifndef MAKEFILEGEN_V2_QUALIFIED_IDENTIFIER_HPP
-#define MAKEFILEGEN_V2_QUALIFIED_IDENTIFIER_HPP
+#ifndef ANANKE_QUALIFIED_IDENTIFIER_HPP
+#define ANANKE_QUALIFIED_IDENTIFIER_HPP
 
 #include <string>
 #include <variant>
@@ -60,4 +57,4 @@ struct qualified_identifier {
     }
 };
 
-#endif //MAKEFILEGEN_V2_QUALIFIED_IDENTIFIER_HPP
+#endif //ANANKE_QUALIFIED_IDENTIFIER_HPP

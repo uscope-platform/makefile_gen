@@ -14,8 +14,8 @@
 // limitations under the License.
 
 
-#ifndef MAKEFILEGEN_V2_CHANNEL_GROUP_HPP
-#define MAKEFILEGEN_V2_CHANNEL_GROUP_HPP
+#ifndef ANANKE_CHANNEL_GROUP_HPP
+#define ANANKE_CHANNEL_GROUP_HPP
 
 #include <string>
 #include <utility>
@@ -51,4 +51,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_CHANNEL_GROUP_HPP
+#endif //ANANKE_CHANNEL_GROUP_HPP

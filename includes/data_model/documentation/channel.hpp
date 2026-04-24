@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_CHANNEL_HPP
-#define MAKEFILEGEN_V2_CHANNEL_HPP
+#ifndef ANANKE_CHANNEL_HPP
+#define ANANKE_CHANNEL_HPP
 
 #include <string>
 #include <cstdint>
@@ -64,4 +64,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_CHANNEL_HPP
+#endif //ANANKE_CHANNEL_HPP

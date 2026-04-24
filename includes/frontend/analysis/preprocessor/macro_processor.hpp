@@ -14,8 +14,8 @@
 //  limitations under the License.
 
 
-#ifndef MAKEFILEGEN_V2_MACRO_PROCESSOR_HPP
-#define MAKEFILEGEN_V2_MACRO_PROCESSOR_HPP
+#ifndef ANANKE_MACRO_PROCESSOR_HPP
+#define ANANKE_MACRO_PROCESSOR_HPP
 
 #include <string>
 #include <optional>
@@ -88,4 +88,4 @@ namespace preprocessor {
         std::unordered_map<std::string, std::variant<std::string, function_macro>> &definitions;
     };
 }
-#endif //MAKEFILEGEN_V2_MACRO_PROCESSOR_HPP
+#endif //ANANKE_MACRO_PROCESSOR_HPP

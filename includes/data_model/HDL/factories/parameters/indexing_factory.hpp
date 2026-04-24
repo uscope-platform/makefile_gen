@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_INDEXING_FACTORY_HPP
-#define MAKEFILEGEN_V2_INDEXING_FACTORY_HPP
+#ifndef ANANKE_INDEXING_FACTORY_HPP
+#define ANANKE_INDEXING_FACTORY_HPP
 
 #include "data_model/HDL/parameters/Expression.hpp"
 #include "data_model/HDL/parameters/dimension.hpp"
@@ -41,4 +41,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_INDEXING_FACTORY_HPP
+#endif //ANANKE_INDEXING_FACTORY_HPP

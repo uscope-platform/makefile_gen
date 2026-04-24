@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_REPLICATION_FACTORY_HPP
-#define MAKEFILEGEN_V2_REPLICATION_FACTORY_HPP
+#ifndef ANANKE_REPLICATION_FACTORY_HPP
+#define ANANKE_REPLICATION_FACTORY_HPP
 
 #include "data_model/HDL/parameters/Replication.hpp"
 #include <stack>
@@ -43,4 +43,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_REPLICATION_FACTORY_HPP
+#endif //ANANKE_REPLICATION_FACTORY_HPP

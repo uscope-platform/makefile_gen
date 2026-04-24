@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_BUS_SPECS_MANAGER_HPP
-#define MAKEFILEGEN_V2_BUS_SPECS_MANAGER_HPP
+#ifndef ANANKE_BUS_SPECS_MANAGER_HPP
+#define ANANKE_BUS_SPECS_MANAGER_HPP
 
 #include <unordered_map>
 #include <string>
@@ -62,4 +62,4 @@ private:
 
 
 
-#endif //MAKEFILEGEN_V2_BUS_SPECS_MANAGER_HPP
+#endif //ANANKE_BUS_SPECS_MANAGER_HPP

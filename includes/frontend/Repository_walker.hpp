@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_REPOSITORY_WALKER_HPP
-#define MAKEFILEGEN_V2_REPOSITORY_WALKER_HPP
+#ifndef ANANKE_REPOSITORY_WALKER_HPP
+#define ANANKE_REPOSITORY_WALKER_HPP
 
 #include <string>
 #include <fstream>
@@ -90,4 +90,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_REPOSITORY_WALKER_HPP
+#endif //ANANKE_REPOSITORY_WALKER_HPP

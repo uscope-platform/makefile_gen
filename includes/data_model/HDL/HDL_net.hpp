@@ -14,8 +14,8 @@
 //  limitations under the License.
 
 
-#ifndef HDL_NET_HPP
-#define HDL_NET_HPP
+#ifndef ANANKE_HDL_NET_HPP
+#define ANANKE_HDL_NET_HPP
 
 #include<string>
 #include <nlohmann/json.hpp>
@@ -141,4 +141,4 @@ private:
 };
 
 
-#endif //HDL_NET_HPP
+#endif //ANANKE_HDL_NET_HPP

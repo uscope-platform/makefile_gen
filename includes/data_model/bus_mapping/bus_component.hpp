@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_MAPPER_BUS_COMPONENT_HPP
-#define MAKEFILEGEN_V2_MAPPER_BUS_COMPONENT_HPP
+#ifndef ANANKE_MAPPER_BUS_COMPONENT_HPP
+#define ANANKE_MAPPER_BUS_COMPONENT_HPP
 
 #include <string>
 #include <unordered_map>
@@ -45,4 +45,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_MAPPER_BUS_COMPONENT_HPP
+#endif //ANANKE_MAPPER_BUS_COMPONENT_HPP

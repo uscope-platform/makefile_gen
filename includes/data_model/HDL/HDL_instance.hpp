@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_HDL_INSTANCE_HPP
-#define MAKEFILEGEN_V2_HDL_INSTANCE_HPP
+#ifndef ANANKE_HDL_INSTANCE_HPP
+#define ANANKE_HDL_INSTANCE_HPP
 
 #include <unordered_map>
 #include <string>
@@ -120,4 +120,4 @@ protected:
 };
 
 
-#endif //MAKEFILEGEN_V2_HDL_INSTANCE_HPP
+#endif //ANANKE_HDL_INSTANCE_HPP

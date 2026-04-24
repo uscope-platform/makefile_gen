@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_PARAMETER_VALUE_BASE_HPP
-#define MAKEFILEGEN_V2_PARAMETER_VALUE_BASE_HPP
+#ifndef ANANKE_PARAMETER_VALUE_BASE_HPP
+#define ANANKE_PARAMETER_VALUE_BASE_HPP
 
 #include <set>
 #include <string>
@@ -79,4 +79,4 @@ protected:
 };
 
 
-#endif //MAKEFILEGEN_V2_PARAMETER_VALUE_BASE_HPP
+#endif //ANANKE_PARAMETER_VALUE_BASE_HPP

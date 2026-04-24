@@ -14,8 +14,8 @@
 //  limitations under the License.
 
 
-#ifndef MAKEFILEGEN_V2_CONCATENATION_HPP
-#define MAKEFILEGEN_V2_CONCATENATION_HPP
+#ifndef ANANKE_CONCATENATION_HPP
+#define ANANKE_CONCATENATION_HPP
 
 #include "data_model/HDL/parameters/Expression.hpp"
 #include "data_model/HDL/parameters/Parameter_value_base.hpp"
@@ -114,4 +114,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_CONCATENATION_HPP
+#endif //ANANKE_CONCATENATION_HPP

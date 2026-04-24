@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_DATA_ACQUISITION_ANALYSIS_HPP
-#define MAKEFILEGEN_V2_DATA_ACQUISITION_ANALYSIS_HPP
+#ifndef ANANKE_DATA_ACQUISITION_ANALYSIS_HPP
+#define ANANKE_DATA_ACQUISITION_ANALYSIS_HPP
 
 #include <memory>
 
@@ -72,4 +72,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_DATA_ACQUISITION_ANALYSIS_HPP
+#endif //ANANKE_DATA_ACQUISITION_ANALYSIS_HPP

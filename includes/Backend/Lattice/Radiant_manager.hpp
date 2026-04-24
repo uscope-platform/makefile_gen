@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_RADIANT_MANAGER_HPP
-#define MAKEFILEGEN_V2_RADIANT_MANAGER_HPP
+#ifndef ANANKE_RADIANT_MANAGER_HPP
+#define ANANKE_RADIANT_MANAGER_HPP
 
 #include <vector>
 #include <string>
@@ -33,4 +33,4 @@ private:
     std::string radiant_path;
 };
 
-#endif //MAKEFILEGEN_V2_RADIANT_MANAGER_HPP
+#endif //ANANKE_RADIANT_MANAGER_HPP

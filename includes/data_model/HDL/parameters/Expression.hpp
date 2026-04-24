@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_EXPRESSION_HPP
-#define MAKEFILEGEN_V2_EXPRESSION_HPP
+#ifndef ANANKE_EXPRESSION_HPP
+#define ANANKE_EXPRESSION_HPP
 
 
 #include <vector>
@@ -88,4 +88,4 @@ public:
 };
 
 
-#endif //MAKEFILEGEN_V2_EXPRESSION_HPP
+#endif //ANANKE_EXPRESSION_HPP

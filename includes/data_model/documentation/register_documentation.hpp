@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_REGISTER_DOCUMENTATION_HPP
-#define MAKEFILEGEN_V2_REGISTER_DOCUMENTATION_HPP
+#ifndef ANANKE_REGISTER_DOCUMENTATION_HPP
+#define ANANKE_REGISTER_DOCUMENTATION_HPP
 
 #include <string>
 #include <cereal/types/vector.hpp>
@@ -66,4 +66,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_REGISTER_DOCUMENTATION_HPP
+#endif //ANANKE_REGISTER_DOCUMENTATION_HPP

@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_MDARRAY_HPP
-#define MAKEFILEGEN_V2_MDARRAY_HPP
+#ifndef ANANKE_MDARRAY_HPP
+#define ANANKE_MDARRAY_HPP
 
 #include <vector>
 #include <cstdint>
@@ -313,4 +313,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_MDARRAY_HPP
+#endif //ANANKE_MDARRAY_HPP

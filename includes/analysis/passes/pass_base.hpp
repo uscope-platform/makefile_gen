@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_PASS_BASE_HPP
-#define MAKEFILEGEN_V2_PASS_BASE_HPP
+#ifndef ANANKE_PASS_BASE_HPP
+#define ANANKE_PASS_BASE_HPP
 
 #include <vector>
 #include <memory>
@@ -31,4 +31,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_PASS_BASE_HPP
+#endif //ANANKE_PASS_BASE_HPP

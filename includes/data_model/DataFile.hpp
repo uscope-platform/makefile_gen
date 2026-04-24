@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_DATAFILE_HPP
-#define MAKEFILEGEN_V2_DATAFILE_HPP
+#ifndef ANANKE_DATAFILE_HPP
+#define ANANKE_DATAFILE_HPP
 
 #include <string>
 #include <sstream>
@@ -44,4 +44,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_DATAFILE_HPP
+#endif //ANANKE_DATAFILE_HPP

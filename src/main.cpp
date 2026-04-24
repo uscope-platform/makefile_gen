@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
         bool no_open = false;
         bool clear_cache = false;
         bool refresh_cache = false;
-        std::string cache_dir = std::string(std::getenv("HOME")) + "/.makefilegen_store";
+        std::string cache_dir = std::string(std::getenv("HOME")) + "/.ananke_store";
         bool wait_profiler = false;
     } CLI_opt;
 

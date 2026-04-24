@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_INITIALIZATION_LIST_HPP
-#define MAKEFILEGEN_V2_INITIALIZATION_LIST_HPP
+#ifndef ANANKE_INITIALIZATION_LIST_HPP
+#define ANANKE_INITIALIZATION_LIST_HPP
 
 
 #include <vector>
@@ -103,4 +103,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_INITIALIZATION_LIST_HPP
+#endif //ANANKE_INITIALIZATION_LIST_HPP

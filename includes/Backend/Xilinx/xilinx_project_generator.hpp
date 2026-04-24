@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_XILINX_PROJECT_GENERATOR_HPP
-#define MAKEFILEGEN_V2_XILINX_PROJECT_GENERATOR_HPP
+#ifndef ANANKE_XILINX_PROJECT_GENERATOR_HPP
+#define ANANKE_XILINX_PROJECT_GENERATOR_HPP
 
 #include "../project_generator_base.hpp"
 #include <spdlog/spdlog.h>
@@ -34,4 +34,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_XILINX_PROJECT_GENERATOR_HPP
+#endif //ANANKE_XILINX_PROJECT_GENERATOR_HPP

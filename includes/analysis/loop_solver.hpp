@@ -14,8 +14,8 @@
 //  limitations under the License.
 
 
-#ifndef MAKEFILEGEN_V2_HDL_LOOP_SOLVER_HPP
-#define MAKEFILEGEN_V2_HDL_LOOP_SOLVER_HPP
+#ifndef ANANKE_HDL_LOOP_SOLVER_HPP
+#define ANANKE_HDL_LOOP_SOLVER_HPP
 
 
 #include <memory>
@@ -34,4 +34,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_HDL_LOOP_SOLVER_HPP
+#endif //ANANKE_HDL_LOOP_SOLVER_HPP

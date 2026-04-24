@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_PARAMETERS_MAP_HPP
-#define MAKEFILEGEN_V2_PARAMETERS_MAP_HPP
+#ifndef ANANKE_PARAMETERS_MAP_HPP
+#define ANANKE_PARAMETERS_MAP_HPP
 
 #include <vector>
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
@@ -134,4 +134,4 @@ private:
 
 
 
-#endif //MAKEFILEGEN_V2_PARAMETERS_MAP_HPP
+#endif //ANANKE_PARAMETERS_MAP_HPP

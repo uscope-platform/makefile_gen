@@ -14,8 +14,8 @@
 //  limitations under the License.
 
 
-#ifndef MAKEFILEGEN_V2_DIMENSION_HPP
-#define MAKEFILEGEN_V2_DIMENSION_HPP
+#ifndef ANANKE_DIMENSION_HPP
+#define ANANKE_DIMENSION_HPP
 
 #include "Expression.hpp"
 
@@ -31,4 +31,4 @@ typedef struct dims_struct{
 
 } dimension_t;
 
-#endif //MAKEFILEGEN_V2_DIMENSION_HPP
+#endif //ANANKE_DIMENSION_HPP

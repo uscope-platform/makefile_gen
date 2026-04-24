@@ -14,8 +14,8 @@
 //  limitations under the License.
 
 
-#ifndef HDL_FUNCTIONS_FACTORY_HPP
-#define HDL_FUNCTIONS_FACTORY_HPP
+#ifndef ANANKE_HDL_FUNCTIONS_FACTORY_HPP
+#define ANANKE_HDL_FUNCTIONS_FACTORY_HPP
 #include <string>
 
 #include "data_model/HDL/HDL_loop.hpp"
@@ -57,4 +57,4 @@ private:
 
 
 
-#endif //HDL_FUNCTIONS_FACTORY_HPP
+#endif //ANANKE_HDL_FUNCTIONS_FACTORY_HPP

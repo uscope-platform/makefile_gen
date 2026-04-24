@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_SCRIPT_HPP
-#define MAKEFILEGEN_V2_SCRIPT_HPP
+#ifndef ANANKE_SCRIPT_HPP
+#define ANANKE_SCRIPT_HPP
 
 #include <string>
 #include <vector>
@@ -78,4 +78,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_SCRIPT_HPP
+#endif //ANANKE_SCRIPT_HPP

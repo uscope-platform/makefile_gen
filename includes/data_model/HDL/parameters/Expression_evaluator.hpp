@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef EXPRESSION_EVALUATOR_HPP
-#define EXPRESSION_EVALUATOR_HPP
+#ifndef ANANKE_EXPRESSION_EVALUATOR_HPP
+#define ANANKE_EXPRESSION_EVALUATOR_HPP
 
 #include "data_model/HDL/parameters/Expression.hpp"
 
@@ -26,4 +26,4 @@ public:
 
 
 
-#endif //EXPRESSION_EVALUATOR_HPP
+#endif //ANANKE_EXPRESSION_EVALUATOR_HPP

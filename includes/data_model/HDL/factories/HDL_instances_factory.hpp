@@ -13,8 +13,8 @@
 // limitations under the License.
 // Unless required by applicable law or agreed to in writing, software
 
-#ifndef MAKEFILEGEN_V2_HDL_INSTANCES_FACTORY_HPP
-#define MAKEFILEGEN_V2_HDL_INSTANCES_FACTORY_HPP
+#ifndef ANANKE_HDL_INSTANCES_FACTORY_HPP
+#define ANANKE_HDL_INSTANCES_FACTORY_HPP
 
 #include "data_model/HDL/HDL_instance.hpp"
 #include "nets/HDL_range_factory.hpp"
@@ -75,4 +75,4 @@ private:
 
 
 
-#endif //MAKEFILEGEN_V2_HDL_INSTANCES_FACTORY_HPP
+#endif //ANANKE_HDL_INSTANCES_FACTORY_HPP

@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_HDL_INSTANCE_AST_HPP
-#define MAKEFILEGEN_V2_HDL_INSTANCE_AST_HPP
+#ifndef ANANKE_HDL_INSTANCE_AST_HPP
+#define ANANKE_HDL_INSTANCE_AST_HPP
 
 #include <vector>
 #include <memory>
@@ -130,4 +130,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_HDL_INSTANCE_AST_HPP
+#endif //ANANKE_HDL_INSTANCE_AST_HPP

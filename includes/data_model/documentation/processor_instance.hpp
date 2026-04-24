@@ -14,8 +14,8 @@
 // limitations under the License.
 
 
-#ifndef MAKEFILEGEN_V2_PROCESSOR_INSTANCE_HPP
-#define MAKEFILEGEN_V2_PROCESSOR_INSTANCE_HPP
+#ifndef ANANKE_PROCESSOR_INSTANCE_HPP
+#define ANANKE_PROCESSOR_INSTANCE_HPP
 
 #include <string>
 #include <utility>
@@ -90,4 +90,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_PROCESSOR_INSTANCE_HPP
+#endif //ANANKE_PROCESSOR_INSTANCE_HPP

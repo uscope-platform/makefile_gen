@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_CACHE_MANAGER_HPP
-#define MAKEFILEGEN_V2_CACHE_MANAGER_HPP
+#ifndef ANANKE_CACHE_MANAGER_HPP
+#define ANANKE_CACHE_MANAGER_HPP
 
 #include <filesystem>
 #include <gtest/gtest.h>
@@ -51,4 +51,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_CACHE_MANAGER_HPP
+#endif //ANANKE_CACHE_MANAGER_HPP

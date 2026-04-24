@@ -14,8 +14,8 @@
 //  limitations under the License.
 
 
-#ifndef MAKEFILEGEN_V2_EXPRESSIONS_FACTORY_HPP
-#define MAKEFILEGEN_V2_EXPRESSIONS_FACTORY_HPP
+#ifndef ANANKE_EXPRESSIONS_FACTORY_HPP
+#define ANANKE_EXPRESSIONS_FACTORY_HPP
 
 #include "data_model/HDL/parameters/Expression.hpp"
 
@@ -44,4 +44,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_EXPRESSIONS_FACTORY_HPP
+#endif //ANANKE_EXPRESSIONS_FACTORY_HPP

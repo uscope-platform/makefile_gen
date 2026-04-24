@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_TOOLCHAIN_MANAGER_HPP
-#define MAKEFILEGEN_V2_TOOLCHAIN_MANAGER_HPP
+#ifndef ANANKE_TOOLCHAIN_MANAGER_HPP
+#define ANANKE_TOOLCHAIN_MANAGER_HPP
 
 
 #include <string>
@@ -48,4 +48,4 @@ protected:
     std::string project_name;
     std::shared_ptr<settings_store> s_store;
 };
-#endif //MAKEFILEGEN_V2_TOOLCHAIN_MANAGER_HPP
+#endif //ANANKE_TOOLCHAIN_MANAGER_HPP

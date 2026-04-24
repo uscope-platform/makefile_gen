@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(makefilegen_v2)
+project(ananke)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")

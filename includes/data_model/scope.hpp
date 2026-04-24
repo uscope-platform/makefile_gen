@@ -12,8 +12,8 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-#ifndef MAKEFILEGEN_V2_SCOPE_HPP
-#define MAKEFILEGEN_V2_SCOPE_HPP
+#ifndef ANANKE_SCOPE_HPP
+#define ANANKE_SCOPE_HPP
 
 #include <cstdint>
 
@@ -24,4 +24,4 @@ struct scope_data {
     uint64_t mux_address = 0;
 };
 
-#endif //MAKEFILEGEN_V2_SCOPE_HPP
+#endif //ANANKE_SCOPE_HPP

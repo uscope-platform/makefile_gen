@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_HDL_MODULES_FACTORY_HPP
-#define MAKEFILEGEN_V2_HDL_MODULES_FACTORY_HPP
+#ifndef ANANKE_HDL_MODULES_FACTORY_HPP
+#define ANANKE_HDL_MODULES_FACTORY_HPP
 
 #include "data_model/HDL/HDL_Resource.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
@@ -42,4 +42,4 @@ public:
 };
 
 
-#endif //MAKEFILEGEN_V2_HDL_MODULES_FACTORY_HPP
+#endif //ANANKE_HDL_MODULES_FACTORY_HPP

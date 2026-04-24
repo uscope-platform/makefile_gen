@@ -14,8 +14,8 @@
 //  limitations under the License.
 
 
-#ifndef MAKEFILEGEN_V2_TERNARY_HPP
-#define MAKEFILEGEN_V2_TERNARY_HPP
+#ifndef ANANKE_TERNARY_HPP
+#define ANANKE_TERNARY_HPP
 
 #include <memory>
 #include "data_model/HDL/parameters/Parameter_value_base.hpp"
@@ -57,4 +57,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_TERNARY_HPP
+#endif //ANANKE_TERNARY_HPP

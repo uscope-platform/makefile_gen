@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_MAIN_HPP
-#define MAKEFILEGEN_V2_MAIN_HPP
+#ifndef ANANKE_MAIN_HPP
+#define ANANKE_MAIN_HPP
 
 #include <string>
 
@@ -42,4 +42,4 @@
 #include "Backend/uplatform/peripheral_definition_generator.hpp"
 
 
-#endif //MAKEFILEGEN_V2_MAIN_HPP
+#endif //ANANKE_MAIN_HPP

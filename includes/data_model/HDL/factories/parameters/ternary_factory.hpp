@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_TERNARY_FACTORY_HPP
-#define MAKEFILEGEN_V2_TERNARY_FACTORY_HPP
+#ifndef ANANKE_TERNARY_FACTORY_HPP
+#define ANANKE_TERNARY_FACTORY_HPP
 
 #include "data_model/HDL/parameters/Parameter_value_base.hpp"
 #include "data_model/HDL/parameters/Ternary.hpp"
@@ -41,4 +41,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_TERNARY_FACTORY_HPP
+#endif //ANANKE_TERNARY_FACTORY_HPP

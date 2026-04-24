@@ -14,8 +14,8 @@
 // Unless required by applicable law or agreed to in writing, software
 
 
-#ifndef MAKEFILEGEN_V2_HDL_DEFINITIONS_HPP
-#define MAKEFILEGEN_V2_HDL_DEFINITIONS_HPP
+#ifndef ANANKE_HDL_DEFINITIONS_HPP
+#define ANANKE_HDL_DEFINITIONS_HPP
 
 enum dependency_class {
     module=0,
@@ -35,4 +35,4 @@ enum port_direction_t {
     raw_port = 4
 };
 
-#endif //MAKEFILEGEN_V2_HDL_DEFINITIONS_HPP
+#endif //ANANKE_HDL_DEFINITIONS_HPP

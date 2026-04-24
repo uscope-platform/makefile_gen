@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_SV_VISITOR_HPP
-#define MAKEFILEGEN_V2_SV_VISITOR_HPP
+#ifndef ANANKE_SV_VISITOR_HPP
+#define ANANKE_SV_VISITOR_HPP
 
 #include "mgp_sv/sv2017BaseListener.h"
 #include "mgp_sv/sv2017.h"
@@ -215,4 +215,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_SV_VISITOR_HPP
+#endif //ANANKE_SV_VISITOR_HPP

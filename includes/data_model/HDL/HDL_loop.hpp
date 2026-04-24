@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef HDL_LOOP_HPP
-#define HDL_LOOP_HPP
+#ifndef ANANKE_HDL_LOOP_HPP
+#define ANANKE_HDL_LOOP_HPP
 
 
 #include <optional>
@@ -102,4 +102,4 @@ private:
 
 };
 
-#endif //HDL_LOOP_HPP
+#endif //ANANKE_HDL_LOOP_HPP

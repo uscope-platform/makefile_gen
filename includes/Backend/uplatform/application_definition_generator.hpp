@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_APPLICATION_DEFINITION_GENERATOR_HPP
-#define MAKEFILEGEN_V2_APPLICATION_DEFINITION_GENERATOR_HPP
+#ifndef ANANKE_APPLICATION_DEFINITION_GENERATOR_HPP
+#define ANANKE_APPLICATION_DEFINITION_GENERATOR_HPP
 
 #include <string>
 #include <utility>
@@ -71,4 +71,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_APPLICATION_DEFINITION_GENERATOR_HPP
+#endif //ANANKE_APPLICATION_DEFINITION_GENERATOR_HPP

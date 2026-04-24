@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_RESOURCES_FACTORY_BASE_HPP
-#define MAKEFILEGEN_V2_RESOURCES_FACTORY_BASE_HPP
+#ifndef ANANKE_RESOURCES_FACTORY_BASE_HPP
+#define ANANKE_RESOURCES_FACTORY_BASE_HPP
 
 #include <string>
 #include <stack>
@@ -41,4 +41,4 @@ protected:
 
 
 
-#endif //MAKEFILEGEN_V2_RESOURCES_FACTORY_BASE_HPP
+#endif //ANANKE_RESOURCES_FACTORY_BASE_HPP

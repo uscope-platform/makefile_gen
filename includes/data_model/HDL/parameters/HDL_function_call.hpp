@@ -14,8 +14,8 @@
 //  limitations under the License.
 
 
-#ifndef MAKEFILEGEN_V2_HDL_FUNCTION_CALL_HPP
-#define MAKEFILEGEN_V2_HDL_FUNCTION_CALL_HPP
+#ifndef ANANKE_HDL_FUNCTION_CALL_HPP
+#define ANANKE_HDL_FUNCTION_CALL_HPP
 
 #include "data_model/HDL/parameters/Parameter_value_base.hpp"
 #include "data_model/HDL/parameters/Expression_component.hpp"
@@ -77,4 +77,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_HDL_FUNCTION_CALL_HPP
+#endif //ANANKE_HDL_FUNCTION_CALL_HPP

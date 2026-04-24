@@ -13,20 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+//
+// Created by vivado on 4/24/26.
+//
 
-#ifndef ANANKE_PROCESSORS_DETECTION_HPP
-#define ANANKE_PROCESSORS_DETECTION_HPP
-
-#include "analysis/passes/pass_base.hpp"
-
-class processor_detection : public pass_base{
-public:
-    processor_detection(const std::shared_ptr<data_store> &d);
-    void process_node(const std::shared_ptr<HDL_instance_AST> &node) override;
-private:
-    std::shared_ptr<data_store> d_store;
-};
-
-
-
-#endif //ANANKE_PROCESSORS_DETECTION_HPP
+#include "ananke.hpp"

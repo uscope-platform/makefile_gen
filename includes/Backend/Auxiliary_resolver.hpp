@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_AUXILIARY_RESOLVER_HPP
-#define MAKEFILEGEN_V2_AUXILIARY_RESOLVER_HPP
+#ifndef ANANKE_AUXILIARY_RESOLVER_HPP
+#define ANANKE_AUXILIARY_RESOLVER_HPP
 
 #include <utility>
 #include <unordered_set>
@@ -40,4 +40,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_AUXILIARY_RESOLVER_HPP
+#endif //ANANKE_AUXILIARY_RESOLVER_HPP

@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_VIVADO_MANAGER_HPP
-#define MAKEFILEGEN_V2_VIVADO_MANAGER_HPP
+#ifndef ANANKE_VIVADO_MANAGER_HPP
+#define ANANKE_VIVADO_MANAGER_HPP
 
 #include <string>
 #include <spdlog/spdlog.h>
@@ -47,4 +47,4 @@ protected:
 };
 
 
-#endif //MAKEFILEGEN_V2_VIVADO_MANAGER_HPP
+#endif //ANANKE_VIVADO_MANAGER_HPP

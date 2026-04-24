@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_BACKEND_TYPES_HPP
-#define MAKEFILEGEN_V2_BACKEND_TYPES_HPP
+#ifndef ANANKE_BACKEND_TYPES_HPP
+#define ANANKE_BACKEND_TYPES_HPP
 
 #include <map>
 #include <set>
@@ -51,4 +51,4 @@ struct project_data {
     std::vector<script_source> scripts;
 };
 
-#endif //MAKEFILEGEN_V2_BACKEND_TYPES_HPP
+#endif //ANANKE_BACKEND_TYPES_HPP

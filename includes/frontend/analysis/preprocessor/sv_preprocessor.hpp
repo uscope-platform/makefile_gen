@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_SV_PREPROCESSOR_HPP
-#define MAKEFILEGEN_V2_SV_PREPROCESSOR_HPP
+#ifndef ANANKE_SV_PREPROCESSOR_HPP
+#define ANANKE_SV_PREPROCESSOR_HPP
 
 #include <ctre.hpp>
 #include <filesystem>
@@ -57,4 +57,4 @@ namespace preprocessor {
 
 
 
-#endif //MAKEFILEGEN_V2_SV_PREPROCESSOR_HPP
+#endif //ANANKE_SV_PREPROCESSOR_HPP

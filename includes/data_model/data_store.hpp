@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_DATA_STORE_HPP
-#define MAKEFILEGEN_V2_DATA_STORE_HPP
+#ifndef ANANKE_DATA_STORE_HPP
+#define ANANKE_DATA_STORE_HPP
 
 #include <unordered_map>
 #include <filesystem>
@@ -116,4 +116,4 @@ private:
 
 
 
-#endif //MAKEFILEGEN_V2_DATA_STORE_HPP
+#endif //ANANKE_DATA_STORE_HPP

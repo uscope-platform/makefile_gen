@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_DEPFILE_HPP
-#define MAKEFILEGEN_V2_DEPFILE_HPP
+#ifndef ANANKE_DEPFILE_HPP
+#define ANANKE_DEPFILE_HPP
 
 #include <string>
 #include <fstream>
@@ -61,4 +61,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_DEPFILE_HPP
+#endif //ANANKE_DEPFILE_HPP

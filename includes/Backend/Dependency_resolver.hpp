@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_DEPENDENCY_RESOLVER_HPP
-#define MAKEFILEGEN_V2_DEPENDENCY_RESOLVER_HPP
+#ifndef ANANKE_DEPENDENCY_RESOLVER_HPP
+#define ANANKE_DEPENDENCY_RESOLVER_HPP
 
 #include <string>
 #include <vector>
@@ -48,4 +48,4 @@ private:
 
 
 
-#endif //MAKEFILEGEN_V2_DEPENDENCY_RESOLVER_HPP
+#endif //ANANKE_DEPENDENCY_RESOLVER_HPP

@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_VHDL_VISITOR_HPP
-#define MAKEFILEGEN_V2_VHDL_VISITOR_HPP
+#ifndef ANANKE_VHDL_VISITOR_HPP
+#define ANANKE_VHDL_VISITOR_HPP
 
 #include <string>
 #include <utility>
@@ -48,4 +48,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_VHDL_VISITOR_HPP
+#endif //ANANKE_VHDL_VISITOR_HPP

@@ -14,19 +14,16 @@
 //  limitations under the License.
 
 
-#ifndef ANANKE_PROCESSORS_DETECTION_HPP
-#define ANANKE_PROCESSORS_DETECTION_HPP
 
-#include "analysis/passes/pass_base.hpp"
+#ifndef ANANKE_ANANKE_HPP
+#define ANANKE_ANANKE_HPP
 
-class processor_detection : public pass_base{
-public:
-    processor_detection(const std::shared_ptr<data_store> &d);
-    void process_node(const std::shared_ptr<HDL_instance_AST> &node) override;
-private:
-    std::shared_ptr<data_store> d_store;
+
+
+class ananke {
+
 };
 
 
 
-#endif //ANANKE_PROCESSORS_DETECTION_HPP
+#endif //ANANKE_ANANKE_HPP

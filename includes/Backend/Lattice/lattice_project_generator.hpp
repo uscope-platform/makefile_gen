@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_LATTICE_PROJECT_GENERATOR_HPP
-#define MAKEFILEGEN_V2_LATTICE_PROJECT_GENERATOR_HPP
+#ifndef ANANKE_LATTICE_PROJECT_GENERATOR_HPP
+#define ANANKE_LATTICE_PROJECT_GENERATOR_HPP
 
 
 #include "../project_generator_base.hpp"
@@ -27,4 +27,4 @@ public:
     void generate_synth_script(std::ostream &output) override;
 };
 
-#endif //MAKEFILEGEN_V2_LATTICE_PROJECT_GENERATOR_HPP
+#endif //ANANKE_LATTICE_PROJECT_GENERATOR_HPP

@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_DOCUMENTATION_ANALYZER_HPP
-#define MAKEFILEGEN_V2_DOCUMENTATION_ANALYZER_HPP
+#ifndef ANANKE_DOCUMENTATION_ANALYZER_HPP
+#define ANANKE_DOCUMENTATION_ANALYZER_HPP
 
 #include <sstream>
 #include <utility>
@@ -65,4 +65,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_DOCUMENTATION_ANALYZER_HPP
+#endif //ANANKE_DOCUMENTATION_ANALYZER_HPP

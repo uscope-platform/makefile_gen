@@ -14,8 +14,8 @@
 //  limitations under the License.
 
 
-#ifndef MAKEFILEGEN_V2_CAST_HPP
-#define MAKEFILEGEN_V2_CAST_HPP
+#ifndef ANANKE_CAST_HPP
+#define ANANKE_CAST_HPP
 
 
 #include "Expression.hpp"
@@ -82,4 +82,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_CAST_HPP
+#endif //ANANKE_CAST_HPP

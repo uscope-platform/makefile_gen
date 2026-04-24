@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_HDL_LOOPS_FACTORY_H
-#define MAKEFILEGEN_V2_HDL_LOOPS_FACTORY_H
+#ifndef ANANKE_HDL_LOOPS_FACTORY_H
+#define ANANKE_HDL_LOOPS_FACTORY_H
 
 #include <vector>
 #include "data_model/HDL/HDL_instance.hpp"
@@ -60,4 +60,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_HDL_LOOPS_FACTORY_H
+#endif //ANANKE_HDL_LOOPS_FACTORY_H

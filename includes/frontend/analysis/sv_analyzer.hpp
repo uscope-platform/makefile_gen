@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_SV_ANALYZER_HPP
-#define MAKEFILEGEN_V2_SV_ANALYZER_HPP
+#ifndef ANANKE_SV_ANALYZER_HPP
+#define ANANKE_SV_ANALYZER_HPP
 
 #include <string>
 #include <sstream>
@@ -60,4 +60,4 @@ public:
     void syntaxError(antlr4::Recognizer *recognizer, antlr4::Token * offendingSymbol, size_t line, size_t charPositionInLine,
                      const std::string &msg, std::exception_ptr e) override;
 };
-#endif //MAKEFILEGEN_V2_SV_ANALYZER_HPP
+#endif //ANANKE_SV_ANALYZER_HPP

@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_CONDITIONAL_SOLVER_HPP
-#define MAKEFILEGEN_V2_CONDITIONAL_SOLVER_HPP
+#ifndef ANANKE_CONDITIONAL_SOLVER_HPP
+#define ANANKE_CONDITIONAL_SOLVER_HPP
 
 
 #include <vector>
@@ -41,4 +41,4 @@ namespace preprocessor {
 }
 
 
-#endif //MAKEFILEGEN_V2_CONDITIONAL_SOLVER_HPP
+#endif //ANANKE_CONDITIONAL_SOLVER_HPP

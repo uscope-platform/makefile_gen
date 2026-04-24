@@ -14,8 +14,8 @@
 //  limitations under the License.
 
 
-#ifndef MAKEFILEGEN_V2_CAST_FACTORY_HPP
-#define MAKEFILEGEN_V2_CAST_FACTORY_HPP
+#ifndef ANANKE_CAST_FACTORY_HPP
+#define ANANKE_CAST_FACTORY_HPP
 
 #include <memory>
 
@@ -49,4 +49,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_CAST_FACTORY_HPP
+#endif //ANANKE_CAST_FACTORY_HPP

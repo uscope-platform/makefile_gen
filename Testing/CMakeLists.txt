@@ -10,7 +10,7 @@ FetchContent_Populate(
         SOURCE_DIR ${CHECK_FILES_DIR}
 )
 
-set(MAKEFILEGEN_TESTS
+set(ANANKE_TESTS
         test_main.cpp
         data_model/Depfile_test.cpp
         data_model/Script_test.cpp
@@ -47,7 +47,7 @@ set(MAKEFILEGEN_TESTS
 )
 
 
-add_executable(tests ${MAKEFILEGEN_TESTS})
+add_executable(tests ${ANANKE_TESTS})
 
 
 # Locate GTest

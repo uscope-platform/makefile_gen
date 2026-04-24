@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef HDL_REPETITION_FACTORY_HPP
-#define HDL_REPETITION_FACTORY_HPP
+#ifndef ANANKE_HDL_REPETITION_FACTORY_HPP
+#define ANANKE_HDL_REPETITION_FACTORY_HPP
 
 #include <string>
 
@@ -40,4 +40,4 @@ private:
 
 
 
-#endif //HDL_REPETITION_FACTORY_HPP
+#endif //ANANKE_HDL_REPETITION_FACTORY_HPP

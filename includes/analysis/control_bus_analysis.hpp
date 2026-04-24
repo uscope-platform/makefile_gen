@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_CONTROL_BUS_ANALYSIS_HPP
-#define MAKEFILEGEN_V2_CONTROL_BUS_ANALYSIS_HPP
+#ifndef ANANKE_CONTROL_BUS_ANALYSIS_HPP
+#define ANANKE_CONTROL_BUS_ANALYSIS_HPP
 
 #include "data_model/HDL/HDL_instance_AST.hpp"
 #include "data_model/bus_mapping/bus_specs_manager.hpp"
@@ -77,4 +77,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_CONTROL_BUS_ANALYSIS_HPP
+#endif //ANANKE_CONTROL_BUS_ANALYSIS_HPP

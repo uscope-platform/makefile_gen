@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_PROJECT_GENERATOR_BASE_HPP
-#define MAKEFILEGEN_V2_PROJECT_GENERATOR_BASE_HPP
+#ifndef ANANKE_PROJECT_GENERATOR_BASE_HPP
+#define ANANKE_PROJECT_GENERATOR_BASE_HPP
 
 
 #include <string>
@@ -46,4 +46,4 @@ protected:
 };
 
 
-#endif //MAKEFILEGEN_V2_PROJECT_GENERATOR_BASE_HPP
+#endif //ANANKE_PROJECT_GENERATOR_BASE_HPP

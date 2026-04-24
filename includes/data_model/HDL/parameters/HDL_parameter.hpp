@@ -13,8 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_HDL_PARAMETER_HPP
-#define MAKEFILEGEN_V2_HDL_PARAMETER_HPP
+#ifndef ANANKE_HDL_PARAMETER_HPP
+#define ANANKE_HDL_PARAMETER_HPP
 
 #include <string>
 #include <regex>
@@ -157,4 +157,4 @@ constexpr std::string parameter_type_to_string(HDL_parameter::parameter_type in)
     }
 }
 
-#endif //MAKEFILEGEN_V2_HDL_PARAMETER_HPP
+#endif //ANANKE_HDL_PARAMETER_HPP

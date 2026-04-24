@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MAKEFILEGEN_V2_PERIPHERAL_DEFINITION_GENERATOR_HPP
-#define MAKEFILEGEN_V2_PERIPHERAL_DEFINITION_GENERATOR_HPP
+#ifndef ANANKE_PERIPHERAL_DEFINITION_GENERATOR_HPP
+#define ANANKE_PERIPHERAL_DEFINITION_GENERATOR_HPP
 
 #include <memory>
 #include <nlohmann/json.hpp>
@@ -63,4 +63,4 @@ private:
 };
 
 
-#endif //MAKEFILEGEN_V2_PERIPHERAL_DEFINITION_GENERATOR_HPP
+#endif //ANANKE_PERIPHERAL_DEFINITION_GENERATOR_HPP

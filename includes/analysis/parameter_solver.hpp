@@ -14,8 +14,8 @@
 //  limitations under the License.
 
 
-#ifndef MAKEFILEGEN_V2_PARAMETER_SOLVING_PASS_HPP
-#define MAKEFILEGEN_V2_PARAMETER_SOLVING_PASS_HPP
+#ifndef ANANKE_PARAMETER_SOLVING_PASS_HPP
+#define ANANKE_PARAMETER_SOLVING_PASS_HPP
 
 #include "analysis/passes/pass_base.hpp"
 #include "data_model/HDL/HDL_Resource.hpp"
@@ -56,4 +56,4 @@ public:
 };
 
 
-#endif //MAKEFILEGEN_V2_PARAMETER_SOLVING_PASS_HPP
+#endif //ANANKE_PARAMETER_SOLVING_PASS_HPP
