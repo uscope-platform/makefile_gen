@@ -54,7 +54,7 @@ add_executable(tests ${MAKEFILEGEN_TESTS})
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
-target_link_libraries(tests PRIVATE ${GTEST_LIBRARIES} makefile_gen_lib gtest::gtest)
+target_link_libraries(tests PRIVATE ${GTEST_LIBRARIES} ananke_lib gtest::gtest)
 set(CHECK_FILES_DIR ${CMAKE_CURRENT_BINARY_DIR}/check_files)
 file(MAKE_DIRECTORY ${CHECK_FILES_DIR})
 

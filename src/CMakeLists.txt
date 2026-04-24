@@ -1,8 +1,8 @@
 
 
-add_library(makefile_gen_lib STATIC)
+add_library(ananke_lib STATIC)
 
-target_sources(makefile_gen_lib
+target_sources(ananke_lib
     PRIVATE
     analysis/HDL_ast_builder_v2.cpp
     analysis/passes/pass_manager.cpp
@@ -85,7 +85,7 @@ target_sources(makefile_gen_lib
     frontend/cache_manager.cpp
 )
 
-target_link_libraries(makefile_gen_lib PUBLIC
+target_link_libraries(ananke_lib PUBLIC
         mgp_sv_lib
         mgp_vh_lib
         antlr4_static
@@ -104,18 +104,18 @@ set(TEMPLATE_FILES /
         ../templates/make_bitstream_xlnx.j2)
 
 
-add_executable(makefile_gen ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+add_executable(ananke ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set_property(TARGET makefile_gen PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
+    set_property(TARGET ananke PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
 endif(CMAKE_BUILD_TYPE STREQUAL "Release")
 
-target_link_libraries(makefile_gen PRIVATE makefile_gen_lib  CLI11::CLI11 )
+target_link_libraries(ananke PRIVATE ananke_lib  CLI11::CLI11 )
 
 ## INSTALLATION SECTION
 
-install(TARGETS makefile_gen DESTINATION /usr/local/bin)
-install(DIRECTORY ../bus_specs/ DESTINATION /usr/local/etc/makefile_gen/specs)
+install(TARGETS ananke DESTINATION /usr/local/bin)
+install(DIRECTORY ../bus_specs/ DESTINATION /usr/local/etc/ananke/specs)
 
 ## PACKAGING SECTION
 
@@ -123,8 +123,8 @@ SET(MAJOR_VERSION "1")
 SET(MINOR_VERSION "0")
 SET(PATCH_VERSION "0")
 
-SET(CPACK_PACKAGE_DESCRIPTION "makefile_gen FPGA tool")
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Simple build system and project generator for FPGA")
+SET(CPACK_PACKAGE_DESCRIPTION "ananke FPGA/SoC orchestration tool")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Orchestration tool for FPGA and SoC development")
 SET(CPACK_PACKAGE_VENDOR "filippo savi")
 SET(CPACK_PACKAGE_CONTACT "filippo.savi@unimore.it")
 SET(CPACK_PACKAGE_VERSION_MAJOR "${MAJOR_VERSION}")
@@ -132,7 +132,7 @@ SET(CPACK_PACKAGE_VERSION_MINOR "${MINOR_VERSION}")
 SET(CPACK_PACKAGE_VERSION_PATCH "${PATCH_VERSION}")
 SET(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
-set(CPACK_PACKAGE_EXECUTABLES makefile_gen)
+set(CPACK_PACKAGE_EXECUTABLES ananke_gen)
 
 #dependencies for this service menu
 SET(CPACK_DEBIAN_PACKAGE_DEPENDS " libssl-dev , libantlr4-runtime-dev ")

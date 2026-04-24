@@ -1,6 +1,6 @@
-# Makefile_gen
+# Ananke
 
-Makefile_gen is a build system for FPGA HDL development, it allows the developer to structure their
+Ananke is a build system for FPGA HDL development, it allows the developer to structure their
 IP repository in the most logical way, without having to conform to the one required by the toolchain vendor.
 
 The tool analyzes all the HDL files in the repository, figuring out the dependencies between modules, and can automatically generate 
@@ -113,7 +113,7 @@ This section contains a list of script objects that need to be invoked prior or 
 
 ## Dependencies
 
-The only runtime dependency needed by the makefile_gen tool is the pthread library, which should be already available in any modern Linux distribution.
+The only runtime dependency needed by the ananke tool is the pthread library, which should be already available in any modern Linux distribution.
 All other libraries are statically linked during compilation to ease deployment.
 
 
@@ -133,7 +133,7 @@ sudo apt install libssl-dev libgtest-dev build-essential pkg-config uuid-dev lib
 To build from source the following command can be used:
 
 ```shell
-cd makefile_gen
+cd ananke
 mkdir build && cd build
 cmake .. -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=conan_provider.cmake -DCMAKE_BUILD_TYPE=Release
 cmake --build . --parallel 8

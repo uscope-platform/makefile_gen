@@ -48,7 +48,7 @@ int main(int argc, char *argv[]){
 
     CLI_opt opts;
 
-    CLI::App app("Makefile_gen FPGA build system version 2.0");
+    CLI::App app("Ananke FPGA build system version 2.0");
 
     app.add_option("-D,--depfile", opts.target, "Target Depfile")->check(CLI::ExistingFile);
     app.add_flag("--X",opts.generate_xilinx,"Generate Xilinx Makefile");
