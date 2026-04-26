@@ -24,7 +24,7 @@
 
 class new_app_generator {
 public:
-    new_app_generator(std::string &app_name, std::string &app_language);
+    new_app_generator(const std::string &app_name, std::string &app_language);
 private:
     void write_depfile();
     void write_synth_hdl();

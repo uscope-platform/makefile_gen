@@ -4,6 +4,7 @@ add_library(ananke_lib STATIC)
 
 target_sources(ananke_lib
     PRIVATE
+    ananke.cpp
     analysis/HDL_ast_builder_v2.cpp
     analysis/passes/pass_manager.cpp
     analysis/parameter_solver.cpp

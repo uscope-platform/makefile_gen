@@ -15,7 +15,7 @@
 
 #include "Backend/new_app_generator.hpp"
 
-new_app_generator::new_app_generator(std::string &app_name, std::string &app_language) {
+new_app_generator::new_app_generator(const std::string &app_name, std::string &app_language) {
     name = app_name;
     lang = app_language;
 

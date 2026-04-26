@@ -17,29 +17,7 @@
 #define ANANKE_MAIN_HPP
 
 #include <string>
-
-
 #include <CLI/CLI.hpp>
 
-#include "frontend/Repository_walker.hpp"
-#include "analysis/HDL_ast_builder_v2.hpp"
-#include "analysis/control_bus_analysis.hpp"
-#include "analysis/proxy_bus_analysis.hpp"
-#include "analysis/data_acquisition_analysis.hpp"
-#include "data_model/data_store.hpp"
-#include "data_model/settings_store.hpp"
-#include "frontend/analysis/sv_analyzer.hpp"
-#include "data_model/Depfile.hpp"
-#include "Backend/Dependency_resolver.hpp"
-#include "Backend/Xilinx/xilinx_project_generator.hpp"
-#include "Backend/python_script_runner.hpp"
-#include "Backend/Auxiliary_resolver.hpp"
-#include "Backend/Xilinx/Vivado_manager.hpp"
-#include "Backend/Lattice/lattice_project_generator.hpp"
-#include "Backend/Lattice/Radiant_manager.hpp"
-#include "Backend/new_app_generator.hpp"
-#include "Backend/uplatform/application_definition_generator.hpp"
-#include "Backend/uplatform/peripheral_definition_generator.hpp"
-
-
+#include "ananke.hpp"
 #endif //ANANKE_MAIN_HPP
