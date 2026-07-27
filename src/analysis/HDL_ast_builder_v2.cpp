@@ -152,6 +152,56 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                                 child_wo.push_back({child, parent_params, wo.path + "." + working_instance->get_name(), interfaces_map});
                             }
                         }
+                    } else if (auto cond = std::dynamic_pointer_cast<hdl_conditional_statement>(stmt)) {
+                        bool any_matched = false;
+                        for (auto &branch : cond->get_branches()) {
+                            bool selected = evaluate_condition(branch.condition, current_param_values);
+                            any_matched = any_matched || selected;
+                            for (auto &body_stmt : branch.body) {
+                                auto body_inst = std::dynamic_pointer_cast<hdl_instance_statement>(body_stmt);
+                                if (!body_inst) continue;
+                                auto dc = body_inst->get_dependency_class();
+                                if (dc == module || dc == interface) {
+                                    auto child = std::make_shared<hdl_ast_node>(*body_inst);
+                                    child->set_parent(working_instance);
+                                    child->set_active(selected);
+                                    process_quantifier(child->get_array_quantifier(), current_param_values);
+                                    working_instance->add_child(child);
+                                    child_wo.push_back({child, current_param_values,
+                                        wo.path + "." + working_instance->get_name(), interfaces_map});
+                                } else if (dc == package) {
+                                    auto pkg = d_store->get_HDL_resource(body_inst->get_type(), res_path);
+                                    if (pkg.has_value())
+                                        working_instance->add_package_dependency(res_path);
+                                } else if (dc == memory_init) {
+                                    auto df = d_store->get_data_file(body_inst->get_type());
+                                    if (df.has_value())
+                                        working_instance->add_data_dependency(df.value().get_path());
+                                }
+                            }
+                        }
+                        for (auto &body_stmt : cond->get_else_body()) {
+                            auto body_inst = std::dynamic_pointer_cast<hdl_instance_statement>(body_stmt);
+                            if (!body_inst) continue;
+                            auto dc = body_inst->get_dependency_class();
+                            if (dc == module || dc == interface) {
+                                auto child = std::make_shared<hdl_ast_node>(*body_inst);
+                                child->set_parent(working_instance);
+                                child->set_active(!any_matched);
+                                process_quantifier(child->get_array_quantifier(), current_param_values);
+                                working_instance->add_child(child);
+                                child_wo.push_back({child, current_param_values,
+                                    wo.path + "." + working_instance->get_name(), interfaces_map});
+                            } else if (dc == package) {
+                                auto pkg = d_store->get_HDL_resource(body_inst->get_type(), res_path);
+                                if (pkg.has_value())
+                                    working_instance->add_package_dependency(res_path);
+                            } else if (dc == memory_init) {
+                                auto df = d_store->get_data_file(body_inst->get_type());
+                                if (df.has_value())
+                                    working_instance->add_data_dependency(df.value().get_path());
+                            }
+                        }
                     }
                 }
                 for (const auto &c:child_wo| std::views::reverse) {
@@ -160,6 +210,13 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
             }
         }
     return top;
+}
+
+bool HDL_ast_builder_v2::evaluate_condition(const std::shared_ptr<Expression_base> &cond,
+    const std::map<qualified_identifier, resolved_parameter> &parameters) {
+    if (!cond) return false;
+    auto result = cond->evaluate(parameters);
+    return result.has_value() && result.value().is_integer() && result.value().get_integer() != 0;
 }
 
 void HDL_ast_builder_v2::process_quantifier(const std::shared_ptr<HDL_parameter> &quantifier, const std::map<qualified_identifier, resolved_parameter> &parameters) {

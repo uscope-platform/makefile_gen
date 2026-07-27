@@ -21,5 +21,6 @@
 #include "data_model/HDL/statement/hdl_assignment_statement.hpp"
 #include "data_model/HDL/statement/hdl_function_statement.hpp"
 #include "data_model/HDL/statement/hdl_resource_statement.hpp"
+#include "data_model/HDL/statement/hdl_conditional_statement.hpp"
 
 #endif //ANANKE_HDL_STATEMENTS_HPP

@@ -25,6 +25,7 @@
 #include "data_model/HDL/factories/HDL_interfaces_factory.hpp"
 #include "data_model/HDL/factories/HDL_instances_factory.hpp"
 #include "data_model/HDL/factories/HDL_loops_factory.hpp"
+#include "data_model/HDL/factories/HDL_conditionals_factory.hpp"
 #include "data_model/HDL/factories/HDL_functions_factory.hpp"
 
 #include "data_model/HDL/parameters/components/Parameter_components.hpp"
@@ -161,6 +162,14 @@ public:
     void enterGenvar_expression(sv2017::Genvar_expressionContext *ctx) override;
     void exitGenvar_expression(sv2017::Genvar_expressionContext *ctx) override;
 
+    void enterConstant_expression(sv2017::Constant_expressionContext *ctx) override;
+    void exitConstant_expression(sv2017::Constant_expressionContext *ctx) override;
+
+    void enterIf_generate_construct(sv2017::If_generate_constructContext *ctx) override;
+    void exitIf_generate_construct(sv2017::If_generate_constructContext *ctx) override;
+    void enterGenerate_item(sv2017::Generate_itemContext *ctx) override;
+    void exitGenerate_item(sv2017::Generate_itemContext *ctx) override;
+
     void enterUntyped_function_declaration(sv2017::Untyped_function_declarationContext *ctx) override;
 
     void exitFunction_declaration(sv2017::Function_declarationContext *ctx) override;
@@ -225,6 +234,7 @@ private:
     HDL_instances_factory deps_factory;
     HDL_parameters_factory params_factory;
     HDL_loops_factory loops_factory;
+    HDL_conditionals_factory conditionals_factory;
 
     bool in_anonymous_struct = false;
     std::shared_ptr<hdl_type> pending_anon_struct_type;

@@ -107,7 +107,9 @@ void sv_visitor::enterModule_or_interface_or_program_or_udp_instantiation(sv2017
 
 
 void sv_visitor::exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) {
-    if(loops_factory.in_loop()){
+    if(conditionals_factory.is_active()){
+        conditionals_factory.add_statement(deps_factory.get_dependency());
+    } else if(loops_factory.in_loop()){
         loops_factory.add_statement(deps_factory.get_dependency());
     } else {
         modules_factory.add_statement(deps_factory.get_dependency());
@@ -1014,7 +1016,10 @@ void sv_visitor::enterLoop_generate_construct(sv2017::Loop_generate_constructCon
 }
 
 void sv_visitor::exitLoop_generate_construct(sv2017::Loop_generate_constructContext *) {
-    modules_factory.add_statement(loops_factory.get_loop_statement());
+    if (conditionals_factory.is_active())
+        conditionals_factory.add_statement(loops_factory.get_loop_statement());
+    else
+        modules_factory.add_statement(loops_factory.get_loop_statement());
 }
 
 void sv_visitor::enterGenvar_initialization(sv2017::Genvar_initializationContext *ctx) {
@@ -1050,6 +1055,48 @@ void sv_visitor::exitGenvar_expression(sv2017::Genvar_expressionContext *ctx) {
         }
     }
     params_factory.stop_param_assignment();
+}
+
+void sv_visitor::enterConstant_expression(sv2017::Constant_expressionContext *) {
+    if (conditionals_factory.is_active()) {
+        params_factory.start_param_assignment();
+        params_factory.new_parameter("if_cond");
+    }
+}
+
+void sv_visitor::exitConstant_expression(sv2017::Constant_expressionContext *) {
+    if (conditionals_factory.is_active()) {
+        auto param = params_factory.get_parameter();
+        conditionals_factory.set_condition(param->get_expression());
+        params_factory.stop_param_assignment();
+    }
+}
+
+void sv_visitor::enterIf_generate_construct(sv2017::If_generate_constructContext *) {
+    if (conditionals_factory.is_active())
+        conditionals_factory.add_branch();
+    else
+        conditionals_factory.new_conditional();
+}
+
+void sv_visitor::enterGenerate_item(sv2017::Generate_itemContext *) {
+    if (conditionals_factory.is_active())
+        conditionals_factory.enter_body_item();
+}
+
+void sv_visitor::exitGenerate_item(sv2017::Generate_itemContext *) {
+    if (conditionals_factory.is_active())
+        conditionals_factory.exit_body_item();
+}
+
+void sv_visitor::exitIf_generate_construct(sv2017::If_generate_constructContext *) {
+    auto stmt = conditionals_factory.get_conditional();
+    if (stmt.is_empty()) return;
+    auto ptr = std::make_shared<hdl_conditional_statement>(stmt);
+    if (loops_factory.in_loop())
+        loops_factory.add_statement(ptr);
+    else if (modules_factory.is_current_valid())
+        modules_factory.add_statement(ptr);
 }
 
 void sv_visitor::enterUntyped_function_declaration(sv2017::Untyped_function_declarationContext *ctx) {

@@ -67,6 +67,9 @@ public:
     dependency_class get_dependency_class() const { return dep_class; }
     void set_dependency_class(dependency_class dc) { dep_class = dc; }
 
+    void set_active(bool a){active = a;}
+    bool is_active(){return active;}
+
     void set_wildcard(bool w) { wildcard_assignment = w; }
     bool get_wildcard() const { return wildcard_assignment; }
 
@@ -133,19 +136,12 @@ public:
 
     friend bool operator==(const hdl_ast_node&lhs, const hdl_ast_node&rhs);
 
-    template<class Archive>
-    void serialize(Archive & ar) {
-        ar(name, type, dep_class, ports_map, parameters, groups, array_quantifier,
-           bus_address, child_instances, data_dependencies, package_dependencies,
-           leaf_module_top, leaf_module_prefix, proxy_specs, proxy_ast,
-           array_index, if_specs, processors, parent);
-    }
-
 private:
     static std::string dump_structure(const std::shared_ptr<hdl_ast_node>&ast, const std::string &prefix);
 
     std::string name;
     std::string type;
+    bool active = true;
     dependency_class dep_class = module;
     Parameters_map parameters;
     std::unordered_map<std::string, std::vector<HDL_net>> ports_map;

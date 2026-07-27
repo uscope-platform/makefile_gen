@@ -13,17 +13,26 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-
 #ifndef ANANKE_HDL_CONDITIONAL_STATEMENT_HPP
 #define ANANKE_HDL_CONDITIONAL_STATEMENT_HPP
+
+#include <memory>
+#include <vector>
 
 #include "data_model/HDL/statement/hdl_statement_base.hpp"
 #include "data_model/HDL/parameters/components/Expression_base.hpp"
 
-struct conditional_block {
+
+struct hdl_conditional_branch {
     std::shared_ptr<Expression_base> condition;
-    std::vector<std::shared_ptr<hdl_statement_base>> content;
+    std::vector<std::shared_ptr<hdl_statement_base>> body;
+
+    template<class Archive>
+    void serialize(Archive & ar) {
+        ar(condition, body);
+    }
 };
+
 
 class hdl_conditional_statement : public hdl_statement_base {
 public:
@@ -32,12 +41,27 @@ public:
     bool equals(const hdl_statement_base& other) const override;
     std::string print() const override;
 
-    void set_else_content(const  std::vector<std::shared_ptr<hdl_statement_base>> &block){else_branch = block;}
-    void add_if_block(const conditional_block &block) {if_branches.push_back(block);}
+    void add_branch(const std::shared_ptr<Expression_base>& cond);
+    void set_condition(const std::shared_ptr<Expression_base>& e);
+    void add_to_branch(const std::shared_ptr<hdl_statement_base>& s);
+    void add_to_else(const std::shared_ptr<hdl_statement_base>& s);
+    void flatten();
+
+    const std::vector<hdl_conditional_branch>& get_branches() const { return branches; }
+    const std::vector<std::shared_ptr<hdl_statement_base>>& get_else_body() const { return else_body; }
+
+    bool is_empty() const;
+
+    friend void PrintTo(const hdl_conditional_statement& s, std::ostream* os);
+
+    template<class Archive>
+    void serialize(Archive & ar) {
+        ar(branches, else_body);
+    }
 
 private:
-    std::vector<conditional_block> if_branches;
-    std::vector<std::shared_ptr<hdl_statement_base>> else_branch;
+    std::vector<hdl_conditional_branch> branches;
+    std::vector<std::shared_ptr<hdl_statement_base>> else_body;
 };
 
 

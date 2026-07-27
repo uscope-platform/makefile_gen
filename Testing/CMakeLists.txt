@@ -31,6 +31,7 @@ set(ANANKE_TESTS
         analysis/port_extraction.cpp
         analysis/hdl_ast_builder.cpp
         analysis/function_processing.cpp
+        analysis/conditional_processing.cpp
         Backend/Application_definition_generator.cpp
         Backend/Peripheral_definition_generator.cpp
         Backend/toolchain_manager.cpp

@@ -38,6 +38,8 @@ private:
     std::map<qualified_identifier, resolved_parameter> process_runtime_parameters(
         const std::map<qualified_identifier, resolved_parameter> &parameters,
         const std::shared_ptr<hdl_resource_statement> &res);
+    bool evaluate_condition(const std::shared_ptr<Expression_base> &cond,
+        const std::map<qualified_identifier, resolved_parameter> &parameters);
     std::shared_ptr<data_store> d_store;
     std::shared_ptr<settings_store> s_store;
     Depfile  dep_file;
