@@ -5112,3 +5112,38 @@ TEST(parameter_extraction, top_level_function_with_args) {
     qualified_identifier sid = qualified_identifier("TEST_PARAM");
     EXPECT_EQ(defaults[sid], 12);
 }
+
+
+TEST(parameter_extraction, conditional_in_function) {
+    auto test_pattern = R"(
+        module test_mod #(
+        )();
+            parameter CONDITION = 1;
+
+            function integer compute();
+                if(CONDITION ==2)begin
+                    compute = 32;
+                end else begin
+                    compute = 47;
+                end
+            endfunction
+
+
+            localparam TEST_PARAM = compute();
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+    auto file = analyzer.analyze("", test_pattern);
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    d_store->store_file({"/dev/zero", "file_hash", file});
+
+    auto resource = std::static_pointer_cast<hdl_resource_statement>(file.get_content()[0]);
+
+    parameter_solver::propagate_functions(resource, d_store);
+    auto defaults = parameter_solver::process_parameters(resource->get_parameters(), {});
+
+    qualified_identifier sid = qualified_identifier("TEST_PARAM");
+    EXPECT_EQ(defaults[sid], 47);
+}
