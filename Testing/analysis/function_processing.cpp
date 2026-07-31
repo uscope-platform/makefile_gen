@@ -436,3 +436,52 @@ TEST(function_processing, local_variable_scalar) {
 
 
 
+
+TEST(function_processing, conditional_in_function) {
+    auto test_pattern = R"(
+        module test_mod #(
+        )();
+            parameter CONDITION = 1;
+
+            function integer compute();
+                if(CONDITION ==2)begin
+                    compute = 32;
+                end else begin
+                    compute = 47;
+                end
+            endfunction
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+
+    auto resource = analyzer.analyze("",test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto functions = resource.get_functions();
+
+    EXPECT_EQ(functions.size(), 1);
+    EXPECT_TRUE(functions.contains("compute"));
+    auto result = functions["compute"];
+
+    hdl_function_statement check_f;
+    check_f.set_name("compute");
+    hdl_conditional_statement check_cond;
+
+    auto expr = std::make_shared<Expression_v2>();
+    expr->set_lhs(std::make_shared<Identifier_token>(qualified_identifier("CONDITION")));
+    expr->set_rhs(std::make_shared<Numeric_token>("2"));
+    expr->set_operation(Expression_v2::equal);
+    check_cond.add_branch(expr);
+    auto stmt = std::make_shared<hdl_assignment_statement>();
+    stmt->set_target("compute");
+    stmt->set_value(std::make_shared<Numeric_token>("32"));
+    check_cond.add_to_branch(stmt);
+    stmt = std::make_shared<hdl_assignment_statement>();
+    stmt->set_target("compute");
+    stmt->set_value(std::make_shared<Numeric_token>("47"));
+    check_cond.add_to_else(stmt);
+    check_f.add_statement(std::make_shared<hdl_conditional_statement>(check_cond));
+
+    EXPECT_EQ(check_f, result);
+}
+
+

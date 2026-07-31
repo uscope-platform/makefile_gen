@@ -500,10 +500,39 @@ void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
         params_factory.stop_expression_new(ctx->primary() == nullptr);
     }else if (f_factory.is_active()) {
         f_factory.stop_expression();
+        if (conditionals_factory.is_active() && !conditionals_factory.has_condition())
+            conditionals_factory.set_condition(f_factory.get_last_value());
     }
     if (deps_factory.is_valid_dependency()) {
         deps_factory.stop_expression(ctx->primary() == nullptr);
     }
+}
+
+void sv_visitor::enterConditional_statement(sv2017::Conditional_statementContext *) {
+    if (conditionals_factory.is_active())
+        conditionals_factory.add_branch();
+    else
+        conditionals_factory.new_conditional();
+}
+
+void sv_visitor::exitConditional_statement(sv2017::Conditional_statementContext *) {
+    auto stmt = conditionals_factory.get_conditional();
+    if (stmt.is_empty()) return;
+    auto ptr = std::make_shared<hdl_conditional_statement>(stmt);
+    if (loops_factory.in_loop())
+        loops_factory.add_statement(ptr);
+    else if (f_factory.is_active())
+        f_factory.add_statement(ptr);
+}
+
+void sv_visitor::enterStatement_or_null(sv2017::Statement_or_nullContext *) {
+    if (conditionals_factory.is_active())
+        conditionals_factory.enter_body_item();
+}
+
+void sv_visitor::exitStatement_or_null(sv2017::Statement_or_nullContext *) {
+    if (conditionals_factory.is_active())
+        conditionals_factory.exit_body_item();
 }
 
 void sv_visitor::exitPrimaryLit(sv2017::PrimaryLitContext *ctx) {
@@ -1136,6 +1165,8 @@ void sv_visitor::exitLoop_statement(sv2017::Loop_statementContext *ctx) {
         f_factory.add_loop(loops_factory.get_loop_statement());
         loops_factory.clear();
         f_factory.resume();
+        if (conditionals_factory.is_active())
+            conditionals_factory.add_statement(f_factory.pop_last());
     }
 }
 
@@ -1219,6 +1250,8 @@ void sv_visitor::enterInc_or_dec_expressionPost(sv2017::Inc_or_dec_expressionPos
 void sv_visitor::exitBlocking_assignment(sv2017::Blocking_assignmentContext *ctx) {
     if(!loops_factory.in_loop() && f_factory.is_active()) {
         f_factory.finish_assignment();
+        if (conditionals_factory.is_active())
+            conditionals_factory.add_statement(f_factory.pop_last());
     }
 
 }

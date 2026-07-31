@@ -170,6 +170,11 @@ public:
     void enterGenerate_item(sv2017::Generate_itemContext *ctx) override;
     void exitGenerate_item(sv2017::Generate_itemContext *ctx) override;
 
+    void enterConditional_statement(sv2017::Conditional_statementContext *ctx) override;
+    void exitConditional_statement(sv2017::Conditional_statementContext *ctx) override;
+    void enterStatement_or_null(sv2017::Statement_or_nullContext *ctx) override;
+    void exitStatement_or_null(sv2017::Statement_or_nullContext *ctx) override;
+
     void enterUntyped_function_declaration(sv2017::Untyped_function_declarationContext *ctx) override;
 
     void exitFunction_declaration(sv2017::Function_declarationContext *ctx) override;

@@ -31,6 +31,7 @@ public:
     void add_statement(const std::shared_ptr<hdl_statement_base> &stmt);
     hdl_conditional_statement get_conditional();
     bool is_active() const { return active; }
+    bool has_condition() const;
 
 private:
     struct if_frame {

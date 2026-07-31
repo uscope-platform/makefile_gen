@@ -100,6 +100,20 @@ void HDL_function_call::walk_body(
                 loop_ctx[loop_var] = resolved_parameter(idx);
                 walk_body(fcn_name, loop->get_body(), loop_ctx, value_map, size_map);
             }
+        } else if (auto cond = std::dynamic_pointer_cast<hdl_conditional_statement>(stmt)) {
+            bool matched = false;
+            for (auto &branch : cond->get_branches()) {
+                if (branch.condition) {
+                    auto result = branch.condition->evaluate(ctx);
+                    if (result.has_value() && result.value().is_integer() && result.value().get_integer() != 0) {
+                        matched = true;
+                        walk_body(fcn_name, branch.body, ctx, value_map, size_map);
+                        break;
+                    }
+                }
+            }
+            if (!matched)
+                walk_body(fcn_name, cond->get_else_body(), ctx, value_map, size_map);
         }
     }
 }

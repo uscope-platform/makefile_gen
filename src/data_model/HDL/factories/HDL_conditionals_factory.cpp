@@ -61,6 +61,11 @@ void HDL_conditionals_factory::add_statement(const std::shared_ptr<hdl_statement
         _statement.add_to_branch(stmt);
 }
 
+bool HDL_conditionals_factory::has_condition() const {
+    auto &branches = _statement.get_branches();
+    return !branches.empty() && branches.back().condition != nullptr;
+}
+
 hdl_conditional_statement HDL_conditionals_factory::get_conditional() {
     _nesting--;
     if (_nesting > 0) {

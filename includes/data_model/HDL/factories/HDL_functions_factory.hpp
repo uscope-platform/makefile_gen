@@ -45,6 +45,10 @@ public:
     void add_loop(const std::shared_ptr<hdl_loop_statement> &ls) {
         f.add_statement(ls);
     }
+    void add_statement(const std::shared_ptr<hdl_statement_base> &s) {
+        f.add_statement(s);
+    }
+    std::shared_ptr<hdl_statement_base> pop_last() { return f.pop_last(); }
     hdl_function_statement get_function();
     void set_return_type_name(const std::string &n) { f.set_return_type_name(n); }
     bool is_active()const{return active;}
