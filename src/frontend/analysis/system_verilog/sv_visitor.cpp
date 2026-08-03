@@ -509,10 +509,12 @@ void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
 }
 
 void sv_visitor::enterConditional_statement(sv2017::Conditional_statementContext *) {
-    if (conditionals_factory.is_active())
+    if (!conditionals_factory.is_active())
+        conditionals_factory.new_conditional();
+    else if (conditionals_factory.in_else_branch())
         conditionals_factory.add_branch();
     else
-        conditionals_factory.new_conditional();
+        conditionals_factory.push_nested();
 }
 
 void sv_visitor::exitConditional_statement(sv2017::Conditional_statementContext *) {
@@ -1102,10 +1104,12 @@ void sv_visitor::exitConstant_expression(sv2017::Constant_expressionContext *) {
 }
 
 void sv_visitor::enterIf_generate_construct(sv2017::If_generate_constructContext *) {
-    if (conditionals_factory.is_active())
+    if (!conditionals_factory.is_active())
+        conditionals_factory.new_conditional();
+    else if (conditionals_factory.in_else_branch())
         conditionals_factory.add_branch();
     else
-        conditionals_factory.new_conditional();
+        conditionals_factory.push_nested();
 }
 
 void sv_visitor::enterGenerate_item(sv2017::Generate_itemContext *) {

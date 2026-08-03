@@ -25,12 +25,14 @@ class HDL_conditionals_factory {
 public:
     void new_conditional();
     void add_branch();
+    void push_nested();
     void set_condition(const std::shared_ptr<Expression_base> &cond);
     void enter_body_item();
     void exit_body_item();
     void add_statement(const std::shared_ptr<hdl_statement_base> &stmt);
     hdl_conditional_statement get_conditional();
     bool is_active() const { return active; }
+    bool in_else_branch() const { return in_else; }
     bool has_condition() const;
 
 private:
@@ -39,7 +41,14 @@ private:
         bool then_done = false;
     };
 
+    struct nested_state {
+        hdl_conditional_statement statement;
+        std::stack<if_frame> if_stack;
+        int body_item_depth = 0;
+    };
+
     hdl_conditional_statement _statement;
+    std::stack<nested_state> _statement_stack;
     std::stack<if_frame> _if_stack;
     int _body_item_depth = 0;
     int _nesting = 0;

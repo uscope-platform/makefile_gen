@@ -18,6 +18,7 @@
 
 void HDL_conditionals_factory::new_conditional() {
     _statement = hdl_conditional_statement();
+    _statement_stack = std::stack<nested_state>();
     _if_stack = std::stack<if_frame>();
     _if_stack.push({0, false});
     _body_item_depth = 0;
@@ -30,6 +31,15 @@ void HDL_conditionals_factory::add_branch() {
     _statement.add_branch(nullptr);
     _if_stack.push({_body_item_depth, false});
     _nesting++;
+    in_else = false;
+}
+
+void HDL_conditionals_factory::push_nested() {
+    _statement_stack.push({std::move(_statement), std::move(_if_stack), _body_item_depth});
+    _statement = hdl_conditional_statement();
+    _if_stack = std::stack<if_frame>();
+    _if_stack.push({0, false});
+    _body_item_depth = 0;
     in_else = false;
 }
 
@@ -67,16 +77,21 @@ bool HDL_conditionals_factory::has_condition() const {
 }
 
 hdl_conditional_statement HDL_conditionals_factory::get_conditional() {
-    _nesting--;
-    if (_nesting > 0) {
-        _if_stack.pop();
-        return {};
-    }
     auto ret = _statement;
     ret.flatten();
-    _statement = hdl_conditional_statement();
-    active = false;
-    in_else = false;
-    _body_item_depth = 0;
-    return ret;
+    if (_statement_stack.empty()) {
+        _statement = hdl_conditional_statement();
+        active = false;
+        in_else = false;
+        _body_item_depth = 0;
+        return ret;
+    }
+    auto &saved = _statement_stack.top();
+    _statement = std::move(saved.statement);
+    _if_stack = std::move(saved.if_stack);
+    _body_item_depth = saved.body_item_depth;
+    _statement_stack.pop();
+    if (!ret.is_empty())
+        add_statement(std::make_shared<hdl_conditional_statement>(ret));
+    return {};
 }

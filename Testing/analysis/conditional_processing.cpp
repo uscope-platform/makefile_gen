@@ -114,3 +114,59 @@ TEST(conditional_processing, else_if_chain) {
 
     EXPECT_EQ(result, check_cond);
 }
+
+
+TEST(conditional_processing, nested_if_in_then) {
+    auto test_pattern = R"(
+        module test_mod #(
+            parameter A = 1,
+            parameter B = 1
+        )();
+
+            generate
+                if (A == 1) begin
+                    child_a inst_0();
+                    if (B == 1) begin
+                        child_b inst_1();
+                    end
+                end
+            endgenerate
+
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+
+    auto resources = analyzer.analyze("", test_pattern);
+    auto content = resources.get_content()[0]->as<hdl_resource_statement>();
+    auto result = content.get_statements()[0]->as<hdl_conditional_statement>();
+
+    hdl_conditional_statement check_cond;
+
+    Expression_v2 cond_a;
+    cond_a.set_operation(Expression_v2::equal);
+    cond_a.set_lhs(std::make_shared<Identifier_token>(qualified_identifier("A")));
+    cond_a.set_rhs(std::make_shared<Numeric_token>(1, 1));
+    check_cond.add_branch(std::make_shared<Expression_v2>(cond_a));
+
+    hdl_instance_statement inst_0;
+    inst_0.set_name("inst_0");
+    inst_0.set_type("child_a");
+    check_cond.add_to_branch(std::make_shared<hdl_instance_statement>(inst_0));
+
+    hdl_conditional_statement inner;
+    Expression_v2 cond_b;
+    cond_b.set_operation(Expression_v2::equal);
+    cond_b.set_lhs(std::make_shared<Identifier_token>(qualified_identifier("B")));
+    cond_b.set_rhs(std::make_shared<Numeric_token>(1, 1));
+    inner.add_branch(std::make_shared<Expression_v2>(cond_b));
+
+    hdl_instance_statement inst_1;
+    inst_1.set_name("inst_1");
+    inst_1.set_type("child_b");
+    inner.add_to_branch(std::make_shared<hdl_instance_statement>(inst_1));
+
+    check_cond.add_to_branch(std::make_shared<hdl_conditional_statement>(inner));
+
+    EXPECT_EQ(result, check_cond);
+}
