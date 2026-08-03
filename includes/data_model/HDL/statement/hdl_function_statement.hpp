@@ -50,9 +50,6 @@ public:
     void add_local_variable(const std::shared_ptr<HDL_parameter> &p) { local_variables.push_back(p); }
     const std::vector<std::shared_ptr<HDL_parameter>>& get_local_variables() const { return local_variables; }
 
-    void set_return_type_name(const std::string &n) { return_type_name = n; }
-    std::string get_return_type_name() const { return return_type_name; }
-
     void set_return_type(const std::shared_ptr<hdl_type> &t) { return_type = t; }
     std::shared_ptr<hdl_type> get_return_type() const { return return_type; }
 
@@ -68,7 +65,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, argument_names, return_type_name, return_type, body, local_variables);
+        ar(name, argument_names, return_type, body, local_variables);
     }
 
     friend void PrintTo(const hdl_function_statement& s, std::ostream* os);
@@ -76,7 +73,6 @@ public:
 private:
     std::string name;
     std::vector<std::string> argument_names;
-    std::string return_type_name;
     std::shared_ptr<hdl_type> return_type;
     std::shared_ptr<Expression_base> return_unpacked_range_left;
     std::shared_ptr<Expression_base> return_unpacked_range_right;

@@ -21,6 +21,8 @@
 #include "data_model/HDL/factories/resource_factory_base.hpp"
 #include "data_model/HDL/statement/hdl_resource_statement.hpp"
 
+#include <map>
+
 class HDL_modules_factory : protected resources_factory_base<hdl_resource_statement> {
 
 public:
@@ -39,9 +41,12 @@ public:
 
     void add_parameter(const std::shared_ptr<HDL_parameter> &p);
     void add_function(const hdl_function_statement &f);
+    void add_function(const hdl_function_statement &f, const std::string &return_type_name);
     void add_port(const std::string &p_n, HDL_port p);
     bool is_current_valid() {return valid_resource;}
 
+private:
+    std::map<std::string, std::string> function_return_types;
 };
 
 

@@ -1157,18 +1157,20 @@ void sv_visitor::enterUntyped_function_declaration(sv2017::Untyped_function_decl
 
 void sv_visitor::exitFunction_declaration(sv2017::Function_declarationContext *ctx) {
     auto func_type = ctx->function_data_type_or_implicit();
+    std::string ret_type_name;
     if (func_type) {
         auto dv = func_type->data_type_or_void();
         if (dv && !dv->KW_VOID()) {
             auto dt = dv->data_type();
             if (dt && dt->package_or_class_scoped_path()) {
-                f_factory.set_return_type_name(dt->package_or_class_scoped_path()->getText());
+                ret_type_name = dt->package_or_class_scoped_path()->getText();
+                f_factory.set_return_type_name(ret_type_name);
             }
         }
     }
     auto func = f_factory.get_function();
     if (modules_factory.is_current_valid()) {
-        modules_factory.add_function(func);
+        modules_factory.add_function(func, ret_type_name);
     } else {
         entities.push_back(std::make_shared<hdl_function_statement>(func));
     }

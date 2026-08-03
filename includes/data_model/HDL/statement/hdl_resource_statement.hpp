@@ -46,8 +46,6 @@ public:
     bool equals(const hdl_statement_base& other) const override;
     std::string print() const override;
 
-    void process_calls();
-
     void add_typedef(const std::string &tname, const std::shared_ptr<hdl_type> &type) { typedefs.insert({tname, type}); }
     std::map<std::string, std::shared_ptr<hdl_type>> get_typedefs() { return typedefs; }
 

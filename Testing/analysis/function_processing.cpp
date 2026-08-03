@@ -511,7 +511,6 @@ TEST(function_processing, struct_returning_function) {
 
     hdl_function_statement check_f;
     check_f.set_name("compute_addr");
-    check_f.set_return_type_name("addr_range_t");
     check_f.set_return_type(result.get_return_type());
 
     auto s0 = std::make_shared<hdl_assignment_statement>();

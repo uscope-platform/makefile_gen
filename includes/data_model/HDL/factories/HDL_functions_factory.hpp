@@ -50,7 +50,8 @@ public:
     }
     std::shared_ptr<hdl_statement_base> pop_last() { return f.pop_last(); }
     hdl_function_statement get_function();
-    void set_return_type_name(const std::string &n) { f.set_return_type_name(n); }
+    void set_return_type_name(const std::string &n) { return_type_name = n; }
+    std::string get_return_type_name() const { return return_type_name; }
     bool is_active()const{return active;}
     bool is_raw_body()const{return consumer_stack.empty();}
 
@@ -92,6 +93,7 @@ private:
     bool in_bit_selection = false;
     std::stack<std::unique_ptr<factory_base>> consumer_stack;
     hdl_function_statement f;
+    std::string return_type_name;
     std::shared_ptr<Expression_base> bit_index;
 
     enum{

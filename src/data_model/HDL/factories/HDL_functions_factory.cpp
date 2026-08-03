@@ -92,6 +92,7 @@ void HDL_functions_factory::finish_assignment() {
 hdl_function_statement HDL_functions_factory::get_function() {
     auto current_function = f;
     f = hdl_function_statement();
+    return_type_name.clear();
     active = false;
     return current_function;
 }

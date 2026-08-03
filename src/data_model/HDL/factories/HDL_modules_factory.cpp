@@ -16,12 +16,15 @@
 #include "data_model/HDL/factories/HDL_modules_factory.hpp"
 
 #include "data_model/HDL/statement/hdl_resource_statement.hpp"
+#include "data_model/HDL/types/HDL_simple_type.hpp"
+#include "data_model/HDL/types/HDL_struct_type.hpp"
 
 
 void HDL_modules_factory::new_module(const std::string &name, const dependency_class &type, unsigned int line_n) {
     new_basic_resource(name);
     current_resource.set_type(type);
     current_resource.set_line_n(line_n);
+    function_return_types.clear();
 }
 
 
@@ -44,7 +47,25 @@ void HDL_modules_factory::add_port(const std::string &p_n, HDL_port p) {
 
 std::shared_ptr<hdl_resource_statement> HDL_modules_factory::get_module() {
     auto res = get_resource();
-    res.process_calls();
+    auto typedefs = res.get_typedefs();
+    for (auto &stmt : res.get_statements()) {
+        auto function = std::dynamic_pointer_cast<hdl_function_statement>(stmt);
+        if (!function) continue;
+        auto it = function_return_types.find(function->get_name());
+        if (it == function_return_types.end() || it->second.empty()) continue;
+        auto type_it = typedefs.find(it->second);
+        if (type_it != typedefs.end()) {
+            function->set_return_type(type_it->second);
+            if (type_it->second->is<HDL_simple_type>()) {
+                auto& simple = type_it->second->as<HDL_simple_type>();
+                auto udims = simple.get_unpacked_dimensions();
+                if (!udims.empty()) {
+                    function->set_return_unpacked_bounds(udims[0].first_bound, udims[0].second_bound);
+                }
+            }
+        }
+    }
+    function_return_types.clear();
     return std::make_shared<hdl_resource_statement>(res);
 }
 
@@ -55,6 +76,12 @@ void HDL_modules_factory::add_parameter(const std::shared_ptr<HDL_parameter> &p)
 
 void HDL_modules_factory::add_function(const hdl_function_statement &f) {
     current_resource.add_function(f);
+}
+
+void HDL_modules_factory::add_function(const hdl_function_statement &f, const std::string &return_type_name) {
+    current_resource.add_function(f);
+    if (!return_type_name.empty())
+        function_return_types[f.get_name()] = return_type_name;
 }
 
 

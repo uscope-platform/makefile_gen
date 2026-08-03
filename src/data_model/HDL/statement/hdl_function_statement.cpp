@@ -47,7 +47,6 @@ std::unique_ptr<hdl_statement_base> hdl_function_statement::clone() const {
     auto result = std::make_unique<hdl_function_statement>();
     result->name = name;
     result->argument_names = argument_names;
-    result->return_type_name = return_type_name;
     result->return_type = return_type;
     result->return_unpacked_range_left = return_unpacked_range_left;
     result->return_unpacked_range_right = return_unpacked_range_right;
@@ -60,7 +59,6 @@ bool hdl_function_statement::equals(const hdl_statement_base& other) const {
     const auto& rhs = static_cast<const hdl_function_statement&>(other);
     bool retval = name == rhs.name;
     retval &= argument_names == rhs.argument_names;
-    retval &= return_type_name == rhs.return_type_name;
     if (return_type && rhs.return_type) {
         retval &= return_type->is_equal(*rhs.return_type);
     } else {
