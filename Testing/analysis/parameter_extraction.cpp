@@ -5472,3 +5472,67 @@ TEST(parameter_extraction, system_task_sqrt_int_arg) {
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("V")).get_real(), 5.0);
 }
+
+TEST(parameter_extraction, wide_integer_subtraction) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [127:0] BIG = 128'hFFFFFFFFFFFFFFFF0000000000000003;
+            parameter SUB = BIG - 1;
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+
+    auto big_val = defaults.at(qualified_identifier("BIG")).get_integer().get_wide();
+    auto sub_val = defaults.at(qualified_identifier("SUB")).get_integer().get_wide();
+    EXPECT_EQ(sub_val, big_val - 1);
+}
+
+TEST(parameter_extraction, wide_integer_bitwise_and) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [127:0] A = 128'hFFFFFFFFFFFFFFFF000000000000000F;
+            parameter [127:0] B = 128'hAAAAAAAAAAAAAAAA5555555555555555;
+            parameter AND_RES = A & B;
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+
+    auto and_val = defaults.at(qualified_identifier("AND_RES")).get_integer().get_wide();
+    auto expected = int1024_t("0xAAAAAAAAAAAAAAAA0000000000000005");
+    EXPECT_EQ(and_val, expected);
+}
+
+TEST(parameter_extraction, wide_integer_shift_left) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [127:0] SRC = 128'h00000000000000000000000000000001;
+            parameter SHIFTED = SRC << 64;
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+
+    auto shifted_val = defaults.at(qualified_identifier("SHIFTED")).get_integer().get_wide();
+    EXPECT_EQ(shifted_val, int1024_t("0x00000000000000010000000000000000"));
+}
+
+TEST(parameter_extraction, wide_integer_mixed_arithmetic) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [127:0] BIG = 128'hFFFFFFFFFFFFFFFF0000000000000000;
+            parameter MULT = BIG * 2;
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+
+    auto mult_val = defaults.at(qualified_identifier("MULT")).get_integer().get_wide();
+    auto expected = int1024_t("0xFFFFFFFFFFFFFFFF0000000000000000") * 2;
+    EXPECT_EQ(mult_val, expected);
+}

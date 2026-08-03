@@ -122,6 +122,7 @@ public:
     hdl_integer(int64_t val) {
         value = val;
     }
+    [[nodiscard]] int1024_t to_wide() const { return wide ? wide_value : int1024_t(value); }
     void set_size(const int64_t s);
     void set_value(const uint64_t v);
     void set_value(const int1024_t v);
@@ -149,13 +150,25 @@ public:
     hdl_integer operator<<(const hdl_integer &o) const;
     hdl_integer operator>>(const hdl_integer &o) const;
 
-    hdl_integer& operator+=(int64_t rhs) {
-        value += rhs;
+    hdl_integer& operator+=(const hdl_integer &rhs) {
+        if (wide || rhs.wide) {
+            wide_value = to_wide() + rhs.to_wide();
+            value = static_cast<int64_t>(wide_value);
+            wide = true;
+        } else {
+            value += rhs.value;
+        }
         return *this;
     }
 
-    hdl_integer& operator|=(hdl_integer rhs) {
-        value |= rhs.value;
+    hdl_integer& operator|=(const hdl_integer &rhs) {
+        if (wide || rhs.wide) {
+            wide_value = to_wide() | rhs.to_wide();
+            value = static_cast<int64_t>(wide_value);
+            wide = true;
+        } else {
+            value |= rhs.value;
+        }
         return *this;
     }
 
@@ -210,10 +223,10 @@ namespace std {
 
     // Support for std::abs(hdl_integer)
     inline hdl_integer abs(const hdl_integer& s) {
-        int64_t raw_val = s.get_value();
-        if (raw_val < 0) {
-            hdl_integer result = s;
-            result.set_value(static_cast<uint64_t>(-raw_val));
+        auto w = s.to_wide();
+        if (w < 0) {
+            hdl_integer result;
+            result.set_value(-w);
             return result;
         }
         return s;

@@ -18,7 +18,6 @@
 
 void hdl_integer::set_size(const int64_t v) {
     size = v;
-    wide = false;
 }
 
 void hdl_integer::set_value(const uint64_t v) {
@@ -33,6 +32,16 @@ void hdl_integer::set_value(const int1024_t v) {
 
 uint64_t hdl_integer::get_size() {
     if (size > 0) return size;
+    if (wide) {
+        int1024_t tmp = wide_value;
+        int bits = 0;
+        while (tmp != 0) {
+            tmp >>= 1;
+            bits++;
+        }
+        if (bits == 0) bits = 1;
+        return static_cast<uint64_t>(bits);
+    }
     if(value == 0) return 1;
     auto n_bits = std::log2(value);
     if(std::isinf(n_bits)) {
@@ -62,57 +71,124 @@ hdl_integer hdl_integer::operator+(const hdl_integer &o) const {
 }
 
 hdl_integer hdl_integer::operator-(const hdl_integer &o) const {
+    if (wide || o.wide) {
+        hdl_integer res;
+        res.set_value(to_wide() - o.to_wide());
+        return res;
+    }
     return value - o.value;
 }
 
 hdl_integer hdl_integer::operator*(const hdl_integer &o) const {
+    if (wide || o.wide) {
+        hdl_integer res;
+        res.set_value(to_wide() * o.to_wide());
+        return res;
+    }
     return value * o.value;
 }
 
 hdl_integer hdl_integer::operator/(const hdl_integer &o) const {
-    if(o.value == 0) return 0;
+    if (o.value == 0 && !o.wide) return 0;
+    if (wide || o.wide) {
+        auto divisor = o.to_wide();
+        if (divisor == 0) return 0;
+        hdl_integer res;
+        res.set_value(to_wide() / divisor);
+        return res;
+    }
+    if (o.value == 0) return 0;
     return value / o.value;
 }
 
 hdl_integer hdl_integer::operator%(const hdl_integer &o) const {
-    if(o.value == 0) return 0;
+    if (o.value == 0 && !o.wide) return 0;
+    if (wide || o.wide) {
+        auto divisor = o.to_wide();
+        if (divisor == 0) return 0;
+        hdl_integer res;
+        res.set_value(to_wide() % divisor);
+        return res;
+    }
+    if (o.value == 0) return 0;
     return value % o.value;
 }
 
 hdl_integer hdl_integer::operator&&(const hdl_integer &o) const {
+    if (wide || o.wide) {
+        return static_cast<int64_t>(to_wide() != 0 && o.to_wide() != 0);
+    }
     return value && o.value;
 }
 
 hdl_integer hdl_integer::operator||(const hdl_integer &o) const {
+    if (wide || o.wide) {
+        return static_cast<int64_t>(to_wide() != 0 || o.to_wide() != 0);
+    }
     return value || o.value;
 }
 
 hdl_integer hdl_integer::operator&(const hdl_integer &o) const {
+    if (wide || o.wide) {
+        hdl_integer res;
+        res.set_value(to_wide() & o.to_wide());
+        return res;
+    }
     return value & o.value;
 }
 
 hdl_integer hdl_integer::operator|(const hdl_integer &o) const {
+    if (wide || o.wide) {
+        hdl_integer res;
+        res.set_value(to_wide() | o.to_wide());
+        return res;
+    }
     return value | o.value;
 }
 
 hdl_integer hdl_integer::operator^(const hdl_integer &o) const {
+    if (wide || o.wide) {
+        hdl_integer res;
+        res.set_value(to_wide() ^ o.to_wide());
+        return res;
+    }
     return value ^ o.value;
 }
 
 hdl_integer hdl_integer::operator~() const {
+    if (wide) {
+        hdl_integer res;
+        res.set_value(-wide_value - 1);
+        return res;
+    }
     return ~value;
 }
 
 hdl_integer hdl_integer::operator!() const {
+    if (wide) {
+        return static_cast<int64_t>(wide_value == 0);
+    }
     return !value;
 }
 
 hdl_integer hdl_integer::operator<<(const hdl_integer &o) const {
-    if(o.value >= 64) return 0;
-    return value << o.value;
+    int64_t shift = o.value;
+    if (wide || shift >= 64) {
+        hdl_integer res;
+        res.set_value(to_wide() << static_cast<int>(shift));
+        return res;
+    }
+    if (shift >= 64) return 0;
+    return value << shift;
 }
 
 hdl_integer hdl_integer::operator>>(const hdl_integer &o) const {
-    if(o.value >= 64) return 0;
-    return value >> o.value;
+    int64_t shift = o.value;
+    if (wide || shift >= 64) {
+        hdl_integer res;
+        res.set_value(to_wide() >> static_cast<int>(shift));
+        return res;
+    }
+    if (shift >= 64) return 0;
+    return value >> shift;
 }
