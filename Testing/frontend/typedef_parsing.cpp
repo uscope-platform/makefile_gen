@@ -252,6 +252,104 @@ TEST(typedef_parsing, nested_struct_definition) {
     EXPECT_EQ(outer_check, outer_result->as<HDL_struct_type>());
 }
 
+TEST(typedef_parsing, inline_nested_struct_definition) {
+    auto test_pattern = R"(
+        package test_package;
+
+            typedef struct packed {
+                struct packed {
+                    int field_a;
+                    int field_b;
+                } nested;
+                int field_c;
+            } outer_struct;
+        endpackage
+    )";
+
+    sv_analyzer analyzer;
+
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+
+    auto structs = resource.get_typedefs();
+    EXPECT_TRUE(structs.contains("outer_struct"));
+
+    HDL_struct_type inner_check;
+    inner_check.packed = true;
+    struct_member m;
+    m.name = "field_a";
+    auto t1 = Type_engine::create_primitive_type("int");
+    m.type = t1;
+    inner_check.member.push_back(m);
+    m.name = "field_b";
+    auto t2 = Type_engine::create_primitive_type("int");
+    m.type = t2;
+    inner_check.member.push_back(m);
+
+    HDL_struct_type outer_check;
+    outer_check.packed = true;
+    struct_member m2;
+    m2.name = "nested";
+    m2.type = std::make_shared<HDL_struct_type>(inner_check);
+    outer_check.member.push_back(m2);
+    m2 = {};
+    m2.name = "field_c";
+    auto t3 = Type_engine::create_primitive_type("int");
+    m2.type = t3;
+    outer_check.member.push_back(m2);
+
+    auto outer_result = structs.at("outer_struct");
+    EXPECT_EQ(outer_check, outer_result->as<HDL_struct_type>());
+}
+
+TEST(typedef_parsing, inline_unpacked_nested_struct) {
+    auto test_pattern = R"(
+        package test_package;
+
+            typedef struct packed {
+                struct {
+                    int field_a;
+                    int field_b;
+                } nested;
+                int field_c;
+            } outer_struct;
+        endpackage
+    )";
+
+    sv_analyzer analyzer;
+
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+
+    auto structs = resource.get_typedefs();
+    EXPECT_TRUE(structs.contains("outer_struct"));
+
+    HDL_struct_type inner_check;
+    inner_check.packed = false;
+    struct_member m;
+    m.name = "field_a";
+    auto t1 = Type_engine::create_primitive_type("int");
+    m.type = t1;
+    inner_check.member.push_back(m);
+    m.name = "field_b";
+    auto t2 = Type_engine::create_primitive_type("int");
+    m.type = t2;
+    inner_check.member.push_back(m);
+
+    HDL_struct_type outer_check;
+    outer_check.packed = true;
+    struct_member m2;
+    m2.name = "nested";
+    m2.type = std::make_shared<HDL_struct_type>(inner_check);
+    outer_check.member.push_back(m2);
+    m2 = {};
+    m2.name = "field_c";
+    auto t3 = Type_engine::create_primitive_type("int");
+    m2.type = t3;
+    outer_check.member.push_back(m2);
+
+    auto outer_result = structs.at("outer_struct");
+    EXPECT_EQ(outer_check, outer_result->as<HDL_struct_type>());
+}
+
 TEST(typedef_parsing, anonymous_simple_struct) {
     auto test_pattern = R"(
         package test_package;

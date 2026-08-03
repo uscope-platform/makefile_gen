@@ -242,6 +242,7 @@ private:
     HDL_conditionals_factory conditionals_factory;
 
     bool in_anonymous_struct = false;
+    bool top_level_struct_started = false;
     std::shared_ptr<hdl_type> pending_anon_struct_type;
 
     std::string instance_prefix;

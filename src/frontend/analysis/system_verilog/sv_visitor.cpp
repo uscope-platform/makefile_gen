@@ -191,6 +191,7 @@ void sv_visitor::enterData_declaration(sv2017::Data_declarationContext *ctx) {
         ) {
             if (ctx->type_declaration()->data_type()->struct_union()->KW_STRUCT())
                 type_engine.start_composite_type_declaration(Type_engine::struct_type);
+            top_level_struct_started = true;
         } else {
             type_engine.start_simple_type_declaration();
         }
@@ -201,6 +202,7 @@ void sv_visitor::enterData_declaration(sv2017::Data_declarationContext *ctx) {
         ) {
             in_anonymous_struct = true;
             type_engine.start_composite_type_declaration(Type_engine::struct_type);
+            top_level_struct_started = true;
             params_factory.start_param_assignment();
         }
     }
@@ -272,15 +274,31 @@ void sv_visitor::enterData_type_primitive(sv2017::Data_type_primitiveContext *ct
 
 void sv_visitor::enterData_type(sv2017::Data_typeContext *ctx) {
     auto packed =  ctx->KW_PACKED() != nullptr;
-    if (type_engine.active() && packed) {
+    if (type_engine.active() && ctx->struct_union()) {
+        if (top_level_struct_started) {
+            top_level_struct_started = false;
+            if (packed) type_engine.set_packed();
+        } else {
+            if (ctx->struct_union()->KW_STRUCT())
+                type_engine.start_composite_type_declaration(Type_engine::struct_type);
+            else if (ctx->struct_union()->KW_UNION())
+                type_engine.start_composite_type_declaration(Type_engine::union_type);
+            if (packed) type_engine.set_packed();
+        }
+    } else if (type_engine.active() && packed) {
         type_engine.set_packed();
     }
 }
 
 void sv_visitor::exitData_type(sv2017::Data_typeContext *ctx) {
     type_engine.close_packed_dimensions();
-    if (in_anonymous_struct && ctx->struct_union() && type_engine.active()) {
-        pending_anon_struct_type = type_engine.stop_composite_type_declaration("", true);
+    if (type_engine.active() && ctx->struct_union()) {
+        if (type_engine.is_nested()) {
+            auto completed = type_engine.stop_composite_type_declaration("", true);
+            type_engine.set_current_member_type(completed);
+        } else if (in_anonymous_struct) {
+            pending_anon_struct_type = type_engine.stop_composite_type_declaration("", true);
+        }
     }
 }
 

@@ -19,6 +19,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 #include "data_model/HDL/types/HDL_struct_type.hpp"
 #include "data_model/HDL/types/HDL_simple_type.hpp"
@@ -57,11 +58,12 @@ public:
     void add_component(const std::shared_ptr<Expression_base> &c);
     void stop_expression();
 
-    [[nodiscard]] bool active() const { return kind != simple_type; }
+    [[nodiscard]] bool active() const { return !composite_type_stack.empty(); }
     [[nodiscard]] bool is_ranging() const { return r_factory.active(); }
     [[nodiscard]] bool has_type(const std::string &name) const;
     [[nodiscard]] std::shared_ptr<hdl_type> get_type(const std::string &name) const;
-    [[nodiscard]] bool is_simple_type()const{ return kind == simple_type;}
+    [[nodiscard]] bool is_simple_type()const{ return composite_type_stack.empty(); }
+    [[nodiscard]] bool is_nested() const { return composite_type_stack.size() > 1; }
 
     void set_base_type(const std::shared_ptr<hdl_type>  &t);
     std::shared_ptr<hdl_type> finalize_type();
@@ -70,6 +72,7 @@ public:
     void set_type(const std::string & string);
     void set_packed();
     void set_member_signed(bool s);
+    void set_current_member_type(const std::shared_ptr<hdl_type> &t);
 
     void set_operation(Expression_v2::expression_operator subtract);
 
@@ -77,11 +80,14 @@ public:
     std::shared_ptr<hdl_type> resolve_type(const std::string &type_name);
 
 private:
+    HDL_struct_type &current_struct() { return struct_stack.back(); }
+    const HDL_struct_type &current_struct() const { return struct_stack.back(); }
+
     expressions_factory expr_factory;
     ranges_factory r_factory;
     std::map<std::string, std::shared_ptr<hdl_type>> type_registry;
-    type_kind kind = simple_type;
-    HDL_struct_type current_struct;
+    std::vector<type_kind> composite_type_stack;
+    std::vector<HDL_struct_type> struct_stack;
     std::shared_ptr<hdl_type> current_type;
 
 };

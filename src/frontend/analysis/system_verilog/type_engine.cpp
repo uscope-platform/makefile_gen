@@ -18,26 +18,26 @@
 #include "data_model/HDL/types/HDL_external_type.hpp"
 
 void Type_engine::start_composite_type_declaration(type_kind k) {
-    kind = k;
+    composite_type_stack.push_back(k);
     if (k==struct_type) {
-        current_struct = {};
+        struct_stack.emplace_back();
     }
 }
 
 void Type_engine::open_composite_member() {
     r_factory.start();
-    current_struct.member.emplace_back();
+    current_struct().member.emplace_back();
 }
 
 void Type_engine::close_composite_member(const std::string &name) {
     r_factory.stop();
     auto  [packed, unpacked] = r_factory.get_dimensions();
     r_factory.clear();
-    current_struct.member.back().name = name;
-    if (current_struct.member.back().type) {
-        if (current_struct.member.back().type->is<HDL_struct_type>())
+    current_struct().member.back().name = name;
+    if (current_struct().member.back().type) {
+        if (current_struct().member.back().type->is<HDL_struct_type>())
             return;
-        auto &old = current_struct.member.back().type->as<HDL_simple_type>();
+        auto &old = current_struct().member.back().type->as<HDL_simple_type>();
         HDL_simple_type t;
         t.set_signed(old.get_signed());
         t.set_implicit(old.get_implicit());
@@ -50,18 +50,18 @@ void Type_engine::close_composite_member(const std::string &name) {
         if (unpacked.empty()) {
             t.set_unpacked_dimensions(old.get_unpacked_dimensions());
         }
-        current_struct.member.back().type = std::make_shared<HDL_simple_type>(t);
+        current_struct().member.back().type = std::make_shared<HDL_simple_type>(t);
     } else {
         HDL_simple_type t;
         t.set_packed_dimensions(packed);
         t.set_unpacked_dimensions(unpacked);
-        current_struct.member.back().type = std::make_shared<HDL_simple_type>(t);
+        current_struct().member.back().type = std::make_shared<HDL_simple_type>(t);
     }
 }
 
 void Type_engine::set_member_signed(bool s) {
-    if (kind != simple_type && !current_struct.member.empty() && current_struct.member.back().type) {
-        auto &t = current_struct.member.back().type->as<HDL_simple_type>();
+    if (!composite_type_stack.empty() && !current_struct().member.empty() && current_struct().member.back().type) {
+        auto &t = current_struct().member.back().type->as<HDL_simple_type>();
         t.set_signed(s);
     }
 }
@@ -70,25 +70,30 @@ void Type_engine::set_operation(Expression_v2::expression_operator op) {
     expr_factory.set_operation(op);
 }
 
+void Type_engine::set_current_member_type(const std::shared_ptr<hdl_type> &t) {
+    current_struct().member.back().type = t;
+}
+
 std::shared_ptr<hdl_type> Type_engine::stop_composite_type_declaration(const std::string &name, bool anonymous) {
-    kind = simple_type;
-    auto result = std::make_shared<HDL_struct_type>(current_struct);
+    composite_type_stack.pop_back();
+    auto result = std::make_shared<HDL_struct_type>(current_struct());
+    struct_stack.pop_back();
     if (!anonymous) type_registry[name] = result;
     return result;
 }
 
 void Type_engine::set_type(const std::string &type_name) {
-    if (kind != simple_type) {
+    if (!composite_type_stack.empty()) {
         if (has_type(type_name))
-            current_struct.member.back().type = get_type(type_name);
+            current_struct().member.back().type = get_type(type_name);
         else
-            current_struct.member.back().type = create_primitive_type(type_name);
+            current_struct().member.back().type = create_primitive_type(type_name);
     }
 }
 
 void Type_engine::set_packed() {
-    if (kind != simple_type) {
-        current_struct.packed = true;
+    if (!composite_type_stack.empty()) {
+        current_struct().packed = true;
     }
 }
 
