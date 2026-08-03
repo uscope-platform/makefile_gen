@@ -14,6 +14,7 @@
 // limitations under the License.
 
 #include "Backend/Dependency_resolver.hpp"
+#include "data_model/HDL/statement/hdl_statements.hpp"
 
 
 
@@ -45,10 +46,34 @@ void Dependency_resolver_v2::solve_dep(std::shared_ptr<hdl_ast_node> &i) {
 
     auto type = i->get_type();
 
+    std::string res_path;
+    //TODO: this processing step, going back to the data store to get package and memory init dependencies is a bad leaky abstraction
+    // needed because the AST cant represent these constructs for now, it will go away once the AST is made properly polymorphic
+    auto res = d_store->get_HDL_resource(type, res_path);
+    if (res.has_value())
+        modules.insert(res_path);
+
+    if (res.has_value()) {
+        for (auto &stmt : res.value()->get_statements()) {
+            auto inst = std::dynamic_pointer_cast<hdl_instance_statement>(stmt);
+            if (!inst) continue;
+            auto dc = inst->get_dependency_class();
+            if (dc == package) {
+                std::string pkg_path;
+                if (d_store->get_HDL_resource(inst->get_type(), pkg_path).has_value())
+                    packages.insert(pkg_path);
+            } else if (dc == memory_init) {
+                auto df = d_store->get_data_file(inst->get_type());
+                if (df.has_value())
+                    data.insert(df.value().get_path());
+            }
+        }
+    }
+
     for(auto &dep:i->get_dependencies()){
-        std::string res_path;
-        if (d_store->get_HDL_resource(dep->get_type(), res_path).has_value())
-            modules.insert(res_path);
+        std::string dep_path;
+        if (d_store->get_HDL_resource(dep->get_type(), dep_path).has_value())
+            modules.insert(dep_path);
         solve_dep(dep);
     }
 

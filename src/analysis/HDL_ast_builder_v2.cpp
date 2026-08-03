@@ -101,21 +101,6 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                             process_quantifier(child->get_array_quantifier(), current_param_values);
                             working_instance->add_child(child);
                             child_wo.push_back({child, current_param_values, wo.path + "." + working_instance->get_name(), interfaces_map});
-                        } else if (dc == package) {
-                            auto pkg = d_store->get_HDL_resource(inst->get_type(), res_path);
-                            if (!pkg.has_value()) {
-                                spdlog::error("Definition of package {} not found while AST building", inst->get_type());
-                                continue;
-                            }
-                            auto path = res_path;
-                            working_instance->add_package_dependency(path);
-                        } else if (dc == memory_init) {
-                            auto df = d_store->get_data_file(inst->get_type());
-                            if (!df.has_value()) {
-                                spdlog::error("Data file {} mot found while AST building", inst->get_type());
-                                continue;
-                            }
-                            working_instance->add_data_dependency(df.value().get_path());
                         }
                     } else if (auto loop = std::dynamic_pointer_cast<hdl_loop_statement>(stmt)) {
                         auto indices = loop_solver::solve_loop(*loop, current_param_values);
@@ -169,14 +154,6 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                                     working_instance->add_child(child);
                                     child_wo.push_back({child, current_param_values,
                                         wo.path + "." + working_instance->get_name(), interfaces_map});
-                                } else if (dc == package) {
-                                    auto pkg = d_store->get_HDL_resource(body_inst->get_type(), res_path);
-                                    if (pkg.has_value())
-                                        working_instance->add_package_dependency(res_path);
-                                } else if (dc == memory_init) {
-                                    auto df = d_store->get_data_file(body_inst->get_type());
-                                    if (df.has_value())
-                                        working_instance->add_data_dependency(df.value().get_path());
                                 }
                             }
                         }
@@ -192,14 +169,6 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                                 working_instance->add_child(child);
                                 child_wo.push_back({child, current_param_values,
                                     wo.path + "." + working_instance->get_name(), interfaces_map});
-                            } else if (dc == package) {
-                                auto pkg = d_store->get_HDL_resource(body_inst->get_type(), res_path);
-                                if (pkg.has_value())
-                                    working_instance->add_package_dependency(res_path);
-                            } else if (dc == memory_init) {
-                                auto df = d_store->get_data_file(body_inst->get_type());
-                                if (df.has_value())
-                                    working_instance->add_data_dependency(df.value().get_path());
                             }
                         }
                     }

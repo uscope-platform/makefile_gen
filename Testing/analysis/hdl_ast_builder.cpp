@@ -21,6 +21,7 @@
 #include "data_model/mm_file.hpp"
 #include "frontend/analysis/system_verilog/sv_analyzer.hpp"
 #include "analysis/HDL_ast_builder_v2.hpp"
+#include "Backend/Dependency_resolver.hpp"
 
 TEST( hdl_ast_builder, pid_ast_build) {
 
@@ -294,8 +295,9 @@ TEST( hdl_ast_builder, package_dependency) {
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
     auto synth_ast = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
-    auto deps = synth_ast->get_package_dependencies();
-    std::vector<std::string> deps_check = {"/tmp/dep.sv"};
+    Dependency_resolver_v2 resolver({synth_ast}, d_store);
+    auto deps = resolver.get_packages();
+    std::set<std::string> deps_check = {"/tmp/dep.sv"};
     EXPECT_EQ(deps, deps_check);
 }
 
@@ -331,8 +333,9 @@ TEST( hdl_ast_builder, memory_dependency) {
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
     auto synth_ast = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
-    auto deps = synth_ast->get_data_dependencies();
-    std::vector<std::string> deps_check = {"/tmp/mem.dat"};
+    Dependency_resolver_v2 resolver({synth_ast}, d_store);
+    auto deps = resolver.get_data();
+    std::set<std::string> deps_check = {"/tmp/mem.dat"};
     EXPECT_EQ(deps, deps_check);
 }
 
