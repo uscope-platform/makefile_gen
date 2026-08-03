@@ -76,6 +76,14 @@ void HDL_loops_factory::set_phase(loop_phase_t p) {
     if(p==init) {
         current_expression = Expression_v2();
     } else if(p==end) {
+        if (!_statement.get_init()) {
+            auto lhs = current_expression.get_lhs();
+            if (auto id = std::dynamic_pointer_cast<Identifier_token>(lhs)) {
+                HDL_parameter param;
+                param.set_name(id->get_value().get_name());
+                _statement.set_init(std::make_shared<HDL_parameter>(param));
+            }
+        }
         auto init = _statement.get_init();
         if (init) {
             auto copy = std::make_shared<HDL_parameter>(*init);

@@ -19,9 +19,11 @@
 
 std::vector<hdl_integer> loop_solver::solve_loop(const hdl_loop_statement &loop, const std::map<qualified_identifier, resolved_parameter> &context) {
     std::vector<hdl_integer> ret;
-    auto loop_var = loop.get_init()->get_identifier();
+    auto init = loop.get_init();
+    if (!init || init->get_name().empty()) return ret;
+    auto loop_var = init->get_identifier();
 
-    auto init_copy = std::make_shared<HDL_parameter>(*loop.get_init());
+    auto init_copy = std::make_shared<HDL_parameter>(*init);
     auto init_val = init_copy->evaluate(context);
     if (!init_val.has_value() || !init_val.value().is_integer()) return ret;
 
