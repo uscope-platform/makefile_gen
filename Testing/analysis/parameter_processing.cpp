@@ -2327,3 +2327,84 @@ TEST(parameter_processing, unpacked_struct_override) {
     EXPECT_EQ(val->get_value({0}), hdl_integer(200));
     EXPECT_EQ(val->get_value({1}), hdl_integer(100));
 }
+
+TEST(parameter_processing, circular_self_reference) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter A = A + 1;
+            parameter B = 42;
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", test_pattern);
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+    d_store->store_file({"/dev/zero", "file_hash", resources});
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto params = ast_v2->get_parameters();
+    ASSERT_TRUE(params.contains("A"));
+    EXPECT_EQ(params.get("A")->get_numeric_value(), 0);
+    ASSERT_TRUE(params.contains("B"));
+    EXPECT_EQ(params.get("B")->get_numeric_value(), 42);
+}
+
+TEST(parameter_processing, circular_mutual_dependency) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter A = B + 1;
+            parameter B = A - 1;
+            parameter C = 99;
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", test_pattern);
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+    d_store->store_file({"/dev/zero", "file_hash", resources});
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto params = ast_v2->get_parameters();
+    ASSERT_TRUE(params.contains("A"));
+    EXPECT_EQ(params.get("A")->get_numeric_value(), 0);
+    ASSERT_TRUE(params.contains("B"));
+    EXPECT_EQ(params.get("B")->get_numeric_value(), 0);
+    ASSERT_TRUE(params.contains("C"));
+    EXPECT_EQ(params.get("C")->get_numeric_value(), 99);
+}
+
+TEST(parameter_processing, circular_three_way_cycle) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter A = B + 1;
+            parameter B = C * 2;
+            parameter C = A - 3;
+            parameter D = 77;
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", test_pattern);
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+    d_store->store_file({"/dev/zero", "file_hash", resources});
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto params = ast_v2->get_parameters();
+    ASSERT_TRUE(params.contains("A"));
+    EXPECT_EQ(params.get("A")->get_numeric_value(), 0);
+    ASSERT_TRUE(params.contains("B"));
+    EXPECT_EQ(params.get("B")->get_numeric_value(), 0);
+    ASSERT_TRUE(params.contains("C"));
+    EXPECT_EQ(params.get("C")->get_numeric_value(), 0);
+    ASSERT_TRUE(params.contains("D"));
+    EXPECT_EQ(params.get("D")->get_numeric_value(), 77);
+}

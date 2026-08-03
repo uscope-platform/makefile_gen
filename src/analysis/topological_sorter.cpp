@@ -61,3 +61,15 @@ void topological_sorter::purge(const qualified_identifier &id) {
     }
     topo_map.erase(id);
 }
+
+bool topological_sorter::empty() const {
+    return topo_map.empty();
+}
+
+std::vector<qualified_identifier> topological_sorter::get_remaining_nodes() const {
+    std::vector<qualified_identifier> remaining;
+    for (const auto &[node_name, node] : topo_map) {
+        remaining.push_back(node_name);
+    }
+    return remaining;
+}

@@ -25,6 +25,8 @@ public:
     void analyze(const Parameters_map &p,const std::map<qualified_identifier, resolved_parameter> &context);
     std::optional<qualified_identifier> get_next();
     void purge(const qualified_identifier &id);
+    [[nodiscard]] bool empty() const;
+    [[nodiscard]] std::vector<qualified_identifier> get_remaining_nodes() const;
 private:
     struct topo_node {
         std::string name;

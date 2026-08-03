@@ -87,6 +87,14 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
         s.purge(next.value());
     }
 
+    if (!s.empty()) {
+        for (const auto &rem : s.get_remaining_nodes()) {
+            spdlog::warn("The parameter {} is part of a circular dependency, defaulting to 0", rem.get_name());
+            ctx[rem] = 0;
+            solved_parameters[rem] = 0;
+        }
+    }
+
     return solved_parameters;
 }
 
