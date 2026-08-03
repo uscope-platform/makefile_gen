@@ -15,7 +15,7 @@
 
 #include "Backend/Auxiliary_resolver.hpp"
 
-#include "../../../../.conan2/p/b/spdloaee7bae194d75/p/include/spdlog/spdlog.h"
+#include <spdlog/spdlog.h>
 
 
 Auxiliary_resolver::Auxiliary_resolver(std::shared_ptr<data_store> store) {
