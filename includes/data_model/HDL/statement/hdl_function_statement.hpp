@@ -22,6 +22,7 @@
 
 #include "data_model/HDL/statement/hdl_statement_base.hpp"
 #include "data_model/HDL/parameters/components/Expression_base.hpp"
+#include "data_model/HDL/types/HDL_struct_type.hpp"
 
 class HDL_parameter;
 
@@ -52,6 +53,9 @@ public:
     void set_return_type_name(const std::string &n) { return_type_name = n; }
     std::string get_return_type_name() const { return return_type_name; }
 
+    void set_return_type(const std::shared_ptr<hdl_type> &t) { return_type = t; }
+    std::shared_ptr<hdl_type> get_return_type() const { return return_type; }
+
     void set_return_unpacked_bounds(
         const std::shared_ptr<Expression_base> &left,
         const std::shared_ptr<Expression_base> &right
@@ -64,7 +68,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, argument_names, return_type_name, body, local_variables);
+        ar(name, argument_names, return_type_name, return_type, body, local_variables);
     }
 
     friend void PrintTo(const hdl_function_statement& s, std::ostream* os);
@@ -73,6 +77,7 @@ private:
     std::string name;
     std::vector<std::string> argument_names;
     std::string return_type_name;
+    std::shared_ptr<hdl_type> return_type;
     std::shared_ptr<Expression_base> return_unpacked_range_left;
     std::shared_ptr<Expression_base> return_unpacked_range_right;
 

@@ -15,6 +15,7 @@
 
 #include "data_model/HDL/parameters/components/HDL_function_call.hpp"
 #include "data_model/HDL/parameters/components/Replication.hpp"
+#include "data_model/HDL/types/HDL_struct_type.hpp"
 
 #include "analysis/loop_solver.hpp"
 
@@ -48,6 +49,7 @@ void HDL_function_call::propagate_function(const hdl_function_statement &def) {
         body.clear();
         for (const auto &stmt : def.get_body())
             body.push_back(stmt->clone());
+        return_type = def.get_return_type();
         auto arg_names = def.get_arguments_names();
         for (int i =0;i<arg_names.size(); i++) {
             auto arg_val = arguments[i];
@@ -68,14 +70,17 @@ void HDL_function_call::walk_body(
     const std::vector<std::shared_ptr<hdl_statement_base>> &stmts,
     std::map<qualified_identifier, resolved_parameter> ctx,
     std::map<int64_t, hdl_integer> &value_map,
-    std::map<int64_t, int64_t> &size_map
+    std::map<int64_t, int64_t> &size_map,
+    const std::shared_ptr<hdl_type> &rt
 ) {
     for (const auto &stmt : stmts) {
         if (auto asgn = std::dynamic_pointer_cast<hdl_assignment_statement>(stmt)) {
             if (!asgn->get_value()) continue;
             auto val = asgn->get_value()->evaluate(ctx);
             if (!val.has_value()) continue;
-            if (asgn->get_target() == fcn_name) {
+
+            const auto &target = asgn->get_target();
+            if (target == fcn_name) {
                 int64_t idx = 0;
                 if (asgn->get_index()) {
                     auto idx_res = asgn->get_index()->evaluate(ctx);
@@ -89,8 +94,29 @@ void HDL_function_call::walk_body(
                     value_map[idx] = val.value().get_int_array().get_1d_slice({0, 0})[0];
                     size_map[idx] = 0;
                 }
+            } else if (rt && rt->is<HDL_struct_type>() && target.starts_with(fcn_name + ".")) {
+                std::string field_name = target.substr(fcn_name.size() + 1);
+                const auto& members = rt->as<HDL_struct_type>().member;
+                for (size_t i = 0; i < members.size(); ++i) {
+                    if (members[i].name == field_name) {
+                        int64_t idx = static_cast<int64_t>(i);
+                        if (asgn->get_index()) {
+                            auto idx_res = asgn->get_index()->evaluate(ctx);
+                            if (!idx_res.has_value() || !idx_res.value().is_integer()) continue;
+                            idx = idx_res.value().get_integer().get_value();
+                        }
+                        if (val.value().is_integer()) {
+                            value_map[idx] = val.value().get_integer();
+                            size_map[idx] = val.value().get_integer().get_size();
+                        } else if (val.value().is_int_array()) {
+                            value_map[idx] = val.value().get_int_array().get_1d_slice({0, 0})[0];
+                            size_map[idx] = 0;
+                        }
+                        break;
+                    }
+                }
             } else {
-                ctx[qualified_identifier(asgn->get_target())] = val.value();
+                ctx[qualified_identifier(target)] = val.value();
             }
         } else if (auto loop = std::dynamic_pointer_cast<hdl_loop_statement>(stmt)) {
             auto indices = loop_solver::solve_loop(*loop, ctx);
@@ -98,7 +124,7 @@ void HDL_function_call::walk_body(
             for (auto &idx : indices) {
                 auto loop_ctx = ctx;
                 loop_ctx[loop_var] = resolved_parameter(idx);
-                walk_body(fcn_name, loop->get_body(), loop_ctx, value_map, size_map);
+                walk_body(fcn_name, loop->get_body(), loop_ctx, value_map, size_map, rt);
             }
         } else if (auto cond = std::dynamic_pointer_cast<hdl_conditional_statement>(stmt)) {
             bool matched = false;
@@ -107,13 +133,13 @@ void HDL_function_call::walk_body(
                     auto result = branch.condition->evaluate(ctx);
                     if (result.has_value() && result.value().is_integer() && result.value().get_integer() != 0) {
                         matched = true;
-                        walk_body(fcn_name, branch.body, ctx, value_map, size_map);
+                        walk_body(fcn_name, branch.body, ctx, value_map, size_map, rt);
                         break;
                     }
                 }
             }
             if (!matched)
-                walk_body(fcn_name, cond->get_else_body(), ctx, value_map, size_map);
+                walk_body(fcn_name, cond->get_else_body(), ctx, value_map, size_map, rt);
         }
     }
 }
@@ -126,7 +152,7 @@ std::optional<resolved_parameter> HDL_function_call::evaluate(const std::map<qua
 
     std::map<int64_t, hdl_integer> value_map;
     std::map<int64_t, int64_t> size_map;
-    walk_body(function_name, body, context, value_map, size_map);
+    walk_body(function_name, body, context, value_map, size_map, return_type);
 
     if (value_map.empty()) return std::nullopt;
 
@@ -146,11 +172,12 @@ std::optional<resolved_parameter> HDL_function_call::evaluate(const std::map<qua
 
     apply_return_order_reversal(values, sizes, context);
 
+    if (packing) {
+        return resolved_parameter(pack_values(values, sizes));
+    }
+
     mdarray<hdl_integer> result;
     result.set_1d_slice({0, 0}, values);
-    if (packing) {
-        result.set_1d_slice({0,0}, {pack_values(values, sizes)});
-    }
     return result;
 }
 

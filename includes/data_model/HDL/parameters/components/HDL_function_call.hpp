@@ -50,6 +50,9 @@ public:
 
     void set_container_sizes(const resolved_type &s, const std::map<qualified_identifier, resolved_parameter> &context = {}) override;
 
+    void set_return_type(const std::shared_ptr<hdl_type> &t) { return_type = t; }
+    std::shared_ptr<hdl_type> get_return_type() const { return return_type; }
+
     std::string print() const override;
 
     [[nodiscard]] bool empty() const;
@@ -65,7 +68,8 @@ private:
         const std::vector<std::shared_ptr<hdl_statement_base>> &stmts,
         std::map<qualified_identifier, resolved_parameter> ctx,
         std::map<int64_t, hdl_integer> &value_map,
-        std::map<int64_t, int64_t> &size_map
+        std::map<int64_t, int64_t> &size_map,
+        const std::shared_ptr<hdl_type> &rt
     );
 
     std::string function_name;
@@ -73,6 +77,7 @@ private:
     std::vector<std::shared_ptr<Expression_base>> arguments;
 
     std::vector<std::shared_ptr<hdl_statement_base>> body;
+    std::shared_ptr<hdl_type> return_type;
 
     bool packing = false;
     bool container_unpacked_ascending = false;

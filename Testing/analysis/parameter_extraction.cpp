@@ -5241,3 +5241,124 @@ TEST(parameter_extraction, conditional_in_function) {
     qualified_identifier sid = qualified_identifier("TEST_PARAM");
     EXPECT_EQ(defaults[sid], 47);
 }
+
+TEST(parameter_extraction, struct_returning_function) {
+    auto test_pattern = R"(
+        module test_mod #(
+        )();
+            typedef struct {
+                logic [31:0] base;
+                logic [31:0] size;
+            } addr_range_t;
+
+            function addr_range_t compute_addr();
+                compute_addr.base = 32'h1000;
+                compute_addr.size = 32'h400;
+            endfunction
+
+            parameter logic [31:0] TEST_PARAM [1:0] = compute_addr();
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+    auto file = analyzer.analyze("", test_pattern);
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    d_store->store_file({"/dev/zero", "file_hash", file});
+
+    auto resource = std::static_pointer_cast<hdl_resource_statement>(file.get_content()[0]);
+
+    parameter_solver::propagate_functions(resource, d_store);
+    auto defaults = parameter_solver::process_parameters(resource->get_parameters(), {});
+
+    mdarray<hdl_integer> av;
+    av.set_1d_slice({0, 0}, {0x1000, 0x400});
+
+    std::map<qualified_identifier, resolved_parameter> check_defaults = {
+        {qualified_identifier("TEST_PARAM"), av}
+    };
+    for (const auto& [name, value] : check_defaults) {
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+
+TEST(parameter_extraction, packed_struct_returning_function) {
+    auto test_pattern = R"(
+        module test_mod #(
+        )();
+            typedef struct packed {
+                logic [15:0] base;
+                logic [15:0] size;
+            } addr_range_t;
+
+            function addr_range_t compute_addr();
+                compute_addr.base = 16'hCAFE;
+                compute_addr.size = 16'hBEBE;
+            endfunction
+
+            parameter logic [31:0] TEST_PARAM = compute_addr();
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+    auto file = analyzer.analyze("", test_pattern);
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    d_store->store_file({"/dev/zero", "file_hash", file});
+
+    auto resource = std::static_pointer_cast<hdl_resource_statement>(file.get_content()[0]);
+
+    parameter_solver::propagate_functions(resource, d_store);
+    auto defaults = parameter_solver::process_parameters(resource->get_parameters(), {});
+
+
+    std::map<qualified_identifier, resolved_parameter> check_defaults = {
+        {qualified_identifier("TEST_PARAM"), hdl_integer(0xBEBECAFE)}
+    };
+    for (const auto& [name, value] : check_defaults) {
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}
+
+
+TEST(parameter_extraction, packed_struct_returning_function_reverse_order) {
+    auto test_pattern = R"(
+        module test_mod #(
+        )();
+            typedef struct packed {
+                logic [15:0] base;
+                logic [15:0] size;
+            } addr_range_t;
+
+            function addr_range_t compute_addr();
+                compute_addr.size = 16'hBEBE;
+                compute_addr.base = 16'hCAFE;
+            endfunction
+
+            parameter logic [31:0] TEST_PARAM = compute_addr();
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+    auto file = analyzer.analyze("", test_pattern);
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    d_store->store_file({"/dev/zero", "file_hash", file});
+
+    auto resource = std::static_pointer_cast<hdl_resource_statement>(file.get_content()[0]);
+
+    parameter_solver::propagate_functions(resource, d_store);
+    auto defaults = parameter_solver::process_parameters(resource->get_parameters(), {});
+
+
+    std::map<qualified_identifier, resolved_parameter> check_defaults = {
+        {qualified_identifier("TEST_PARAM"), hdl_integer(0xBEBECAFE)}
+    };
+    for (const auto& [name, value] : check_defaults) {
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+}

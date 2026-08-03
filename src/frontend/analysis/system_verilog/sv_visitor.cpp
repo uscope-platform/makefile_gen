@@ -1280,7 +1280,11 @@ void sv_visitor::exitBlocking_assignment(sv2017::Blocking_assignmentContext *ctx
 
 void sv_visitor::enterVariable_lvalue(sv2017::Variable_lvalueContext *ctx) {
     if(f_factory.is_active()) {
-        auto var_name = ctx->package_or_class_scoped_hier_id_with_select()->package_or_class_scoped_path()->getText();
+        auto hier = ctx->package_or_class_scoped_hier_id_with_select();
+        auto var_name = hier->package_or_class_scoped_path()->getText();
+        for (size_t i = 0; i < hier->DOT().size(); ++i) {
+            var_name += "." + hier->identifier_with_bit_select(i)->identifier()->getText();
+        }
         if(loops_factory.in_loop()) {
             loops_factory.start_assignment(var_name);
             if (loops_factory.in_body()) {

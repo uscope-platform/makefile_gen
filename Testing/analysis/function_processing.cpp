@@ -484,4 +484,46 @@ TEST(function_processing, conditional_in_function) {
     EXPECT_EQ(check_f, result);
 }
 
+TEST(function_processing, struct_returning_function) {
+    auto test_pattern = R"(
+        module test_mod #(
+        )();
+            typedef struct {
+                logic [31:0] base;
+                logic [31:0] size;
+            } addr_range_t;
+
+            function addr_range_t compute_addr();
+                compute_addr.base = 32'h1000;
+                compute_addr.size = 32'h400;
+            endfunction
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+
+    auto resource = analyzer.analyze("",test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto functions = resource.get_functions();
+
+    EXPECT_EQ(functions.size(), 1);
+    EXPECT_TRUE(functions.contains("compute_addr"));
+    auto result = functions["compute_addr"];
+
+    hdl_function_statement check_f;
+    check_f.set_name("compute_addr");
+    check_f.set_return_type_name("addr_range_t");
+    check_f.set_return_type(result.get_return_type());
+
+    auto s0 = std::make_shared<hdl_assignment_statement>();
+    s0->set_target("compute_addr.base");
+    s0->set_value(std::make_shared<Numeric_token>("32'h1000"));
+    check_f.add_statement(s0);
+    auto s1 = std::make_shared<hdl_assignment_statement>();
+    s1->set_target("compute_addr.size");
+    s1->set_value(std::make_shared<Numeric_token>("32'h400"));
+    check_f.add_statement(s1);
+
+    EXPECT_EQ(check_f, result);
+}
+
 
