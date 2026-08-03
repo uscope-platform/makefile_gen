@@ -5362,3 +5362,113 @@ TEST(parameter_extraction, packed_struct_returning_function_reverse_order) {
         ASSERT_EQ(value, defaults.at(name));
     }
 }
+
+TEST(parameter_extraction, system_task_ln) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam V = $ln(1.0);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("V")).get_real(), 0.0);
+}
+
+TEST(parameter_extraction, system_task_log10) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam V = $log10(100);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("V")).get_real(), 2.0);
+}
+
+TEST(parameter_extraction, system_task_sqrt) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam V = $sqrt(16);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("V")).get_real(), 4.0);
+}
+
+TEST(parameter_extraction, system_task_pow) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam V = $pow(2, 3);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("V")).get_real(), 8.0);
+}
+
+TEST(parameter_extraction, system_task_min_int) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam V = $min(5, 3, 7, 1);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("V")).get_integer(), 1);
+}
+
+TEST(parameter_extraction, system_task_max_int) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam V = $max(5, 3, 7, 1);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("V")).get_integer(), 7);
+}
+
+TEST(parameter_extraction, system_task_countones) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam V = $countones(8'b10110011);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("V")).get_integer(), 5);
+}
+
+TEST(parameter_extraction, system_task_ln_int_arg) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam BASE = 7;
+            localparam V = $ln(BASE);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("V")).get_real(), std::log(7.0));
+}
+
+TEST(parameter_extraction, system_task_sqrt_int_arg) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam N = 25;
+            localparam V = $sqrt(N);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("V")).get_real(), 5.0);
+}

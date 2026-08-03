@@ -237,13 +237,111 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
         spdlog::warn("Encountered an invalid argument for a $floor call");
 
     }
+    if (task_name == "ln") {
+        if (resolved_arguments[0].is_real()) {
+            return std::log(resolved_arguments[0].get_real());
+        } else if (resolved_arguments[0].is_integer()) {
+            return std::log(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        }
+        spdlog::warn("Encountered an invalid argument for a $ln call");
+        return 0;
+    }
+    if (task_name == "log10") {
+        if (resolved_arguments[0].is_real()) {
+            return std::log10(resolved_arguments[0].get_real());
+        } else if (resolved_arguments[0].is_integer()) {
+            return std::log10(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        }
+        spdlog::warn("Encountered an invalid argument for a $log10 call");
+        return 0;
+    }
+    if (task_name == "sqrt") {
+        if (resolved_arguments[0].is_real()) {
+            return std::sqrt(resolved_arguments[0].get_real());
+        } else if (resolved_arguments[0].is_integer()) {
+            return std::sqrt(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        }
+        spdlog::warn("Encountered an invalid argument for a $sqrt call");
+        return 0;
+    }
+    if (task_name == "pow") {
+        if (resolved_arguments.size() < 2) {
+            spdlog::warn("$pow requires exactly 2 arguments");
+            return 0;
+        }
+        double base = resolved_arguments[0].is_real()
+                          ? resolved_arguments[0].get_real()
+                          : static_cast<double>(resolved_arguments[0].get_integer().get_value());
+        double exponent = resolved_arguments[1].is_real()
+                              ? resolved_arguments[1].get_real()
+                              : static_cast<double>(resolved_arguments[1].get_integer().get_value());
+        return std::pow(base, exponent);
+    }
+    if (task_name == "min") {
+        if (resolved_arguments.size() < 2) {
+            spdlog::warn("$min requires at least 2 arguments");
+            return 0;
+        }
+        bool all_int = std::ranges::all_of(resolved_arguments, [](const auto &a) { return a.is_integer(); });
+        if (all_int) {
+            auto result = resolved_arguments[0].get_integer();
+            for (size_t i = 1; i < resolved_arguments.size(); i++) {
+                if (resolved_arguments[i].get_integer() < result) result = resolved_arguments[i].get_integer();
+            }
+            return result;
+        } else {
+            double result = resolved_arguments[0].is_real()
+                                ? resolved_arguments[0].get_real()
+                                : static_cast<double>(resolved_arguments[0].get_integer().get_value());
+            for (size_t i = 1; i < resolved_arguments.size(); i++) {
+                double v = resolved_arguments[i].is_real()
+                               ? resolved_arguments[i].get_real()
+                               : static_cast<double>(resolved_arguments[i].get_integer().get_value());
+                if (v < result) result = v;
+            }
+            return result;
+        }
+    }
+    if (task_name == "max") {
+        if (resolved_arguments.size() < 2) {
+            spdlog::warn("$max requires at least 2 arguments");
+            return 0;
+        }
+        bool all_int = std::ranges::all_of(resolved_arguments, [](const auto &a) { return a.is_integer(); });
+        if (all_int) {
+            auto result = resolved_arguments[0].get_integer();
+            for (size_t i = 1; i < resolved_arguments.size(); i++) {
+                if (result < resolved_arguments[i].get_integer()) result = resolved_arguments[i].get_integer();
+            }
+            return result;
+        } else {
+            double result = resolved_arguments[0].is_real()
+                                ? resolved_arguments[0].get_real()
+                                : static_cast<double>(resolved_arguments[0].get_integer().get_value());
+            for (size_t i = 1; i < resolved_arguments.size(); i++) {
+                double v = resolved_arguments[i].is_real()
+                               ? resolved_arguments[i].get_real()
+                               : static_cast<double>(resolved_arguments[i].get_integer().get_value());
+                if (result < v) result = v;
+            }
+            return result;
+        }
+    }
+    if (task_name == "countones") {
+        if (resolved_arguments[0].is_integer()) {
+            uint64_t val = static_cast<uint64_t>(resolved_arguments[0].get_integer().get_value());
+            return static_cast<hdl_integer>(std::popcount(val));
+        }
+        spdlog::warn("Encountered an invalid argument for a $countones call");
+        return 0;
+    }
     if (task_name == "clog2") {
         if (resolved_arguments[0].is_real()) {
             return static_cast<hdl_integer>(std::ceil(std::log2(resolved_arguments[0].get_real())));
         } else if (resolved_arguments[0].is_integer()) {
             return static_cast<hdl_integer>(std::ceil(std::log2(resolved_arguments[0].get_integer().get_value())));
         }
-        spdlog::warn("Encountered an invalid argument for a $floor call");
+        spdlog::warn("Encountered an invalid argument for a $clog2 call");
     }
     spdlog::warn("Unsupported system task {} encountered while parsing a parameter", function_name);
     return 0;
