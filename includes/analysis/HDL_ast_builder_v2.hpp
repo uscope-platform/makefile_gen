@@ -42,6 +42,13 @@ private:
     bool evaluate_condition(const std::shared_ptr<Expression_base> &cond,
         const std::map<qualified_identifier, resolved_parameter> &parameters);
 
+    std::vector<work_order> process_statement(
+        const std::shared_ptr<hdl_statement_base> &stmt,
+        const std::shared_ptr<hdl_ast_node> &parent,
+        const std::map<qualified_identifier, resolved_parameter> &params,
+        const std::string &path,
+        const std::unordered_map<std::string, std::string> &if_map
+    );
     std::vector<work_order> process_instance(
         const std::shared_ptr<hdl_instance_statement> &inst,
         const std::shared_ptr<hdl_ast_node> &parent,
