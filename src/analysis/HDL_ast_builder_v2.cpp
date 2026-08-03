@@ -79,11 +79,8 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                 spdlog::trace("Processing dependency {} in module {}",working_instance->get_name(), type);
                 auto current_param_values = parameter_solver::override_parameters(wo, d_store);
 
-                for (auto &[name, value]: process_runtime_parameters(current_param_values, res)) {
-                    current_param_values[name] = value;
-                }
-
                 std::vector<work_order> child_wo;
+                auto child_path = wo.path + "." + working_instance->get_name();
 
                 std::unordered_map<std::string, std::string> interfaces_map;
                 for (auto &[port_name, port_net] :wo.node->get_ports()) {
@@ -100,7 +97,7 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                             child->set_parent(working_instance);
                             process_quantifier(child->get_array_quantifier(), current_param_values);
                             working_instance->add_child(child);
-                            child_wo.push_back({child, current_param_values, wo.path + "." + working_instance->get_name(), interfaces_map});
+                            child_wo.push_back({child, current_param_values, child_path, interfaces_map});
                         }
                     } else if (auto loop = std::dynamic_pointer_cast<hdl_loop_statement>(stmt)) {
                         auto indices = loop_solver::solve_loop(*loop, current_param_values);
@@ -134,7 +131,7 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                                 working_instance->add_child(child);
                                 auto parent_params = current_param_values;
                                 parent_params[qualified_identifier(loop_var_name)] = resolved_parameter(idx);
-                                child_wo.push_back({child, parent_params, wo.path + "." + working_instance->get_name(), interfaces_map});
+                                child_wo.push_back({child, parent_params, child_path, interfaces_map});
                             }
                         }
                     } else if (auto cond = std::dynamic_pointer_cast<hdl_conditional_statement>(stmt)) {
@@ -153,7 +150,7 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                                     process_quantifier(child->get_array_quantifier(), current_param_values);
                                     working_instance->add_child(child);
                                     child_wo.push_back({child, current_param_values,
-                                        wo.path + "." + working_instance->get_name(), interfaces_map});
+                                        child_path, interfaces_map});
                                 }
                             }
                         }
@@ -168,7 +165,7 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                                 process_quantifier(child->get_array_quantifier(), current_param_values);
                                 working_instance->add_child(child);
                                 child_wo.push_back({child, current_param_values,
-                                    wo.path + "." + working_instance->get_name(), interfaces_map});
+                                    child_path, interfaces_map});
                             }
                         }
                     }
@@ -195,21 +192,4 @@ void HDL_ast_builder_v2::process_quantifier(const std::shared_ptr<HDL_parameter>
         if (!value.has_value()) throw std::runtime_error("unknown identifiers remain in an array quantifier");
         quantifier->set_value(value.value());
     }
-}
-
-std::map<qualified_identifier, resolved_parameter> HDL_ast_builder_v2::process_runtime_parameters(
-    const std::map<qualified_identifier, resolved_parameter> &parameters,
-    const std::shared_ptr<hdl_resource_statement> &res
-) {
-    std::map<qualified_identifier, resolved_parameter> runtime_parameters;
-    for ( auto &[name, value]: parameters) {
-        if (value.is_string()) {
-            if (value.get_string() == "__RUNTIME_ONLY_PARAMETER__") {
-                auto raw_param = res->get_parameters().get(name.get_name());
-                auto val = raw_param->evaluate({});
-                if (val.has_value()) runtime_parameters.insert({name, val.value()});
-            }
-        }
-    }
-    return runtime_parameters;
 }

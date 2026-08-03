@@ -174,6 +174,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
     solved_parameters.insert(solution.begin(), solution.end());
 
     update_parameters_map(solved_parameters, work.node, d_store);
+
     return solved_parameters;
 }
 
