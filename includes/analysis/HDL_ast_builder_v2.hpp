@@ -27,6 +27,10 @@
 #include "analysis/passes/pass_manager.hpp"
 #include "parameter_solver.hpp"
 
+class hdl_loop_statement;
+class hdl_conditional_statement;
+class hdl_instance_statement;
+
 
 class HDL_ast_builder_v2 {
 public:
@@ -37,6 +41,30 @@ private:
     void process_quantifier(const std::shared_ptr<HDL_parameter> &quantifier, const std::map<qualified_identifier, resolved_parameter> &parameters);
     bool evaluate_condition(const std::shared_ptr<Expression_base> &cond,
         const std::map<qualified_identifier, resolved_parameter> &parameters);
+
+    std::vector<work_order> process_instance(
+        const std::shared_ptr<hdl_instance_statement> &inst,
+        const std::shared_ptr<hdl_ast_node> &parent,
+        const std::map<qualified_identifier, resolved_parameter> &params,
+        const std::string &path,
+        const std::unordered_map<std::string, std::string> &if_map,
+        bool active = true
+    );
+    std::vector<work_order> process_loop(
+        const hdl_loop_statement &loop,
+        const std::shared_ptr<hdl_ast_node> &parent,
+        const std::map<qualified_identifier, resolved_parameter> &params,
+        const std::string &path,
+        const std::unordered_map<std::string, std::string> &if_map
+    );
+    std::vector<work_order> process_conditional(
+        const hdl_conditional_statement &cond,
+        const std::shared_ptr<hdl_ast_node> &parent,
+        const std::map<qualified_identifier, resolved_parameter> &params,
+        const std::string &path,
+        const std::unordered_map<std::string, std::string> &if_map
+    );
+
     std::shared_ptr<data_store> d_store;
     std::shared_ptr<settings_store> s_store;
     Depfile  dep_file;

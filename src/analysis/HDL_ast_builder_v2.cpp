@@ -91,83 +91,14 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                 }
                 for (auto &stmt : res->get_statements()) {
                     if (auto inst = std::dynamic_pointer_cast<hdl_instance_statement>(stmt)) {
-                        auto dc = inst->get_dependency_class();
-                        if (dc == module || dc == interface) {
-                            auto child = std::make_shared<hdl_ast_node>(*inst);
-                            child->set_parent(working_instance);
-                            process_quantifier(child->get_array_quantifier(), current_param_values);
-                            working_instance->add_child(child);
-                            child_wo.push_back({child, current_param_values, child_path, interfaces_map});
-                        }
+                        auto result_wo = process_instance(inst, working_instance, current_param_values, child_path, interfaces_map);
+                        child_wo.insert(child_wo.end(), result_wo.begin(), result_wo.end());
                     } else if (auto loop = std::dynamic_pointer_cast<hdl_loop_statement>(stmt)) {
-                        auto indices = loop_solver::solve_loop(*loop, current_param_values);
-                        auto loop_var_name = loop->get_init()->get_name();
-                        for (auto &body_stmt : loop->get_body()) {
-                            for (auto &idx : indices) {
-                                auto body_inst = std::dynamic_pointer_cast<hdl_instance_statement>(body_stmt);
-                                if (!body_inst) continue;
-                                auto child = std::make_shared<hdl_ast_node>(*body_inst);
-                                child->set_parent(working_instance);
-                                process_quantifier(child->get_array_quantifier(), current_param_values);
-
-                                std::unordered_map<std::string, std::vector<HDL_net>> new_ports;
-                                for (auto &[port_name, nets] : child->get_ports()) {
-                                    std::vector<HDL_net> port_content;
-                                    for (auto &n : nets) {
-                                        if (n.is_array()) {
-                                            auto new_net = n;
-                                            Expression_v2 n_idx;
-                                            n_idx.set_lhs(std::make_shared<Numeric_token>(std::variant<hdl_integer, double>(idx), 0));
-                                            new_net.set_index({n_idx});
-                                            port_content.emplace_back(new_net);
-                                        } else {
-                                            port_content.push_back(n);
-                                        }
-                                    }
-                                    new_ports[port_name] = port_content;
-                                }
-                                child->set_ports(new_ports);
-
-                                working_instance->add_child(child);
-                                auto parent_params = current_param_values;
-                                parent_params[qualified_identifier(loop_var_name)] = resolved_parameter(idx);
-                                child_wo.push_back({child, parent_params, child_path, interfaces_map});
-                            }
-                        }
+                        auto result_wo = process_loop(*loop, working_instance, current_param_values, child_path, interfaces_map);
+                        child_wo.insert(child_wo.end(), result_wo.begin(), result_wo.end());
                     } else if (auto cond = std::dynamic_pointer_cast<hdl_conditional_statement>(stmt)) {
-                        bool any_matched = false;
-                        for (auto &branch : cond->get_branches()) {
-                            bool selected = evaluate_condition(branch.condition, current_param_values);
-                            any_matched = any_matched || selected;
-                            for (auto &body_stmt : branch.body) {
-                                auto body_inst = std::dynamic_pointer_cast<hdl_instance_statement>(body_stmt);
-                                if (!body_inst) continue;
-                                auto dc = body_inst->get_dependency_class();
-                                if (dc == module || dc == interface) {
-                                    auto child = std::make_shared<hdl_ast_node>(*body_inst);
-                                    child->set_parent(working_instance);
-                                    child->set_active(selected);
-                                    process_quantifier(child->get_array_quantifier(), current_param_values);
-                                    working_instance->add_child(child);
-                                    child_wo.push_back({child, current_param_values,
-                                        child_path, interfaces_map});
-                                }
-                            }
-                        }
-                        for (auto &body_stmt : cond->get_else_body()) {
-                            auto body_inst = std::dynamic_pointer_cast<hdl_instance_statement>(body_stmt);
-                            if (!body_inst) continue;
-                            auto dc = body_inst->get_dependency_class();
-                            if (dc == module || dc == interface) {
-                                auto child = std::make_shared<hdl_ast_node>(*body_inst);
-                                child->set_parent(working_instance);
-                                child->set_active(!any_matched);
-                                process_quantifier(child->get_array_quantifier(), current_param_values);
-                                working_instance->add_child(child);
-                                child_wo.push_back({child, current_param_values,
-                                    child_path, interfaces_map});
-                            }
-                        }
+                        auto result_wo = process_conditional(*cond, working_instance, current_param_values, child_path, interfaces_map);
+                        child_wo.insert(child_wo.end(), result_wo.begin(), result_wo.end());
                     }
                 }
                 for (const auto &c:child_wo| std::views::reverse) {
@@ -192,4 +123,97 @@ void HDL_ast_builder_v2::process_quantifier(const std::shared_ptr<HDL_parameter>
         if (!value.has_value()) throw std::runtime_error("unknown identifiers remain in an array quantifier");
         quantifier->set_value(value.value());
     }
+}
+
+std::vector<work_order> HDL_ast_builder_v2::process_instance(
+    const std::shared_ptr<hdl_instance_statement> &inst,
+    const std::shared_ptr<hdl_ast_node> &parent,
+    const std::map<qualified_identifier, resolved_parameter> &params,
+    const std::string &path,
+    const std::unordered_map<std::string, std::string> &if_map,
+    bool active
+) {
+    std::vector<work_order> orders;
+    auto dc = inst->get_dependency_class();
+    if (dc != module && dc != interface) return orders;
+    auto child = std::make_shared<hdl_ast_node>(*inst);
+    child->set_parent(parent);
+    child->set_active(active);
+    process_quantifier(child->get_array_quantifier(), params);
+    parent->add_child(child);
+    orders.push_back({child, params, path, if_map});
+    return orders;
+}
+
+std::vector<work_order> HDL_ast_builder_v2::process_loop(
+    const hdl_loop_statement &loop,
+    const std::shared_ptr<hdl_ast_node> &parent,
+    const std::map<qualified_identifier, resolved_parameter> &params,
+    const std::string &path,
+    const std::unordered_map<std::string, std::string> &if_map
+) {
+    std::vector<work_order> orders;
+    auto indices = loop_solver::solve_loop(loop, params);
+    auto loop_var_name = loop.get_init()->get_name();
+    for (auto &body_stmt : loop.get_body()) {
+        for (auto &idx : indices) {
+            auto body_inst = std::dynamic_pointer_cast<hdl_instance_statement>(body_stmt);
+            if (!body_inst) continue;
+            auto child = std::make_shared<hdl_ast_node>(*body_inst);
+            child->set_parent(parent);
+            process_quantifier(child->get_array_quantifier(), params);
+
+            std::unordered_map<std::string, std::vector<HDL_net>> new_ports;
+            for (auto &[port_name, nets] : child->get_ports()) {
+                std::vector<HDL_net> port_content;
+                for (auto &n : nets) {
+                    if (n.is_array()) {
+                        auto new_net = n;
+                        Expression_v2 n_idx;
+                        n_idx.set_lhs(std::make_shared<Numeric_token>(std::variant<hdl_integer, double>(idx), 0));
+                        new_net.set_index({n_idx});
+                        port_content.emplace_back(new_net);
+                    } else {
+                        port_content.push_back(n);
+                    }
+                }
+                new_ports[port_name] = port_content;
+            }
+            child->set_ports(new_ports);
+
+            parent->add_child(child);
+            auto parent_params = params;
+            parent_params[qualified_identifier(loop_var_name)] = resolved_parameter(idx);
+            orders.push_back({child, parent_params, path, if_map});
+        }
+    }
+    return orders;
+}
+
+std::vector<work_order> HDL_ast_builder_v2::process_conditional(
+    const hdl_conditional_statement &cond,
+    const std::shared_ptr<hdl_ast_node> &parent,
+    const std::map<qualified_identifier, resolved_parameter> &params,
+    const std::string &path,
+    const std::unordered_map<std::string, std::string> &if_map
+) {
+    std::vector<work_order> orders;
+    bool any_matched = false;
+    for (auto &branch : cond.get_branches()) {
+        bool selected = evaluate_condition(branch.condition, params);
+        any_matched = any_matched || selected;
+        for (auto &body_stmt : branch.body) {
+            auto body_inst = std::dynamic_pointer_cast<hdl_instance_statement>(body_stmt);
+            if (!body_inst) continue;
+            auto wo = process_instance(body_inst, parent, params, path, if_map, selected);
+            orders.insert(orders.end(), wo.begin(), wo.end());
+        }
+    }
+    for (auto &body_stmt : cond.get_else_body()) {
+        auto body_inst = std::dynamic_pointer_cast<hdl_instance_statement>(body_stmt);
+        if (!body_inst) continue;
+        auto wo = process_instance(body_inst, parent, params, path, if_map, !any_matched);
+        orders.insert(orders.end(), wo.begin(), wo.end());
+    }
+    return orders;
 }
