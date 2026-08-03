@@ -337,3 +337,172 @@ TEST( hdl_ast_builder, memory_dependency) {
 }
 
 
+TEST( hdl_ast_builder, nested_generate_loop) {
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+
+    auto test_pattern = R"(
+        module leaf();
+            wire w;
+        endmodule
+
+        module top #(
+            parameter N = 2,
+            parameter M = 3
+        )();
+            generate
+                for (genvar i = 0; i < N; i = i + 1) begin
+                    for (genvar j = 0; j < M; j = j + 1) begin
+                        leaf l();
+                    end
+                end
+            endgenerate
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+    auto entities = analyzer.analyze("", test_pattern);
+    d_store->store_file({"/dev/zero", "file_hash", entities});
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto synth_ast = b2.build_ast(std::vector<std::string>({"top"}))[0];
+
+    auto structure = synth_ast->dump_structure();
+    auto reference = "TL:top\n    l:leaf\n    l:leaf\n    l:leaf\n    l:leaf\n    l:leaf\n    l:leaf\n";
+    EXPECT_EQ(structure, reference);
+    EXPECT_EQ(synth_ast->get_dependencies().size(), 6);
+}
+
+
+TEST( hdl_ast_builder, loop_around_conditional) {
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+
+    auto test_pattern = R"(
+        module leaf();
+            wire w;
+        endmodule
+
+        module top #(
+            parameter N = 2,
+            parameter FLAG = 1
+        )();
+            generate
+                for (genvar i = 0; i < N; i = i + 1) begin
+                    if (FLAG) begin
+                        leaf l_then();
+                    end else begin
+                        leaf l_else();
+                    end
+                end
+            endgenerate
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+    auto entities = analyzer.analyze("", test_pattern);
+    d_store->store_file({"/dev/zero", "file_hash", entities});
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto synth_ast = b2.build_ast(std::vector<std::string>({"top"}))[0];
+
+    auto structure = synth_ast->dump_structure();
+    auto reference = "TL:top\n    l_then:leaf\n    l_else:leaf\n    l_then:leaf\n    l_else:leaf\n";
+    EXPECT_EQ(structure, reference);
+    EXPECT_EQ(synth_ast->get_dependencies().size(), 4);
+}
+
+
+TEST( hdl_ast_builder, conditional_around_loop) {
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+
+    auto test_pattern = R"(
+        module leaf();
+            wire w;
+        endmodule
+
+        module top #(
+            parameter N = 3,
+            parameter FEAT_A = 1,
+            parameter FEAT_B = 0
+        )();
+            generate
+                if (FEAT_A) begin
+                    leaf l_a();
+                    if (FEAT_B) begin
+                        leaf l_b();
+                    end else begin
+                        leaf l_not_b();
+                    end
+                end else begin
+                    leaf l_not_a();
+                end
+            endgenerate
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+    auto entities = analyzer.analyze("", test_pattern);
+    d_store->store_file({"/dev/zero", "file_hash", entities});
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto synth_ast = b2.build_ast(std::vector<std::string>({"top"}))[0];
+
+    auto structure = synth_ast->dump_structure();
+    auto reference = "TL:top\n    l_a:leaf\n    l_b:leaf\n    l_not_b:leaf\n    l_not_a:leaf\n";
+    EXPECT_EQ(structure, reference);
+    EXPECT_EQ(synth_ast->get_dependencies().size(), 4);
+}
+
+TEST( hdl_ast_builder, triple_nested_conditional) {
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+
+    auto test_pattern = R"(
+        module leaf();
+            wire w;
+        endmodule
+
+        module top #(
+            parameter A = 1,
+            parameter B = 0,
+            parameter C = 1
+        )();
+            generate
+                if (A) begin
+                    leaf l_a();
+                    if (B) begin
+                        leaf l_b();
+                    end else begin
+                        if (C) begin
+                            leaf l_c();
+                        end else begin
+                            leaf l_d();
+                        end
+                    end
+                end else begin
+                    leaf l_not_a();
+                end
+            endgenerate
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+    auto entities = analyzer.analyze("", test_pattern);
+    d_store->store_file({"/dev/zero", "file_hash", entities});
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto synth_ast = b2.build_ast(std::vector<std::string>({"top"}))[0];
+
+    auto structure = synth_ast->dump_structure();
+    auto reference = "TL:top\n    l_a:leaf\n    l_b:leaf\n    l_c:leaf\n    l_d:leaf\n    l_not_a:leaf\n";
+    EXPECT_EQ(structure, reference);
+    EXPECT_EQ(synth_ast->get_dependencies().size(), 5);
+}
+
+
