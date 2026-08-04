@@ -5620,3 +5620,29 @@ TEST(parameter_extraction, system_task_left_right) {
     EXPECT_EQ(defaults.at(qualified_identifier("LFT")).get_integer(), 5);
     EXPECT_EQ(defaults.at(qualified_identifier("RGT")).get_integer(), 2);
 }
+
+TEST(parameter_extraction, system_task_signed) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [7:0] RAW = 8'hFF;
+            parameter S = $signed(RAW);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), -1);
+}
+
+TEST(parameter_extraction, system_task_unsigned) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter signed [3:0] NEG = -1;
+            parameter U = $unsigned(NEG);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("U")).get_integer(), 15);
+}

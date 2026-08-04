@@ -18,6 +18,7 @@
 #include "data_model/HDL/parameters/components/Replication.hpp"
 #include "data_model/HDL/types/HDL_struct_type.hpp"
 #include "data_model/HDL/types/HDL_simple_type.hpp"
+#include "analysis/type_cast_engine.hpp"
 
 #include "analysis/loop_solver.hpp"
 
@@ -393,6 +394,22 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
             }
         }
         spdlog::warn("${} argument is not a typed identifier, defaulting to 0", task_name);
+        return 0;
+    }
+    if (task_name == "signed" || task_name == "unsigned") {
+        if (resolved_arguments[0].is_integer()) {
+            uint64_t container = 64;
+            if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
+                auto t = arguments[0]->as<Identifier_token>().get_expression_type();
+                if (t) {
+                    auto rt = t->evaluate_type(context);
+                    if (rt && !rt->packed_sizes.empty()) container = rt->packed_sizes[0];
+                }
+            }
+            if (task_name == "signed") return type_cast_engine::to_signed(resolved_arguments[0].get_integer(), container);
+            return type_cast_engine::to_unsigned(resolved_arguments[0].get_integer(), container);
+        }
+        spdlog::warn("Encountered an invalid argument for a ${} call", task_name);
         return 0;
     }
     if (task_name == "clog2") {
