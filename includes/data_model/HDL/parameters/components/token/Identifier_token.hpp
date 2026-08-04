@@ -24,6 +24,8 @@
 
 #include "data_model/HDL/parameters/components/Expression_base.hpp"
 
+class hdl_type;
+
 class Identifier_token :public Expression_base{
 public:
     Identifier_token() = default;
@@ -47,6 +49,8 @@ public:
 
     qualified_identifier get_value() const {return id;}
 
+    void set_expression_type(const std::shared_ptr<hdl_type> &t) { expression_type = t; }
+    std::shared_ptr<hdl_type> get_expression_type() const { return expression_type; }
 
     void set_container_sizes(const resolved_type &s, const std::map<qualified_identifier, resolved_parameter> &context = {}) override;
 
@@ -62,6 +66,7 @@ private:
 
     qualified_identifier id;
     std::vector<std::shared_ptr<Expression_base>> array_index;
+    std::shared_ptr<hdl_type> expression_type;
 };
 
 

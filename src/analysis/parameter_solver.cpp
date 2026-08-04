@@ -16,6 +16,14 @@
 #include "analysis/parameter_solver.hpp"
 #include "crash_context.hpp"
 
+#include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
+#include "data_model/HDL/parameters/components/Expression_v2.hpp"
+#include "data_model/HDL/parameters/components/Concatenation.hpp"
+#include "data_model/HDL/parameters/components/Replication.hpp"
+#include "data_model/HDL/parameters/components/Ternary.hpp"
+#include "data_model/HDL/parameters/components/Cast.hpp"
+#include "data_model/HDL/parameters/components/HDL_function_call.hpp"
+
 #include <set>
 
 
@@ -57,6 +65,63 @@ void parameter_solver::resolve_interface_chain(
     if (container) examined_node = container;
 }
 
+static void annotate_identifier_types(
+    const std::shared_ptr<Expression_base> &root,
+    const std::map<qualified_identifier, std::shared_ptr<hdl_type>> &type_map
+) {
+    if (!root) return;
+
+    std::vector<std::shared_ptr<Expression_base>> stack;
+    stack.push_back(root);
+
+    while (!stack.empty()) {
+        auto node = stack.back();
+        stack.pop_back();
+        if (!node) continue;
+
+        if (node->is<Identifier_token>()) {
+            auto &id_token = node->as<Identifier_token>();
+            auto it = type_map.find(id_token.get_value());
+            if (it != type_map.end()) {
+                id_token.set_expression_type(it->second);
+            }
+        } else if (node->is<Expression_v2>()) {
+            auto &e = node->as<Expression_v2>();
+            if (e.get_rhs()) stack.push_back(e.get_rhs());
+            if (e.get_lhs()) stack.push_back(e.get_lhs());
+        } else if (node->is<Concatenation>()) {
+            for (auto &comp : node->as<Concatenation>().get_components()) {
+                if (comp) stack.push_back(comp);
+            }
+        } else if (node->is<Replication>()) {
+            auto &r = node->as<Replication>();
+            if (r.get_size()) stack.push_back(r.get_size());
+            if (r.get_item()) stack.push_back(r.get_item());
+        } else if (node->is<Ternary>()) {
+            auto &t = node->as<Ternary>();
+            if (t.get_false_value()) stack.push_back(t.get_false_value());
+            if (t.get_true_value()) stack.push_back(t.get_true_value());
+            if (t.get_condition()) stack.push_back(t.get_condition());
+        } else if (node->is<Cast>()) {
+            auto &c = node->as<Cast>();
+            if (c.get_size_expr()) stack.push_back(c.get_size_expr());
+            if (c.get_content()) stack.push_back(c.get_content());
+        } else if (node->is<HDL_function_call>()) {
+            for (auto &arg : node->as<HDL_function_call>().get_arguments()) {
+                if (arg) stack.push_back(arg);
+            }
+        }
+    }
+}
+
+static std::map<qualified_identifier, std::shared_ptr<hdl_type>> build_type_map(const Parameters_map &map) {
+    std::map<qualified_identifier, std::shared_ptr<hdl_type>> types;
+    for (const auto &[name, param] : map) {
+        types[qualified_identifier(name)] = param->get_type();
+    }
+    return types;
+}
+
 std::map<qualified_identifier, resolved_parameter> parameter_solver::process_parameters(
     const Parameters_map &map_in,
     const std::map<qualified_identifier, resolved_parameter> &context
@@ -68,9 +133,14 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
     topological_sorter s;
     s.analyze(map_in, ctx);
 
+    auto type_map = build_type_map(map_in);
+
     while (auto next = s.get_next()) {
         auto param = map_in.const_get(next.value().get_name());
         crash_ctx.parameter = next.value().get_name();
+        if (param->get_expression()) {
+            annotate_identifier_types(param->get_expression(), type_map);
+        }
         auto res = param->evaluate(ctx);
         if (res) {
             ctx[next.value()] = res.value();

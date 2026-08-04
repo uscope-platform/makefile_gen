@@ -26,6 +26,7 @@ public:
         components = {};
     };
     void add_component(const std::shared_ptr<Expression_base> &expr) {components.push_back(expr);}
+    std::vector<std::shared_ptr<Expression_base>> get_components() const { return components; }
 
     Concatenation(const Concatenation &other);
     Concatenation(Concatenation &&other) noexcept;

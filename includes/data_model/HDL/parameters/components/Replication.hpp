@@ -37,6 +37,7 @@ public:
     void set_item(std::shared_ptr<Expression_base> item){ repeated_item = std::move(item);}
     std::shared_ptr<Expression_base> get_item()const { return repeated_item;}
     void set_size(const std::shared_ptr<Expression_base> &expr);
+    std::shared_ptr<Expression_base> get_size() const { return repetition_size; }
 
     parameter_deps_t get_dependencies()const override;
     void propagate_expression(const qualified_identifier &constant_id, const std::shared_ptr<Expression_base> &value) override;

@@ -35,6 +35,7 @@ public:
     void set_name(const std::string &n){function_name = n;}
     std::string get_name(){return function_name;}
     void add_argument(const std::shared_ptr<Expression_base> &p);
+    std::vector<std::shared_ptr<Expression_base>> get_arguments() const { return arguments; }
     void add_package_prefix(const std::string &p){package_prefix = p;}
     std::string get_package_prefix() const {return package_prefix;}
     parameter_deps_t get_dependencies() const override;

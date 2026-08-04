@@ -27,6 +27,9 @@ public:
     void set_condition(const std::shared_ptr<Expression_base> &c) {condition = c;}
     void set_true_value(const std::shared_ptr<Expression_base> &v) {true_value = v;}
     void set_false_value(const std::shared_ptr<Expression_base> &v) {false_value =v;}
+    std::shared_ptr<Expression_base> get_condition() const { return condition; }
+    std::shared_ptr<Expression_base> get_true_value() const { return true_value; }
+    std::shared_ptr<Expression_base> get_false_value() const { return false_value; }
 
     [[nodiscard]] parameter_deps_t get_dependencies()const override;
     void propagate_expression(const qualified_identifier &constant_id, const std::shared_ptr<Expression_base> &value) override;

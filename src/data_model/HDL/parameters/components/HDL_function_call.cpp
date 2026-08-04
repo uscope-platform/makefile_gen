@@ -14,6 +14,7 @@
 //  limitations under the License.
 
 #include "data_model/HDL/parameters/components/HDL_function_call.hpp"
+#include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
 #include "data_model/HDL/parameters/components/Replication.hpp"
 #include "data_model/HDL/types/HDL_struct_type.hpp"
 
@@ -333,6 +334,38 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
             return static_cast<hdl_integer>(std::popcount(val));
         }
         spdlog::warn("Encountered an invalid argument for a $countones call");
+        return 0;
+    }
+    if (task_name == "bits") {
+        if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
+            auto t = arguments[0]->as<Identifier_token>().get_expression_type();
+            if (t) {
+                auto rt = t->evaluate_type(context);
+                if (rt) {
+                    uint64_t bits = rt->packed_sizes.empty() ? 0 : rt->packed_sizes[0];
+                    for (size_t i = 1; i < rt->packed_sizes.size(); i++) bits *= rt->packed_sizes[i];
+                    return static_cast<hdl_integer>(bits == 0 ? 1 : bits);
+                }
+            }
+        }
+        spdlog::warn("$bits argument is not a typed identifier, defaulting to 0");
+        return 0;
+    }
+    if (task_name == "size") {
+        int dim = 1;
+        if (resolved_arguments.size() >= 2 && resolved_arguments[1].is_integer()) {
+            dim = static_cast<int>(resolved_arguments[1].get_integer().get_value());
+        }
+        if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
+            auto t = arguments[0]->as<Identifier_token>().get_expression_type();
+            if (t) {
+                auto rt = t->evaluate_type(context);
+                if (rt && dim >= 1 && static_cast<size_t>(dim) <= rt->unpacked_sizes.size()) {
+                    return static_cast<hdl_integer>(rt->unpacked_sizes[dim - 1]);
+                }
+            }
+        }
+        spdlog::warn("$size argument is not a typed identifier, defaulting to 0");
         return 0;
     }
     if (task_name == "clog2") {

@@ -5536,3 +5536,57 @@ TEST(parameter_extraction, wide_integer_mixed_arithmetic) {
     auto expected = int1024_t("0xFFFFFFFFFFFFFFFF0000000000000000") * 2;
     EXPECT_EQ(mult_val, expected);
 }
+
+TEST(parameter_extraction, system_task_bits_sized) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [31:0] W = 32;
+            parameter B = $bits(W);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 32);
+}
+
+TEST(parameter_extraction, system_task_bits_packed_dim) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [7:0][3:0] V = 64;
+            parameter B = $bits(V);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 32);
+}
+
+TEST(parameter_extraction, system_task_bits_dependency) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [15:0] X = 42;
+            parameter B = $bits(X);
+            parameter C = B + 1;
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 16);
+    EXPECT_EQ(defaults.at(qualified_identifier("C")).get_integer(), 17);
+}
+
+TEST(parameter_extraction, system_task_size) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [7:0] arr [3:0] = '{4{8'hFF}};
+            parameter S = $size(arr);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), 4);
+}

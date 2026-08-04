@@ -56,6 +56,8 @@ public:
 
     void set_size(const std::shared_ptr<Expression_base> &s){size = s;}
     void set_content(const std::shared_ptr<Expression_base> &c){content = c;}
+    std::shared_ptr<Expression_base> get_content() const { return content; }
+    std::shared_ptr<Expression_base> get_size_expr() const { return size; }
 
     [[nodiscard]] parameter_deps_t get_dependencies()const override;
     void propagate_expression(const qualified_identifier &constant_id, const std::shared_ptr<Expression_base> &value) override;
