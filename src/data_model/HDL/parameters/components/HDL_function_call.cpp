@@ -17,6 +17,7 @@
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
 #include "data_model/HDL/parameters/components/Replication.hpp"
 #include "data_model/HDL/types/HDL_struct_type.hpp"
+#include "data_model/HDL/types/HDL_simple_type.hpp"
 
 #include "analysis/loop_solver.hpp"
 
@@ -366,6 +367,32 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
             }
         }
         spdlog::warn("$size argument is not a typed identifier, defaulting to 0");
+        return 0;
+    }
+    if (task_name == "left" || task_name == "right" || task_name == "high" || task_name == "low") {
+        int dim = 1;
+        if (resolved_arguments.size() >= 2 && resolved_arguments[1].is_integer()) {
+            dim = static_cast<int>(resolved_arguments[1].get_integer().get_value());
+        }
+        if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
+            auto t = arguments[0]->as<Identifier_token>().get_expression_type();
+            if (t && t->is<HDL_simple_type>()) {
+                auto udims = t->as<HDL_simple_type>().get_unpacked_dimensions();
+                if (dim >= 1 && static_cast<size_t>(dim) <= udims.size()) {
+                    auto lb = udims[dim - 1].first_bound->evaluate(context);
+                    auto rb = udims[dim - 1].second_bound->evaluate(context);
+                    if (lb && rb && lb->is_integer() && rb->is_integer()) {
+                        int64_t l = lb->get_integer().get_value();
+                        int64_t r = rb->get_integer().get_value();
+                        if (task_name == "left") return static_cast<hdl_integer>(l);
+                        if (task_name == "right") return static_cast<hdl_integer>(r);
+                        if (task_name == "high") return static_cast<hdl_integer>(std::max(l, r));
+                        return static_cast<hdl_integer>(std::min(l, r));
+                    }
+                }
+            }
+        }
+        spdlog::warn("${} argument is not a typed identifier, defaulting to 0", task_name);
         return 0;
     }
     if (task_name == "clog2") {

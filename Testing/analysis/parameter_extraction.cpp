@@ -5590,3 +5590,33 @@ TEST(parameter_extraction, system_task_size) {
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), 4);
 }
+
+TEST(parameter_extraction, system_task_high_low) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [7:0] arr [3:0] = '{4{8'hFF}};
+            parameter H = $high(arr);
+            parameter L = $low(arr);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("H")).get_integer(), 3);
+    EXPECT_EQ(defaults.at(qualified_identifier("L")).get_integer(), 0);
+}
+
+TEST(parameter_extraction, system_task_left_right) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [7:0] arr [5:2] = '{4{8'hFF}};
+            parameter LFT = $left(arr);
+            parameter RGT = $right(arr);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("LFT")).get_integer(), 5);
+    EXPECT_EQ(defaults.at(qualified_identifier("RGT")).get_integer(), 2);
+}
