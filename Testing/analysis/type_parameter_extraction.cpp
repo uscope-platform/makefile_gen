@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "frontend/analysis/system_verilog/sv_analyzer.hpp"
+#include "analysis/parameter_solver.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/types/HDL_simple_type.hpp"
 #include "frontend/analysis/system_verilog/type_engine.hpp"
@@ -116,4 +117,93 @@ TEST(type_parameter_extraction, localparam_type) {
         ASSERT_TRUE(parameters.contains(name));
         ASSERT_EQ(*item, *parameters.get(name));
     }
+}
+
+TEST(type_parameter_extraction, processing_with_default) {
+    auto test_pattern = R"(
+        module test_mod #(
+            parameter type T = int,
+            parameter X = 42
+        )();
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+
+    auto result = parameter_solver::process_parameters(resource.get_parameters(), {});
+
+    ASSERT_TRUE(result.contains(qualified_identifier("T")));
+    ASSERT_TRUE(result.contains(qualified_identifier("X")));
+    EXPECT_EQ(result.at(qualified_identifier("X")).get_integer(), 42);
+}
+
+TEST(type_parameter_extraction, processing_no_default) {
+    auto test_pattern = R"(
+        module test_mod #(
+            parameter type T,
+            parameter X = 7
+        )();
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+
+    auto result = parameter_solver::process_parameters(resource.get_parameters(), {});
+
+    ASSERT_TRUE(result.contains(qualified_identifier("T")));
+    ASSERT_TRUE(result.contains(qualified_identifier("X")));
+    EXPECT_EQ(result.at(qualified_identifier("X")).get_integer(), 7);
+}
+
+TEST(type_parameter_extraction, processing_type_param_chain) {
+    auto test_pattern = R"(
+        module test_mod #(
+            parameter type T = int,
+            parameter type U = T,
+            parameter B = $bits(T)
+        )();
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+
+    auto result = parameter_solver::process_parameters(resource.get_parameters(), {});
+
+    EXPECT_EQ(result.at(qualified_identifier("B")).get_integer(), 32);
+}
+
+TEST(type_parameter_extraction, processing_bits_of_type_param) {
+    auto test_pattern = R"(
+        module test_mod #(
+            parameter type T = shortint,
+            parameter B = $bits(T)
+        )();
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+
+    auto result = parameter_solver::process_parameters(resource.get_parameters(), {});
+
+    EXPECT_EQ(result.at(qualified_identifier("B")).get_integer(), 16);
+}
+
+TEST(type_parameter_extraction, processing_multiple_type_params) {
+    auto test_pattern = R"(
+        module test_mod #(
+            parameter type A = int,
+            parameter type B = bit,
+            parameter C = 99
+        )();
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+
+    auto result = parameter_solver::process_parameters(resource.get_parameters(), {});
+
+    ASSERT_TRUE(result.contains(qualified_identifier("A")));
+    ASSERT_TRUE(result.contains(qualified_identifier("B")));
+    ASSERT_TRUE(result.contains(qualified_identifier("C")));
+    EXPECT_EQ(result.at(qualified_identifier("C")).get_integer(), 99);
 }

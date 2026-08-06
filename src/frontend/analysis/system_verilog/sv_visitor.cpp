@@ -183,8 +183,19 @@ std::shared_ptr<hdl_type> sv_visitor::resolve_data_type(sv2017::Data_typeContext
         return type_engine.resolve_type(type);
     }
     if (dt->package_or_class_scoped_path()) {
-        auto qi = sv_parsing_helpers::parse_qualified_identifier(dt->package_or_class_scoped_path());
-        return std::make_shared<HDL_external_type>(qi);
+        auto pkg_ctx = dt->package_or_class_scoped_path();
+        if (!pkg_ctx->DOUBLE_COLON().empty()) {
+            auto qi = sv_parsing_helpers::parse_qualified_identifier(pkg_ctx);
+            return std::make_shared<HDL_external_type>(qi);
+        }
+        std::string name = pkg_ctx->getText();
+        if (name == "bit" || name == "logic" || name == "reg") {
+            return Type_engine::create_primitive_type(name);
+        }
+        if (type_engine.has_type(name)) {
+            return type_engine.get_type(name);
+        }
+        return nullptr;
     }
     return std::make_shared<HDL_simple_type>();
 }
@@ -483,8 +494,13 @@ void sv_visitor::enterParameter_declaration(sv2017::Parameter_declarationContext
             std::string name = ta->identifier()->getText();
             auto p = std::make_shared<HDL_parameter>(name);
             p->is_type_param = true;
-            if (ta->data_type()) {
-                p->set_type(resolve_data_type(ta->data_type()));
+            if (auto *dt = ta->data_type()) {
+                auto resolved = resolve_data_type(dt);
+                if (resolved)
+                    p->set_type(resolved);
+                else
+                    p->set_raw_value(std::make_shared<Type_ref>(
+                        qualified_identifier(dt->package_or_class_scoped_path()->getText())));
             }
             if (modules_factory.is_current_valid())
                 modules_factory.add_parameter(p);
@@ -514,8 +530,13 @@ void sv_visitor::enterParameter_port_declaration(sv2017::Parameter_port_declarat
             std::string name = ta->identifier()->getText();
             auto p = std::make_shared<HDL_parameter>(name);
             p->is_type_param = true;
-            if (ta->data_type()) {
-                p->set_type(resolve_data_type(ta->data_type()));
+            if (auto *dt = ta->data_type()) {
+                auto resolved = resolve_data_type(dt);
+                if (resolved)
+                    p->set_type(resolved);
+                else
+                    p->set_raw_value(std::make_shared<Type_ref>(
+                        qualified_identifier(dt->package_or_class_scoped_path()->getText())));
             }
             if (modules_factory.is_current_valid())
                 modules_factory.add_parameter(p);
@@ -1101,8 +1122,13 @@ void sv_visitor::enterLocal_parameter_declaration(sv2017::Local_parameter_declar
             std::string name = ta->identifier()->getText();
             auto p = std::make_shared<HDL_parameter>(name);
             p->is_type_param = true;
-            if (ta->data_type()) {
-                p->set_type(resolve_data_type(ta->data_type()));
+            if (auto *dt = ta->data_type()) {
+                auto resolved = resolve_data_type(dt);
+                if (resolved)
+                    p->set_type(resolved);
+                else
+                    p->set_raw_value(std::make_shared<Type_ref>(
+                        qualified_identifier(dt->package_or_class_scoped_path()->getText())));
             }
             if (modules_factory.is_current_valid())
                 modules_factory.add_parameter(p);

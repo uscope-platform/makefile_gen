@@ -149,8 +149,8 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
         crash_ctx.parameter = next.value().get_name();
 
         if (param->is_type_param) {
-            std::shared_ptr<hdl_type> resolved_type = param->get_type();
-            if (!resolved_type && param->get_expression() && param->get_expression()->is<Type_ref>()) {
+            std::shared_ptr<hdl_type> resolved_type;
+            if (param->get_expression() && param->get_expression()->is<Type_ref>()) {
                 auto &ref = param->get_expression()->as<Type_ref>();
                 auto it = type_ctx.find(ref.get_target());
                 if (it != type_ctx.end()) {
@@ -158,6 +158,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
                     param->set_type(resolved_type);
                 }
             }
+            if (!resolved_type) resolved_type = param->get_type();
             if (!resolved_type) {
                 spdlog::warn("Type parameter {} has no resolved type, defaulting to implicit", next.value().get_name());
                 resolved_type = Type_engine::create_primitive_type("implicit");
