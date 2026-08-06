@@ -53,6 +53,7 @@ target_sources(ananke_lib
     data_model/HDL/parameters/components/token/Identifier_token.cpp
     data_model/HDL/parameters/components/token/Numeric_token.cpp
     data_model/HDL/parameters/components/token/String_token.cpp
+    data_model/HDL/parameters/components/token/Type_ref.cpp
     data_model/HDL/parameters/components/HDL_function_call.cpp
     data_model/HDL/statement/hdl_resource_statement.cpp
     data_model/HDL/statement/hdl_function_statement.cpp
