@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "frontend/analysis/system_verilog/sv_analyzer.hpp"
+#include "analysis/HDL_ast_builder_v2.hpp"
 #include "analysis/parameter_solver.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/types/HDL_simple_type.hpp"
@@ -206,4 +207,63 @@ TEST(type_parameter_extraction, processing_multiple_type_params) {
     ASSERT_TRUE(result.contains(qualified_identifier("B")));
     ASSERT_TRUE(result.contains(qualified_identifier("C")));
     EXPECT_EQ(result.at(qualified_identifier("C")).get_integer(), 99);
+}
+
+TEST(type_parameter_extraction, override_type_param) {
+    auto test_pattern = R"(
+        module child #(
+            parameter type T = bit
+        )();
+        endmodule
+
+        module parent #(
+            parameter type U = int
+        )();
+            child #(.T(U)) inst();
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", test_pattern);
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+    d_store->store_file({"/dev/zero", "file_hash", resources});
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"parent"}))[0];
+
+    auto child_params = ast_v2->get_dependencies()[0]->get_parameters();
+    ASSERT_TRUE(child_params.contains("T"));
+    auto t = child_params.get("T");
+    ASSERT_TRUE(t->is_type_param);
+    ASSERT_TRUE(t->get_type() != nullptr);
+    EXPECT_TRUE(t->get_type()->is<HDL_simple_type>());
+    EXPECT_TRUE(t->get_type()->as<HDL_simple_type>().get_signed());
+}
+
+TEST(type_parameter_extraction, override_recomputes_dependent_param) {
+    auto test_pattern = R"(
+        module child #(
+            parameter type T = int,
+            parameter W = $bits(T)
+        )();
+        endmodule
+
+        module parent #(
+            parameter type U = shortint
+        )();
+            child #(.T(U)) inst();
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", test_pattern);
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+    d_store->store_file({"/dev/zero", "file_hash", resources});
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"parent"}))[0];
+
+    auto child_params = ast_v2->get_dependencies()[0]->get_parameters();
+    ASSERT_TRUE(child_params.contains("T"));
+    ASSERT_TRUE(child_params.get("T")->is_type_param);
+    ASSERT_TRUE(child_params.contains("W"));
+    EXPECT_EQ(child_params.get("W")->get_numeric_value(), 16);
 }

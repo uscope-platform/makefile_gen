@@ -38,7 +38,8 @@ public:
           raw_value(std::move(other.raw_value)),
           solved_value(std::move(other.solved_value)),
           return_unpacked_range_left(std::move(other.return_unpacked_range_left)),
-          return_unpacked_range_right(std::move(other.return_unpacked_range_right)){
+          return_unpacked_range_right(std::move(other.return_unpacked_range_right)),
+          is_type_param(other.is_type_param){
     }
     HDL_parameter & operator=(const HDL_parameter &other) {
         if (this == &other)
@@ -49,6 +50,7 @@ public:
         solved_value = other.solved_value;
         return_unpacked_range_left = other.return_unpacked_range_left;
         return_unpacked_range_right = other.return_unpacked_range_right;
+        is_type_param = other.is_type_param;
         return *this;
     }
 
@@ -61,6 +63,7 @@ public:
         solved_value = std::move(other.solved_value);
         return_unpacked_range_left = std::move(other.return_unpacked_range_left);
         return_unpacked_range_right = std::move(other.return_unpacked_range_right);
+        is_type_param = other.is_type_param;
         return *this;
     }
 

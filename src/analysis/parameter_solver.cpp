@@ -388,9 +388,36 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::solve_compl
         }
     }
 
+    std::map<qualified_identifier, std::shared_ptr<hdl_type>> parent_type_ctx;
+    auto parent_node = work.node->get_parent();
+    if (parent_node) {
+        auto parent_spec = d_store->get_HDL_resource(parent_node->get_type());
+        if (parent_spec.has_value()) {
+            for (const auto &[name, pp] : parent_spec.value()->get_parameters()) {
+                if (pp->is_type_param && pp->get_type()) {
+                    parent_type_ctx[qualified_identifier(name)] = pp->get_type();
+                }
+            }
+        }
+    }
+
     for(auto &[override_name, param]:node_overrides) {
         if (node_parameters.contains(override_name)) {
-            param->set_type(node_parameters.get(override_name)->get_type());
+            auto spec_param = node_parameters.get(override_name);
+            if (spec_param->is_type_param) {
+                param->is_type_param = true;
+                if (param->get_expression() && param->get_expression()->is<Identifier_token>()) {
+                    auto ref_name = param->get_expression()->as<Identifier_token>().get_value();
+                    auto it = parent_type_ctx.find(ref_name);
+                    if (it != parent_type_ctx.end()) {
+                        param->set_type(it->second);
+                        continue;
+                    }
+                }
+                param->set_type(spec_param->get_type());
+            } else {
+                param->set_type(spec_param->get_type());
+            }
         }
     }
 

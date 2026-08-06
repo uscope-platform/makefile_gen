@@ -21,6 +21,7 @@ HDL_parameter::HDL_parameter(const HDL_parameter &c) {
     name = c.name;
     type = c.type;
     solved_value = c.solved_value;
+    is_type_param = c.is_type_param;
 
     raw_value = c.raw_value;
     return_unpacked_range_left = c.return_unpacked_range_left;
