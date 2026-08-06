@@ -28,6 +28,7 @@ set(ANANKE_TESTS
         analysis/analysis.cpp
         analysis/parameter_extraction.cpp
         analysis/parameter_processing.cpp
+        analysis/type_parameter_extraction.cpp
         analysis/port_extraction.cpp
         analysis/hdl_ast_builder.cpp
         analysis/function_processing.cpp

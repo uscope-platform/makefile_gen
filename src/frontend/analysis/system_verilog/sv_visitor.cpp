@@ -23,6 +23,7 @@
 #include "frontend/analysis/system_verilog/sv_parsing_helpers.hpp"
 #include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
+#include "data_model/HDL/parameters/components/token/Type_ref.hpp"
 #include "data_model/HDL/parameters/components/token/String_token.hpp"
 #include "data_model/HDL/types/HDL_external_type.hpp"
 
@@ -171,6 +172,19 @@ std::shared_ptr<hdl_type> sv_visitor::setup_data_type(sv2017::Data_type_or_impli
         auto implicit = Type_engine::create_primitive_type("implicit");
         type_engine.set_base_type(implicit);
         return implicit;
+    }
+    return std::make_shared<HDL_simple_type>();
+}
+
+std::shared_ptr<hdl_type> sv_visitor::resolve_data_type(sv2017::Data_typeContext *dt) {
+    if (!dt) return Type_engine::create_primitive_type("implicit");
+    if (dt->data_type_primitive()) {
+        std::string type = dt->data_type_primitive()->getText();
+        return type_engine.resolve_type(type);
+    }
+    if (dt->package_or_class_scoped_path()) {
+        auto qi = sv_parsing_helpers::parse_qualified_identifier(dt->package_or_class_scoped_path());
+        return std::make_shared<HDL_external_type>(qi);
     }
     return std::make_shared<HDL_simple_type>();
 }
@@ -463,7 +477,22 @@ void sv_visitor::exitPackage_or_class_scoped_path(sv2017::Package_or_class_scope
 }
 
 void sv_visitor::enterParameter_declaration(sv2017::Parameter_declarationContext *ctx) {
-    if (ctx->list_of_type_assignments() ) return;
+    if (ctx->list_of_type_assignments()) {
+        in_param_declaration = true;
+        for (auto *ta : ctx->list_of_type_assignments()->type_assignment()) {
+            std::string name = ta->identifier()->getText();
+            auto p = std::make_shared<HDL_parameter>(name);
+            p->is_type_param = true;
+            if (ta->data_type()) {
+                p->set_type(resolve_data_type(ta->data_type()));
+            }
+            if (modules_factory.is_current_valid())
+                modules_factory.add_parameter(p);
+            else if (interfaces_factory.is_current_valid())
+                interfaces_factory.add_parameter(p);
+        }
+        return;
+    }
     in_param_declaration = true;
     if (!ctx->list_of_param_assignments()) {
         throw std::runtime_error("Encountered non existent list of parameter declarations");
@@ -477,6 +506,23 @@ void sv_visitor::enterParameter_declaration(sv2017::Parameter_declarationContext
 void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext *ctx) {
     params_factory.set_type(std::make_shared<HDL_simple_type>() );
     in_param_declaration = false;
+}
+
+void sv_visitor::enterParameter_port_declaration(sv2017::Parameter_port_declarationContext *ctx) {
+    if (ctx->KW_TYPE()) {
+        for (auto *ta : ctx->list_of_type_assignments()->type_assignment()) {
+            std::string name = ta->identifier()->getText();
+            auto p = std::make_shared<HDL_parameter>(name);
+            p->is_type_param = true;
+            if (ta->data_type()) {
+                p->set_type(resolve_data_type(ta->data_type()));
+            }
+            if (modules_factory.is_current_valid())
+                modules_factory.add_parameter(p);
+            else if (interfaces_factory.is_current_valid())
+                interfaces_factory.add_parameter(p);
+        }
+    }
 }
 
 void sv_visitor::enterExpression(sv2017::ExpressionContext *ctx) {
@@ -1049,6 +1095,22 @@ void sv_visitor::exitData_type_or_implicit(sv2017::Data_type_or_implicitContext 
 }
 
 void sv_visitor::enterLocal_parameter_declaration(sv2017::Local_parameter_declarationContext *ctx) {
+    if (ctx->list_of_type_assignments()) {
+        in_param_declaration = true;
+        for (auto *ta : ctx->list_of_type_assignments()->type_assignment()) {
+            std::string name = ta->identifier()->getText();
+            auto p = std::make_shared<HDL_parameter>(name);
+            p->is_type_param = true;
+            if (ta->data_type()) {
+                p->set_type(resolve_data_type(ta->data_type()));
+            }
+            if (modules_factory.is_current_valid())
+                modules_factory.add_parameter(p);
+            else if (interfaces_factory.is_current_valid())
+                interfaces_factory.add_parameter(p);
+        }
+        return;
+    }
     in_param_declaration = true;
     auto resolved = setup_data_type(ctx->data_type_or_implicit());
     type_engine.start_range();

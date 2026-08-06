@@ -47,6 +47,7 @@ bool operator==(const HDL_parameter &lhs, const HDL_parameter &rhs) {
     }
 
     ret &= lhs.solved_value == rhs.solved_value;
+    ret &= lhs.is_type_param == rhs.is_type_param;
 
     return ret;
 }
@@ -58,6 +59,7 @@ bool operator<(const HDL_parameter &lhs, const HDL_parameter &rhs) {
 
 
 std::optional<resolved_parameter> HDL_parameter::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
+    if (is_type_param) return resolved_parameter(0);
     if (!type) return std::nullopt;
     std::optional<resolved_type> container_size;
     if (type->is<HDL_external_type>()) {

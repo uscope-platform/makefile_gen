@@ -23,6 +23,8 @@
 #include "data_model/HDL/parameters/components/Ternary.hpp"
 #include "data_model/HDL/parameters/components/Cast.hpp"
 #include "data_model/HDL/parameters/components/HDL_function_call.hpp"
+#include "data_model/HDL/parameters/components/token/Type_ref.hpp"
+#include "frontend/analysis/system_verilog/type_engine.hpp"
 
 #include <set>
 
@@ -135,9 +137,39 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
 
     auto type_map = build_type_map(map_in);
 
+    std::map<qualified_identifier, std::shared_ptr<hdl_type>> type_ctx;
+    for (const auto &[name, param] : map_in) {
+        if (param->is_type_param && param->get_type()) {
+            type_ctx[qualified_identifier(name)] = param->get_type();
+        }
+    }
+
     while (auto next = s.get_next()) {
         auto param = map_in.const_get(next.value().get_name());
         crash_ctx.parameter = next.value().get_name();
+
+        if (param->is_type_param) {
+            std::shared_ptr<hdl_type> resolved_type = param->get_type();
+            if (!resolved_type && param->get_expression() && param->get_expression()->is<Type_ref>()) {
+                auto &ref = param->get_expression()->as<Type_ref>();
+                auto it = type_ctx.find(ref.get_target());
+                if (it != type_ctx.end()) {
+                    resolved_type = it->second;
+                    param->set_type(resolved_type);
+                }
+            }
+            if (!resolved_type) {
+                spdlog::warn("Type parameter {} has no resolved type, defaulting to implicit", next.value().get_name());
+                resolved_type = Type_engine::create_primitive_type("implicit");
+                param->set_type(resolved_type);
+            }
+            type_ctx[next.value()] = resolved_type;
+            ctx[next.value()] = 0;
+            solved_parameters[next.value()] = 0;
+            s.purge(next.value());
+            continue;
+        }
+
         if (param->get_expression()) {
             annotate_identifier_types(param->get_expression(), type_map);
         }

@@ -68,6 +68,7 @@ public:
     void exitPackage_or_class_scoped_path(sv2017::Package_or_class_scoped_pathContext *ctx) override;
     void enterParameter_declaration(sv2017::Parameter_declarationContext *ctx) override;
     void exitParameter_declaration(sv2017::Parameter_declarationContext *ctx) override;
+    void enterParameter_port_declaration(sv2017::Parameter_port_declarationContext *ctx) override;
     void enterParam_assignment(sv2017::Param_assignmentContext *ctx) override;
     void exitParam_assignment(sv2017::Param_assignmentContext *ctx) override;
     void exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext *ctx) override;
@@ -223,6 +224,7 @@ private:
     void route_expression_component(const std::shared_ptr<Expression_base>& ec);
     void process_operation(Expression_v2::expression_operator op);
     std::shared_ptr<hdl_type> setup_data_type(sv2017::Data_type_or_implicitContext *dtoi);
+    std::shared_ptr<hdl_type> resolve_data_type(sv2017::Data_typeContext *dt);
 
     bool in_param_declaration = false;
     bool in_function_var_decl = false;

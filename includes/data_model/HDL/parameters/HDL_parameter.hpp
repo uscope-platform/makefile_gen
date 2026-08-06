@@ -92,6 +92,8 @@ public:
 
     bool is_array() const{return type && !type->is_scalar();}
 
+    bool is_type_param = false;
+
     std::string get_name() const {return name;}
     qualified_identifier get_identifier(){return qualified_identifier(name);}
 
@@ -115,7 +117,7 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, raw_value, type);
+        ar(name, raw_value, type, is_type_param);
     }
 
     nlohmann::json dump();
