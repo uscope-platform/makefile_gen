@@ -27,6 +27,7 @@ set(ANANKE_TESTS
         analysis/bus_analyzer.cpp
         analysis/analysis.cpp
         analysis/parameter_extraction.cpp
+        analysis/system_task_tests.cpp
         analysis/parameter_processing.cpp
         analysis/type_parameter_extraction.cpp
         analysis/port_extraction.cpp

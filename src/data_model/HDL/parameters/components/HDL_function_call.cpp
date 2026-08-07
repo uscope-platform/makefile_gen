@@ -338,6 +338,93 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
         spdlog::warn("Encountered an invalid argument for a $countones call");
         return 0;
     }
+    if (task_name == "sin") {
+        if (resolved_arguments[0].is_real()) return std::sin(resolved_arguments[0].get_real());
+        if (resolved_arguments[0].is_integer()) return std::sin(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        spdlog::warn("Encountered an invalid argument for a $sin call");
+        return 0;
+    }
+    if (task_name == "cos") {
+        if (resolved_arguments[0].is_real()) return std::cos(resolved_arguments[0].get_real());
+        if (resolved_arguments[0].is_integer()) return std::cos(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        spdlog::warn("Encountered an invalid argument for a $cos call");
+        return 0;
+    }
+    if (task_name == "tan") {
+        if (resolved_arguments[0].is_real()) return std::tan(resolved_arguments[0].get_real());
+        if (resolved_arguments[0].is_integer()) return std::tan(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        spdlog::warn("Encountered an invalid argument for a $tan call");
+        return 0;
+    }
+    if (task_name == "sinh") {
+        if (resolved_arguments[0].is_real()) return std::sinh(resolved_arguments[0].get_real());
+        if (resolved_arguments[0].is_integer()) return std::sinh(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        spdlog::warn("Encountered an invalid argument for a $sinh call");
+        return 0;
+    }
+    if (task_name == "cosh") {
+        if (resolved_arguments[0].is_real()) return std::cosh(resolved_arguments[0].get_real());
+        if (resolved_arguments[0].is_integer()) return std::cosh(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        spdlog::warn("Encountered an invalid argument for a $cosh call");
+        return 0;
+    }
+    if (task_name == "tanh") {
+        if (resolved_arguments[0].is_real()) return std::tanh(resolved_arguments[0].get_real());
+        if (resolved_arguments[0].is_integer()) return std::tanh(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        spdlog::warn("Encountered an invalid argument for a $tanh call");
+        return 0;
+    }
+    if (task_name == "asinh") {
+        if (resolved_arguments[0].is_real()) return std::asinh(resolved_arguments[0].get_real());
+        if (resolved_arguments[0].is_integer()) return std::asinh(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        spdlog::warn("Encountered an invalid argument for a $asinh call");
+        return 0;
+    }
+    if (task_name == "acosh") {
+        if (resolved_arguments[0].is_real()) return std::acosh(resolved_arguments[0].get_real());
+        if (resolved_arguments[0].is_integer()) return std::acosh(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        spdlog::warn("Encountered an invalid argument for a $acosh call");
+        return 0;
+    }
+    if (task_name == "atanh") {
+        if (resolved_arguments[0].is_real()) return std::atanh(resolved_arguments[0].get_real());
+        if (resolved_arguments[0].is_integer()) return std::atanh(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        spdlog::warn("Encountered an invalid argument for a $atanh call");
+        return 0;
+    }
+    if (task_name == "exp") {
+        if (resolved_arguments[0].is_real()) return std::exp(resolved_arguments[0].get_real());
+        if (resolved_arguments[0].is_integer()) return std::exp(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        spdlog::warn("Encountered an invalid argument for a $exp call");
+        return 0;
+    }
+    if (task_name == "hypot") {
+        if (resolved_arguments.size() < 2) { spdlog::warn("$hypot requires exactly 2 arguments"); return 0; }
+        double a = resolved_arguments[0].is_real() ? resolved_arguments[0].get_real()
+                    : static_cast<double>(resolved_arguments[0].get_integer().get_value());
+        double b = resolved_arguments[1].is_real() ? resolved_arguments[1].get_real()
+                    : static_cast<double>(resolved_arguments[1].get_integer().get_value());
+        return std::hypot(a, b);
+    }
+    if (task_name == "onehot") {
+        if (resolved_arguments[0].is_integer()) {
+            uint64_t v = static_cast<uint64_t>(resolved_arguments[0].get_integer().get_value());
+            return static_cast<hdl_integer>(v != 0 && std::popcount(v) == 1);
+        }
+        spdlog::warn("Encountered an invalid argument for a $onehot call");
+        return 0;
+    }
+    if (task_name == "onehot0") {
+        if (resolved_arguments[0].is_integer()) {
+            uint64_t v = static_cast<uint64_t>(resolved_arguments[0].get_integer().get_value());
+            return static_cast<hdl_integer>(std::popcount(v) <= 1);
+        }
+        spdlog::warn("Encountered an invalid argument for a $onehot0 call");
+        return 0;
+    }
+    if (task_name == "isunknown") {
+        return 0;
+    }
     if (task_name == "bits") {
         if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
             auto t = arguments[0]->as<Identifier_token>().get_expression_type();
@@ -368,6 +455,28 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
             }
         }
         spdlog::warn("$size argument is not a typed identifier, defaulting to 0");
+        return 0;
+    }
+    if (task_name == "dimensions") {
+        if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
+            auto t = arguments[0]->as<Identifier_token>().get_expression_type();
+            if (t) {
+                auto rt = t->evaluate_type(context);
+                if (rt) return static_cast<hdl_integer>(rt->packed_sizes.size() + rt->unpacked_sizes.size());
+            }
+        }
+        spdlog::warn("$dimensions argument is not a typed identifier, defaulting to 0");
+        return 0;
+    }
+    if (task_name == "unpacked_dimensions") {
+        if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
+            auto t = arguments[0]->as<Identifier_token>().get_expression_type();
+            if (t) {
+                auto rt = t->evaluate_type(context);
+                if (rt) return static_cast<hdl_integer>(rt->unpacked_sizes.size());
+            }
+        }
+        spdlog::warn("$unpacked_dimensions argument is not a typed identifier, defaulting to 0");
         return 0;
     }
     if (task_name == "left" || task_name == "right" || task_name == "high" || task_name == "low") {
