@@ -84,6 +84,7 @@ void sv_visitor::enterModule_declaration(sv2017::Module_declarationContext *ctx)
 
 
 void sv_visitor::exitModule_declaration(sv2017::Module_declarationContext *ctx) {
+    type_engine.clear_type_params();
     entities.push_back(modules_factory.get_module());
 }
 
@@ -95,6 +96,7 @@ void sv_visitor::enterInterface_declaration(sv2017::Interface_declarationContext
 }
 
 void sv_visitor::exitInterface_declaration(sv2017::Interface_declarationContext *ctx) {
+    type_engine.clear_type_params();
     entities.push_back(interfaces_factory.get_interface());
 }
 
@@ -506,6 +508,10 @@ void sv_visitor::enterParameter_declaration(sv2017::Parameter_declarationContext
                 modules_factory.add_parameter(p);
             else if (interfaces_factory.is_current_valid())
                 interfaces_factory.add_parameter(p);
+            if (p->get_type() && p->get_type()->is<HDL_simple_type>()
+                && (p->get_type()->as<HDL_simple_type>().get_signed()
+                    || !p->get_type()->as<HDL_simple_type>().get_packed_dimensions().empty()))
+                type_engine.add_type_param(name, p->get_type());
         }
         return;
     }
@@ -542,6 +548,10 @@ void sv_visitor::enterParameter_port_declaration(sv2017::Parameter_port_declarat
                 modules_factory.add_parameter(p);
             else if (interfaces_factory.is_current_valid())
                 interfaces_factory.add_parameter(p);
+            if (p->get_type() && p->get_type()->is<HDL_simple_type>()
+                && (p->get_type()->as<HDL_simple_type>().get_signed()
+                    || !p->get_type()->as<HDL_simple_type>().get_packed_dimensions().empty()))
+                type_engine.add_type_param(name, p->get_type());
         }
     }
 }
@@ -1134,6 +1144,10 @@ void sv_visitor::enterLocal_parameter_declaration(sv2017::Local_parameter_declar
                 modules_factory.add_parameter(p);
             else if (interfaces_factory.is_current_valid())
                 interfaces_factory.add_parameter(p);
+            if (p->get_type() && p->get_type()->is<HDL_simple_type>()
+                && (p->get_type()->as<HDL_simple_type>().get_signed()
+                    || !p->get_type()->as<HDL_simple_type>().get_packed_dimensions().empty()))
+                type_engine.add_type_param(name, p->get_type());
         }
         return;
     }

@@ -267,3 +267,25 @@ TEST(type_parameter_extraction, override_recomputes_dependent_param) {
     ASSERT_TRUE(child_params.contains("W"));
     EXPECT_EQ(child_params.get("W")->get_numeric_value(), 16);
 }
+
+TEST(type_parameter_extraction, used_in_port_declaration) {
+    auto test_pattern = R"(
+        module test_mod #(
+            parameter type T = int
+        )(
+            input T data_in,
+            output T data_out
+        );
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", test_pattern);
+    auto resource = resources.get_content()[0]->as<hdl_resource_statement>();
+    auto params = resource.get_parameters();
+    // THis test mainly verifies that using a parametrized type on a port does not crash the program
+    ASSERT_TRUE(params.contains("T"));
+    auto t = params.get("T");
+    ASSERT_TRUE(t->is_type_param);
+    EXPECT_TRUE(t->get_type()->is<HDL_simple_type>());
+    EXPECT_TRUE(t->get_type()->as<HDL_simple_type>().get_signed());
+}
