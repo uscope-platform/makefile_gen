@@ -212,12 +212,17 @@ void sv_visitor::enterData_declaration(sv2017::Data_declarationContext *ctx) {
         return;
     }
     if (ctx->type_declaration()) {
-        if (
-            ctx->type_declaration()->data_type() &&
+        if (ctx->type_declaration()->data_type() &&
             ctx->type_declaration()->data_type()->struct_union()
         ) {
             if (ctx->type_declaration()->data_type()->struct_union()->KW_STRUCT())
                 type_engine.start_composite_type_declaration(Type_engine::struct_type);
+            else if (ctx->type_declaration()->data_type()->struct_union()->KW_UNION())
+                type_engine.start_composite_type_declaration(Type_engine::union_type);
+            top_level_struct_started = true;
+        } else if (ctx->type_declaration()->data_type() &&
+                   ctx->type_declaration()->data_type()->KW_ENUM()) {
+            type_engine.start_composite_type_declaration(Type_engine::enum_type);
             top_level_struct_started = true;
         } else {
             type_engine.start_simple_type_declaration();
@@ -256,18 +261,22 @@ void sv_visitor::exitData_declaration(sv2017::Data_declarationContext *ctx) {
         }
     } else {
         if (ctx->data_type_or_implicit() &&
-            ctx->data_type_or_implicit()->data_type() &&
-            ctx->data_type_or_implicit()->data_type()->struct_union()
+            ctx->data_type_or_implicit()->data_type()
         ) {
-            in_anonymous_struct = false;
-            auto name = ctx->list_of_variable_decl_assignments()
-                ->variable_decl_assignment(0)->identifier()->getText();
-            params_factory.set_type(pending_anon_struct_type);
-            params_factory.new_parameter(name);
-            params_factory.stop_param_assignment();
-            auto param = params_factory.get_parameter();
-            param->set_type(pending_anon_struct_type);
-            modules_factory.add_parameter(param);
+            auto dt = ctx->data_type_or_implicit()->data_type();
+            if (dt->struct_union()) {
+                in_anonymous_struct = false;
+                auto name = ctx->list_of_variable_decl_assignments()
+                    ->variable_decl_assignment(0)->identifier()->getText();
+                params_factory.set_type(pending_anon_struct_type);
+                params_factory.new_parameter(name);
+                params_factory.stop_param_assignment();
+                auto param = params_factory.get_parameter();
+                param->set_type(pending_anon_struct_type);
+                modules_factory.add_parameter(param);
+            } else if (dt->KW_ENUM()) {
+                type_engine.start_composite_type_declaration(Type_engine::enum_type);
+            }
         }
     }
 }
@@ -279,6 +288,14 @@ void sv_visitor::enterStruct_union_member(sv2017::Struct_union_memberContext *ct
 void sv_visitor::exitStruct_union_member(sv2017::Struct_union_memberContext *ctx) {
     auto name = ctx->list_of_variable_decl_assignments()->variable_decl_assignment(0)->identifier()->getText();
     type_engine.close_composite_member(name);
+}
+
+void sv_visitor::enterEnum_name_declaration(sv2017::Enum_name_declarationContext *ctx) {
+    type_engine.open_composite_member();
+}
+
+void sv_visitor::exitEnum_name_declaration(sv2017::Enum_name_declarationContext *ctx) {
+    type_engine.close_composite_member(ctx->identifier()->getText());
 }
 
 void sv_visitor::enterData_type_primitive(sv2017::Data_type_primitiveContext *ctx) {

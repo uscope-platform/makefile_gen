@@ -23,6 +23,8 @@
 
 #include "data_model/HDL/types/HDL_struct_type.hpp"
 #include "data_model/HDL/types/HDL_simple_type.hpp"
+#include "data_model/HDL/types/HDL_enum_type.hpp"
+#include "data_model/HDL/types/HDL_union_type.hpp"
 #include "data_model/HDL/factories/parameters/ranges_factory.hpp"
 #include "data_model/HDL/factories/parameters/expressions_factory.hpp"
 
@@ -85,6 +87,10 @@ public:
 private:
     HDL_struct_type &current_struct() { return struct_stack.back(); }
     const HDL_struct_type &current_struct() const { return struct_stack.back(); }
+    HDL_enum_type &current_enum() { return enum_stack.back(); }
+    const HDL_enum_type &current_enum() const { return enum_stack.back(); }
+    HDL_union_type &current_union() { return union_stack.back(); }
+    const HDL_union_type &current_union() const { return union_stack.back(); }
 
     expressions_factory expr_factory;
     ranges_factory r_factory;
@@ -92,6 +98,8 @@ private:
     std::set<std::string> type_param_names;
     std::vector<type_kind> composite_type_stack;
     std::vector<HDL_struct_type> struct_stack;
+    std::vector<HDL_enum_type> enum_stack;
+    std::vector<HDL_union_type> union_stack;
     std::shared_ptr<hdl_type> current_type;
 
 };

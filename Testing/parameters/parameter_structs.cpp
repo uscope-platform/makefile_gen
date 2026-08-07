@@ -481,4 +481,55 @@ TEST(parameter_extraction, anonymous_unpacked_struct_parameter) {
     EXPECT_EQ(defaults[sid], array_value);
 }
 
+TEST(parameter_extraction, enum_typedef_parameter) {
+    auto test_pattern = R"(
+        module test_mod ();
+            typedef enum { IDLE, RUN, DONE } state_t;
+            parameter state_t S = IDLE;
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto typedefs = resource.get_typedefs();
+    ASSERT_TRUE(typedefs.contains("state_t"));
+    EXPECT_TRUE(typedefs.at("state_t")->is<HDL_enum_type>());
+    auto &et = typedefs.at("state_t")->as<HDL_enum_type>();
+    EXPECT_EQ(et.members.size(), 3);
+    EXPECT_EQ(et.members[0].name, "IDLE");
+    EXPECT_EQ(et.members[1].name, "RUN");
+    EXPECT_EQ(et.members[2].name, "DONE");
+}
+
+TEST(parameter_extraction, union_typedef_parameter) {
+    auto test_pattern = R"(
+        module test_mod ();
+            typedef union { logic [31:0] raw; struct packed { logic [15:0] hi; logic [15:0] lo; } split; } word_t;
+            parameter word_t W = '{raw: 0};
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto typedefs = resource.get_typedefs();
+    ASSERT_TRUE(typedefs.contains("word_t"));
+    EXPECT_TRUE(typedefs.at("word_t")->is<HDL_union_type>());
+}
+
+TEST(parameter_extraction, inline_enum_variable) {
+    auto test_pattern = R"(
+module test_mod (
+    input wire clock,
+    input wire reset
+);
+    enum logic [2:0] {
+        idle_state,
+        active_state,
+        done_state
+    } state;
+endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", test_pattern);
+    ASSERT_FALSE(resources.empty());
+}
+
 

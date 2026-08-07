@@ -215,6 +215,8 @@ public:
 
     void enterStruct_union_member(sv2017::Struct_union_memberContext *ctx) override;
     void exitStruct_union_member(sv2017::Struct_union_memberContext *ctx) override;
+    void enterEnum_name_declaration(sv2017::Enum_name_declarationContext *ctx) override;
+    void exitEnum_name_declaration(sv2017::Enum_name_declarationContext *ctx) override;
     void enterData_type_primitive(sv2017::Data_type_primitiveContext *ctx) override;
 
 

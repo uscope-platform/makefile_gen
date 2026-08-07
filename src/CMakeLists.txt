@@ -44,6 +44,8 @@ target_sources(ananke_lib
     data_model/HDL/parameters/common/hdl_integer.cpp
     data_model/HDL/types/HDL_simple_type.cpp
     data_model/HDL/types/HDL_struct_type.cpp
+    data_model/HDL/types/HDL_enum_type.cpp
+    data_model/HDL/types/HDL_union_type.cpp
     data_model/HDL/types/HDL_external_type.cpp
     data_model/HDL/parameters/components/Expression_v2.cpp
     data_model/HDL/parameters/components/Concatenation.cpp
