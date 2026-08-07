@@ -26,10 +26,10 @@ set(ANANKE_TESTS
         analysis/documentation_analyzer.cpp
         analysis/bus_analyzer.cpp
         analysis/analysis.cpp
-        analysis/parameter_extraction.cpp
-        analysis/system_task_tests.cpp
-        analysis/parameter_processing.cpp
-        analysis/type_parameter_extraction.cpp
+        parameters/parameter_extraction.cpp
+        parameters/system_task_tests.cpp
+        parameters/parameter_processing.cpp
+        parameters/type_parameter_extraction.cpp
         analysis/port_extraction.cpp
         analysis/hdl_ast_builder.cpp
         analysis/function_processing.cpp
