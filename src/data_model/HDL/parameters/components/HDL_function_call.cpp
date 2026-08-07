@@ -425,6 +425,17 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
     if (task_name == "isunknown") {
         return 0;
     }
+    if (task_name == "typename") {
+        if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
+            auto t = arguments[0]->as<Identifier_token>().get_expression_type();
+            if (t && t->is<HDL_simple_type>())
+                return resolved_parameter(t->as<HDL_simple_type>().get_type_name());
+            if (t && t->is<HDL_struct_type>())
+                return resolved_parameter("struct");
+        }
+        spdlog::warn("$typename argument is not a typed identifier, defaulting to empty");
+        return resolved_parameter("");
+    }
     if (task_name == "bits") {
         if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
             auto t = arguments[0]->as<Identifier_token>().get_expression_type();

@@ -283,6 +283,7 @@ std::shared_ptr<hdl_type> Type_engine::create_primitive_type(const std::string &
             }
         });
     }
+    t.set_type_name(type_name);
     return std::make_shared<HDL_simple_type>(t);
 }
 
@@ -291,4 +292,16 @@ std::shared_ptr<hdl_type> Type_engine::resolve_type(const std::string &type_name
         return get_type(type_name);
     }
     return create_primitive_type(type_name);
+}
+
+void Type_engine::add_type_param(const std::string &name, const std::shared_ptr<hdl_type> &t) {
+    type_registry[name] = t;
+    type_param_names.insert(name);
+}
+
+void Type_engine::clear_type_params() {
+    for (const auto &n : type_param_names) {
+        type_registry.erase(n);
+    }
+    type_param_names.clear();
 }

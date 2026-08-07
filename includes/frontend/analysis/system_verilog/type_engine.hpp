@@ -65,6 +65,9 @@ public:
     [[nodiscard]] bool is_simple_type()const{ return composite_type_stack.empty(); }
     [[nodiscard]] bool is_nested() const { return composite_type_stack.size() > 1; }
 
+    void add_type_param(const std::string &name, const std::shared_ptr<hdl_type> &t);
+    void clear_type_params();
+
     void set_base_type(const std::shared_ptr<hdl_type>  &t);
     std::shared_ptr<hdl_type> finalize_type();
     std::shared_ptr<hdl_type> finalize_dimensions();
@@ -86,6 +89,7 @@ private:
     expressions_factory expr_factory;
     ranges_factory r_factory;
     std::map<std::string, std::shared_ptr<hdl_type>> type_registry;
+    std::set<std::string> type_param_names;
     std::vector<type_kind> composite_type_stack;
     std::vector<HDL_struct_type> struct_stack;
     std::shared_ptr<hdl_type> current_type;

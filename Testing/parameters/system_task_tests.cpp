@@ -600,3 +600,16 @@ TEST(system_task, dimensions_scalar) {
     EXPECT_EQ(defaults.at(qualified_identifier("D")).get_integer(), 1);
     EXPECT_EQ(defaults.at(qualified_identifier("UD")).get_integer(), 0);
 }
+
+TEST(system_task, typename) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter int V = 0;
+            parameter TN = $typename(V);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("TN")).get_string(), "int");
+}

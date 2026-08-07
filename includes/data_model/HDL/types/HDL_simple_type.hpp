@@ -93,6 +93,8 @@ public:
     [[nodiscard]] bool get_real() const {return is_real;}
     void set_implicit(bool i) {is_implicit = i;}
     [[nodiscard]] bool get_implicit() const {return is_implicit;}
+    void set_type_name(const std::string &n) { type_name = n; }
+    [[nodiscard]] std::string get_type_name() const { return type_name; }
     parameter_deps_t get_dependencies() override;
 
 
@@ -129,12 +131,13 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(unpacked_dimensions, packed_dimensions);
+        ar(unpacked_dimensions, packed_dimensions, type_name);
     }
 private:
     bool is_signed = false;
     bool is_real = false;
     bool is_implicit = false;
+    std::string type_name;
     std::vector<dimension_t> unpacked_dimensions;
     std::vector<dimension_t> packed_dimensions;
 };
