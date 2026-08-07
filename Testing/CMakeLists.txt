@@ -26,7 +26,10 @@ set(ANANKE_TESTS
         analysis/documentation_analyzer.cpp
         analysis/bus_analyzer.cpp
         analysis/analysis.cpp
-        parameters/parameter_extraction.cpp
+        parameters/parameter_basics.cpp
+        parameters/parameter_arrays.cpp
+        parameters/parameter_structs.cpp
+        parameters/parameter_functions.cpp
         parameters/system_task_tests.cpp
         parameters/parameter_processing.cpp
         parameters/type_parameter_extraction.cpp
