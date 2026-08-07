@@ -144,6 +144,11 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
         }
     }
 
+    for (const auto &[name, param] : map_in) {
+        auto ev = extract_enum_values(param);
+        ctx.insert(ev.begin(), ev.end());
+    }
+
     while (auto next = s.get_next()) {
         auto param = map_in.const_get(next.value().get_name());
         crash_ctx.parameter = next.value().get_name();
@@ -182,6 +187,9 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
             auto struct_fields = extract_struct_fields(param, res.value(), next.value(), ctx);
             ctx.insert(struct_fields.begin(), struct_fields.end());
             solved_parameters.insert(struct_fields.begin(), struct_fields.end());
+            auto enum_values = extract_enum_values(param);
+            ctx.insert(enum_values.begin(), enum_values.end());
+            solved_parameters.insert(enum_values.begin(), enum_values.end());
         } else {
             spdlog::warn("The parameter {} can't be solved, defaulting to 0",  next.value().get_name());
             ctx[next.value()] = 0;
@@ -412,7 +420,8 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::solve_compl
                     if (it != parent_type_ctx.end()) {
                         param->set_type(it->second);
                         continue;
-                    }
+}
+
                 }
                 param->set_type(spec_param->get_type());
             } else {
@@ -553,6 +562,20 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::extract_str
                 }
             }
         }
+    }
+    return fields;
+}
+
+std::map<qualified_identifier, resolved_parameter> parameter_solver::extract_enum_values(
+    const std::shared_ptr<HDL_parameter> &param
+) {
+    std::map<qualified_identifier, resolved_parameter> fields;
+    auto type = param->get_type();
+    if (!type || !type->is<HDL_enum_type>()) return fields;
+    auto &et = type->as<HDL_enum_type>();
+    for (const auto &m : et.members) {
+        if (m.value.has_value())
+            fields[qualified_identifier(m.name)] = static_cast<hdl_integer>(m.value.value());
     }
     return fields;
 }

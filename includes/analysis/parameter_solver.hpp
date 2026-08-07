@@ -21,6 +21,7 @@
 #include "data_model/HDL/statement/hdl_function_statement.hpp"
 #include "data_model/HDL/types/HDL_struct_type.hpp"
 #include "data_model/HDL/types/HDL_union_type.hpp"
+#include "data_model/HDL/types/HDL_enum_type.hpp"
 #include "analysis/topological_sorter.hpp"
 #include "data_model/data_store.hpp"
 
@@ -76,6 +77,9 @@ private:
         const resolved_parameter &res,
         const qualified_identifier &id,
         const std::map<qualified_identifier, resolved_parameter> &ctx
+    );
+    static std::map<qualified_identifier, resolved_parameter> extract_enum_values(
+        const std::shared_ptr<HDL_parameter> &param
     );
 };
 

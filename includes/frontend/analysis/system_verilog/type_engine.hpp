@@ -78,6 +78,7 @@ public:
     void set_packed();
     void set_member_signed(bool s);
     void set_current_member_type(const std::shared_ptr<hdl_type> &t);
+    void set_current_enum_value(uint64_t v);
 
     void set_operation(Expression_v2::expression_operator subtract);
 

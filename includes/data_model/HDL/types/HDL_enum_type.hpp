@@ -23,14 +23,15 @@
 
 struct enum_member {
     std::string name;
+    std::optional<uint64_t> value;
 
     template<class Archive>
     void serialize(Archive & ar) {
-        ar(name);
+        ar(name, value);
     }
 
     friend bool operator==(const enum_member &lhs, const enum_member &rhs) {
-        return lhs.name == rhs.name;
+        return lhs.name == rhs.name && lhs.value == rhs.value;
     }
 };
 

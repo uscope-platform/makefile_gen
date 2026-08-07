@@ -502,6 +502,39 @@ TEST(parameter_extraction, enum_typedef_parameter) {
     EXPECT_EQ(et.members[0].name, "IDLE");
     EXPECT_EQ(et.members[1].name, "RUN");
     EXPECT_EQ(et.members[2].name, "DONE");
+    EXPECT_EQ(et.members[0].value.value(), 0);
+    EXPECT_EQ(et.members[1].value.value(), 1);
+    EXPECT_EQ(et.members[2].value.value(), 2);
+}
+
+TEST(parameter_extraction, enum_parameter_evaluation) {
+    auto test_pattern = R"(
+        module test_mod ();
+            typedef enum { IDLE, RUN, DONE } state_t;
+            parameter state_t S = RUN;
+            parameter V = S + 1;
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), 1);
+    EXPECT_EQ(defaults.at(qualified_identifier("V")).get_integer(), 2);
+}
+
+TEST(parameter_extraction, enum_with_explicit_values) {
+    auto test_pattern = R"(
+        module test_mod ();
+            typedef enum { A = 10, B = 20, C = 30 } vals_t;
+            parameter vals_t X = B;
+            parameter Y = X + A;
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 20);
+    EXPECT_EQ(defaults.at(qualified_identifier("Y")).get_integer(), 30);
 }
 
 TEST(parameter_extraction, union_typedef_parameter) {

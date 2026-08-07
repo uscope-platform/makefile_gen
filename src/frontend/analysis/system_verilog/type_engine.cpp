@@ -108,12 +108,22 @@ void Type_engine::set_current_member_type(const std::shared_ptr<hdl_type> &t) {
     }
 }
 
+void Type_engine::set_current_enum_value(uint64_t v) {
+    if (composite_type_stack.empty() || composite_type_stack.back() != enum_type) return;
+    current_enum().members.back().value = v;
+}
+
 std::shared_ptr<hdl_type> Type_engine::stop_composite_type_declaration(const std::string &name, bool anonymous) {
     type_kind kind = composite_type_stack.back();
     composite_type_stack.pop_back();
 
     std::shared_ptr<hdl_type> result;
     if (kind == enum_type) {
+        uint64_t next_val = 0;
+        for (auto &m : current_enum().members) {
+            if (!m.value.has_value()) m.value = next_val;
+            next_val = m.value.value() + 1;
+        }
         result = std::make_shared<HDL_enum_type>(current_enum());
         enum_stack.pop_back();
     } else if (kind == union_type) {

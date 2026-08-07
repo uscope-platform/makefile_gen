@@ -302,6 +302,19 @@ void sv_visitor::enterEnum_name_declaration(sv2017::Enum_name_declarationContext
 
 void sv_visitor::exitEnum_name_declaration(sv2017::Enum_name_declarationContext *ctx) {
     type_engine.close_composite_member(ctx->identifier()->getText());
+    if (ctx->expression()) {
+        std::string val_text = ctx->expression()->getText();
+        auto tick = val_text.find('\'');
+        if (tick != std::string::npos) {
+            val_text = val_text.substr(tick + 1);
+            if (!val_text.empty() && (val_text[0] == 'b' || val_text[0] == 'h'
+                || val_text[0] == 'd' || val_text[0] == 'o'))
+                val_text = val_text.substr(1);
+        }
+        char *end = nullptr;
+        uint64_t v = std::strtoull(val_text.c_str(), &end, 0);
+        if (end != val_text.c_str()) type_engine.set_current_enum_value(v);
+    }
 }
 
 void sv_visitor::enterData_type_primitive(sv2017::Data_type_primitiveContext *ctx) {
