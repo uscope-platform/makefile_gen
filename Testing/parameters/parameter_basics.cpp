@@ -2269,3 +2269,29 @@ TEST(parameter_extraction, wide_integer_mixed_arithmetic) {
     auto expected = int1024_t("0xFFFFFFFFFFFFFFFF0000000000000000") * 2;
     EXPECT_EQ(mult_val, expected);
 }
+
+TEST(parameter_extraction, streaming_operators) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter logic [31:0] BASE_ADDR_LE = 32'h1234_5678;
+            localparam logic [31:0] BASE_ADDR_BE = {<< 8 {BASE_ADDR_LE}};
+            localparam logic [31:0] REVERSED_MASK = {<< {32'h0000_00FF}};
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    // TODO: ACTUALLY IMPLEMENT STREAMING OPERATORS
+
+    std::map<qualified_identifier, resolved_parameter> check_defaults = {
+        {qualified_identifier("BASE_ADDR_LE"), 0x12345678},
+        {qualified_identifier("BASE_ADDR_BE"), 0x78563412},
+        {qualified_identifier("REVERSED_MASK"), hdl_integer(0xff000000)}
+    };
+    for(const auto& [name, value]:check_defaults){
+        ASSERT_TRUE(defaults.contains(name));
+        ASSERT_EQ(value, defaults.at(name));
+    }
+
+    int i = 0;
+}
