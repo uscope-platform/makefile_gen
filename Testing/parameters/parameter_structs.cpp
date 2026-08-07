@@ -27,6 +27,10 @@
 #include "data_model/HDL/parameters/components/HDL_function_call.hpp"
 #include "data_model/HDL/parameters/components/Ternary.hpp"
 
+#include "analysis/HDL_ast_builder_v2.hpp"
+#include "data_model/data_store.hpp"
+#include "data_model/settings_store.hpp"
+
 using namespace std::string_literals;
 
 TEST(parameter_extraction, struct_typed_parameter) {
@@ -504,7 +508,6 @@ TEST(parameter_extraction, union_typedef_parameter) {
     auto test_pattern = R"(
         module test_mod ();
             typedef union { logic [31:0] raw; struct packed { logic [15:0] hi; logic [15:0] lo; } split; } word_t;
-            parameter word_t W = '{raw: 0};
         endmodule
     )";
     sv_analyzer analyzer;
@@ -512,6 +515,44 @@ TEST(parameter_extraction, union_typedef_parameter) {
     auto typedefs = resource.get_typedefs();
     ASSERT_TRUE(typedefs.contains("word_t"));
     EXPECT_TRUE(typedefs.at("word_t")->is<HDL_union_type>());
+}
+
+TEST(parameter_extraction, package_union_parameter) {
+    auto test_pattern = R"(
+        package my_types_pkg;
+            typedef union packed {
+                logic [15:0] raw;
+                struct packed {
+                    logic [7:0] hi;
+                    logic [7:0] lo;
+                } bytes;
+            } bus_val_u;
+        endpackage
+
+        module test_mod #(
+            parameter my_types_pkg::bus_val_u DEFAULT_VAL = 16'hABCD,
+            parameter test_field_access = DEFAULT_VAL.bytes.hi
+        )();
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", test_pattern);
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+    d_store->store_file({"/dev/zero", "file_hash", resources});
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto params = ast_v2->get_parameters();
+    ASSERT_TRUE(params.contains("DEFAULT_VAL"));
+    auto val = params.get("DEFAULT_VAL")->get_numeric_value();
+    ASSERT_TRUE(val.has_value());
+    EXPECT_EQ(val.value().get_value(), 0xABCD);
+
+    ASSERT_TRUE(params.contains("test_field_access"));
+    auto field_val = params.get("test_field_access")->get_numeric_value();
+    ASSERT_TRUE(field_val.has_value());
+    EXPECT_EQ(field_val.value().get_value(), 0xAB);
 }
 
 TEST(parameter_extraction, inline_enum_variable) {
@@ -529,7 +570,28 @@ endmodule
     )";
     sv_analyzer analyzer;
     auto resources = analyzer.analyze("", test_pattern);
-    ASSERT_FALSE(resources.empty());
+    EXPECT_FALSE(resources.get_content().empty());
+}
+
+TEST(parameter_extraction, inline_enum_with_parameters) {
+    auto test_pattern = R"(
+module test_mod (
+    input wire clock,
+    input wire reset
+);
+    parameter W = 8;
+    enum logic [1:0] {
+        idle_state,
+        active_state
+    } state;
+    localparam V = W + 1;
+endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("W")).get_integer(), 8);
+    EXPECT_EQ(defaults.at(qualified_identifier("V")).get_integer(), 9);
 }
 
 

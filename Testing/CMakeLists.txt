@@ -12,6 +12,17 @@ FetchContent_Populate(
 
 set(ANANKE_TESTS
         test_main.cpp
+        parameters/parameter_basics.cpp
+        parameters/parameter_arrays.cpp
+        parameters/parameter_structs.cpp
+        parameters/parameter_functions.cpp
+        parameters/system_task_tests.cpp
+        parameters/parameter_processing.cpp
+        parameters/type_parameter_extraction.cpp
+        frontend/sv_preprocessor.cpp
+        frontend/typedef_parsing.cpp
+        frontend/source_mapping.cpp
+        frontend/repository_walker.cpp
         data_model/Depfile_test.cpp
         data_model/Script_test.cpp
         data_model/Constraints_test.cpp
@@ -26,13 +37,6 @@ set(ANANKE_TESTS
         analysis/documentation_analyzer.cpp
         analysis/bus_analyzer.cpp
         analysis/analysis.cpp
-        parameters/parameter_basics.cpp
-        parameters/parameter_arrays.cpp
-        parameters/parameter_structs.cpp
-        parameters/parameter_functions.cpp
-        parameters/system_task_tests.cpp
-        parameters/parameter_processing.cpp
-        parameters/type_parameter_extraction.cpp
         analysis/port_extraction.cpp
         analysis/hdl_ast_builder.cpp
         analysis/function_processing.cpp
@@ -40,10 +44,6 @@ set(ANANKE_TESTS
         Backend/Application_definition_generator.cpp
         Backend/Peripheral_definition_generator.cpp
         Backend/toolchain_manager.cpp
-        frontend/sv_preprocessor.cpp
-        frontend/typedef_parsing.cpp
-        frontend/source_mapping.cpp
-        frontend/repository_walker.cpp
         Backend/python_script_runner.cpp
         Backend/auxiliary_resolver.cpp
         Backend/project_generator.cpp

@@ -16,6 +16,7 @@
 
 #include "analysis/topological_sorter.hpp"
 #include "data_model/HDL/types/HDL_struct_type.hpp"
+#include "data_model/HDL/types/HDL_union_type.hpp"
 
 void topological_sorter::analyze(const Parameters_map &p, const std::map<qualified_identifier, resolved_parameter> & context) {
 
@@ -31,7 +32,7 @@ void topological_sorter::analyze(const Parameters_map &p, const std::map<qualifi
                 for (auto &inst : dep.get_instance()) {
                     if (p.contains(inst)) {
                         auto sp = p.const_get(inst);
-                        if (sp && sp->get_type() && sp->get_type()->is<HDL_struct_type>()) {
+                        if (sp && sp->get_type() && (sp->get_type()->is<HDL_struct_type>() || sp->get_type()->is<HDL_union_type>())) {
                             effective_dep = qualified_identifier(inst);
                         }
                         break;

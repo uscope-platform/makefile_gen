@@ -20,6 +20,7 @@
 #include "analysis/passes/pass_base.hpp"
 #include "data_model/HDL/statement/hdl_function_statement.hpp"
 #include "data_model/HDL/types/HDL_struct_type.hpp"
+#include "data_model/HDL/types/HDL_union_type.hpp"
 #include "analysis/topological_sorter.hpp"
 #include "data_model/data_store.hpp"
 

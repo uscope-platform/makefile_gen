@@ -429,6 +429,10 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::solve_compl
         for(auto &dep: param->get_dependencies().data) {
             if (ctx.contains(dep)) continue;
             if (!dep.get_instance().empty()) {
+                auto first_inst = dep.get_instance()[0];
+                if (to_solve.contains(first_inst) || node_parameters.contains(first_inst)) {
+                    continue;
+                }
                 ctx[dep] = resolve_instance_dependency(dep, work, d_store);
             } else if (dep.get_package_prefix().empty() && dep.get_instance().empty() && to_solve.contains(dep.get_name())) {
                 continue;
@@ -446,6 +450,10 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::solve_compl
         if (ctx.contains(p_id)) continue;
         for (auto &dep : param->get_dependencies().data) {
             if (!dep.get_instance().empty() && !ctx.contains(dep)) {
+                auto first_inst = dep.get_instance()[0];
+                if (to_solve.contains(first_inst) || node_parameters.contains(first_inst)) {
+                    continue;
+                }
                 ctx[dep] = resolve_instance_dependency(dep, work, d_store);
             }
         }
@@ -476,51 +484,73 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::extract_str
 ) {
     std::map<qualified_identifier, resolved_parameter> fields;
     auto type = param->get_type();
-    if (!type || !type->is<HDL_struct_type>()) return fields;
-    auto &st = type->as<HDL_struct_type>();
+    if (!type || (!type->is<HDL_struct_type>() && !type->is<HDL_union_type>())) return fields;
+
+    auto emit_field = [&](const std::string &member_name, hdl_integer member_value,
+                          const std::shared_ptr<hdl_type> &member_type) {
+        auto prefix = id.get_instance();
+        prefix.push_back(id.get_name());
+        qualified_identifier kid(member_name);
+        kid.set_instance_prefix(prefix);
+        if (member_type && (member_type->is<HDL_struct_type>() || member_type->is<HDL_union_type>())) {
+            auto sub = std::make_shared<HDL_parameter>();
+            sub->set_name(member_name);
+            sub->set_type(member_type);
+            sub->set_value(member_value);
+            auto sp = id.get_instance();
+            sp.push_back(id.get_name());
+            qualified_identifier sid(member_name);
+            sid.set_instance_prefix(sp);
+            auto sub_fields = extract_struct_fields(sub, member_value, sid, ctx);
+            fields.insert(sub_fields.begin(), sub_fields.end());
+        } else {
+            fields[kid] = member_value;
+        }
+    };
 
     if (res.is_integer()) {
-        auto type_info = st.evaluate_type(ctx);
-        if (type_info) {
-            uint64_t raw = res.get_integer().get_value();
-            uint64_t offset = 0;
-            for (int i = st.member.size() - 1; i >= 0; i--) {
-                uint64_t w = 1;
-                for (auto &ps : type_info->struct_sizes[i].packed_sizes) w *= ps;
-                uint64_t mask = (w >= 64) ? ~0ULL : (1ULL << w) - 1;
-                hdl_integer field_val = static_cast<uint64_t>((raw >> offset) & mask);
-                auto full_prefix = id.get_instance();
-                full_prefix.push_back(id.get_name());
-                qualified_identifier new_identifier(st.member[i].name);
-                new_identifier.set_instance_prefix(full_prefix);
-                if (st.member[i].type->is<HDL_struct_type>()) {
-                    auto sub_param = std::make_shared<HDL_parameter>();
-                    sub_param->set_name(st.member[i].name);
-                    sub_param->set_type(st.member[i].type);
-                    sub_param->set_value(field_val);
-                    auto sub_prefix = id.get_instance();
-                    sub_prefix.push_back(id.get_name());
-                    qualified_identifier sub_id(st.member[i].name);
-                    sub_id.set_instance_prefix(sub_prefix);
-                    auto sub_fields = extract_struct_fields(sub_param, field_val, sub_id, ctx);
-                    fields.insert(sub_fields.begin(), sub_fields.end());
-                } else {
-                    fields[new_identifier] = field_val;
+        uint64_t raw = res.get_integer().get_value();
+        if (type->is<HDL_struct_type>()) {
+            auto &st = type->as<HDL_struct_type>();
+            auto type_info = st.evaluate_type(ctx);
+            if (type_info) {
+                uint64_t offset = 0;
+                for (int i = st.member.size() - 1; i >= 0; i--) {
+                    uint64_t w = 1;
+                    for (auto &ps : type_info->struct_sizes[i].packed_sizes) w *= ps;
+                    uint64_t mask = (w >= 64) ? ~0ULL : (1ULL << w) - 1;
+                    emit_field(st.member[i].name,
+                               static_cast<uint64_t>((raw >> offset) & mask),
+                               st.member[i].type);
+                    offset += w;
                 }
-                offset += w;
+            }
+        } else {
+            auto &ut = type->as<HDL_union_type>();
+            for (const auto &m : ut.members) {
+                uint64_t w = 1;
+                if (m.type) {
+                    auto s = m.type->evaluate_type(ctx);
+                    if (s) for (auto &ps : s->packed_sizes) w *= ps;
+                }
+                uint64_t mask = (w >= 64) ? ~0ULL : (1ULL << w) - 1;
+                emit_field(m.name, static_cast<uint64_t>(raw & mask), m.type);
             }
         }
     } else if (res.is_int_array()) {
-        auto arr = res.get_int_array();
-        for (size_t i = 0; i < st.member.size(); i++) {
-            int arr_idx = st.member.size() - 1 - i;
-            auto field_val = arr.get_value({static_cast<int64_t>(arr_idx)});
-            if (field_val) {
-                auto full_prefix = id.get_instance();
-                full_prefix.push_back(id.get_name());
-                qualified_identifier new_identifier(st.member[i].name);
-                new_identifier.set_instance_prefix(full_prefix);
-                fields[new_identifier] = field_val.value();
+        if (type->is<HDL_struct_type>()) {
+            auto &st = type->as<HDL_struct_type>();
+            auto arr = res.get_int_array();
+            for (size_t i = 0; i < st.member.size(); i++) {
+                int arr_idx = st.member.size() - 1 - i;
+                auto field_val = arr.get_value({static_cast<int64_t>(arr_idx)});
+                if (field_val) {
+                    auto prefix = id.get_instance();
+                    prefix.push_back(id.get_name());
+                    qualified_identifier kid(st.member[i].name);
+                    kid.set_instance_prefix(prefix);
+                    fields[kid] = field_val.value();
+                }
             }
         }
     }

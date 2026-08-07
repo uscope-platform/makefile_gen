@@ -34,6 +34,7 @@ public:
         resolved_type result;
         uint64_t max_width = 0;
         for (auto &m : members) {
+            if (!m.type) continue;
             struct_member_resolved_type smrt;
             uint64_t member_width = 1;
             if (m.type->is<HDL_struct_type>()) {
