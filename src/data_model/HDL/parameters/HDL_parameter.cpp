@@ -15,6 +15,8 @@
 
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
+#include <spdlog/spdlog.h>
+
 
 HDL_parameter::HDL_parameter(const HDL_parameter &c) {
 
@@ -77,6 +79,7 @@ std::optional<resolved_parameter> HDL_parameter::evaluate(const std::map<qualifi
     }
     raw_value->set_container_sizes(container_size.value(), context);
     auto val = raw_value->evaluate(context);
+    if (!val) return std::nullopt;
     if (type->is<HDL_simple_type>()) {
         return cast_result(val, container_size);
     } else {
