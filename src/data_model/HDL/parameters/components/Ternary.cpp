@@ -16,6 +16,8 @@
 
 #include "data_model/HDL/parameters/components/Ternary.hpp"
 
+#include <spdlog/spdlog.h>
+
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/archives/binary.hpp>
 
@@ -43,8 +45,16 @@ void Ternary::propagate_expression(const qualified_identifier &constant_id,
 std::optional<resolved_parameter> Ternary::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
     auto condition_value = condition->evaluate(context);
     if (!condition_value.has_value()) return std::nullopt;
-    auto int_val = condition_value.value().get_integer();
-    if (int_val == 0) {
+    bool cond_true;
+    if (condition_value.value().is_integer()) {
+        cond_true = condition_value.value().get_integer() != 0;
+    } else if (condition_value.value().is_real()) {
+        cond_true = condition_value.value().get_real() != 0.0;
+    } else {
+         spdlog::warn("Ternary condition is of unsupported type");
+        return std::nullopt;
+    }
+    if (!cond_true) {
         return false_value->evaluate(context);
     } else {
         return true_value->evaluate(context);
@@ -67,7 +77,9 @@ bool Ternary::isEqual(const Expression_base &other) const {
 
     bool ret_val = true;
     ret_val &= *condition == *rhs.condition;
-    ret_val &= (true_value && rhs.true_value) && *true_value == *rhs.true_value;
-    ret_val &= (false_value && rhs.false_value) && *false_value == *rhs.false_value;
+    if (true_value && rhs.true_value) ret_val &= *true_value == *rhs.true_value;
+    else if (true_value || rhs.true_value) ret_val = false;
+    if (false_value && rhs.false_value) ret_val &= *false_value == *rhs.false_value;
+    else if (false_value || rhs.false_value) ret_val = false;
     return ret_val;
 }

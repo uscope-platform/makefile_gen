@@ -55,6 +55,7 @@ void HDL_function_call::propagate_function(const hdl_function_statement &def) {
         return_type = def.get_return_type();
         auto arg_names = def.get_arguments_names();
         for (int i =0;i<arg_names.size(); i++) {
+            if (i >= static_cast<int>(arguments.size())) break;
             auto arg_val = arguments[i];
             for (auto &stmt : body) {
                 if (auto asgn = std::dynamic_pointer_cast<hdl_assignment_statement>(stmt)) {
@@ -203,6 +204,10 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
         auto resolved_val = arg->evaluate(context);
         if (!resolved_val.has_value()) return std::nullopt;
         resolved_arguments.push_back(resolved_val.value());
+    }
+    if (resolved_arguments.empty()) {
+        spdlog::warn("System task {} requires at least one argument", function_name);
+        return std::nullopt;
     }
     if (task_name == "rtoi") {
         if (resolved_arguments[0].is_real()) {

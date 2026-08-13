@@ -186,14 +186,27 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
         if (param->get_expression()) {
             annotate_identifier_types(param->get_expression(), type_map);
         }
-        auto res = param->evaluate(ctx);
+        std::optional<resolved_parameter> res;
+        try {
+            res = param->evaluate(ctx);
+        } catch (const std::exception &e) {
+            spdlog::warn("Exception while evaluating parameter {}: {}", next.value().get_name(), e.what());
+            res = std::nullopt;
+        } catch (...) {
+            spdlog::warn("Unknown exception while evaluating parameter {}", next.value().get_name());
+            res = std::nullopt;
+        }
         if (res) {
             ctx[next.value()] = res.value();
             solved_parameters[next.value()] = res.value();
 
-            auto struct_fields = extract_struct_fields(param, res.value(), next.value(), ctx);
-            ctx.insert(struct_fields.begin(), struct_fields.end());
-            solved_parameters.insert(struct_fields.begin(), struct_fields.end());
+            try {
+                auto struct_fields = extract_struct_fields(param, res.value(), next.value(), ctx);
+                ctx.insert(struct_fields.begin(), struct_fields.end());
+                solved_parameters.insert(struct_fields.begin(), struct_fields.end());
+            } catch (const std::exception &e) {
+                spdlog::warn("Exception while extracting struct fields of parameter {}: {}", next.value().get_name(), e.what());
+            }
             auto enum_values = extract_enum_values(param);
             ctx.insert(enum_values.begin(), enum_values.end());
             solved_parameters.insert(enum_values.begin(), enum_values.end());
@@ -453,7 +466,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::solve_compl
             } else if (dep.get_package_prefix().empty() && dep.get_instance().empty() && to_solve.contains(dep.get_name())) {
                 continue;
             } else if(!node_overrides.contains(dep.get_name())) {
-                spdlog::warn("Parameter {}::{} is not defined in the design", dep.get_package_prefix().back(), dep.get_name());
+                spdlog::warn("Parameter {}::{} is not defined in the design", dep.get_package_prefix().empty() ? "" : dep.get_package_prefix().back(), dep.get_name());
                 resolved_parameter value;
                 value.set_undefined();
                 ctx[dep] = value;

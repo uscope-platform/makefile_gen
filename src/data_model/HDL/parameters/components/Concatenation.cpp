@@ -17,6 +17,7 @@
 #include "data_model/HDL/parameters/components/Concatenation.hpp"
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
 #include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
+#include <spdlog/spdlog.h>
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/archives/binary.hpp>
 
@@ -102,12 +103,17 @@ std::optional<resolved_parameter> Concatenation::evaluate(const std::map<qualifi
         bool reverse_order = unpacked_ascending.empty() || !unpacked_ascending.back();
 
         auto v = components[0]->evaluate(context);
+        if (!v.has_value()) return std::nullopt;
         if (v.value().is_string()) {
             mdarray<std::string> result_string;
             for (int64_t i = 0;i<concat_size; i++) {
                 int64_t idx = reverse_order ? concat_size - i - 1 : i;
                 auto value_opt = components[idx]->evaluate(context);
                 if (!value_opt.has_value()) return std::nullopt;
+                if (!value_opt.value().is_string()) {
+                    spdlog::warn("Concatenating mixed string and non-string components, defaulting to 0");
+                    return std::nullopt;
+                }
                 mdarray<std::string> to_concat;
                 to_concat.set_value(0,value_opt.value().get_string());
                 result_string = mdarray<std::string>::concatenate(result_string, to_concat).value();
