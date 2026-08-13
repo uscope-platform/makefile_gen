@@ -100,3 +100,53 @@ TEST(parameter_defparam, nested_override) {
     ASSERT_TRUE(leaf_params.contains("Q"));
     EXPECT_EQ(leaf_params.get("Q")->get_numeric_value(), 9);
 }
+
+TEST(parameter_defparam, root_qualified_warns_and_does_not_crash) {
+    auto test_pattern = R"(
+        module child #(
+            parameter P = 0
+        )();
+        endmodule
+
+        module test_mod ();
+            child u1();
+            defparam $root.u1.P = 5;
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", test_pattern);
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+    d_store->store_file({"/dev/zero", "file_hash", resources});
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto child_params = ast_v2->get_dependencies()[0]->get_parameters();
+    ASSERT_TRUE(child_params.contains("P"));
+    EXPECT_EQ(child_params.get("P")->get_numeric_value(), 0);
+}
+
+TEST(parameter_defparam, unit_qualified_warns_and_does_not_crash) {
+    auto test_pattern = R"(
+        module child #(
+            parameter P = 0
+        )();
+        endmodule
+
+        module test_mod ();
+            child u1();
+            defparam $unit.u1.P = 5;
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", test_pattern);
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+    d_store->store_file({"/dev/zero", "file_hash", resources});
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto ast_v2 = b2.build_ast(std::vector<std::string>({"test_mod"}))[0];
+
+    auto child_params = ast_v2->get_dependencies()[0]->get_parameters();
+    ASSERT_TRUE(child_params.contains("P"));
+    EXPECT_EQ(child_params.get("P")->get_numeric_value(), 0);
+}

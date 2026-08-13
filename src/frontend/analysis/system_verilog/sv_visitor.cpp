@@ -595,21 +595,29 @@ void sv_visitor::enterParameter_port_declaration(sv2017::Parameter_port_declarat
 }
 
 void sv_visitor::enterParameter_override(sv2017::Parameter_overrideContext *ctx) {
-    if (ctx->list_of_defparam_assignments()) {
-        auto hi = ctx->list_of_defparam_assignments()->defparam_assignment(0)->hierarchical_identifier();
-        if (hi) {
-            std::string text = hi->getText();
-            pending_defparam_path.clear();
-            size_t last_dot = std::string::npos;
-            size_t start = 0;
-            while (true) {
-                auto dot = text.find('.', start);
-                if (dot == std::string::npos) break;
-                pending_defparam_path.push_back(text.substr(start, dot - start));
-                start = dot + 1;
-                last_dot = dot;
+    skip_current_defparam = false;
+    auto list = ctx->list_of_defparam_assignments();
+    if (list && !list->defparam_assignment().empty()) {
+        auto da = list->defparam_assignment(0);
+        if (da) {
+            auto hi = da->hierarchical_identifier();
+            if (hi) {
+                std::string text = hi->getText();
+                if (text.starts_with("$root.") || text.starts_with("$unit.")) {
+                    spdlog::warn("Unsupported defparam scope qualifier '{}' ignored", text);
+                    skip_current_defparam = true;
+                } else {
+                    pending_defparam_path.clear();
+                    size_t start = 0;
+                    while (true) {
+                        auto dot = text.find('.', start);
+                        if (dot == std::string::npos) break;
+                        pending_defparam_path.push_back(text.substr(start, dot - start));
+                        start = dot + 1;
+                    }
+                    pending_defparam_param = text.substr(start);
+                }
             }
-            pending_defparam_param = text.substr(start);
         }
     }
     params_factory.start_param_assignment();
@@ -619,6 +627,10 @@ void sv_visitor::enterParameter_override(sv2017::Parameter_overrideContext *ctx)
 void sv_visitor::exitParameter_override(sv2017::Parameter_overrideContext *ctx) {
     auto param = params_factory.get_parameter();
     params_factory.stop_param_assignment();
+    if (skip_current_defparam) {
+        skip_current_defparam = false;
+        return;
+    }
 
     auto stmt = std::make_shared<hdl_parameter_override_statement>();
     stmt->set_instance_path(pending_defparam_path);

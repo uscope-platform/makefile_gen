@@ -244,6 +244,7 @@ private:
     std::string current_declaration_type;
     std::vector<std::string> pending_defparam_path;
     std::string pending_defparam_param;
+    bool skip_current_defparam = false;
 
     Type_engine type_engine;
     HDL_functions_factory f_factory;
