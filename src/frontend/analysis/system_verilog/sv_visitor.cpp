@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 
 #include "frontend/analysis/system_verilog/sv_parsing_helpers.hpp"
+#include "data_model/HDL/statement/hdl_parameter_override_statement.hpp"
 #include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
 #include "data_model/HDL/parameters/components/token/Type_ref.hpp"
@@ -591,6 +592,41 @@ void sv_visitor::enterParameter_port_declaration(sv2017::Parameter_port_declarat
                 type_engine.add_type_param(name, p->get_type());
         }
     }
+}
+
+void sv_visitor::enterParameter_override(sv2017::Parameter_overrideContext *ctx) {
+    if (ctx->list_of_defparam_assignments()) {
+        auto hi = ctx->list_of_defparam_assignments()->defparam_assignment(0)->hierarchical_identifier();
+        if (hi) {
+            std::string text = hi->getText();
+            pending_defparam_path.clear();
+            size_t last_dot = std::string::npos;
+            size_t start = 0;
+            while (true) {
+                auto dot = text.find('.', start);
+                if (dot == std::string::npos) break;
+                pending_defparam_path.push_back(text.substr(start, dot - start));
+                start = dot + 1;
+                last_dot = dot;
+            }
+            pending_defparam_param = text.substr(start);
+        }
+    }
+    params_factory.start_param_assignment();
+    params_factory.new_parameter("defparam_value");
+}
+
+void sv_visitor::exitParameter_override(sv2017::Parameter_overrideContext *ctx) {
+    auto param = params_factory.get_parameter();
+    params_factory.stop_param_assignment();
+
+    auto stmt = std::make_shared<hdl_parameter_override_statement>();
+    stmt->set_instance_path(pending_defparam_path);
+    stmt->set_parameter_name(pending_defparam_param);
+    stmt->set_value(param->get_expression());
+    pending_defparam_path.clear();
+    pending_defparam_param.clear();
+    modules_factory.add_statement(stmt);
 }
 
 void sv_visitor::enterExpression(sv2017::ExpressionContext *ctx) {

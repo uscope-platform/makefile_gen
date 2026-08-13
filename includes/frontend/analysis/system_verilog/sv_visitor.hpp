@@ -69,6 +69,8 @@ public:
     void enterParameter_declaration(sv2017::Parameter_declarationContext *ctx) override;
     void exitParameter_declaration(sv2017::Parameter_declarationContext *ctx) override;
     void enterParameter_port_declaration(sv2017::Parameter_port_declarationContext *ctx) override;
+    void enterParameter_override(sv2017::Parameter_overrideContext *ctx) override;
+    void exitParameter_override(sv2017::Parameter_overrideContext *ctx) override;
     void enterParam_assignment(sv2017::Param_assignmentContext *ctx) override;
     void exitParam_assignment(sv2017::Param_assignmentContext *ctx) override;
     void exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext *ctx) override;
@@ -240,6 +242,8 @@ private:
 
     std::string current_parameter;
     std::string current_declaration_type;
+    std::vector<std::string> pending_defparam_path;
+    std::string pending_defparam_param;
 
     Type_engine type_engine;
     HDL_functions_factory f_factory;

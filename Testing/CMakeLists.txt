@@ -19,6 +19,7 @@ set(ANANKE_TESTS
         parameters/system_task_tests.cpp
         parameters/parameter_processing.cpp
         parameters/type_parameter_extraction.cpp
+        parameters/parameter_defparam.cpp
         frontend/sv_preprocessor.cpp
         frontend/typedef_parsing.cpp
         frontend/source_mapping.cpp

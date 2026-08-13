@@ -71,6 +71,11 @@ private:
         const std::string &path,
         const std::unordered_map<std::string, std::string> &if_map
     );
+    void apply_parameter_overrides(
+        const std::vector<std::shared_ptr<hdl_statement_base>> &statements,
+        const std::vector<pending_parameter_override> &inherited,
+        std::vector<work_order> &child_wo
+    );
 
     std::shared_ptr<data_store> d_store;
     std::shared_ptr<settings_store> s_store;

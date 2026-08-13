@@ -19,7 +19,6 @@
 #include "analysis/loop_solver.hpp"
 #include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
 #include "data_model/HDL/statement/hdl_statements.hpp"
-
 HDL_ast_builder_v2::HDL_ast_builder_v2(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d,
                                        const Depfile &d_f){
     s_store = s;
@@ -93,6 +92,7 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                     auto wo = process_statement(stmt, working_instance, current_param_values, child_path, interfaces_map);
                     child_wo.insert(child_wo.end(), wo.begin(), wo.end());
                 }
+                apply_parameter_overrides(res->get_statements(), wo.pending_overrides, child_wo);
                 for (const auto &c:child_wo| std::views::reverse) {
                     working_stack.push(c);
                 }
@@ -237,4 +237,52 @@ std::vector<work_order> HDL_ast_builder_v2::process_conditional(
         }
     }
     return orders;
+}
+
+void HDL_ast_builder_v2::apply_parameter_overrides(
+    const std::vector<std::shared_ptr<hdl_statement_base>> &statements,
+    const std::vector<pending_parameter_override> &inherited,
+    std::vector<work_order> &child_wo
+) {
+    // Resolve each override one level at a time against the child work orders.
+    // If the remaining path is exhausted, the override is injected onto the
+    // target instance's node; otherwise it is forwarded to the matching child
+    // work order for the next level.
+    auto find_child = [&](const std::string &name) -> work_order* {
+        for (auto &wo : child_wo) {
+            if (wo.node->get_name() == name) return &wo;
+        }
+        return nullptr;
+    };
+
+    auto handle = [&](const std::vector<std::string> &path, const std::string &pname,
+                      const std::shared_ptr<Expression_base> &value) {
+        if (path.empty()) return;
+        auto child = find_child(path[0]);
+        if (!child) {
+            spdlog::warn("defparam target path not found, ignoring");
+            return;
+        }
+        if (path.size() == 1) {
+            auto p = std::make_shared<HDL_parameter>(pname);
+            p->set_raw_value(value);
+            child->node->add_parameter(p);
+        } else {
+            pending_parameter_override po;
+            po.path.assign(path.begin() + 1, path.end());
+            po.parameter_name = pname;
+            po.value = value;
+            child->pending_overrides.push_back(po);
+        }
+    };
+
+    for (const auto &stmt : statements) {
+        auto dp = std::dynamic_pointer_cast<hdl_parameter_override_statement>(stmt);
+        if (!dp) continue;
+        handle(dp->get_instance_path(), dp->get_parameter_name(), dp->get_value());
+    }
+
+    for (const auto &po : inherited) {
+        handle(po.path, po.parameter_name, po.value);
+    }
 }
