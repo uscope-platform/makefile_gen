@@ -33,9 +33,9 @@ void Depfile::set_content(const nlohmann::json &file_content) {
     general.project_name = gen["project_name"];
     if ( gen.contains("target_part"))
         general.target_part = gen["target_part"];
-    else if ( gen.contains("board"))
+    if ( gen.contains("board"))
         general.board = gen["board"];
-    else {
+    if (general.board->empty() && !general.target_part){
         spdlog::warn("The selected Depfile does not define a target");
     }
     general.synth_tl = gen["synth_tl"];
