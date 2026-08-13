@@ -74,9 +74,13 @@ add_subdirectory(grammars)
 ExternalProject_Add(antlr_runtime
         GIT_REPOSITORY https://github.com/antlr/antlr4.git
         GIT_TAG ${ANTLR_VERSION}
-        CONFIGURE_COMMAND cmake ${CMAKE_BINARY_DIR}/antlr_runtime-prefix/src/antlr_runtime/runtime/Cpp
+        CONFIGURE_COMMAND ${CMAKE_COMMAND}
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+        -DBUILD_TESTING=OFF
+        -DANTLR_BUILD_CPP_TESTS=OFF
+        ${CMAKE_BINARY_DIR}/antlr_runtime-prefix/src/antlr_runtime/runtime/Cpp
         INSTALL_COMMAND DESTDIR=${CMAKE_BINARY_DIR}/antlr_runtime/dist make install
-        )
+)
 
 add_custom_target(parsers)
 add_dependencies(parsers vh_parser_gen sv_parser_gen)
