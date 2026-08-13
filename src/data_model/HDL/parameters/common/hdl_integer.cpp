@@ -21,19 +21,21 @@ void hdl_integer::set_size(const int64_t v) {
 }
 
 void hdl_integer::set_value(const uint64_t v) {
-    value = v;
-    wide = false;
+    content = static_cast<int64_t>(v);
 }
 
 void hdl_integer::set_value(const int1024_t v) {
-    wide_value = v;
-    wide = true;
+    if (v >= int1024_t(INT64_MIN) && v <= int1024_t(INT64_MAX)) {
+        content = static_cast<int64_t>(v);
+    } else {
+        content = v;
+    }
 }
 
 uint64_t hdl_integer::get_size() {
     if (size > 0) return size;
-    if (wide) {
-        int1024_t tmp = wide_value;
+    if (is_wide()) {
+        int1024_t tmp = std::get<int1024_t>(content);
         int bits = 0;
         while (tmp != 0) {
             tmp >>= 1;
@@ -42,8 +44,8 @@ uint64_t hdl_integer::get_size() {
         if (bits == 0) bits = 1;
         return static_cast<uint64_t>(bits);
     }
-    if(value == 0) return 1;
-    auto n_bits = std::log2(value);
+    if (get_value() == 0) return 1;
+    auto n_bits = std::log2(get_value());
     if(std::isinf(n_bits)) {
         return 1;
     }
@@ -55,140 +57,136 @@ uint64_t hdl_integer::get_size() {
 
 hdl_integer hdl_integer::operator+(const hdl_integer &o) const {
     hdl_integer res;
-    if (o.wide && wide) {
-        auto res_val = o.wide_value + wide_value;
-        res.set_value(res_val);
-    }else if (o.wide && !wide) {
-        auto res_val = o.wide_value + int1024_t(value);
-        res.set_value(res_val);
-    }else if (!o.wide && wide) {
-        auto res_val = int1024_t(o.value) + wide_value;
-        res.set_value(res_val);
-    }else if (!o.wide && !wide) {
-        return o.value + value;
+    if (o.is_wide() || is_wide()) {
+        res.set_value(to_wide() + o.to_wide());
+    } else {
+        res.set_value(static_cast<uint64_t>(get_value() + o.get_value()));
     }
     return res;
 }
 
 hdl_integer hdl_integer::operator-(const hdl_integer &o) const {
-    if (wide || o.wide) {
-        hdl_integer res;
+    hdl_integer res;
+    if (o.is_wide() || is_wide()) {
         res.set_value(to_wide() - o.to_wide());
-        return res;
+    } else {
+        res.set_value(static_cast<uint64_t>(get_value() - o.get_value()));
     }
-    return value - o.value;
+    return res;
 }
 
 hdl_integer hdl_integer::operator*(const hdl_integer &o) const {
-    if (wide || o.wide) {
-        hdl_integer res;
+    hdl_integer res;
+    if (o.is_wide() || is_wide()) {
         res.set_value(to_wide() * o.to_wide());
-        return res;
+    } else {
+        res.set_value(static_cast<uint64_t>(get_value() * o.get_value()));
     }
-    return value * o.value;
+    return res;
 }
 
 hdl_integer hdl_integer::operator/(const hdl_integer &o) const {
-    if (o.value == 0 && !o.wide) return 0;
-    if (wide || o.wide) {
+    if (o.get_value() == 0) return 0;
+    hdl_integer res;
+    if (o.is_wide() || is_wide()) {
         auto divisor = o.to_wide();
         if (divisor == 0) return 0;
-        hdl_integer res;
         res.set_value(to_wide() / divisor);
-        return res;
+    } else {
+        res.set_value(static_cast<uint64_t>(get_value() / o.get_value()));
     }
-    if (o.value == 0) return 0;
-    return value / o.value;
+    return res;
 }
 
 hdl_integer hdl_integer::operator%(const hdl_integer &o) const {
-    if (o.value == 0 && !o.wide) return 0;
-    if (wide || o.wide) {
+    if (o.get_value() == 0) return 0;
+    hdl_integer res;
+    if (o.is_wide() || is_wide()) {
         auto divisor = o.to_wide();
         if (divisor == 0) return 0;
-        hdl_integer res;
         res.set_value(to_wide() % divisor);
-        return res;
+    } else {
+        res.set_value(static_cast<uint64_t>(get_value() % o.get_value()));
     }
-    if (o.value == 0) return 0;
-    return value % o.value;
+    return res;
 }
 
 hdl_integer hdl_integer::operator&&(const hdl_integer &o) const {
-    if (wide || o.wide) {
-        return static_cast<int64_t>(to_wide() != 0 && o.to_wide() != 0);
-    }
-    return value && o.value;
+    hdl_integer res;
+    res.set_value(static_cast<uint64_t>(to_wide() != 0 && o.to_wide() != 0));
+    return res;
 }
 
 hdl_integer hdl_integer::operator||(const hdl_integer &o) const {
-    if (wide || o.wide) {
-        return static_cast<int64_t>(to_wide() != 0 || o.to_wide() != 0);
-    }
-    return value || o.value;
+    hdl_integer res;
+    res.set_value(static_cast<uint64_t>(to_wide() != 0 || o.to_wide() != 0));
+    return res;
 }
 
 hdl_integer hdl_integer::operator&(const hdl_integer &o) const {
-    if (wide || o.wide) {
-        hdl_integer res;
+    hdl_integer res;
+    if (o.is_wide() || is_wide()) {
         res.set_value(to_wide() & o.to_wide());
-        return res;
+    } else {
+        res.set_value(static_cast<uint64_t>(get_value() & o.get_value()));
     }
-    return value & o.value;
+    return res;
 }
 
 hdl_integer hdl_integer::operator|(const hdl_integer &o) const {
-    if (wide || o.wide) {
-        hdl_integer res;
+    hdl_integer res;
+    if (o.is_wide() || is_wide()) {
         res.set_value(to_wide() | o.to_wide());
-        return res;
+    } else {
+        res.set_value(static_cast<uint64_t>(get_value() | o.get_value()));
     }
-    return value | o.value;
+    return res;
 }
 
 hdl_integer hdl_integer::operator^(const hdl_integer &o) const {
-    if (wide || o.wide) {
-        hdl_integer res;
+    hdl_integer res;
+    if (o.is_wide() || is_wide()) {
         res.set_value(to_wide() ^ o.to_wide());
-        return res;
+    } else {
+        res.set_value(static_cast<uint64_t>(get_value() ^ o.get_value()));
     }
-    return value ^ o.value;
+    return res;
 }
 
 hdl_integer hdl_integer::operator~() const {
-    if (wide) {
-        hdl_integer res;
-        res.set_value(-wide_value - 1);
-        return res;
+    hdl_integer res;
+    if (is_wide()) {
+        res.set_value(-std::get<int1024_t>(content) - 1);
+    } else {
+        res.set_value(static_cast<uint64_t>(~get_value()));
     }
-    return ~value;
+    return res;
 }
 
 hdl_integer hdl_integer::operator!() const {
-    if (wide) {
-        return static_cast<int64_t>(wide_value == 0);
-    }
-    return !value;
+    hdl_integer res;
+    res.set_value(static_cast<uint64_t>(to_wide() == 0));
+    return res;
 }
 
 hdl_integer hdl_integer::operator<<(const hdl_integer &o) const {
-    int64_t shift = o.value;
-    if (wide || shift >= 64) {
-        hdl_integer res;
+    int64_t shift = o.get_value();
+    hdl_integer res;
+    if (is_wide() || shift >= 64) {
         res.set_value(to_wide() << static_cast<int>(shift));
-        return res;
+    } else {
+        res.set_value(static_cast<uint64_t>(get_value() << shift));
     }
-    if (shift >= 64) return 0;
-    return value << shift;
+    return res;
 }
 
 hdl_integer hdl_integer::operator>>(const hdl_integer &o) const {
-    int64_t shift = o.value;
-    if (wide || shift >= 64) {
-        hdl_integer res;
+    int64_t shift = o.get_value();
+    hdl_integer res;
+    if (is_wide() || shift >= 64) {
         res.set_value(to_wide() >> static_cast<int>(shift));
-        return res;
+    } else {
+        res.set_value(static_cast<uint64_t>(get_value() >> shift));
     }
-    if (shift >= 64) return 0;
-    return value >> shift;
+    return res;
 }

@@ -536,7 +536,12 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
         if (resolved_arguments[0].is_real()) {
             return static_cast<hdl_integer>(std::ceil(std::log2(resolved_arguments[0].get_real())));
         } else if (resolved_arguments[0].is_integer()) {
-            return static_cast<hdl_integer>(std::ceil(std::log2(resolved_arguments[0].get_integer().get_value())));
+            auto arg = resolved_arguments[0].get_integer().to_wide();
+            if (arg <= 1) return static_cast<hdl_integer>(0);
+            int bits = 0;
+            auto tmp = arg - 1;
+            while (tmp != 0) { tmp >>= 1; bits++; }
+            return static_cast<hdl_integer>(bits);
         }
         spdlog::warn("Encountered an invalid argument for a $clog2 call");
     }

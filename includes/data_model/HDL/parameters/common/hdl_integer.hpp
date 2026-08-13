@@ -20,7 +20,10 @@
 #include <cstdint>
 #include <cmath>
 #include <string>
+#include <variant>
 #include <nlohmann/json.hpp>
+#include <cereal/types/variant.hpp>
+#include <cereal/types/string.hpp>
 
 #include "third_party/uintwide_t.h"
 
@@ -81,54 +84,32 @@ class hdl_integer {
 public:
     hdl_integer() = default;
 
-    hdl_integer(const hdl_integer &other)
-        : value(other.value),
-          wide_value(other.wide_value),
-          size(other.size),
-          signedness(other.signedness),
-          wide(other.wide) {
-    }
-
-    hdl_integer(hdl_integer &&other) noexcept
-        : value(other.value),
-          wide_value(std::move(other.wide_value)),
-          size(other.size),
-          signedness(other.signedness),
-          wide(other.wide)  {
-    }
-
-    hdl_integer & operator=(const hdl_integer &other) {
-        if (this == &other)
-            return *this;
-        value = other.value;
-        wide_value = other.wide_value;
-        size = other.size;
-        signedness = other.signedness;
-        wide = other.wide;
-        return *this;
-    }
-
-    hdl_integer & operator=(hdl_integer &&other) noexcept {
-        if (this == &other)
-            return *this;
-        value = other.value;
-        wide_value = std::move(other.wide_value);
-        size = other.size;
-        signedness = other.signedness;
-        wide = other.wide;
-        return *this;
-    }
+    hdl_integer(const hdl_integer &other) = default;
+    hdl_integer(hdl_integer &&other) noexcept = default;
+    hdl_integer & operator=(const hdl_integer &other) = default;
+    hdl_integer & operator=(hdl_integer &&other) noexcept = default;
 
     hdl_integer(int64_t val) {
-        value = val;
+        content = val;
     }
-    [[nodiscard]] int1024_t to_wide() const { return wide ? wide_value : int1024_t(value); }
+
+    [[nodiscard]] int1024_t to_wide() const {
+        if (std::holds_alternative<int1024_t>(content))
+            return std::get<int1024_t>(content);
+        return int1024_t(std::get<int64_t>(content));
+    }
+    [[nodiscard]] bool is_wide() const { return std::holds_alternative<int1024_t>(content); }
+
     void set_size(const int64_t s);
     void set_value(const uint64_t v);
     void set_value(const int1024_t v);
     void set_signed(const bool s) {signedness = s;}
-    [[nodiscard]] int64_t get_value() const {return  value;}
-    [[nodiscard]] int1024_t get_wide() const {return  wide_value;}
+    [[nodiscard]] int64_t get_value() const {
+        if (std::holds_alternative<int1024_t>(content))
+            return static_cast<int64_t>(std::get<int1024_t>(content));
+        return std::get<int64_t>(content);
+    }
+    [[nodiscard]] int1024_t get_wide() const { return to_wide(); }
 
     uint64_t get_size();
     bool get_signed(){return signedness;}
@@ -151,42 +132,38 @@ public:
     hdl_integer operator>>(const hdl_integer &o) const;
 
     hdl_integer& operator+=(const hdl_integer &rhs) {
-        if (wide || rhs.wide) {
-            wide_value = to_wide() + rhs.to_wide();
-            value = static_cast<int64_t>(wide_value);
-            wide = true;
+        if (!is_wide() && !rhs.is_wide()) {
+            content = get_value() + rhs.get_value();
         } else {
-            value += rhs.value;
+            content = to_wide() + rhs.to_wide();
         }
         return *this;
     }
 
     hdl_integer& operator|=(const hdl_integer &rhs) {
-        if (wide || rhs.wide) {
-            wide_value = to_wide() | rhs.to_wide();
-            value = static_cast<int64_t>(wide_value);
-            wide = true;
+        if (!is_wide() && !rhs.is_wide()) {
+            content = get_value() | rhs.get_value();
         } else {
-            value |= rhs.value;
+            content = to_wide() | rhs.to_wide();
         }
         return *this;
     }
 
     std::string to_string() const {
-        return std::to_string(value);
+        if (std::holds_alternative<int1024_t>(content)) {
+            std::stringstream ss;
+            ss << std::get<int1024_t>(content);
+            return ss.str();
+        }
+        return std::to_string(std::get<int64_t>(content));
     }
 
     friend bool operator==(const hdl_integer &lhs, const hdl_integer &rhs) {
-        bool ret = true;
-        ret &= lhs.value == rhs.value;
-        ret &= lhs.signedness == rhs.signedness;
-        ret &= lhs.wide_value == rhs.wide_value;
-        return ret;
+        return lhs.to_wide() == rhs.to_wide();
     }
 
-
     friend bool operator<(const hdl_integer &lhs, const hdl_integer &rhs) {
-        return lhs.value < rhs.value;
+        return lhs.to_wide() < rhs.to_wide();
     }
 
     friend bool operator<=(const hdl_integer &lhs, const hdl_integer &rhs) {
@@ -203,16 +180,32 @@ public:
 
     template<class Archive>
     void serialize(Archive &ar) {
-        ar(value, size, signedness, wide_value, wide);
+        ar(content, size, signedness);
     }
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(hdl_integer, value, size, signedness, wide_value, wide);
+
+    friend void to_json(nlohmann::json& j, const hdl_integer& val) {
+        j["value"] = val.get_value();
+        j["size"] = val.size;
+        j["signedness"] = val.signedness;
+        j["wide_value"] = val.get_wide();
+        j["wide"] = val.is_wide();
+    }
+
+    friend void from_json(const nlohmann::json& j, hdl_integer& val) {
+        if (j.at("wide").get<bool>()) {
+            val.content = j.at("wide_value").get<int1024_t>();
+        } else {
+            val.content = j.at("value").get<int64_t>();
+        }
+        val.size = j.at("size").get<uint64_t>();
+        val.signedness = j.at("signedness").get<bool>();
+    }
+
 private:
 
-    int64_t value = 0;
-    int1024_t wide_value = 0;
+    std::variant<int64_t, int1024_t> content;
     uint64_t size = 0;
     bool signedness = false;
-    bool wide = false;
 };
 namespace std {
 
@@ -232,7 +225,9 @@ namespace std {
         return s;
     }
     inline hdl_integer pow(const hdl_integer &a, const hdl_integer &b) {
-        return static_cast<int64_t>(std::pow(a.get_value(), b.get_value()));
+        double base = static_cast<double>(a.to_wide());
+        double exp = static_cast<double>(b.to_wide());
+        return static_cast<int64_t>(std::pow(base, exp));
     }
 }
 

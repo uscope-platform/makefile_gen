@@ -19,6 +19,9 @@
 
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
+#include "data_model/HDL/parameters/common/hdl_integer.hpp"
+#include <sstream>
+#include <cereal/archives/binary.hpp>
 
 
 
@@ -136,10 +139,138 @@ TEST(Token, wide_input_decimal_processing) {
 
     Numeric_token check;
     hdl_integer check_val;
-    check_val.set_value(int1024_t(test_str));
+    check_val.set_value(int1024_t("0x10DE0B5E3A7640000"));
     check_val.set_signed(false);
     check.set_value(check_val);
     EXPECT_EQ(check, test_token);
+}
+
+TEST(hdl_integer, cross_representation_equality) {
+    hdl_integer narrow = 5;
+    hdl_integer wide;
+    wide.set_value(int1024_t(5));
+    EXPECT_EQ(narrow, wide);
+    EXPECT_EQ(wide, narrow);
+}
+
+TEST(hdl_integer, wide_ordering) {
+    hdl_integer a, b, c;
+    a.set_value(int1024_t(1) << 100);
+    b.set_value(int1024_t(1) << 99);
+    c.set_value(int1024_t(1) << 101);
+    EXPECT_TRUE(a > b);
+    EXPECT_TRUE(a < c);
+    EXPECT_TRUE(b < a);
+}
+
+TEST(hdl_integer, get_value_low64_of_wide) {
+    hdl_integer w;
+    w.set_value((int1024_t(1) << 100) + 5);
+    EXPECT_EQ(w.get_value(), 5);
+    EXPECT_EQ(w.get_wide(), (int1024_t(1) << 100) + 5);
+    EXPECT_TRUE(w.is_wide());
+}
+
+TEST(hdl_integer, get_wide_of_narrow) {
+    hdl_integer n = 42;
+    EXPECT_EQ(n.get_wide(), int1024_t(42));
+    EXPECT_FALSE(n.is_wide());
+    EXPECT_EQ(n.get_value(), 42);
+}
+
+TEST(hdl_integer, wide_arithmetic_demotes) {
+    hdl_integer w;
+    w.set_value(int1024_t(1) << 100);
+    hdl_integer w2;
+    w2.set_value(int1024_t(1) << 100);
+    auto sum = w + w2;          // 2^101, still wide
+    EXPECT_TRUE(sum.is_wide());
+    EXPECT_EQ(sum.to_wide(), int1024_t(1) << 101);
+
+    hdl_integer one = 1;
+    auto back = sum - w2;       // 2^100, still wide
+    EXPECT_TRUE(back.is_wide());
+
+    hdl_integer big;
+    big.set_value((int1024_t(1) << 100) + 1);
+    auto small = big - big;     // 0, should demote to narrow
+    EXPECT_FALSE(small.is_wide());
+    EXPECT_EQ(small.get_value(), 0);
+}
+
+TEST(hdl_integer, wide_to_string) {
+    hdl_integer w;
+    w.set_value(int1024_t(0xDEADBEEFCAFEBABE));
+    std::string s = w.to_string();
+    EXPECT_FALSE(s.empty());
+    EXPECT_NE(s, "0");
+}
+
+TEST(hdl_integer, serialization_round_trip) {
+    hdl_integer orig;
+    orig.set_value((int1024_t(1) << 100) + 0xCAFE);
+    orig.set_signed(true);
+    orig.set_size(128);
+
+    std::stringstream ss;
+    {
+        cereal::BinaryOutputArchive oa(ss);
+        oa(orig);
+    }
+    hdl_integer loaded;
+    {
+        cereal::BinaryInputArchive ia(ss);
+        ia(loaded);
+    }
+    EXPECT_EQ(orig, loaded);
+    EXPECT_TRUE(loaded.is_wide());
+    EXPECT_EQ(loaded.get_wide(), (int1024_t(1) << 100) + 0xCAFE);
+    EXPECT_EQ(loaded.get_signed(), true);
+    EXPECT_EQ(loaded.get_size(), 128u);
+}
+
+TEST(hdl_integer, wide_division_and_modulo) {
+    hdl_integer a, b;
+    a.set_value(int1024_t(1) << 100);
+    b.set_value(int1024_t(1) << 50);
+    auto q = a / b;
+    EXPECT_EQ(q.to_wide(), int1024_t(1) << 50);
+    auto r = a % b;
+    EXPECT_EQ(r.to_wide(), int1024_t(0));
+}
+
+TEST(hdl_integer, wide_shift) {
+    hdl_integer w;
+    w.set_value(int1024_t(1) << 100);
+    auto shl = w << 10;
+    EXPECT_EQ(shl.to_wide(), int1024_t(1) << 110);
+    auto shr = w >> 10;
+    EXPECT_EQ(shr.to_wide(), int1024_t(1) << 90);
+}
+
+TEST(hdl_integer, json_dump_shape) {
+    hdl_integer n = 42;
+    nlohmann::json jn = n;
+    EXPECT_TRUE(jn.contains("value"));
+    EXPECT_TRUE(jn.contains("size"));
+    EXPECT_TRUE(jn.contains("signedness"));
+    EXPECT_TRUE(jn.contains("wide_value"));
+    EXPECT_TRUE(jn.contains("wide"));
+    EXPECT_EQ(jn["value"], 42);
+    EXPECT_EQ(jn["wide"], false);
+    hdl_integer n2 = jn.get<hdl_integer>();
+    EXPECT_EQ(n2, n);
+
+    hdl_integer w;
+    w.set_value(int1024_t(1) << 100);
+    nlohmann::json jw = w;
+    EXPECT_TRUE(jw.contains("value"));
+    EXPECT_TRUE(jw.contains("wide_value"));
+    EXPECT_TRUE(jw.contains("wide"));
+    EXPECT_EQ(jw["wide"], true);
+    hdl_integer w2 = jw.get<hdl_integer>();
+    EXPECT_EQ(w2, w);
+    EXPECT_TRUE(w2.is_wide());
 }
 
 
