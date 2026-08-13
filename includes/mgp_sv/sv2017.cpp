@@ -2299,7 +2299,7 @@ void sv2017ParserInitialize() {
   	0,4399,4402,1,0,0,0,4400,4398,1,0,0,0,4400,4401,1,0,0,0,4401,4403,1,0,
   	0,0,4402,4400,1,0,0,0,4403,4404,5,293,0,0,4404,609,1,0,0,0,4405,4406,
   	7,58,0,0,4406,611,1,0,0,0,4407,4412,3,10,5,0,4408,4412,3,16,8,0,4409,
-  	4412,3,394,197,0,4410,4412,3,582,291,0,4411,4407,1,0,0,0,4411,4408,1,
+  	4412,3,394,197,0,4410,4412,3,578,289,0,4411,4407,1,0,0,0,4411,4408,1,
   	0,0,0,4411,4409,1,0,0,0,4411,4410,1,0,0,0,4412,613,1,0,0,0,4413,4414,
   	5,292,0,0,4414,4416,3,610,305,0,4415,4417,3,612,306,0,4416,4415,1,0,0,
   	0,4416,4417,1,0,0,0,4417,4418,1,0,0,0,4418,4419,3,616,308,0,4419,4420,
@@ -39598,8 +39598,8 @@ sv2017::Package_or_class_scoped_pathContext* sv2017::Slice_sizeContext::package_
   return getRuleContext<sv2017::Package_or_class_scoped_pathContext>(0);
 }
 
-sv2017::ExpressionContext* sv2017::Slice_sizeContext::expression() {
-  return getRuleContext<sv2017::ExpressionContext>(0);
+sv2017::Constant_expressionContext* sv2017::Slice_sizeContext::constant_expression() {
+  return getRuleContext<sv2017::Constant_expressionContext>(0);
 }
 
 
@@ -39666,7 +39666,7 @@ sv2017::Slice_sizeContext* sv2017::slice_size() {
     case 4: {
       enterOuterAlt(_localctx, 4);
       setState(4410);
-      expression(0);
+      constant_expression();
       break;
     }
 

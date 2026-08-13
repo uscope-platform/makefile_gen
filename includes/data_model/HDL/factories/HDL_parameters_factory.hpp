@@ -23,6 +23,7 @@
 #include "resource_factory_base.hpp"
 #include "data_model/HDL/factories/parameters/expressions_factory.hpp"
 #include "data_model/HDL/factories/parameters/factory_base.hpp"
+#include "data_model/HDL/parameters/components/Streaming.hpp"
 
 class  HDL_parameters_factory : protected resources_factory_base<HDL_parameter> {
 
@@ -64,6 +65,11 @@ public:
 
     void start_concatenation();
     void stop_concatenation();
+
+    void start_streaming();
+    void stop_streaming();
+    void set_stream_direction(Streaming::stream_direction d);
+    void set_stream_slice_size(const std::shared_ptr<Expression_base> &s);
 
     void start_cast(bool expression_size);
     void set_cast_type(const std::string &t);
@@ -117,6 +123,9 @@ private:
     bool in_bit_selection = false;
 
     std::shared_ptr<hdl_type> current_type = std::make_shared<HDL_simple_type>();
+
+    Streaming::stream_direction pending_stream_direction = Streaming::left;
+    std::shared_ptr<Expression_base> pending_stream_slice_size;
 };
 
 

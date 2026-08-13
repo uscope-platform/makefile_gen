@@ -1,5 +1,5 @@
 //  Copyright 2023 Filippo Savi
-//  Author: Filippo Savi <filssavi@gmap->com>
+//  Author: Filippo Savi <filssavi@gmail.com>
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -2281,7 +2281,7 @@ TEST(parameter_extraction, streaming_operators) {
     sv_analyzer analyzer;
     auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
-    // TODO: ACTUALLY IMPLEMENT STREAMING OPERATORS
+
 
     std::map<qualified_identifier, resolved_parameter> check_defaults = {
         {qualified_identifier("BASE_ADDR_LE"), 0x12345678},
@@ -2294,4 +2294,58 @@ TEST(parameter_extraction, streaming_operators) {
     }
 
     int i = 0;
+}
+
+TEST(parameter_extraction, streaming_bit_reversal) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [7:0] SRC = 8'hAB;
+            parameter X = {<<{SRC}};
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 0xD5);
+}
+
+TEST(parameter_extraction, streaming_byte_reversal) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [31:0] SRC = 32'h44332211;
+            parameter X = {<<8{SRC}};
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 0x11223344);
+}
+
+TEST(parameter_extraction, streaming_multi_component) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [7:0] A = 8'h12;
+            parameter [7:0] B = 8'h34;
+            parameter X = {<<8{A, B}};
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 0x3412);
+}
+
+TEST(parameter_extraction, streaming_slice_size_expression) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter N = 8;
+            parameter [31:0] SRC = 32'h44332211;
+            parameter X = {<<N{SRC}};
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 0x11223344);
 }

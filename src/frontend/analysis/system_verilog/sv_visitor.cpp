@@ -24,6 +24,7 @@
 #include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
 #include "data_model/HDL/parameters/components/token/Type_ref.hpp"
+#include "data_model/HDL/parameters/components/Streaming.hpp"
 #include "data_model/HDL/parameters/components/token/String_token.hpp"
 #include "data_model/HDL/types/HDL_external_type.hpp"
 
@@ -34,7 +35,7 @@ void sv_visitor::route_expression_text(const std::string& text) {
     }
     if(type_engine.active() || type_engine.is_ranging()){
         type_engine.add_component(sv_parsing_helpers::make_value(text));
-    } else if(params_factory.is_component_relevant()){
+    } else if(!in_streaming_slice && params_factory.is_component_relevant()){
         params_factory.add_component(sv_parsing_helpers::make_value(text));
     }
     if (f_factory.is_active()) {
@@ -68,7 +69,7 @@ void sv_visitor::route_expression_component(const std::shared_ptr<Expression_bas
     if(type_engine.active() || type_engine.is_ranging()){
         type_engine.add_component(routed ? clone(ec) : ec);
         routed = true;
-    } else if(params_factory.is_component_relevant()){
+    } else if(!in_streaming_slice && params_factory.is_component_relevant()){
         params_factory.add_component(routed ? clone(ec) : ec);
         routed = true;
     }
@@ -598,7 +599,7 @@ void sv_visitor::enterExpression(sv2017::ExpressionContext *ctx) {
     }
     if(type_engine.active() || type_engine.is_ranging()){
         type_engine.start_expression();
-    } else if(params_factory.is_component_relevant()|| params_factory.is_param_assignment() || params_factory.is_param_override()) {
+    } else if(!in_streaming_slice && (params_factory.is_component_relevant()|| params_factory.is_param_assignment() || params_factory.is_param_override())) {
         if (auto primary = dynamic_cast<sv2017::PrimaryAssigContext*>(ctx->primary())) {
             if (primary->assignment_pattern_expression()) return;
         }
@@ -620,7 +621,7 @@ void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
     }
     if (type_engine.active() || type_engine.is_ranging()) {
         type_engine.stop_expression();
-    } else if (params_factory.is_component_relevant() || params_factory.is_param_assignment() || params_factory.is_param_override()) {
+    } else if(!in_streaming_slice && (params_factory.is_component_relevant() || params_factory.is_param_assignment() || params_factory.is_param_override())) {
         if (auto primary = dynamic_cast<sv2017::PrimaryAssigContext*>(ctx->primary())) {
             if (primary->assignment_pattern_expression()) return;
         }
@@ -1152,6 +1153,37 @@ void sv_visitor::exitConcatenation(sv2017::ConcatenationContext *ctx) {
     } else {
         params_factory.stop_concatenation();
     }
+}
+
+void sv_visitor::enterStreaming_concatenation(sv2017::Streaming_concatenationContext *ctx) {
+    if (f_factory.is_active()) return;
+    in_streaming_slice = ctx->slice_size() != nullptr;
+    if (ctx->stream_operator()) {
+        if (ctx->stream_operator()->SHIFT_LEFT())
+            params_factory.set_stream_direction(Streaming::left);
+        else
+            params_factory.set_stream_direction(Streaming::right);
+    }
+}
+
+void sv_visitor::exitStreaming_concatenation(sv2017::Streaming_concatenationContext *ctx) {
+    in_streaming_slice = false;
+}
+
+void sv_visitor::enterStream_concatenation(sv2017::Stream_concatenationContext *ctx) {
+    if (f_factory.is_active()) return;
+    in_streaming_slice = false;
+    params_factory.start_streaming();
+}
+
+void sv_visitor::exitStream_concatenation(sv2017::Stream_concatenationContext *ctx) {
+    if (f_factory.is_active()) return;
+    params_factory.stop_streaming();
+}
+
+void sv_visitor::exitSlice_size(sv2017::Slice_sizeContext *ctx) {
+    std::string text = ctx->getText();
+    params_factory.set_stream_slice_size(sv_parsing_helpers::make_value(text));
 }
 
 

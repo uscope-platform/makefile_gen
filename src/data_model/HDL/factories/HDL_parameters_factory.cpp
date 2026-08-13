@@ -19,6 +19,7 @@
 #include "data_model/HDL/factories/parameters/function_calls_factory.hpp"
 #include "data_model/HDL/factories/parameters/ternary_factory.hpp"
 #include "data_model/HDL/factories/parameters/cast_factory.hpp"
+#include "data_model/HDL/factories/parameters/streaming_factory.hpp"
 
 
 void HDL_parameters_factory::new_parameter(const std::string &name) {
@@ -201,6 +202,41 @@ void HDL_parameters_factory::stop_concatenation() {
             current_resource.set_raw_value(result);
         }
     }
+}
+
+void HDL_parameters_factory::start_streaming() {
+    if (ctx == param_context::declaration || ctx == param_context::override || ctx == param_context::packed_dim) {
+        expr_factory.push_level();
+        auto stream = std::make_unique<streaming_factory>();
+        stream->start_streaming();
+        stream->set_direction(pending_stream_direction);
+        if (pending_stream_slice_size) stream->set_slice_size(pending_stream_slice_size);
+        pending_stream_direction = Streaming::left;
+        pending_stream_slice_size = nullptr;
+        consumer_stack.push(std::move(stream));
+    }
+}
+
+void HDL_parameters_factory::stop_streaming() {
+    if (top_as<streaming_factory>()) {
+        expr_factory.pop_level();
+        auto result = consumer_stack.top()->result();
+        consumer_stack.pop();
+        if (!consumer_stack.empty()) {
+            consumer_stack.top()->consume(result);
+        } else {
+            current_resource.set_type(current_type);
+            current_resource.set_raw_value(result);
+        }
+    }
+}
+
+void HDL_parameters_factory::set_stream_direction(Streaming::stream_direction d) {
+    pending_stream_direction = d;
+}
+
+void HDL_parameters_factory::set_stream_slice_size(const std::shared_ptr<Expression_base> &s) {
+    pending_stream_slice_size = s;
 }
 
 void HDL_parameters_factory::start_replication() {

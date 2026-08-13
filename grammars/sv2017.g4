@@ -1370,7 +1370,7 @@ slice_size:
   integer_type
    | non_integer_type
    | package_or_class_scoped_path
-   | expression
+   | constant_expression
 ;
 streaming_concatenation:
  LBRACE stream_operator ( slice_size )? stream_concatenation RBRACE;

@@ -51,6 +51,7 @@ target_sources(ananke_lib
     data_model/HDL/parameters/components/Concatenation.cpp
     data_model/HDL/parameters/components/Ternary.cpp
     data_model/HDL/parameters/components/Replication.cpp
+    data_model/HDL/parameters/components/Streaming.cpp
     data_model/HDL/parameters/components/Cast.cpp
     data_model/HDL/parameters/components/token/Identifier_token.cpp
     data_model/HDL/parameters/components/token/Numeric_token.cpp
@@ -73,6 +74,7 @@ target_sources(ananke_lib
     data_model/HDL/factories/parameters/ranges_factory.cpp
     data_model/HDL/factories/parameters/concatenation_factory.cpp
     data_model/HDL/factories/parameters/replication_factory.cpp
+    data_model/HDL/factories/parameters/streaming_factory.cpp
     data_model/HDL/factories/parameters/expressions_factory.cpp
     data_model/HDL/factories/parameters/function_calls_factory.cpp
     data_model/HDL/factories/parameters/ternary_factory.cpp

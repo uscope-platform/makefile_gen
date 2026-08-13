@@ -137,6 +137,11 @@ public:
 
     void enterConcatenation(sv2017::ConcatenationContext *ctx) override;
     void exitConcatenation(sv2017::ConcatenationContext *ctx) override;
+    void enterStreaming_concatenation(sv2017::Streaming_concatenationContext *ctx) override;
+    void exitStreaming_concatenation(sv2017::Streaming_concatenationContext *ctx) override;
+    void enterStream_concatenation(sv2017::Stream_concatenationContext *ctx) override;
+    void exitStream_concatenation(sv2017::Stream_concatenationContext *ctx) override;
+    void exitSlice_size(sv2017::Slice_sizeContext *ctx) override;
 
 
     void enterReplication(sv2017::ReplicationContext *ctx) override;
@@ -247,6 +252,7 @@ private:
 
     bool in_anonymous_struct = false;
     bool top_level_struct_started = false;
+    bool in_streaming_slice = false;
     std::shared_ptr<hdl_type> pending_anon_struct_type;
 
     std::string instance_prefix;

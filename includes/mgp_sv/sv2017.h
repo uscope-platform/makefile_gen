@@ -7106,7 +7106,7 @@ public:
     Integer_typeContext *integer_type();
     Non_integer_typeContext *non_integer_type();
     Package_or_class_scoped_pathContext *package_or_class_scoped_path();
-    ExpressionContext *expression();
+    Constant_expressionContext *constant_expression();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
