@@ -19,6 +19,7 @@
 
 #include <string>
 #include <sstream>
+#include <cereal/types/optional.hpp>
 #include "data_model/HDL/types/HDL_simple_type.hpp"
 
 struct enum_member {
@@ -53,24 +54,9 @@ public:
 
     [[nodiscard]] bool is_scalar() const override { return true; }
 
-    parameter_deps_t get_dependencies() override {
-        parameter_deps_t result;
-        if (base_type) result.merge(base_type->get_dependencies());
-        return result;
-    }
+    parameter_deps_t get_dependencies() override;
 
-    [[nodiscard]] std::string to_print() const override {
-        std::string result = "enum {";
-        for (size_t i = 0; i < members.size(); ++i) {
-            if (i > 0) result += ", ";
-            result += members[i].name;
-        }
-        result += "}";
-        if (base_type) {
-            result += " (base: " + base_type->to_print() + ")";
-        }
-        return result;
-    }
+    [[nodiscard]] std::string to_print() const override;
 
     [[nodiscard]] bool is_equal(const hdl_type &other) const override {
         if (auto *o = dynamic_cast<const HDL_enum_type *>(&other)) {

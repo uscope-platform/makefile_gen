@@ -13,9 +13,29 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "data_model/HDL/types/HDL_enum_type.hpp"
-
+#include <cereal/archives/binary.hpp>
 #include <cereal/types/polymorphic.hpp>
+
+#include "data_model/HDL/types/HDL_enum_type.hpp"
 
 CEREAL_REGISTER_TYPE(HDL_enum_type)
 CEREAL_REGISTER_POLYMORPHIC_RELATION(hdl_type, HDL_enum_type)
+
+parameter_deps_t HDL_enum_type::get_dependencies(){
+    parameter_deps_t result;
+    if (base_type) result.merge(base_type->get_dependencies());
+    return result;
+}
+
+std::string HDL_enum_type::to_print() const{
+    std::string result = "enum {";
+    for (size_t i = 0; i < members.size(); ++i) {
+        if (i > 0) result += ", ";
+        result += members[i].name;
+    }
+    result += "}";
+    if (base_type) {
+        result += " (base: " + base_type->to_print() + ")";
+    }
+    return result;
+}
