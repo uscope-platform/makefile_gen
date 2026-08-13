@@ -804,6 +804,16 @@ void sv_visitor::exitUnary_operator(sv2017::Unary_operatorContext *ctx) {
     if (ctx->PLUS()) process_operation(Expression_v2::expression_operator::add);
     if (ctx->MINUS()) process_operation(Expression_v2::expression_operator::subtract);
 
+    if (auto um = ctx->unary_module_path_operator()) {
+        if (um->NOT()) process_operation(Expression_v2::expression_operator::logic_neg);
+        if (um->NEG()) process_operation(Expression_v2::expression_operator::bitwise_neg);
+        if (um->AMPERSAND()) process_operation(Expression_v2::expression_operator::reduction_and);
+        if (um->NAND()) process_operation(Expression_v2::expression_operator::reduction_nand);
+        if (um->BAR()) process_operation(Expression_v2::expression_operator::reduction_or);
+        if (um->NOR()) process_operation(Expression_v2::expression_operator::reduction_nor);
+        if (um->XOR()) process_operation(Expression_v2::expression_operator::reduction_xor);
+        if (um->NXOR() || um->XORN()) process_operation(Expression_v2::expression_operator::reduction_xnor);
+    }
 }
 
 void sv_visitor::exitOperator_cmp(sv2017::Operator_cmpContext *ctx) {

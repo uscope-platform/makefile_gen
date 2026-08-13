@@ -37,7 +37,7 @@ hdl_integer type_cast_engine::to_signed(hdl_integer in, uint64_t container_size)
 }
 
 hdl_integer type_cast_engine::to_int(hdl_integer in, uint64_t container_size) {
-    return 0;
+    return to_signed(in, container_size);
 }
 
 hdl_integer type_cast_engine::to_int(double in, uint64_t container_size) {

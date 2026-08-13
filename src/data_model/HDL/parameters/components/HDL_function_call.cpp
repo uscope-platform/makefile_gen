@@ -206,7 +206,7 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
     }
     if (task_name == "rtoi") {
         if (resolved_arguments[0].is_real()) {
-            return static_cast<hdl_integer>(std::round(resolved_arguments[0].get_real()));
+            return static_cast<hdl_integer>(std::trunc(resolved_arguments[0].get_real()));
         }
         if (resolved_arguments[0].is_integer()) {
             return resolved_arguments[0].get_integer();
@@ -241,31 +241,22 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
 
     }
     if (task_name == "ln") {
-        if (resolved_arguments[0].is_real()) {
-            return std::log(resolved_arguments[0].get_real());
-        } else if (resolved_arguments[0].is_integer()) {
-            return std::log(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
-        }
-        spdlog::warn("Encountered an invalid argument for a $ln call");
-        return 0;
+        double arg = resolved_arguments[0].is_real() ? resolved_arguments[0].get_real()
+                     : static_cast<double>(resolved_arguments[0].get_integer().get_value());
+        if (arg <= 0) { spdlog::warn("$ln argument must be positive"); return 0; }
+        return std::log(arg);
     }
     if (task_name == "log10") {
-        if (resolved_arguments[0].is_real()) {
-            return std::log10(resolved_arguments[0].get_real());
-        } else if (resolved_arguments[0].is_integer()) {
-            return std::log10(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
-        }
-        spdlog::warn("Encountered an invalid argument for a $log10 call");
-        return 0;
+        double arg = resolved_arguments[0].is_real() ? resolved_arguments[0].get_real()
+                     : static_cast<double>(resolved_arguments[0].get_integer().get_value());
+        if (arg <= 0) { spdlog::warn("$log10 argument must be positive"); return 0; }
+        return std::log10(arg);
     }
     if (task_name == "sqrt") {
-        if (resolved_arguments[0].is_real()) {
-            return std::sqrt(resolved_arguments[0].get_real());
-        } else if (resolved_arguments[0].is_integer()) {
-            return std::sqrt(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
-        }
-        spdlog::warn("Encountered an invalid argument for a $sqrt call");
-        return 0;
+        double arg = resolved_arguments[0].is_real() ? resolved_arguments[0].get_real()
+                     : static_cast<double>(resolved_arguments[0].get_integer().get_value());
+        if (arg < 0) { spdlog::warn("$sqrt argument must be non-negative"); return 0; }
+        return std::sqrt(arg);
     }
     if (task_name == "pow") {
         if (resolved_arguments.size() < 2) {
@@ -281,10 +272,11 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
         return std::pow(base, exponent);
     }
     if (task_name == "min") {
-        if (resolved_arguments.size() < 2) {
-            spdlog::warn("$min requires at least 2 arguments");
+        if (resolved_arguments.empty()) {
+            spdlog::warn("$min requires at least 1 argument");
             return 0;
         }
+        if (resolved_arguments.size() == 1) return resolved_arguments[0];
         bool all_int = std::ranges::all_of(resolved_arguments, [](const auto &a) { return a.is_integer(); });
         if (all_int) {
             auto result = resolved_arguments[0].get_integer();
@@ -306,10 +298,11 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
         }
     }
     if (task_name == "max") {
-        if (resolved_arguments.size() < 2) {
-            spdlog::warn("$max requires at least 2 arguments");
+        if (resolved_arguments.empty()) {
+            spdlog::warn("$max requires at least 1 argument");
             return 0;
         }
+        if (resolved_arguments.size() == 1) return resolved_arguments[0];
         bool all_int = std::ranges::all_of(resolved_arguments, [](const auto &a) { return a.is_integer(); });
         if (all_int) {
             auto result = resolved_arguments[0].get_integer();

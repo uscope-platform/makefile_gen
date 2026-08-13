@@ -34,9 +34,7 @@ TEST(system_task, simple) {
         localparam CAST = $rtoi(16.8);
 
     endmodule
-    )";
-
-    sv_analyzer analyzer;
+    )";    sv_analyzer analyzer;
 
     auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
@@ -62,7 +60,7 @@ TEST(system_task, simple) {
 
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     std::map<qualified_identifier, resolved_parameter> check_defaults = {
-        {qualified_identifier("CAST"), 17},
+        {qualified_identifier("CAST"), 16},
     };
 
     for(const auto& [name, value]:check_defaults){
@@ -121,7 +119,7 @@ TEST(system_task, multiple) {
 
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     std::map<qualified_identifier, resolved_parameter> check_defaults = {
-        {qualified_identifier("CAST"), 17},
+        {qualified_identifier("CAST"), 16},
         {qualified_identifier("CAST_2"), 12},
     };
 
@@ -179,7 +177,7 @@ TEST(system_task, propagation) {
 
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     std::map<qualified_identifier, resolved_parameter> check_defaults = {
-        {qualified_identifier("CAST"), 17},
+        {qualified_identifier("CAST"), 16},
     };
 
     for(const auto& [name, value]:check_defaults){
@@ -613,3 +611,44 @@ TEST(system_task, typename) {
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("TN")).get_string(), "int");
 }
+
+TEST(system_task, rtoi_truncates) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam A = $rtoi(16.8);
+            localparam B = $rtoi(-16.8);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 16);
+    EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), -16);
+}
+
+TEST(system_task, min_max_single_arg) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam A = $min(42);
+            localparam B = $max(7);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 42);
+    EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 7);
+}
+
+TEST(system_task, ln_domain_guard) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam A = $ln(-1);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 0);
+}
+

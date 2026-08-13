@@ -81,8 +81,17 @@ std::optional<resolved_parameter> Cast::evaluate(const std::map<qualified_identi
         }
         auto raw_value = content_val.value().get_integer();
         auto cast_size = raw_cast_size.value().get_integer().get_value();
-        int64_t mask = (1ULL << cast_size) - 1;
-        auto result = raw_value & mask;
+        if (cast_size <= 0) {
+            spdlog::warn("Cast size must be a positive integer");
+            return content_val.value();
+        }
+        if (cast_size >= 1024) {
+            spdlog::warn("Cast size {} exceeds supported width, truncating to 1024 bits", cast_size);
+            cast_size = 1024;
+        }
+        int1024_t mask = (int1024_t(1) << cast_size) - 1;
+        hdl_integer result;
+        result.set_value(raw_value.to_wide() & mask);
         result.set_size(cast_size);
         return result;
     }

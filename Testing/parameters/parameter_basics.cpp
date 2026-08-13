@@ -2309,6 +2309,76 @@ TEST(parameter_extraction, streaming_bit_reversal) {
     EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 0xD5);
 }
 
+TEST(parameter_extraction, unary_logical_not) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [3:0] V = 4'b0011;
+            parameter X = !V;
+            parameter Y = ~V;
+            parameter Z = !0;
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 0);
+    EXPECT_EQ(defaults.at(qualified_identifier("Y")).get_integer(), 12);
+    EXPECT_EQ(defaults.at(qualified_identifier("Z")).get_integer(), 1);
+}
+
+TEST(parameter_extraction, reduction_operators) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [3:0] V = 4'b1011;
+            parameter A = &V;
+            parameter O = |V;
+            parameter X = ^V;
+            parameter NA = ~&V;
+            parameter NO = ~|V;
+            parameter NX = ~^V;
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 0);   // 1011: not all ones
+    EXPECT_EQ(defaults.at(qualified_identifier("O")).get_integer(), 1);   // 1011: any bit set
+    EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 1);   // 1011: odd parity (3 ones)
+    EXPECT_EQ(defaults.at(qualified_identifier("NA")).get_integer(), 1);  // NAND
+    EXPECT_EQ(defaults.at(qualified_identifier("NO")).get_integer(), 0);  // NOR
+    EXPECT_EQ(defaults.at(qualified_identifier("NX")).get_integer(), 0);  // XNOR
+}
+
+TEST(parameter_extraction, int_real_equality) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter int I = 1;
+            parameter E1 = (I == 1.0);
+            parameter E2 = (I != 2.0);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("E1")).get_integer(), 1);
+    EXPECT_EQ(defaults.at(qualified_identifier("E2")).get_integer(), 1);
+}
+
+TEST(parameter_extraction, wide_size_cast) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [127:0] V = 128'hFEDCBA9876543210FEDCBA9876543210;
+            parameter X = 64'(V);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    auto x = defaults.at(qualified_identifier("X")).get_integer();
+    EXPECT_EQ(x.get_value(), static_cast<int64_t>(0xFEDCBA9876543210));
+}
+
+
 TEST(parameter_extraction, streaming_byte_reversal) {
     auto test_pattern = R"(
         module test_mod ();

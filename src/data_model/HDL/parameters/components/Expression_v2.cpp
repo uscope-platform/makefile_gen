@@ -152,7 +152,10 @@ std::optional<resolved_parameter> Expression_v2::evaluate(
 
     if (lhs) l_val = lhs->evaluate(context);
     if (rhs) r_val = rhs->evaluate(context);
-    if (operation == logic_neg || operation == bitwise_neg) {
+    if (operation == logic_neg || operation == bitwise_neg ||
+        operation == reduction_and || operation == reduction_nand ||
+        operation == reduction_or || operation == reduction_nor ||
+        operation == reduction_xor || operation == reduction_xnor) {
         resolved_parameter operand = 0;
         if (l_val.has_value()) operand = l_val.value();
         auto res = evaluate_unary_expression(operand);
@@ -180,10 +183,23 @@ std::optional<resolved_parameter> Expression_v2::evaluate(
 std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(resolved_parameter op_a, resolved_parameter op_b) {
 
     if(operation ==  equal){
-        return op_a == op_b;
+        if (op_a.is_integer() && op_b.is_integer())
+            return op_a.get_integer() == op_b.get_integer();
+        if (op_a.is_string() && op_b.is_string())
+            return op_a.get_string() == op_b.get_string();
+        // Mixed int/real or any real comparison: compare as doubles.
+        double a = op_a.is_real() ? op_a.get_real() : static_cast<double>(op_a.get_integer().get_value());
+        double b = op_b.is_real() ? op_b.get_real() : static_cast<double>(op_b.get_integer().get_value());
+        return a == b;
     }
     if(operation ==  not_equal){
-        return op_a != op_b;
+        if (op_a.is_integer() && op_b.is_integer())
+            return op_a.get_integer() != op_b.get_integer();
+        if (op_a.is_string() && op_b.is_string())
+            return op_a.get_string() != op_b.get_string();
+        double a = op_a.is_real() ? op_a.get_real() : static_cast<double>(op_a.get_integer().get_value());
+        double b = op_b.is_real() ? op_b.get_real() : static_cast<double>(op_b.get_integer().get_value());
+        return a != b;
     }
 
     bool supported_a = (op_a.is_integer() || op_a.is_real() );
@@ -265,13 +281,17 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(reso
         if(int_exec) result_i =i_a <= i_b;
         else result_d = d_a <= d_b;
     } else if(operation == bitwise_and){
-        result_i = i_a & i_b;
+        if (!int_exec) { spdlog::warn("Bitwise operator with real operand"); result_d = 0; }
+        else result_i = i_a & i_b;
     } else if(operation == bitwise_or){
-        result_i = i_a | i_b;
+        if (!int_exec) { spdlog::warn("Bitwise operator with real operand"); result_d = 0; }
+        else result_i = i_a | i_b;
     } else if(operation == bitwise_xor){
-        result_i = i_a ^ i_b;
+        if (!int_exec) { spdlog::warn("Bitwise operator with real operand"); result_d = 0; }
+        else result_i = i_a ^ i_b;
     } else if(operation == bitwise_xnor){
-        result_i = ~(i_a ^ i_b);
+        if (!int_exec) { spdlog::warn("Bitwise operator with real operand"); result_d = 0; }
+        else result_i = ~(i_a ^ i_b);
     } else if(operation == logical_and){
         if(int_exec) result_i =i_a && i_b;
         result_d = d_a && d_b;
@@ -292,23 +312,64 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(reso
 
 std::variant<hdl_integer, double> Expression_v2::evaluate_unary_expression(resolved_parameter operand) {
 
-    if( !operand.is_integer() || operand.is_real()) {
+    if (operation == logic_neg) {
+        if (operand.is_real()) return operand.get_real() == 0.0 ? hdl_integer(1) : hdl_integer(0);
+        if (operand.is_integer()) return operand.get_integer() == 0 ? hdl_integer(1) : hdl_integer(0);
         spdlog::warn("Attempted evaluation of operand of unsupported type");
-        return  0;
-    }
-    const bool int_exec = operand.is_integer();
-
-    hdl_integer int_op;
-    if(int_exec) int_op = operand.get_integer();
-    double double_op = 0;
-    if(operand.is_real()) double_op = operand.get_real();
-    if(operation == logic_neg){
-        if(int_exec) return !int_op;
-        return double_op != 0 ? 1 : 0;
+        return 0;
     }
 
-    if(operation ==  bitwise_neg){
-        return ~operand.get_integer();
+    if (!operand.is_integer()) {
+        spdlog::warn("Attempted evaluation of operand of unsupported type");
+        return 0;
     }
+
+    auto int_op = operand.get_integer();
+
+    if (operation == bitwise_neg) {
+        auto width = int_op.get_size();
+        int1024_t negated = -int_op.to_wide() - 1;
+        if (width < 1024) negated &= (int1024_t(1) << width) - 1;
+        hdl_integer res;
+        res.set_value(negated);
+        return res;
+    }
+
+    if (operation == reduction_and) {
+        int1024_t v = int_op.to_wide();
+        while (v != 0) {
+            if ((v & 1) == 0) return static_cast<hdl_integer>(0);
+            v >>= 1;
+        }
+        // Value is 0, or all bits are 1. A zero value has a zero bit, so AND-reduce is 0.
+        return static_cast<hdl_integer>(int_op.to_wide() != 0);
+    }
+    if (operation == reduction_nand) {
+        int1024_t v = int_op.to_wide();
+        while (v != 0) {
+            if ((v & 1) == 0) return static_cast<hdl_integer>(1);
+            v >>= 1;
+        }
+        return static_cast<hdl_integer>(int_op.to_wide() == 0);
+    }
+    if (operation == reduction_or) {
+        return static_cast<hdl_integer>(int_op.to_wide() != 0);
+    }
+    if (operation == reduction_nor) {
+        return static_cast<hdl_integer>(int_op.to_wide() == 0);
+    }
+
+    // Reduction XOR / XNOR: parity of the set bits, across the full wide value.
+    if (operation == reduction_xor || operation == reduction_xnor) {
+        int1024_t v = int_op.to_wide();
+        bool parity = false;
+        while (v != 0) {
+            parity = !parity;
+            v &= (v - 1);
+        }
+        if (operation == reduction_xnor) parity = !parity;
+        return static_cast<hdl_integer>(parity ? 1 : 0);
+    }
+
     throw std::runtime_error("Error: Attempted evaluation of an unsupported unary expression ");
 }
