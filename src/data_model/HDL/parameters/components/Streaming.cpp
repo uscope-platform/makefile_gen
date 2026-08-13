@@ -86,33 +86,25 @@ std::optional<resolved_parameter> Streaming::evaluate(const std::map<qualified_i
             slice = s.value().get_integer().get_value();
     }
 
-    // Split P into slices from MSB.
-    std::vector<hdl_integer> slices;
-    for (int64_t off = total_width; off > 0; off -= slice) {
-        int64_t start = off - slice;
-        if (start < 0) start = 0;
-        int64_t w = off - start;
-        hdl_integer mask = (w >= 64) ? ~0ULL : (1ULL << w) - 1;
-        slices.push_back((P >> start) & mask);
-    }
-
-    // Assemble the result.
     hdl_integer result = 0;
-    int64_t out_shift = 0;
-    if (direction == left) {
-        // Left-to-right: reverse slice order, bits within slice unchanged.
-        for (size_t i = 0; i < slices.size(); i++) {
-            int64_t w = total_width - static_cast<int64_t>(i) * slice;
-            if (w > slice) w = slice;
-            result |= slices[i] << out_shift;
-            out_shift += w;
-        }
+    if (direction == right) {
+        // Right-to-left streaming (>>): left-to-right order, slice_size ignored, no re-ordering.
+        result = P;
     } else {
-        // Right-to-left: keep slice order, reverse bits within each slice.
-        for (const auto &s : slices) {
-            hdl_integer rs = reverse_bits(s, slice);
-            result |= rs << out_shift;
-            out_shift += slice;
+        // Left-to-right streaming (<<): slice into blocks starting from the right-most bit,
+        // then reverse the block order, preserving bits within each block.
+        std::vector<hdl_integer> blocks;      // blocks[0] = right-most (LSB) block
+        std::vector<int64_t> block_widths;
+        for (int64_t off = 0; off < total_width; off += slice) {
+            int64_t w = std::min<int64_t>(slice, total_width - off);
+            int64_t mask = (w >= 64) ? ~0ULL : (1ULL << w) - 1;
+            blocks.push_back((P >> off) & mask);
+            block_widths.push_back(w);
+        }
+        int64_t out_shift = 0;
+        for (int64_t i = static_cast<int64_t>(blocks.size()) - 1; i >= 0; i--) {
+            result |= blocks[i] << out_shift;
+            out_shift += block_widths[i];
         }
     }
 

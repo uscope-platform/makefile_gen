@@ -2322,6 +2322,34 @@ TEST(parameter_extraction, streaming_byte_reversal) {
     EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 0x11223344);
 }
 
+TEST(parameter_extraction, streaming_right_shift_no_reorder) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [31:0] SRC = 32'h44332211;
+            parameter X = {>>8{SRC}};
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer().get_value(), 0x44332211);
+}
+
+TEST(parameter_extraction, streaming_ieee_examples) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [5:0] SRC = 6'b110101;
+            parameter X = {<<4{SRC}};
+            parameter Y = {>>4{SRC}};
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer().get_value(), 0b010111);
+    EXPECT_EQ(defaults.at(qualified_identifier("Y")).get_integer().get_value(), 0b110101);
+}
+
 TEST(parameter_extraction, streaming_multi_component) {
     auto test_pattern = R"(
         module test_mod ();
