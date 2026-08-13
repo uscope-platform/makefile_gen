@@ -19,21 +19,22 @@
 #include "data_model/HDL/parameters/common/hdl_integer.hpp"
 
 hdl_integer type_cast_engine::to_unsigned(hdl_integer in, uint64_t container_size) {
-    uint64_t mask;
-    if(container_size >= 64) {
-        mask = ~0ULL;
-    } else {
-        mask = (1ULL << container_size) - 1;
-    }
-    return static_cast<hdl_integer>(static_cast<hdl_integer>(in) & mask);
+    hdl_integer mask = (hdl_integer(1) << hdl_integer(container_size)) - 1;
+    return in & mask;
 }
 
 hdl_integer type_cast_engine::to_signed(hdl_integer in, uint64_t container_size) {
     if(container_size == 0) return 0;
-    if(container_size >= 64) return in;
+    if(container_size >= 1024) return in;
 
-    uint64_t shift_amount = 64 - container_size;
-    return (in << shift_amount) >> shift_amount;
+    hdl_integer mask = (hdl_integer(1) << hdl_integer(container_size)) - 1;
+    hdl_integer v = in & mask;
+    // Sign-extend from bit (container_size - 1).
+    hdl_integer sign_bit = hdl_integer(1) << hdl_integer(container_size - 1);
+    if ((v & sign_bit) != 0) {
+        v = v | ~mask;
+    }
+    return v;
 }
 
 hdl_integer type_cast_engine::to_int(hdl_integer in, uint64_t container_size) {
@@ -54,10 +55,6 @@ hdl_integer type_cast_engine::to_int(double in, uint64_t container_size) {
         intermediate = static_cast<int64_t>(rounded);
     }
 
-    if (container_size >= 64 || container_size == 0) {
-        return intermediate;
-    }
-
-    uint64_t shift_amount = 64 - container_size;
-    return (intermediate << shift_amount) >> shift_amount;
+    hdl_integer intermediate_val = static_cast<int64_t>(rounded);
+    return to_signed(intermediate_val, container_size);
 }

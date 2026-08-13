@@ -74,8 +74,9 @@ std::optional<resolved_parameter> Streaming::evaluate(const std::map<qualified_i
     int64_t shift = total_width;
     for (size_t i = 0; i < values.size(); i++) {
         shift -= widths[i];
-        hdl_integer masked = values[i] & ((widths[i] >= 64) ? ~0ULL : (1ULL << widths[i]) - 1);
-        P |= masked << shift;
+        hdl_integer mask = (hdl_integer(1) << hdl_integer(widths[i])) - 1;
+        auto masked = values[i] & mask;
+        P = P | (masked << hdl_integer(shift));
     }
 
     // Determine slice size (default 1).
@@ -97,13 +98,13 @@ std::optional<resolved_parameter> Streaming::evaluate(const std::map<qualified_i
         std::vector<int64_t> block_widths;
         for (int64_t off = 0; off < total_width; off += slice) {
             int64_t w = std::min<int64_t>(slice, total_width - off);
-            int64_t mask = (w >= 64) ? ~0ULL : (1ULL << w) - 1;
-            blocks.push_back((P >> off) & mask);
+            hdl_integer mask = (hdl_integer(1) << hdl_integer(w)) - 1;
+            blocks.push_back((P >> hdl_integer(off)) & mask);
             block_widths.push_back(w);
         }
         int64_t out_shift = 0;
         for (int64_t i = static_cast<int64_t>(blocks.size()) - 1; i >= 0; i--) {
-            result |= blocks[i] << out_shift;
+            result = result | (blocks[i] << hdl_integer(out_shift));
             out_shift += block_widths[i];
         }
     }

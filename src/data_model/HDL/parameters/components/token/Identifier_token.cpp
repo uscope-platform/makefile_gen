@@ -70,8 +70,11 @@ std::optional<resolved_parameter> Identifier_token::evaluate(
             if (array_val.has_value()) return resolved_parameter(array_val.value());
             return resolved_parameter("");
         } else if (resolved.is_integer() && !indices.empty()) {
-            std::bitset<64> bits(resolved.get_integer().get_value());
-            return static_cast<hdl_integer>(bits[indices[0]]);
+            int64_t bit = indices[0];
+            if (bit < 0 || bit >= 1024) return static_cast<hdl_integer>(0);
+            auto shifted = resolved.get_integer() >> hdl_integer(bit);
+            auto b = shifted & hdl_integer(1);
+            return b;
         }
         return std::nullopt;
     }

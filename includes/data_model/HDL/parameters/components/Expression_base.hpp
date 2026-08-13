@@ -56,20 +56,22 @@ public:
 
     hdl_integer pack_values(const std::vector<hdl_integer> &components, const std::vector<int64_t> &sizes) {
         hdl_integer packed_result = 0;
-        hdl_integer current_shift = 0;
+        int64_t current_shift = 0;
 
         for (size_t i = 0; i < components.size(); ++i) {
             int64_t size = sizes[i];
+            if (size < 0) continue;
 
-            hdl_integer mask = (size >= 64) ? ~0ULL : (1ULL << size) - 1;
+            // Build a size-bit all-ones mask as an hdl_integer: (1 << size) - 1.
+            hdl_integer mask = (hdl_integer(1) << hdl_integer(size)) - 1;
             auto masked_component = components[i] & mask;
 
-            packed_result |= masked_component << current_shift;
+            packed_result = packed_result | (masked_component << hdl_integer(current_shift));
 
             current_shift += size;
         }
 
-        return static_cast<hdl_integer>(packed_result);
+        return packed_result;
     }
 
 protected:

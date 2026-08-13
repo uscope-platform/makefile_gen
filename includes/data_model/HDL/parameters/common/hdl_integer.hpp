@@ -96,7 +96,9 @@ public:
     [[nodiscard]] int1024_t to_wide() const {
         if (std::holds_alternative<int1024_t>(content))
             return std::get<int1024_t>(content);
-        return int1024_t(std::get<int64_t>(content));
+        // Zero-extend the narrow value: treat its int64 bit pattern as unsigned,
+        // so a negative narrow value does not sign-extend into the high bits.
+        return int1024_t(static_cast<uint64_t>(std::get<int64_t>(content)));
     }
     [[nodiscard]] bool is_wide() const { return std::holds_alternative<int1024_t>(content); }
 

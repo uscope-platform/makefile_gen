@@ -2378,6 +2378,85 @@ TEST(parameter_extraction, wide_size_cast) {
     EXPECT_EQ(x.get_value(), static_cast<int64_t>(0xFEDCBA9876543210));
 }
 
+TEST(parameter_extraction, wide_packed_concatenation) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [63:0] HI = 64'hCAFEBABECAFEBABE;
+            parameter [63:0] LO = 64'hDEADBEEFDEADBEEF;
+            parameter [127:0] C = {HI, LO};
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    auto c = defaults.at(qualified_identifier("C")).get_integer();
+    EXPECT_EQ(c.to_wide(), int1024_t("0xCAFEBABECAFEBABEDEADBEEFDEADBEEF"));
+}
+
+TEST(parameter_extraction, wide_streaming_byte_reversal) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [127:0] V = 128'h0123456789ABCDEF0123456789ABCDEF;
+            parameter X = {<<8{V}};
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    auto x = defaults.at(qualified_identifier("X")).get_integer();
+    EXPECT_EQ(x.to_wide(), int1024_t("0xEFCDAB8967452301EFCDAB8967452301"));
+}
+
+TEST(parameter_extraction, wide_replication) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [63:0] V = 64'hDEADBEEFCAFEBABE;
+            parameter [127:0] R = {2{V}};
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    auto r = defaults.at(qualified_identifier("R")).get_integer();
+    EXPECT_EQ(r.to_wide(), int1024_t("0xDEADBEEFCAFEBABEDEADBEEFCAFEBABE"));
+}
+
+TEST(parameter_extraction, wide_bit_select) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [127:0] V = 128'h00000000000000020000000000000000;
+            parameter W = V;
+            parameter B65 = V[65];
+            parameter B64 = V[64];
+            parameter B63 = V[63];
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    auto w = defaults.at(qualified_identifier("W")).get_integer();
+    ASSERT_TRUE(w.is_wide());
+    EXPECT_EQ(w.to_wide(), int1024_t(1) << 65);
+    EXPECT_EQ(defaults.at(qualified_identifier("B65")).get_integer().get_value(), 1);
+    EXPECT_EQ(defaults.at(qualified_identifier("B64")).get_integer().get_value(), 0);
+    EXPECT_EQ(defaults.at(qualified_identifier("B63")).get_integer().get_value(), 0);
+}
+
+TEST(parameter_extraction, wide_logic_shift_right) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [127:0] V = 128'h10000000000000000000000000000000;
+            parameter X = V >> 64;
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    auto x = defaults.at(qualified_identifier("X")).get_integer();
+    EXPECT_EQ(x.to_wide(), int1024_t(0x1000000000000000));
+}
+
+
 
 TEST(parameter_extraction, streaming_byte_reversal) {
     auto test_pattern = R"(
@@ -2447,3 +2526,4 @@ TEST(parameter_extraction, streaming_slice_size_expression) {
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 0x11223344);
 }
+

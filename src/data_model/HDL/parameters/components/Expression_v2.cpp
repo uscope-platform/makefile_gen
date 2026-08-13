@@ -250,13 +250,15 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(reso
         result_d = 0;
     }else if(operation == logic_shift_right){
         if(int_exec) {
-            uint64_t u_a = static_cast<uint64_t>(i_a.get_value());
-            if(current_size > 0 && current_size < 64) {
-                u_a &= (1ULL << current_size) - 1;
+            uint64_t operand_size = i_a.get_size();
+            hdl_integer u_a = i_a;
+            if(operand_size > 0) {
+                hdl_integer mask = (hdl_integer(1) << hdl_integer(operand_size)) - 1;
+                u_a = i_a & mask;
             }
-            uint64_t shift = static_cast<uint64_t>(i_b.get_value());
-            if(shift >= 64) return hdl_integer(0);
-            return hdl_integer(static_cast<int64_t>(u_a >> shift));
+            int64_t shift = i_b.get_value();
+            if(shift < 0 || shift >= 1024) return hdl_integer(0);
+            return u_a >> hdl_integer(shift);
         }
         spdlog::warn("The shift operator is only defined between integers");
         return 0;
