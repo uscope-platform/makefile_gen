@@ -198,10 +198,10 @@ std::optional<int> ananke::build_flow() {
             data.synth_tl = dep.general.synth_tl;
             data.commons_dir = dep.general.include_paths;
             data.repo_dir = std::filesystem::current_path();
-            if (dep.general.target_part) {
-                data.target_part = dep.general.target_part.value();
-            } else if(dep.general.board){
+            if (dep.general.board) {
                 data.board_part = dep.general.board.value();
+            } else if(dep.general.target_part){
+                data.target_part = dep.general.target_part.value();
             } else {
                 return 76;
             }
