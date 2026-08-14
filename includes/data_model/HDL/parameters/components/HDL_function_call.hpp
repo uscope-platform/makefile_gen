@@ -43,6 +43,8 @@ public:
     std::optional<resolved_parameter> evaluate(const std::map<qualified_identifier, resolved_parameter> &context) override;
 
     std::optional<resolved_parameter> evaluate_system_task(const std::map<qualified_identifier, resolved_parameter> &context);
+    std::optional<resolved_type> resolve_expression_type(
+        const std::map<qualified_identifier, resolved_parameter> &context) const override;
     void apply_return_order_reversal(
         std::vector<hdl_integer> &values,
         std::vector<int64_t> &value_sizes,
@@ -72,6 +74,13 @@ private:
         std::map<int64_t, int64_t> &size_map,
         const std::shared_ptr<hdl_type> &rt
     );
+
+    std::optional<resolved_parameter> evaluate_type_query(
+        const std::map<qualified_identifier, resolved_parameter> &context, const std::string &task_name);
+    std::optional<resolved_parameter> evaluate_typename(
+        const std::map<qualified_identifier, resolved_parameter> &context);
+    std::optional<resolved_parameter> evaluate_signedness(
+        const std::map<qualified_identifier, resolved_parameter> &context, const std::string &task_name);
 
     std::string function_name;
     std::string package_prefix;

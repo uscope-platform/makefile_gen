@@ -27,12 +27,14 @@ Numeric_token::Numeric_token(const Numeric_token &c) {
     value = c.value;
     container_size = c.container_size;
     binary_size = c.binary_size;
+    sized_explicit = c.sized_explicit;
 }
 
 Numeric_token::Numeric_token(const std::string &s) {
-    auto [v, b] = process_number(s);
-    value = v;
-    binary_size = b;
+    auto r = process_number(s);
+    value = r.value;
+    binary_size = r.binary_size;
+    sized_explicit = r.sized_explicit;
 }
 
 Numeric_token::Numeric_token(std::variant<hdl_integer, double> n, int64_t b_s) {
@@ -42,6 +44,7 @@ Numeric_token::Numeric_token(std::variant<hdl_integer, double> n, int64_t b_s) {
         value = std::get<hdl_integer>(n);
     }
     binary_size = b_s;
+    sized_explicit = b_s >= 0;
 }
 
 std::optional<resolved_parameter> Numeric_token::evaluate(
@@ -67,6 +70,28 @@ bool operator==(const Numeric_token &lhs, const Numeric_token &rhs) {
     return ret_val;
 }
 
+std::optional<resolved_type> Numeric_token::resolve_expression_type(
+    const std::map<qualified_identifier, resolved_parameter> &context) const {
+    resolved_type result;
+    if (value.is_real()) {
+        result.is_real = true;
+        return result;
+    }
+    uint64_t width = 32;
+    if (sized_explicit && binary_size > 0) {
+        width = static_cast<uint64_t>(binary_size);
+    } else if (!sized_explicit) {
+        auto int_val = value.get_integer();
+        auto minimal = int_val.get_size();
+        if (minimal > 32) width = minimal;
+    }
+    result.packed_sizes.push_back(width);
+    result.packed_ascending.push_back(false);
+    result.packed_left.push_back(static_cast<int64_t>(width) - 1);
+    result.packed_right.push_back(0);
+    return result;
+}
+
 void Numeric_token::set_container_sizes(const resolved_type &s,
     const std::map<qualified_identifier, resolved_parameter> &context) {
     container_size = 1;
@@ -74,7 +99,10 @@ void Numeric_token::set_container_sizes(const resolved_type &s,
     for (auto &us : s.unpacked_sizes) container_size *= us;
 }
 
-std::pair<resolved_parameter, int64_t> Numeric_token::process_number(const std::string_view &s) {
+Numeric_token::numeric_parse_result Numeric_token::process_number(const std::string_view &s) {
+    numeric_parse_result result;
+    result.binary_size = 0;
+    result.sized_explicit = false;
     std::string_view raw_number = s;
     int explicit_size = -1;
     bool signed_number = false;
@@ -83,7 +111,9 @@ std::pair<resolved_parameter, int64_t> Numeric_token::process_number(const std::
     if (s.contains('.')) {
         double value;
         std::from_chars(s.data(), s.data() + s.size(), value);
-        return {value, 64};
+        result.value = value;
+        result.binary_size = 64;
+        return result;
     }
 
     if( s.starts_with("+") || negative_number) {
@@ -95,7 +125,8 @@ std::pair<resolved_parameter, int64_t> Numeric_token::process_number(const std::
     if (raw_number.contains('\'')) {
         raw_value = raw_number.substr(raw_number.find_first_of('\'')+1);
         auto size_str = raw_number.substr(0, raw_number.find_first_of('\''));
-        std::from_chars(size_str.data(), size_str.data() + size_str.size(), explicit_size, 10);
+        auto [ptr, ec] = std::from_chars(size_str.data(), size_str.data() + size_str.size(), explicit_size, 10);
+        if (ec == std::errc() && ptr != size_str.data()) result.sized_explicit = true;
     } else {
         raw_value = raw_number;
     }
@@ -129,24 +160,34 @@ std::pair<resolved_parameter, int64_t> Numeric_token::process_number(const std::
         int64_t value;
         auto [ptr, ec] = std::from_chars(purged_value.data(), purged_value.data() + purged_value.size(), value, base);
         if (ec == std::errc::result_out_of_range) {
-            return process_wide_integer(purged_value, base, signed_number);
+            auto [v, b] = process_wide_integer(purged_value, base, signed_number);
+            result.value = v;
+            result.binary_size = b;
+            return result;
         } else {
             hdl_integer ret(value);
             ret.set_signed(signed_number);
             if (explicit_size<0) explicit_size = ret.get_size();
-            return{ret, explicit_size};
+            result.value = ret;
+            result.binary_size = explicit_size;
+            return result;
         }
     } else {
         uint64_t value;
         auto [ptr, ec] = std::from_chars(purged_value.data(), purged_value.data() + purged_value.size(), value, base);
         if (ec == std::errc::result_out_of_range) {
-            return process_wide_integer(purged_value, base, signed_number);
+            auto [v, b] = process_wide_integer(purged_value, base, signed_number);
+            result.value = v;
+            result.binary_size = b;
+            return result;
         } else {
             hdl_integer ret;
             ret.set_value(value);
             ret.set_signed(signed_number);
             if (explicit_size<0) explicit_size = ret.get_size();
-            return{ret, explicit_size};
+            result.value = ret;
+            result.binary_size = explicit_size;
+            return result;
         }
     }
 }

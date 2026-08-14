@@ -61,6 +61,32 @@ std::optional<resolved_parameter> Ternary::evaluate(const std::map<qualified_ide
     }
 }
 
+std::optional<resolved_type> Ternary::resolve_expression_type(
+    const std::map<qualified_identifier, resolved_parameter> &context) const {
+    auto t_t = true_value ? true_value->resolve_expression_type(context) : std::nullopt;
+    auto f_t = false_value ? false_value->resolve_expression_type(context) : std::nullopt;
+
+    if (!t_t) return f_t;
+    if (!f_t) return t_t;
+    if (t_t->is_real || f_t->is_real) {
+        resolved_type result;
+        result.is_real = true;
+        result.packed_sizes.push_back(64);
+        result.packed_ascending.push_back(false);
+        result.packed_left.push_back(63);
+        result.packed_right.push_back(0);
+        return result;
+    }
+
+    auto width_of = [](const resolved_type &t) -> uint64_t {
+        uint64_t w = 1;
+        for (auto ps : t.packed_sizes) w *= ps;
+        return w;
+    };
+    if (width_of(*t_t) >= width_of(*f_t)) return t_t;
+    return f_t;
+}
+
 std::string Ternary::print() const {
     std::ostringstream oss;
     oss << condition->print();

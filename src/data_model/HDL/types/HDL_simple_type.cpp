@@ -56,6 +56,7 @@ parameter_deps_t HDL_simple_type::get_dependencies() {
 
 std::optional<resolved_type> HDL_simple_type::evaluate_type(const std::map<qualified_identifier, resolved_parameter> &context) {
     resolved_type result;
+    result.is_real = is_real;
     for (auto &dim: unpacked_dimensions) {
         auto f_b = dim.first_bound->evaluate(context);
         auto s_b = dim.second_bound->evaluate(context);
@@ -63,6 +64,8 @@ std::optional<resolved_type> HDL_simple_type::evaluate_type(const std::map<quali
         auto diff = std::abs(f_b.value().get_integer() - s_b.value().get_integer())+1;
         result.unpacked_sizes.push_back(diff.get_value());
         result.unpacked_ascending.push_back(f_b.value().get_integer() < s_b.value().get_integer());
+        result.unpacked_left.push_back(f_b.value().get_integer().get_value());
+        result.unpacked_right.push_back(s_b.value().get_integer().get_value());
     }
     for (auto &dim: packed_dimensions) {
         auto f_b = dim.first_bound->evaluate(context);
@@ -71,6 +74,8 @@ std::optional<resolved_type> HDL_simple_type::evaluate_type(const std::map<quali
         auto diff = std::abs(f_b.value().get_integer() - s_b.value().get_integer())+1;
         result.packed_sizes.push_back(diff.get_value());
         result.packed_ascending.push_back(f_b.value().get_integer() < s_b.value().get_integer());
+        result.packed_left.push_back(f_b.value().get_integer().get_value());
+        result.packed_right.push_back(s_b.value().get_integer().get_value());
     }
 
     return result;

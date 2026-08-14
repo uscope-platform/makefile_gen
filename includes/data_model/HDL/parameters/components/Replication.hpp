@@ -60,6 +60,8 @@ public:
 
 
     void set_container_sizes(const resolved_type &s, const std::map<qualified_identifier, resolved_parameter> &context = {}) override;
+    std::optional<resolved_type> resolve_expression_type(
+        const std::map<qualified_identifier, resolved_parameter> &context) const override;
 
     template<class Archive>
     void serialize( Archive & ar ) {

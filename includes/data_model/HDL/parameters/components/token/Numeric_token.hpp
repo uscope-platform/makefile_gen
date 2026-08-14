@@ -45,17 +45,27 @@ public:
 
 
     void set_binary_size(int64_t s) {binary_size = s;}
+    void set_sized_explicit(bool e) {sized_explicit = e;}
+    [[nodiscard]] bool is_sized_explicit() const {return sized_explicit;}
 
     void set_container_sizes(const resolved_type &s, const std::map<qualified_identifier, resolved_parameter> &context = {}) override;
+    std::optional<resolved_type> resolve_expression_type(
+        const std::map<qualified_identifier, resolved_parameter> &context) const override;
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(value, binary_size);
+        ar(value, binary_size, sized_explicit);
     }
 
 private:
 
-    static std::pair<resolved_parameter, int64_t> process_number(const std::string_view &s);
+    struct numeric_parse_result {
+        resolved_parameter value;
+        int64_t binary_size;
+        bool sized_explicit;
+    };
+
+    static numeric_parse_result process_number(const std::string_view &s);
     static std::pair<resolved_parameter, int64_t> process_wide_integer(const std::string_view &s, uint8_t base, bool signed_number);
 
 
@@ -66,6 +76,7 @@ private:
 
     int64_t binary_size = 0;
     int64_t container_size = 0;
+    bool sized_explicit = false;
 
 
 };

@@ -14,6 +14,7 @@
 //  limitations under the License.
 
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
+#include "data_model/HDL/types/hdl_type.hpp"
 
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/archives/binary.hpp>
@@ -100,6 +101,14 @@ bool operator==(const Identifier_token &lhs, const Identifier_token &rhs) {
 
 void Identifier_token::set_container_sizes(const resolved_type &s,
     const std::map<qualified_identifier, resolved_parameter> &context) {
+}
+
+std::optional<resolved_type> Identifier_token::resolve_expression_type(
+    const std::map<qualified_identifier, resolved_parameter> &context) const {
+    if (expression_type) {
+        return expression_type->evaluate_type(context);
+    }
+    return std::nullopt;
 }
 
 std::string Identifier_token::print_index(const std::vector<std::shared_ptr<Expression_base>> &index) const {

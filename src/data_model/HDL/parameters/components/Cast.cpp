@@ -129,6 +129,34 @@ void Cast::set_container_sizes(const resolved_type &s, const std::map<qualified_
     }
 }
 
+std::optional<resolved_type> Cast::resolve_expression_type(
+    const std::map<qualified_identifier, resolved_parameter> &context) const {
+    if (type_cast) {
+        if (container_size && (!container_size->packed_sizes.empty() || !container_size->unpacked_sizes.empty())) {
+            return container_size;
+        }
+        if (target_type == "real" || target_type == "shortreal" || target_type == "realtime") {
+            resolved_type result;
+            result.is_real = true;
+            return result;
+        }
+    }
+    if (size) {
+        auto cast_size = size->evaluate(context);
+        if (cast_size && cast_size->is_integer() && cast_size->get_integer().get_value() > 0) {
+            uint64_t w = static_cast<uint64_t>(cast_size->get_integer().get_value());
+            resolved_type result;
+            result.packed_sizes.push_back(w);
+            result.packed_ascending.push_back(false);
+            result.packed_left.push_back(static_cast<int64_t>(w) - 1);
+            result.packed_right.push_back(0);
+            return result;
+        }
+    }
+    if (content) return content->resolve_expression_type(context);
+    return std::nullopt;
+}
+
 
 bool Cast::isEqual(const Expression_base &other) const {
 

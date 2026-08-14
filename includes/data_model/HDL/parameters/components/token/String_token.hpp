@@ -34,6 +34,8 @@ public:
     std::string print() const override;
 
     void set_container_sizes(const resolved_type &s, const std::map<qualified_identifier, resolved_parameter> &context = {}) override {}
+    std::optional<resolved_type> resolve_expression_type(
+        const std::map<qualified_identifier, resolved_parameter> &context) const override;
 
     void set_value(const resolved_parameter &v) {value = v;}
     std::optional<resolved_parameter> get_value() const {return value;}

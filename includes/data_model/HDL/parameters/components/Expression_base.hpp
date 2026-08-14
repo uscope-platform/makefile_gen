@@ -40,6 +40,11 @@ public:
 
     virtual void set_container_sizes(const resolved_type &s, const std::map<qualified_identifier, resolved_parameter> &context = {}) = 0;
 
+    virtual std::optional<resolved_type> resolve_expression_type(
+        const std::map<qualified_identifier, resolved_parameter> &context) const {
+        return std::nullopt;
+    }
+
     template<typename T>
         T& as() { return static_cast<T&>(*this); }
 

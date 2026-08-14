@@ -133,6 +133,27 @@ void Streaming::set_container_sizes(const resolved_type &s,
     if (slice_size) slice_size->set_container_sizes(s, context);
 }
 
+std::optional<resolved_type> Streaming::resolve_expression_type(
+    const std::map<qualified_identifier, resolved_parameter> &context) const {
+    uint64_t total_bits = 0;
+    for (const auto &comp : components) {
+        auto comp_t = comp->resolve_expression_type(context);
+        if (!comp_t) return std::nullopt;
+        if (comp_t->is_real) {
+            resolved_type result;
+            result.is_real = true;
+            return result;
+        }
+        for (auto ps : comp_t->packed_sizes) total_bits += ps;
+    }
+    resolved_type result;
+    result.packed_sizes.push_back(total_bits);
+    result.packed_ascending.push_back(false);
+    result.packed_left.push_back(static_cast<int64_t>(total_bits) - 1);
+    result.packed_right.push_back(0);
+    return result;
+}
+
 bool operator==(const Streaming &lhs, const Streaming &rhs) {
     if (lhs.direction != rhs.direction) return false;
     if (lhs.components.size() != rhs.components.size()) return false;

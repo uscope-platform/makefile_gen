@@ -140,6 +140,69 @@ parameter_deps_t Expression_v2::get_dependencies() const {
     return deps;
 }
 
+std::optional<resolved_type> Expression_v2::resolve_expression_type(
+    const std::map<qualified_identifier, resolved_parameter> &context) const {
+    if (operation == none) {
+        if (lhs && !rhs) return lhs ? lhs->resolve_expression_type(context) : std::nullopt;
+        return std::nullopt;
+    }
+
+    auto lhs_t = lhs ? lhs->resolve_expression_type(context) : std::nullopt;
+    auto rhs_t = rhs ? rhs->resolve_expression_type(context) : std::nullopt;
+
+    auto width_of = [](const std::optional<resolved_type> &t) -> uint64_t {
+        if (!t) return 0;
+        uint64_t w = 1;
+        for (auto ps : t->packed_sizes) w *= ps;
+        return w;
+    };
+
+    if ((lhs_t && lhs_t->is_real) || (rhs_t && rhs_t->is_real)) {
+        resolved_type result;
+        result.is_real = true;
+        result.packed_sizes.push_back(64);
+        result.packed_ascending.push_back(false);
+        result.packed_left.push_back(63);
+        result.packed_right.push_back(0);
+        return result;
+    }
+
+    uint64_t w_a = width_of(lhs_t);
+    uint64_t w_b = width_of(rhs_t);
+
+    uint64_t width = std::max(w_a, w_b);
+    switch (operation) {
+        case logic_neg:
+        case reduction_and: case reduction_nand:
+        case reduction_or: case reduction_nor:
+        case reduction_xor: case reduction_xnor:
+        case greater: case greater_equal: case less: case less_equal:
+        case equal: case not_equal:
+        case logical_and: case logical_or:
+            width = 1;
+            break;
+        case bitwise_neg:
+            width = w_a;
+            break;
+        case logic_shift_left: case logic_shift_right:
+        case arithmetic_shift_left: case arithmetic_shift_right:
+        case power:
+            width = w_a;
+            break;
+        default:
+            width = std::max(w_a, w_b);
+            break;
+    }
+    if (width == 0) width = 32;
+
+    resolved_type result;
+    result.packed_sizes.push_back(width);
+    result.packed_ascending.push_back(false);
+    result.packed_left.push_back(static_cast<int64_t>(width) - 1);
+    result.packed_right.push_back(0);
+    return result;
+}
+
 std::optional<resolved_parameter> Expression_v2::evaluate(
     const std::map<qualified_identifier, resolved_parameter> &context) {
     std::optional<resolved_parameter> r_val, l_val;

@@ -15,9 +15,13 @@
 
 #include "data_model/HDL/parameters/components/HDL_function_call.hpp"
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
+#include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
 #include "data_model/HDL/parameters/components/Replication.hpp"
 #include "data_model/HDL/types/HDL_struct_type.hpp"
 #include "data_model/HDL/types/HDL_simple_type.hpp"
+#include "data_model/HDL/types/HDL_external_type.hpp"
+#include "data_model/HDL/types/HDL_enum_type.hpp"
+#include "data_model/HDL/types/HDL_union_type.hpp"
 #include "analysis/type_cast_engine.hpp"
 
 #include "analysis/loop_solver.hpp"
@@ -199,6 +203,18 @@ void HDL_function_call::apply_return_order_reversal(
 
 std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const std::map<qualified_identifier, resolved_parameter> &context) {
     std::string task_name = function_name.substr(1, function_name.size()-1);
+
+    if (task_name == "bits" || task_name == "size" || task_name == "left" || task_name == "right" ||
+        task_name == "high" || task_name == "low" || task_name == "dimensions" || task_name == "unpacked_dimensions") {
+        return evaluate_type_query(context, task_name);
+    }
+    if (task_name == "typename") {
+        return evaluate_typename(context);
+    }
+    if (task_name == "signed" || task_name == "unsigned") {
+        return evaluate_signedness(context, task_name);
+    }
+
     std::vector<resolved_parameter> resolved_arguments;
     for (auto &arg:arguments) {
         auto resolved_val = arg->evaluate(context);
@@ -423,113 +439,6 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
     if (task_name == "isunknown") {
         return 0;
     }
-    if (task_name == "typename") {
-        if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
-            auto t = arguments[0]->as<Identifier_token>().get_expression_type();
-            if (t && t->is<HDL_simple_type>())
-                return resolved_parameter(t->as<HDL_simple_type>().get_type_name());
-            if (t && t->is<HDL_struct_type>())
-                return resolved_parameter("struct");
-        }
-        spdlog::warn("$typename argument is not a typed identifier, defaulting to empty");
-        return resolved_parameter("");
-    }
-    if (task_name == "bits") {
-        if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
-            auto t = arguments[0]->as<Identifier_token>().get_expression_type();
-            if (t) {
-                auto rt = t->evaluate_type(context);
-                if (rt) {
-                    uint64_t bits = rt->packed_sizes.empty() ? 0 : rt->packed_sizes[0];
-                    for (size_t i = 1; i < rt->packed_sizes.size(); i++) bits *= rt->packed_sizes[i];
-                    return static_cast<hdl_integer>(bits == 0 ? 1 : bits);
-                }
-            }
-        }
-        spdlog::warn("$bits argument is not a typed identifier, defaulting to 0");
-        return 0;
-    }
-    if (task_name == "size") {
-        int dim = 1;
-        if (resolved_arguments.size() >= 2 && resolved_arguments[1].is_integer()) {
-            dim = static_cast<int>(resolved_arguments[1].get_integer().get_value());
-        }
-        if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
-            auto t = arguments[0]->as<Identifier_token>().get_expression_type();
-            if (t) {
-                auto rt = t->evaluate_type(context);
-                if (rt && dim >= 1 && static_cast<size_t>(dim) <= rt->unpacked_sizes.size()) {
-                    return static_cast<hdl_integer>(rt->unpacked_sizes[dim - 1]);
-                }
-            }
-        }
-        spdlog::warn("$size argument is not a typed identifier, defaulting to 0");
-        return 0;
-    }
-    if (task_name == "dimensions") {
-        if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
-            auto t = arguments[0]->as<Identifier_token>().get_expression_type();
-            if (t) {
-                auto rt = t->evaluate_type(context);
-                if (rt) return static_cast<hdl_integer>(rt->packed_sizes.size() + rt->unpacked_sizes.size());
-            }
-        }
-        spdlog::warn("$dimensions argument is not a typed identifier, defaulting to 0");
-        return 0;
-    }
-    if (task_name == "unpacked_dimensions") {
-        if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
-            auto t = arguments[0]->as<Identifier_token>().get_expression_type();
-            if (t) {
-                auto rt = t->evaluate_type(context);
-                if (rt) return static_cast<hdl_integer>(rt->unpacked_sizes.size());
-            }
-        }
-        spdlog::warn("$unpacked_dimensions argument is not a typed identifier, defaulting to 0");
-        return 0;
-    }
-    if (task_name == "left" || task_name == "right" || task_name == "high" || task_name == "low") {
-        int dim = 1;
-        if (resolved_arguments.size() >= 2 && resolved_arguments[1].is_integer()) {
-            dim = static_cast<int>(resolved_arguments[1].get_integer().get_value());
-        }
-        if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
-            auto t = arguments[0]->as<Identifier_token>().get_expression_type();
-            if (t && t->is<HDL_simple_type>()) {
-                auto udims = t->as<HDL_simple_type>().get_unpacked_dimensions();
-                if (dim >= 1 && static_cast<size_t>(dim) <= udims.size()) {
-                    auto lb = udims[dim - 1].first_bound->evaluate(context);
-                    auto rb = udims[dim - 1].second_bound->evaluate(context);
-                    if (lb && rb && lb->is_integer() && rb->is_integer()) {
-                        int64_t l = lb->get_integer().get_value();
-                        int64_t r = rb->get_integer().get_value();
-                        if (task_name == "left") return static_cast<hdl_integer>(l);
-                        if (task_name == "right") return static_cast<hdl_integer>(r);
-                        if (task_name == "high") return static_cast<hdl_integer>(std::max(l, r));
-                        return static_cast<hdl_integer>(std::min(l, r));
-                    }
-                }
-            }
-        }
-        spdlog::warn("${} argument is not a typed identifier, defaulting to 0", task_name);
-        return 0;
-    }
-    if (task_name == "signed" || task_name == "unsigned") {
-        if (resolved_arguments[0].is_integer()) {
-            uint64_t container = 64;
-            if (!arguments.empty() && arguments[0]->is<Identifier_token>()) {
-                auto t = arguments[0]->as<Identifier_token>().get_expression_type();
-                if (t) {
-                    auto rt = t->evaluate_type(context);
-                    if (rt && !rt->packed_sizes.empty()) container = rt->packed_sizes[0];
-                }
-            }
-            if (task_name == "signed") return type_cast_engine::to_signed(resolved_arguments[0].get_integer(), container);
-            return type_cast_engine::to_unsigned(resolved_arguments[0].get_integer(), container);
-        }
-        spdlog::warn("Encountered an invalid argument for a ${} call", task_name);
-        return 0;
-    }
     if (task_name == "clog2") {
         if (resolved_arguments[0].is_real()) {
             return static_cast<hdl_integer>(std::ceil(std::log2(resolved_arguments[0].get_real())));
@@ -545,6 +454,210 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
     }
     spdlog::warn("Unsupported system task {} encountered while parsing a parameter", function_name);
     return 0;
+}
+
+namespace {
+
+struct type_dimension {
+    uint64_t size;
+    int64_t left;
+    int64_t right;
+};
+
+std::optional<resolved_type> resolve_argument_type(
+    const std::shared_ptr<Expression_base> &arg,
+    const std::map<qualified_identifier, resolved_parameter> &context
+) {
+    if (!arg) return std::nullopt;
+    auto type = arg->resolve_expression_type(context);
+    if (type) return type;
+
+    auto val = arg->evaluate(context);
+    if (!val) return std::nullopt;
+    if (val->is_real()) {
+        resolved_type result;
+        result.is_real = true;
+        return result;
+    }
+    if (val->is_integer()) {
+        resolved_type result;
+        auto width = val->get_integer().get_size();
+        if (width == 0) width = 32;
+        result.packed_sizes.push_back(width);
+        result.packed_ascending.push_back(false);
+        result.packed_left.push_back(static_cast<int64_t>(width) - 1);
+        result.packed_right.push_back(0);
+        return result;
+    }
+    return std::nullopt;
+}
+
+std::vector<type_dimension> collect_dimensions(const resolved_type &t) {
+    std::vector<type_dimension> dims;
+    for (size_t i = 0; i < t.unpacked_sizes.size(); i++) {
+        bool asc = i < t.unpacked_ascending.size() ? t.unpacked_ascending[i] : false;
+        int64_t left = i < t.unpacked_left.size()
+            ? t.unpacked_left[i]
+            : (asc ? 0 : static_cast<int64_t>(t.unpacked_sizes[i]) - 1);
+        int64_t right = i < t.unpacked_right.size()
+            ? t.unpacked_right[i]
+            : (asc ? static_cast<int64_t>(t.unpacked_sizes[i]) - 1 : 0);
+        dims.push_back({t.unpacked_sizes[i], left, right});
+    }
+    for (size_t i = 0; i < t.packed_sizes.size(); i++) {
+        bool asc = i < t.packed_ascending.size() ? t.packed_ascending[i] : false;
+        int64_t left = i < t.packed_left.size()
+            ? t.packed_left[i]
+            : (asc ? 0 : static_cast<int64_t>(t.packed_sizes[i]) - 1);
+        int64_t right = i < t.packed_right.size()
+            ? t.packed_right[i]
+            : (asc ? static_cast<int64_t>(t.packed_sizes[i]) - 1 : 0);
+        dims.push_back({t.packed_sizes[i], left, right});
+    }
+    return dims;
+}
+
+} // namespace
+
+std::optional<resolved_parameter> HDL_function_call::evaluate_type_query(
+    const std::map<qualified_identifier, resolved_parameter> &context, const std::string &task_name) {
+    if (arguments.empty()) {
+        spdlog::warn("${} requires at least one argument", task_name);
+        return std::nullopt;
+    }
+
+    int dim = 1;
+    if (arguments.size() >= 2) {
+        auto dim_val = arguments[1]->evaluate(context);
+        if (dim_val && dim_val->is_integer()) dim = dim_val->get_integer().get_value();
+    }
+
+    auto type = resolve_argument_type(arguments[0], context);
+
+    if (task_name == "bits") {
+        if (!type) {
+            spdlog::warn("$bits argument type could not be resolved, defaulting to 0");
+            return 0;
+        }
+        if (type->is_real) return static_cast<hdl_integer>(64);
+        uint64_t bits = 1;
+        bool any = false;
+        for (auto s : type->packed_sizes) { bits *= s; any = true; }
+        for (auto s : type->unpacked_sizes) { bits *= s; any = true; }
+        if (!any) {
+            spdlog::warn("$bits argument is of unsupported type, defaulting to 0");
+            return 0;
+        }
+        return static_cast<hdl_integer>(bits);
+    }
+
+    if (task_name == "dimensions" || task_name == "unpacked_dimensions") {
+        if (!type) {
+            spdlog::warn("${} argument type could not be resolved, defaulting to 0", task_name);
+            return 0;
+        }
+        if (type->is_real) return static_cast<hdl_integer>(0);
+        if (task_name == "dimensions")
+            return static_cast<hdl_integer>(type->packed_sizes.size() + type->unpacked_sizes.size());
+        return static_cast<hdl_integer>(type->unpacked_sizes.size());
+    }
+
+    if (!type) {
+        spdlog::warn("${} argument type could not be resolved, defaulting to 0", task_name);
+        return 0;
+    }
+    if (type->is_real) {
+        spdlog::warn("${} is not defined for real arguments, defaulting to 0", task_name);
+        return 0;
+    }
+    auto dims = collect_dimensions(*type);
+    if (dim < 1 || static_cast<size_t>(dim) > dims.size()) {
+        spdlog::warn("${} dimension {} is out of range, defaulting to 0", task_name, dim);
+        return 0;
+    }
+    const auto &d = dims[dim - 1];
+    if (task_name == "size") return static_cast<hdl_integer>(d.size);
+    if (task_name == "left") return static_cast<hdl_integer>(d.left);
+    if (task_name == "right") return static_cast<hdl_integer>(d.right);
+    if (task_name == "high") return static_cast<hdl_integer>(std::max(d.left, d.right));
+    return static_cast<hdl_integer>(std::min(d.left, d.right));
+}
+
+std::optional<resolved_parameter> HDL_function_call::evaluate_typename(
+    const std::map<qualified_identifier, resolved_parameter> &context) {
+    if (arguments.empty()) {
+        spdlog::warn("$typename requires at least one argument");
+        return resolved_parameter("");
+    }
+    auto &arg = arguments[0];
+    if (arg->is<Identifier_token>()) {
+        auto t = arg->as<Identifier_token>().get_expression_type();
+        if (t) {
+            if (t->is<HDL_simple_type>())
+                return resolved_parameter(t->as<HDL_simple_type>().get_type_name());
+            if (t->is<HDL_struct_type>()) return resolved_parameter("struct");
+            if (t->is<HDL_union_type>()) return resolved_parameter("union");
+            if (t->is<HDL_enum_type>()) return resolved_parameter("enum");
+            if (t->is<HDL_external_type>()) return resolved_parameter(t->as<HDL_external_type>().to_print());
+        }
+    }
+    auto type = resolve_argument_type(arg, context);
+    if (type) {
+        if (type->is_real) return resolved_parameter("real");
+        if (!type->packed_sizes.empty() || !type->unpacked_sizes.empty()) return resolved_parameter("logic");
+    }
+    auto val = arg->evaluate(context);
+    if (val) {
+        if (val->is_real()) return resolved_parameter("real");
+        if (val->is_string()) return resolved_parameter("string");
+        if (val->is_integer()) return resolved_parameter("integer");
+    }
+    spdlog::warn("$typename argument type could not be determined, defaulting to empty");
+    return resolved_parameter("");
+}
+
+std::optional<resolved_parameter> HDL_function_call::evaluate_signedness(
+    const std::map<qualified_identifier, resolved_parameter> &context, const std::string &task_name) {
+    if (arguments.empty()) {
+        spdlog::warn("${} requires at least one argument", task_name);
+        return 0;
+    }
+    auto &arg = arguments[0];
+    auto val = arg->evaluate(context);
+    if (!val || !val->is_integer()) {
+        spdlog::warn("Encountered an invalid argument for a ${} call", task_name);
+        return 0;
+    }
+
+    uint64_t container = 32;
+    auto type = arg->resolve_expression_type(context);
+    if (type) {
+        uint64_t width = 1;
+        for (auto ps : type->packed_sizes) width *= ps;
+        if (width > 0) container = width;
+    } else if (arg->is<Numeric_token>()) {
+        auto &num = arg->as<Numeric_token>();
+        if (num.is_sized_explicit() && num.get_size() > 0) container = static_cast<uint64_t>(num.get_size());
+    }
+
+    if (task_name == "signed") return type_cast_engine::to_signed(val->get_integer(), container);
+    return type_cast_engine::to_unsigned(val->get_integer(), container);
+}
+
+std::optional<resolved_type> HDL_function_call::resolve_expression_type(
+    const std::map<qualified_identifier, resolved_parameter> &context) const {
+    if (function_name.starts_with("$")) {
+        if ((function_name == "$signed" || function_name == "$unsigned") && !arguments.empty()) {
+            return arguments[0]->resolve_expression_type(context);
+        }
+        if (function_name == "$bits") {
+            return resolve_argument_type(arguments[0], context);
+        }
+    }
+    if (return_type) {
+        return return_type->evaluate_type(context);
+    }
+    return std::nullopt;
 }
 
 void HDL_function_call::set_container_sizes(const resolved_type &s, const std::map<qualified_identifier, resolved_parameter> &context) {

@@ -33,6 +33,20 @@ std::optional<resolved_parameter> String_token::evaluate(
     return value;
 }
 
+std::optional<resolved_type> String_token::resolve_expression_type(
+    const std::map<qualified_identifier, resolved_parameter> &context) const {
+    if (value.is_string()) {
+        resolved_type result;
+        auto width = value.get_string().size() * 8;
+        result.packed_sizes.push_back(width);
+        result.packed_ascending.push_back(false);
+        result.packed_left.push_back(static_cast<int64_t>(width) - 1);
+        result.packed_right.push_back(0);
+        return result;
+    }
+    return std::nullopt;
+}
+
 std::string String_token::print() const {
     if (value.is_string())
         return "\"" + value.get_string() + "\"";

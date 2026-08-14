@@ -211,6 +211,54 @@ void Concatenation::set_container_sizes(const resolved_type &s, const std::map<q
 
 }
 
+std::optional<resolved_type> Concatenation::resolve_expression_type(
+    const std::map<qualified_identifier, resolved_parameter> &context) const {
+    resolved_type result;
+    uint64_t total_bits = 0;
+    bool all_real = true;
+    for (const auto &comp : components) {
+        auto comp_t = comp->resolve_expression_type(context);
+        if (!comp_t) return std::nullopt;
+        if (!comp_t->is_real) all_real = false;
+        for (auto ps : comp_t->packed_sizes) total_bits += ps;
+    }
+    if (all_real && !components.empty()) {
+        result.is_real = true;
+        return result;
+    }
+    if (packing || unpacked_dimension.empty()) {
+        result.packed_sizes.push_back(total_bits);
+        result.packed_ascending.push_back(false);
+        result.packed_left.push_back(static_cast<int64_t>(total_bits) - 1);
+        result.packed_right.push_back(0);
+        return result;
+    }
+    if (!unpacked_dimension.empty()) {
+        result.unpacked_sizes = unpacked_dimension;
+        result.unpacked_ascending = unpacked_ascending;
+        result.unpacked_left.clear();
+        result.unpacked_right.clear();
+        for (size_t i = 0; i < unpacked_dimension.size(); i++) {
+            bool asc = i < unpacked_ascending.size() ? unpacked_ascending[i] : false;
+            int64_t sz = static_cast<int64_t>(unpacked_dimension[i]);
+            result.unpacked_left.push_back(asc ? 0 : sz - 1);
+            result.unpacked_right.push_back(asc ? sz - 1 : 0);
+        }
+    } else {
+        result.unpacked_sizes.push_back(components.size());
+        result.unpacked_ascending.push_back(true);
+        result.unpacked_left.push_back(0);
+        result.unpacked_right.push_back(static_cast<int64_t>(components.size()) - 1);
+    }
+    if (total_bits > 0) {
+        result.packed_sizes.push_back(total_bits);
+        result.packed_ascending.push_back(false);
+        result.packed_left.push_back(static_cast<int64_t>(total_bits) - 1);
+        result.packed_right.push_back(0);
+    }
+    return result;
+}
+
 void Concatenation::process_struct_size(
     const std::vector<struct_member_resolved_type> &members,
     uint64_t size,

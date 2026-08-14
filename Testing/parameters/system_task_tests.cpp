@@ -652,3 +652,204 @@ TEST(system_task, ln_domain_guard) {
     EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 0);
 }
 
+TEST(system_task, bits_literal) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam A = $bits(8'hFF);
+            localparam B = $bits(1'b1);
+            localparam C = $bits(42);
+            localparam D = $bits('h3F);
+            localparam E = $bits(1.0);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 8);
+    EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 1);
+    EXPECT_EQ(defaults.at(qualified_identifier("C")).get_integer(), 32);
+    EXPECT_EQ(defaults.at(qualified_identifier("D")).get_integer(), 32);
+    EXPECT_EQ(defaults.at(qualified_identifier("E")).get_integer(), 64);
+}
+
+TEST(system_task, bits_expression) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam A = $bits(8'hFF + 1'b1);
+            localparam B = $bits(16'(42));
+            localparam C = $bits({8'hFF, 8'h00});
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 8);
+    EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 16);
+    EXPECT_EQ(defaults.at(qualified_identifier("C")).get_integer(), 16);
+}
+
+TEST(system_task, bits_type) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam A = $bits(bit [7:0]);
+            localparam B = $bits(int);
+            localparam C = $bits(bit [7:0][3:0]);
+            localparam D = $bits(shortint);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 8);
+    EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 32);
+    EXPECT_EQ(defaults.at(qualified_identifier("C")).get_integer(), 32);
+    EXPECT_EQ(defaults.at(qualified_identifier("D")).get_integer(), 16);
+}
+
+TEST(system_task, bits_unpacked_array) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [7:0] arr [3:0] = '{4{8'hFF}};
+            parameter B = $bits(arr);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 32);
+}
+
+TEST(system_task, size_packed_only) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [31:0] V = 0;
+            parameter S = $size(V);
+            parameter L = $left(V);
+            parameter R = $right(V);
+            parameter H = $high(V);
+            parameter L2 = $low(V);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), 32);
+    EXPECT_EQ(defaults.at(qualified_identifier("L")).get_integer(), 31);
+    EXPECT_EQ(defaults.at(qualified_identifier("R")).get_integer(), 0);
+    EXPECT_EQ(defaults.at(qualified_identifier("H")).get_integer(), 31);
+    EXPECT_EQ(defaults.at(qualified_identifier("L2")).get_integer(), 0);
+}
+
+TEST(system_task, packed_dim_numbering) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [7:0][3:0] V = 0;
+            localparam L1 = $left(V, 1);
+            localparam R1 = $right(V, 1);
+            localparam S1 = $size(V, 1);
+            localparam L2 = $left(V, 2);
+            localparam S2 = $size(V, 2);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("L1")).get_integer(), 7);
+    EXPECT_EQ(defaults.at(qualified_identifier("R1")).get_integer(), 0);
+    EXPECT_EQ(defaults.at(qualified_identifier("S1")).get_integer(), 8);
+    EXPECT_EQ(defaults.at(qualified_identifier("L2")).get_integer(), 3);
+    EXPECT_EQ(defaults.at(qualified_identifier("S2")).get_integer(), 4);
+}
+
+TEST(system_task, size_packed_dim_after_unpacked) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [7:0] arr [3:0] = '{4{8'hFF}};
+            parameter S1 = $size(arr, 1);
+            parameter S2 = $size(arr, 2);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("S1")).get_integer(), 4);
+    EXPECT_EQ(defaults.at(qualified_identifier("S2")).get_integer(), 8);
+}
+
+TEST(system_task, size_literal) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam S = $size(8'hFF);
+            localparam D = $dimensions(8'hFF);
+            localparam UD = $unpacked_dimensions(8'hFF);
+            localparam DR = $dimensions(1.0);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), 8);
+    EXPECT_EQ(defaults.at(qualified_identifier("D")).get_integer(), 1);
+    EXPECT_EQ(defaults.at(qualified_identifier("UD")).get_integer(), 0);
+    EXPECT_EQ(defaults.at(qualified_identifier("DR")).get_integer(), 0);
+}
+
+TEST(system_task, signed_unsigned_literals) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam S = $signed(8'hFF);
+            localparam U = $unsigned(8'hFF);
+            localparam S2 = $signed(42);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), -1);
+    EXPECT_EQ(defaults.at(qualified_identifier("U")).get_integer(), 255);
+    EXPECT_EQ(defaults.at(qualified_identifier("S2")).get_integer(), 42);
+}
+
+TEST(system_task, type_queries_on_type) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam S = $size(bit [7:0]);
+            localparam L = $left(bit [7:0]);
+            localparam R = $right(bit [7:0]);
+            localparam D = $dimensions(bit [7:0]);
+            localparam UD = $unpacked_dimensions(bit [7:0]);
+            localparam S2 = $size(bit [7:0][3:0], 2);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), 8);
+    EXPECT_EQ(defaults.at(qualified_identifier("L")).get_integer(), 7);
+    EXPECT_EQ(defaults.at(qualified_identifier("R")).get_integer(), 0);
+    EXPECT_EQ(defaults.at(qualified_identifier("D")).get_integer(), 1);
+    EXPECT_EQ(defaults.at(qualified_identifier("UD")).get_integer(), 0);
+    EXPECT_EQ(defaults.at(qualified_identifier("S2")).get_integer(), 4);
+}
+
+TEST(system_task, type_queries_expression) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter [7:0] A = 8'h1;
+            localparam B = $bits(A + 1'b1);
+            localparam S = $size(A + 1'b1);
+            localparam L = $left(A + 1'b1);
+            localparam R = $right(A + 1'b1);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 8);
+    EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), 8);
+    EXPECT_EQ(defaults.at(qualified_identifier("L")).get_integer(), 7);
+    EXPECT_EQ(defaults.at(qualified_identifier("R")).get_integer(), 0);
+}
+
+
+

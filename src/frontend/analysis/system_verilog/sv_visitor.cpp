@@ -36,7 +36,7 @@ void sv_visitor::route_expression_text(const std::string& text) {
     }
     if(type_engine.active() || type_engine.is_ranging()){
         type_engine.add_component(sv_parsing_helpers::make_value(text));
-    } else if(!in_streaming_slice && params_factory.is_component_relevant()){
+    } else if(!in_streaming_slice && !in_type_argument && params_factory.is_component_relevant()){
         params_factory.add_component(sv_parsing_helpers::make_value(text));
     }
     if (f_factory.is_active()) {
@@ -70,7 +70,7 @@ void sv_visitor::route_expression_component(const std::shared_ptr<Expression_bas
     if(type_engine.active() || type_engine.is_ranging()){
         type_engine.add_component(routed ? clone(ec) : ec);
         routed = true;
-    } else if(!in_streaming_slice && params_factory.is_component_relevant()){
+    } else if(!in_streaming_slice && !in_type_argument && params_factory.is_component_relevant()){
         params_factory.add_component(routed ? clone(ec) : ec);
         routed = true;
     }
@@ -199,6 +199,52 @@ std::shared_ptr<hdl_type> sv_visitor::resolve_data_type(sv2017::Data_typeContext
         return nullptr;
     }
     return std::make_shared<HDL_simple_type>();
+}
+
+std::shared_ptr<Expression_base> sv_visitor::build_data_type_expression(sv2017::Data_typeContext *dt) {
+    auto base = resolve_data_type(dt);
+    if (!base) {
+        if (dt->package_or_class_scoped_path()) {
+            auto pkg_ctx = dt->package_or_class_scoped_path();
+            if (!pkg_ctx->DOUBLE_COLON().empty()) {
+                auto qi = sv_parsing_helpers::parse_qualified_identifier(pkg_ctx);
+                return std::make_shared<Identifier_token>(qi);
+            }
+            return std::make_shared<Identifier_token>(qualified_identifier(pkg_ctx->getText()));
+        }
+        return std::make_shared<Identifier_token>(qualified_identifier(dt->getText()));
+    }
+
+    // Preserve the original identifier when the data type is a named type reference
+    // (e.g. a typedef or a type parameter), so dependency tracking and override
+    // re-resolution keep working on the identifier itself.
+    std::string name = "<data_type>";
+    if (dt->package_or_class_scoped_path() && !dt->package_or_class_scoped_path()->DOUBLE_COLON().empty()) {
+        auto qi = sv_parsing_helpers::parse_qualified_identifier(dt->package_or_class_scoped_path());
+        name = qi.print();
+    } else if (dt->package_or_class_scoped_path()) {
+        name = dt->package_or_class_scoped_path()->getText();
+    }
+    auto id_token = std::make_shared<Identifier_token>(qualified_identifier(name));
+
+    if (base->is<HDL_simple_type>()) {
+        auto simple = base->as<HDL_simple_type>();
+        std::vector<dimension_t> packed_dims;
+        for (auto *vd : dt->variable_dimension()) {
+            if (!vd || !vd->array_range_expression()) continue;
+            auto re = vd->array_range_expression();
+            dimension_t d;
+            d.packed = true;
+            auto exprs = re->expression();
+            d.first_bound = sv_parsing_helpers::make_value(exprs[0]->getText());
+            d.second_bound = exprs.size() > 1 ? sv_parsing_helpers::make_value(exprs[1]->getText()) : d.first_bound;
+            packed_dims.push_back(d);
+        }
+        if (!packed_dims.empty()) simple.set_packed_dimensions(packed_dims);
+        base = std::make_shared<HDL_simple_type>(simple);
+    }
+    id_token->set_expression_type(base);
+    return id_token;
 }
 
 void sv_visitor::enterData_declaration(sv2017::Data_declarationContext *ctx) {
@@ -399,13 +445,13 @@ void sv_visitor::enterPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
                     params_factory.add_component(ec);
                 }
             } else{
-                auto text = ctx->data_type()->getText();
+                in_type_argument = true;
+                auto ec = build_data_type_expression(ctx->data_type());
                 if (f_factory.is_active()) {
-                    f_factory.add_component(sv_parsing_helpers::make_value(text));
+                    f_factory.add_component(ec);
                 } else {
-                    params_factory.add_component(sv_parsing_helpers::make_value(text), true);
+                    params_factory.add_component(ec, true);
                 }
-
             }
 
         }
@@ -493,8 +539,15 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
         }
     }
     if(params_factory.is_component_relevant()) {
+        in_type_argument = false;
         params_factory.stop_function_call();
     }
+}
+
+void sv_visitor::enterList_of_arguments(sv2017::List_of_argumentsContext *ctx) {
+    // The data_type portion of a system-task call is over once the real
+    // argument list starts; stop suppressing expression routing there.
+    in_type_argument = false;
 }
 
 void sv_visitor::enterPackage_declaration(sv2017::Package_declarationContext *ctx) {
@@ -643,7 +696,7 @@ void sv_visitor::enterExpression(sv2017::ExpressionContext *ctx) {
     }
     if(type_engine.active() || type_engine.is_ranging()){
         type_engine.start_expression();
-    } else if(!in_streaming_slice && (params_factory.is_component_relevant()|| params_factory.is_param_assignment() || params_factory.is_param_override())) {
+    } else if(!in_streaming_slice && !in_type_argument && (params_factory.is_component_relevant()|| params_factory.is_param_assignment() || params_factory.is_param_override())) {
         if (auto primary = dynamic_cast<sv2017::PrimaryAssigContext*>(ctx->primary())) {
             if (primary->assignment_pattern_expression()) return;
         }
@@ -665,7 +718,7 @@ void sv_visitor::exitExpression(sv2017::ExpressionContext *ctx) {
     }
     if (type_engine.active() || type_engine.is_ranging()) {
         type_engine.stop_expression();
-    } else if(!in_streaming_slice && (params_factory.is_component_relevant() || params_factory.is_param_assignment() || params_factory.is_param_override())) {
+    } else if(!in_streaming_slice && !in_type_argument && (params_factory.is_component_relevant() || params_factory.is_param_assignment() || params_factory.is_param_override())) {
         if (auto primary = dynamic_cast<sv2017::PrimaryAssigContext*>(ctx->primary())) {
             if (primary->assignment_pattern_expression()) return;
         }

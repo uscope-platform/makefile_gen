@@ -121,6 +121,8 @@ public:
     friend bool operator==(const Expression_v2 &lhs, const Expression_v2 &rhs);
     std::string print() const override;
     void set_container_sizes(const resolved_type &s, const std::map<qualified_identifier, resolved_parameter> &context = {}) override;
+    std::optional<resolved_type> resolve_expression_type(
+        const std::map<qualified_identifier, resolved_parameter> &context) const override;
     std::optional<resolved_parameter> evaluate(const std::map<qualified_identifier, resolved_parameter> &context) override;
     parameter_deps_t get_dependencies()const override;
     void propagate_expression(const qualified_identifier &constant_id, const std::shared_ptr<Expression_base> &value) override;

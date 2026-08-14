@@ -30,10 +30,15 @@ struct struct_member_resolved_type {
 struct resolved_type {
     std::vector<uint64_t> unpacked_sizes;
     std::vector<bool> unpacked_ascending;
+    std::vector<int64_t> unpacked_left;
+    std::vector<int64_t> unpacked_right;
     std::vector<uint64_t> packed_sizes;
     std::vector<bool> packed_ascending;
+    std::vector<int64_t> packed_left;
+    std::vector<int64_t> packed_right;
     std::vector<struct_member_resolved_type> struct_sizes;
     bool packed_struct = false;
+    bool is_real = false;
     std::optional<bool> return_unpacked_ascending;
 };
 

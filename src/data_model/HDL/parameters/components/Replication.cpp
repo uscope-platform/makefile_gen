@@ -150,3 +150,30 @@ std::string Replication::print() const {
 void Replication::set_container_sizes(const resolved_type &s, const std::map<qualified_identifier, resolved_parameter> &context) {
     packing = s.unpacked_sizes.empty();
 }
+
+std::optional<resolved_type> Replication::resolve_expression_type(
+    const std::map<qualified_identifier, resolved_parameter> &context) const {
+    auto item_t = repeated_item ? repeated_item->resolve_expression_type(context) : std::nullopt;
+    if (!item_t) return std::nullopt;
+
+    uint64_t count = 1;
+    if (repetition_size) {
+        auto size = repetition_size->evaluate(context);
+        if (size && size->is_integer() && size->get_integer().get_value() > 0) {
+            count = static_cast<uint64_t>(size->get_integer().get_value());
+        }
+    }
+
+    if (item_t->is_real) {
+        resolved_type result;
+        result.is_real = true;
+        return result;
+    }
+
+    resolved_type result;
+    for (auto ps : item_t->packed_sizes) result.packed_sizes.push_back(ps * count);
+    result.packed_ascending = item_t->packed_ascending;
+    for (auto l : item_t->packed_left) result.packed_left.push_back(l);
+    for (auto r : item_t->packed_right) result.packed_right.push_back(r);
+    return result;
+}
