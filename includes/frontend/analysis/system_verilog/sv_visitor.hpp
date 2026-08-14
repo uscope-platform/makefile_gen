@@ -51,6 +51,7 @@ public:
     void exitModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) override;
     void exitInterface_header(sv2017::Interface_headerContext *ctx) override;
     void enterPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) override;
+    bool is_known_system_function(const std::string &name) const;
 
     void enterCast_separator(sv2017::Cast_separatorContext *ctx) override;
     void enterPrimaryCast2(sv2017::PrimaryCast2Context *ctx) override;

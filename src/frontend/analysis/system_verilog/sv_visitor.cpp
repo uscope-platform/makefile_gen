@@ -14,6 +14,7 @@
 //  limitations under the License.
 
 #include <algorithm>
+#include <set>
 #include <ctre.hpp>
 
 #include "frontend/analysis/system_verilog/sv_visitor.hpp"
@@ -29,6 +30,41 @@
 #include "data_model/HDL/parameters/components/token/String_token.hpp"
 #include "data_model/HDL/types/HDL_external_type.hpp"
 
+
+bool sv_visitor::is_known_system_function(const std::string &name) const {
+    static const std::set<std::string> known = {
+        // Value-returning system functions evaluated by the parameter pipeline
+        "bits", "size", "left", "right", "high", "low", "dimensions", "unpacked_dimensions",
+        "typename", "signed", "unsigned",
+        "rtoi", "itor", "ceil", "floor", "ln", "log10", "log2", "sqrt", "pow",
+        "min", "max", "countones", "countbits",
+        "sin", "cos", "tan", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh",
+        "exp", "hypot", "atan", "atan2", "asin", "acos", "round", "truncate",
+        "onehot", "onehot0", "isunknown", "clog2",
+        "realtobits", "bitstoreal", "shortrealtobits", "shortrealbits",
+        "len", "substr", "to_lower", "to_upper", "atoi", "compare", "sformatf",
+        // Random / distribution functions (recognized, not constant-evaluable)
+        "random", "urandom", "urandom_range", "srandom",
+        "dist_uniform", "dist_normal", "dist_exponential", "dist_poisson",
+        "dist_chi_square", "dist_t", "dist_erlang",
+        // Common procedural system tasks that may appear in parse contexts
+        "display", "displayb", "displayh", "displayo",
+        "write", "writeb", "writeh", "writeo",
+        "monitor", "monitorb", "monitorh", "monitoro", "monitoroff", "monitoron",
+        "finish", "stop", "fatal", "error", "warning", "info",
+        "time", "realtime", "stime", "printtimescale",
+        "readmemh", "readmemb",
+        "fopen", "fclose", "fdisplay", "fdisplayb", "fdisplayh", "fdisplayo",
+        "fwrite", "fwriteb", "fwriteh", "fwriteo", "fmonitor",
+        "fscanf", "fread", "fseek", "ftell", "fflush", "feof", "ferror", "rewind",
+        "fgetc", "fgets", "ungetc", "fputc", "fputs", "sscanf",
+        "system", "value$plusargs", "test$plusargs",
+        "assert", "asserton", "assertoff", "assertkill", "assertpasson",
+        "cast", "root", "unit", "fatal", "error", "warning", "info",
+        "urandom", "urandom_range", "random", "srandom"
+    };
+    return known.contains(name);
+}
 
 void sv_visitor::route_expression_text(const std::string& text) {
     if(loops_factory.in_loop()) {
@@ -429,6 +465,9 @@ std::vector<std::shared_ptr<hdl_statement_base>> sv_visitor::get_entities() {
 void sv_visitor::enterPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
     if(params_factory.is_component_relevant() || f_factory.is_active()){
         std::string call_name = ctx->any_system_tf_identifier()->getText();
+        if (!call_name.empty() && call_name[0] == '$' && !is_known_system_function(call_name.substr(1))) {
+            spdlog::warn("Unknown system function {} encountered while parsing a parameter expression", call_name);
+        }
         if (f_factory.is_active()) {
             // TODO: sort out calls in functions
         } else {
