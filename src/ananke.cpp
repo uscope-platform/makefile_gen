@@ -259,13 +259,29 @@ std::optional<int> ananke::build_flow() {
             data.constraints_sources = constr_deps;
             data.tb_tl = dep.general.sim_tl;
             data.synth_tl = dep.general.synth_tl;
+            data.commons_dir = dep.general.include_paths;
+            data.repo_dir = std::filesystem::current_path();
+            if (dep.general.target_part) {
+                data.target_part = dep.general.target_part.value();
+            } else if(dep.general.board){
+                data.board_part = dep.general.board.value();
+            } else {
+                return 76;
+            }
 
-            std::ofstream makefile("makefile.tcl");
-            generator.write_makefile(makefile);
+            generator.set_data(data);
 
-            Radiant_manager manager(s_store, !opts.keep_makefile, dep.general.project_name);
-            LOG_TIMEPOINT("Build script generated");
-            if (!opts.makefile_only) manager.create_project("makefile.tcl",  !opts.no_open);
+            if (opts.generate_synth_script) {
+                std::ofstream synthfile("synth.tcl");
+                generator.generate_synth_script(synthfile);
+            } else {
+                std::ofstream makefile("makefile.tcl");
+                generator.write_makefile(makefile);
+
+                Radiant_manager manager(s_store, !opts.keep_makefile, dep.general.project_name);
+                LOG_TIMEPOINT("Build script generated");
+                if (!opts.makefile_only) manager.create_project("makefile.tcl",  !opts.no_open);
+            }
         }
         if (opts.generate_periph_definition || opts.generate_app_definition) {
             peripheral_definition_generator periph_def_gen(d_store, synth_ast);

@@ -17,6 +17,8 @@
 
 #include <fmt/format.h>
 
+#include <filesystem>
+
 void lattice_project_generator::write_makefile(std::ostream &output) {
     generate_project(output);
     output << R"(prj_close)" <<std::endl;
@@ -63,8 +65,8 @@ void lattice_project_generator::generate_project(std::ostream &output) {
     output << R"(if {![file exists $build_dir]} {)" <<std::endl;
     output << R"(    file mkdir $build_dir)" <<std::endl;
     output << R"(})" <<std::endl;
-    output << R"()" << data.name << "\"" <<std::endl;
-    output << fmt::format(R"(prj_create -name "{}" -impl "impl1" -dev "{}" -dir "./build_dir")", data.name, data.target_part) <<std::endl;
+    std::string device = !data.target_part.empty() ? data.target_part : data.board_part;
+    output << fmt::format(R"(prj_create -name "{}" -impl "impl1" -dev "{}" -dir "$build_dir")", data.name, device) <<std::endl;
     for(const auto& str:data.synth_sources){
         output << fmt::format(R"(prj_add_source {})", str) <<std::endl;
     }
@@ -75,7 +77,26 @@ void lattice_project_generator::generate_project(std::ostream &output) {
         output << fmt::format(R"(prj_add_source {})", str) <<std::endl;
     }
     output << R"(prj_set_impl_opt -impl "impl1" {top} {)"<<data.synth_tl<< "}" <<std::endl;
-    output << R"(prj_set_impl_opt -impl "impl1" {VerilogStandard} {System Verilog})" <<std::endl;
+    auto language = detect_hdl_language();
+    if(language == "vhdl"){
+        output << R"(prj_set_impl_opt -impl "impl1" {VhdlStandard} {VHDL-2008})" <<std::endl;
+    } else if(language == "sv"){
+        output << R"(prj_set_impl_opt -impl "impl1" {VerilogStandard} {System Verilog})" <<std::endl;
+    }
     output << R"(prj_save)" <<std::endl;
 
+}
+
+std::string lattice_project_generator::detect_hdl_language() {
+    for(const auto& str:data.synth_sources){
+        if(std::filesystem::path(str).extension() == ".vhd" || std::filesystem::path(str).extension() == ".vhdl"){
+            return "vhdl";
+        }
+    }
+    for(const auto& str:data.package_synth_sources){
+        if(std::filesystem::path(str).extension() == ".vhd" || std::filesystem::path(str).extension() == ".vhdl"){
+            return "vhdl";
+        }
+    }
+    return "sv";
 }

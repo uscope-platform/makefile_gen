@@ -29,6 +29,11 @@ Radiant_manager::Radiant_manager(std::shared_ptr<settings_store> s, bool del_mkf
 }
 
 void Radiant_manager::create_project(const std::string &makefile, bool start_gui) {
+    if(radiant_path.empty()){
+        spdlog::error("Radiant installation not configured, skipping project creation");
+        return;
+    }
+
     std::vector<std::string> arg_v;
     arg_v.emplace_back(radiant_path + "/bin/lin64/radiantc");
     arg_v.push_back(makefile);

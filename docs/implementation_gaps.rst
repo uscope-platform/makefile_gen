@@ -68,25 +68,34 @@ are latent bugs or dead code.
 
 .. _lattice-backend:
 
-Lattice backend correctness
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Lattice backend
+~~~~~~~~~~~~~~~
 
-The Lattice branch in :file:`src/ananke.cpp:235-257` never populates
-``data.target_part``, ``data.board_part``, ``data.commons_dir`` or
-``data.repo_dir``. Consequences:
+The Lattice backend previously emitted an empty device (``-dev ""``) because
+:file:`src/ananke.cpp` never propagated ``target_part``/``board_part``, plus a
+stray dangling-quote line, a hardcoded ``-dir "./build_dir"``, an always-forced
+SystemVerilog language standard, and no toolchain-path verification. These are
+fixed:
 
-* ``prj_create ... -dev ""`` emits an empty device
-  (:file:`src/Backend/Lattice/lattice_project_generator.cpp:67`).
-* A stray dangling-quote line is emitted on the project name
-  (:file:`src/Backend/Lattice/lattice_project_generator.cpp:66`).
-* ``-dir "./build_dir"`` is hardcoded instead of using ``$build_dir``.
-* ``prj_set_impl_opt {VerilogStandard} {System Verilog}`` is always forced
-  (:file:`src/Backend/Lattice/lattice_project_generator.cpp:78`); there is no
-  VHDL language-standard option.
-* ``Radiant_manager`` does not verify that the toolchain path exists, unlike
-  ``Vivado_manager`` (:file:`src/Backend/Lattice/Radiant_manager.cpp:21-46`).
-* ``generate_sim_script`` / ``generate_synth_script`` for Lattice are
-  implemented but never invoked from the main flow.
+* :file:`src/ananke.cpp` now populates ``target_part`` (preferred) or
+  ``board_part`` as the device, along with ``commons_dir`` and ``repo_dir``,
+  and routes ``--synth_script`` and the default makefile flow.
+* The generator emits ``prj_create ... -dev "<device>" -dir "$build_dir"``,
+  and sets ``{VerilogStandard} {System Verilog}`` only for SystemVerilog
+  designs, a ``{VhdlStandard}`` option for VHDL designs, and nothing otherwise
+  (:file:`src/Backend/Lattice/lattice_project_generator.cpp`).
+* ``Radiant_manager`` warns and clears the tool path when the Radiant
+  installation is missing, and refuses to spawn on an empty path
+  (:file:`src/Backend/Lattice/Radiant_manager.cpp`).
+
+Remaining:
+
+* ``--sim_script`` is deliberately deferred for Lattice: the current
+  ``generate_sim_script`` emits raw ModelSim commands (``vlib``/``vlog``/
+  ``vsim``) that do not run under ``radiantc`` batch; a proper Radiant
+  simulation flow is needed.
+* Include directories still need to be set up manually in Radiant, as the
+  feature is not exposed through tcl scripting (documented in the README).
 
 Unimplemented design-synthesis flow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -302,8 +311,9 @@ Additional toolchain backends
 The ``project_generator_base`` / ``Toolchain_manager`` abstraction
 (:file:`includes/Backend/project_generator_base.hpp`,
 :file:`src/Backend/Toolchain_manager.cpp`) makes a Quartus or open
-Yosys/nextpnr backend tractable. The Lattice backend should be fixed first
-(see :ref:`lattice-backend`).
+Yosys/nextpnr backend tractable. The Lattice backend's project generation is
+now functional; the remaining gap is its deferred simulation flow (see
+:ref:`lattice-backend`).
 
 Generate-statement gaps
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -404,8 +414,8 @@ fixtures is the end goal.
 Recommended Sequencing
 ----------------------
 
-1. **Cheap wins first.** The Lattice backend fixes, the unary operator gap, and
-   the unimplemented synthesis flow are contained, well-bounded items.
+1. **Cheap wins first.** The unary operator gap and the unimplemented synthesis
+   flow are contained, well-bounded items.
 2. **Then the highest-value mid projects:** VHDL frontend completion followed
    by generalization of the bus/scope analysis.
 3. **Finally the heavy refactors**, starting with the data-flow engine once

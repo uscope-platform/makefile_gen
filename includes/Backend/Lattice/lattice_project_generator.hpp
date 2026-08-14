@@ -27,6 +27,7 @@ public:
     void generate_synth_script(std::ostream &output) override;
 private:
     void generate_project(std::ostream &output);
+    std::string detect_hdl_language();
 };
 
 #endif //ANANKE_LATTICE_PROJECT_GENERATOR_HPP
