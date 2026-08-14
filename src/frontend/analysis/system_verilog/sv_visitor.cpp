@@ -15,7 +15,6 @@
 
 #include <algorithm>
 #include <set>
-#include <ctre.hpp>
 
 #include "frontend/analysis/system_verilog/sv_visitor.hpp"
 

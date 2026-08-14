@@ -27,7 +27,6 @@
 #include "data_model/HDL/parameters/components/token/Time_token.hpp"
 #include "data_model/HDL/parameters/components/token/String_token.hpp"
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
-#include <ctre.hpp>
 
 namespace sv_parsing_helpers {
     qualified_identifier parse_qualified_identifier(mgp_sv::sv2017::Package_or_class_scoped_pathContext *ctx);
