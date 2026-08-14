@@ -14,7 +14,6 @@
 //  limitations under the License.
 
 #include "data_model/HDL/parameters/components/Streaming.hpp"
-#include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
 
 #include <sstream>
 #include <cereal/types/polymorphic.hpp>
@@ -62,7 +61,8 @@ std::optional<resolved_parameter> Streaming::evaluate(const std::map<qualified_i
         if (!v.has_value() || !v.value().is_integer()) return std::nullopt;
         auto raw = v.value().get_integer();
         int64_t w = 0;
-        if (auto num = std::dynamic_pointer_cast<Numeric_token>(comp)) w = num->get_size();
+        auto comp_t = comp->resolve_expression_type(context);
+        if (comp_t) w = static_cast<int64_t>(packed_width(*comp_t));
         if (w <= 0) w = raw.get_size();
         widths.push_back(w);
         values.push_back(raw);

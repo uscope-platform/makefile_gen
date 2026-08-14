@@ -42,4 +42,14 @@ struct resolved_type {
     std::optional<bool> return_unpacked_ascending;
 };
 
+inline uint64_t packed_width(const std::vector<uint64_t> &sizes) {
+    uint64_t w = 1;
+    for (auto s : sizes) w *= s;
+    return w;
+}
+
+inline uint64_t packed_width(const resolved_type &t) {
+    return packed_width(t.packed_sizes);
+}
+
 #endif //ANANKE_RESOLVED_TYPE_HPP

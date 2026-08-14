@@ -94,16 +94,14 @@ std::optional<resolved_parameter> HDL_parameter::cast_result(
     auto t = type->as<HDL_simple_type>();
     if (in->is_integer()) {
         if (t.get_signed() && !in->get_integer().get_signed()) {
-            if (sizes->packed_sizes[0] == 32) {
+            if (sizes.has_value() && !sizes->packed_sizes.empty() && packed_width(*sizes) == 32) {
                 uint32_t truncated_val = in->get_integer().get_value() & 0xFFFFFFFF;
                 return static_cast<int32_t>(truncated_val);
             }
         }
-        if (t.get_signed() && !in->get_integer().get_signed()) {
-        }
         if (sizes.has_value() && !sizes->packed_sizes.empty()) {
             auto val = in->get_integer();
-            val.set_size(sizes->packed_sizes[0]);
+            val.set_size(packed_width(*sizes));
             return val;
         }
     }

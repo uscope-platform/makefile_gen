@@ -545,8 +545,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::extract_str
             if (type_info) {
                 uint64_t offset = 0;
                 for (int i = st.member.size() - 1; i >= 0; i--) {
-                    uint64_t w = 1;
-                    for (auto &ps : type_info->struct_sizes[i].packed_sizes) w *= ps;
+                    uint64_t w = packed_width(type_info->struct_sizes[i].packed_sizes);
                     uint64_t mask = (w >= 64) ? ~0ULL : (1ULL << w) - 1;
                     emit_field(st.member[i].name,
                                static_cast<uint64_t>((raw >> offset) & mask),
@@ -560,7 +559,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::extract_str
                 uint64_t w = 1;
                 if (m.type) {
                     auto s = m.type->evaluate_type(ctx);
-                    if (s) for (auto &ps : s->packed_sizes) w *= ps;
+                    if (s) w = packed_width(*s);
                 }
                 uint64_t mask = (w >= 64) ? ~0ULL : (1ULL << w) - 1;
                 emit_field(m.name, static_cast<uint64_t>(raw & mask), m.type);

@@ -16,7 +16,6 @@
 #include "data_model/HDL/parameters/components/Replication.hpp"
 #include "data_model/HDL/parameters/components/Concatenation.hpp"
 #include "data_model/HDL/parameters/components/Expression_v2.hpp"
-#include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
 #include "data_model/HDL/parameters/components/Expression_base.hpp"
 
 #include <cereal/types/polymorphic.hpp>
@@ -85,7 +84,10 @@ std::optional<resolved_parameter> Replication::evaluate(const std::map<qualified
         auto item = repeated_item->as<Expression_v2>().evaluate(context);
         if (!item.has_value()) return std::nullopt;
         if (!item.value().is_integer()) throw std::runtime_error("Tried to replicate non integer");
-        int64_t repeated_size = item.value().get_integer().get_size();
+        int64_t repeated_size = 0;
+        auto comp_t = repeated_item->resolve_expression_type(context);
+        if (comp_t) repeated_size = static_cast<int64_t>(packed_width(*comp_t));
+        if (repeated_size <= 0) repeated_size = item.value().get_integer().get_size();
         if (!packing) {
             repeated_value = std::vector(size, item.value().get_integer());
         } else {
@@ -108,8 +110,9 @@ std::optional<resolved_parameter> Replication::evaluate(const std::map<qualified
         auto item = repeated_item->evaluate(context);
         if (!item.has_value()) return std::nullopt;
         if (!item.value().is_integer()) throw std::runtime_error("Tried to replicate non integer");
-        auto num = std::dynamic_pointer_cast<Numeric_token>(repeated_item);
-        int64_t repeated_size = num ? num->get_size() : 0;
+        int64_t repeated_size = 0;
+        auto comp_t = repeated_item->resolve_expression_type(context);
+        if (comp_t) repeated_size = static_cast<int64_t>(packed_width(*comp_t));
         if (repeated_size <= 0) repeated_size = item.value().get_integer().get_size();
         if (!packing) {
             repeated_value = std::vector(size, item.value().get_integer());

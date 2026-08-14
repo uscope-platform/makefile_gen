@@ -632,8 +632,7 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_signedness(
     uint64_t container = 32;
     auto type = arg->resolve_expression_type(context);
     if (type) {
-        uint64_t width = 1;
-        for (auto ps : type->packed_sizes) width *= ps;
+        uint64_t width = packed_width(*type);
         if (width > 0) container = width;
     } else if (arg->is<Numeric_token>()) {
         auto &num = arg->as<Numeric_token>();

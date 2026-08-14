@@ -840,7 +840,8 @@ TEST(parameter_extraction, packed_repetition_initialization) {
     auto test_pattern = R"(
         module test_mod #(
             parameter repetition_size = 2,
-            parameter int repetition_parameter_1  = {repetition_size{1}}
+            parameter int repetition_parameter_1  = {repetition_size{1}},
+            parameter int repetition_parameter_2  = {repetition_size{1'b1}}
         )();
 
         endmodule
@@ -879,6 +880,23 @@ TEST(parameter_extraction, packed_repetition_initialization) {
 
     check_params.insert(p);
 
+    p = std::make_shared<HDL_parameter>();
+
+    p->set_name("repetition_parameter_2");
+
+    Replication rep2;
+    auto size_2 = std::make_shared<Identifier_token>(qualified_identifier("repetition_size"));
+    rep2.set_size(size_2);
+    rep2.set_item(std::make_shared<Numeric_token>("1'b1"));
+    auto param_type_2 = Type_engine::create_primitive_type("int");
+    p->set_type(param_type_2);
+    p->set_raw_value(std::make_shared<Replication>(rep2));
+
+
+
+
+    check_params.insert(p);
+
     ASSERT_EQ(check_params.size(), parameters.size());
 
     for(const auto& [name, item]:check_params){
@@ -890,7 +908,8 @@ TEST(parameter_extraction, packed_repetition_initialization) {
 
     std::map<qualified_identifier, resolved_parameter> check_defaults  = {
         {qualified_identifier("repetition_size"), 2},
-        {qualified_identifier("repetition_parameter_1"), 3}
+        {qualified_identifier("repetition_parameter_1"), 1},
+        {qualified_identifier("repetition_parameter_2"), 3}
     };
     for(const auto& [name, value]:check_defaults){
         ASSERT_TRUE(defaults.contains(name));
@@ -904,9 +923,9 @@ TEST(parameter_extraction, repetition_initialization) {
         module test_mod #(
             parameter repetition_size = 2,
             parameter bit repetition_parameter_1 [1:0]  = '{repetition_size{1}},
-            parameter bit repetition_parameter_2 [1:0]  = '{repetition_size{4}},
-            parameter bit multi_repetition_parameter [3:0]  = {repetition_parameter_1,repetition_parameter_2},
-            parameter bit mixed_repetition_parameter [3:0]  = {1,2,repetition_parameter_2}
+            parameter int repetition_parameter_2 [1:0]  = '{repetition_size{4}},
+            parameter int multi_repetition_parameter [3:0]  = {repetition_parameter_1,repetition_parameter_2},
+            parameter int mixed_repetition_parameter [3:0]  = {1,2,repetition_parameter_2}
         )();
 
         endmodule
@@ -952,12 +971,12 @@ TEST(parameter_extraction, repetition_initialization) {
     p->set_name("repetition_parameter_2");
 
 
-    auto param_type_2 = HDL_simple_type();
-    param_type_2.add_dimension({std::make_shared<Numeric_token>("1"), std::make_shared<Numeric_token>("0"), false});
+    auto param_type_2 = Type_engine::create_primitive_type("int");
+    param_type_2->as<HDL_simple_type>().add_dimension({std::make_shared<Numeric_token>("1"), std::make_shared<Numeric_token>("0"), false});
     size = std::make_shared<Identifier_token>(qualified_identifier("repetition_size"));
     r.set_size(size);
     r.set_item(std::make_shared<Numeric_token>("4"));
-    p->set_type(std::make_shared<HDL_simple_type>(param_type_2));
+    p->set_type(param_type_2);
     p->set_raw_value(std::make_shared<Replication>(r));
 
 
@@ -969,8 +988,8 @@ TEST(parameter_extraction, repetition_initialization) {
     p->set_name("multi_repetition_parameter");
 
 
-    auto param_type_3 = HDL_simple_type();
-    param_type_3.add_dimension({
+    auto param_type_3 = Type_engine::create_primitive_type("int");
+    param_type_3->as<HDL_simple_type>().add_dimension({
     std::make_shared<Numeric_token>("3"),
     std::make_shared<Numeric_token>("0"),
     false
@@ -978,7 +997,7 @@ TEST(parameter_extraction, repetition_initialization) {
     Concatenation c;
     c.add_component(std::make_shared<Identifier_token>(qualified_identifier("repetition_parameter_1")));
     c.add_component( std::make_shared<Identifier_token>(qualified_identifier("repetition_parameter_2")));
-    p->set_type(std::make_shared<HDL_simple_type>(param_type_3));
+    p->set_type(param_type_3);
     p->set_raw_value(std::make_shared<Concatenation>(c));
 
 
@@ -989,8 +1008,8 @@ TEST(parameter_extraction, repetition_initialization) {
     p->set_name("mixed_repetition_parameter");
 
 
-    auto param_type_4 = HDL_simple_type();
-    param_type_4.add_dimension({
+    auto param_type_4 = Type_engine::create_primitive_type("int");
+    param_type_4->as<HDL_simple_type>().add_dimension({
     std::make_shared<Numeric_token>("3"),
     std::make_shared<Numeric_token>("0"),
     false
@@ -999,7 +1018,7 @@ TEST(parameter_extraction, repetition_initialization) {
     c.add_component(std::make_shared<Numeric_token>("1"));
     c.add_component( std::make_shared<Numeric_token>("2"));
     c.add_component( std::make_shared<Identifier_token>(qualified_identifier("repetition_parameter_2")));
-    p->set_type(std::make_shared<HDL_simple_type>(param_type_4));
+    p->set_type(param_type_4);
     p->set_raw_value(std::make_shared<Concatenation>(c));
 
 

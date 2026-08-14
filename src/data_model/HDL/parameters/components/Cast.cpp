@@ -53,7 +53,7 @@ std::optional<resolved_parameter> Cast::evaluate(const std::map<qualified_identi
             spdlog::warn("Casting of non scalar integer values is not supported");
         }
         uint64_t container = 64;
-        if (!container_size->packed_sizes.empty()) container = container_size->packed_sizes[0];
+        if (!container_size->packed_sizes.empty()) container = packed_width(*container_size);
         if (target_type == "signed") {
             return type_cast_engine::to_signed(content_val.value().get_integer(), container);
         }
