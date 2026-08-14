@@ -149,7 +149,6 @@ public:
     void enterReplication(sv2017::ReplicationContext *ctx) override;
     void exitReplication(sv2017::ReplicationContext *ctx) override;
 
-    static uint32_t parse_number(const std::string& s);
     std::vector<std::shared_ptr<hdl_statement_base>> get_entities();
 
     void exitData_type_or_implicit(sv2017::Data_type_or_implicitContext *ctx) override;
@@ -240,7 +239,6 @@ private:
     bool in_class = false;
     std::vector<std::shared_ptr<hdl_statement_base>> entities;
 
-    std::string current_parameter;
     std::string current_declaration_type;
     std::vector<std::string> pending_defparam_path;
     std::string pending_defparam_param;

@@ -49,7 +49,6 @@ public:
 private:
     std::map<std::string, hdl_integer> get_parameters(const nlohmann::json &spec, std::shared_ptr<hdl_ast_node> &node);
     void process_ast(const std::shared_ptr<hdl_ast_node> &l);
-    void detect_scope(const std::string &s, std::vector<int64_t> addr);
     void deduplicate_peripheral_names();
     void denormalize_addresses();
     static std::string uint_to_hex(uint64_t i);

@@ -88,19 +88,20 @@ The Lattice branch in :file:`src/ananke.cpp:235-257` never populates
 * ``generate_sim_script`` / ``generate_synth_script`` for Lattice are
   implemented but never invoked from the main flow.
 
-Dead CLI option
-~~~~~~~~~~~~~~~
+Unimplemented design-synthesis flow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``--S`` / ``opts.synth_design`` is declared in
-:file:`src/main.cpp:39` and :file:`includes/ananke.hpp` but never referenced
-anywhere else. Either wire it up or remove it.
-
-Undefined behaviour in Depfile parsing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-:file:`src/data_model/Depfile.cpp:38` evaluates ``general.board->empty()``
-unconditionally; ``board`` is an empty ``std::optional`` when the depfile has no
-``"board"`` key, so this dereferences a disengaged optional.
+``--S`` / ``opts.synth_design`` is declared and wired to the CLI
+(:file:`src/main.cpp:39`, :file:`includes/ananke.hpp:59`) but the feature it
+announces -- running synthesis on the design -- is not implemented yet: the
+flag is never referenced in :file:`src/ananke.cpp`. Most of the building blocks
+already exist: the Xilinx backend can emit a standalone synthesis script
+(:file:`src/Backend/Xilinx/xilinx_project_generator.cpp:208-295`), and the
+Lattice backend has ``generate_synth_script`` as well
+(:file:`src/Backend/Lattice/lattice_project_generator.cpp:50-58`), but neither
+is reachable through the main flow. Implementing ``--S`` is wiring the flag to
+the existing synth-script generators and driving the corresponding
+``Toolchain_manager`` (see also :ref:`lattice-backend`).
 
 VHDL file-extension mismatch
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -120,24 +121,6 @@ the grammar and the evaluation engine already support ``!``, ``~``, ``&``,
 ``~&``, ``|``, ``~|``, ``^``, ``~^`` (:file:`grammars/sv2017.g4:94-110`).
 Consequently ``parameter P = ~X`` loses the negation and vector reduction
 operators produce wrong results. Cheap, high-impact correctness fix.
-
-Dead code and small bugs
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-* ``sv_visitor::parse_number`` is defined and declared
-  (:file:`src/frontend/analysis/system_verilog/sv_visitor.cpp:853`,
-  :file:`includes/frontend/analysis/system_verilog/sv_visitor.hpp:152`) but
-  never called.
-* ``application_definition_generator::detect_scope`` is declared
-  (:file:`includes/Backend/uplatform/application_definition_generator.hpp:52`)
-  but never defined.
-* ``current_parameter`` member is written but never read
-  (:file:`src/frontend/analysis/system_verilog/sv_visitor.cpp:563`).
-* Copy-paste bug in ``proxy_target::operator==`` compares ``module`` against
-  ``interface`` (:file:`includes/data_model/HDL/hdl_ast_node.hpp:39-42`).
-* Dead statements such as ``int i = 0;``
-  (:file:`src/frontend/analysis/system_verilog/sv_visitor.cpp:146`) and an
-  empty ``else {;`` (:file:`src/frontend/analysis/system_verilog/sv_visitor.cpp:266`).
 
 Test-suite hygiene
 ~~~~~~~~~~~~~~~~~~
@@ -335,36 +318,31 @@ Generate-statement gaps
   (:file:`src/frontend/analysis/system_verilog/sv_visitor.cpp:599-602`) and
   ``$root.``/``$unit.`` scopes are skipped with a warning.
 
+.. _factory-consolidation:
+
+Factory consolidation residuals
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``unified_function_params_factories`` branch has essentially landed: its
+commits are in ``main``, and ``main`` has continued the migration (the
+functions factory moved off the legacy expression engine, the old expression
+was removed from the main expressions factory). What remains is not a branch to
+merge but residual dual-path complexity in the visitor, where the functions
+factory and the parameters factory are two parallel instances selected by
+``f_factory.is_active()`` branching
+(:file:`src/frontend/analysis/system_verilog/sv_visitor.cpp:1198-1224`).
+
+The concrete symptom: streaming concatenations inside function bodies are
+skipped (:file:`src/frontend/analysis/system_verilog/sv_visitor.cpp:1207`)
+while the standalone ``Streaming`` factory implements them for module
+parameters. Closing that gap, and over time collapsing the two visitor
+factories into one, would remove the remaining duplication.
+
 
 Heavy Refactors
 ---------------
 
 Architectural restructuring, multi-week effort each.
-
-Context-based elaboration
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-An in-flight branch already exists (:file:`.git`:
-``origin/context_based_elaboration``) containing "context-based parameter
-resolution", removal of HDL resource cloning, removal of the constant
-propagation machinery, and migration of ``Parameters_map`` to a true map. The
-current design clones parameter maps per instance and threads
-``std::map<qualified_identifier, resolved_parameter>`` copies through every
-work-order in :file:`src/analysis/HDL_ast_builder_v2.cpp`. This is the root
-scaling and correctness constraint of the elaboration path and should be
-merged and completed.
-
-Unified expression / function factory architecture
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The second WIP branch (:file:`.git`: ``origin/unified_function_params_factories``)
-points at the duplication between the visitor and the parallel factory
-hierarchy (``expressions_factory``, ``function_calls_factory``,
-``cast_factory``, ``concatenation_factory``, ``replication_factory``,
-``streaming_factory``, ``ternary_factory``). The duplication has already
-diverged -- for example streaming concatenations inside functions are skipped
-(:file:`src/frontend/analysis/system_verilog/sv_visitor.cpp:1207`) while the
-standalone ``Streaming.cpp`` factory implements them.
 
 A real data-flow / elaboration engine
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -384,8 +362,8 @@ Unified type / value model
 ``resolved_parameter`` variant family (separate wide-integer / string / array
 kinds). The ``string`` data type is unresolved and parametric types are
 partial. A unified context-based value/type model is the substrate most other
-features depend on and naturally follows the context-based elaboration
-refactor.
+features depend on and builds on the context-based parameter machinery already
+in place (``work_order`` parent contexts and ``parameter_solver`` resolution).
 
 Shared frontend semantics (SystemVerilog + VHDL)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -403,9 +381,9 @@ of that IR:
   SystemVerilog operator semantics; VHDL operators and precedence must be
   folded into the same evaluator rather than handled on a parallel expression
   path.
-* The factory hierarchy itself carries internal duplication that has already
-  diverged between the visitor and the standalone factories (see the
-  ``unified_function_params_factories`` branch above).
+* The factory hierarchy still carries residual internal duplication between
+  the visitor and the standalone factories (see
+  :ref:`factory-consolidation`).
 
 The refactor is therefore about unifying these semantics and retiring the
 duplication -- not about inventing a new abstraction or a third pipeline. VHDL
@@ -426,14 +404,9 @@ fixtures is the end goal.
 Recommended Sequencing
 ----------------------
 
-1. **Cheap wins first.** The Lattice backend fixes, the Depfile UB, the unary
-   operator gap, and the dead-option cleanup are latent correctness bugs with
-   contained blast radius.
-2. **Merge the two WIP branches** (:file:`.git`:
-   ``context_based_elaboration``, ``unified_function_params_factories``) before
-   undertaking any work that touches parameter resolution, since the parameter
-   engine is the most heavily exercised subsystem.
-3. **Then the highest-value mid projects:** VHDL frontend completion followed
+1. **Cheap wins first.** The Lattice backend fixes, the unary operator gap, and
+   the unimplemented synthesis flow are contained, well-bounded items.
+2. **Then the highest-value mid projects:** VHDL frontend completion followed
    by generalization of the bus/scope analysis.
-4. **Finally the heavy refactors**, starting with the data-flow engine once
+3. **Finally the heavy refactors**, starting with the data-flow engine once
    procedural-block support lands, since the two are mutually reinforcing.

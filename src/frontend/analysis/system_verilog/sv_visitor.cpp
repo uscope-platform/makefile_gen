@@ -142,10 +142,7 @@ void sv_visitor::enterTf_port_item(sv2017::Tf_port_itemContext *ctx) {
     } else if (ctx->data_type_or_implicit()) {
         auto name = ctx->data_type_or_implicit()->getText();
         f_factory.add_argument(name);
-    } else {
-        int i =0;
     }
-
 }
 
 void sv_visitor::exitTf_port_list(sv2017::Tf_port_listContext *ctx) {
@@ -263,7 +260,7 @@ void sv_visitor::exitData_declaration(sv2017::Data_declarationContext *ctx) {
         auto name = ctx->type_declaration()->identifier(0)->getText();
         if (type_engine.is_simple_type()) {
             modules_factory.add_typedef(name, type_engine.stop_type_declaration(name));
-        } else {;
+        } else {
             modules_factory.add_struct_def(name, type_engine.stop_composite_type_declaration(name, false));
         }
     } else {
@@ -560,7 +557,6 @@ void sv_visitor::enterParameter_declaration(sv2017::Parameter_declarationContext
     auto resolved = setup_data_type(ctx->data_type_or_implicit());
     type_engine.start_range();
     params_factory.set_type(resolved);
-    current_parameter = ctx->list_of_param_assignments()[0].param_assignment()[0]->identifier()->getText();
 }
 
 void sv_visitor::exitParameter_declaration(sv2017::Parameter_declarationContext *ctx) {
@@ -848,20 +844,6 @@ void sv_visitor::exitOperator_log_and(sv2017::Operator_log_andContext *ctx) {
 void sv_visitor::exitOperator_log_or(sv2017::Operator_log_orContext *ctx) {
     process_operation(Expression_v2::expression_operator::logical_or);
 };
-
-
-uint32_t sv_visitor::parse_number(const std::string& s) {
-    if(auto m = ctre::match<R"(\d*'h([0-9a-fA-F]*))">(s)) {
-        return std::stoul(m.get<1>().str(),nullptr, 16);
-    } else if(auto m = ctre::match<R"(^(?:\d*'d)?([0-9]*)$)">(s)) {
-        return std::stoul(m.get<1>().str(),nullptr, 10);
-    } else if(auto m = ctre::match<R"(^\d*'o([0-7]*)$)">(s)) {
-        return std::stoul(m.get<1>().str(),nullptr, 8);
-    } else if(auto m = ctre::match<R"(\d*'b([0-1]*))">(s)) {
-        return std::stoul(m.get<1>().str(),nullptr, 2);
-    }
-    return 0;
-}
 
 void sv_visitor::exitAnsi_port_declaration(sv2017::Ansi_port_declarationContext *ctx) {
     if(current_declaration_type == "module"){

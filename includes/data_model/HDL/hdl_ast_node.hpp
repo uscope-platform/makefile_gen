@@ -38,7 +38,7 @@ struct proxy_target {
     std::string interface;
     bool operator==(const proxy_target& a) const
     {
-        return (module == a.interface && interface == a.interface);
+        return (module == a.module && interface == a.interface);
     }
 } ;
 
