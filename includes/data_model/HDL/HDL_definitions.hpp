@@ -23,7 +23,8 @@ enum dependency_class {
     program=2,
     udp=3,
     memory_init=4,
-    package=5
+    package=5,
+    primitive=6
 };
 
 

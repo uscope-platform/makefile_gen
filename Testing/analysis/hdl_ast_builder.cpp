@@ -21,6 +21,7 @@
 #include "data_model/mm_file.hpp"
 #include "frontend/analysis/system_verilog/sv_analyzer.hpp"
 #include "analysis/HDL_ast_builder_v2.hpp"
+#include "analysis/passes/pass_manager.hpp"
 #include "Backend/Dependency_resolver.hpp"
 
 TEST( hdl_ast_builder, pid_ast_build) {
@@ -506,6 +507,53 @@ TEST( hdl_ast_builder, triple_nested_conditional) {
     auto reference = "TL:top\n    l_a:leaf\n    l_b:leaf\n    l_c:leaf\n    l_d:leaf\n    l_not_a:leaf\n";
     EXPECT_EQ(structure, reference);
     EXPECT_EQ(synth_ast->get_dependencies().size(), 5);
+}
+
+TEST( hdl_ast_builder, primitive_classification) {
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+
+    auto test_pattern = R"(
+        module leaf();
+            wire w;
+        endmodule
+
+        module top();
+            FDRE f1 (.C(1'b0), .D(1'b0), .Q());
+            leaf l1();
+            BUFG b1 (.I(1'b0), .O());
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+    auto entities = analyzer.analyze("", test_pattern);
+    d_store->store_file({"/dev/zero", "file_hash", entities});
+
+    hdl_resource_statement leaf_mod;
+    leaf_mod.set_name("leaf");
+    leaf_mod.set_type(module);
+    hdl_file f;
+    f.set_content({std::make_shared<hdl_resource_statement>(leaf_mod)});
+    d_store->store_file({"/dev/zero/leaf.sv", "file_hash", f});
+
+    HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
+    auto synth_ast = b2.build_ast(std::vector<std::string>({"top"}))[0];
+
+    ASSERT_EQ(synth_ast->get_dependencies().size(), 3);
+    auto fdre = synth_ast->get_dependencies()[0];
+    auto leaf = synth_ast->get_dependencies()[1];
+    auto bufg = synth_ast->get_dependencies()[2];
+
+    EXPECT_EQ(fdre->get_type(), "FDRE");
+    EXPECT_EQ(fdre->get_dependency_class(), primitive);
+    EXPECT_EQ(bufg->get_type(), "BUFG");
+    EXPECT_EQ(bufg->get_dependency_class(), primitive);
+    EXPECT_EQ(leaf->get_type(), "leaf");
+    EXPECT_EQ(leaf->get_dependency_class(), module);
+
+    pass_manager pm(d_store);
+    pm.apply_passes(synth_ast);
 }
 
 

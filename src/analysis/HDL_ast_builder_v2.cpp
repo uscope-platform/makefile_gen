@@ -147,6 +147,8 @@ std::vector<work_order> HDL_ast_builder_v2::process_instance(
     auto child = std::make_shared<hdl_ast_node>(*inst);
     child->set_parent(parent);
     child->set_active(active);
+    auto type = inst->get_type();
+    if (dep_file.is_module_excluded(type) || d_store->is_primitive(type)) child->set_dependency_class(primitive);
     process_quantifier(child->get_array_quantifier(), params);
     parent->add_child(child);
     orders.push_back({child, params, path, if_map});
@@ -174,6 +176,8 @@ std::vector<work_order> HDL_ast_builder_v2::process_loop(
             if (auto body_inst = std::dynamic_pointer_cast<hdl_instance_statement>(body_stmt)) {
                 auto child = std::make_shared<hdl_ast_node>(*body_inst);
                 child->set_parent(parent);
+                auto inst_type = body_inst->get_type();
+                if (dep_file.is_module_excluded(inst_type) || d_store->is_primitive(inst_type)) child->set_dependency_class(primitive);
                 process_quantifier(child->get_array_quantifier(), params);
 
                 std::unordered_map<std::string, std::vector<HDL_net>> new_ports;

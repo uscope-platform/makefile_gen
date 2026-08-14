@@ -22,10 +22,11 @@ processor_detection::processor_detection(const std::shared_ptr<data_store> &d) {
 }
 
 void processor_detection::process_node(const std::shared_ptr<hdl_ast_node> &node) {
+    if (node->get_dependency_class() == primitive) return;
     auto node_spec_opt = d_store->get_HDL_resource(node->get_type());
     auto node_params = node->get_parameters();
     if (!node_spec_opt.has_value()) {
-        spdlog::critical("Skipping processor detection for module {} that was not found in the current repositor");
+        spdlog::warn("Skipping processor detection for module {} that was not found in the current repository", node->get_type());
         return;
     }
     auto node_spec = node_spec_opt.value();
