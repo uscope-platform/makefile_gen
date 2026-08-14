@@ -58,10 +58,11 @@ namespace sv_parsing_helpers {
         if (ctre::match<R"(^\d+$)">(s)
             || ctre::search<R"(^\d*'(s)?(h|d|o|b)([0-9a-fA-F]+))">(s)
             || ctre::match<R"(^[+\-]?(\d+\.\d*|\.\d+)([eE][+\-]?\d+)?$|^[+\-]?\d+[eE][+\-]?\d+$)">(s)
+            || ctre::match<R"(\d+(\.\d+)?(s|ms|us|ns|ps|fs))">(s)
         ) {
             return std::make_shared<Numeric_token>(s);
         }
-        if (s.starts_with("\"") || ctre::match<R"(\d+(\.\d+)?(s|ms|us|ns|ps|fs))">(s)) {
+        if (s.starts_with("\"")) {
             return std::make_shared<String_token>(s);
         }
         return std::make_shared<Identifier_token>(qualified_identifier(s));

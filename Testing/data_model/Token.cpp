@@ -118,8 +118,7 @@ TEST(Token, signed_sized_hex_with_separator){
 
     Numeric_token check;
     check.set_binary_size(8);
-    hdl_integer i;
-    i.set_value(31);
+        hdl_integer i(-31);
     i.set_signed(true);
     check.set_value(i);
     EXPECT_EQ(check, ec);
@@ -141,6 +140,7 @@ TEST(Token, wide_input_decimal_processing) {
     hdl_integer check_val;
     check_val.set_value(int1024_t("0x10DE0B5E3A7640000"));
     check_val.set_signed(false);
+    check.set_binary_size(65);
     check.set_value(check_val);
     EXPECT_EQ(check, test_token);
 }
@@ -299,6 +299,7 @@ TEST(Token, wide_input_sized_processing) {
     hdl_integer check_val;
     check_val.set_value(int1024_t("0xCAFEBEBEDEADBEEFCAFE"));
     check_val.set_signed(false);
+    check.set_binary_size(72);
     check.set_value(check_val);
     EXPECT_EQ(check, test_token);
 }
@@ -317,6 +318,60 @@ TEST(Token, wide_input_auto_sized_processing) {
     hdl_integer check_val;
     check_val.set_value(int1024_t("0xCAFEBEBEDEADBEEFCAFE"));
     check_val.set_signed(false);
+    check.set_binary_size(80);
     check.set_value(check_val);
     EXPECT_EQ(check, test_token);
+}
+
+TEST(Token, scientific_notation_real) {
+    Numeric_token ec("1e3");
+    auto val = ec.get_value();
+    ASSERT_TRUE(val.has_value());
+    ASSERT_TRUE(val.value().is_real());
+    EXPECT_DOUBLE_EQ(val.value().get_real(), 1000.0);
+
+    Numeric_token ec2("1.5e-2");
+    auto val2 = ec2.get_value();
+    ASSERT_TRUE(val2.value().is_real());
+    EXPECT_DOUBLE_EQ(val2.value().get_real(), 1.5e-2);
+}
+
+TEST(Token, hex_e_not_scientific) {
+    Numeric_token ec("'hE");
+    auto val = ec.get_value();
+    ASSERT_TRUE(val.has_value());
+    ASSERT_TRUE(val.value().is_integer());
+    EXPECT_EQ(val.value().get_integer(), 14);
+}
+
+TEST(Token, leading_minus_consistency) {
+    Numeric_token a("-8'sd5");
+    Numeric_token b("8'sd-5");
+    auto va = a.get_value();
+    auto vb = b.get_value();
+    ASSERT_TRUE(va.has_value() && vb.has_value());
+    EXPECT_EQ(va.value().get_integer().get_value(), -5);
+    EXPECT_EQ(vb.value().get_integer().get_value(), -5);
+    EXPECT_EQ(a.get_size(), 8);
+    EXPECT_EQ(b.get_size(), 8);
+
+    Numeric_token neg("-42");
+    auto vneg = neg.get_value();
+    ASSERT_TRUE(vneg.has_value());
+    EXPECT_EQ(vneg.value().get_integer().get_value(), -42);
+}
+
+TEST(Token, partial_parse_rejected) {
+    Numeric_token ec("8'b1011x");
+    auto val = ec.get_value();
+    ASSERT_TRUE(val.has_value());
+    ASSERT_TRUE(val.value().is_integer());
+    EXPECT_EQ(val.value().get_integer(), 0);
+}
+
+TEST(Token, power_of_two_sized_correctly) {
+    Numeric_token ec("4");
+    EXPECT_EQ(ec.get_size(), 3);
+    Numeric_token ec2("8");
+    EXPECT_EQ(ec2.get_size(), 4);
 }

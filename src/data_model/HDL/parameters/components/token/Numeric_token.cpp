@@ -104,11 +104,15 @@ Numeric_token::numeric_parse_result Numeric_token::process_number(const std::str
     result.binary_size = 0;
     result.sized_explicit = false;
 
+    if (is_time_literal(s))
+        return parse_time_literal(s);
+
     if (is_real_literal(s))
         return parse_real_literal(s);
 
     bool signed_number = false;
-    auto body = strip_sign(s, signed_number);
+    bool negative_number = false;
+    auto body = strip_sign(s, signed_number, negative_number);
 
     auto qualifiers = parse_qualifiers(body, signed_number);
     result.sized_explicit = qualifiers.sized_explicit;
@@ -116,13 +120,50 @@ Numeric_token::numeric_parse_result Numeric_token::process_number(const std::str
     auto digits = purge_underscores(qualifiers.digits);
 
     auto [value, binary_size] = parse_integer_digits(digits, qualifiers.base, signed_number, qualifiers.explicit_size);
+    if (negative_number) {
+        auto int_val = value.get_integer();
+        int1024_t negated = -int_val.to_wide();
+        hdl_integer neg_val;
+        neg_val.set_value(negated);
+        neg_val.set_signed(int_val.get_signed());
+        value = neg_val;
+    }
     result.value = value;
     result.binary_size = binary_size;
     return result;
 }
 
+bool Numeric_token::is_time_literal(const std::string_view &s) {
+    if (s.size() < 2) return false;
+    static const std::string_view units[] = {"fs", "ps", "ns", "us", "ms", "s"};
+    for (const auto &unit : units)
+        if (s.ends_with(unit)) return true;
+    return false;
+}
+
+Numeric_token::numeric_parse_result Numeric_token::parse_time_literal(const std::string_view &s) {
+    numeric_parse_result result;
+    result.binary_size = 64;
+    result.sized_explicit = false;
+
+    double scale = 1.0;
+    size_t unit_size = 1;
+    if (s.ends_with("fs")) { scale = 1e-15; unit_size = 2; }
+    else if (s.ends_with("ps")) { scale = 1e-12; unit_size = 2; }
+    else if (s.ends_with("ns")) { scale = 1e-9; unit_size = 2; }
+    else if (s.ends_with("us")) { scale = 1e-6; unit_size = 2; }
+    else if (s.ends_with("ms")) { scale = 1e-3; unit_size = 2; }
+
+    auto number = s.substr(0, s.size() - unit_size);
+    double value;
+    std::from_chars(number.data(), number.data() + number.size(), value);
+    result.value = value * scale;
+    return result;
+}
+
 bool Numeric_token::is_real_literal(const std::string_view &s) {
-    return s.contains('.');
+    if (s.contains('\'')) return false;
+    return s.contains('.') || s.find_first_of("eE") != std::string_view::npos;
 }
 
 Numeric_token::numeric_parse_result Numeric_token::parse_real_literal(const std::string_view &s) {
@@ -135,9 +176,10 @@ Numeric_token::numeric_parse_result Numeric_token::parse_real_literal(const std:
     return result;
 }
 
-std::string_view Numeric_token::strip_sign(const std::string_view &s, bool &is_signed) {
+std::string_view Numeric_token::strip_sign(const std::string_view &s, bool &is_signed, bool &is_negative) {
     if (s.starts_with("+") || s.starts_with("-")) {
         is_signed = true;
+        is_negative = s.starts_with("-");
         return s.substr(1);
     }
     return s;
@@ -201,14 +243,18 @@ std::pair<resolved_parameter, int64_t> Numeric_token::parse_integer_digits(const
         int64_t value;
         auto [ptr, ec] = std::from_chars(digits.data(), digits.data() + digits.size(), value, base);
         if (ec == std::errc::result_out_of_range)
-            return process_wide_integer(digits, base, is_signed);
+            return process_wide_integer(digits, base, is_signed, explicit_size);
+        if (ec != std::errc() || ptr != digits.data() + digits.size())
+            return {0, 0};
         hdl_integer ret(value);
         return finalize_integer(ret, explicit_size, is_signed);
     } else {
         uint64_t value;
         auto [ptr, ec] = std::from_chars(digits.data(), digits.data() + digits.size(), value, base);
         if (ec == std::errc::result_out_of_range)
-            return process_wide_integer(digits, base, is_signed);
+            return process_wide_integer(digits, base, is_signed, explicit_size);
+        if (ec != std::errc() || ptr != digits.data() + digits.size())
+            return {0, 0};
         hdl_integer ret;
         ret.set_value(value);
         return finalize_integer(ret, explicit_size, is_signed);
@@ -223,7 +269,7 @@ std::pair<resolved_parameter, int64_t> Numeric_token::finalize_integer(hdl_integ
 }
 
 std::pair<resolved_parameter, int64_t> Numeric_token::process_wide_integer(const std::string_view &raw_string, uint8_t base,
-    bool signed_number) {
+    bool signed_number, int64_t explicit_size) {
     hdl_integer res;
 
     std::string prefixed_string;
@@ -237,7 +283,9 @@ std::pair<resolved_parameter, int64_t> Numeric_token::process_wide_integer(const
     int1024_t wide_num(prefixed_string.c_str());
 
     res.set_value(wide_num);
-    return {res, 0};
+    res.set_signed(signed_number);
+    if (explicit_size < 0) explicit_size = res.get_size();
+    return {res, explicit_size};
 }
 
 bool Numeric_token::isEqual(const Expression_base &other) const {

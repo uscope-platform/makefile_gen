@@ -433,7 +433,8 @@ TEST(parameter_extraction,time_literal) {
         module test_mod #(
             )();
 
-            parameter integer TEST_PARAM = 10ns;
+            parameter TEST_PARAM = 10ns;
+            parameter TEST_PARAM_2 = 1.5us;
 
         endmodule
     )";
@@ -447,8 +448,14 @@ TEST(parameter_extraction,time_literal) {
 
     auto p = std::make_shared<HDL_parameter>();
     p->set_name("TEST_PARAM");
-    p->set_raw_value(std::make_shared<String_token>("10ns"));
-    p->set_type(Type_engine::create_primitive_type("integer"));
+    p->set_raw_value(std::make_shared<Numeric_token>("10ns"));
+    p->set_type(Type_engine::create_primitive_type("implicit"));
+    check_params.insert(p);
+
+    p = std::make_shared<HDL_parameter>();
+    p->set_name("TEST_PARAM_2");
+    p->set_raw_value(std::make_shared<Numeric_token>("1.5us"));
+    p->set_type(Type_engine::create_primitive_type("implicit"));
     check_params.insert(p);
 
 
@@ -461,7 +468,8 @@ TEST(parameter_extraction,time_literal) {
 
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
-    ASSERT_EQ("10ns", defaults.at(qualified_identifier("TEST_PARAM")).get_string());
+    EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("TEST_PARAM")).get_real(), 1e-8);
+    EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("TEST_PARAM_2")).get_real(), 1.5e-6);
 }
 
 TEST(parameter_extraction, cast_in_concat) {

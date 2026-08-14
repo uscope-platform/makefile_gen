@@ -74,9 +74,11 @@ private:
 
     static numeric_parse_result process_number(const std::string_view &s);
 
+    static bool is_time_literal(const std::string_view &s);
+    static numeric_parse_result parse_time_literal(const std::string_view &s);
     static bool is_real_literal(const std::string_view &s);
     static numeric_parse_result parse_real_literal(const std::string_view &s);
-    static std::string_view strip_sign(const std::string_view &s, bool &is_signed);
+    static std::string_view strip_sign(const std::string_view &s, bool &is_signed, bool &is_negative);
     static literal_qualifiers parse_qualifiers(const std::string_view &body, bool &is_signed);
     static int detect_base(std::string_view &digits);
     static std::string purge_underscores(const std::string_view &digits);
@@ -84,7 +86,7 @@ private:
         bool is_signed, int64_t explicit_size);
     static std::pair<resolved_parameter, int64_t> finalize_integer(hdl_integer value, int64_t explicit_size, bool is_signed);
     static std::pair<resolved_parameter, int64_t> process_wide_integer(const std::string_view &s, uint8_t base,
-        bool signed_number);
+        bool signed_number, int64_t explicit_size);
 
 
     bool isEqual(const Expression_base& other) const override;
