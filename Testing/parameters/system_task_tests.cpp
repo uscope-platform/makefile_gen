@@ -22,6 +22,7 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "analysis/parameter_solver.hpp"
 #include "data_model/HDL/parameters/components/HDL_function_call.hpp"
+#include "data_model/HDL/parameters/components/token/Real_token.hpp"
 
 using namespace std::string_literals;
 
@@ -45,7 +46,7 @@ TEST(system_task, simple) {
     p->set_name("CAST");
     p->set_type(Type_engine::create_primitive_type("implicit"));
     HDL_function_call call("$rtoi");
-    call.add_argument(std::make_shared<Numeric_token>("16.8"));
+    call.add_argument(std::make_shared<Real_token>("16.8"));
 
     p->set_raw_value(std::make_shared<HDL_function_call>(call));
 
@@ -93,7 +94,7 @@ TEST(system_task, multiple) {
     p->set_type(Type_engine::create_primitive_type("implicit"));
     HDL_function_call call("$rtoi");
     Expression_v2 e;
-    e.set_lhs(std::make_shared<Numeric_token>("14.8"));
+    e.set_lhs(std::make_shared<Real_token>("14.8"));
     e.set_rhs(std::make_shared<Numeric_token>("2"));
     e.set_operation(Expression_v2::add);
     call.add_argument(std::make_shared<Expression_v2>(e));
@@ -106,7 +107,7 @@ TEST(system_task, multiple) {
     p->set_name("CAST_2");
     p->set_type(Type_engine::create_primitive_type("implicit"));
     call = HDL_function_call("$rtoi");
-    call.add_argument(std::make_shared<Numeric_token>("12.2"));
+    call.add_argument(std::make_shared<Real_token>("12.2"));
     p->set_raw_value(std::make_shared<HDL_function_call>(call));
 
     check_params.insert(p);
@@ -153,7 +154,7 @@ TEST(system_task, propagation) {
     p->set_type(Type_engine::create_primitive_type("implicit"));
     HDL_function_call call("$rtoi");
     Expression_v2 e;
-    e.set_lhs(std::make_shared<Numeric_token>("11.8"));
+    e.set_lhs(std::make_shared<Real_token>("11.8"));
     e.set_rhs(std::make_shared<Identifier_token>(qualified_identifier("PARAMETER_1")));
     e.set_operation(Expression_v2::add);
     call.add_argument(std::make_shared<Expression_v2>(e));
@@ -217,7 +218,7 @@ TEST(system_task, nested) {
     Expression_v2 e;
     e.set_lhs(std::make_shared<Identifier_token>(qualified_identifier("PARAMETER_1")));
     e.set_operation(Expression_v2::divide);
-    e.set_rhs(std::make_shared<Numeric_token>("16.0"));
+    e.set_rhs(std::make_shared<Real_token>("16.0"));
     inner_call->add_argument(std::make_shared<Expression_v2>(e));
     auto outer_call = std::make_shared<HDL_function_call>("$rtoi");
     outer_call->add_argument(inner_call);

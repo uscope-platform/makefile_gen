@@ -55,6 +55,8 @@ target_sources(ananke_lib
     data_model/HDL/parameters/components/Cast.cpp
     data_model/HDL/parameters/components/token/Identifier_token.cpp
     data_model/HDL/parameters/components/token/Numeric_token.cpp
+    data_model/HDL/parameters/components/token/Real_token.cpp
+    data_model/HDL/parameters/components/token/Time_token.cpp
     data_model/HDL/parameters/components/token/String_token.cpp
     data_model/HDL/parameters/components/token/Type_ref.cpp
     data_model/HDL/parameters/components/HDL_function_call.cpp

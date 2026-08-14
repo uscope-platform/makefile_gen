@@ -19,6 +19,7 @@
 
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
+#include "data_model/HDL/parameters/components/token/Real_token.hpp"
 #include "data_model/HDL/parameters/common/hdl_integer.hpp"
 #include <sstream>
 #include <cereal/archives/binary.hpp>
@@ -324,13 +325,13 @@ TEST(Token, wide_input_auto_sized_processing) {
 }
 
 TEST(Token, scientific_notation_real) {
-    Numeric_token ec("1e3");
+    Real_token ec("1e3");
     auto val = ec.get_value();
     ASSERT_TRUE(val.has_value());
     ASSERT_TRUE(val.value().is_real());
     EXPECT_DOUBLE_EQ(val.value().get_real(), 1000.0);
 
-    Numeric_token ec2("1.5e-2");
+    Real_token ec2("1.5e-2");
     auto val2 = ec2.get_value();
     ASSERT_TRUE(val2.value().is_real());
     EXPECT_DOUBLE_EQ(val2.value().get_real(), 1.5e-2);

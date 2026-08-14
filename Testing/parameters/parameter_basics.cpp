@@ -26,6 +26,8 @@
 #include "data_model/HDL/parameters/components/Cast.hpp"
 #include "data_model/HDL/parameters/components/HDL_function_call.hpp"
 #include "data_model/HDL/parameters/components/Ternary.hpp"
+#include "data_model/HDL/parameters/components/token/Real_token.hpp"
+#include "data_model/HDL/parameters/components/token/Time_token.hpp"
 
 using namespace std::string_literals;
 
@@ -330,7 +332,7 @@ TEST(parameter_extraction, multiple_type_cast) {
     c = Cast();
     c.set_type_cast();
     c.set_target_type("int");
-    c.set_content(std::make_shared<Numeric_token>("2.5"));
+    c.set_content(std::make_shared<Real_token>("2.5"));
     p->set_raw_value(std::make_shared<Cast>(c));
 
     check_params.insert(p);
@@ -448,13 +450,13 @@ TEST(parameter_extraction,time_literal) {
 
     auto p = std::make_shared<HDL_parameter>();
     p->set_name("TEST_PARAM");
-    p->set_raw_value(std::make_shared<Numeric_token>("10ns"));
+    p->set_raw_value(std::make_shared<Time_token>("10ns"));
     p->set_type(Type_engine::create_primitive_type("implicit"));
     check_params.insert(p);
 
     p = std::make_shared<HDL_parameter>();
     p->set_name("TEST_PARAM_2");
-    p->set_raw_value(std::make_shared<Numeric_token>("1.5us"));
+    p->set_raw_value(std::make_shared<Time_token>("1.5us"));
     p->set_type(Type_engine::create_primitive_type("implicit"));
     check_params.insert(p);
 
@@ -741,10 +743,10 @@ TEST(parameter_extraction, float_parameter) {
     p->set_type(Type_engine::create_primitive_type("implicit"));
     Expression_v2 e1, e2, e3;
     e3.set_lhs(std::make_shared<Numeric_token>("2"));
-    e3.set_rhs(std::make_shared<Numeric_token>("3.14159265358979323846"));
+    e3.set_rhs(std::make_shared<Real_token>("3.14159265358979323846"));
     e3.set_operation(Expression_v2::multiply);
     e2.set_lhs(std::make_shared<Expression_v2>(e3));
-    e2.set_rhs(std::make_shared<Numeric_token>("4.0"));
+    e2.set_rhs(std::make_shared<Real_token>("4.0"));
     e2.set_operation(Expression_v2::divide);
     e1.set_lhs(std::make_shared<Expression_v2>(e2));
     e1.set_rhs(std::make_shared<Identifier_token>(qualified_identifier("LUT_DEPTH")));

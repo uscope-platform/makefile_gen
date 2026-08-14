@@ -23,6 +23,8 @@
 #include "data_model/HDL/parameters/common/qualified_identifier.hpp"
 #include "data_model/HDL/parameters/components/Expression_base.hpp"
 #include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
+#include "data_model/HDL/parameters/components/token/Real_token.hpp"
+#include "data_model/HDL/parameters/components/token/Time_token.hpp"
 #include "data_model/HDL/parameters/components/token/String_token.hpp"
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
 #include <ctre.hpp>

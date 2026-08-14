@@ -55,10 +55,14 @@ namespace sv_parsing_helpers {
     }
 
     std::shared_ptr<Expression_base> make_value(const std::string &s) {
+        if (ctre::match<R"(\d+(\.\d+)?(s|ms|us|ns|ps|fs))">(s)) {
+            return std::make_shared<Time_token>(s);
+        }
+        if (ctre::match<R"(^[+\-]?(\d+\.\d*|\.\d+)([eE][+\-]?\d+)?$|^[+\-]?\d+[eE][+\-]?\d+$)">(s)) {
+            return std::make_shared<Real_token>(s);
+        }
         if (ctre::match<R"(^\d+$)">(s)
             || ctre::search<R"(^\d*'(s)?(h|d|o|b)([0-9a-fA-F]+))">(s)
-            || ctre::match<R"(^[+\-]?(\d+\.\d*|\.\d+)([eE][+\-]?\d+)?$|^[+\-]?\d+[eE][+\-]?\d+$)">(s)
-            || ctre::match<R"(\d+(\.\d+)?(s|ms|us|ns|ps|fs))">(s)
         ) {
             return std::make_shared<Numeric_token>(s);
         }

@@ -75,10 +75,6 @@ private:
 
     static numeric_parse_result process_number(const std::string_view &s);
 
-    static bool is_time_literal(const std::string_view &s);
-    static numeric_parse_result parse_time_literal(const std::string_view &s);
-    static bool is_real_literal(const std::string_view &s);
-    static numeric_parse_result parse_real_literal(const std::string_view &s);
     static std::string_view strip_sign(const std::string_view &s, bool &is_signed, bool &is_negative);
     static literal_qualifiers parse_qualifiers(const std::string_view &body, bool &is_signed);
     static int detect_base(std::string_view &digits);

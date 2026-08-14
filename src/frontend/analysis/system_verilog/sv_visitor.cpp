@@ -24,6 +24,8 @@
 #include "frontend/analysis/system_verilog/sv_parsing_helpers.hpp"
 #include "data_model/HDL/statement/hdl_parameter_override_statement.hpp"
 #include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
+#include "data_model/HDL/parameters/components/token/Real_token.hpp"
+#include "data_model/HDL/parameters/components/token/Time_token.hpp"
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
 #include "data_model/HDL/parameters/components/token/Type_ref.hpp"
 #include "data_model/HDL/parameters/components/Streaming.hpp"
@@ -89,6 +91,10 @@ void sv_visitor::route_expression_component(const std::shared_ptr<Expression_bas
             return std::make_shared<Identifier_token>(*id);
         if (auto num = std::dynamic_pointer_cast<const Numeric_token>(src))
             return std::make_shared<Numeric_token>(*num);
+        if (auto real = std::dynamic_pointer_cast<const Real_token>(src))
+            return std::make_shared<Real_token>(*real);
+        if (auto time = std::dynamic_pointer_cast<const Time_token>(src))
+            return std::make_shared<Time_token>(*time);
         if (auto str = std::dynamic_pointer_cast<const String_token>(src))
             return std::make_shared<String_token>(*str);
         return src;

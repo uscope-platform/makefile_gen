@@ -104,12 +104,6 @@ Numeric_token::numeric_parse_result Numeric_token::process_number(const std::str
     result.binary_size = 0;
     result.sized_explicit = false;
 
-    if (is_time_literal(s))
-        return parse_time_literal(s);
-
-    if (is_real_literal(s))
-        return parse_real_literal(s);
-
     bool signed_number = false;
     bool negative_number = false;
     auto body = strip_sign(s, signed_number, negative_number);
@@ -132,49 +126,6 @@ Numeric_token::numeric_parse_result Numeric_token::process_number(const std::str
     }
     result.value = value;
     result.binary_size = binary_size;
-    return result;
-}
-
-bool Numeric_token::is_time_literal(const std::string_view &s) {
-    if (s.size() < 2) return false;
-    static const std::string_view units[] = {"fs", "ps", "ns", "us", "ms", "s"};
-    for (const auto &unit : units)
-        if (s.ends_with(unit)) return true;
-    return false;
-}
-
-Numeric_token::numeric_parse_result Numeric_token::parse_time_literal(const std::string_view &s) {
-    numeric_parse_result result;
-    result.binary_size = 64;
-    result.sized_explicit = false;
-
-    double scale = 1.0;
-    size_t unit_size = 1;
-    if (s.ends_with("fs")) { scale = 1e-15; unit_size = 2; }
-    else if (s.ends_with("ps")) { scale = 1e-12; unit_size = 2; }
-    else if (s.ends_with("ns")) { scale = 1e-9; unit_size = 2; }
-    else if (s.ends_with("us")) { scale = 1e-6; unit_size = 2; }
-    else if (s.ends_with("ms")) { scale = 1e-3; unit_size = 2; }
-
-    auto number = s.substr(0, s.size() - unit_size);
-    double value;
-    std::from_chars(number.data(), number.data() + number.size(), value);
-    result.value = value * scale;
-    return result;
-}
-
-bool Numeric_token::is_real_literal(const std::string_view &s) {
-    if (s.contains('\'')) return false;
-    return s.contains('.') || s.find_first_of("eE") != std::string_view::npos;
-}
-
-Numeric_token::numeric_parse_result Numeric_token::parse_real_literal(const std::string_view &s) {
-    numeric_parse_result result;
-    result.binary_size = 64;
-    result.sized_explicit = false;
-    double value;
-    std::from_chars(s.data(), s.data() + s.size(), value);
-    result.value = value;
     return result;
 }
 
