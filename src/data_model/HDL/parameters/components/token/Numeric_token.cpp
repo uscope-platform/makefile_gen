@@ -103,93 +103,123 @@ Numeric_token::numeric_parse_result Numeric_token::process_number(const std::str
     numeric_parse_result result;
     result.binary_size = 0;
     result.sized_explicit = false;
-    std::string_view raw_number = s;
-    int explicit_size = -1;
+
+    if (is_real_literal(s))
+        return parse_real_literal(s);
+
     bool signed_number = false;
-    bool negative_number =  s.starts_with("-");
+    auto body = strip_sign(s, signed_number);
 
-    if (s.contains('.')) {
-        double value;
-        std::from_chars(s.data(), s.data() + s.size(), value);
-        result.value = value;
-        result.binary_size = 64;
-        return result;
-    }
+    auto qualifiers = parse_qualifiers(body, signed_number);
+    result.sized_explicit = qualifiers.sized_explicit;
 
-    if( s.starts_with("+") || negative_number) {
-        raw_number = raw_number.substr(1);
-        signed_number = true;
+    auto digits = purge_underscores(qualifiers.digits);
+
+    auto [value, binary_size] = parse_integer_digits(digits, qualifiers.base, signed_number, qualifiers.explicit_size);
+    result.value = value;
+    result.binary_size = binary_size;
+    return result;
+}
+
+bool Numeric_token::is_real_literal(const std::string_view &s) {
+    return s.contains('.');
+}
+
+Numeric_token::numeric_parse_result Numeric_token::parse_real_literal(const std::string_view &s) {
+    numeric_parse_result result;
+    result.binary_size = 64;
+    result.sized_explicit = false;
+    double value;
+    std::from_chars(s.data(), s.data() + s.size(), value);
+    result.value = value;
+    return result;
+}
+
+std::string_view Numeric_token::strip_sign(const std::string_view &s, bool &is_signed) {
+    if (s.starts_with("+") || s.starts_with("-")) {
+        is_signed = true;
+        return s.substr(1);
     }
+    return s;
+}
+
+Numeric_token::literal_qualifiers Numeric_token::parse_qualifiers(const std::string_view &body, bool &is_signed) {
+    literal_qualifiers qualifiers;
+    qualifiers.explicit_size = -1;
+    qualifiers.sized_explicit = false;
 
     std::string_view raw_value;
-    if (raw_number.contains('\'')) {
-        raw_value = raw_number.substr(raw_number.find_first_of('\'')+1);
-        auto size_str = raw_number.substr(0, raw_number.find_first_of('\''));
-        auto [ptr, ec] = std::from_chars(size_str.data(), size_str.data() + size_str.size(), explicit_size, 10);
-        if (ec == std::errc() && ptr != size_str.data()) result.sized_explicit = true;
+    if (body.contains('\'')) {
+        raw_value = body.substr(body.find_first_of('\'') + 1);
+        auto size_str = body.substr(0, body.find_first_of('\''));
+        auto [ptr, ec] = std::from_chars(size_str.data(), size_str.data() + size_str.size(), qualifiers.explicit_size, 10);
+        if (ec == std::errc() && ptr != size_str.data()) qualifiers.sized_explicit = true;
     } else {
-        raw_value = raw_number;
+        raw_value = body;
     }
 
     if (raw_value.starts_with('s')) {
         raw_value = raw_value.substr(1);
-        signed_number = true;
+        is_signed = true;
     }
 
+    qualifiers.base = detect_base(raw_value);
+    qualifiers.digits = raw_value;
+    return qualifiers;
+}
+
+int Numeric_token::detect_base(std::string_view &digits) {
     int base = 10;
-    if (raw_value.starts_with("d")) {
+    if (digits.starts_with("d")) {
         base = 10;
-        raw_value = raw_value.substr(1);
+        digits = digits.substr(1);
     }
-    if (raw_value.starts_with("b")) {
+    if (digits.starts_with("b")) {
         base = 2;
-        raw_value = raw_value.substr(1);
+        digits = digits.substr(1);
     }
-    if (raw_value.starts_with("o")) {
+    if (digits.starts_with("o")) {
         base = 8;
-        raw_value = raw_value.substr(1);
+        digits = digits.substr(1);
     }
-    if (raw_value.starts_with("h")) {
+    if (digits.starts_with("h")) {
         base = 16;
-        raw_value = raw_value.substr(1);
+        digits = digits.substr(1);
     }
-    std::string purged_value(raw_value);
-    std::erase(purged_value, '_');
+    return base;
+}
 
-    if (signed_number) {
+std::string Numeric_token::purge_underscores(const std::string_view &digits) {
+    std::string purged_value(digits);
+    std::erase(purged_value, '_');
+    return purged_value;
+}
+
+std::pair<resolved_parameter, int64_t> Numeric_token::parse_integer_digits(const std::string &digits, int base,
+    bool is_signed, int64_t explicit_size) {
+    if (is_signed) {
         int64_t value;
-        auto [ptr, ec] = std::from_chars(purged_value.data(), purged_value.data() + purged_value.size(), value, base);
-        if (ec == std::errc::result_out_of_range) {
-            auto [v, b] = process_wide_integer(purged_value, base, signed_number);
-            result.value = v;
-            result.binary_size = b;
-            return result;
-        } else {
-            hdl_integer ret(value);
-            ret.set_signed(signed_number);
-            if (explicit_size<0) explicit_size = ret.get_size();
-            result.value = ret;
-            result.binary_size = explicit_size;
-            return result;
-        }
+        auto [ptr, ec] = std::from_chars(digits.data(), digits.data() + digits.size(), value, base);
+        if (ec == std::errc::result_out_of_range)
+            return process_wide_integer(digits, base, is_signed);
+        hdl_integer ret(value);
+        return finalize_integer(ret, explicit_size, is_signed);
     } else {
         uint64_t value;
-        auto [ptr, ec] = std::from_chars(purged_value.data(), purged_value.data() + purged_value.size(), value, base);
-        if (ec == std::errc::result_out_of_range) {
-            auto [v, b] = process_wide_integer(purged_value, base, signed_number);
-            result.value = v;
-            result.binary_size = b;
-            return result;
-        } else {
-            hdl_integer ret;
-            ret.set_value(value);
-            ret.set_signed(signed_number);
-            if (explicit_size<0) explicit_size = ret.get_size();
-            result.value = ret;
-            result.binary_size = explicit_size;
-            return result;
-        }
+        auto [ptr, ec] = std::from_chars(digits.data(), digits.data() + digits.size(), value, base);
+        if (ec == std::errc::result_out_of_range)
+            return process_wide_integer(digits, base, is_signed);
+        hdl_integer ret;
+        ret.set_value(value);
+        return finalize_integer(ret, explicit_size, is_signed);
     }
+}
+
+std::pair<resolved_parameter, int64_t> Numeric_token::finalize_integer(hdl_integer int_val, int64_t explicit_size,
+    bool is_signed) {
+    int_val.set_signed(is_signed);
+    if (explicit_size < 0) explicit_size = int_val.get_size();
+    return {int_val, explicit_size};
 }
 
 std::pair<resolved_parameter, int64_t> Numeric_token::process_wide_integer(const std::string_view &raw_string, uint8_t base,

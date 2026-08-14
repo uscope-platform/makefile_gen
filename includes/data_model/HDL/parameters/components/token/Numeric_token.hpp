@@ -65,8 +65,26 @@ private:
         bool sized_explicit;
     };
 
+    struct literal_qualifiers {
+        std::string_view digits;
+        int base;
+        int64_t explicit_size;
+        bool sized_explicit;
+    };
+
     static numeric_parse_result process_number(const std::string_view &s);
-    static std::pair<resolved_parameter, int64_t> process_wide_integer(const std::string_view &s, uint8_t base, bool signed_number);
+
+    static bool is_real_literal(const std::string_view &s);
+    static numeric_parse_result parse_real_literal(const std::string_view &s);
+    static std::string_view strip_sign(const std::string_view &s, bool &is_signed);
+    static literal_qualifiers parse_qualifiers(const std::string_view &body, bool &is_signed);
+    static int detect_base(std::string_view &digits);
+    static std::string purge_underscores(const std::string_view &digits);
+    static std::pair<resolved_parameter, int64_t> parse_integer_digits(const std::string &digits, int base,
+        bool is_signed, int64_t explicit_size);
+    static std::pair<resolved_parameter, int64_t> finalize_integer(hdl_integer value, int64_t explicit_size, bool is_signed);
+    static std::pair<resolved_parameter, int64_t> process_wide_integer(const std::string_view &s, uint8_t base,
+        bool signed_number);
 
 
     bool isEqual(const Expression_base& other) const override;

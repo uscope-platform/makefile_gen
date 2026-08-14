@@ -142,7 +142,7 @@ TEST(parameter_extraction, paretesized_cast) {
 
     auto p = std::make_shared<HDL_parameter>();
     p->set_name("SIZE");
-    p->set_raw_value(std::make_shared<Numeric_token>(4, 2));
+    p->set_raw_value(std::make_shared<Numeric_token>(4, 3));
     p->set_type(Type_engine::create_primitive_type("integer"));
     check_params.insert(p);
 
@@ -268,7 +268,7 @@ TEST(parameter_extraction, nested_type_cast) {
     p = std::make_shared<HDL_parameter>();
     p->set_name("NumLevels");
     p->set_type(Type_engine::create_primitive_type("implicit"));
-    p->set_raw_value(std::make_shared<Numeric_token>(4, 2));
+    p->set_raw_value(std::make_shared<Numeric_token>(4, 3));
     check_params.insert(p);
 
     ASSERT_EQ(check_params.size(), parameters.size());
