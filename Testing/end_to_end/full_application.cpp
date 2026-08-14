@@ -433,3 +433,60 @@ TEST( end_to_end , lattice_project_generation) {
     std::filesystem::remove_all("/tmp/radiant");
     e2e_clean_settings();
 }
+
+TEST( end_to_end , lattice_project_generation) {
+    e2e_setup_settings();
+    ananke::CLI_opt opts;
+    opts.no_cache = true;
+    opts.generate_lattice = true;
+    opts.keep_makefile = true;
+    opts.makefile_only = true;
+    opts.no_open = true;
+
+    opts.cache_dir = "/tmp/ananke_test_cache";
+    auto test_dir = opts.cache_dir + "/PID";
+
+
+    auto wd = std::filesystem::current_path();
+    const auto copyOptions = std::filesystem::copy_options::recursive |
+                             std::filesystem::copy_options::overwrite_existing;
+
+
+    std::filesystem::create_directory("/tmp/radiant");
+
+    auto components = wd / "check_files/test_data/Components";
+    std::filesystem::copy(components/"controls/PID", opts.cache_dir +"/PID", copyOptions);
+    std::filesystem::remove_all(opts.cache_dir +"/PID/makefile.tcl");
+    EXPECT_FALSE(std::filesystem::exists(opts.cache_dir +"/PID/makefile.tcl"));
+    std::filesystem::copy(components/"Common", opts.cache_dir +"/Common", copyOptions);
+    std::filesystem::copy(components/"system/axi_lite/simple_register_cu",  opts.cache_dir +"/simple_register_cu", copyOptions);
+    std::filesystem::copy(components/"system/axi_lite/skid_buffer", opts.cache_dir +"/skid_buffer", copyOptions);
+    std::filesystem::copy(components/"controls/integrator", opts.cache_dir +"/integrator", copyOptions);
+
+
+
+    std::filesystem::current_path(test_dir);
+
+    ananke uut(opts);
+    uut.load_data_cache();
+    uut.build_flow();
+
+    EXPECT_TRUE(std::filesystem::exists(opts.cache_dir +"/PID/makefile.tcl"));
+
+
+    auto ifs = std::ifstream(opts.cache_dir +"/PID/makefile.tcl");
+    std::stringstream ss;
+    ss << ifs.rdbuf();
+    std::string result = ss.str();
+
+    EXPECT_NE(result.find(R"(prj_create -name "PID" -impl "impl1" -dev "xc7z020clg400" -dir "$build_dir")"), std::string::npos);
+    EXPECT_NE(result.find(R"(prj_set_impl_opt -impl "impl1" {top} {PID})"), std::string::npos);
+    EXPECT_NE(result.find(R"(prj_set_impl_opt -impl "impl1" {VerilogStandard} {System Verilog})"), std::string::npos);
+    EXPECT_NE(result.find(R"(prj_add_source /tmp/ananke_test_cache/PID/rtl/PID.sv)"), std::string::npos);
+    EXPECT_EQ(result.find("-dir \"./build_dir\""), std::string::npos);
+    EXPECT_EQ(result.find("\nPID\""), std::string::npos);
+
+    std::filesystem::current_path(wd);
+    std::filesystem::remove_all("/tmp/radiant");
+    e2e_clean_settings();
+}
