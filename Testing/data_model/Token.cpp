@@ -370,8 +370,8 @@ TEST(Token, partial_parse_rejected) {
 }
 
 TEST(Token, power_of_two_sized_correctly) {
-    Numeric_token ec("4");
+    Numeric_token ec("'d4");
     EXPECT_EQ(ec.get_size(), 3);
-    Numeric_token ec2("8");
+    Numeric_token ec2("'d8");
     EXPECT_EQ(ec2.get_size(), 4);
 }

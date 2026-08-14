@@ -181,12 +181,12 @@ TEST(typedef_parsing, struct_with_unpacked_array_of_packed) {
     HDL_simple_type t;
     t.set_packed_dimensions({
         {
-            std::make_shared<Numeric_token>(3, 2),
-            std::make_shared<Numeric_token>(0, 1),
+            std::make_shared<Numeric_token>(3, 32),
+            std::make_shared<Numeric_token>(0, 32),
             true
         }});
     t.set_unpacked_dimensions({
-        {std::make_shared<Numeric_token>(1, 1), std::make_shared<Numeric_token>(0, 1), false}
+        {std::make_shared<Numeric_token>(1, 32), std::make_shared<Numeric_token>(0, 32), false}
     });
     m.type = std::make_shared<HDL_simple_type>(t);
     check_struct.member.emplace_back(m);

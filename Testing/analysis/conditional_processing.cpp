@@ -50,7 +50,7 @@ TEST(conditional_processing, simple_if_generate) {
     Expression_v2 condition;
     condition.set_operation(Expression_v2::equal);
     condition.set_lhs(std::make_shared<Identifier_token>(qualified_identifier("ENABLE")));
-    condition.set_rhs(std::make_shared<Numeric_token>(1, 1));
+    condition.set_rhs(std::make_shared<Numeric_token>(1, 32));
     check_cond.add_branch(std::make_shared<Expression_v2>(condition));
 
     hdl_instance_statement inst;
@@ -94,7 +94,7 @@ TEST(conditional_processing, else_if_chain) {
     Expression_v2 condition;
     condition.set_operation(Expression_v2::equal);
     condition.set_lhs(std::make_shared<Identifier_token>(qualified_identifier("MODE")));
-    condition.set_rhs(std::make_shared<Numeric_token>(0, 1));
+    condition.set_rhs(std::make_shared<Numeric_token>(0, 32));
     check_cond.add_branch(std::make_shared<Expression_v2>(condition));
 
     hdl_instance_statement inst;
@@ -102,7 +102,7 @@ TEST(conditional_processing, else_if_chain) {
     inst.set_type("child_a");
     check_cond.add_to_branch(std::make_shared<hdl_instance_statement>(inst));
 
-    condition.set_rhs(std::make_shared<Numeric_token>(1, 1));
+    condition.set_rhs(std::make_shared<Numeric_token>(1, 32));
     check_cond.add_branch(std::make_shared<Expression_v2>(condition));
     inst.set_name("inst_1");
     inst.set_type("child_b");
@@ -146,7 +146,7 @@ TEST(conditional_processing, nested_if_in_then) {
     Expression_v2 cond_a;
     cond_a.set_operation(Expression_v2::equal);
     cond_a.set_lhs(std::make_shared<Identifier_token>(qualified_identifier("A")));
-    cond_a.set_rhs(std::make_shared<Numeric_token>(1, 1));
+    cond_a.set_rhs(std::make_shared<Numeric_token>(1, 32));
     check_cond.add_branch(std::make_shared<Expression_v2>(cond_a));
 
     hdl_instance_statement inst_0;
@@ -158,7 +158,7 @@ TEST(conditional_processing, nested_if_in_then) {
     Expression_v2 cond_b;
     cond_b.set_operation(Expression_v2::equal);
     cond_b.set_lhs(std::make_shared<Identifier_token>(qualified_identifier("B")));
-    cond_b.set_rhs(std::make_shared<Numeric_token>(1, 1));
+    cond_b.set_rhs(std::make_shared<Numeric_token>(1, 32));
     inner.add_branch(std::make_shared<Expression_v2>(cond_b));
 
     hdl_instance_statement inst_1;

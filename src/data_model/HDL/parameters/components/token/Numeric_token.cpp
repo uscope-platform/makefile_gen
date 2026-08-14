@@ -120,6 +120,8 @@ Numeric_token::numeric_parse_result Numeric_token::process_number(const std::str
     auto digits = purge_underscores(qualifiers.digits);
 
     auto [value, binary_size] = parse_integer_digits(digits, qualifiers.base, signed_number, qualifiers.explicit_size);
+    if (!qualifiers.based && qualifiers.explicit_size < 0 && binary_size < 32)
+        binary_size = 32;
     if (negative_number) {
         auto int_val = value.get_integer();
         int1024_t negated = -int_val.to_wide();
@@ -189,6 +191,7 @@ Numeric_token::literal_qualifiers Numeric_token::parse_qualifiers(const std::str
     literal_qualifiers qualifiers;
     qualifiers.explicit_size = -1;
     qualifiers.sized_explicit = false;
+    qualifiers.based = false;
 
     std::string_view raw_value;
     if (body.contains('\'')) {
@@ -205,6 +208,8 @@ Numeric_token::literal_qualifiers Numeric_token::parse_qualifiers(const std::str
         is_signed = true;
     }
 
+    qualifiers.based = raw_value.starts_with("d") || raw_value.starts_with("b")
+        || raw_value.starts_with("o") || raw_value.starts_with("h");
     qualifiers.base = detect_base(raw_value);
     qualifiers.digits = raw_value;
     return qualifiers;

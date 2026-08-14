@@ -70,6 +70,7 @@ private:
         int base;
         int64_t explicit_size;
         bool sized_explicit;
+        bool based;
     };
 
     static numeric_parse_result process_number(const std::string_view &s);

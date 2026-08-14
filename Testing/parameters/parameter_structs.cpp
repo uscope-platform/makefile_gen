@@ -440,8 +440,8 @@ TEST(parameter_extraction, anonymous_packed_struct_typed_parameter) {
     ASSERT_TRUE(st.member[0].type != nullptr);
     dimension_t check_dim;
     check_dim.packed = true;
-    check_dim.first_bound = std::make_shared<Numeric_token>(31, 5);
-    check_dim.second_bound = std::make_shared<Numeric_token>(0, 1);
+    check_dim.first_bound = std::make_shared<Numeric_token>(31, 32);
+    check_dim.second_bound = std::make_shared<Numeric_token>(0, 32);
     ASSERT_EQ(st.member[0].type->as<HDL_simple_type>().get_packed_dimensions()[0],check_dim);
     EXPECT_EQ(st.member[1].name, "field_b");
     ASSERT_TRUE(st.member[1].type != nullptr);
