@@ -951,7 +951,7 @@ std::optional<resolved_type> HDL_function_call::resolve_expression_type(
         if ((function_name == "$signed" || function_name == "$unsigned") && !arguments.empty()) {
             return arguments[0]->resolve_expression_type(context);
         }
-        if (function_name == "$bits") {
+        if (function_name == "$bits" && !arguments.empty()) {
             return resolve_argument_type(arguments[0], context);
         }
     }
