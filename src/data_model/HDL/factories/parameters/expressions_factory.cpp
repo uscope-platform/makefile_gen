@@ -119,6 +119,13 @@ void expressions_factory::set_operation(const Expression_v2::expression_operator
         }
         bit_select_v2.set_operation(op);
     } else {
+        // A pending unary operation (op set, operand in lhs, no rhs) becomes the
+        // left operand of the following binary operation, e.g. `-a + b`, `!x && y`.
+        if (operation_set && current_v2.get_lhs() != nullptr && current_v2.get_rhs() == nullptr) {
+            auto nested = current_v2;
+            current_v2 = Expression_v2();
+            current_v2.set_lhs(std::make_shared<Expression_v2>(nested));
+        }
         current_v2.set_operation(op);
         operation_set = true;
     }

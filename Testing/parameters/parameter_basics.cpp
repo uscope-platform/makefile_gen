@@ -2537,3 +2537,18 @@ TEST(parameter_extraction, streaming_slice_size_expression) {
     EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 0x11223344);
 }
 
+
+TEST(parameter_extraction, unary_minus_in_comparison) {
+    // Counter-example: -8'sd1 == 8'hFF is true (both 8-bit: -1 is 0xFF), so the
+    // ternary must yield 1. The frontend's expression factory drops the unary
+    // minus when a binary operator follows, building 1 == 255 -> false -> 0.
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter f = -8'sd1 == 8'hFF ? 1 : 0;
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("f")).get_integer(), 1);
+}

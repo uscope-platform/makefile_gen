@@ -113,8 +113,8 @@ public:
     }
     [[nodiscard]] int1024_t get_wide() const { return to_wide(); }
 
-    uint64_t get_size();
-    bool get_signed(){return signedness;}
+    uint64_t get_size() const;
+    bool get_signed() const {return signedness;}
 
     hdl_integer operator+(const hdl_integer &o) const;
     hdl_integer operator-(const hdl_integer &o) const;
@@ -160,12 +160,55 @@ public:
         return std::to_string(std::get<int64_t>(content));
     }
 
+    // The value interpreted as a signed number (sign-extends narrow values).
+    static int1024_t signed_value(const hdl_integer &v) {
+        if (std::holds_alternative<int1024_t>(v.content)) return std::get<int1024_t>(v.content);
+        return int1024_t(std::get<int64_t>(v.content));
+    }
+
+    // Extend to a common comparison width: sign-extend when signed, zero-extend otherwise.
+    static int1024_t extend_to_width(const hdl_integer &v, int64_t width) {
+        int1024_t mask = (width >= 1024) ? int1024_t(-1) : (int1024_t(1) << width) - 1;
+        int1024_t m = v.to_wide() & mask;
+        if (v.get_signed() && width > 0 && width < 1024) {
+            int1024_t sign_bit = int1024_t(1) << (width - 1);
+            if ((m & sign_bit) != 0) m |= ~mask;
+        }
+        return m;
+    }
+
+    // Interpret a possibly sign-extended pattern as an unsigned width-bit value.
+    static int1024_t as_unsigned_bits(const int1024_t &v, int64_t width) {
+        if (width >= 1024 || v >= 0) return v;
+        return v + (int1024_t(1) << width);
+    }
+
+    // Minimum bit width that can hold a signed value (magnitude bits + sign bit).
+    static int64_t signed_fit_width(const hdl_integer &v) {
+        if (!v.get_signed()) return 0;
+        int1024_t mag = signed_value(v);
+        if (mag < 0) mag = -mag;
+        int64_t bits = 0;
+        while (mag != 0) { mag >>= 1; bits++; }
+        return bits + 1;
+    }
+
     friend bool operator==(const hdl_integer &lhs, const hdl_integer &rhs) {
-        return lhs.to_wide() == rhs.to_wide();
+        int64_t width = std::max(std::max(static_cast<int64_t>(lhs.get_size()), static_cast<int64_t>(rhs.get_size())),
+                                 std::max(signed_fit_width(lhs), signed_fit_width(rhs)));
+        auto a = extend_to_width(lhs, width);
+        auto b = extend_to_width(rhs, width);
+        if (lhs.get_signed() && rhs.get_signed()) return a == b;
+        return as_unsigned_bits(a, width) == as_unsigned_bits(b, width);
     }
 
     friend bool operator<(const hdl_integer &lhs, const hdl_integer &rhs) {
-        return lhs.to_wide() < rhs.to_wide();
+        int64_t width = std::max(std::max(static_cast<int64_t>(lhs.get_size()), static_cast<int64_t>(rhs.get_size())),
+                                 std::max(signed_fit_width(lhs), signed_fit_width(rhs)));
+        auto a = extend_to_width(lhs, width);
+        auto b = extend_to_width(rhs, width);
+        if (lhs.get_signed() && rhs.get_signed()) return a < b;
+        return as_unsigned_bits(a, width) < as_unsigned_bits(b, width);
     }
 
     friend bool operator<=(const hdl_integer &lhs, const hdl_integer &rhs) {

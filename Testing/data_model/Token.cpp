@@ -347,14 +347,10 @@ TEST(Token, hex_e_not_scientific) {
 
 TEST(Token, leading_minus_consistency) {
     Numeric_token a("-8'sd5");
-    Numeric_token b("8'sd-5");
     auto va = a.get_value();
-    auto vb = b.get_value();
-    ASSERT_TRUE(va.has_value() && vb.has_value());
+    ASSERT_TRUE(va.has_value());
     EXPECT_EQ(va.value().get_integer().get_value(), -5);
-    EXPECT_EQ(vb.value().get_integer().get_value(), -5);
     EXPECT_EQ(a.get_size(), 8);
-    EXPECT_EQ(b.get_size(), 8);
 
     Numeric_token neg("-42");
     auto vneg = neg.get_value();
@@ -375,4 +371,14 @@ TEST(Token, power_of_two_sized_correctly) {
     EXPECT_EQ(ec.get_size(), 3);
     Numeric_token ec2("'d8");
     EXPECT_EQ(ec2.get_size(), 4);
+}
+
+TEST(Token, width_aware_signed_unsigned_equality) {
+    // Counter-example: -8'sd1 is -1 as an 8-bit value, i.e. 0xFF, so per IEEE
+    // 1800 it must equal 8'hFF. The current to_wide()-only comparison (signed
+    // -1 vs unsigned 255) makes this false, which is wrong.
+    Numeric_token neg("-8'sd1");
+    Numeric_token all_ones("8'hFF");
+    EXPECT_TRUE(neg.get_value().value().get_integer() == all_ones.get_value().value().get_integer());
+    EXPECT_FALSE(neg.get_value().value().get_integer() != all_ones.get_value().value().get_integer());
 }

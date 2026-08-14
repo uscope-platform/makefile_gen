@@ -32,7 +32,7 @@ void hdl_integer::set_value(const int1024_t v) {
     }
 }
 
-uint64_t hdl_integer::get_size() {
+uint64_t hdl_integer::get_size() const {
     if (size > 0) return size;
     int1024_t tmp;
     if (is_wide()) {
