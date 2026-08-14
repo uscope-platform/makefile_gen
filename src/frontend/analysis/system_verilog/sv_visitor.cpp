@@ -924,6 +924,10 @@ void sv_visitor::exitOperator_cmp(sv2017::Operator_cmpContext *ctx) {
 void sv_visitor::exitOperator_eq_neq(sv2017::Operator_eq_neqContext *ctx) {
     if (ctx->EQ()) process_operation(Expression_v2::expression_operator::equal);
     if (ctx->NE()) process_operation(Expression_v2::expression_operator::not_equal);
+    if (ctx->CASE_EQ()) process_operation(Expression_v2::expression_operator::case_equal);
+    if (ctx->CASE_NE()) process_operation(Expression_v2::expression_operator::case_not_equal);
+    if (ctx->WILDCARD_EQ()) process_operation(Expression_v2::expression_operator::wildcard_equal);
+    if (ctx->WILDCARD_NE()) process_operation(Expression_v2::expression_operator::wildcard_not_equal);
 }
 
 void sv_visitor::exitOperator_bitwise_and(sv2017::Operator_bitwise_andContext *ctx) {

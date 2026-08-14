@@ -178,6 +178,8 @@ std::optional<resolved_type> Expression_v2::resolve_expression_type(
         case reduction_xor: case reduction_xnor:
         case greater: case greater_equal: case less: case less_equal:
         case equal: case not_equal:
+        case case_equal: case case_not_equal:
+        case wildcard_equal: case wildcard_not_equal:
         case logical_and: case logical_or:
             width = 1;
             break;
@@ -240,12 +242,66 @@ std::optional<resolved_parameter> Expression_v2::evaluate(
         if (std::holds_alternative<double>(res)) ret_val = std::get<double>(res);
         else ret_val = std::get<hdl_integer>(res);
     }
+
+    // Self-determined result-width truncation: the result of an expression is
+    // truncated to the maximum operand width (1 bit for comparisons/logic, the
+    // left operand width for shifts and unary ops), so wide values do not leak
+    // past their container.
+    if (ret_val.is_integer()) {
+        auto operand_width = [&](const std::shared_ptr<Expression_base> &e) -> uint64_t {
+            if (!e) return 0;
+            auto t = e->resolve_expression_type(context);
+            if (t && !t->is_real) {
+                uint64_t w = 1;
+                for (auto ps : t->packed_sizes) w *= ps;
+                if (w > 0) return w;
+            }
+            auto v = e->evaluate(context);
+            if (v && v->is_integer()) return v->get_integer().get_size();
+            return 64;
+        };
+        uint64_t w_a = operand_width(lhs);
+        uint64_t w_b = operand_width(rhs);
+        uint64_t width = 1;
+        switch (operation) {
+            case logic_neg:
+            case reduction_and: case reduction_nand:
+            case reduction_or: case reduction_nor:
+            case reduction_xor: case reduction_xnor:
+            case greater: case greater_equal: case less: case less_equal:
+            case equal: case not_equal: case case_equal: case case_not_equal:
+            case wildcard_equal: case wildcard_not_equal:
+            case logical_and: case logical_or:
+                width = 1;
+                break;
+            case bitwise_neg:
+            case logic_shift_left: case logic_shift_right:
+            case arithmetic_shift_left: case arithmetic_shift_right:
+            case power:
+                width = w_a;
+                break;
+            default:
+                width = std::max(w_a, w_b);
+                break;
+        }
+        auto v = ret_val.get_integer();
+        if (width > 0 && width < 1024 && v.get_size() > width) {
+            int1024_t mask = (int1024_t(1) << width) - 1;
+            int1024_t masked = v.to_wide() & mask;
+            if (v.get_signed() && (masked & (int1024_t(1) << (width - 1))) != 0)
+                masked |= ~mask;
+            hdl_integer truncated;
+            truncated.set_value(masked);
+            truncated.set_signed(v.get_signed());
+            ret_val = truncated;
+        }
+    }
     return  ret_val;
 }
 
 std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(resolved_parameter op_a, resolved_parameter op_b) {
 
-    if(operation ==  equal){
+    if(operation ==  equal || operation == case_equal || operation == wildcard_equal){
         if (op_a.is_integer() && op_b.is_integer())
             return op_a.get_integer() == op_b.get_integer();
         if (op_a.is_string() && op_b.is_string())
@@ -255,7 +311,7 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(reso
         double b = op_b.is_real() ? op_b.get_real() : static_cast<double>(op_b.get_integer().get_value());
         return a == b;
     }
-    if(operation ==  not_equal){
+    if(operation ==  not_equal || operation == case_not_equal || operation == wildcard_not_equal){
         if (op_a.is_integer() && op_b.is_integer())
             return op_a.get_integer() != op_b.get_integer();
         if (op_a.is_string() && op_b.is_string())

@@ -2206,12 +2206,11 @@ TEST(parameter_extraction, wide_int_parameter) {
 
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
-    int1024_t res_int("0xCAFEBEBEDEADBEEFCB03");
-    hdl_integer res;
-    res.set_value(res_int);
     auto param = defaults.at(qualified_identifier("TEST_PARAM"));
-
-    ASSERT_EQ(res, param.get_integer());
+    // Self-determined result width is max(72, 32) = 72 bits, so the 80-bit sum
+    // is truncated to 72 bits. Expected value written as a Verilog literal.
+    Numeric_token expected("72'hFEBEBEDEADBEEFCB03");
+    ASSERT_EQ(expected.get_value().value().get_integer(), param.get_integer());
 }
 
 
@@ -2276,7 +2275,11 @@ TEST(parameter_extraction, wide_integer_mixed_arithmetic) {
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
     auto mult_val = defaults.at(qualified_identifier("MULT")).get_integer().get_wide();
-    auto expected = int1024_t("0xFFFFFFFFFFFFFFFF0000000000000000") * 2;
+    // BIG is 128-bit, 2 is unsized (32-bit); the self-determined result width is
+    // 128 bits, so the 129-bit product is truncated to the low 128 bits. Expected
+    // value written as a Verilog literal.
+    Numeric_token expected_tok("128'hFFFFFFFFFFFFFFFE0000000000000000");
+    auto expected = expected_tok.get_value().value().get_integer().get_wide();
     EXPECT_EQ(mult_val, expected);
 }
 
@@ -2551,4 +2554,40 @@ TEST(parameter_extraction, unary_minus_in_comparison) {
     auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("f")).get_integer(), 1);
+}
+
+TEST(parameter_extraction, case_wildcard_equality) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter A = 4'hA === 4'hA ? 1 : 0;
+            parameter B = 4'hA !== 4'hB ? 1 : 0;
+            parameter C = 4'hA ==? 4'hA ? 1 : 0;
+            parameter D = 4'hA !=? 4'hF ? 1 : 0;
+            parameter E = 4'hA === 4'hB ? 1 : 0;
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 1);
+    EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 1);
+    EXPECT_EQ(defaults.at(qualified_identifier("C")).get_integer(), 1);
+    EXPECT_EQ(defaults.at(qualified_identifier("D")).get_integer(), 1);
+    EXPECT_EQ(defaults.at(qualified_identifier("E")).get_integer(), 0);
+}
+
+TEST(parameter_extraction, result_width_truncation) {
+    auto test_pattern = R"(
+        module test_mod ();
+            parameter A = 4'hF + 4'h1;   // 16, truncated to 4 bits -> 0
+            parameter B = 8'hFF + 8'h01; // 256, truncated to 8 bits -> 0
+            parameter C = 4'hA * 4'h4;   // 40, truncated to 4 bits -> 8
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 0);
+    EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 0);
+    EXPECT_EQ(defaults.at(qualified_identifier("C")).get_integer(), 8);
 }
