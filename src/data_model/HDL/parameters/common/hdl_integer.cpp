@@ -34,25 +34,20 @@ void hdl_integer::set_value(const int1024_t v) {
 
 uint64_t hdl_integer::get_size() {
     if (size > 0) return size;
+    int1024_t tmp;
     if (is_wide()) {
-        int1024_t tmp = std::get<int1024_t>(content);
-        int bits = 0;
-        while (tmp != 0) {
-            tmp >>= 1;
-            bits++;
-        }
-        if (bits == 0) bits = 1;
-        return static_cast<uint64_t>(bits);
+        tmp = std::get<int1024_t>(content);
+    } else {
+        tmp = get_value();
     }
-    if (get_value() == 0) return 1;
-    auto n_bits = std::log2(get_value());
-    if(std::isinf(n_bits)) {
-        return 1;
+    if (tmp < 0) tmp = -tmp;
+    int bits = 0;
+    while (tmp != 0) {
+        tmp >>= 1;
+        bits++;
     }
-    if(n_bits == 0) {
-        return 1;
-    }
-    return static_cast<uint64_t>(std::ceil(n_bits));
+    if (bits == 0) bits = 1;
+    return static_cast<uint64_t>(bits);
 }
 
 hdl_integer hdl_integer::operator+(const hdl_integer &o) const {
