@@ -15,6 +15,20 @@
 
 #include "Backend/Xilinx/xilinx_project_generator.hpp"
 
+namespace {
+    // Replace all occurrences of `from` with `to` in `str`, treating `from` as a
+    // literal string (paths may contain regex metacharacters like ( [ + * \ ).
+    std::string replace_all(std::string str, const std::string &from, const std::string &to) {
+        if (from.empty()) return str;
+        size_t pos = 0;
+        while ((pos = str.find(from, pos)) != std::string::npos) {
+            str.replace(pos, from.size(), to);
+            pos += to.size();
+        }
+        return str;
+    }
+}
+
 void xilinx_project_generator::write_makefile(std::ostream &output) {
 
     output << "set project_name " <<  data.name <<std::endl;
@@ -30,25 +44,25 @@ void xilinx_project_generator::write_makefile(std::ostream &output) {
     output << "set synth_sources [list ";
     for(const auto& str:data.synth_sources){
 
-        output << "\""<< std::regex_replace(str, std::regex(base_dir), "${base_dir}") << "\" ";
+        output << "\""<< replace_all(str, base_dir, "${base_dir}") << "\" ";
     }
     for(const auto& str:data.package_synth_sources){
-        output << "\""<< std::regex_replace(str, std::regex(base_dir), "${base_dir}") << "\" ";
+        output << "\""<< replace_all(str, base_dir, "${base_dir}") << "\" ";
     }
     for(const auto& str:data.data_synth_sources){
-        output << "\""<< std::regex_replace(str, std::regex(base_dir), "${base_dir}") << "\" ";
+        output << "\""<< replace_all(str, base_dir, "${base_dir}") << "\" ";
     }
     output << "]"<< std::endl;
 
     output << "set sim_sources [list ";
     for(const auto& str:data.sim_sources){
-        output << "\""<< std::regex_replace(str, std::regex(base_dir), "${base_dir}") << "\" ";
+        output << "\""<< replace_all(str, base_dir, "${base_dir}") << "\" ";
     }
     for(const auto& str:data.package_sim_sources){
-        output << "\""<< std::regex_replace(str, std::regex(base_dir), "${base_dir}") << "\" ";
+        output << "\""<< replace_all(str, base_dir, "${base_dir}") << "\" ";
     }
     for(const auto& str:data.data_sim_sources){
-        output << "\""<< std::regex_replace(str, std::regex(base_dir), "${base_dir}") << "\" ";
+        output << "\""<< replace_all(str, base_dir, "${base_dir}") << "\" ";
     }
     output << "]"<< std::endl;
 
