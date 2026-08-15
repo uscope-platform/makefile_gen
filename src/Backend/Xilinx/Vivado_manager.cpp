@@ -15,6 +15,7 @@
 
 
 #include "Backend/Xilinx/Vivado_manager.hpp"
+#include <spdlog/spdlog.h>
 
 
 
@@ -32,7 +33,9 @@ void Vivado_manager::create_project(const std::string& makefile, bool start_gui)
     spawn_process(prepare_call(makefile), false, true);
 
     if(delete_makefile){
-        std::filesystem::remove(makefile);
+        std::error_code ec;
+        std::filesystem::remove(makefile, ec);
+        if (ec) spdlog::warn("Could not remove makefile {}: {}", makefile, ec.message());
     }
 
     if(start_gui){

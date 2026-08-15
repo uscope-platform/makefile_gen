@@ -32,7 +32,9 @@ void Radiant_manager::create_project(const std::string &makefile, bool start_gui
     spawn_process(arg_v, false, true);
 
     if(delete_makefile){
-        std::filesystem::remove(makefile);
+        std::error_code ec;
+        std::filesystem::remove(makefile, ec);
+        if (ec) spdlog::warn("Could not remove makefile {}: {}", makefile, ec.message());
     }
 
     if(start_gui){

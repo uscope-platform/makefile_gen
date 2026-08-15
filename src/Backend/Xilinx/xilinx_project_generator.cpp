@@ -14,6 +14,7 @@
 //  limitations under the License.
 
 #include "Backend/Xilinx/xilinx_project_generator.hpp"
+#include <spdlog/spdlog.h>
 
 namespace {
     // Replace all occurrences of `from` with `to` in `str`, treating `from` as a
@@ -275,7 +276,11 @@ void xilinx_project_generator::generate_synth_script(std::ostream &output) {
                 }
                 output << std::endl;
             }
-            output << "synth_ip [get_ips " << scr.variables.at("name") <<"]" << std::endl;
+            if (scr.variables.contains("name")) {
+                output << "synth_ip [get_ips " << scr.variables.at("name") <<"]" << std::endl;
+            } else {
+                spdlog::warn("Function-mode script {} has no name argument, skipping synth_ip", scr.name);
+            }
         } else {
             if(!sourced_scripts.contains(scr.path)) {
                 output << "source " << scr.path << std::endl;
