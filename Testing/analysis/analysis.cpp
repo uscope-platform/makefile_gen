@@ -439,3 +439,16 @@ TEST(analysis_test, generate_for_loop) {
     ASSERT_NE(loop, nullptr);
     ASSERT_EQ(*loop, expected);
 }
+TEST(analysis_test, visitor_malformed_input_no_crash) {
+    sv_analyzer analyzer;
+
+    // These inputs historically crashed the visitor (null ctx accessors after
+    // error recovery, $readmemh with no arguments, unsupported concatenation
+    // lvalue, pop_last on an empty function body). They must now complete
+    // without throwing; whether the file is kept or skipped depends on how
+    // the parser recovers, which is intentionally not asserted.
+    (void)analyzer.analyze("", "module top; my_mod (.a(x), .b(y); endmodule");
+    (void)analyzer.analyze("", "module top; initial $readmemh; endmodule");
+    (void)analyzer.analyze("", "module top; function void f(); {a, b} = 1; endfunction endmodule");
+    (void)analyzer.analyze("", "module top; function void f(); if (x) a = ; endfunction endmodule");
+}

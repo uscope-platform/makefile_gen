@@ -145,8 +145,16 @@ void sv_visitor::exitInterface_declaration(sv2017::Interface_declarationContext 
 
 
 void sv_visitor::enterModule_or_interface_or_program_or_udp_instantiation(sv2017::Module_or_interface_or_program_or_udp_instantiationContext *ctx) {
-    std::string module_name = ctx->identifier()->getText();
-    std::string instance_name = ctx->hierarchical_instance(0)->name_of_instance()->identifier()->getText();
+    auto id = ctx->identifier();
+    auto hier = ctx->hierarchical_instance(0);
+    auto inst_name = hier ? hier->name_of_instance() : nullptr;
+    if (!id || !hier || !inst_name || !inst_name->identifier()) {
+        spdlog::warn("Malformed module instantiation, skipping file");
+        had_error = true;
+        return;
+    }
+    std::string module_name = id->getText();
+    std::string instance_name = inst_name->identifier()->getText();
 
     deps_factory.new_dependency(instance_name, module_name, module);
 }
@@ -334,8 +342,14 @@ void sv_visitor::enterData_declaration(sv2017::Data_declarationContext *ctx) {
 void sv_visitor::exitData_declaration(sv2017::Data_declarationContext *ctx) {
     if (in_function_var_decl) {
         in_function_var_decl = false;
-        auto var_name = ctx->list_of_variable_decl_assignments()
-            ->variable_decl_assignment(0)->identifier()->getText();
+        auto var_decls = ctx->list_of_variable_decl_assignments();
+        auto decl = var_decls && !var_decls->variable_decl_assignment().empty() ? var_decls->variable_decl_assignment(0) : nullptr;
+        if (!decl || !decl->identifier()) {
+            spdlog::warn("Malformed variable declaration, skipping file");
+            had_error = true;
+            return;
+        }
+        auto var_name = decl->identifier()->getText();
         auto t = type_engine.finalize_type();
         if (!t) t = Type_engine::create_primitive_type("implicit");
         auto param = std::make_shared<HDL_parameter>(var_name);
@@ -357,8 +371,14 @@ void sv_visitor::exitData_declaration(sv2017::Data_declarationContext *ctx) {
             auto dt = ctx->data_type_or_implicit()->data_type();
             if (dt->struct_union()) {
                 in_anonymous_struct = false;
-                auto name = ctx->list_of_variable_decl_assignments()
-                    ->variable_decl_assignment(0)->identifier()->getText();
+                auto var_decls = ctx->list_of_variable_decl_assignments();
+                auto decl = var_decls && !var_decls->variable_decl_assignment().empty() ? var_decls->variable_decl_assignment(0) : nullptr;
+                if (!decl || !decl->identifier()) {
+                    spdlog::warn("Malformed variable declaration, skipping file");
+                    had_error = true;
+                    return;
+                }
+                auto name = decl->identifier()->getText();
                 params_factory.set_type(pending_anon_struct_type);
                 params_factory.new_parameter(name);
                 params_factory.stop_param_assignment();
@@ -378,7 +398,14 @@ void sv_visitor::enterStruct_union_member(sv2017::Struct_union_memberContext *ct
 }
 
 void sv_visitor::exitStruct_union_member(sv2017::Struct_union_memberContext *ctx) {
-    auto name = ctx->list_of_variable_decl_assignments()->variable_decl_assignment(0)->identifier()->getText();
+    auto var_decls = ctx->list_of_variable_decl_assignments();
+    auto decl = var_decls && !var_decls->variable_decl_assignment().empty() ? var_decls->variable_decl_assignment(0) : nullptr;
+    if (!decl || !decl->identifier()) {
+        spdlog::warn("Malformed struct member declaration, skipping file");
+        had_error = true;
+        return;
+    }
+    auto name = decl->identifier()->getText();
     type_engine.close_composite_member(name);
 }
 
@@ -569,7 +596,13 @@ void sv_visitor::exitClass_declaration(sv2017::Class_declarationContext *ctx) {
 void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
     std::string call_name = ctx->any_system_tf_identifier()->getText();
     if(call_name=="$readmemh" || call_name=="$readmemb"){
-        std::string data_file = ctx->list_of_arguments()->expression()[0]->getText();
+        auto args = ctx->list_of_arguments();
+        auto exprs = args ? args->expression() : std::vector<sv2017::ExpressionContext*>{};
+        if (exprs.empty()) {
+            spdlog::warn("{} call has no arguments, ignoring memory initialization", call_name);
+            return;
+        }
+        std::string data_file = exprs[0]->getText();
         data_file.erase(std::remove(data_file.begin(), data_file.end(), '\\'), data_file.end());
         data_file.erase(std::remove(data_file.begin(), data_file.end(), '"'), data_file.end());
         std::filesystem::path p = data_file;
@@ -632,9 +665,15 @@ void sv_visitor::enterParameter_declaration(sv2017::Parameter_declarationContext
                 auto resolved = resolve_data_type(dt);
                 if (resolved)
                     p->set_type(resolved);
-                else
-                    p->set_raw_value(std::make_shared<Type_ref>(
-                        qualified_identifier(dt->package_or_class_scoped_path()->getText())));
+                else {
+                    auto pscp = dt->package_or_class_scoped_path();
+                    if (!pscp) {
+                        spdlog::warn("Malformed type parameter, skipping file");
+                        had_error = true;
+                        return;
+                    }
+                    p->set_raw_value(std::make_shared<Type_ref>(qualified_identifier(pscp->getText())));
+                }
             }
             if (modules_factory.is_current_valid())
                 modules_factory.add_parameter(p);
@@ -673,9 +712,15 @@ void sv_visitor::enterParameter_port_declaration(sv2017::Parameter_port_declarat
                 auto resolved = resolve_data_type(dt);
                 if (resolved)
                     p->set_type(resolved);
-                else
-                    p->set_raw_value(std::make_shared<Type_ref>(
-                        qualified_identifier(dt->package_or_class_scoped_path()->getText())));
+                else {
+                    auto pscp = dt->package_or_class_scoped_path();
+                    if (!pscp) {
+                        spdlog::warn("Malformed type parameter, skipping file");
+                        had_error = true;
+                        return;
+                    }
+                    p->set_raw_value(std::make_shared<Type_ref>(qualified_identifier(pscp->getText())));
+                }
             }
             if (modules_factory.is_current_valid())
                 modules_factory.add_parameter(p);
@@ -853,14 +898,18 @@ void sv_visitor::exitPrimaryPath(sv2017::PrimaryPathContext *ctx) {
         }
         if (dot_chain.empty()) {
             ec = sv_parsing_helpers::make_value(ctx->getText());
-        } else {
-            auto leaf = ctx->package_or_class_scoped_path()->getText();
+        } else if (scoped_ctx) {
+            auto leaf = scoped_ctx->getText();
             qualified_identifier qi(dot_chain.back());
             std::vector<std::string> instance = {leaf};
             for (size_t i = 0; i < dot_chain.size() - 1; ++i)
                 instance.push_back(dot_chain[i]);
             qi.set_instance_prefix(instance);
             ec = std::make_shared<Identifier_token>(qi);
+        } else {
+            spdlog::warn("Malformed primary path, skipping file");
+            had_error = true;
+            return;
         }
     }
 
@@ -1351,9 +1400,15 @@ void sv_visitor::enterLocal_parameter_declaration(sv2017::Local_parameter_declar
                 auto resolved = resolve_data_type(dt);
                 if (resolved)
                     p->set_type(resolved);
-                else
-                    p->set_raw_value(std::make_shared<Type_ref>(
-                        qualified_identifier(dt->package_or_class_scoped_path()->getText())));
+                else {
+                    auto pscp = dt->package_or_class_scoped_path();
+                    if (!pscp) {
+                        spdlog::warn("Malformed type parameter, skipping file");
+                        had_error = true;
+                        return;
+                    }
+                    p->set_raw_value(std::make_shared<Type_ref>(qualified_identifier(pscp->getText())));
+                }
             }
             if (modules_factory.is_current_valid())
                 modules_factory.add_parameter(p);
@@ -1506,8 +1561,10 @@ void sv_visitor::exitLoop_statement(sv2017::Loop_statementContext *ctx) {
         f_factory.add_loop(loops_factory.get_loop_statement());
         loops_factory.clear();
         f_factory.resume();
-        if (conditionals_factory.is_active())
-            conditionals_factory.add_statement(f_factory.pop_last());
+        if (conditionals_factory.is_active()) {
+            auto last = f_factory.pop_last();
+            if (last) conditionals_factory.add_statement(last);
+        }
     }
 }
 
@@ -1528,8 +1585,13 @@ void sv_visitor::enterFor_initialization(sv2017::For_initializationContext *ctx)
     if(f_factory.is_active()) {
         loops_factory.set_phase(HDL_loops_factory::init);
         if(!ctx->for_variable_declaration().empty()) {
-            auto decl = ctx->for_variable_declaration()[0]->for_variable_declaration_var_assign();
-            loops_factory.add_loop_variable(decl[0]->identifier()->getText());
+            auto var_assigns = ctx->for_variable_declaration()[0]->for_variable_declaration_var_assign();
+            if (var_assigns.empty() || !var_assigns[0]->identifier()) {
+                spdlog::warn("Malformed for-loop variable declaration, skipping file");
+                had_error = true;
+                return;
+            }
+            loops_factory.add_loop_variable(var_assigns[0]->identifier()->getText());
         }
     }
 }
@@ -1550,6 +1612,11 @@ void sv_visitor::exitFor_end_expression(sv2017::For_end_expressionContext *ctx) 
     if(f_factory.is_active()) {
         auto param = params_factory.get_parameter();
         auto ex = param->get_expression();
+        if (!ex) {
+            spdlog::warn("Malformed for-loop end expression, skipping file");
+            had_error = true;
+            return;
+        }
         if (ex->is<Expression_v2>()) {
             loops_factory.add_expression(ex->as<Expression_v2>());
         } else {
@@ -1591,8 +1658,10 @@ void sv_visitor::enterInc_or_dec_expressionPost(sv2017::Inc_or_dec_expressionPos
 void sv_visitor::exitBlocking_assignment(sv2017::Blocking_assignmentContext *ctx) {
     if(!loops_factory.in_loop() && f_factory.is_active()) {
         f_factory.finish_assignment();
-        if (conditionals_factory.is_active())
-            conditionals_factory.add_statement(f_factory.pop_last());
+        if (conditionals_factory.is_active()) {
+            auto last = f_factory.pop_last();
+            if (last) conditionals_factory.add_statement(last);
+        }
     }
 
 }
@@ -1600,9 +1669,16 @@ void sv_visitor::exitBlocking_assignment(sv2017::Blocking_assignmentContext *ctx
 void sv_visitor::enterVariable_lvalue(sv2017::Variable_lvalueContext *ctx) {
     if(f_factory.is_active()) {
         auto hier = ctx->package_or_class_scoped_hier_id_with_select();
+        if (!hier || !hier->package_or_class_scoped_path()) {
+            spdlog::warn("Unsupported lvalue in function body, skipping file");
+            had_error = true;
+            return;
+        }
         auto var_name = hier->package_or_class_scoped_path()->getText();
         for (size_t i = 0; i < hier->DOT().size(); ++i) {
-            var_name += "." + hier->identifier_with_bit_select(i)->identifier()->getText();
+            auto bit_sel = hier->identifier_with_bit_select(i);
+            if (bit_sel && bit_sel->identifier())
+                var_name += "." + bit_sel->identifier()->getText();
         }
         if(loops_factory.in_loop()) {
             loops_factory.start_assignment(var_name);

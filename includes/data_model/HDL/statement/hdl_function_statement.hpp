@@ -35,6 +35,7 @@ public:
 
     void add_statement(const std::shared_ptr<hdl_statement_base> stmt){body.push_back(stmt);}
     std::shared_ptr<hdl_statement_base> pop_last(){
+        if (body.empty()) return nullptr;
         auto s = body.back();
         body.pop_back();
         return s;
