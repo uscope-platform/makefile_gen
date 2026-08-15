@@ -18,7 +18,11 @@
 
 settings_store::settings_store(bool e, std::string cache_dir_path, std::string profile) {
     store_path = std::move(cache_dir_path);
-    if (!std::filesystem::exists(store_path)) std::filesystem::create_directory(store_path);
+    std::error_code ec;
+    std::filesystem::create_directories(store_path, ec);
+    if (ec) {
+        spdlog::warn("Could not create settings directory {}: {}", store_path, ec.message());
+    }
     ephemeral = e;
     settings_file = store_path + "/settings";
     selected_profile = std::move(profile);
@@ -84,7 +88,13 @@ settings_store::~settings_store() {
 
 void settings_store::load_settings(const std::string  &settings_file) {
     std::ifstream ifs(settings_file);
-    auto settings =  nlohmann::json::parse( ifs );
+    nlohmann::json settings;
+    try {
+        settings = nlohmann::json::parse(ifs);
+    } catch (const std::exception &e) {
+        spdlog::warn("Could not parse settings file {} ({}), using defaults", settings_file, e.what());
+        return;
+    }
 
     if (settings.contains("profiles")) {
         for (auto &[key, value]: settings["profiles"].items()) {
@@ -105,18 +115,26 @@ void settings_store::load_settings(const std::string  &settings_file) {
 }
 
 void settings_store::flush() {
-    std::ofstream ofs(settings_file);
-    nlohmann::json settings;
+    try {
+        std::ofstream ofs(settings_file);
+        if (!ofs.good()) {
+            spdlog::error("Could not open settings file {} for writing", settings_file);
+            return;
+        }
+        nlohmann::json settings;
 
-    for (const auto& [key, profile] : profiles) {
-        settings["profiles"][key]["hdl_store"] = profile.hdl_store.string();
-        settings["profiles"][key]["default_includes"] = profile.includes;
+        for (const auto& [key, profile] : profiles) {
+            settings["profiles"][key]["hdl_store"] = profile.hdl_store.string();
+            settings["profiles"][key]["default_includes"] = profile.includes;
+        }
+        for (auto &[tool_name, path]: tool_paths) {
+            settings[tool_name + "_path"] = path;
+        }
+        settings["default_profile"] = selected_profile;
+        ofs << settings.dump(4);
+    } catch (const std::exception &e) {
+        spdlog::error("Could not save settings file {}: {}", settings_file, e.what());
     }
-    for (auto &[tool_name, path]: tool_paths) {
-        settings[tool_name + "_path"] = path;
-    }
-    settings["default_profile"] = selected_profile;
-    ofs << settings.dump(4);
 }
 
 

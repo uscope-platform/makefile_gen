@@ -244,3 +244,30 @@ TEST( data_store_test , resource_clean_up) {
 
 }
 
+
+TEST( data_store_test , corrupted_cache_recovery ) {
+    std::filesystem::create_directories("/tmp/ananke_ds_corrupt");
+    {
+        std::ofstream ofs("/tmp/ananke_ds_corrupt/unified_cache", std::ios::binary);
+        ofs << "\x01\x02\x03 garbage not cereal data";
+    }
+    // Should not throw, should start with an empty cache.
+    data_store ds(false, "/tmp/ananke_ds_corrupt");
+    EXPECT_FALSE(ds.contains("anything"));
+    std::filesystem::remove_all("/tmp/ananke_ds_corrupt");
+}
+
+TEST( data_store_test , store_cache_never_throws ) {
+    // Point store_path at an existing regular file so directory creation fails;
+    // the constructor and the destructor's store_cache must not throw.
+    std::filesystem::create_directories("/tmp/ananke_ds_nodir");
+    {
+        std::ofstream ofs("/tmp/ananke_ds_nodir/blocker");
+        ofs << "x";
+    }
+    {
+        data_store ds(false, "/tmp/ananke_ds_nodir/blocker");
+        (void)ds;
+    }
+    std::filesystem::remove_all("/tmp/ananke_ds_nodir");
+}

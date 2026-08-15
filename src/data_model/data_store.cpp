@@ -14,17 +14,22 @@
 // limitations under the License.
 
 #include "data_model/data_store.hpp"
+#include <spdlog/spdlog.h>
 
 
 
 data_store::data_store(bool e, std::string cache_dir_path) {
     ephemeral = e;
     store_path = std::move(cache_dir_path);
-    std::filesystem::create_directory(store_path);
+    std::error_code ec;
+    std::filesystem::create_directories(store_path, ec);
+    if (ec) {
+        spdlog::warn("Could not create cache directory {}: {}", store_path, ec.message());
+    }
 
     unified_cache = store_path + "/unified_cache";
 
-    if(std::filesystem::exists(unified_cache) & !ephemeral){
+    if (std::filesystem::exists(unified_cache) && !ephemeral) {
         load_cache();
     }
     clean_up_caches();
@@ -130,30 +135,48 @@ data_store::~data_store() {
 
 
 void data_store::load_cache() {
-    std::ifstream is(unified_cache, std::ios_base::binary);
-
-    cereal::BinaryInputArchive archive_in(is);
-    archive_in(cache);
-
+    try {
+        std::ifstream is(unified_cache, std::ios_base::binary);
+        if (!is.good()) {
+            spdlog::warn("Could not open cache file {}, starting with an empty cache", unified_cache);
+            cache.clear();
+            return;
+        }
+        cereal::BinaryInputArchive archive_in(is);
+        archive_in(cache);
+    } catch (const std::exception &e) {
+        spdlog::warn("Could not load cache file {} ({}), starting with an empty cache", unified_cache, e.what());
+        cache.clear();
+    }
 }
 
 
 void data_store::store_cache() {
-    std::filesystem::remove(unified_cache);
-    std::ofstream os(unified_cache, std::ios_base::binary);
-    {
+    try {
+        std::error_code ec;
+        std::filesystem::remove(unified_cache, ec);
+        std::ofstream os(unified_cache, std::ios_base::binary);
+        if (!os.good()) {
+            spdlog::error("Could not write cache file {}", unified_cache);
+            return;
+        }
         cereal::BinaryOutputArchive archive_out(os);
         archive_out(cache);
+    } catch (const std::exception &e) {
+        spdlog::error("Could not save cache file {}: {}", unified_cache, e.what());
     }
-
 }
 
 void data_store::clean_up_caches() {
-    std::vector<std::string> evicted_items;
-    for (auto &path: cache | std::views::keys) {
-        if(!std::filesystem::exists(path)){
-           cache.erase(path);
+    std::vector<std::string> stale_paths;
+    for (const auto &path : cache | std::views::keys) {
+        std::error_code ec;
+        if (!std::filesystem::exists(path, ec)) {
+            stale_paths.push_back(path);
         }
+    }
+    for (const auto &path : stale_paths) {
+        cache.erase(path);
     }
 }
 
