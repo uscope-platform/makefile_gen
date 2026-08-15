@@ -139,7 +139,8 @@ std::optional<std::vector<data_stream>> data_acquisition_analysis::process_node(
         } else if (node_type == "nTo1"){
             return process_n_to_1_node(node, in_stream);
         } else{
-            throw std::runtime_error("Error: unknown axi stream insterconnect type found");
+            spdlog::warn("Error: unknown axi stream interconnect type '{}' found for node {}", node_type, node->get_name());
+            return std::nullopt;
         }
     } else if(specs_manager.is_source(node->get_type())){
         process_source(node, in_stream);

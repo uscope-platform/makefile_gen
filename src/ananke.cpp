@@ -127,6 +127,10 @@ std::optional<int> ananke::build_flow() {
     if(std::filesystem::exists(opts.target)) {
         std::ifstream ifs(opts.target);
         Depfile dep(ifs);
+        if (dep.has_error()) {
+            spdlog::error("Invalid Depfile {}: {}", opts.target, dep.get_error());
+            return 60;
+        }
 
         // Resolve auxiliary files (scripts and constraints)
         Auxiliary_resolver aux_resolver(d_store);

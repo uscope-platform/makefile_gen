@@ -70,7 +70,10 @@ public:
     std::vector<Script> get_scripts();
     bool is_module_excluded(const std::string &s);
     void add_excluded_module(const std::string &s);
+    [[nodiscard]] bool has_error() const {return !validation_error.empty();}
+    [[nodiscard]] const std::string& get_error() const {return validation_error;}
 private:
+    std::string validation_error;
 };
 
 

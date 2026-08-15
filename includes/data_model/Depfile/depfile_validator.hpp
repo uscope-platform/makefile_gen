@@ -36,7 +36,9 @@
 #define FCORE_TOOLCHAIN_SCHEMA_VALIDATOR_BASE_H
 
 #include <string>
+#include <optional>
 #include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
 
 #include <valijson/adapters/nlohmann_json_adapter.hpp>
 #include <valijson/utils/nlohmann_json_utils.hpp>
@@ -49,7 +51,7 @@
 namespace  depfile_validator {
 
 
-    inline void validate(const nlohmann::json &spec_file) {
+    inline std::optional<std::string> validate(const nlohmann::json &spec_file) {
         valijson::Schema schema;
         std::string error;
         std::string schema_name;
@@ -66,6 +68,7 @@ namespace  depfile_validator {
         if (!validator.validate(schema, myTargetAdapter, &results)) {
             valijson::ValidationResults::Error err;
             unsigned int errorNum = 1;
+            std::string summary;
             while (results.popError(err)) {
 
                 std::string context;
@@ -74,13 +77,14 @@ namespace  depfile_validator {
                     context += *itr;
                 }
 
-                std::cerr << "Error #" << errorNum << std::endl
-                          << "  context: " << context << std::endl
-                          << "  desc:    " << err.description << std::endl;
+                spdlog::error("Depfile validation error #{}: context: {} desc: {}", errorNum, context, err.description);
+                if (!summary.empty()) summary += "; ";
+                summary += err.description;
                 ++errorNum;
             }
-            throw std::invalid_argument("");
+            return summary;
         }
+        return std::nullopt;
     }
 }
 

@@ -99,9 +99,16 @@ std::vector<analysis_context> control_bus_analysis::process_interconnect(const a
                                                   inst.current_module_top, inst.current_module_prefix, inst.proxy, inst.array_index};
                             ret_val.push_back(ctx);
                         } else {
-                            auto port_index = nets[0].get_index_at(0)->evaluate({});
-                            if (!port_index.has_value()) throw std::runtime_error("The port index must have a deefined value");
-                            if(port_index.value().is_string()) throw std::runtime_error("The port index cannot be a string during control bus analysis");
+                            auto port_index_expr = nets[0].get_index_at(0);
+                            if (!port_index_expr) {
+                                spdlog::warn("Bus master {} has an unindexed connection to an array instance, skipping", master.name);
+                                goto break2;
+                            }
+                            auto port_index = port_index_expr->evaluate({});
+                            if (!port_index.has_value() || !port_index.value().is_integer()) {
+                                spdlog::warn("The port index of bus master {} is not a defined integer, skipping", master.name);
+                                goto break2;
+                            }
                             if(port_index.value().get_integer() == master.idx) {
                                 int32_t index = master.in_array && inst.array_index == -1 ? master.idx : inst.array_index;
                                 dep->set_array_index(index);

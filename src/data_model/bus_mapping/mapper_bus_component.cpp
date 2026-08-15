@@ -14,6 +14,7 @@
 //  limitations under the License.
 
 #include "data_model/bus_mapping/bus_component.hpp"
+#include <spdlog/spdlog.h>
 
 
 mapper_bus_component::mapper_bus_component(const mapper_bus_component &bc) {
@@ -25,27 +26,30 @@ mapper_bus_component::mapper_bus_component(const mapper_bus_component &bc) {
 
 mapper_bus_component::mapper_bus_component(const std::string &n, nlohmann::json &spec) {
     name = n;
-    if(!spec.contains("class")){
-        std::cerr << "ERROR: Could not find class when processing specs for bus component: "<< name<< std::endl;
-        exit(-1);
-    }
-    std::string raw_class = spec["class"];
-    if(raw_class=="source")
-        component_class = source;
-    else if(raw_class=="sink")
-        component_class = sink;
-    else if(raw_class=="interconnect")
-        component_class = interconnect;
-    else {
-        std::cerr<< "ERROR: unknown component class: "<< raw_class<<" encountered while processing specs for bus component: "<< name<< std::endl;
-        exit(-1);
+    component_class = unknown;
+    if(!spec.contains("class") || !spec["class"].is_string()){
+        spdlog::warn("Could not find a valid class when processing specs for bus component: {}", name);
+    } else {
+        std::string raw_class = spec["class"];
+        if(raw_class=="source")
+            component_class = source;
+        else if(raw_class=="sink")
+            component_class = sink;
+        else if(raw_class=="interconnect")
+            component_class = interconnect;
+        else {
+            spdlog::warn("unknown component class: {} encountered while processing specs for bus component: {}", raw_class, name);
+        }
     }
 
     for(auto &item:spec.items()){
         auto k = item.key();
         auto v = item.value();
         if(item.key() != "class"){
-            component_specs[item.key()]= item.value();
+            if (v.is_string())
+                component_specs[item.key()] = v.get<std::string>();
+            else
+                component_specs[item.key()] = v.dump();
         }
     }
 }

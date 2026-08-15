@@ -25,7 +25,8 @@
 typedef enum{
     source = 0,
     sink = 1,
-    interconnect = 2
+    interconnect = 2,
+    unknown = 3
 }bus_component_class;
 
 class mapper_bus_component {

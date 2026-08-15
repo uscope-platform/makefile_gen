@@ -20,15 +20,22 @@
 
 Depfile::Depfile(std::istream &in) {
 
-
     nlohmann::json file_content;
-    in >> file_content;
-    set_content(file_content);
+    try {
+        in >> file_content;
+        set_content(file_content);
+    } catch (const std::exception &e) {
+        validation_error = std::string("could not parse Depfile: ") + e.what();
+    }
 }
 
 void Depfile::set_content(const nlohmann::json &file_content) {
 
-    depfile_validator::validate(file_content);
+    auto validation_err = depfile_validator::validate(file_content);
+    if (validation_err.has_value()) {
+        validation_error = "Depfile schema validation failed: " + validation_err.value();
+        return;
+    }
     auto gen = file_content["general"];
     general.project_name = gen["project_name"];
     if ( gen.contains("target_part"))
