@@ -92,7 +92,6 @@ private:
     resolved_parameter value = 0;
 
     int64_t binary_size = 0;
-    int64_t container_size = 0;
     bool sized_explicit = false;
 
 

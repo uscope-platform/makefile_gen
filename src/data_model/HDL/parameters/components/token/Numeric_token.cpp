@@ -25,7 +25,6 @@ CEREAL_REGISTER_POLYMORPHIC_RELATION(Expression_base, Numeric_token)
 
 Numeric_token::Numeric_token(const Numeric_token &c) {
     value = c.value;
-    container_size = c.container_size;
     binary_size = c.binary_size;
     sized_explicit = c.sized_explicit;
 }
@@ -94,9 +93,6 @@ std::optional<resolved_type> Numeric_token::resolve_expression_type(
 
 void Numeric_token::set_container_sizes(const resolved_type &s,
     const std::map<qualified_identifier, resolved_parameter> &context) {
-    container_size = 1;
-    for (auto &ps : s.packed_sizes) container_size *= ps;
-    for (auto &us : s.unpacked_sizes) container_size *= us;
 }
 
 Numeric_token::numeric_parse_result Numeric_token::process_number(const std::string_view &s) {

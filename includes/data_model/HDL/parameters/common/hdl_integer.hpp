@@ -293,7 +293,7 @@ public:
         j["value"] = val.get_value();
         j["size"] = val.size;
         j["signedness"] = val.signedness;
-        j["wide_value"] = val.get_wide();
+        j["wide_value"] = val.to_wide();
         j["wide"] = val.is_wide();
     }
 

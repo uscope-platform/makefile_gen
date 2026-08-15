@@ -150,8 +150,6 @@ private:
     std::shared_ptr<Expression_base> lhs;
     std::shared_ptr<Expression_base> rhs;
     expression_operator operation = none;
-
-    uint64_t current_size=0;
 };
 
 
