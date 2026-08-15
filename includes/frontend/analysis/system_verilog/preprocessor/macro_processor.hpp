@@ -61,7 +61,8 @@ namespace preprocessor {
         macro_processor(
             std::unordered_map<std::string, std::variant<std::string, function_macro>> &d,
             uint64_t &l_n,
-            std::string &path
+            std::string &path,
+            std::optional<std::string> &error
         );
         std::string process_macro(const std::string_view &in);
         static std::pair<std::vector<std::string_view>, std::string_view> get_call_arguments(const std::string_view &in);
@@ -79,9 +80,11 @@ namespace preprocessor {
         static std::optional<function_macro> parse_function_macro(const std::string_view &in);
 
     private:
+        void report_error(const std::string &msg);
         std::string &path;
         uint64_t &line_number;
         std::unordered_map<std::string, std::variant<std::string, function_macro>> &definitions;
+        std::optional<std::string> &error;
     };
 }
 #endif //ANANKE_MACRO_PROCESSOR_HPP

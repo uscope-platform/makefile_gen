@@ -49,7 +49,7 @@ TEST( bus_analysis, simple_bus_analysis) {
                 sv_analyzer analyzer;
 
                 analyzer.set_include_directories({std::string(prefix) + "Components/Common"});
-                auto resources = analyzer.analyze(prefix, test_file.view());
+                auto resources = analyzer.analyze(prefix, test_file.view()).value();
                 d_store->store_file({
                     f.path(),
                     "file_hash",

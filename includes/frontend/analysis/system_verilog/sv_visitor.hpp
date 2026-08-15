@@ -52,6 +52,7 @@ public:
     void exitInterface_header(sv2017::Interface_headerContext *ctx) override;
     void enterPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) override;
     bool is_known_system_function(const std::string &name) const;
+    [[nodiscard]] bool is_error() const { return had_error; }
 
     void enterCast_separator(sv2017::Cast_separatorContext *ctx) override;
     void enterPrimaryCast2(sv2017::PrimaryCast2Context *ctx) override;
@@ -240,6 +241,7 @@ private:
     bool in_param_declaration = false;
     bool in_function_var_decl = false;
     bool in_class = false;
+    bool had_error = false;
     std::vector<std::shared_ptr<hdl_statement_base>> entities;
 
     std::string current_declaration_type;

@@ -45,7 +45,7 @@ TEST( app_def_generation , generate_app_def) {
                 auto test_file = mm_file(f.path());
                 sv_analyzer analyzer;
 
-                auto resources = analyzer.analyze("", test_file.view());
+                auto resources = analyzer.analyze("", test_file.view()).value();
                 d_store->store_file({f.path(), "file_hash", resources});
             }
         }

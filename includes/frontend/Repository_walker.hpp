@@ -49,7 +49,7 @@ static file_analysis_context<hdl_file> analyze_vhdl(const std::filesystem::path 
 static file_analysis_context<Script>  analyze_script(const std::filesystem::path &file, std::set<std::string> i_d, const std::string &old_hash);
 static file_analysis_context<DataFile>  analyze_data(const std::filesystem::path &file, std::set<std::string> i_d, const std::string &old_hash);
 static file_analysis_context<Constraints>  analyze_constraint(const std::filesystem::path &file, std::set<std::string> i_d, const std::string &old_hash);
-static std::string hash_file(const std::string_view &file_content);
+static std::optional<std::string> hash_file(const std::string_view &file_content);
 
 const unsigned int max_threads = std::thread::hardware_concurrency()-1;
 

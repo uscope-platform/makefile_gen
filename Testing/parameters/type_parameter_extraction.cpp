@@ -30,7 +30,7 @@ TEST(type_parameter_extraction, with_default) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -55,7 +55,7 @@ TEST(type_parameter_extraction, no_default) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -79,7 +79,7 @@ TEST(type_parameter_extraction, unsigned_type) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -103,7 +103,7 @@ TEST(type_parameter_extraction, localparam_type) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -129,7 +129,7 @@ TEST(type_parameter_extraction, processing_with_default) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto result = parameter_solver::process_parameters(resource.get_parameters(), {});
 
@@ -147,7 +147,7 @@ TEST(type_parameter_extraction, processing_no_default) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto result = parameter_solver::process_parameters(resource.get_parameters(), {});
 
@@ -166,7 +166,7 @@ TEST(type_parameter_extraction, processing_type_param_chain) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto result = parameter_solver::process_parameters(resource.get_parameters(), {});
 
@@ -182,7 +182,7 @@ TEST(type_parameter_extraction, processing_bits_of_type_param) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto result = parameter_solver::process_parameters(resource.get_parameters(), {});
 
@@ -199,7 +199,7 @@ TEST(type_parameter_extraction, processing_multiple_type_params) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto result = parameter_solver::process_parameters(resource.get_parameters(), {});
 
@@ -223,7 +223,7 @@ TEST(type_parameter_extraction, override_type_param) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
     d_store->store_file({"/dev/zero", "file_hash", resources});
@@ -254,7 +254,7 @@ TEST(type_parameter_extraction, override_recomputes_dependent_param) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
     d_store->store_file({"/dev/zero", "file_hash", resources});
@@ -279,7 +279,7 @@ TEST(type_parameter_extraction, used_in_port_declaration) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     auto resource = resources.get_content()[0]->as<hdl_resource_statement>();
     auto params = resource.get_parameters();
     // THis test mainly verifies that using a parametrized type on a port does not crash the program

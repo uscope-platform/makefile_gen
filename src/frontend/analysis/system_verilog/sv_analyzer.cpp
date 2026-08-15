@@ -22,26 +22,32 @@
 
 
 std::pair<std::string, std::vector<std::string>> sv_analyzer::preprocess(const std::string &path, const std::string_view &content) {
-
+    last_error.reset();
     preprocessor::sv_preprocessor preproc;
     preproc.set_path(path);
     preproc.set_include_directories(include_directories);
     auto processed_content = preproc.preprocess(content);
+    if (preproc.has_error()) last_error = preproc.get_error();
     auto documentation_comments = preproc.get_documentation_comments();
     return {processed_content, documentation_comments};
 }
 
 
-hdl_file sv_analyzer::analyze(const std::string &path, const std::string_view &file_content) {
-
+std::optional<hdl_file> sv_analyzer::analyze(const std::string &path, const std::string_view &file_content) {
+    last_error.reset();
     preprocessor::sv_preprocessor preproc;
     preproc.set_path(path);
     preproc.set_include_directories(include_directories);
     auto processed_content = preproc.preprocess(file_content);
+    if (preproc.has_error()) {
+        last_error = preproc.get_error();
+        return std::nullopt;
+    }
     auto documentation_comments = preproc.get_documentation_comments();
     auto sources_map = preproc.get_source_map();
 
     auto result = process_hdl(path, processed_content);
+    if (last_error.has_value()) return std::nullopt;
 
 
     documentation_analyzer doc(documentation_comments);
@@ -108,6 +114,10 @@ hdl_file sv_analyzer::process_hdl(const std::string &path, const std::string &pr
 
     sv_visitor sv_modules_explorer;
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&sv_modules_explorer, Tree);
+    if (sv_modules_explorer.is_error()) {
+        last_error = "Unsupported construct while parsing " + path;
+        return result;
+    }
     result.set_content(sv_modules_explorer.get_entities());
     return result;
 }

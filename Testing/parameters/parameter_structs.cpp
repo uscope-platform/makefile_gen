@@ -45,7 +45,7 @@ TEST(parameter_extraction, struct_typed_parameter) {
     )";
 
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto parameters = resource.get_parameters();
     ASSERT_TRUE(parameters.contains("struct_param"));
@@ -100,7 +100,7 @@ TEST(parameter_extraction, nested_struct_parameter) {
     )";
 
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto parameters = resource.get_parameters();
     ASSERT_TRUE(parameters.contains("struct_param"));
@@ -139,7 +139,7 @@ TEST(parameter_extraction, packed_struct_access_initialization) {
     )";
 
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     qualified_identifier check_id = qualified_identifier("struct_access_param");
@@ -168,7 +168,7 @@ TEST(parameter_extraction, nested_packed_struct_access_initialization) {
     )";
 
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     qualified_identifier check_id = qualified_identifier("struct_access_param");
@@ -193,7 +193,7 @@ TEST(parameter_extraction, inline_nested_struct_parameter) {
     )";
 
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto parameters = resource.get_parameters();
     ASSERT_TRUE(parameters.contains("struct_param"));
@@ -264,7 +264,7 @@ TEST(parameter_extraction, inline_nested_struct_access_initialization) {
     )";
 
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     qualified_identifier check_id = qualified_identifier("struct_access_param");
@@ -284,7 +284,7 @@ TEST(parameter_extraction, struct_unpacked_parameter) {
     )";
 
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto parameters = resource.get_parameters();
     ASSERT_TRUE(parameters.contains("struct_param"));
@@ -338,7 +338,7 @@ TEST(parameter_extraction, unpacked_struct_access_initialization) {
     )";
 
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     qualified_identifier check_id = qualified_identifier("struct_access_param");
@@ -361,7 +361,7 @@ TEST(parameter_extraction, packed_struct_parametrized_member_width) {
     )";
 
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
@@ -389,7 +389,7 @@ TEST(parameter_extraction, packed_struct_parametrized_member_width_wide) {
     )";
 
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
@@ -426,7 +426,7 @@ TEST(parameter_extraction, anonymous_packed_struct_typed_parameter) {
     )";
 
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto parameters = resource.get_parameters();
     ASSERT_TRUE(parameters.contains("anon_struct"));
@@ -463,7 +463,7 @@ TEST(parameter_extraction, anonymous_unpacked_struct_parameter) {
     )";
 
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto parameters = resource.get_parameters();
     ASSERT_TRUE(parameters.contains("anon_struct"));
@@ -493,7 +493,7 @@ TEST(parameter_extraction, enum_typedef_parameter) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto typedefs = resource.get_typedefs();
     ASSERT_TRUE(typedefs.contains("state_t"));
     EXPECT_TRUE(typedefs.at("state_t")->is<HDL_enum_type>());
@@ -516,7 +516,7 @@ TEST(parameter_extraction, enum_parameter_evaluation) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), 1);
     EXPECT_EQ(defaults.at(qualified_identifier("V")).get_integer(), 2);
@@ -531,7 +531,7 @@ TEST(parameter_extraction, enum_with_explicit_values) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 20);
     EXPECT_EQ(defaults.at(qualified_identifier("Y")).get_integer(), 30);
@@ -544,7 +544,7 @@ TEST(parameter_extraction, union_typedef_parameter) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto typedefs = resource.get_typedefs();
     ASSERT_TRUE(typedefs.contains("word_t"));
     EXPECT_TRUE(typedefs.at("word_t")->is<HDL_union_type>());
@@ -569,7 +569,7 @@ TEST(parameter_extraction, package_union_parameter) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
     d_store->store_file({"/dev/zero", "file_hash", resources});
@@ -602,7 +602,7 @@ module test_mod (
 endmodule
     )";
     sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     EXPECT_FALSE(resources.get_content().empty());
 }
 
@@ -621,7 +621,7 @@ module test_mod (
 endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("W")).get_integer(), 8);
     EXPECT_EQ(defaults.at(qualified_identifier("V")).get_integer(), 9);

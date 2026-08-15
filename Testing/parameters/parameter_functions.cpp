@@ -47,7 +47,7 @@ TEST(parameter_extraction, simple_function_parameter) {
 
     sv_analyzer analyzer;
 
-    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).get_content()[0]);
+    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).value().get_content()[0]);
     auto param =  resource->get_parameters().get("TEST_PARAM");
 
     HDL_parameter p;
@@ -98,7 +98,7 @@ TEST(parameter_extraction, concat_in_function) {
 
     sv_analyzer analyzer;
 
-    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).get_content()[0]);
+    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).value().get_content()[0]);
     auto param =  resource->get_parameters().get("TEST_PARAM");
 
     HDL_parameter p;
@@ -145,7 +145,7 @@ TEST(parameter_extraction, replication_in_function) {
 
     sv_analyzer analyzer;
 
-    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).get_content()[0]);
+    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).value().get_content()[0]);
     auto param =  resource->get_parameters().get("TEST_PARAM");
 
     HDL_parameter p;
@@ -191,7 +191,7 @@ TEST(parameter_extraction, cast_in_concat_in_function) {
 
     sv_analyzer analyzer;
 
-    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).get_content()[0]);
+    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).value().get_content()[0]);
     auto param =  resource->get_parameters().get("TEST_PARAM");
 
     HDL_parameter p;
@@ -235,7 +235,7 @@ TEST(parameter_extraction, function_with_parameters) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto func = resource.get_functions()["CTRL_ADDR_CALC"];
 
@@ -272,7 +272,7 @@ TEST(parameter_extraction, loop_function_parameter) {
 
     sv_analyzer analyzer;
 
-    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).get_content()[0]);
+    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).value().get_content()[0]);
     auto param = resource->get_parameters().get("TEST_PARAM");
 
     HDL_parameter p;
@@ -333,7 +333,7 @@ TEST(parameter_extraction, parametric_loop_function_parameter) {
 
     sv_analyzer analyzer;
 
-    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).get_content()[0]);
+    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).value().get_content()[0]);
     auto param = resource->get_parameters().get("TEST_PARAM");
 
     HDL_parameter p;
@@ -390,7 +390,7 @@ TEST(parameter_extraction, function_with_arguments) {
 
     sv_analyzer analyzer;
 
-    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).get_content()[0]);
+    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).value().get_content()[0]);
     auto param = resource->get_parameters().get("TEST_PARAM");
 
     HDL_parameter p;
@@ -444,7 +444,7 @@ TEST(parameter_extraction, function_with_variables) {
 
     sv_analyzer analyzer;
 
-    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).get_content()[0]);
+    auto resource = std::static_pointer_cast<hdl_resource_statement>(analyzer.analyze("", test_pattern).value().get_content()[0]);
     auto functions = resource->get_functions();
 
     EXPECT_EQ(functions.size(), 1);
@@ -496,7 +496,7 @@ TEST(parameter_extraction, concat_size_mixup_in_function) {
     )";
 
     sv_analyzer analyzer;
-    auto file = analyzer.analyze("", test_pattern);
+    auto file = analyzer.analyze("", test_pattern).value();
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     d_store->store_file({"/dev/zero", "file_hash", file});
@@ -525,7 +525,7 @@ TEST(parameter_extraction, top_level_function_simple) {
     )";
 
     sv_analyzer analyzer;
-    auto file = analyzer.analyze("", test_pattern);
+    auto file = analyzer.analyze("", test_pattern).value();
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     d_store->store_file({"/dev/zero", "file_hash", file});
@@ -554,7 +554,7 @@ TEST(parameter_extraction, top_level_function_with_args) {
     )";
 
     sv_analyzer analyzer;
-    auto file = analyzer.analyze("", test_pattern);
+    auto file = analyzer.analyze("", test_pattern).value();
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     d_store->store_file({"/dev/zero", "file_hash", file});
@@ -589,7 +589,7 @@ TEST(parameter_extraction, conditional_in_function) {
     )";
 
     sv_analyzer analyzer;
-    auto file = analyzer.analyze("", test_pattern);
+    auto file = analyzer.analyze("", test_pattern).value();
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     d_store->store_file({"/dev/zero", "file_hash", file});
@@ -622,7 +622,7 @@ TEST(parameter_extraction, struct_returning_function) {
     )";
 
     sv_analyzer analyzer;
-    auto file = analyzer.analyze("", test_pattern);
+    auto file = analyzer.analyze("", test_pattern).value();
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     d_store->store_file({"/dev/zero", "file_hash", file});
@@ -664,7 +664,7 @@ TEST(parameter_extraction, packed_struct_returning_function) {
     )";
 
     sv_analyzer analyzer;
-    auto file = analyzer.analyze("", test_pattern);
+    auto file = analyzer.analyze("", test_pattern).value();
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     d_store->store_file({"/dev/zero", "file_hash", file});
@@ -704,7 +704,7 @@ TEST(parameter_extraction, packed_struct_returning_function_reverse_order) {
     )";
 
     sv_analyzer analyzer;
-    auto file = analyzer.analyze("", test_pattern);
+    auto file = analyzer.analyze("", test_pattern).value();
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     d_store->store_file({"/dev/zero", "file_hash", file});
@@ -740,7 +740,7 @@ TEST(parameter_extraction, concat_and_assignment_in_function) {
     )";
 
     sv_analyzer analyzer;
-    auto file = analyzer.analyze("", test_pattern);
+    auto file = analyzer.analyze("", test_pattern).value();
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     d_store->store_file({"/dev/zero", "file_hash", file});

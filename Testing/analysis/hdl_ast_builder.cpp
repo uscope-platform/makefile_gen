@@ -46,7 +46,7 @@ TEST( hdl_ast_builder, pid_ast_build) {
                 sv_analyzer analyzer;
 
 
-                auto resources = analyzer.analyze("", test_file.view());
+                auto resources = analyzer.analyze("", test_file.view()).value();
                 d_store->store_file({f.path(), "file_hash", resources});
             }
         }
@@ -91,7 +91,7 @@ TEST( hdl_ast_builder, spi_ast_build) {
                 sv_analyzer analyzer;
                 analyzer.set_include_directories({std::string(prefix) + "Components/Common"});
 
-                auto resources = analyzer.analyze("", test_file.view());
+                auto resources = analyzer.analyze("", test_file.view()).value();
                 d_store->store_file({f.path(), "file_hash", resources});
             }
         }
@@ -136,7 +136,7 @@ TEST( hdl_ast_builder, pwm_ast_build) {
                 auto test_file = mm_file(f.path());
                 sv_analyzer analyzer;
 
-                auto resources = analyzer.analyze("", test_file.view());
+                auto resources = analyzer.analyze("", test_file.view()).value();
                 d_store->store_file({f.path(), "file_hash", resources});
             }
         }
@@ -183,7 +183,7 @@ TEST( hdl_ast_builder, adc_ast_build) {
                 auto test_file = mm_file(f.path());
                 sv_analyzer analyzer;
 
-                auto resources = analyzer.analyze("", test_file.view());
+                auto resources = analyzer.analyze("", test_file.view()).value();
                 d_store->store_file({f.path(), "file_hash", resources});
             }
         }
@@ -226,7 +226,7 @@ TEST( hdl_ast_builder, interface_parameter) {
                 auto test_file = mm_file(f.path());
                 sv_analyzer analyzer;
 
-                auto resources = analyzer.analyze("", test_file.view());
+                auto resources = analyzer.analyze("", test_file.view()).value();
                 d_store->store_file({f.path(), "file_hash", resources});
             }
         }
@@ -243,7 +243,7 @@ TEST( hdl_ast_builder, interface_parameter) {
 
     sv_analyzer analyzer;
     
-    auto resource = analyzer.analyze("",test_pattern);
+    auto resource = analyzer.analyze("",test_pattern).value();
     d_store->store_file({"/dev/zero", "file_hash", resource});
 
     HDL_ast_builder_v2 b(s_store, d_store, Depfile());
@@ -291,7 +291,7 @@ TEST( hdl_ast_builder, package_dependency) {
 
     sv_analyzer analyzer;
     
-    auto entities = analyzer.analyze("/tmp/dep.sv", test_pattern);
+    auto entities = analyzer.analyze("/tmp/dep.sv", test_pattern).value();
     d_store->store_file({"/tmp/dep.sv", "file_hash", entities});
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
@@ -326,7 +326,7 @@ TEST( hdl_ast_builder, memory_dependency) {
 
     sv_analyzer analyzer;
     
-    auto entities = analyzer.analyze("", test_pattern);
+    auto entities = analyzer.analyze("", test_pattern).value();
     d_store->store_file({"/dev/zero", "file_hash", entities});
 
     DataFile d("mem", "/tmp/mem.dat");
@@ -366,7 +366,7 @@ TEST( hdl_ast_builder, nested_generate_loop) {
     )";
 
     sv_analyzer analyzer;
-    auto entities = analyzer.analyze("", test_pattern);
+    auto entities = analyzer.analyze("", test_pattern).value();
     d_store->store_file({"/dev/zero", "file_hash", entities});
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
@@ -406,7 +406,7 @@ TEST( hdl_ast_builder, loop_around_conditional) {
     )";
 
     sv_analyzer analyzer;
-    auto entities = analyzer.analyze("", test_pattern);
+    auto entities = analyzer.analyze("", test_pattern).value();
     d_store->store_file({"/dev/zero", "file_hash", entities});
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
@@ -450,7 +450,7 @@ TEST( hdl_ast_builder, conditional_around_loop) {
     )";
 
     sv_analyzer analyzer;
-    auto entities = analyzer.analyze("", test_pattern);
+    auto entities = analyzer.analyze("", test_pattern).value();
     d_store->store_file({"/dev/zero", "file_hash", entities});
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
@@ -497,7 +497,7 @@ TEST( hdl_ast_builder, triple_nested_conditional) {
     )";
 
     sv_analyzer analyzer;
-    auto entities = analyzer.analyze("", test_pattern);
+    auto entities = analyzer.analyze("", test_pattern).value();
     d_store->store_file({"/dev/zero", "file_hash", entities});
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
@@ -527,7 +527,7 @@ TEST( hdl_ast_builder, primitive_classification) {
     )";
 
     sv_analyzer analyzer;
-    auto entities = analyzer.analyze("", test_pattern);
+    auto entities = analyzer.analyze("", test_pattern).value();
     d_store->store_file({"/dev/zero", "file_hash", entities});
 
     hdl_resource_statement leaf_mod;

@@ -160,7 +160,8 @@ TEST(preprocessor, undef) {
     sv_preprocessor preproc;
     preproc.set_path("/tmp/file.sv");
 
-    EXPECT_THROW(preproc.preprocess(test_pattern), std::runtime_error);
+    preproc.preprocess(test_pattern);
+    EXPECT_TRUE(preproc.has_error());
 }
 
 

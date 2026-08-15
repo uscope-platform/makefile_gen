@@ -22,8 +22,13 @@
 namespace preprocessor {
 
 
+    void sv_preprocessor::report_error(const std::string &msg) {
+        spdlog::error(msg);
+        if (!error) error = msg;
+    }
+
     std::string sv_preprocessor::preprocess(const std::string_view &file_content, unsigned int initial_output_line) {
-        macro_processor macro_engine(definitions , line_number, path);
+        macro_processor macro_engine(definitions , line_number, path, error);
 
         auto flat_source= flatten_source(file_content);
         std::istringstream iss(flat_source);
@@ -35,6 +40,7 @@ namespace preprocessor {
         line_number = 1;
 
         while (std::getline(iss, line)) {
+            if (error) break;
             std::string_view trimmed_line = macro_processor::ltrim(line);
 
             bool skipped_directive = trimmed_line.starts_with("`resetall")
@@ -68,15 +74,12 @@ namespace preprocessor {
                     path = included_file.value();
                     source_map.close_range(output_line_n);
 
-                    try {
-                        mm_file file(path);
-                        auto content = preprocess(file.view(), output_line_n);
-                        out << content + '\n';
-                    } catch (...) {
-                        path = saved_path;
-                        line_number = saved_line;
-                        source_map.open_range(output_line_n, path);
-                        throw;
+                    auto f_opt = mm_file::try_open(path);
+                    if (!f_opt.has_value()) {
+                        report_error(fmt::format("Could not open include file: {}", path));
+                    } else {
+                        auto content = preprocess(f_opt->view(), output_line_n);
+                        if (!error) out << content + '\n';
                     }
 
                     line_number = saved_line;
@@ -129,7 +132,8 @@ namespace preprocessor {
         auto start_identifier = line.find_first_of("\"<");
         std::string file_path;
         if (start_identifier == std::string_view::npos) {
-            throw std::runtime_error(fmt::format("Malformed include [{}] at line {} in file: {}", line,line_number, path));
+            report_error(fmt::format("Malformed include [{}] at line {} in file: {}", line,line_number, path));
+            return std::nullopt;
         }else if (line[start_identifier] == '\"') {
             auto end_identifier = line.substr(start_identifier+1).find_first_of('"');
             auto name = line.substr(start_identifier+1, end_identifier);
@@ -155,7 +159,8 @@ namespace preprocessor {
                 auto full_path = dir/ filename;
                 if (std::filesystem::exists(full_path)) return full_path;
             }
-            throw std::runtime_error(fmt::format("included file not found: {}", filename));
+            report_error(fmt::format("included file not found: {}", filename));
+            return std::nullopt;
         }
     }
 
@@ -170,7 +175,8 @@ namespace preprocessor {
         } else {
             auto id = std::string(purged_identifier);
             if (!definitions.contains(id)) {
-                throw std::runtime_error(fmt::format("{}:{} MACRO {} is not defined", path, line_number, id));
+                report_error(fmt::format("{}:{} MACRO {} is not defined", path, line_number, id));
+                return "";
             }
             auto def = definitions.at(id);
             if (std::holds_alternative<std::string>(def)) {
@@ -193,7 +199,8 @@ namespace preprocessor {
         if (trimmed_view[id_last] == '(') {
             auto macro = macro_processor::parse_function_macro(trimmed_view.substr(id_last+1));
             if (!macro.has_value()) {
-                throw std::runtime_error(fmt::format("The arguments list in macro {} is never closed [{}]", identifier, path));
+                report_error(fmt::format("The arguments list in macro {} is never closed [{}]", identifier, path));
+                return;
             }
             definitions[std::string(identifier)] = macro.value();
         } else {
@@ -400,6 +407,11 @@ namespace preprocessor {
 
             // Evaluate the conditional branches cleanly using the existing rules
             output_line = nested_preproc.preprocess(formatted, output_line_n) + '\n';
+            if (nested_preproc.has_error()) {
+                spdlog::error(nested_preproc.get_error());
+                if (!error) error = nested_preproc.get_error();
+                return "";
+            }
 
             definitions = nested_preproc.definitions;
         }

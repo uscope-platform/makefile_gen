@@ -50,7 +50,7 @@ TEST(parameter_extraction, init_list_after_reg) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -98,7 +98,7 @@ TEST(parameter_extraction, size_cast) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -137,7 +137,7 @@ TEST(parameter_extraction, paretesized_cast) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -183,7 +183,7 @@ TEST(parameter_extraction, type_cast) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -234,7 +234,7 @@ TEST(parameter_extraction, nested_type_cast) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -297,7 +297,7 @@ TEST(parameter_extraction, multiple_type_cast) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -362,7 +362,7 @@ TEST(parameter_extraction, cast_in_binary_expression) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -443,7 +443,7 @@ TEST(parameter_extraction,time_literal) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -487,7 +487,7 @@ TEST(parameter_extraction, cast_in_concat) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -538,7 +538,7 @@ TEST(parameter_extraction, strings_dafault_init) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -597,7 +597,7 @@ TEST(parameter_extraction, string_array_selection) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -667,7 +667,7 @@ TEST(parameter_extraction, strings_array) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -727,7 +727,7 @@ TEST(parameter_extraction, float_parameter) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -789,7 +789,7 @@ TEST(parameter_extraction, package_parameters) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -883,7 +883,7 @@ TEST(parameter_extraction, simple_parameters) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -968,7 +968,7 @@ TEST(parameter_extraction, simple_expressions) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1144,7 +1144,7 @@ TEST(parameter_extraction, bitwise_expressions) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1244,7 +1244,7 @@ TEST(parameter_extraction, power_expression) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1302,7 +1302,7 @@ TEST(parameter_extraction, arithmetic_shift_left) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1362,7 +1362,7 @@ TEST(parameter_extraction, arithmetic_shift_right) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1437,7 +1437,7 @@ TEST(parameter_extraction, logical_and_or) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1532,7 +1532,7 @@ TEST(parameter_extraction, package_parameters_use) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern).get_content();
+    auto resources = analyzer.analyze("", test_pattern).value().get_content();
     auto resource = resources[1]->as<hdl_resource_statement>();
     auto pkg = resources[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
@@ -1588,7 +1588,7 @@ TEST(parameter_extraction, interface_parameter_use) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern).get_content();
+    auto resources = analyzer.analyze("", test_pattern).value().get_content();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(resources[1]->as<hdl_resource_statement>().get_statements()[2]);
     auto parameters = stmt->get_parameters();
 
@@ -1615,7 +1615,7 @@ TEST(parameter_extraction, negative_number_parameters) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1671,7 +1671,7 @@ TEST(parameter_extraction, instance_parameter) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto def_parameters = resource.get_parameters();
 
     auto inst_parameters = std::dynamic_pointer_cast<hdl_instance_statement>(resource.get_statements()[0])->get_parameters();
@@ -1749,7 +1749,7 @@ TEST(parameter_extraction, unrelated_wire_dependency_conflict) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto inst = std::dynamic_pointer_cast<hdl_instance_statement>(resource.get_statements()[0]);
     auto parameter = inst->get_parameters().const_get("DECIMATED");
@@ -1770,7 +1770,7 @@ TEST(parameter_extraction, interface_parameters) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1833,7 +1833,7 @@ TEST(parameter_extraction, generate_for) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
     auto loop_stmt = std::dynamic_pointer_cast<hdl_loop_statement>(resource.get_statements()[0]);
     ASSERT_NE(loop_stmt, nullptr);
@@ -1888,7 +1888,7 @@ TEST(parameter_extraction, param_ternary_conditional) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1966,7 +1966,7 @@ TEST(parameter_extraction, nested_ternary_conditional) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -2036,7 +2036,7 @@ TEST(parameter_extraction, complex_ternary_conditional) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -2099,7 +2099,7 @@ TEST(parameter_extraction, typedef_parameter) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
 
 
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
@@ -2130,7 +2130,7 @@ TEST(parameter_processing, typedef_in_package_parameter) {
     )";
 
     sv_analyzer analyzer;
-    auto file =  analyzer.analyze("", test_pattern);
+    auto file =  analyzer.analyze("", test_pattern).value();
     auto resources= file.get_content();
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
@@ -2174,7 +2174,7 @@ TEST(parameter_extraction, wide_int_parameter) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -2223,7 +2223,7 @@ TEST(parameter_extraction, wide_integer_subtraction) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
     auto big_val = defaults.at(qualified_identifier("BIG")).get_integer().to_wide();
@@ -2240,7 +2240,7 @@ TEST(parameter_extraction, wide_integer_bitwise_and) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
     auto and_val = defaults.at(qualified_identifier("AND_RES")).get_integer().to_wide();
@@ -2256,7 +2256,7 @@ TEST(parameter_extraction, wide_integer_shift_left) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
     auto shifted_val = defaults.at(qualified_identifier("SHIFTED")).get_integer().to_wide();
@@ -2271,7 +2271,7 @@ TEST(parameter_extraction, wide_integer_mixed_arithmetic) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
     auto mult_val = defaults.at(qualified_identifier("MULT")).get_integer().to_wide();
@@ -2292,7 +2292,7 @@ TEST(parameter_extraction, streaming_operators) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
 
@@ -2317,7 +2317,7 @@ TEST(parameter_extraction, streaming_bit_reversal) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 0xD5);
 }
@@ -2332,7 +2332,7 @@ TEST(parameter_extraction, unary_logical_not) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 0);
     EXPECT_EQ(defaults.at(qualified_identifier("Y")).get_integer(), 12);
@@ -2352,7 +2352,7 @@ TEST(parameter_extraction, reduction_operators) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 0);   // 1011: not all ones
     EXPECT_EQ(defaults.at(qualified_identifier("O")).get_integer(), 1);   // 1011: any bit set
@@ -2371,7 +2371,7 @@ TEST(parameter_extraction, int_real_equality) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("E1")).get_integer(), 1);
     EXPECT_EQ(defaults.at(qualified_identifier("E2")).get_integer(), 1);
@@ -2385,7 +2385,7 @@ TEST(parameter_extraction, wide_size_cast) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     auto x = defaults.at(qualified_identifier("X")).get_integer();
     EXPECT_EQ(x.get_value(), static_cast<int64_t>(0xFEDCBA9876543210));
@@ -2400,7 +2400,7 @@ TEST(parameter_extraction, wide_packed_concatenation) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     auto c = defaults.at(qualified_identifier("C")).get_integer();
     EXPECT_EQ(c.to_wide(), int1024_t("0xCAFEBABECAFEBABEDEADBEEFDEADBEEF"));
@@ -2414,7 +2414,7 @@ TEST(parameter_extraction, wide_streaming_byte_reversal) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     auto x = defaults.at(qualified_identifier("X")).get_integer();
     EXPECT_EQ(x.to_wide(), int1024_t("0xEFCDAB8967452301EFCDAB8967452301"));
@@ -2428,7 +2428,7 @@ TEST(parameter_extraction, wide_replication) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     auto r = defaults.at(qualified_identifier("R")).get_integer();
     EXPECT_EQ(r.to_wide(), int1024_t("0xDEADBEEFCAFEBABEDEADBEEFCAFEBABE"));
@@ -2445,7 +2445,7 @@ TEST(parameter_extraction, wide_bit_select) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     auto w = defaults.at(qualified_identifier("W")).get_integer();
     ASSERT_TRUE(w.is_wide());
@@ -2463,7 +2463,7 @@ TEST(parameter_extraction, wide_logic_shift_right) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     auto x = defaults.at(qualified_identifier("X")).get_integer();
     EXPECT_EQ(x.to_wide(), int1024_t(0x1000000000000000));
@@ -2479,7 +2479,7 @@ TEST(parameter_extraction, streaming_byte_reversal) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 0x11223344);
 }
@@ -2492,7 +2492,7 @@ TEST(parameter_extraction, streaming_right_shift_no_reorder) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer().get_value(), 0x44332211);
 }
@@ -2506,7 +2506,7 @@ TEST(parameter_extraction, streaming_ieee_examples) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer().get_value(), 0b010111);
     EXPECT_EQ(defaults.at(qualified_identifier("Y")).get_integer().get_value(), 0b110101);
@@ -2521,7 +2521,7 @@ TEST(parameter_extraction, streaming_multi_component) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 0x3412);
 }
@@ -2535,7 +2535,7 @@ TEST(parameter_extraction, streaming_slice_size_expression) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 0x11223344);
 }
@@ -2551,7 +2551,7 @@ TEST(parameter_extraction, unary_minus_in_comparison) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("f")).get_integer(), 1);
 }
@@ -2567,7 +2567,7 @@ TEST(parameter_extraction, case_wildcard_equality) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 1);
     EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 1);
@@ -2585,7 +2585,7 @@ TEST(parameter_extraction, result_width_truncation) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 0);
     EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 0);

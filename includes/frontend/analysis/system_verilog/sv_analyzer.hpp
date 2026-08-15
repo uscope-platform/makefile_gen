@@ -36,12 +36,15 @@
 class sv_analyzer {
 public:
     std::pair<std::string, std::vector<std::string>> preprocess(const std::string &path, const std::string_view &file_content);
-    hdl_file analyze(const std::string &path, const std::string_view &file_content);
+    std::optional<hdl_file> analyze(const std::string &path, const std::string_view &file_content);
     void set_include_directories(const std::set<std::string> &i_d){include_directories = i_d;}
+    [[nodiscard]] bool has_error() const {return last_error.has_value();}
+    [[nodiscard]] const std::string& get_error() const {return last_error.value();}
 private:
 
     hdl_file process_hdl(const std::string &path, const std::string &preprocessed_content);
     std::set<std::string> include_directories;
+    std::optional<std::string> last_error;
 };
 
 

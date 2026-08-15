@@ -76,12 +76,20 @@ std::expected<std::unordered_map<std::string, std::string>, int> ananke::directe
             }
             try {
                 sv_analyzer analyzer;
-                mm_file file(target);
+                auto f_opt = mm_file::try_open(target);
+                if (!f_opt.has_value()) {
+                    std::cout << "Target: " << target << " not readable" << std::endl;
+                    return std::unexpected(51);
+                }
                 auto includes = s_store->get_default_includes();;
                 analyzer.set_include_directories(includes);
-                auto analysis_result = analyzer.analyze(target, file.view());
+                auto analysis_result = analyzer.analyze(target, f_opt->view());
+                if (!analysis_result.has_value()) {
+                    std::cout << "Error parsing target: " << target << ": " << analyzer.get_error() << std::endl;
+                    return std::unexpected(52);
+                }
                 std::unordered_map<std::string, std::string> res_map;
-                for (auto &res:analysis_result.get_content()) {
+                for (auto &res:analysis_result.value().get_content()) {
                     std::string statement_id;
                     if (res->is<hdl_resource_statement>()) statement_id = res->as<hdl_resource_statement>().getName();
                     else if (res->is<hdl_function_statement>()) statement_id = res->as<hdl_function_statement>().get_name();
@@ -90,7 +98,7 @@ std::expected<std::unordered_map<std::string, std::string>, int> ananke::directe
                 return res_map;
             } catch (std::runtime_error &err) {
                 std::cout << err.what();
-                return std::unexpected(51);
+                return std::unexpected(53);
             }
 
         }

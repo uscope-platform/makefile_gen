@@ -649,7 +649,9 @@ void sv_visitor::enterParameter_declaration(sv2017::Parameter_declarationContext
     }
     in_param_declaration = true;
     if (!ctx->list_of_param_assignments()) {
-        throw std::runtime_error("Encountered non existent list of parameter declarations");
+        spdlog::warn("Encountered non existent list of parameter declarations");
+        had_error = true;
+        return;
     }
     auto resolved = setup_data_type(ctx->data_type_or_implicit());
     type_engine.start_range();
@@ -1005,7 +1007,11 @@ void sv_visitor::exitNamed_port_connection(sv2017::Named_port_connectionContext 
             deps_factory.set_wildcard(true);
             return;
         }
-        else throw std::runtime_error("Encountered a named port connection without an identifier, this is not supported yet");
+        else {
+            spdlog::warn("Encountered a named port connection without an identifier, this is not supported yet");
+            had_error = true;
+            return;
+        }
     }
     auto port_name = ctx->identifier()->getText();
 

@@ -33,7 +33,7 @@ TEST(port_extraction, regular_port) {
     )";
 
     sv_analyzer analyzer;
-    auto res = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto res = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
 
@@ -64,7 +64,7 @@ TEST(port_extraction, wildcard_ports) {
 
     sv_analyzer analyzer;
 
-    auto res = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto res = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
 
@@ -90,7 +90,7 @@ TEST(port_extraction, concat_port) {
 
     sv_analyzer analyzer;
 
-        auto res = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+        auto res = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
@@ -119,7 +119,7 @@ TEST(port_extraction, array_port) {
 
     sv_analyzer analyzer;
 
-        auto res = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+        auto res = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
@@ -149,7 +149,7 @@ TEST(port_extraction, array_range_port) {
 
     sv_analyzer analyzer;
 
-        auto res = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+        auto res = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
@@ -189,7 +189,7 @@ TEST(port_extraction, concat_literal) {
 
     sv_analyzer analyzer;
 
-        auto res = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+        auto res = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
@@ -217,7 +217,7 @@ TEST(port_extraction, concat_simple_slicing) {
 
     sv_analyzer analyzer;
 
-        auto res = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+        auto res = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
@@ -255,7 +255,7 @@ TEST(port_extraction, concat_range) {
 
     sv_analyzer analyzer;
 
-        auto res = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+        auto res = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
@@ -312,7 +312,7 @@ TEST(port_extraction,range_concat_expression) {
 
     sv_analyzer analyzer;
 
-        auto res = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+        auto res = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
@@ -374,7 +374,7 @@ TEST(port_extraction, concat_complex_slicing) {
 
     sv_analyzer analyzer;
 
-        auto res = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+        auto res = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
@@ -435,7 +435,7 @@ TEST(port_extraction, concat_interface_component) {
 
     sv_analyzer analyzer;
 
-        auto res = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+        auto res = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
@@ -462,7 +462,7 @@ TEST(port_extraction, repetition_port) {
 
     sv_analyzer analyzer;
 
-        auto res = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+        auto res = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
@@ -502,7 +502,7 @@ TEST(port_extraction, complex_nested_concat_port) {
 
     sv_analyzer analyzer;
 
-        auto res = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+        auto res = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
@@ -552,7 +552,7 @@ TEST(port_extraction, concat_of_repetitions) {
 
     sv_analyzer analyzer;
 
-        auto res = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+        auto res = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
@@ -616,7 +616,7 @@ TEST(port_extraction, port_extraction_with_declarations) {
 
     sv_analyzer analyzer;
 
-    auto res = analyzer.analyze("",test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto res = analyzer.analyze("",test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[1]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
@@ -645,7 +645,7 @@ TEST(port_extraction, other_port_concat) {
 
     sv_analyzer analyzer;
 
-    auto res = analyzer.analyze("",test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto res = analyzer.analyze("",test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
@@ -684,7 +684,7 @@ TEST(port_extraction, replication_with_parameter) {
 
     sv_analyzer analyzer;
 
-        auto res = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+        auto res = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;
@@ -713,7 +713,7 @@ TEST(port_extraction, interface_component_port ) {
 
     sv_analyzer analyzer;
     
-    auto res = analyzer.analyze("",test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto res = analyzer.analyze("",test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto stmt = std::dynamic_pointer_cast<hdl_instance_statement>(res.get_statements()[0]);
     auto ports = stmt->get_ports();
     std::unordered_map<std::string, std::vector<HDL_net>> check_ports;

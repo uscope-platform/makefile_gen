@@ -43,7 +43,10 @@ namespace preprocessor {
         void set_path(const std::string &s){path = s;}
         std::vector<std::string> get_documentation_comments() {return documentation_comments;}
         source_map_t get_source_map() const {return  source_map.get_map();}
+        [[nodiscard]] bool has_error() const {return error.has_value();}
+        [[nodiscard]] const std::string& get_error() const {return error.value();}
     private:
+        void report_error(const std::string &msg);
         std::string post_process_macro_expansion(const std::string &text);
         std::string gather_multi_line_macro(const std::string &first_line, std::istringstream &iss);
         typedef std::unordered_map<std::string, std::variant<std::string, function_macro>> definitions_map;
@@ -55,6 +58,7 @@ namespace preprocessor {
         definitions_map definitions;
         std::vector<std::string> documentation_comments;
         std::string path;
+        std::optional<std::string> error;
         conditional_solver c_solver;
         std::set<std::string> include_directories;
         source_mapper source_map;

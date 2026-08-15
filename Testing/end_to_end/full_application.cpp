@@ -171,7 +171,7 @@ TEST( end_to_end , directed_parsing_preprocessor_error) {
     auto rc = uut.directed_parsing();
 
     ASSERT_FALSE(rc);
-    EXPECT_EQ(rc.error(), 51);
+    EXPECT_EQ(rc.error(), 52);
     std::filesystem::remove_all(test_file);
     e2e_clean_settings();
 }

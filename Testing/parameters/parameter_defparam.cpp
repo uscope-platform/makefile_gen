@@ -32,7 +32,7 @@ TEST(parameter_defparam, simple_override) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
     d_store->store_file({"/dev/zero", "file_hash", resources});
@@ -59,7 +59,7 @@ TEST(parameter_defparam, override_with_parent_param) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
     d_store->store_file({"/dev/zero", "file_hash", resources});
@@ -88,7 +88,7 @@ TEST(parameter_defparam, nested_override) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
     d_store->store_file({"/dev/zero", "file_hash", resources});
@@ -114,7 +114,7 @@ TEST(parameter_defparam, root_qualified_warns_and_does_not_crash) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
     d_store->store_file({"/dev/zero", "file_hash", resources});
@@ -139,7 +139,7 @@ TEST(parameter_defparam, unit_qualified_warns_and_does_not_crash) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
     d_store->store_file({"/dev/zero", "file_hash", resources});

@@ -42,7 +42,7 @@ TEST(conditional_processing, simple_if_generate) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     auto content = resources.get_content()[0]->as<hdl_resource_statement>();
     auto result = content.get_statements()[0]->as<hdl_conditional_statement>();
 
@@ -86,7 +86,7 @@ TEST(conditional_processing, else_if_chain) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     auto content = resources.get_content()[0]->as<hdl_resource_statement>();
     auto result = content.get_statements()[0]->as<hdl_conditional_statement>();
 
@@ -137,7 +137,7 @@ TEST(conditional_processing, nested_if_in_then) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     auto content = resources.get_content()[0]->as<hdl_resource_statement>();
     auto result = content.get_statements()[0]->as<hdl_conditional_statement>();
 

@@ -62,7 +62,7 @@ TEST(parameter_processing, override_after_fatal) {
     sv_analyzer analyzer;
 
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
 
@@ -104,7 +104,7 @@ TEST(parameter_processing, mixed_dep_override) {
     sv_analyzer analyzer;
 
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
 
@@ -156,7 +156,7 @@ TEST(parameter_processing, package_parameters_in_array_init) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern).get_content();
+    auto resources = analyzer.analyze("", test_pattern).value().get_content();
     auto& pkg = resources[0]->as<hdl_resource_statement>();
     auto& mod = resources[2]->as<hdl_resource_statement>();;
 
@@ -193,7 +193,7 @@ TEST(parameter_processing, package_parameters_use) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern).get_content();
+    auto resources = analyzer.analyze("", test_pattern).value().get_content();
     auto& pkg = resources[0]->as<hdl_resource_statement>();;
     auto& mod = resources[1]->as<hdl_resource_statement>();;
 
@@ -242,7 +242,7 @@ TEST(parameter_processing, array_instance_parameter_override) {
     sv_analyzer analyzer;
 
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
 
@@ -349,7 +349,7 @@ TEST(parameter_processing, packed_array_initialization_expression_override) {
     sv_analyzer analyzer;
 
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     d_store->store_file({"/dev/zero", "file_hash", resources});
@@ -393,7 +393,7 @@ TEST(parameter_processing, simple_for_array_parameter) {
     sv_analyzer analyzer;
 
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
 
@@ -444,7 +444,7 @@ TEST(parameter_processing, complex_for_array_parameter) {
     sv_analyzer analyzer;
 
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
 
@@ -494,7 +494,7 @@ TEST(parameter_processing, complex_vector_function_parameter) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
 
     d_store->store_file({"/dev/zero", "file_hash", resources});
 
@@ -540,7 +540,7 @@ TEST(parameter_processing, complex_vector_function_parameter_endiannes_mismatch)
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
 
     d_store->store_file({"/dev/zero", "file_hash", resources});
 
@@ -591,7 +591,7 @@ TEST(parameter_processing, simple_package_in_function_initialization) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern).get_content();
+    auto resources = analyzer.analyze("", test_pattern).value().get_content();
     auto pkg = resources[0]->as<hdl_resource_statement>();
     auto mod = std::static_pointer_cast<hdl_resource_statement>(resources[1]);
 
@@ -643,7 +643,7 @@ TEST(parameter_processing, nested_package_in_function_initialization) {
     sv_analyzer analyzer;
 
 
-    auto resources = analyzer.analyze("", test_pattern).get_content();
+    auto resources = analyzer.analyze("", test_pattern).value().get_content();
     auto pkg = resources[0]->as<hdl_resource_statement>();
     auto mod = std::static_pointer_cast<hdl_resource_statement>(resources[1]);
 
@@ -678,7 +678,7 @@ TEST(parameter_processing, function_in_package_initialization) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern).get_content();
+    auto resources = analyzer.analyze("", test_pattern).value().get_content();
     auto pkg = std::static_pointer_cast<hdl_resource_statement>(resources[0]);
 
 
@@ -712,7 +712,7 @@ TEST(parameter_processing, package_function_called_from_module) {
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
 
-    auto file =  analyzer.analyze("", test_pattern);
+    auto file =  analyzer.analyze("", test_pattern).value();
     auto resources = file.get_content();
     d_store->store_file({"/dev/zero", "file_hash", file});
     auto pkg = resources[0]->as<hdl_resource_statement>();
@@ -769,7 +769,7 @@ TEST(parameter_processing, package_function_called_from_module_and_typedef) {
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
 
 
-    auto file = analyzer.analyze("", test_pattern);
+    auto file = analyzer.analyze("", test_pattern).value();
     d_store->store_file({"/dev/zero", "file_hash", file});
     auto resources = file.get_content();
     auto pkg = resources[0]->as<hdl_resource_statement>();
@@ -830,7 +830,7 @@ TEST(parameter_processing, override_with_system_task) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
 
     d_store->store_file({"/dev/zero", "file_hash", resources});
 
@@ -867,7 +867,7 @@ TEST(parameter_processing, interface_default_parameters) {
     sv_analyzer analyzer;
 
 
-    auto file = analyzer.analyze("", test_pattern);
+    auto file = analyzer.analyze("", test_pattern).value();
     auto resource = file.get_content()[1]->as<hdl_resource_statement>();
     d_store->store_file({"/dev/zero", "file_hash", file});
 
@@ -919,7 +919,7 @@ TEST(parameter_processing, override_with_interface_param) {
 
     sv_analyzer analyzer;
 
-    auto file = analyzer.analyze("", test_pattern);
+    auto file = analyzer.analyze("", test_pattern).value();
     auto resource = file.get_content()[2]->as<hdl_resource_statement>();
     d_store->store_file({"/dev/zero", "file_hash", file});
 
@@ -980,7 +980,7 @@ TEST(parameter_processing, nested_override_with_interface_param) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
 
     d_store->store_file({"/dev/zero", "file_hash", resources});
 
@@ -1046,7 +1046,7 @@ TEST(parameter_processing, double_nested_override_with_interface_param) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
 
     d_store->store_file({"/dev/zero", "file_hash", resources});
 
@@ -1088,7 +1088,7 @@ TEST(parameter_processing, override_with_package_parameter) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern).get_content();
+    auto resources = analyzer.analyze("", test_pattern).value().get_content();
     auto pkg = std::static_pointer_cast<hdl_resource_statement>(resources[0]);
     auto dep = std::static_pointer_cast<hdl_resource_statement>(resources[1]);
 
@@ -1162,7 +1162,7 @@ TEST(parameter_processing, override_with_function_parameter) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
 
     d_store->store_file({"/dev/zero", "file_hash", resources});
 
@@ -1226,7 +1226,7 @@ TEST(parameter_processing, override_package_function) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern).get_content();
+    auto resources = analyzer.analyze("", test_pattern).value().get_content();
     auto pkg = std::static_pointer_cast<hdl_resource_statement>(resources[0]);
     auto dep =  std::static_pointer_cast<hdl_resource_statement>(resources[1]);
 
@@ -1302,7 +1302,7 @@ TEST(parameter_processing, parameter_with_for_loop) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
 
     d_store->store_file({"/dev/zero", "file_hash", resources});
 
@@ -1370,7 +1370,7 @@ TEST(parameter_processing, parameter_with_for_loop_incr) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
 
     d_store->store_file({"/dev/zero", "file_hash", resources});
 
@@ -1430,7 +1430,7 @@ TEST(parameter_processing, parent_parameter_collision) {
     sv_analyzer analyzer;
 
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
 
@@ -1478,7 +1478,7 @@ TEST(parameter_processing, override_after_function_localparam) {
     sv_analyzer analyzer;
 
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
 
@@ -1530,7 +1530,7 @@ TEST(parameter_processing, init_list_override) {
     sv_analyzer analyzer;
 
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
 
@@ -1640,7 +1640,7 @@ TEST(parameter_processing, override_as_dependency) {
     sv_analyzer analyzer;
 
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
 
@@ -1710,7 +1710,7 @@ endmodule
     sv_analyzer analyzer;
 
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
     d_store->store_file({"/dev/zero", "file_hash", resources});
@@ -1777,7 +1777,7 @@ endmodule
     )";
 
     sv_analyzer analyzer;
-    auto file = analyzer.analyze("", test_pattern);
+    auto file = analyzer.analyze("", test_pattern).value();
     auto resource = file.get_content()[0]->as<hdl_resource_statement>();
     auto pkg_solved = parameter_solver::process_parameters(
         resource.get_parameters(), {});
@@ -1819,7 +1819,7 @@ TEST(parameter_processing, override_with_package_ref_in_array_init) {
     )";
 
     sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
     d_store->store_file({"/dev/zero", "file_hash", resources});
@@ -1877,7 +1877,7 @@ TEST(parameter_processing, intermediate_interface_param) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     d_store->store_file({"/dev/zero", "file_hash", resources});
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
@@ -1926,7 +1926,7 @@ TEST(parameter_processing, intermediate_interface_in_override_param) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     d_store->store_file({"/dev/zero", "file_hash", resources});
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
@@ -2014,7 +2014,7 @@ TEST(parameter_processing, interface_param_same_name_as_child_param_with_loopbac
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     d_store->store_file({"/dev/zero", "file_hash", resources});
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
@@ -2089,7 +2089,7 @@ TEST(parameter_processing, interface_param_same_name_as_child_param_no_loopback)
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     d_store->store_file({"/dev/zero", "file_hash", resources});
 
     HDL_ast_builder_v2 b2(s_store, d_store, Depfile());
@@ -2130,7 +2130,7 @@ TEST(parameter_processing, ternary_with_package_override) {
     )";
 
     sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
     d_store->store_file({"/dev/zero", "file_hash", resources});
@@ -2160,7 +2160,7 @@ TEST(parameter_processing, override_dep_on_local_param_chain) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
 
@@ -2203,7 +2203,7 @@ TEST(parameter_processing, packed_struct_override) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
 
@@ -2240,7 +2240,7 @@ TEST(parameter_processing, packed_struct_field_override_child_param) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
 
@@ -2276,7 +2276,7 @@ TEST(parameter_processing, unpacked_struct_field_override_child_param) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
 
@@ -2310,7 +2310,7 @@ TEST(parameter_processing, unpacked_struct_override) {
 
     sv_analyzer analyzer;
 
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
 
@@ -2337,7 +2337,7 @@ TEST(parameter_processing, circular_self_reference) {
     )";
 
     sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
     d_store->store_file({"/dev/zero", "file_hash", resources});
@@ -2362,7 +2362,7 @@ TEST(parameter_processing, circular_mutual_dependency) {
     )";
 
     sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
     d_store->store_file({"/dev/zero", "file_hash", resources});
@@ -2390,7 +2390,7 @@ TEST(parameter_processing, circular_three_way_cycle) {
     )";
 
     sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", test_pattern);
+    auto resources = analyzer.analyze("", test_pattern).value();
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
     std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
     d_store->store_file({"/dev/zero", "file_hash", resources});

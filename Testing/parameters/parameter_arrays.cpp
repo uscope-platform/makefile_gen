@@ -42,7 +42,7 @@ TEST(parameter_extraction, array_assignment) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -115,7 +115,7 @@ TEST(parameter_extraction, default_assign) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -175,7 +175,7 @@ TEST(parameter_extraction, array_concatenation) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -246,7 +246,7 @@ TEST(parameter_extraction, array_parameter) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -307,7 +307,7 @@ TEST(parameter_extraction, array_parameter_ascending) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -366,7 +366,7 @@ TEST(parameter_extraction, integer_localparams) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -418,7 +418,7 @@ TEST(parameter_extraction, simple_array_propagation) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -501,7 +501,7 @@ TEST(parameter_extraction, simple_ascending_array_propagation) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -584,7 +584,7 @@ TEST(parameter_extraction, array_expression) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -678,7 +678,7 @@ TEST(parameter_extraction, int_concat_initialization) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -729,7 +729,7 @@ TEST(parameter_extraction, implicit_type_concatenation) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -781,7 +781,7 @@ TEST(parameter_extraction, simple_repetition_initialization) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -849,7 +849,7 @@ TEST(parameter_extraction, packed_repetition_initialization) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -933,7 +933,7 @@ TEST(parameter_extraction, repetition_initialization) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1064,7 +1064,7 @@ TEST(parameter_extraction, packed_array) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1127,7 +1127,7 @@ TEST(parameter_extraction, multpidim_packed_array) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1200,7 +1200,7 @@ TEST(parameter_extraction, packed_bit_access) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1271,7 +1271,7 @@ TEST(parameter_extraction, negative_number_array_init) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1328,7 +1328,7 @@ TEST(parameter_extraction, expression_array_init) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1387,7 +1387,7 @@ TEST(parameter_extraction, combined_packed_unpacked_init) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1500,7 +1500,7 @@ TEST(parameter_extraction, mixed_packed_unpacked_init) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1591,7 +1591,7 @@ TEST(parameter_extraction, multidimensional_packed_array) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1691,7 +1691,7 @@ TEST(parameter_extraction, packed_replication_init) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -1746,7 +1746,7 @@ TEST(parameter_extraction, array_initialization_default) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;

@@ -69,7 +69,7 @@ TEST(xilinx_project_gen, simple_gen){
                 auto test_file = mm_file(f.path());
                 sv_analyzer analyzer;
                 analyzer.set_include_directories({std::string(prefix) + "Components/Common"});
-                auto res = analyzer.analyze(f.path(), test_file.view());
+                auto res = analyzer.analyze(f.path(), test_file.view()).value();
                 d_store->store_file({f.path(), "file_hash", res});
             }
         }
@@ -167,7 +167,7 @@ TEST( xilinx_project_gen, sim_script) {
                 sv_analyzer analyzer;
 
                 analyzer.set_include_directories({std::string(prefix) + "Components/Common"});
-                auto res = analyzer.analyze(f.path(), test_file.view());
+                auto res = analyzer.analyze(f.path(), test_file.view()).value();
                 d_store->store_file({f.path(), "file_hash", res});
             }
         }
@@ -235,7 +235,7 @@ TEST( xilinx_project_gen, fpga_synth_script) {
                 sv_analyzer analyzer;
 
                 analyzer.set_include_directories({std::string(prefix) + "Components/Common"});
-                auto res = analyzer.analyze(f.path(), test_file.view());
+                auto res = analyzer.analyze(f.path(), test_file.view()).value();
                 d_store->store_file({f.path(), "file_hash", res});
             }
         }
@@ -313,7 +313,7 @@ TEST( xilinx_project_gen, soc_synth_script) {
                 sv_analyzer analyzer;
 
                 analyzer.set_include_directories({std::string(prefix) + "Components/Common"});
-                auto res = analyzer.analyze(f.path(), test_file.view());
+                auto res = analyzer.analyze(f.path(), test_file.view()).value();
                 d_store->store_file({f.path(), "file_hash", res});
             }
         }

@@ -15,14 +15,21 @@
 
 
 #include "frontend/analysis/system_verilog/preprocessor/macro_processor.hpp"
+#include <spdlog/spdlog.h>
 
 
 namespace preprocessor {
     macro_processor::macro_processor(
     std::unordered_map<std::string, std::variant<std::string, function_macro>> &d,
         uint64_t &l_n,
-        std::string &p) : definitions(d), line_number(l_n), path(p)
+        std::string &p,
+        std::optional<std::string> &e) : definitions(d), line_number(l_n), path(p), error(e)
     {
+    }
+
+    void macro_processor::report_error(const std::string &msg) {
+        spdlog::error(msg);
+        if (!error) error = msg;
     }
 
     std::string macro_processor::process_macro(const std::string_view &in) {
@@ -42,21 +49,18 @@ namespace preprocessor {
                     auto args_text = remaining.substr(start_pos);
                     auto [args, rest_of_line] = get_call_arguments(args_text);
                     if (!definitions.contains(id)) {
-                        throw std::runtime_error(
-                           fmt::format("Attempted to use undefined macro {} in file {}", id, path)
-                       );
+                        report_error(fmt::format("Attempted to use undefined macro {} in file {}", id, path));
+                        return "";
                     }
                     auto macro = definitions.at(id);
                     if (std::holds_alternative<std::string>(macro)) {
-                        throw std::runtime_error(
-                            fmt::format("Attempted to pass arguments to a macro {} that does not need them in file {}", id, path)
-                        );
+                        report_error(fmt::format("Attempted to pass arguments to a macro {} that does not need them in file {}", id, path));
+                        return "";
                     }
                     auto macro_text = replace_function_macro(args,std::get<function_macro>(macro));
                     if (!macro_text.has_value()) {
-                        throw std::runtime_error(
-                            fmt::format("Attempted to call a macro [{}] without enough parameters ", id)
-                        );
+                        report_error(fmt::format("Attempted to call a macro [{}] without enough parameters ", id));
+                        return "";
                     }
                     result.append(macro_text.value());
                     remaining = rest_of_line;
@@ -295,7 +299,8 @@ namespace preprocessor {
             }
             auto id = std::string(purged_identifier);
             if (!definitions.contains(id)) {
-                throw std::runtime_error(fmt::format("{}:{} MACRO {} is not defined", path, line_number, id));
+                report_error(fmt::format("{}:{} MACRO {} is not defined", path, line_number, id));
+                return std::string(identifier);
             }
             auto def = definitions.at(id);
             if (std::holds_alternative<std::string>(def)) {

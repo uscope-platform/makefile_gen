@@ -15,6 +15,7 @@
 
 
 #include "frontend/Repository_walker.hpp"
+#include "data_model/mm_file.hpp"
 
 
 
@@ -47,13 +48,13 @@ void Repository_walker::construct_walker(std::shared_ptr<settings_store> s, std:
 /// on their content (exclude directories containing a .xpr file as they are vivado projecta and contain only auto-generated
 /// stuff.
 void Repository_walker::analyze_dir() {
-    for(auto p_iter = std::filesystem::recursive_directory_iterator(target_repository);
-        p_iter != std::filesystem::recursive_directory_iterator();
-        ++p_iter ) {
+    std::error_code ec;
+    const std::filesystem::recursive_directory_iterator end;
+    auto p_iter = std::filesystem::recursive_directory_iterator(target_repository, ec);
+    while (p_iter != end && !ec) {
 
         auto path = p_iter->path();
-        std::string path_dbg = p_iter->path();
-        if(std::filesystem::is_directory(path)){
+        if(std::filesystem::is_directory(path, ec)){
             if(is_excluded_directory(path)){
                 p_iter.disable_recursion_pending();
             } else{
@@ -67,7 +68,9 @@ void Repository_walker::analyze_dir() {
             }
             analyze_file(path);
         }
+        p_iter.increment(ec);
     }
+    if (ec) spdlog::warn("Error walking repository {}: {}", target_repository, ec.message());
 
     this->collect_analysis_results();
 }
@@ -76,8 +79,14 @@ void Repository_walker::collect_analysis_results() {
     pool.wait_for_tasks();
     auto store = [this](auto &futures) {
         for(auto &f : futures) {
-            auto [path, file_hash, resource] = f.get();
-            if (resource) d_store->store_file({path, file_hash, resource.value()});
+            try {
+                auto [path, file_hash, resource] = f.get();
+                if (resource) d_store->store_file({path, file_hash, resource.value()});
+            } catch (const std::exception &e) {
+                spdlog::error("Error analyzing a file: {}", e.what());
+            } catch (...) {
+                spdlog::error("Unknown error while analyzing a file");
+            }
         }
         futures.clear();
     };
@@ -114,14 +123,19 @@ bool Repository_walker::is_excluded_directory(const std::filesystem::path& dir) 
 /// \param dir Target directory
 /// \return true if the directory needs to be skipped
 bool Repository_walker::contains_excluding_file(const std::filesystem::path &dir) {
-    for(auto& p: std::filesystem::directory_iterator(dir)){
-        if(!std::filesystem::is_directory(p.path())){
-            bool is_excluded = excluding_extensions.find(p.path().extension()) != excluding_extensions.end();
-            if(p.path().filename() == ignore_file_name){
-                this->read_ignore_file(p.path());
+    try {
+        for(auto& p: std::filesystem::directory_iterator(dir)){
+            if(!std::filesystem::is_directory(p.path())){
+                bool is_excluded = excluding_extensions.find(p.path().extension()) != excluding_extensions.end();
+                if(p.path().filename() == ignore_file_name){
+                    this->read_ignore_file(p.path());
+                }
+                if(is_excluded) return true;
             }
-            if(is_excluded) return true;
         }
+    } catch (const std::filesystem::filesystem_error &e) {
+        spdlog::warn("Error iterating directory {}: {}", dir.string(), e.what());
+        return false;
     }
     return false;
 }
@@ -221,20 +235,37 @@ file_analysis_context<hdl_file> analyze_verilog(
     spdlog::trace("PARSING: {}", file.c_str());
     try {
 
-        mm_file f(file);
-        std::string hash = hash_file(f.view());
+        auto f_opt = mm_file::try_open(file.string());
+        if (!f_opt.has_value()) {
+            spdlog::error("Error analyzing {}: could not open file", file.string());
+            return {};
+        }
+        auto hash_opt = hash_file(f_opt->view());
+        if (!hash_opt.has_value()) {
+            spdlog::error("Error analyzing {}: could not calculate file hash", file.string());
+            return {};
+        }
+        std::string hash = hash_opt.value();
         if (old_hash == hash) {
             return {file.string(), hash, std::nullopt};
         }
         sv_analyzer file_processor;
         file_processor.set_include_directories(i_d);
-        return {file.string(), hash,file_processor.analyze(file, f.view())};
-    } catch (std::runtime_error &err) {
-        spdlog::error(err.what());
+        auto analysis = file_processor.analyze(file, f_opt->view());
+        if (!analysis.has_value()) {
+            spdlog::error("Error analyzing {}: {}", file.string(), file_processor.get_error());
+            return {};
+        }
+        return {file.string(), hash, analysis.value()};
+    } catch (const std::exception &err) {
+        spdlog::error("Error analyzing {}: {}", file.string(), err.what());
+        return {};
+    } catch (...) {
+        spdlog::error("Unknown error analyzing {}", file.string());
         return {};
     }
 }
-std::string hash_file(const std::string_view &file_content) {
+std::optional<std::string> hash_file(const std::string_view &file_content) {
 
     EVP_MD_CTX* context = EVP_MD_CTX_new();
 
@@ -258,10 +289,8 @@ std::string hash_file(const std::string_view &file_content) {
             }
         }
     }
-
-
-    // If I get here there must have been some error with the hash calculation, throw an exception
-    throw std::runtime_error("ERROR: could not calculate file hash");
+    EVP_MD_CTX_free(context);
+    return std::nullopt;
 };
 
 /// Analyze the target vhdl-type file to extract declared and used instantiated design elements
@@ -271,15 +300,31 @@ file_analysis_context<hdl_file> analyze_vhdl(
     std::set<std::string> i_d,
     const std::string &old_hash
 ) {
-
-    mm_file f(file);
-    auto hash = hash_file(f.view());
-    if (old_hash == hash) {
-        return {file.string(), hash, std::nullopt};
+    try {
+        auto f_opt = mm_file::try_open(file.string());
+        if (!f_opt.has_value()) {
+            spdlog::error("Error analyzing {}: could not open file", file.string());
+            return {};
+        }
+        auto hash_opt = hash_file(f_opt->view());
+        if (!hash_opt.has_value()) {
+            spdlog::error("Error analyzing {}: could not calculate file hash", file.string());
+            return {};
+        }
+        std::string hash = hash_opt.value();
+        if (old_hash == hash) {
+            return {file.string(), hash, std::nullopt};
+        }
+        vhdl_analyzer file_processor(file);
+        file_processor.cleanup_content("");
+        return {file.string(), hash, file_processor.analyze()};
+    } catch (const std::exception &err) {
+        spdlog::error("Error analyzing {}: {}", file.string(), err.what());
+        return {};
+    } catch (...) {
+        spdlog::error("Unknown error analyzing {}", file.string());
+        return {};
     }
-    vhdl_analyzer file_processor(file);
-    file_processor.cleanup_content("");
-    return {file.string(), hash, file_processor.analyze()};
 }
 
 
@@ -290,15 +335,31 @@ file_analysis_context<DataFile> analyze_data(
     std::set<std::string> i_d,
     const std::string &old_hash
 ) {
+    try {
+        auto f_opt = mm_file::try_open(file.string());
+        if (!f_opt.has_value()) {
+            spdlog::error("Error analyzing {}: could not open file", file.string());
+            return {};
+        }
+        auto hash_opt = hash_file(f_opt->view());
+        if (!hash_opt.has_value()) {
+            spdlog::error("Error analyzing {}: could not calculate file hash", file.string());
+            return {};
+        }
+        std::string hash = hash_opt.value();
+        if (old_hash == hash) {
+            return {file.string(), hash, std::nullopt};
+        }
 
-    mm_file f(file);
-    auto hash = hash_file(f.view());
-    if (old_hash == hash) {
-        return {file.string(), hash, std::nullopt};
+        DataFile data(file.stem(), file.string());
+        return {file.string(), hash, data};
+    } catch (const std::exception &err) {
+        spdlog::error("Error analyzing {}: {}", file.string(), err.what());
+        return {};
+    } catch (...) {
+        spdlog::error("Unknown error analyzing {}", file.string());
+        return {};
     }
-
-    DataFile data(file.stem(), file.string());
-    return {file.string(), hash, data};
 }
 
 /// Analyze the target Script extracting the necessary metadata
@@ -308,20 +369,37 @@ file_analysis_context<Script> analyze_script(
     std::set<std::string> i_d,
     const std::string &old_hash
 ) {
-    mm_file f(file);
-    auto hash = hash_file(f.view());
-    if (old_hash == hash) {
-        return {file.string(), hash, std::nullopt};
-    }
+    try {
+        auto f_opt = mm_file::try_open(file.string());
+        if (!f_opt.has_value()) {
+            spdlog::error("Error analyzing {}: could not open file", file.string());
+            return {};
+        }
+        auto hash_opt = hash_file(f_opt->view());
+        if (!hash_opt.has_value()) {
+            spdlog::error("Error analyzing {}: could not calculate file hash", file.string());
+            return {};
+        }
+        std::string hash = hash_opt.value();
+        if (old_hash == hash) {
+            return {file.string(), hash, std::nullopt};
+        }
 
-    std::string ext = file.extension();
-    if (!ext.empty() && ext[0] == '.') ext = ext.substr(1);
-    script_specs s;
-    s.name = file.stem();
-    s.type = ext;
-    Script scr(s);
-    scr.set_path(file);
-    return {file.string(), hash, scr};
+        std::string ext = file.extension();
+        if (!ext.empty() && ext[0] == '.') ext = ext.substr(1);
+        script_specs s;
+        s.name = file.stem();
+        s.type = ext;
+        Script scr(s);
+        scr.set_path(file);
+        return {file.string(), hash, scr};
+    } catch (const std::exception &err) {
+        spdlog::error("Error analyzing {}: {}", file.string(), err.what());
+        return {};
+    } catch (...) {
+        spdlog::error("Unknown error analyzing {}", file.string());
+        return {};
+    }
 }
 
 /// Analyze the target constraint file extracting the necessary metadata
@@ -331,14 +409,31 @@ file_analysis_context<Constraints> analyze_constraint(
     std::set<std::string> i_d,
     const std::string &old_hash
 ) {
-    mm_file f(file);
-    auto hash = hash_file(f.view());
-    if (old_hash == hash) {
-        return {file.string(), hash, std::nullopt};
+    try {
+        auto f_opt = mm_file::try_open(file.string());
+        if (!f_opt.has_value()) {
+            spdlog::error("Error analyzing {}: could not open file", file.string());
+            return {};
+        }
+        auto hash_opt = hash_file(f_opt->view());
+        if (!hash_opt.has_value()) {
+            spdlog::error("Error analyzing {}: could not calculate file hash", file.string());
+            return {};
+        }
+        std::string hash = hash_opt.value();
+        if (old_hash == hash) {
+            return {file.string(), hash, std::nullopt};
+        }
+        Constraints constr(file.stem());
+        constr.set_path(file);
+        return {file.string(), hash, constr};
+    } catch (const std::exception &err) {
+        spdlog::error("Error analyzing {}: {}", file.string(), err.what());
+        return {};
+    } catch (...) {
+        spdlog::error("Unknown error analyzing {}", file.string());
+        return {};
     }
-    Constraints constr(file.stem());
-    constr.set_path(file);
-    return {file.string(), hash, constr};
 }
 
 

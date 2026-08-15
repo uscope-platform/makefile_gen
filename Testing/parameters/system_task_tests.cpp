@@ -37,7 +37,7 @@ TEST(system_task, simple) {
     endmodule
     )";    sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -84,7 +84,7 @@ TEST(system_task, multiple) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -144,7 +144,7 @@ TEST(system_task, propagation) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -201,7 +201,7 @@ TEST(system_task, nested) {
 
     sv_analyzer analyzer;
 
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto parameters = resource.get_parameters();
 
     Parameters_map check_params;
@@ -253,7 +253,7 @@ TEST(system_task, ln) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("V")).get_real(), 0.0);
 }
@@ -265,7 +265,7 @@ TEST(system_task, log10) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("V")).get_real(), 2.0);
 }
@@ -277,7 +277,7 @@ TEST(system_task, sqrt) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("V")).get_real(), 4.0);
 }
@@ -289,7 +289,7 @@ TEST(system_task, pow) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("V")).get_real(), 8.0);
 }
@@ -301,7 +301,7 @@ TEST(system_task, min_int) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("V")).get_integer(), 1);
 }
@@ -313,7 +313,7 @@ TEST(system_task, max_int) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("V")).get_integer(), 7);
 }
@@ -325,7 +325,7 @@ TEST(system_task, countones) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("V")).get_integer(), 5);
 }
@@ -338,7 +338,7 @@ TEST(system_task, ln_int_arg) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("V")).get_real(), std::log(7.0));
 }
@@ -351,7 +351,7 @@ TEST(system_task, sqrt_int_arg) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("V")).get_real(), 5.0);
 }
@@ -364,7 +364,7 @@ TEST(system_task, bits_sized) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 32);
 }
@@ -377,7 +377,7 @@ TEST(system_task, bits_packed_dim) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 32);
 }
@@ -391,7 +391,7 @@ TEST(system_task, bits_dependency) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 16);
     EXPECT_EQ(defaults.at(qualified_identifier("C")).get_integer(), 17);
@@ -405,7 +405,7 @@ TEST(system_task, size) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), 4);
 }
@@ -419,7 +419,7 @@ TEST(system_task, high_low) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("H")).get_integer(), 3);
     EXPECT_EQ(defaults.at(qualified_identifier("L")).get_integer(), 0);
@@ -434,7 +434,7 @@ TEST(system_task, left_right) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("LFT")).get_integer(), 5);
     EXPECT_EQ(defaults.at(qualified_identifier("RGT")).get_integer(), 2);
@@ -448,7 +448,7 @@ TEST(system_task, signed) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), -1);
 }
@@ -461,7 +461,7 @@ TEST(system_task, unsigned) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("U")).get_integer(), 15);
 }
@@ -475,7 +475,7 @@ TEST(system_task, trig) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("S")).get_real(), 0.0);
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("C")).get_real(), 1.0);
@@ -489,7 +489,7 @@ TEST(system_task, exp) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("E")).get_real(), 1.0);
 }
@@ -501,7 +501,7 @@ TEST(system_task, hypot) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("H")).get_real(), 5.0);
 }
@@ -517,7 +517,7 @@ TEST(system_task, onehot) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("O1")).get_integer(), 1);
     EXPECT_EQ(defaults.at(qualified_identifier("O0")).get_integer(), 0);
@@ -533,7 +533,7 @@ TEST(system_task, isunknown) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("U")).get_integer(), 0);
 }
@@ -545,7 +545,7 @@ TEST(system_task, isunbounded) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("U")).get_integer(), 0);
 }
@@ -559,7 +559,7 @@ TEST(system_task, hyperbolic) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("SH")).get_real(), 0.0);
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("CH")).get_real(), 1.0);
@@ -575,7 +575,7 @@ TEST(system_task, ahyperbolic) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("ASH")).get_real(), 0.0);
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("ACH")).get_real(), 0.0);
@@ -591,7 +591,7 @@ TEST(system_task, dimensions) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("D")).get_integer(), 2);
     EXPECT_EQ(defaults.at(qualified_identifier("UD")).get_integer(), 1);
@@ -606,7 +606,7 @@ TEST(system_task, dimensions_scalar) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("D")).get_integer(), 1);
     EXPECT_EQ(defaults.at(qualified_identifier("UD")).get_integer(), 0);
@@ -620,7 +620,7 @@ TEST(system_task, typename) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("TN")).get_string(), "int");
 }
@@ -633,7 +633,7 @@ TEST(system_task, rtoi_truncates) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 16);
     EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), -16);
@@ -647,7 +647,7 @@ TEST(system_task, min_max_single_arg) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 42);
     EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 7);
@@ -660,7 +660,7 @@ TEST(system_task, ln_domain_guard) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 0);
 }
@@ -676,7 +676,7 @@ TEST(system_task, bits_literal) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 8);
     EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 1);
@@ -694,7 +694,7 @@ TEST(system_task, bits_expression) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 8);
     EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 16);
@@ -711,7 +711,7 @@ TEST(system_task, bits_type) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("A")).get_integer(), 8);
     EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 32);
@@ -727,7 +727,7 @@ TEST(system_task, bits_unpacked_array) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 32);
 }
@@ -744,7 +744,7 @@ TEST(system_task, size_packed_only) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), 32);
     EXPECT_EQ(defaults.at(qualified_identifier("L")).get_integer(), 31);
@@ -765,7 +765,7 @@ TEST(system_task, packed_dim_numbering) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("L1")).get_integer(), 7);
     EXPECT_EQ(defaults.at(qualified_identifier("R1")).get_integer(), 0);
@@ -783,7 +783,7 @@ TEST(system_task, size_packed_dim_after_unpacked) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("S1")).get_integer(), 4);
     EXPECT_EQ(defaults.at(qualified_identifier("S2")).get_integer(), 8);
@@ -799,7 +799,7 @@ TEST(system_task, size_literal) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), 8);
     EXPECT_EQ(defaults.at(qualified_identifier("D")).get_integer(), 1);
@@ -816,7 +816,7 @@ TEST(system_task, signed_unsigned_literals) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), -1);
     EXPECT_EQ(defaults.at(qualified_identifier("U")).get_integer(), 255);
@@ -835,7 +835,7 @@ TEST(system_task, type_queries_on_type) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), 8);
     EXPECT_EQ(defaults.at(qualified_identifier("L")).get_integer(), 7);
@@ -856,7 +856,7 @@ TEST(system_task, type_queries_expression) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("B")).get_integer(), 8);
     EXPECT_EQ(defaults.at(qualified_identifier("S")).get_integer(), 8);
@@ -873,7 +873,7 @@ TEST(system_task, log2) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("V")).get_real(), 3.0);
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("F")).get_real(), -1.0);
@@ -891,7 +891,7 @@ TEST(system_task, inverse_trig) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("A")).get_real(), std::asin(1.0));
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("AC")).get_real(), 0.0);
@@ -910,7 +910,7 @@ TEST(system_task, round_truncate) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("R")).get_real(), 3.0);
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("RN")).get_real(), -3.0);
@@ -928,7 +928,7 @@ TEST(system_task, countbits) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("C1")).get_integer(), 5);
     EXPECT_EQ(defaults.at(qualified_identifier("C0")).get_integer(), 3);
@@ -946,7 +946,7 @@ TEST(system_task, real_bits_conversion) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("RB")).get_integer(), static_cast<hdl_integer>(0x3FF0000000000000ULL));
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("BR")).get_real(), 1.0);
@@ -966,7 +966,7 @@ TEST(system_task, string_functions) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("L")).get_integer(), 5);
     EXPECT_EQ(defaults.at(qualified_identifier("U")).get_string(), "HELLO");
@@ -986,7 +986,7 @@ TEST(system_task, sformatf) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("F1")).get_string(), "val=42");
     EXPECT_EQ(defaults.at(qualified_identifier("F2")).get_string(), "hex=ff");
@@ -1001,7 +1001,7 @@ TEST(system_task, unknown_function_defaults_to_zero) {
         endmodule
     )";
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     EXPECT_EQ(defaults.at(qualified_identifier("X")).get_integer(), 0);
 }
