@@ -112,14 +112,14 @@ bool HDL_ast_builder_v2::evaluate_condition(const std::shared_ptr<Expression_bas
     return result.has_value() && result.value().is_integer() && result.value().get_integer() != 0;
 }
 
-std::optional<solver_errors> HDL_ast_builder_v2::process_quantifier(const std::shared_ptr<HDL_parameter> &quantifier, const std::map<qualified_identifier, resolved_parameter> &parameters) {
+std::expected<void, solver_errors> HDL_ast_builder_v2::process_quantifier(const std::shared_ptr<HDL_parameter> &quantifier, const std::map<qualified_identifier, resolved_parameter> &parameters) {
 
     if (quantifier != nullptr) {
         auto value = quantifier->evaluate(parameters);
-        if (!value.has_value()) return value.error();
+        if (!value.has_value()) return std::unexpected{value.error()};
         quantifier->set_value(value.value());
     }
-    return std::nullopt;
+    return {};
 }
 
 std::expected<std::vector<work_order>, solver_errors> HDL_ast_builder_v2::process_statement(
@@ -154,7 +154,7 @@ std::expected<std::vector<work_order>, solver_errors> HDL_ast_builder_v2::proces
     child->set_active(active);
     auto type = inst->get_type();
     if (dep_file.is_module_excluded(type) || d_store->is_primitive(type)) child->set_dependency_class(primitive);
-    if (auto val = process_quantifier(child->get_array_quantifier(), params); val) return std::unexpected{val.value()};
+    if (auto err = process_quantifier(child->get_array_quantifier(), params); !err) return std::unexpected{err.error()};
     parent->add_child(child);
     orders.push_back({child, params, path, if_map});
     return orders;
@@ -183,7 +183,7 @@ std::expected<std::vector<work_order>, solver_errors> HDL_ast_builder_v2::proces
                 child->set_parent(parent);
                 auto inst_type = body_inst->get_type();
                 if (dep_file.is_module_excluded(inst_type) || d_store->is_primitive(inst_type)) child->set_dependency_class(primitive);
-                if (auto val = process_quantifier(child->get_array_quantifier(), params); val) return std::unexpected{val.value()};
+                if (auto err = process_quantifier(child->get_array_quantifier(), params); !err) return std::unexpected{err.error()};
 
                 std::unordered_map<std::string, std::vector<HDL_net>> new_ports;
                 for (auto &[port_name, nets] : child->get_ports()) {

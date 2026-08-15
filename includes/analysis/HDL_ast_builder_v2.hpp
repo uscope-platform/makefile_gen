@@ -38,7 +38,7 @@ public:
     std::vector<std::shared_ptr<hdl_ast_node>> build_ast(const std::vector<std::string>& modules);
 private:
     std::shared_ptr<hdl_ast_node> build_ast(const std::string& top_level_module);
-    std::optional<solver_errors> process_quantifier(const std::shared_ptr<HDL_parameter> &quantifier, const std::map<qualified_identifier, resolved_parameter> &parameters);
+    std::expected<void, solver_errors> process_quantifier(const std::shared_ptr<HDL_parameter> &quantifier, const std::map<qualified_identifier, resolved_parameter> &parameters);
     bool evaluate_condition(const std::shared_ptr<Expression_base> &cond,
         const std::map<qualified_identifier, resolved_parameter> &parameters);
 
