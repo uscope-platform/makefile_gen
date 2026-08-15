@@ -40,16 +40,6 @@ void Streaming::propagate_function(const hdl_function_statement &def) {
     if (slice_size) slice_size->propagate_function(def);
 }
 
-static hdl_integer reverse_bits(hdl_integer value, int64_t width) {
-    if (width <= 0 || width > 1024) return value;
-    hdl_integer result = 0;
-    for (int64_t i = 0; i < width; i++) {
-        hdl_integer bit = (value >> static_cast<int64_t>(i)) & hdl_integer(1);
-        if (bit.get_value()) result |= (hdl_integer(1) << (width - 1 - i));
-    }
-    return result;
-}
-
 std::optional<resolved_parameter> Streaming::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
     if (components.empty()) return std::nullopt;
 

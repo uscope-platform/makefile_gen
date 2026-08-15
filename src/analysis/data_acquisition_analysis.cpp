@@ -194,11 +194,11 @@ void data_acquisition_analysis::process_source(const std::shared_ptr<hdl_ast_nod
     std::bitset<1024> output_signs;
     if(node->has_parameter("OUTPUT_SIGNED")){
         auto val = node->get_parameter_value("OUTPUT_SIGNED")->get_numeric_value();
-        if(!val.has_value()) {
-            spdlog::warn("The OUTPUT_SIGNED parameter for data source {}, does not have a valid value, assuming unsigned data",node->get_name());
-            output_signs = std::bitset<1024>(val.value().get_value());
+        if(val.has_value()) {
+            output_signs = val.value().to_bitset();
         } else {
-            output_signs =  std::bitset<1024>(0);
+            spdlog::warn("The OUTPUT_SIGNED parameter for data source {}, does not have a valid value, assuming unsigned data",node->get_name());
+            output_signs = std::bitset<1024>(0);
         }
 
     } else {

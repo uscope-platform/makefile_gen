@@ -285,15 +285,11 @@ std::optional<resolved_parameter> Expression_v2::evaluate(
                 break;
         }
         auto v = ret_val.get_integer();
-        if (width > 0 && width < 1024 && v.get_size() > width) {
-            int1024_t mask = (int1024_t(1) << width) - 1;
-            int1024_t masked = v.to_wide() & mask;
-            if (v.get_signed() && (masked & (int1024_t(1) << (width - 1))) != 0)
-                masked |= ~mask;
-            hdl_integer truncated;
-            truncated.set_value(masked);
-            truncated.set_signed(v.get_signed());
-            ret_val = truncated;
+        if (v.get_size() > width) {
+            if (v.get_signed())
+                ret_val = v.sign_extend(static_cast<int64_t>(width));
+            else
+                ret_val = v.truncate_to(static_cast<int64_t>(width));
         }
     }
     return  ret_val;
@@ -307,8 +303,8 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(reso
         if (op_a.is_string() && op_b.is_string())
             return op_a.get_string() == op_b.get_string();
         // Mixed int/real or any real comparison: compare as doubles.
-        double a = op_a.is_real() ? op_a.get_real() : static_cast<double>(op_a.get_integer().get_value());
-        double b = op_b.is_real() ? op_b.get_real() : static_cast<double>(op_b.get_integer().get_value());
+        double a = op_a.is_real() ? op_a.get_real() : op_a.get_integer().to_double();
+        double b = op_b.is_real() ? op_b.get_real() : op_b.get_integer().to_double();
         return a == b;
     }
     if(operation ==  not_equal || operation == case_not_equal || operation == wildcard_not_equal){
@@ -316,8 +312,8 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(reso
             return op_a.get_integer() != op_b.get_integer();
         if (op_a.is_string() && op_b.is_string())
             return op_a.get_string() != op_b.get_string();
-        double a = op_a.is_real() ? op_a.get_real() : static_cast<double>(op_a.get_integer().get_value());
-        double b = op_b.is_real() ? op_b.get_real() : static_cast<double>(op_b.get_integer().get_value());
+        double a = op_a.is_real() ? op_a.get_real() : op_a.get_integer().to_double();
+        double b = op_b.is_real() ? op_b.get_real() : op_b.get_integer().to_double();
         return a != b;
     }
 
@@ -336,9 +332,9 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(reso
         output_signed = op_a.get_integer().get_signed() || op_b.get_integer().get_signed();
     }
     if(op_a.is_real())  d_a = op_a.get_real();
-    else d_a = static_cast<double>(op_a.get_integer().get_value());
+    else d_a = op_a.get_integer().to_double();
     if(op_b.is_real())  d_b = op_b.get_real();
-    else d_b = static_cast<double>(op_b.get_integer().get_value());
+    else d_b = op_b.get_integer().to_double();
     if(op_a.is_integer()) i_a =  op_a.get_integer();
     if(op_b.is_integer()) i_b =  op_b.get_integer();
     
@@ -375,7 +371,6 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(reso
                 u_a = i_a.truncate_to(static_cast<int64_t>(operand_size));
             }
             int64_t shift = i_b.get_value();
-            if(shift < 0 || shift >= 1024) return hdl_integer(0);
             return u_a >> hdl_integer(shift);
         }
         spdlog::warn("The shift operator is only defined between integers");
@@ -449,9 +444,9 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_unary_expression(resol
     if (operation == bitwise_neg) {
         auto width = int_op.get_size();
         int1024_t negated = -int_op.to_wide() - 1;
-        if (width < 1024) negated &= (int1024_t(1) << width) - 1;
         hdl_integer res;
         res.set_value(negated);
+        res = res.truncate_to(static_cast<int64_t>(width));
         return res;
     }
 

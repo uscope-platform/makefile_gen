@@ -266,17 +266,17 @@ std::string format_value(const resolved_parameter &arg, char spec, int width, bo
             break;
         case 'f': case 'F':
             if (arg.is_real()) piece << std::fixed << arg.get_real();
-            else if (arg.is_integer()) piece << std::fixed << static_cast<double>(arg.get_integer().to_wide());
+            else if (arg.is_integer()) piece << std::fixed << arg.get_integer().to_double();
             else piece << std::fixed << 0.0;
             break;
         case 'e': case 'E':
             if (arg.is_real()) piece << std::scientific << arg.get_real();
-            else if (arg.is_integer()) piece << std::scientific << static_cast<double>(arg.get_integer().to_wide());
+            else if (arg.is_integer()) piece << std::scientific << arg.get_integer().to_double();
             else piece << std::scientific << 0.0;
             break;
         case 'g': case 'G':
             if (arg.is_real()) piece << arg.get_real();
-            else if (arg.is_integer()) piece << static_cast<double>(arg.get_integer().to_wide());
+            else if (arg.is_integer()) piece << arg.get_integer().to_double();
             else piece << 0.0;
             break;
         default:
@@ -348,7 +348,7 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
         if (resolved_arguments[0].is_real()) {
             return resolved_arguments[0].get_real();
         } else if (resolved_arguments[0].is_integer()) {
-            return static_cast<double>(resolved_arguments[0].get_integer().get_value());
+            return resolved_arguments[0].get_integer().to_double();
         }
         spdlog::warn("Encountered an invalid argument for a $itor call");
         return  0;
@@ -372,19 +372,19 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
     }
     if (task_name == "ln") {
         double arg = resolved_arguments[0].is_real() ? resolved_arguments[0].get_real()
-                     : static_cast<double>(resolved_arguments[0].get_integer().get_value());
+                     : resolved_arguments[0].get_integer().to_double();
         if (arg <= 0) { spdlog::warn("$ln argument must be positive"); return 0; }
         return std::log(arg);
     }
     if (task_name == "log10") {
         double arg = resolved_arguments[0].is_real() ? resolved_arguments[0].get_real()
-                     : static_cast<double>(resolved_arguments[0].get_integer().get_value());
+                     : resolved_arguments[0].get_integer().to_double();
         if (arg <= 0) { spdlog::warn("$log10 argument must be positive"); return 0; }
         return std::log10(arg);
     }
     if (task_name == "sqrt") {
         double arg = resolved_arguments[0].is_real() ? resolved_arguments[0].get_real()
-                     : static_cast<double>(resolved_arguments[0].get_integer().get_value());
+                     : resolved_arguments[0].get_integer().to_double();
         if (arg < 0) { spdlog::warn("$sqrt argument must be non-negative"); return 0; }
         return std::sqrt(arg);
     }
@@ -395,10 +395,10 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
         }
         double base = resolved_arguments[0].is_real()
                           ? resolved_arguments[0].get_real()
-                          : static_cast<double>(resolved_arguments[0].get_integer().get_value());
+                          : resolved_arguments[0].get_integer().to_double();
         double exponent = resolved_arguments[1].is_real()
                               ? resolved_arguments[1].get_real()
-                              : static_cast<double>(resolved_arguments[1].get_integer().get_value());
+                              : resolved_arguments[1].get_integer().to_double();
         return std::pow(base, exponent);
     }
     if (task_name == "min") {
@@ -417,11 +417,11 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
         } else {
             double result = resolved_arguments[0].is_real()
                                 ? resolved_arguments[0].get_real()
-                                : static_cast<double>(resolved_arguments[0].get_integer().get_value());
+                                : resolved_arguments[0].get_integer().to_double();
             for (size_t i = 1; i < resolved_arguments.size(); i++) {
                 double v = resolved_arguments[i].is_real()
                                ? resolved_arguments[i].get_real()
-                               : static_cast<double>(resolved_arguments[i].get_integer().get_value());
+                               : resolved_arguments[i].get_integer().to_double();
                 if (v < result) result = v;
             }
             return result;
@@ -443,11 +443,11 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
         } else {
             double result = resolved_arguments[0].is_real()
                                 ? resolved_arguments[0].get_real()
-                                : static_cast<double>(resolved_arguments[0].get_integer().get_value());
+                                : resolved_arguments[0].get_integer().to_double();
             for (size_t i = 1; i < resolved_arguments.size(); i++) {
                 double v = resolved_arguments[i].is_real()
                                ? resolved_arguments[i].get_real()
-                               : static_cast<double>(resolved_arguments[i].get_integer().get_value());
+                               : resolved_arguments[i].get_integer().to_double();
                 if (result < v) result = v;
             }
             return result;
@@ -455,92 +455,94 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
     }
     if (task_name == "countones") {
         if (resolved_arguments[0].is_integer()) {
-            uint64_t val = static_cast<uint64_t>(resolved_arguments[0].get_integer().get_value());
-            return static_cast<hdl_integer>(std::popcount(val));
+            int1024_t val = resolved_arguments[0].get_integer().to_wide();
+            int64_t count = 0;
+            while (val != 0) { count++; val &= (val - 1); }
+            return static_cast<hdl_integer>(count);
         }
         spdlog::warn("Encountered an invalid argument for a $countones call");
         return 0;
     }
     if (task_name == "sin") {
         if (resolved_arguments[0].is_real()) return std::sin(resolved_arguments[0].get_real());
-        if (resolved_arguments[0].is_integer()) return std::sin(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        if (resolved_arguments[0].is_integer()) return std::sin(resolved_arguments[0].get_integer().to_double());
         spdlog::warn("Encountered an invalid argument for a $sin call");
         return 0;
     }
     if (task_name == "cos") {
         if (resolved_arguments[0].is_real()) return std::cos(resolved_arguments[0].get_real());
-        if (resolved_arguments[0].is_integer()) return std::cos(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        if (resolved_arguments[0].is_integer()) return std::cos(resolved_arguments[0].get_integer().to_double());
         spdlog::warn("Encountered an invalid argument for a $cos call");
         return 0;
     }
     if (task_name == "tan") {
         if (resolved_arguments[0].is_real()) return std::tan(resolved_arguments[0].get_real());
-        if (resolved_arguments[0].is_integer()) return std::tan(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        if (resolved_arguments[0].is_integer()) return std::tan(resolved_arguments[0].get_integer().to_double());
         spdlog::warn("Encountered an invalid argument for a $tan call");
         return 0;
     }
     if (task_name == "sinh") {
         if (resolved_arguments[0].is_real()) return std::sinh(resolved_arguments[0].get_real());
-        if (resolved_arguments[0].is_integer()) return std::sinh(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        if (resolved_arguments[0].is_integer()) return std::sinh(resolved_arguments[0].get_integer().to_double());
         spdlog::warn("Encountered an invalid argument for a $sinh call");
         return 0;
     }
     if (task_name == "cosh") {
         if (resolved_arguments[0].is_real()) return std::cosh(resolved_arguments[0].get_real());
-        if (resolved_arguments[0].is_integer()) return std::cosh(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        if (resolved_arguments[0].is_integer()) return std::cosh(resolved_arguments[0].get_integer().to_double());
         spdlog::warn("Encountered an invalid argument for a $cosh call");
         return 0;
     }
     if (task_name == "tanh") {
         if (resolved_arguments[0].is_real()) return std::tanh(resolved_arguments[0].get_real());
-        if (resolved_arguments[0].is_integer()) return std::tanh(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        if (resolved_arguments[0].is_integer()) return std::tanh(resolved_arguments[0].get_integer().to_double());
         spdlog::warn("Encountered an invalid argument for a $tanh call");
         return 0;
     }
     if (task_name == "asinh") {
         if (resolved_arguments[0].is_real()) return std::asinh(resolved_arguments[0].get_real());
-        if (resolved_arguments[0].is_integer()) return std::asinh(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        if (resolved_arguments[0].is_integer()) return std::asinh(resolved_arguments[0].get_integer().to_double());
         spdlog::warn("Encountered an invalid argument for a $asinh call");
         return 0;
     }
     if (task_name == "acosh") {
         if (resolved_arguments[0].is_real()) return std::acosh(resolved_arguments[0].get_real());
-        if (resolved_arguments[0].is_integer()) return std::acosh(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        if (resolved_arguments[0].is_integer()) return std::acosh(resolved_arguments[0].get_integer().to_double());
         spdlog::warn("Encountered an invalid argument for a $acosh call");
         return 0;
     }
     if (task_name == "atanh") {
         if (resolved_arguments[0].is_real()) return std::atanh(resolved_arguments[0].get_real());
-        if (resolved_arguments[0].is_integer()) return std::atanh(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        if (resolved_arguments[0].is_integer()) return std::atanh(resolved_arguments[0].get_integer().to_double());
         spdlog::warn("Encountered an invalid argument for a $atanh call");
         return 0;
     }
     if (task_name == "exp") {
         if (resolved_arguments[0].is_real()) return std::exp(resolved_arguments[0].get_real());
-        if (resolved_arguments[0].is_integer()) return std::exp(static_cast<double>(resolved_arguments[0].get_integer().get_value()));
+        if (resolved_arguments[0].is_integer()) return std::exp(resolved_arguments[0].get_integer().to_double());
         spdlog::warn("Encountered an invalid argument for a $exp call");
         return 0;
     }
     if (task_name == "hypot") {
         if (resolved_arguments.size() < 2) { spdlog::warn("$hypot requires exactly 2 arguments"); return 0; }
         double a = resolved_arguments[0].is_real() ? resolved_arguments[0].get_real()
-                    : static_cast<double>(resolved_arguments[0].get_integer().get_value());
+                    : resolved_arguments[0].get_integer().to_double();
         double b = resolved_arguments[1].is_real() ? resolved_arguments[1].get_real()
-                    : static_cast<double>(resolved_arguments[1].get_integer().get_value());
+                    : resolved_arguments[1].get_integer().to_double();
         return std::hypot(a, b);
     }
     if (task_name == "onehot") {
         if (resolved_arguments[0].is_integer()) {
-            uint64_t v = static_cast<uint64_t>(resolved_arguments[0].get_integer().get_value());
-            return static_cast<hdl_integer>(v != 0 && std::popcount(v) == 1);
+            int1024_t v = resolved_arguments[0].get_integer().to_wide();
+            return static_cast<hdl_integer>(v != 0 && (v & (v - 1)) == 0);
         }
         spdlog::warn("Encountered an invalid argument for a $onehot call");
         return 0;
     }
     if (task_name == "onehot0") {
         if (resolved_arguments[0].is_integer()) {
-            uint64_t v = static_cast<uint64_t>(resolved_arguments[0].get_integer().get_value());
-            return static_cast<hdl_integer>(std::popcount(v) <= 1);
+            int1024_t v = resolved_arguments[0].get_integer().to_wide();
+            return static_cast<hdl_integer>((v & (v - 1)) == 0);
         }
         spdlog::warn("Encountered an invalid argument for a $onehot0 call");
         return 0;
@@ -569,7 +571,7 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
 
     auto to_double = [](const resolved_parameter &p) -> std::optional<double> {
         if (p.is_real()) return p.get_real();
-        if (p.is_integer()) return static_cast<double>(p.get_integer().to_wide());
+        if (p.is_integer()) return p.get_integer().to_double();
         return std::nullopt;
     };
 

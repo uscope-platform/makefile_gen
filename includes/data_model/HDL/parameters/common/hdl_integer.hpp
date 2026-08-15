@@ -21,6 +21,7 @@
 #include <cmath>
 #include <string>
 #include <variant>
+#include <bitset>
 #include <nlohmann/json.hpp>
 #include <cereal/types/variant.hpp>
 #include <cereal/types/string.hpp>
@@ -155,6 +156,23 @@ public:
         return std::get<int64_t>(content);
     }
     [[nodiscard]] int1024_t get_wide() const { return to_wide(); }
+
+    // The value as a double, preserving the sign of narrow negatives (unlike
+    // to_wide(), which zero-extends them) and the full width of wide values.
+    [[nodiscard]] double to_double() const {
+        if (std::holds_alternative<int1024_t>(content))
+            return static_cast<double>(std::get<int1024_t>(content));
+        return static_cast<double>(std::get<int64_t>(content));
+    }
+
+    // The value's full bit pattern as a bitset (width encapsulated here).
+    [[nodiscard]] std::bitset<1024> to_bitset() const {
+        std::bitset<1024> result;
+        int1024_t w = to_wide();
+        for (size_t i = 0; i < 1024; i++)
+            if (((w >> i) & 1) != 0) result.set(i);
+        return result;
+    }
 
     uint64_t get_size() const;
     bool get_signed() const {return signedness;}
