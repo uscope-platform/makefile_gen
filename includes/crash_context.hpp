@@ -30,25 +30,43 @@ struct crash_context {
     std::string file;
     std::string parameter;
 };
-
 inline thread_local crash_context crash_ctx;
+
+namespace {
+    // Write the whole buffer, handling short writes. Only async-signal-safe
+    // operations are used here because this runs inside a signal handler.
+    void write_all(int fd, const void *buf, size_t n) {
+        const char *p = static_cast<const char*>(buf);
+        while (n > 0) {
+            ssize_t written = write(fd, p, n);
+            if (written <= 0) return;
+            p += written;
+            n -= static_cast<size_t>(written);
+        }
+    }
+}
 
 inline void install_crash_handler() {
     struct sigaction sa = {};
     sa.sa_handler = [](int) {
-        write(STDERR_FILENO, "\nCRASH while processing: ", 25);
-        write(STDERR_FILENO, crash_ctx.entity.data(), crash_ctx.entity.size());
-        write(STDERR_FILENO, " (", 2);
-        write(STDERR_FILENO, crash_ctx.file.data(), crash_ctx.file.size());
-        write(STDERR_FILENO, ")", 1);
+        write_all(STDERR_FILENO, "\nCRASH while processing: ", sizeof("\nCRASH while processing: ") - 1);
+        if (!crash_ctx.entity.empty())
+            write_all(STDERR_FILENO, crash_ctx.entity.data(), crash_ctx.entity.size());
+        write_all(STDERR_FILENO, " (", sizeof(" (") - 1);
+        if (!crash_ctx.file.empty())
+            write_all(STDERR_FILENO, crash_ctx.file.data(), crash_ctx.file.size());
+        write_all(STDERR_FILENO, ")", sizeof(")") - 1);
         if (!crash_ctx.parameter.empty()) {
-            write(STDERR_FILENO, " parameter: ", 12);
-            write(STDERR_FILENO, crash_ctx.parameter.data(), crash_ctx.parameter.size());
+            write_all(STDERR_FILENO, " parameter: ", sizeof(" parameter: ") - 1);
+            write_all(STDERR_FILENO, crash_ctx.parameter.data(), crash_ctx.parameter.size());
         }
-        write(STDERR_FILENO, "\n", 1);
+        write_all(STDERR_FILENO, "\n", sizeof("\n") - 1);
         _exit(1);
     };
     sigaction(SIGSEGV, &sa, nullptr);
+    sigaction(SIGABRT, &sa, nullptr);
+    sigaction(SIGBUS, &sa, nullptr);
+    sigaction(SIGFPE, &sa, nullptr);
 }
 
 #endif

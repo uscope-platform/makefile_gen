@@ -211,8 +211,10 @@ TEST( end_to_end , sim_script_generation) {
     std::filesystem::current_path(test_dir);
 
     ananke uut(opts);
-    uut.load_data_cache();
-    uut.build_flow();
+    auto cache_rc = uut.load_data_cache();
+    ASSERT_FALSE(cache_rc.has_value());
+    auto build_rc = uut.build_flow();
+    ASSERT_FALSE(build_rc.has_value());
 
     EXPECT_TRUE(std::filesystem::exists(opts.cache_dir +"/PID/sim.tcl"));
     EXPECT_TRUE(std::filesystem::exists(opts.cache_dir +"/PID/sim.sh"));
@@ -272,8 +274,10 @@ TEST( end_to_end , synth_script_generation) {
     std::filesystem::current_path(test_dir);
 
     ananke uut(opts);
-    uut.load_data_cache();
-    uut.build_flow();
+    auto cache_rc = uut.load_data_cache();
+    ASSERT_FALSE(cache_rc.has_value());
+    auto build_rc = uut.build_flow();
+    ASSERT_FALSE(build_rc.has_value());
 
     EXPECT_TRUE(std::filesystem::exists(opts.cache_dir +"/PID/synth.tcl"));
 
@@ -326,8 +330,10 @@ TEST( end_to_end , vivado_project_generation) {
     std::filesystem::current_path(test_dir);
 
     ananke uut(opts);
-    uut.load_data_cache();
-    uut.build_flow();
+    auto cache_rc = uut.load_data_cache();
+    ASSERT_FALSE(cache_rc.has_value());
+    auto build_rc = uut.build_flow();
+    ASSERT_FALSE(build_rc.has_value());
 
     EXPECT_TRUE(std::filesystem::exists(opts.cache_dir +"/PID/makefile.tcl"));
 

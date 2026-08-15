@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <iostream>
+
 #include "main.hpp"
 #include "crash_context.hpp"
 
@@ -59,18 +61,35 @@ int main(int argc, char *argv[]){
 
     MainProfiler profiler;
 
-    ananke engine(opts);
-    std::optional<int> return_code = engine.clear_cache();
-    if (return_code.has_value()) return return_code.value();
-    return_code = engine.generate_new_app();
-    if (return_code.has_value()) return return_code.value();
-    auto parsing_result = engine.directed_parsing();
-    if (!parsing_result) return parsing_result.error();
+    try {
+        ananke engine(opts);
+        if (auto rc = engine.clear_cache()) return *rc;
+        if (auto rc = engine.generate_new_app()) return *rc;
+        auto parsing_result = engine.directed_parsing();
+        if (!parsing_result) return parsing_result.error();
 
-    engine.load_data_cache();
-    LOG_TIMEPOINT("Cache loaded");
-    return_code = engine.build_flow();
-    if (return_code.has_value()) return return_code.value();
+        if (auto rc = engine.load_data_cache()) return *rc;
+        LOG_TIMEPOINT("Cache loaded");
+        if (auto rc = engine.build_flow()) return *rc;
+    } catch (const std::exception &e) {
+        std::cerr << "\nFATAL: " << e.what() << std::endl;
+        if (!crash_ctx.entity.empty()) {
+            std::cerr << "While processing: " << crash_ctx.entity;
+            if (!crash_ctx.file.empty()) std::cerr << " (" << crash_ctx.file << ")";
+            if (!crash_ctx.parameter.empty()) std::cerr << " parameter: " << crash_ctx.parameter;
+            std::cerr << std::endl;
+        }
+        return 1;
+    } catch (...) {
+        std::cerr << "\nFATAL: unknown exception" << std::endl;
+        if (!crash_ctx.entity.empty()) {
+            std::cerr << "While processing: " << crash_ctx.entity;
+            if (!crash_ctx.file.empty()) std::cerr << " (" << crash_ctx.file << ")";
+            if (!crash_ctx.parameter.empty()) std::cerr << " parameter: " << crash_ctx.parameter;
+            std::cerr << std::endl;
+        }
+        return 1;
+    }
 
     return 0;
 }

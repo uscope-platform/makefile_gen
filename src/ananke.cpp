@@ -303,5 +303,5 @@ std::optional<int> ananke::build_flow() {
             ast_file.close();
         }
     }
-    return 0;
+    return std::nullopt;
 }

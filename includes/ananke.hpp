@@ -80,8 +80,8 @@ class ananke {
 
     [[nodiscard]] std::optional<int> generate_new_app() const;
     [[nodiscard]] std::expected<std::unordered_map<std::string, std::string>, int> directed_parsing() const;
-    std::optional<int> load_data_cache();
-    std::optional<int> build_flow();
+    [[nodiscard]] std::optional<int> load_data_cache();
+    [[nodiscard]] std::optional<int> build_flow();
 
 private:
     std::shared_ptr<settings_store>  s_store;
