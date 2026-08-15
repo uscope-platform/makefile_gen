@@ -107,6 +107,11 @@ void application_definition_generator::process_ast(const std::shared_ptr<hdl_ast
 
             }
 
+            if (spec.is_null()) {
+                spdlog::warn("No peripheral specification found for type {}, skipping", type);
+                continue;
+            }
+
             periph["spec_id"] = spec["id"];
 
 
@@ -123,8 +128,15 @@ void application_definition_generator::process_ast(const std::shared_ptr<hdl_ast
             auto proxy_periphs = proxy_gen.get_peripherals();
             for(auto &item:proxy_periphs){
                 item["proxied"] = true;
-                item["proxy_address"] = "0x" + uint_to_hex(current_node->get_parent()->get_address()[0].get_value());
-                item["proxy_type"] = current_node->get_parent()->get_type();
+                auto proxy_parent = current_node->get_parent();
+                auto proxy_addrs = proxy_parent ? proxy_parent->get_address() : std::vector<hdl_integer>{};
+                if (proxy_parent && !proxy_addrs.empty()) {
+                    item["proxy_address"] = "0x" + uint_to_hex(proxy_addrs[0].get_value());
+                    item["proxy_type"] = proxy_parent->get_type();
+                } else {
+                    spdlog::warn("Proxy node {} has no parent address, skipping proxy address assignment", current_node->get_name());
+                    item["proxy_address"] = "0";
+                }
                 item["base_address"] = {item["base_address"]};
                 peripherals.push_back(item);
             }
@@ -234,8 +246,10 @@ std::map<std::string, hdl_integer>
 application_definition_generator::get_parameters(const json &spec, std::shared_ptr<hdl_ast_node> &node) {
     std::map<std::string, hdl_integer> ret_map;
 
+    if (!spec.contains("registers") || !spec["registers"].is_array()) return ret_map;
+
     for(auto &item:spec["registers"]){
-        if(item.contains("n_registers")){
+        if(item.contains("n_registers") && item["n_registers"].is_array() && !item["n_registers"].empty()){
             std::vector<std::string> parameters = item["n_registers"];
             if(node->get_parameters().contains(parameters[0])){
                 auto val = node->get_parameter_value(parameters[0])->get_numeric_value();
@@ -247,16 +261,18 @@ application_definition_generator::get_parameters(const json &spec, std::shared_p
                 }
             }
         }
-        for(auto &f:item["fields"]){
-            if(f.contains("n_fields")){
-                std::vector<std::string> parameters = f["n_fields"];
-                if(node->get_parameters().contains(parameters[0])){
-                    auto val = node->get_parameter_value(parameters[0])->get_numeric_value();
-                    if(!val.has_value()) {
-                        spdlog::warn("The parameter defining the number of fields in peripheral {} is undefined, setting it to 1 out of precaution", node->get_name());
-                        ret_map[parameters[0]] = 1;
-                    } else {
-                        ret_map[parameters[0]] = val.value();
+        if (item.contains("fields") && item["fields"].is_array()) {
+            for(auto &f:item["fields"]){
+                if(f.contains("n_fields") && f["n_fields"].is_array() && !f["n_fields"].empty()){
+                    std::vector<std::string> parameters = f["n_fields"];
+                    if(node->get_parameters().contains(parameters[0])){
+                        auto val = node->get_parameter_value(parameters[0])->get_numeric_value();
+                        if(!val.has_value()) {
+                            spdlog::warn("The parameter defining the number of fields in peripheral {} is undefined, setting it to 1 out of precaution", node->get_name());
+                            ret_map[parameters[0]] = 1;
+                        } else {
+                            ret_map[parameters[0]] = val.value();
+                        }
                     }
                 }
             }

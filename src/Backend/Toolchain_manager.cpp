@@ -15,6 +15,11 @@
 
 #include "Backend/Toolchain_manager.hpp"
 
+#include <spdlog/spdlog.h>
+#include <cerrno>
+#include <cstring>
+#include <cstdlib>
+
 Toolchain_manager::Toolchain_manager(std::shared_ptr <settings_store> s, bool del_mkfile, std::string name) {
     delete_makefile = del_mkfile;
     project_name = std::move(name);
@@ -33,12 +38,23 @@ std::vector<const char *> Toolchain_manager::str_vect_to_char_p(const std::vecto
 }
 
 void Toolchain_manager::spawn_process(const std::vector <std::string> &arg_v, bool daemonize, bool block) {
+    if (arg_v.empty()) {
+        spdlog::error("spawn_process called with no arguments");
+        return;
+    }
     int pid = fork();
-    if(pid== 0){
+    if(pid == 0){
+        // Child: exec, and if that fails exit immediately rather than continuing
+        // to execute the parent's flow (which would corrupt shared state).
         std::vector<const char *> args = str_vect_to_char_p(arg_v);
         if(daemonize) setsid();
         execvp(args[0], const_cast<char *const *>(args.data()));
-
+        spdlog::error("Failed to execute tool {}: {}", arg_v[0], std::strerror(errno));
+        _exit(127);
+    } else if (pid < 0) {
+        // fork failed
+        spdlog::error("fork failed: {}", std::strerror(errno));
+        return;
     }
     if(block) wait(nullptr);
 }

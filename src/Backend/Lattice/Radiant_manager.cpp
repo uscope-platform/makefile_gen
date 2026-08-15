@@ -21,6 +21,10 @@
 Radiant_manager::Radiant_manager(std::shared_ptr<settings_store> s, bool del_mkfile, std::string name) : Toolchain_manager(std::move(s), del_mkfile, std::move(name)) {
     radiant_path = "";
     radiant_path = s_store->get_tool_path("lattice_radiant");
+    if(!std::filesystem::exists(radiant_path)){
+        spdlog::warn("Current Radiant installation not found:{}", radiant_path);
+        radiant_path = "";
+    }
 
 }
 

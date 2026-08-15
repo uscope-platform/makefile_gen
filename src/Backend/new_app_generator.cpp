@@ -14,14 +14,20 @@
 // limitations under the License.
 
 #include "Backend/new_app_generator.hpp"
+#include <spdlog/spdlog.h>
 
 new_app_generator::new_app_generator(const std::string &app_name, std::string &app_language) {
     name = app_name;
     lang = app_language;
 
 
-    std::filesystem::create_directories(app_name + "/tb");
-    std::filesystem::create_directories(app_name + "/rtl");
+    std::error_code ec;
+    std::filesystem::create_directories(app_name + "/tb", ec);
+    if (ec) spdlog::warn("Could not create directory {}: {}", app_name + "/tb", ec.message());
+    ec.clear();
+    std::filesystem::create_directories(app_name + "/rtl", ec);
+    if (ec) spdlog::warn("Could not create directory {}: {}", app_name + "/rtl", ec.message());
+
     write_depfile();
     write_synth_hdl();
     write_sim_hdl();
