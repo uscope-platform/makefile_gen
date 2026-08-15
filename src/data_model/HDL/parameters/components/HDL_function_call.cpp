@@ -159,13 +159,13 @@ std::expected<resolved_parameter, solver_errors> HDL_function_call::evaluate(con
     if (function_name.starts_with("$")) {
         return evaluate_system_task(context);
     }
-    if (body.empty()) return empty_body;
+    if (body.empty()) return std::unexpected{empty_body};
 
     std::map<int64_t, hdl_integer> value_map;
     std::map<int64_t, int64_t> size_map;
     walk_body(function_name, body, context, value_map, size_map, return_type);
 
-    if (value_map.empty()) return missing_value;
+    if (value_map.empty()) return std::unexpected{missing_value};
 
     size_t max_idx = static_cast<size_t>(value_map.rbegin()->first) + 1;
     std::vector<hdl_integer> values(max_idx);
@@ -327,12 +327,12 @@ std::expected<resolved_parameter, solver_errors> HDL_function_call::evaluate_sys
     std::vector<resolved_parameter> resolved_arguments;
     for (auto &arg:arguments) {
         auto resolved_val = arg->evaluate(context);
-        if (!resolved_val.has_value()) return missing_value;
+        if (!resolved_val.has_value()) return std::unexpected{missing_value};
         resolved_arguments.push_back(resolved_val.value());
     }
     if (resolved_arguments.empty()) {
         spdlog::warn("System task {} requires at least one argument", function_name);
-        return missing_arguments;
+        return std::unexpected{missing_arguments};
     }
     if (task_name == "rtoi") {
         if (resolved_arguments[0].is_real()) {
@@ -832,7 +832,7 @@ std::expected<resolved_parameter, solver_errors> HDL_function_call::evaluate_typ
     const std::map<qualified_identifier, resolved_parameter> &context, const std::string &task_name) {
     if (arguments.empty()) {
         spdlog::warn("${} requires at least one argument", task_name);
-        return missing_arguments;
+        return std::unexpected{missing_arguments};
     }
 
     int dim = 1;

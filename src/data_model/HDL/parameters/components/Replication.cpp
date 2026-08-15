@@ -75,15 +75,15 @@ void Replication::propagate_function(const hdl_function_statement &def) {
 std::expected<resolved_parameter, solver_errors> Replication::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
     mdarray<hdl_integer> result;
     auto raw_size = repetition_size->evaluate(context);
-    if (!raw_size.has_value()) return missing_value;
-    if (!raw_size.value().is_integer()) return missing_value;
+    if (!raw_size.has_value()) return std::unexpected{missing_value};
+    if (!raw_size.value().is_integer()) return std::unexpected{missing_value};
     auto size = raw_size.value().get_integer().get_value();
-    if (size <= 0) return missing_value;
+    if (size <= 0) return std::unexpected{missing_value};
     mdarray<hdl_integer>::md_1d_array repeated_value;
     if (repeated_item->is<Expression_v2>()) {
         auto item = repeated_item->as<Expression_v2>().evaluate(context);
-        if (!item.has_value()) return missing_value;
-        if (!item.value().is_integer()) return wrong_type;
+        if (!item.has_value()) return std::unexpected{missing_value};
+        if (!item.value().is_integer()) return std::unexpected{wrong_type};
         int64_t repeated_size = 0;
         auto comp_t = repeated_item->resolve_expression_type(context);
         if (comp_t) repeated_size = static_cast<int64_t>(packed_width(*comp_t));
@@ -96,7 +96,7 @@ std::expected<resolved_parameter, solver_errors> Replication::evaluate(const std
     } else if (repeated_item->is<Concatenation>()) {
 
         auto raw_item = repeated_item->as<Concatenation>().evaluate(context);
-        if (!raw_item.has_value()) return missing_value;
+        if (!raw_item.has_value()) return std::unexpected{missing_value};
         auto item = raw_item.value();
         if (item.is_integer())
             repeated_value = std::vector(size, item.get_integer());
@@ -108,8 +108,8 @@ std::expected<resolved_parameter, solver_errors> Replication::evaluate(const std
         }
     } else if (!repeated_item->is<Expression_v2>() && !repeated_item->is<Concatenation>()){
         auto item = repeated_item->evaluate(context);
-        if (!item.has_value()) return missing_value;
-        if (!item.value().is_integer()) return wrong_type;
+        if (!item.has_value()) return std::unexpected{missing_value};
+        if (!item.value().is_integer()) return std::unexpected{wrong_type};
         int64_t repeated_size = 0;
         auto comp_t = repeated_item->resolve_expression_type(context);
         if (comp_t) repeated_size = static_cast<int64_t>(packed_width(*comp_t));
@@ -120,7 +120,7 @@ std::expected<resolved_parameter, solver_errors> Replication::evaluate(const std
             return pack_repetition(item.value().get_integer() , repeated_size, size);
         }
     } else {
-        return wrong_type;
+        return std::unexpected{wrong_type};
     }
 
     result.set_1d_slice({0,0}, repeated_value);

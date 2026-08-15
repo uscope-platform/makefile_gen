@@ -211,7 +211,7 @@ std::expected<resolved_parameter, solver_errors> Expression_v2::evaluate(
 
     if (operation == none) {
         if (lhs && !rhs) return lhs->evaluate(context);
-        return missing_arguments;
+        return std::unexpected{missing_arguments};
     }
 
     if (lhs) l_val = lhs->evaluate(context);

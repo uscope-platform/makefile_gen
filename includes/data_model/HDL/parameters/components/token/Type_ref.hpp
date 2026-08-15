@@ -33,7 +33,7 @@ public:
 
     std::expected<resolved_parameter, solver_errors> evaluate(
         const std::map<qualified_identifier, resolved_parameter> &) override {
-        return missing_value;
+        return std::unexpected{missing_value};
     }
 
     std::string print() const override {

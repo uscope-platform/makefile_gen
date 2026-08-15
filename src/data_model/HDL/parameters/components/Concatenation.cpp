@@ -79,9 +79,9 @@ std::expected<resolved_parameter, solver_errors> Concatenation::evaluate(const s
         for (int i = 0;i<concat_size; i++) {
 
             auto value_opt = components[concat_size-i-1]->evaluate(context);
-            if (!value_opt.has_value()) return missing_value;
+            if (!value_opt.has_value()) return std::unexpected{missing_value};
             auto raw_value = value_opt.value();
-            if (!raw_value.is_integer()) return wrong_type;
+            if (!raw_value.is_integer()) return std::unexpected{wrong_type};
             values[i] = raw_value.get_integer();
 
             if (!fields_sizes.empty()) {
@@ -96,21 +96,21 @@ std::expected<resolved_parameter, solver_errors> Concatenation::evaluate(const s
         result = pack_values(values, sizes);
         result = result->get_integer().truncate_to(container_size);
     } else {
-        if (components.empty())return missing_value;
+        if (components.empty())return std::unexpected{missing_value};
 
         bool reverse_order = unpacked_ascending.empty() || !unpacked_ascending.back();
 
         auto v = components[0]->evaluate(context);
-        if (!v.has_value()) return missing_value;
+        if (!v.has_value()) return std::unexpected{missing_value};
         if (v.value().is_string()) {
             mdarray<std::string> result_string;
             for (int64_t i = 0;i<concat_size; i++) {
                 int64_t idx = reverse_order ? concat_size - i - 1 : i;
                 auto value_opt = components[idx]->evaluate(context);
-                if (!value_opt.has_value()) return missing_value;
+                if (!value_opt.has_value()) return std::unexpected{missing_value};
                 if (!value_opt.value().is_string()) {
                     spdlog::warn("Concatenating mixed string and non-string components, defaulting to 0");
-                    return wrong_type;
+                    return std::unexpected{wrong_type};
                 }
                 mdarray<std::string> to_concat;
                 to_concat.set_value(0,value_opt.value().get_string());
@@ -122,7 +122,7 @@ std::expected<resolved_parameter, solver_errors> Concatenation::evaluate(const s
             for (int64_t i = 0;i<concat_size; i++) {
                 int64_t idx = reverse_order ? concat_size - i - 1 : i;
                 auto value_opt = components[idx]->evaluate(context);
-                if (!value_opt.has_value()) return missing_value;
+                if (!value_opt.has_value()) return std::unexpected{missing_value};
                 if (value_opt.value().is_integer()) {
                     mdarray<hdl_integer> to_concat;
                     to_concat.set_value(0,value_opt.value().get_integer());
@@ -144,13 +144,13 @@ std::expected<resolved_parameter, solver_errors> Concatenation::evaluate(const s
         while (dims.size()<3) dims.insert(dims.begin(), 1);
         if(result.value().is_int_array()) {
             auto val = result.value().get_int_array().get_scalar();
-            if (!val) return missing_arguments;
+            if (!val) return std::unexpected{missing_arguments};
             mdarray result_array = {dims, val.value()};
             return result_array;
         }
         if(result.value().is_string_array()) {
             auto val = result.value().get_string_array().get_scalar();
-            if (!val) return missing_arguments;
+            if (!val) return std::unexpected{missing_arguments};
             mdarray result_array = {dims, val.value()};
             return result_array;
         }

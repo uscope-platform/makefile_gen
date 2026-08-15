@@ -41,7 +41,7 @@ void Streaming::propagate_function(const hdl_function_statement &def) {
 }
 
 std::expected<resolved_parameter, solver_errors> Streaming::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
-    if (components.empty()) return missing_arguments;
+    if (components.empty()) return std::unexpected{missing_arguments};
 
     // Evaluate all components; use declared literal width when available.
     std::vector<hdl_integer> values;
@@ -49,7 +49,7 @@ std::expected<resolved_parameter, solver_errors> Streaming::evaluate(const std::
     int64_t total_width = 0;
     for (const auto &comp : components) {
         auto v = comp->evaluate(context);
-        if (!v.has_value() || !v.value().is_integer()) return missing_value;
+        if (!v.has_value() || !v.value().is_integer()) return std::unexpected{missing_value};
         auto raw = v.value().get_integer();
         int64_t w = 0;
         auto comp_t = comp->resolve_expression_type(context);

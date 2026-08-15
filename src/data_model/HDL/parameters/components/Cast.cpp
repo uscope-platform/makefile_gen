@@ -46,9 +46,9 @@ parameter_deps_t Cast::get_dependencies() const {
 
 std::expected<resolved_parameter, solver_errors> Cast::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
     if (type_cast) {
-        if (!container_size) return missing_value;
+        if (!container_size) return std::unexpected{missing_value};
         auto content_val = content->evaluate(context);
-        if (!content_val.has_value()) return missing_value;
+        if (!content_val.has_value()) return std::unexpected{missing_value};
         if (!content_val.value().is_integer()) {
             spdlog::warn("Casting of non scalar integer values is not supported");
         }
@@ -70,11 +70,11 @@ std::expected<resolved_parameter, solver_errors> Cast::evaluate(const std::map<q
         }
     } else {
         auto content_val = content->evaluate(context);
-        if (!content_val.has_value()) return missing_value;
+        if (!content_val.has_value()) return std::unexpected{missing_value};
         if (!content_val.value().is_integer()) return content_val.value();
-        if (!size) return missing_value;
+        if (!size) return std::unexpected{missing_value};
         auto raw_cast_size = size->evaluate(context);
-        if (!raw_cast_size.has_value()) return missing_value;
+        if (!raw_cast_size.has_value()) return std::unexpected{missing_value};
         if (!raw_cast_size.value().is_integer()) {
             spdlog::warn("Cast size evaluates to a non integer");
             return content_val.value();
@@ -95,7 +95,7 @@ std::expected<resolved_parameter, solver_errors> Cast::evaluate(const std::map<q
         result.set_size(cast_size);
         return result;
     }
-        return missing_value;
+        return std::unexpected{missing_value};
 }
 
 std::string Cast::print() const {

@@ -63,13 +63,13 @@ bool operator<(const HDL_parameter &lhs, const HDL_parameter &rhs) {
 
 std::expected<resolved_parameter, solver_errors>  HDL_parameter::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
     if (is_type_param) return resolved_parameter(0);
-    if (!type) return wrong_type;
+    if (!type) return std::unexpected{wrong_type};
     std::optional<resolved_type> container_size;
     if (type->is<HDL_external_type>()) {
     } else {
         container_size = type->evaluate_type(context);
     }
-    if (!container_size) return missing_value;
+    if (!container_size) return std::unexpected{missing_value};
     if (return_unpacked_range_left && return_unpacked_range_right) {
         auto lower = return_unpacked_range_left->evaluate(context);
         auto upper = return_unpacked_range_right->evaluate(context);
@@ -79,7 +79,7 @@ std::expected<resolved_parameter, solver_errors>  HDL_parameter::evaluate(const 
     }
     raw_value->set_container_sizes(container_size.value(), context);
     auto val = raw_value->evaluate(context);
-    if (!val) return val.error();
+    if (!val) return std::unexpected{val.error()};
     if (type->is<HDL_simple_type>()) {
         return cast_result(val.value(), container_size);
     } else {

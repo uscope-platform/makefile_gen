@@ -26,6 +26,8 @@
 
 #include <cereal/types/variant.hpp>
 
+#include "solver_errors.hpp"
+
 class resolved_parameter {
 public:
     resolved_parameter() = default;
@@ -57,6 +59,7 @@ public:
         content = init_val;
         undefined = false;
     }
+    resolved_parameter(solver_errors) = delete; // explicitly stop conversion of an error to a valid value;
     [[nodiscard]] hdl_integer get_integer() const;
     [[nodiscard]] std::string get_string() const;
     [[nodiscard]] mdarray<hdl_integer> get_int_array() const;

@@ -61,8 +61,8 @@ std::expected<resolved_parameter, solver_errors> Identifier_token::evaluate(
         std::vector<int64_t> indices;
         for (const auto &idx_expr : array_index) {
             auto idx_val = idx_expr->evaluate(context);
-            if (!idx_val.has_value()) return missing_value;
-            if (!idx_val.value().is_integer()) return wrong_type;
+            if (!idx_val.has_value()) return std::unexpected{missing_value};
+            if (!idx_val.value().is_integer()) return std::unexpected{wrong_type};
             indices.push_back(idx_val.value().get_integer().get_value());
         }
 
@@ -83,9 +83,9 @@ std::expected<resolved_parameter, solver_errors> Identifier_token::evaluate(
             auto b = shifted & hdl_integer(1);
             return b;
         }
-         return wrong_type;
+         return std::unexpected{wrong_type};
     }
-    return missing_value;
+    return std::unexpected{missing_value};
 }
 
 std::string Identifier_token::print() const {

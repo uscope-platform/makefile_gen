@@ -44,7 +44,7 @@ void Ternary::propagate_expression(const qualified_identifier &constant_id,
 
 std::expected<resolved_parameter, solver_errors> Ternary::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
     auto condition_value = condition->evaluate(context);
-    if (!condition_value.has_value()) return missing_value;
+    if (!condition_value.has_value()) return std::unexpected{missing_value};
     bool cond_true;
     if (condition_value.value().is_integer()) {
         cond_true = condition_value.value().get_integer() != 0;
@@ -52,7 +52,7 @@ std::expected<resolved_parameter, solver_errors> Ternary::evaluate(const std::ma
         cond_true = condition_value.value().get_real() != 0.0;
     } else {
          spdlog::warn("Ternary condition is of unsupported type");
-        return unsupported;
+        return std::unexpected{unsupported};
     }
     if (!cond_true) {
         return false_value->evaluate(context);
