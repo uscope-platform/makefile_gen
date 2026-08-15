@@ -538,6 +538,18 @@ TEST(system_task, isunknown) {
     EXPECT_EQ(defaults.at(qualified_identifier("U")).get_integer(), 0);
 }
 
+TEST(system_task, isunbounded) {
+    auto test_pattern = R"(
+        module test_mod ();
+            localparam U = $isunbounded(42);
+        endmodule
+    )";
+    sv_analyzer analyzer;
+    auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+    EXPECT_EQ(defaults.at(qualified_identifier("U")).get_integer(), 0);
+}
+
 TEST(system_task, hyperbolic) {
     auto test_pattern = R"(
         module test_mod ();
@@ -930,7 +942,7 @@ TEST(system_task, real_bits_conversion) {
             localparam RB = $realtobits(1.0);
             localparam BR = $bitstoreal(64'h3FF0000000000000);
             localparam SRB = $shortrealtobits(1.0);
-            localparam SBR = $shortrealbits(32'h3F800000);
+            localparam SBR = $bitstoshortreal(32'h3F800000);
         endmodule
     )";
     sv_analyzer analyzer;

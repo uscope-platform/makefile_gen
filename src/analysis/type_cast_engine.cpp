@@ -19,7 +19,7 @@
 #include "data_model/HDL/parameters/common/hdl_integer.hpp"
 
 hdl_integer type_cast_engine::to_unsigned(hdl_integer in, uint64_t container_size) {
-.    return in.truncate_to(static_cast<int64_t>(container_size));
+    return in.truncate_to(static_cast<int64_t>(container_size));
 }
 
 hdl_integer type_cast_engine::to_signed(hdl_integer in, uint64_t container_size) {

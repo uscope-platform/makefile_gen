@@ -41,8 +41,8 @@ bool sv_visitor::is_known_system_function(const std::string &name) const {
         "min", "max", "countones", "countbits",
         "sin", "cos", "tan", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh",
         "exp", "hypot", "atan", "atan2", "asin", "acos", "round", "truncate",
-        "onehot", "onehot0", "isunknown", "clog2",
-        "realtobits", "bitstoreal", "shortrealtobits", "shortrealbits",
+        "onehot", "onehot0", "isunknown", "isunbounded", "clog2",
+        "realtobits", "bitstoreal", "shortrealtobits", "bitstoshortreal",
         "len", "substr", "to_lower", "to_upper", "atoi", "compare", "sformatf",
         // Random / distribution functions (recognized, not constant-evaluable)
         "random", "urandom", "urandom_range", "srandom",

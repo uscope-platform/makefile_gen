@@ -548,6 +548,11 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
     if (task_name == "isunknown") {
         return 0;
     }
+    if (task_name == "isunbounded") {
+        // No unbounded types are representable in this tool, so this always
+        // resolves to false in constant evaluation.
+        return 0;
+    }
     if (task_name == "clog2") {
         if (resolved_arguments[0].is_real()) {
             return static_cast<hdl_integer>(std::ceil(std::log2(resolved_arguments[0].get_real())));
@@ -666,14 +671,14 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
         spdlog::warn("Encountered an invalid argument for a $shortrealtobits call");
         return 0;
     }
-    if (task_name == "shortrealbits") {
+    if (task_name == "bitstoshortreal") {
         if (resolved_arguments[0].is_integer()) {
             uint32_t bits = static_cast<uint32_t>(resolved_arguments[0].get_integer().to_wide());
             float f;
             std::memcpy(&f, &bits, sizeof(f));
             return static_cast<double>(f);
         }
-        spdlog::warn("Encountered an invalid argument for a $shortrealbits call");
+        spdlog::warn("Encountered an invalid argument for a $bitstoshortreal call");
         return 0;
     }
     if (task_name == "random" || task_name == "urandom" || task_name == "urandom_range" || task_name.starts_with("dist_")) {
