@@ -186,15 +186,15 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
         if (param->get_expression()) {
             annotate_identifier_types(param->get_expression(), type_map);
         }
-        std::optional<resolved_parameter> res;
+        std::expected<resolved_parameter, solver_errors>  res;
         try {
             res = param->evaluate(ctx);
         } catch (const std::exception &e) {
             spdlog::warn("Exception while evaluating parameter {}: {}", next.value().get_name(), e.what());
-            res = std::nullopt;
+            res = missing_value;
         } catch (...) {
             spdlog::warn("Unknown exception while evaluating parameter {}", next.value().get_name());
-            res = std::nullopt;
+            res = missing_value;
         }
         if (res) {
             if (res.value().is_undefined()) {

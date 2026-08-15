@@ -31,9 +31,9 @@ public:
         return deps;
     }
 
-    std::optional<resolved_parameter> evaluate(
+    std::expected<resolved_parameter, solver_errors> evaluate(
         const std::map<qualified_identifier, resolved_parameter> &) override {
-        return std::nullopt;
+        return missing_value;
     }
 
     std::string print() const override {

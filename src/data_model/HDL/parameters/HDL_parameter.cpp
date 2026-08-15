@@ -61,15 +61,15 @@ bool operator<(const HDL_parameter &lhs, const HDL_parameter &rhs) {
 
 
 
-std::optional<resolved_parameter> HDL_parameter::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
+std::expected<resolved_parameter, solver_errors>  HDL_parameter::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
     if (is_type_param) return resolved_parameter(0);
-    if (!type) return std::nullopt;
+    if (!type) return wrong_type;
     std::optional<resolved_type> container_size;
     if (type->is<HDL_external_type>()) {
     } else {
         container_size = type->evaluate_type(context);
     }
-    if (!container_size) return std::nullopt;
+    if (!container_size) return missing_value;
     if (return_unpacked_range_left && return_unpacked_range_right) {
         auto lower = return_unpacked_range_left->evaluate(context);
         auto upper = return_unpacked_range_right->evaluate(context);
@@ -79,28 +79,28 @@ std::optional<resolved_parameter> HDL_parameter::evaluate(const std::map<qualifi
     }
     raw_value->set_container_sizes(container_size.value(), context);
     auto val = raw_value->evaluate(context);
-    if (!val) return std::nullopt;
+    if (!val) return val.error();
     if (type->is<HDL_simple_type>()) {
-        return cast_result(val, container_size);
+        return cast_result(val.value(), container_size);
     } else {
-        return val;
+        return val.value();
     }
 }
 
-std::optional<resolved_parameter> HDL_parameter::cast_result(
-    const std::optional<resolved_parameter> &in,
+std::expected<resolved_parameter, solver_errors> HDL_parameter::cast_result(
+    const resolved_parameter &in,
     const std::optional<resolved_type> &sizes
     ) {
     auto t = type->as<HDL_simple_type>();
-    if (in->is_integer()) {
-        if (t.get_signed() && !in->get_integer().get_signed()) {
+    if (in.is_integer()) {
+        if (t.get_signed() && !in.get_integer().get_signed()) {
             if (sizes.has_value() && !sizes->packed_sizes.empty() && packed_width(*sizes) == 32) {
-                uint32_t truncated_val = in->get_integer().get_value() & 0xFFFFFFFF;
+                uint32_t truncated_val = in.get_integer().get_value() & 0xFFFFFFFF;
                 return static_cast<int32_t>(truncated_val);
             }
         }
         if (sizes.has_value() && !sizes->packed_sizes.empty()) {
-            auto val = in->get_integer();
+            auto val = in.get_integer();
             val.set_size(packed_width(*sizes));
             return val;
         }

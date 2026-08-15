@@ -40,9 +40,9 @@ public:
     std::string get_package_prefix() const {return package_prefix;}
     parameter_deps_t get_dependencies() const override;
     void propagate_function(const hdl_function_statement &def) override;
-    std::optional<resolved_parameter> evaluate(const std::map<qualified_identifier, resolved_parameter> &context) override;
+    std::expected<resolved_parameter, solver_errors> evaluate(const std::map<qualified_identifier, resolved_parameter> &context) override;
 
-    std::optional<resolved_parameter> evaluate_system_task(const std::map<qualified_identifier, resolved_parameter> &context);
+    std::expected<resolved_parameter, solver_errors> evaluate_system_task(const std::map<qualified_identifier, resolved_parameter> &context);
     std::optional<resolved_type> resolve_expression_type(
         const std::map<qualified_identifier, resolved_parameter> &context) const override;
     void apply_return_order_reversal(
@@ -75,11 +75,11 @@ private:
         const std::shared_ptr<hdl_type> &rt
     );
 
-    std::optional<resolved_parameter> evaluate_type_query(
+    std::expected<resolved_parameter, solver_errors> evaluate_type_query(
         const std::map<qualified_identifier, resolved_parameter> &context, const std::string &task_name);
-    std::optional<resolved_parameter> evaluate_typename(
+    std::expected<resolved_parameter, solver_errors> evaluate_typename(
         const std::map<qualified_identifier, resolved_parameter> &context);
-    std::optional<resolved_parameter> evaluate_signedness(
+    std::expected<resolved_parameter, solver_errors> evaluate_signedness(
         const std::map<qualified_identifier, resolved_parameter> &context, const std::string &task_name);
 
     std::string function_name;

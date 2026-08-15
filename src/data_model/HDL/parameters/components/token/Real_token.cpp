@@ -37,7 +37,7 @@ Real_token::Real_token(const std::string &s) {
     value = v;
 }
 
-std::optional<resolved_parameter> Real_token::evaluate(
+std::expected<resolved_parameter, solver_errors> Real_token::evaluate(
     const std::map<qualified_identifier, resolved_parameter> &context) {
     return value;
 }

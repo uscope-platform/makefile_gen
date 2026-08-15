@@ -203,14 +203,15 @@ std::optional<resolved_type> Expression_v2::resolve_expression_type(
     return result;
 }
 
-std::optional<resolved_parameter> Expression_v2::evaluate(
+std::expected<resolved_parameter, solver_errors> Expression_v2::evaluate(
     const std::map<qualified_identifier, resolved_parameter> &context) {
-    std::optional<resolved_parameter> r_val, l_val;
+
+    std::expected<resolved_parameter, solver_errors> r_val, l_val;
     resolved_parameter ret_val;
 
     if (operation == none) {
         if (lhs && !rhs) return lhs->evaluate(context);
-        return std::nullopt;
+        return missing_arguments;
     }
 
     if (lhs) l_val = lhs->evaluate(context);
@@ -228,7 +229,7 @@ std::optional<resolved_parameter> Expression_v2::evaluate(
         resolved_parameter operand_a = 0;
         resolved_parameter operand_b = 0;
         if (l_val) operand_a = l_val.value();
-        if (r_val) {
+        if (rhs && r_val) {
             operand_b = r_val.value();
         } else {
             if (operation == subtract) {

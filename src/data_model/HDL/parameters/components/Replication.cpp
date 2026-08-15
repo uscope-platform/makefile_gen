@@ -72,17 +72,17 @@ void Replication::propagate_function(const hdl_function_statement &def) {
     repeated_item->propagate_function(def);
 }
 
-std::optional<resolved_parameter> Replication::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
+std::expected<resolved_parameter, solver_errors> Replication::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
     mdarray<hdl_integer> result;
     auto raw_size = repetition_size->evaluate(context);
-    if (!raw_size.has_value()) return std::nullopt;
-    if (!raw_size.value().is_integer()) return std::nullopt;
+    if (!raw_size.has_value()) return missing_value;
+    if (!raw_size.value().is_integer()) return missing_value;
     auto size = raw_size.value().get_integer().get_value();
-    if (size <= 0) return std::nullopt;
+    if (size <= 0) return missing_value;
     mdarray<hdl_integer>::md_1d_array repeated_value;
     if (repeated_item->is<Expression_v2>()) {
         auto item = repeated_item->as<Expression_v2>().evaluate(context);
-        if (!item.has_value()) return std::nullopt;
+        if (!item.has_value()) return missing_value;
         if (!item.value().is_integer()) throw std::runtime_error("Tried to replicate non integer");
         int64_t repeated_size = 0;
         auto comp_t = repeated_item->resolve_expression_type(context);
@@ -96,7 +96,7 @@ std::optional<resolved_parameter> Replication::evaluate(const std::map<qualified
     } else if (repeated_item->is<Concatenation>()) {
 
         auto raw_item = repeated_item->as<Concatenation>().evaluate(context);
-        if (!raw_item.has_value()) return std::nullopt;
+        if (!raw_item.has_value()) return missing_value;
         auto item = raw_item.value();
         if (item.is_integer())
             repeated_value = std::vector(size, item.get_integer());
@@ -108,7 +108,7 @@ std::optional<resolved_parameter> Replication::evaluate(const std::map<qualified
         }
     } else if (!repeated_item->is<Expression_v2>() && !repeated_item->is<Concatenation>()){
         auto item = repeated_item->evaluate(context);
-        if (!item.has_value()) return std::nullopt;
+        if (!item.has_value()) return missing_value;
         if (!item.value().is_integer()) throw std::runtime_error("Tried to replicate non integer");
         int64_t repeated_size = 0;
         auto comp_t = repeated_item->resolve_expression_type(context);

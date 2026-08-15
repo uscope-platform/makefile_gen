@@ -46,7 +46,7 @@ Time_token::Time_token(const std::string &s) {
     value = v * scale;
 }
 
-std::optional<resolved_parameter> Time_token::evaluate(
+std::expected<resolved_parameter, solver_errors> Time_token::evaluate(
     const std::map<qualified_identifier, resolved_parameter> &context) {
     return value;
 }

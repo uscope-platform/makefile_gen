@@ -30,7 +30,7 @@ public:
 
     parameter_deps_t get_dependencies() const override {return {};}
     void propagate_function(const hdl_function_statement &def) override {}
-    std::optional<resolved_parameter> evaluate(const std::map<qualified_identifier, resolved_parameter> &context) override;
+    std::expected<resolved_parameter, solver_errors> evaluate(const std::map<qualified_identifier, resolved_parameter> &context) override;
 
     std::string print() const override;
 

@@ -28,7 +28,7 @@ String_token::String_token(const std::string &s) {
     value = resolved_parameter(s);
 }
 
-std::optional<resolved_parameter> String_token::evaluate(
+std::expected<resolved_parameter, solver_errors>  String_token::evaluate(
     const std::map<qualified_identifier, resolved_parameter> &context) {
     return value;
 }

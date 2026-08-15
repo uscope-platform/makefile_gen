@@ -42,9 +42,9 @@ void Ternary::propagate_expression(const qualified_identifier &constant_id,
     false_value->propagate_expression(constant_id, value);
 }
 
-std::optional<resolved_parameter> Ternary::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
+std::expected<resolved_parameter, solver_errors> Ternary::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
     auto condition_value = condition->evaluate(context);
-    if (!condition_value.has_value()) return std::nullopt;
+    if (!condition_value.has_value()) return missing_value;
     bool cond_true;
     if (condition_value.value().is_integer()) {
         cond_true = condition_value.value().get_integer() != 0;
@@ -52,7 +52,7 @@ std::optional<resolved_parameter> Ternary::evaluate(const std::map<qualified_ide
         cond_true = condition_value.value().get_real() != 0.0;
     } else {
          spdlog::warn("Ternary condition is of unsupported type");
-        return std::nullopt;
+        return unsupported;
     }
     if (!cond_true) {
         return false_value->evaluate(context);

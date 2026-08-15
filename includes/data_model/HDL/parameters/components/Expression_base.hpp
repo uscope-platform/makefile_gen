@@ -18,9 +18,11 @@
 
 #include <string>
 #include <vector>
+#include <expected>
 #include "data_model/HDL/parameters/common/qualified_identifier.hpp"
 #include "data_model/HDL/parameters/common/resolved_parameter.hpp"
 #include "data_model/HDL/types/resolved_type.hpp"
+#include "data_model/HDL/parameters/common/solver_errors.hpp"
 
 class hdl_function_statement;
 
@@ -33,7 +35,7 @@ public:
     virtual parameter_deps_t get_dependencies()const {return {};}
     virtual void propagate_expression(const qualified_identifier &constant_id, const std::shared_ptr<Expression_base> &value){}
     virtual void propagate_function(const hdl_function_statement &def) {}
-    virtual std::optional<resolved_parameter> evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {return std::nullopt;}
+    virtual std::expected<resolved_parameter, solver_errors> evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {return missing_value;}
     virtual std::string print() const {return "";}
 
 

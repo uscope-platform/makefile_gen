@@ -70,8 +70,8 @@ void Concatenation::propagate_function(const hdl_function_statement &def) {
     }
 }
 
-std::optional<resolved_parameter> Concatenation::evaluate(const std::map<qualified_identifier, resolved_parameter> &context){
-    std::optional<resolved_parameter> result;
+std::expected<resolved_parameter, solver_errors> Concatenation::evaluate(const std::map<qualified_identifier, resolved_parameter> &context){
+    std::expected<resolved_parameter, solver_errors> result;
     auto concat_size = components.size();
     if (packing) {
         std::vector<int64_t> sizes(concat_size);
@@ -79,7 +79,7 @@ std::optional<resolved_parameter> Concatenation::evaluate(const std::map<qualifi
         for (int i = 0;i<concat_size; i++) {
 
             auto value_opt = components[concat_size-i-1]->evaluate(context);
-            if (!value_opt.has_value()) return std::nullopt;
+            if (!value_opt.has_value()) return missing_value;
             auto raw_value = value_opt.value();
             if (!raw_value.is_integer()) throw std::runtime_error("packing concatenations of arrays is unsupported");
             values[i] = raw_value.get_integer();
@@ -96,21 +96,21 @@ std::optional<resolved_parameter> Concatenation::evaluate(const std::map<qualifi
         result = pack_values(values, sizes);
         result = result->get_integer().truncate_to(container_size);
     } else {
-        if (components.empty())return std::nullopt;
+        if (components.empty())return missing_value;
 
         bool reverse_order = unpacked_ascending.empty() || !unpacked_ascending.back();
 
         auto v = components[0]->evaluate(context);
-        if (!v.has_value()) return std::nullopt;
+        if (!v.has_value()) return missing_value;
         if (v.value().is_string()) {
             mdarray<std::string> result_string;
             for (int64_t i = 0;i<concat_size; i++) {
                 int64_t idx = reverse_order ? concat_size - i - 1 : i;
                 auto value_opt = components[idx]->evaluate(context);
-                if (!value_opt.has_value()) return std::nullopt;
+                if (!value_opt.has_value()) return missing_value;
                 if (!value_opt.value().is_string()) {
                     spdlog::warn("Concatenating mixed string and non-string components, defaulting to 0");
-                    return std::nullopt;
+                    return wrong_type;
                 }
                 mdarray<std::string> to_concat;
                 to_concat.set_value(0,value_opt.value().get_string());
@@ -122,7 +122,7 @@ std::optional<resolved_parameter> Concatenation::evaluate(const std::map<qualifi
             for (int64_t i = 0;i<concat_size; i++) {
                 int64_t idx = reverse_order ? concat_size - i - 1 : i;
                 auto value_opt = components[idx]->evaluate(context);
-                if (!value_opt.has_value()) return std::nullopt;
+                if (!value_opt.has_value()) return missing_value;
                 if (value_opt.value().is_integer()) {
                     mdarray<hdl_integer> to_concat;
                     to_concat.set_value(0,value_opt.value().get_integer());

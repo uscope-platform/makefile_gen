@@ -46,7 +46,7 @@ Numeric_token::Numeric_token(std::variant<hdl_integer, double> n, int64_t b_s) {
     sized_explicit = b_s >= 0;
 }
 
-std::optional<resolved_parameter> Numeric_token::evaluate(
+std::expected<resolved_parameter, solver_errors> Numeric_token::evaluate(
     const std::map<qualified_identifier, resolved_parameter> &context) {
     return value;
 }

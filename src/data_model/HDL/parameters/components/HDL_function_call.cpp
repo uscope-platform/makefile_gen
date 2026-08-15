@@ -155,17 +155,17 @@ void HDL_function_call::walk_body(
     }
 }
 
-std::optional<resolved_parameter> HDL_function_call::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
+std::expected<resolved_parameter, solver_errors> HDL_function_call::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
     if (function_name.starts_with("$")) {
         return evaluate_system_task(context);
     }
-    if (body.empty()) return std::nullopt;
+    if (body.empty()) return empty_body;
 
     std::map<int64_t, hdl_integer> value_map;
     std::map<int64_t, int64_t> size_map;
     walk_body(function_name, body, context, value_map, size_map, return_type);
 
-    if (value_map.empty()) return std::nullopt;
+    if (value_map.empty()) return missing_value;
 
     size_t max_idx = static_cast<size_t>(value_map.rbegin()->first) + 1;
     std::vector<hdl_integer> values(max_idx);
@@ -311,7 +311,7 @@ std::string format_string(const std::string &fmt, const std::vector<resolved_par
 
 } // namespace
 
-std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const std::map<qualified_identifier, resolved_parameter> &context) {
+std::expected<resolved_parameter, solver_errors> HDL_function_call::evaluate_system_task(const std::map<qualified_identifier, resolved_parameter> &context) {
     std::string task_name = function_name.substr(1, function_name.size()-1);
     if (task_name == "bits" || task_name == "size" || task_name == "left" || task_name == "right" ||
         task_name == "high" || task_name == "low" || task_name == "dimensions" || task_name == "unpacked_dimensions") {
@@ -327,12 +327,12 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_system_task(const 
     std::vector<resolved_parameter> resolved_arguments;
     for (auto &arg:arguments) {
         auto resolved_val = arg->evaluate(context);
-        if (!resolved_val.has_value()) return std::nullopt;
+        if (!resolved_val.has_value()) return missing_value;
         resolved_arguments.push_back(resolved_val.value());
     }
     if (resolved_arguments.empty()) {
         spdlog::warn("System task {} requires at least one argument", function_name);
-        return std::nullopt;
+        return missing_arguments;
     }
     if (task_name == "rtoi") {
         if (resolved_arguments[0].is_real()) {
@@ -828,11 +828,11 @@ std::vector<type_dimension> collect_dimensions(const resolved_type &t) {
 
 } // namespace
 
-std::optional<resolved_parameter> HDL_function_call::evaluate_type_query(
+std::expected<resolved_parameter, solver_errors> HDL_function_call::evaluate_type_query(
     const std::map<qualified_identifier, resolved_parameter> &context, const std::string &task_name) {
     if (arguments.empty()) {
         spdlog::warn("${} requires at least one argument", task_name);
-        return std::nullopt;
+        return missing_arguments;
     }
 
     int dim = 1;
@@ -892,7 +892,7 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_type_query(
     return static_cast<hdl_integer>(std::min(d.left, d.right));
 }
 
-std::optional<resolved_parameter> HDL_function_call::evaluate_typename(
+std::expected<resolved_parameter, solver_errors> HDL_function_call::evaluate_typename(
     const std::map<qualified_identifier, resolved_parameter> &context) {
     if (arguments.empty()) {
         spdlog::warn("$typename requires at least one argument");
@@ -925,7 +925,7 @@ std::optional<resolved_parameter> HDL_function_call::evaluate_typename(
     return resolved_parameter("");
 }
 
-std::optional<resolved_parameter> HDL_function_call::evaluate_signedness(
+std::expected<resolved_parameter, solver_errors> HDL_function_call::evaluate_signedness(
     const std::map<qualified_identifier, resolved_parameter> &context, const std::string &task_name) {
     if (arguments.empty()) {
         spdlog::warn("${} requires at least one argument", task_name);

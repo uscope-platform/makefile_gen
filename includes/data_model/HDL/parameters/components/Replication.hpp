@@ -20,8 +20,6 @@
 #include "Concatenation.hpp"
 #include "Expression_base.hpp"
 
-
-
 class Replication : public Expression_base{
 public:
     Replication() = default;
@@ -42,7 +40,7 @@ public:
     parameter_deps_t get_dependencies()const override;
     void propagate_expression(const qualified_identifier &constant_id, const std::shared_ptr<Expression_base> &value) override;
     void propagate_function(const hdl_function_statement &def) override;
-    std::optional<resolved_parameter> evaluate(const std::map<qualified_identifier, resolved_parameter> &context) override;
+    std::expected<resolved_parameter, solver_errors> evaluate(const std::map<qualified_identifier, resolved_parameter> &context) override;
 
     hdl_integer pack_repetition(hdl_integer value, int64_t width, int64_t count);
 
