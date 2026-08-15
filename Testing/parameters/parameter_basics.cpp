@@ -2226,8 +2226,8 @@ TEST(parameter_extraction, wide_integer_subtraction) {
     auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
-    auto big_val = defaults.at(qualified_identifier("BIG")).get_integer().get_wide();
-    auto sub_val = defaults.at(qualified_identifier("SUB")).get_integer().get_wide();
+    auto big_val = defaults.at(qualified_identifier("BIG")).get_integer().to_wide();
+    auto sub_val = defaults.at(qualified_identifier("SUB")).get_integer().to_wide();
     EXPECT_EQ(sub_val, big_val - 1);
 }
 
@@ -2243,7 +2243,7 @@ TEST(parameter_extraction, wide_integer_bitwise_and) {
     auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
-    auto and_val = defaults.at(qualified_identifier("AND_RES")).get_integer().get_wide();
+    auto and_val = defaults.at(qualified_identifier("AND_RES")).get_integer().to_wide();
     auto expected = int1024_t("0xAAAAAAAAAAAAAAAA0000000000000005");
     EXPECT_EQ(and_val, expected);
 }
@@ -2259,7 +2259,7 @@ TEST(parameter_extraction, wide_integer_shift_left) {
     auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
-    auto shifted_val = defaults.at(qualified_identifier("SHIFTED")).get_integer().get_wide();
+    auto shifted_val = defaults.at(qualified_identifier("SHIFTED")).get_integer().to_wide();
     EXPECT_EQ(shifted_val, int1024_t("0x00000000000000010000000000000000"));
 }
 
@@ -2274,12 +2274,12 @@ TEST(parameter_extraction, wide_integer_mixed_arithmetic) {
     auto resource = analyzer.analyze("", test_pattern).get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
-    auto mult_val = defaults.at(qualified_identifier("MULT")).get_integer().get_wide();
+    auto mult_val = defaults.at(qualified_identifier("MULT")).get_integer().to_wide();
     // BIG is 128-bit, 2 is unsized (32-bit); the self-determined result width is
     // 128 bits, so the 129-bit product is truncated to the low 128 bits. Expected
     // value written as a Verilog literal.
     Numeric_token expected_tok("128'hFFFFFFFFFFFFFFFE0000000000000000");
-    auto expected = expected_tok.get_value().value().get_integer().get_wide();
+    auto expected = expected_tok.get_value().value().get_integer().to_wide();
     EXPECT_EQ(mult_val, expected);
 }
 

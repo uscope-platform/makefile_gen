@@ -168,13 +168,13 @@ TEST(hdl_integer, get_value_low64_of_wide) {
     hdl_integer w;
     w.set_value((int1024_t(1) << 100) + 5);
     EXPECT_EQ(w.get_value(), 5);
-    EXPECT_EQ(w.get_wide(), (int1024_t(1) << 100) + 5);
+    EXPECT_EQ(w.to_wide(), (int1024_t(1) << 100) + 5);
     EXPECT_TRUE(w.is_wide());
 }
 
-TEST(hdl_integer, get_wide_of_narrow) {
+TEST(hdl_integer, to_wide_of_narrow) {
     hdl_integer n = 42;
-    EXPECT_EQ(n.get_wide(), int1024_t(42));
+    EXPECT_EQ(n.to_wide(), int1024_t(42));
     EXPECT_FALSE(n.is_wide());
     EXPECT_EQ(n.get_value(), 42);
 }
@@ -225,7 +225,7 @@ TEST(hdl_integer, serialization_round_trip) {
     }
     EXPECT_EQ(orig, loaded);
     EXPECT_TRUE(loaded.is_wide());
-    EXPECT_EQ(loaded.get_wide(), (int1024_t(1) << 100) + 0xCAFE);
+    EXPECT_EQ(loaded.to_wide(), (int1024_t(1) << 100) + 0xCAFE);
     EXPECT_EQ(loaded.get_signed(), true);
     EXPECT_EQ(loaded.get_size(), 128u);
 }
@@ -247,7 +247,7 @@ TEST(hdl_integer, serialization_round_trip_negative_wide) {
     }
     EXPECT_EQ(orig, loaded);
     EXPECT_TRUE(loaded.is_wide());
-    EXPECT_EQ(loaded.get_wide(), -((int1024_t(1) << 100) + 0xCAFE));
+    EXPECT_EQ(loaded.to_wide(), -((int1024_t(1) << 100) + 0xCAFE));
 }
 
 TEST(hdl_integer, wide_division_and_modulo) {

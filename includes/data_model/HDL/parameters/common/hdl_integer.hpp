@@ -155,7 +155,6 @@ public:
             return static_cast<int64_t>(std::get<int1024_t>(content));
         return std::get<int64_t>(content);
     }
-    [[nodiscard]] int1024_t get_wide() const { return to_wide(); }
 
     // The value as a double, preserving the sign of narrow negatives (unlike
     // to_wide(), which zero-extends them) and the full width of wide values.
