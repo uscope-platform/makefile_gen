@@ -257,9 +257,10 @@ md_2d_array get_2d_slice(std::vector<int64_t> idx) {
                 idx.insert(idx.begin(), 0);
             }
         }
-        if(idx[0] >= data.size() ||
-           idx[1] >= data[idx[0]].size() ||
-           idx[2] >= data[idx[0]][idx[1]].size()) {
+        if(idx[0] < 0 || idx[1] < 0 || idx[2] < 0 ||
+           idx[0] >= static_cast<int64_t>(data.size()) ||
+           idx[1] >= static_cast<int64_t>(data[idx[0]].size()) ||
+           idx[2] >= static_cast<int64_t>(data[idx[0]][idx[1]].size())) {
             return std::nullopt;
         }
         return data[idx[0]][idx[1]][idx[2]];

@@ -84,7 +84,7 @@ std::expected<resolved_parameter, solver_errors> Concatenation::evaluate(const s
             if (!raw_value.is_integer()) return std::unexpected{wrong_type};
             values[i] = raw_value.get_integer();
 
-            if (!fields_sizes.empty()) {
+            if (!fields_sizes.empty() && concat_size - i - 1 < fields_sizes.size()) {
                 sizes[i] = 1;
                 for (auto &ps : fields_sizes[concat_size-i-1].packed_sizes) sizes[i] *= ps;
             } else {
@@ -287,7 +287,8 @@ void Concatenation::process_struct_size(
 ) {
     container_size = size;
     fields_sizes = members;
-    for (int i = 0; i<members.size(); i++) {
+    size_t n = std::min(members.size(), components.size());
+    for (int i = 0; i < n; i++) {
         resolved_type rt;
         rt.packed_sizes = members[i].packed_sizes;
         rt.unpacked_sizes = members[i].unpacked_sizes;
