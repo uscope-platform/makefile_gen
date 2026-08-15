@@ -302,18 +302,27 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(reso
         if (op_a.is_string() && op_b.is_string())
             return op_a.get_string() == op_b.get_string();
         // Mixed int/real or any real comparison: compare as doubles.
-        double a = op_a.is_real() ? op_a.get_real() : op_a.get_integer().to_double();
-        double b = op_b.is_real() ? op_b.get_real() : op_b.get_integer().to_double();
-        return a == b;
+        if ((op_a.is_integer() || op_a.is_real()) && (op_b.is_integer() || op_b.is_real())) {
+            double a = op_a.is_real() ? op_a.get_real() : op_a.get_integer().to_double();
+            double b = op_b.is_real() ? op_b.get_real() : op_b.get_integer().to_double();
+            return a == b;
+        }
+        spdlog::warn("Attempted comparison between incompatible operand types");
+        return 0;
     }
     if(operation ==  not_equal || operation == case_not_equal || operation == wildcard_not_equal){
         if (op_a.is_integer() && op_b.is_integer())
             return op_a.get_integer() != op_b.get_integer();
         if (op_a.is_string() && op_b.is_string())
             return op_a.get_string() != op_b.get_string();
-        double a = op_a.is_real() ? op_a.get_real() : op_a.get_integer().to_double();
-        double b = op_b.is_real() ? op_b.get_real() : op_b.get_integer().to_double();
-        return a != b;
+        // Mixed int/real or any real comparison: compare as doubles.
+        if ((op_a.is_integer() || op_a.is_real()) && (op_b.is_integer() || op_b.is_real())) {
+            double a = op_a.is_real() ? op_a.get_real() : op_a.get_integer().to_double();
+            double b = op_b.is_real() ? op_b.get_real() : op_b.get_integer().to_double();
+            return a != b;
+        }
+        spdlog::warn("Attempted comparison between incompatible operand types");
+        return 0;
     }
 
     bool supported_a = (op_a.is_integer() || op_a.is_real() );

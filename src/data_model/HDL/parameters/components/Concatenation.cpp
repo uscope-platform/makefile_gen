@@ -114,7 +114,12 @@ std::expected<resolved_parameter, solver_errors> Concatenation::evaluate(const s
                 }
                 mdarray<std::string> to_concat;
                 to_concat.set_value(0,value_opt.value().get_string());
-                result_string = mdarray<std::string>::concatenate(result_string, to_concat).value();
+                auto concat_res = mdarray<std::string>::concatenate(result_string, to_concat);
+                if (!concat_res.has_value()) {
+                    spdlog::warn("Concatenation of arrays with incompatible shapes, defaulting to empty");
+                    return std::unexpected{missing_value};
+                }
+                result_string = concat_res.value();
             }
             result = result_string;
         } else {
@@ -126,13 +131,25 @@ std::expected<resolved_parameter, solver_errors> Concatenation::evaluate(const s
                 if (value_opt.value().is_integer()) {
                     mdarray<hdl_integer> to_concat;
                     to_concat.set_value(0,value_opt.value().get_integer());
-                    result_array = mdarray<hdl_integer>::concatenate(result_array, to_concat).value();
-                } else {
+                    auto concat_res = mdarray<hdl_integer>::concatenate(result_array, to_concat);
+                    if (!concat_res.has_value()) {
+                        spdlog::warn("Concatenation of arrays with incompatible shapes, defaulting to empty");
+                        return std::unexpected{missing_value};
+                    }
+                    result_array = concat_res.value();
+                } else if (value_opt.value().is_int_array()) {
                     auto array_res = value_opt.value().get_int_array();
-                    if( unpacked_dimension.size() ==1)
-                        result_array= mdarray<hdl_integer>::concatenate(result_array, array_res).value();
-                    else
-                        result_array= mdarray<hdl_integer>::stack(result_array, array_res).value();
+                    auto concat_res = unpacked_dimension.size() == 1
+                        ? mdarray<hdl_integer>::concatenate(result_array, array_res)
+                        : mdarray<hdl_integer>::stack(result_array, array_res);
+                    if (!concat_res.has_value()) {
+                        spdlog::warn("Concatenation of arrays with incompatible shapes, defaulting to empty");
+                        return std::unexpected{missing_value};
+                    }
+                    result_array = concat_res.value();
+                } else {
+                    spdlog::warn("Concatenating unsupported component type, defaulting to 0");
+                    return std::unexpected{wrong_type};
                 }
             }
             result = result_array;

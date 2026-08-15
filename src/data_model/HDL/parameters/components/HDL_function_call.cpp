@@ -371,26 +371,37 @@ std::expected<resolved_parameter, solver_errors> HDL_function_call::evaluate_sys
 
     }
     if (task_name == "ln") {
-        double arg = resolved_arguments[0].is_real() ? resolved_arguments[0].get_real()
-                     : resolved_arguments[0].get_integer().to_double();
+        double arg;
+        if (resolved_arguments[0].is_real()) arg = resolved_arguments[0].get_real();
+        else if (resolved_arguments[0].is_integer()) arg = resolved_arguments[0].get_integer().to_double();
+        else { spdlog::warn("Encountered an invalid argument for a $ln call"); return 0; }
         if (arg <= 0) { spdlog::warn("$ln argument must be positive"); return 0; }
         return std::log(arg);
     }
     if (task_name == "log10") {
-        double arg = resolved_arguments[0].is_real() ? resolved_arguments[0].get_real()
-                     : resolved_arguments[0].get_integer().to_double();
+        double arg;
+        if (resolved_arguments[0].is_real()) arg = resolved_arguments[0].get_real();
+        else if (resolved_arguments[0].is_integer()) arg = resolved_arguments[0].get_integer().to_double();
+        else { spdlog::warn("Encountered an invalid argument for a $log10 call"); return 0; }
         if (arg <= 0) { spdlog::warn("$log10 argument must be positive"); return 0; }
         return std::log10(arg);
     }
     if (task_name == "sqrt") {
-        double arg = resolved_arguments[0].is_real() ? resolved_arguments[0].get_real()
-                     : resolved_arguments[0].get_integer().to_double();
+        double arg;
+        if (resolved_arguments[0].is_real()) arg = resolved_arguments[0].get_real();
+        else if (resolved_arguments[0].is_integer()) arg = resolved_arguments[0].get_integer().to_double();
+        else { spdlog::warn("Encountered an invalid argument for a $sqrt call"); return 0; }
         if (arg < 0) { spdlog::warn("$sqrt argument must be non-negative"); return 0; }
         return std::sqrt(arg);
     }
     if (task_name == "pow") {
         if (resolved_arguments.size() < 2) {
             spdlog::warn("$pow requires exactly 2 arguments");
+            return 0;
+        }
+        if (!(resolved_arguments[0].is_integer() || resolved_arguments[0].is_real()) ||
+            !(resolved_arguments[1].is_integer() || resolved_arguments[1].is_real())) {
+            spdlog::warn("Encountered an invalid argument for a $pow call");
             return 0;
         }
         double base = resolved_arguments[0].is_real()
@@ -415,14 +426,16 @@ std::expected<resolved_parameter, solver_errors> HDL_function_call::evaluate_sys
             }
             return result;
         } else {
-            double result = resolved_arguments[0].is_real()
-                                ? resolved_arguments[0].get_real()
-                                : resolved_arguments[0].get_integer().to_double();
-            for (size_t i = 1; i < resolved_arguments.size(); i++) {
-                double v = resolved_arguments[i].is_real()
-                               ? resolved_arguments[i].get_real()
-                               : resolved_arguments[i].get_integer().to_double();
-                if (v < result) result = v;
+            double result = 0.0;
+            bool result_set = false;
+            for (const auto &a : resolved_arguments) {
+                if (!(a.is_integer() || a.is_real())) {
+                    spdlog::warn("Encountered an invalid argument for a $min call");
+                    return 0;
+                }
+                double v = a.is_real() ? a.get_real() : a.get_integer().to_double();
+                if (!result_set) { result = v; result_set = true; }
+                else if (v < result) result = v;
             }
             return result;
         }
@@ -441,14 +454,16 @@ std::expected<resolved_parameter, solver_errors> HDL_function_call::evaluate_sys
             }
             return result;
         } else {
-            double result = resolved_arguments[0].is_real()
-                                ? resolved_arguments[0].get_real()
-                                : resolved_arguments[0].get_integer().to_double();
-            for (size_t i = 1; i < resolved_arguments.size(); i++) {
-                double v = resolved_arguments[i].is_real()
-                               ? resolved_arguments[i].get_real()
-                               : resolved_arguments[i].get_integer().to_double();
-                if (result < v) result = v;
+            double result = 0.0;
+            bool result_set = false;
+            for (const auto &a : resolved_arguments) {
+                if (!(a.is_integer() || a.is_real())) {
+                    spdlog::warn("Encountered an invalid argument for a $max call");
+                    return 0;
+                }
+                double v = a.is_real() ? a.get_real() : a.get_integer().to_double();
+                if (!result_set) { result = v; result_set = true; }
+                else if (result < v) result = v;
             }
             return result;
         }
@@ -525,6 +540,11 @@ std::expected<resolved_parameter, solver_errors> HDL_function_call::evaluate_sys
     }
     if (task_name == "hypot") {
         if (resolved_arguments.size() < 2) { spdlog::warn("$hypot requires exactly 2 arguments"); return 0; }
+        if (!(resolved_arguments[0].is_integer() || resolved_arguments[0].is_real()) ||
+            !(resolved_arguments[1].is_integer() || resolved_arguments[1].is_real())) {
+            spdlog::warn("Encountered an invalid argument for a $hypot call");
+            return 0;
+        }
         double a = resolved_arguments[0].is_real() ? resolved_arguments[0].get_real()
                     : resolved_arguments[0].get_integer().to_double();
         double b = resolved_arguments[1].is_real() ? resolved_arguments[1].get_real()

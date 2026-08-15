@@ -90,7 +90,11 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                 }
                 for (auto &stmt : res->get_statements()) {
                     auto wo = process_statement(stmt, working_instance, current_param_values, child_path, interfaces_map);
-                    child_wo.insert(child_wo.end(), wo.begin(), wo.end());
+                    if (!wo) {
+                        spdlog::warn("An error happened while processing instance {}::{}", working_instance->get_type(), working_instance->get_name());
+                        continue;
+                    }
+                    child_wo.insert(child_wo.end(), wo.value().begin(), wo.value().end());
                 }
                 apply_parameter_overrides(res->get_statements(), wo.pending_overrides, child_wo);
                 for (const auto &c:child_wo| std::views::reverse) {
@@ -108,16 +112,17 @@ bool HDL_ast_builder_v2::evaluate_condition(const std::shared_ptr<Expression_bas
     return result.has_value() && result.value().is_integer() && result.value().get_integer() != 0;
 }
 
-void HDL_ast_builder_v2::process_quantifier(const std::shared_ptr<HDL_parameter> &quantifier, const std::map<qualified_identifier, resolved_parameter> &parameters) {
+std::optional<solver_errors> HDL_ast_builder_v2::process_quantifier(const std::shared_ptr<HDL_parameter> &quantifier, const std::map<qualified_identifier, resolved_parameter> &parameters) {
 
     if (quantifier != nullptr) {
         auto value = quantifier->evaluate(parameters);
-        if (!value.has_value()) throw std::runtime_error("unknown identifiers remain in an array quantifier");
+        if (!value.has_value()) return value.error();
         quantifier->set_value(value.value());
     }
+    return std::nullopt;
 }
 
-std::vector<work_order> HDL_ast_builder_v2::process_statement(
+std::expected<std::vector<work_order>, solver_errors> HDL_ast_builder_v2::process_statement(
     const std::shared_ptr<hdl_statement_base> &stmt,
     const std::shared_ptr<hdl_ast_node> &parent,
     const std::map<qualified_identifier, resolved_parameter> &params,
@@ -133,7 +138,7 @@ std::vector<work_order> HDL_ast_builder_v2::process_statement(
     return {};
 }
 
-std::vector<work_order> HDL_ast_builder_v2::process_instance(
+std::expected<std::vector<work_order>, solver_errors> HDL_ast_builder_v2::process_instance(
     const std::shared_ptr<hdl_instance_statement> &inst,
     const std::shared_ptr<hdl_ast_node> &parent,
     const std::map<qualified_identifier, resolved_parameter> &params,
@@ -149,13 +154,13 @@ std::vector<work_order> HDL_ast_builder_v2::process_instance(
     child->set_active(active);
     auto type = inst->get_type();
     if (dep_file.is_module_excluded(type) || d_store->is_primitive(type)) child->set_dependency_class(primitive);
-    process_quantifier(child->get_array_quantifier(), params);
+    if (auto val = process_quantifier(child->get_array_quantifier(), params); val) return std::unexpected{val.value()};
     parent->add_child(child);
     orders.push_back({child, params, path, if_map});
     return orders;
 }
 
-std::vector<work_order> HDL_ast_builder_v2::process_loop(
+std::expected<std::vector<work_order>, solver_errors> HDL_ast_builder_v2::process_loop(
     const hdl_loop_statement &loop,
     const std::shared_ptr<hdl_ast_node> &parent,
     const std::map<qualified_identifier, resolved_parameter> &params,
@@ -178,7 +183,7 @@ std::vector<work_order> HDL_ast_builder_v2::process_loop(
                 child->set_parent(parent);
                 auto inst_type = body_inst->get_type();
                 if (dep_file.is_module_excluded(inst_type) || d_store->is_primitive(inst_type)) child->set_dependency_class(primitive);
-                process_quantifier(child->get_array_quantifier(), params);
+                if (auto val = process_quantifier(child->get_array_quantifier(), params); val) return std::unexpected{val.value()};
 
                 std::unordered_map<std::string, std::vector<HDL_net>> new_ports;
                 for (auto &[port_name, nets] : child->get_ports()) {
@@ -202,14 +207,15 @@ std::vector<work_order> HDL_ast_builder_v2::process_loop(
                 orders.push_back({child, parent_params, path, if_map});
             } else {
                 auto wo = process_statement(body_stmt, parent, parent_params, path, if_map);
-                orders.insert(orders.end(), wo.begin(), wo.end());
+                if (!wo) return std::unexpected{wo.error()};
+                orders.insert(orders.end(), wo.value().begin(), wo.value().end());
             }
         }
     }
     return orders;
 }
 
-std::vector<work_order> HDL_ast_builder_v2::process_conditional(
+std::expected<std::vector<work_order>, solver_errors> HDL_ast_builder_v2::process_conditional(
     const hdl_conditional_statement &cond,
     const std::shared_ptr<hdl_ast_node> &parent,
     const std::map<qualified_identifier, resolved_parameter> &params,
@@ -224,20 +230,24 @@ std::vector<work_order> HDL_ast_builder_v2::process_conditional(
         for (auto &body_stmt : branch.body) {
             if (auto inst = std::dynamic_pointer_cast<hdl_instance_statement>(body_stmt)) {
                 auto wo = process_instance(inst, parent, params, path, if_map, selected);
-                orders.insert(orders.end(), wo.begin(), wo.end());
+                if (!wo)return std::unexpected{wo.error()};
+                orders.insert(orders.end(), wo.value().begin(), wo.value().end());
             } else {
                 auto wo = process_statement(body_stmt, parent, params, path, if_map);
-                orders.insert(orders.end(), wo.begin(), wo.end());
+                if (!wo) return std::unexpected{wo.error()};
+                orders.insert(orders.end(), wo.value().begin(), wo.value().end());
             }
         }
     }
     for (auto &body_stmt : cond.get_else_body()) {
         if (auto inst = std::dynamic_pointer_cast<hdl_instance_statement>(body_stmt)) {
             auto wo = process_instance(inst, parent, params, path, if_map, !any_matched);
-            orders.insert(orders.end(), wo.begin(), wo.end());
+            if (!wo) return std::unexpected{wo.error()};
+            orders.insert(orders.end(), wo.value().begin(), wo.value().end());
         } else {
             auto wo = process_statement(body_stmt, parent, params, path, if_map);
-            orders.insert(orders.end(), wo.begin(), wo.end());
+            if (!wo) return std::unexpected{wo.error()};
+            orders.insert(orders.end(), wo.value().begin(), wo.value().end());
         }
     }
     return orders;

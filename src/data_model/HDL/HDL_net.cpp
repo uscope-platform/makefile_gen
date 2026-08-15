@@ -44,7 +44,7 @@ std::string HDL_net::get_full_name() const {
 void HDL_net::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
     auto val = range.accessor.evaluate(context);
     if(val.has_value()) {
-        if(val.value().get_integer().to_wide() != 0) {
+        if(val.value().is_integer() && val.value().get_integer().to_wide() != 0) {
             Expression_v2 acc;
             acc.set_lhs(std::make_shared<Numeric_token>(val.value().get_integer(), 0));
             range.accessor = acc;

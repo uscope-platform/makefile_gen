@@ -38,18 +38,18 @@ public:
     std::vector<std::shared_ptr<hdl_ast_node>> build_ast(const std::vector<std::string>& modules);
 private:
     std::shared_ptr<hdl_ast_node> build_ast(const std::string& top_level_module);
-    void process_quantifier(const std::shared_ptr<HDL_parameter> &quantifier, const std::map<qualified_identifier, resolved_parameter> &parameters);
+    std::optional<solver_errors> process_quantifier(const std::shared_ptr<HDL_parameter> &quantifier, const std::map<qualified_identifier, resolved_parameter> &parameters);
     bool evaluate_condition(const std::shared_ptr<Expression_base> &cond,
         const std::map<qualified_identifier, resolved_parameter> &parameters);
 
-    std::vector<work_order> process_statement(
+    std::expected<std::vector<work_order>, solver_errors> process_statement(
         const std::shared_ptr<hdl_statement_base> &stmt,
         const std::shared_ptr<hdl_ast_node> &parent,
         const std::map<qualified_identifier, resolved_parameter> &params,
         const std::string &path,
         const std::unordered_map<std::string, std::string> &if_map
     );
-    std::vector<work_order> process_instance(
+    std::expected<std::vector<work_order>, solver_errors> process_instance(
         const std::shared_ptr<hdl_instance_statement> &inst,
         const std::shared_ptr<hdl_ast_node> &parent,
         const std::map<qualified_identifier, resolved_parameter> &params,
@@ -57,14 +57,14 @@ private:
         const std::unordered_map<std::string, std::string> &if_map,
         bool active = true
     );
-    std::vector<work_order> process_loop(
+    std::expected<std::vector<work_order>, solver_errors> process_loop(
         const hdl_loop_statement &loop,
         const std::shared_ptr<hdl_ast_node> &parent,
         const std::map<qualified_identifier, resolved_parameter> &params,
         const std::string &path,
         const std::unordered_map<std::string, std::string> &if_map
     );
-    std::vector<work_order> process_conditional(
+    std::expected<std::vector<work_order>, solver_errors> process_conditional(
         const hdl_conditional_statement &cond,
         const std::shared_ptr<hdl_ast_node> &parent,
         const std::map<qualified_identifier, resolved_parameter> &params,

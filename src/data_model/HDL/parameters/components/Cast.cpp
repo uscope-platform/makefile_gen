@@ -49,24 +49,26 @@ std::expected<resolved_parameter, solver_errors> Cast::evaluate(const std::map<q
         if (!container_size) return std::unexpected{missing_value};
         auto content_val = content->evaluate(context);
         if (!content_val.has_value()) return std::unexpected{missing_value};
-        if (!content_val.value().is_integer()) {
-            spdlog::warn("Casting of non scalar integer values is not supported");
-        }
         uint64_t container = 64;
         if (!container_size->packed_sizes.empty()) container = packed_width(*container_size);
-        if (target_type == "signed") {
-            return type_cast_engine::to_signed(content_val.value().get_integer(), container);
-        }
-        if (target_type == "unsigned") {
+        if (target_type == "signed" || target_type == "unsigned") {
+            if (!content_val.value().is_integer()) {
+                spdlog::warn("Casting of non scalar integer values is not supported");
+                return std::unexpected{wrong_type};
+            }
+            if (target_type == "signed") {
+                return type_cast_engine::to_signed(content_val.value().get_integer(), container);
+            }
             return type_cast_engine::to_unsigned(content_val.value().get_integer(), container);
         }
         if (target_type == "int"){
             if (content_val.value().is_real()) {
                 return type_cast_engine::to_int(content_val.value().get_real(), container);
-            } else {
+            } else if (content_val.value().is_integer()) {
                 return type_cast_engine::to_int(content_val.value().get_integer(), container);
             }
-
+            spdlog::warn("Casting of non scalar integer values is not supported");
+            return std::unexpected{wrong_type};
         }
     } else {
         auto content_val = content->evaluate(context);
@@ -121,7 +123,7 @@ void Cast::set_container_sizes(const resolved_type &s, const std::map<qualified_
     else {
         if (!size) return;
         auto cast_size = size->evaluate(context);
-        if (!cast_size.has_value()) return;
+        if (!cast_size.has_value() || !cast_size.value().is_integer()) return;
         resolved_type t;
         t.packed_sizes.push_back(cast_size.value().get_integer().get_value());
         t.packed_ascending.push_back(true);
