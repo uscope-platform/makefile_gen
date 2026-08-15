@@ -144,3 +144,20 @@ To generate a distributable DEB package use the following command:
 ```shell
 cpack -G DEB
 ```
+
+# Known limitations
+
+The SystemVerilog constant-expression evaluator (used for parameter/localparam resolution) has a few deliberate gaps. A detailed, tiered audit lives in `PARAMETER_EVALUATION_ISSUES.md`.
+
+## X/Z 4-state values
+
+The value model is 2-state (0/1). There is no X/Z representation, so literals containing `x`, `z` or `?` (`8'hx`, `'z`, `4'b101z`, unbased `'0`/`'1`/`'x`/`'z`) are not modeled and resolve to `0`. `$isunknown` and `$isunbounded` always return `0`. This only matters for testbench/don't-care code — it does not affect the synthesizable parameters used to generate projects.
+
+## `inside` operator
+
+The set-membership operator (`x inside {1, 4, [7:9]}`) is parsed by the grammar but not evaluated. It is valid in constant expressions per the LRM, but does not appear in the parameter sets this tool processes, so it is not implemented.
+
+## `$root` / `$unit` defparam prefixes
+
+Package-scoped defparam paths using `$root` or `$unit` are not supported; the tool warns and skips them (no crash).
+
