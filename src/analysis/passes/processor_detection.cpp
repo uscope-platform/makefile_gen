@@ -38,21 +38,33 @@ void processor_detection::process_node(const std::shared_ptr<hdl_ast_node> &node
             auto addr_vals = node_params.get(addr_s);
             hdl_integer address;
 
+            auto addr_value = addr_vals->get_value();
+            if (!addr_value.has_value()) {
+                spdlog::warn("Processor {} does not have a valid address, thus it will be omitted from the application file", proc.get_name());
+                continue;
+            }
             if(addr_vals->is_array()){
+                if (!addr_value.value().is_int_array()) {
+                    spdlog::warn("Processor {} does not have a valid array address, thus it will be omitted from the application file", proc.get_name());
+                    continue;
+                }
                 auto addr_idx = proc.get_address_idx();
-                auto addr_opt = addr_vals->get_int_array_value();
+                if (addr_idx < 0) {
+                    spdlog::warn("Processor {} has a negative address index, thus it will be omitted from the application file", proc.get_name());
+                    continue;
+                }
+                auto addr_opt = addr_value.value().get_int_array().get_value({0,0,addr_idx});
                 if(!addr_opt.has_value()) {
-                    spdlog::warn("Processor {} does not have a valid address, thus it will be omitted from the application file", proc.get_name());
+                    spdlog::warn("Processor {} address index {} is out of range, thus it will be omitted from the application file", proc.get_name(), addr_idx);
                     continue;
                 }
-                address = addr_opt.value().get_value({0,0,addr_idx}).value();
+                address = addr_opt.value();
             } else {
-                auto addr = addr_vals->get_numeric_value();
-                if(!addr.has_value()) {
-                    spdlog::warn("Processor {} does not have a defined address, thus it will be omitted from the application file", proc.get_name());
+                if (!addr_value.value().is_integer()) {
+                    spdlog::warn("Processor {} does not have a defined integer address, thus it will be omitted from the application file", proc.get_name());
                     continue;
                 }
-                address = addr.value();
+                address = addr_value.value().get_integer();
             }
             proc.set_address_value(address);
         }
