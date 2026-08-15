@@ -80,7 +80,12 @@ std::vector<analysis_context> control_bus_analysis::process_interconnect(const a
     auto masters = expand_bus_array(masters_ifs, addresses);
 
     for(auto & master : masters){
-        auto dependencies=  inst.node->get_parent()->get_dependencies();
+        auto parent = inst.node->get_parent();
+        if (!parent) {
+            spdlog::warn("Interconnect {} has no parent module, skipping", inst.node->get_name());
+            continue;
+        }
+        auto dependencies = parent->get_dependencies();
         for(auto &dep:dependencies){
             for(auto &[port_name, nets]:dep->get_ports()){
 
@@ -192,12 +197,16 @@ std::vector<analysis_context> control_bus_analysis::process_nested_module(const 
 void control_bus_analysis::process_leaf_node(const analysis_context &leaf) {
 
     auto leaf_parent = leaf.node->get_parent();
-    leaf.node->get_parent()->add_address(leaf.address);
+    if (!leaf_parent) {
+        spdlog::warn("Bus sink {} has no parent module, skipping address assignment", leaf.node->get_name());
+        return;
+    }
+    leaf_parent->add_address(leaf.address);
     if(!leaf.current_module_top.empty()){
-        leaf.node->get_parent()->set_leaf_module_top(leaf.current_module_top);
+        leaf_parent->set_leaf_module_top(leaf.current_module_top);
     }
     if(!leaf.current_module_prefix.empty()){
-        leaf.node->get_parent()->set_leaf_module_prefix(leaf.current_module_prefix);
+        leaf_parent->set_leaf_module_prefix(leaf.current_module_prefix);
     }
     leaf.node->set_proxy_specs(leaf.proxy);
 
@@ -214,10 +223,14 @@ void control_bus_analysis::process_leaf_node(const analysis_context &leaf) {
 std::vector<bus_context>
 control_bus_analysis::expand_bus_array( const std::vector<HDL_net> &masters, const std::vector<hdl_integer> &addresses ) {
     std::vector<bus_context> ret;
-    uint16_t current_bus = 0;
+    size_t current_bus = 0;
     for(auto &m:masters) {
         auto current_array_idx = 0;
         while(current_array_idx < modules_array_size[m.get_name()]) {
+            if (current_bus >= addresses.size()) {
+                spdlog::warn("Interconnect has more master slots than SLAVE_ADDR entries, truncating");
+                return ret;
+            }
             bus_context b;
             b.address = addresses[addresses.size()-current_bus-1];
             b.name = m.get_name();
