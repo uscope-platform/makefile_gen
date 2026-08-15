@@ -413,7 +413,7 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(reso
         if(int_exec)  result_i = i_a || i_b;
         result_d = d_a || d_b;
     } else {
-        throw std::runtime_error("Error: Attempted evaluation of an unsupported binary expression expression ");
+        return unsupported;
     }
 
     if (int_exec) {
@@ -485,5 +485,5 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_unary_expression(resol
         return static_cast<hdl_integer>(parity ? 1 : 0);
     }
 
-    throw std::runtime_error("Error: Attempted evaluation of an unsupported unary expression ");
+    throw unsupported;
 }

@@ -83,7 +83,7 @@ std::expected<resolved_parameter, solver_errors> Replication::evaluate(const std
     if (repeated_item->is<Expression_v2>()) {
         auto item = repeated_item->as<Expression_v2>().evaluate(context);
         if (!item.has_value()) return missing_value;
-        if (!item.value().is_integer()) throw std::runtime_error("Tried to replicate non integer");
+        if (!item.value().is_integer()) return wrong_type;
         int64_t repeated_size = 0;
         auto comp_t = repeated_item->resolve_expression_type(context);
         if (comp_t) repeated_size = static_cast<int64_t>(packed_width(*comp_t));
@@ -109,7 +109,7 @@ std::expected<resolved_parameter, solver_errors> Replication::evaluate(const std
     } else if (!repeated_item->is<Expression_v2>() && !repeated_item->is<Concatenation>()){
         auto item = repeated_item->evaluate(context);
         if (!item.has_value()) return missing_value;
-        if (!item.value().is_integer()) throw std::runtime_error("Tried to replicate non integer");
+        if (!item.value().is_integer()) return wrong_type;
         int64_t repeated_size = 0;
         auto comp_t = repeated_item->resolve_expression_type(context);
         if (comp_t) repeated_size = static_cast<int64_t>(packed_width(*comp_t));
@@ -120,7 +120,7 @@ std::expected<resolved_parameter, solver_errors> Replication::evaluate(const std
             return pack_repetition(item.value().get_integer() , repeated_size, size);
         }
     } else {
-        throw std::runtime_error("Encountered a unknown parameter value type");
+        return wrong_type;
     }
 
     result.set_1d_slice({0,0}, repeated_value);

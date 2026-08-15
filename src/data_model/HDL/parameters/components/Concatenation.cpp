@@ -81,7 +81,7 @@ std::expected<resolved_parameter, solver_errors> Concatenation::evaluate(const s
             auto value_opt = components[concat_size-i-1]->evaluate(context);
             if (!value_opt.has_value()) return missing_value;
             auto raw_value = value_opt.value();
-            if (!raw_value.is_integer()) throw std::runtime_error("packing concatenations of arrays is unsupported");
+            if (!raw_value.is_integer()) return wrong_type;
             values[i] = raw_value.get_integer();
 
             if (!fields_sizes.empty()) {
@@ -144,13 +144,13 @@ std::expected<resolved_parameter, solver_errors> Concatenation::evaluate(const s
         while (dims.size()<3) dims.insert(dims.begin(), 1);
         if(result.value().is_int_array()) {
             auto val = result.value().get_int_array().get_scalar();
-            if (!val) throw std::runtime_error("Error: initializer of default array should be defined");
+            if (!val) return missing_arguments;
             mdarray result_array = {dims, val.value()};
             return result_array;
         }
         if(result.value().is_string_array()) {
             auto val = result.value().get_string_array().get_scalar();
-            if (!val) throw std::runtime_error("Error: initializer of default array should be defined");
+            if (!val) return missing_arguments;
             mdarray result_array = {dims, val.value()};
             return result_array;
         }
