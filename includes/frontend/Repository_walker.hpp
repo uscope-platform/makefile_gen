@@ -51,7 +51,10 @@ static file_analysis_context<DataFile>  analyze_data(const std::filesystem::path
 static file_analysis_context<Constraints>  analyze_constraint(const std::filesystem::path &file, std::set<std::string> i_d, const std::string &old_hash);
 static std::optional<std::string> hash_file(const std::string_view &file_content);
 
-const unsigned int max_threads = std::thread::hardware_concurrency()-1;
+const unsigned int max_threads = [] {
+    auto h = std::thread::hardware_concurrency();
+    return h > 1 ? (h - 1) : 1;
+}();
 
 class Repository_walker {
 
