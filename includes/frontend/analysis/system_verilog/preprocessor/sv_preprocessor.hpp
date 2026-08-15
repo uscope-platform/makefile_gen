@@ -59,6 +59,7 @@ namespace preprocessor {
         std::vector<std::string> documentation_comments;
         std::string path;
         std::optional<std::string> error;
+        std::set<std::string> active_includes;
         conditional_solver c_solver;
         std::set<std::string> include_directories;
         source_mapper source_map;

@@ -69,22 +69,28 @@ namespace preprocessor {
 
                 auto included_file = parse_include_path(trimmed_line);
                 if (included_file.has_value()) {
-                    auto saved_path = path;
-                    auto saved_line = line_number;
-                    path = included_file.value();
-                    source_map.close_range(output_line_n);
-
-                    auto f_opt = mm_file::try_open(path);
-                    if (!f_opt.has_value()) {
-                        report_error(fmt::format("Could not open include file: {}", path));
+                    if (included_file.value() == path || active_includes.contains(included_file.value())) {
+                        report_error(fmt::format("Recursive include detected for file {} in file {}", included_file.value(), path));
                     } else {
-                        auto content = preprocess(f_opt->view(), output_line_n);
-                        if (!error) out << content + '\n';
-                    }
+                        auto saved_path = path;
+                        auto saved_line = line_number;
+                        path = included_file.value();
+                        active_includes.insert(path);
+                        source_map.close_range(output_line_n);
 
-                    line_number = saved_line;
-                    path = saved_path;
-                    source_map.open_range(output_line_n, path);
+                        auto f_opt = mm_file::try_open(path);
+                        if (!f_opt.has_value()) {
+                            report_error(fmt::format("Could not open include file: {}", path));
+                        } else {
+                            auto content = preprocess(f_opt->view(), output_line_n);
+                            if (!error) out << content + '\n';
+                        }
+
+                        active_includes.erase(path);
+                        line_number = saved_line;
+                        path = saved_path;
+                        source_map.open_range(output_line_n, path);
+                    }
                 }
             } else if (trimmed_line.starts_with("`ifdef")) {
                 auto condition = parse_one_arg_directive(trimmed_line, 6);

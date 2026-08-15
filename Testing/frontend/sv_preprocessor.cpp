@@ -1474,3 +1474,21 @@ TEST(preprocessor, recursive_macro_capped) {
     auto res = preproc.preprocess(test_pattern);
     EXPECT_TRUE(preproc.has_error());
 }
+
+TEST(preprocessor, self_include_rejected) {
+    // A file that includes itself must be detected and error out instead of
+    // recursing until the stack overflows.
+    std::filesystem::create_directories("/tmp/ananke_inc_test");
+    std::string inc = "/tmp/ananke_inc_test/self.svh";
+    {
+        std::ofstream ofs(inc);
+        ofs << "`include \"/tmp/ananke_inc_test/self.svh\"\nwire self_wire;\n";
+    }
+    std::string pattern = "`include \"/tmp/ananke_inc_test/self.svh\"\nmodule m; endmodule\n";
+
+    sv_preprocessor preproc;
+    preproc.set_path("/tmp/ananke_inc_test/main.sv");
+    preproc.preprocess(pattern);
+    EXPECT_TRUE(preproc.has_error());
+    std::filesystem::remove_all("/tmp/ananke_inc_test");
+}
