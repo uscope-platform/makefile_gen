@@ -17,6 +17,8 @@
 #include "frontend/analysis/system_verilog/preprocessor/macro_processor.hpp"
 #include <spdlog/spdlog.h>
 
+static constexpr size_t MAX_MACRO_EXPANSION_SIZE = 64 * 1024 * 1024;
+static constexpr int MAX_NONCONVERGING_PASSES = 16;
 
 namespace preprocessor {
     macro_processor::macro_processor(
@@ -34,12 +36,18 @@ namespace preprocessor {
 
     std::string macro_processor::process_macro(const std::string_view &in) {
         if (!in.contains('`')) return std::string(in);
-        bool  expansion_needed = true;
         std::string result;
-        std::string remaining = std::string(in);
+        std::string working = std::string(in);
         int nesting_counter = 0;
-        while (expansion_needed && nesting_counter <1000) {
+        size_t previous_size = 0;
+        int nonconverging_passes = 0;
+        bool expansion_needed = true;
+        while (expansion_needed && nesting_counter < 1000) {
             result.clear();
+            // Work on a view into `working` (a separate buffer) so that
+            // advancing `remaining` can never alias the `result` buffer that
+            // is being built in this pass.
+            std::string_view remaining = working;
             while (auto match = identifier_pattern(remaining)) {
                 result.append(remaining.begin(), match.begin());
                 if (match.view().back() == '(') {
@@ -72,8 +80,26 @@ namespace preprocessor {
             }
 
             result.append(remaining);
+            if (result.size() > MAX_MACRO_EXPANSION_SIZE) {
+                report_error(fmt::format("Macro expansion exceeded the maximum supported size of {} bytes in file {}", MAX_MACRO_EXPANSION_SIZE, path));
+                return "";
+            }
             expansion_needed = result.contains('`');
-            remaining = result;
+            // A self-multiplying recursive macro keeps growing every pass and
+            // never converges; a legitimate expansion (e.g. UVM field utils)
+            // converges within a couple of passes. Detect sustained growth early
+            // so the tool errors instead of exhausting memory.
+            if (expansion_needed && result.size() > previous_size) {
+                nonconverging_passes++;
+            } else {
+                nonconverging_passes = 0;
+            }
+            if (nonconverging_passes >= MAX_NONCONVERGING_PASSES) {
+                report_error(fmt::format("Macro expansion did not converge, possible recursive macro in file {}", path));
+                return "";
+            }
+            previous_size = result.size();
+            working = result;
             nesting_counter++;
         }
 

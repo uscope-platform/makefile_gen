@@ -1458,3 +1458,19 @@ endmodule
     auto check_string = "module test;\nassert((a || b)) ;\nendmodule";
     EXPECT_EQ(result, check_string);
 }
+TEST(preprocessor, recursive_macro_capped) {
+    auto test_pattern = R"(
+        `define A `A `A
+        module test_module ();
+            parameter TEST_PARAM = `A;
+        endmodule
+    )";
+
+    sv_preprocessor preproc;
+    preproc.set_path("/tmp/file.sv");
+
+    // Must not hang or exhaust memory: the expansion blows past the cap and
+    // the preprocessor reports an error instead.
+    auto res = preproc.preprocess(test_pattern);
+    EXPECT_TRUE(preproc.has_error());
+}
