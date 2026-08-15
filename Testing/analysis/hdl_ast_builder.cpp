@@ -24,6 +24,8 @@
 #include "analysis/passes/pass_manager.hpp"
 #include "Backend/Dependency_resolver.hpp"
 
+#include "test_paths.hpp"
+
 TEST( hdl_ast_builder, pid_ast_build) {
 
 
@@ -38,7 +40,7 @@ TEST( hdl_ast_builder, pid_ast_build) {
             "Components/system/axi_lite/skid_buffer/rtl"
     };
 
-    auto prefix = "check_files/test_data/";
+    auto prefix = td_file("check_files/test_data/");
     for(auto &p:paths){
         for(auto &f:std::filesystem::directory_iterator(prefix + p)){
             if(f.path().extension() == ".v" || f.path().extension() == ".sv"){
@@ -83,7 +85,7 @@ TEST( hdl_ast_builder, spi_ast_build) {
             "Components/system/axi_lite/skid_buffer/rtl"
     };
 
-    auto prefix = "check_files/test_data/";
+    auto prefix = td_file("check_files/test_data/");
     for(auto &p:paths){
         for(auto &f:std::filesystem::directory_iterator(prefix + p)){
             if(f.path().extension() == ".v" || f.path().extension() == ".sv"){
@@ -129,7 +131,7 @@ TEST( hdl_ast_builder, pwm_ast_build) {
             "Components/system/axi_lite/skid_buffer/rtl"
     };
 
-    auto prefix = "check_files/test_data/";
+    auto prefix = td_file("check_files/test_data/");
     for(auto &p:paths){
         for(auto &f:std::filesystem::directory_iterator(prefix + p)){
             if(f.path().extension() == ".v" || f.path().extension() == ".sv" || f.path().extension() == ".svh"){
@@ -175,7 +177,7 @@ TEST( hdl_ast_builder, adc_ast_build) {
             "Components/system/axi_lite/skid_buffer/rtl"
     };
 
-    auto prefix = "check_files/test_data/";
+    auto prefix = td_file("check_files/test_data/");
     for(auto &p:paths){
         for(auto &f:std::filesystem::directory_iterator(prefix + p)){
             if(f.path().extension() == ".v" || f.path().extension() == ".sv" || f.path().extension() == ".svh"){
@@ -219,7 +221,7 @@ TEST( hdl_ast_builder, interface_parameter) {
             "Components/Common"
     };
 
-    auto prefix = "check_files/test_data/";
+    auto prefix = td_file("check_files/test_data/");
     for(auto &p:paths){
         for(auto &f:std::filesystem::directory_iterator(prefix + p)){
             if(f.path().extension() == ".v" || f.path().extension() == ".sv" || f.path().extension() == ".svh"){

@@ -16,10 +16,11 @@
 #include <gtest/gtest.h>
 #include <spdlog/spdlog.h>
 
-#include "crash_context.hpp"
-
 int main(int argc, char **argv) {
-    install_crash_handler();
+    // NOTE: the production crash handler (crash_context.hpp) calls _exit(1) on
+    // SIGSEGV/SIGABRT, which would kill the whole suite on the first crashing
+    // test. It is intentionally NOT installed here: gtest's per-test [ RUN ]
+    // lines identify the culprit and the remaining tests still execute.
     spdlog::set_level(spdlog::level::trace);
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

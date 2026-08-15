@@ -22,9 +22,11 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/statement/hdl_statements.hpp"
 
+#include "test_paths.hpp"
+
 
 TEST( analysis_test , package) {
-    auto  test_file = mm_file("check_files/test_package.sv");
+    auto  test_file = mm_file(td_file("check_files/test_package.sv"));
     sv_analyzer analyzer;
 
     
@@ -226,7 +228,7 @@ TEST( analysis_test , sv_module) {
 
 TEST( analysis_test , vhdl_module) {
 
-    vhdl_analyzer analyzer("check_files/test_vhdl_module.vhd");
+    vhdl_analyzer analyzer(td_file("check_files/test_vhdl_module.vhd"));
     analyzer.cleanup_content("`(.*)");
     auto resource = analyzer.analyze().get_content()[0]->as<hdl_resource_statement>();
     hdl_resource_statement check_res;

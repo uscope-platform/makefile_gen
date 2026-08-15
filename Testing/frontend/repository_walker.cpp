@@ -16,6 +16,8 @@
 #include "frontend/Repository_walker.hpp"
 #include <gtest/gtest.h>
 
+#include "test_paths.hpp"
+
 
 std::string repw_settings_path = "/tmp/test_settings_store";
 auto repw_settings_file = repw_settings_path + "/settings";
@@ -24,7 +26,9 @@ std::shared_ptr<settings_store> repw_setup_settings() {
     std::filesystem::create_directories(repw_settings_path);
     std::ofstream ofs(repw_settings_file);
 
-    ofs << R"({"profiles": {"test_profile": {"hdl_store":"repository_walker"}}})";
+    ofs << "{\"profiles\": {\"test_profile\": {\"hdl_store\":\""
+        << td_file("repository_walker")
+        << "\"}}}";
     ofs.flush();
     ofs.close();
     std::error_code ec;
@@ -58,18 +62,18 @@ protected:
 
 TEST_F(repository_walker , directory_analysis) {
 
-    Repository_walker walker(s_store,d_store, false,{"repository_walker/ignored_dir","repository_walker/ignored_dir_2" });
+    Repository_walker walker(s_store,d_store, false,{td_file("repository_walker/ignored_dir"),td_file("repository_walker/ignored_dir_2") });
 
     // NEW CHECKS
 
-    auto file_name = "repository_walker/data.dat";
+    auto file_name = td_file("repository_walker/data.dat");
     auto d = d_store->get_file<DataFile>(file_name);
-    DataFile check_d("data", "repository_walker/data.dat");
+    DataFile check_d("data", td_file("repository_walker/data.dat"));
     ASSERT_TRUE(d.has_value());
     ASSERT_EQ(d.value(), check_d);
 
 
-    file_name = "repository_walker/script_1.tcl";
+    file_name = td_file("repository_walker/script_1.tcl");
     script_specs s;
     s.name = "script_1";
     s.type = "tcl";
@@ -79,7 +83,7 @@ TEST_F(repository_walker , directory_analysis) {
     ASSERT_TRUE(s1.has_value());
     ASSERT_EQ(s1.value(), check_s);
 
-    file_name = "repository_walker/script_2.py";
+    file_name = td_file("repository_walker/script_2.py");
     s.name = "script_2";
     s.type = "py";
     check_s = Script(s);
@@ -90,7 +94,7 @@ TEST_F(repository_walker , directory_analysis) {
     ASSERT_EQ(s2.value(), check_s);
 
 
-    file_name = "repository_walker/constraints.xdc";
+    file_name = td_file("repository_walker/constraints.xdc");
     auto c = d_store->get_file<Constraints>(file_name);
     Constraints check_c("constraints");
     check_c.set_path(file_name);
@@ -98,7 +102,7 @@ TEST_F(repository_walker , directory_analysis) {
     ASSERT_EQ(c.value(), check_c);
 
 
-    file_name = "repository_walker/test_sv_module.sv";
+    file_name = td_file("repository_walker/test_sv_module.sv");
     auto content = d_store->get_file<hdl_file>(file_name)->get_content();
     auto res = content[0]->as<hdl_resource_statement>();
     std::unordered_map<std::string, HDL_port> test_ports;
@@ -116,7 +120,7 @@ TEST_F(repository_walker , directory_analysis) {
     ASSERT_EQ(res, sv_res);
 
 
-    file_name = "repository_walker/test_vhdl_module.vhd";
+    file_name = td_file("repository_walker/test_vhdl_module.vhd");
     hdl_resource_statement vh_res;
     vh_res.set_name("half_adder");
     vh_res.set_type(module);

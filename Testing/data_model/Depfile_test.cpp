@@ -20,6 +20,8 @@
 #include "data_model/Script.hpp"
 #include "data_model/Depfile/Depfile.hpp"
 
+#include "test_paths.hpp"
+
 
 class DepfileTest : public ::testing::Test {
 protected:
@@ -37,7 +39,7 @@ protected:
 
 
 TEST_F( DepfileTest , general_section_parsing) {
-    SetUp("Depfile");
+    SetUp(td_file("Depfile"));
 
     ASSERT_EQ(file->general.project_name, "test_project_name");
     ASSERT_EQ(file->general.synth_tl, "test_synth_tl");
@@ -52,7 +54,7 @@ TEST_F( DepfileTest , general_section_parsing) {
 
 
 TEST_F( DepfileTest , Depfile_excluded_modules) {
-    SetUp("Depfile");
+    SetUp(td_file("Depfile"));
 
     ASSERT_THAT(file->excluded_modules,
                 testing::ElementsAre( "test_excluded_module_1", "test_excluded_module_2"));
@@ -61,7 +63,7 @@ TEST_F( DepfileTest , Depfile_excluded_modules) {
 
 
 TEST_F( DepfileTest , Depfile_constraints) {
-    SetUp("Depfile");
+    SetUp(td_file("Depfile"));
     std::vector<Constraints> correct_answer;
     correct_answer.emplace_back("test_constraints_1");
     correct_answer.emplace_back("test_constraints_2");
@@ -70,7 +72,7 @@ TEST_F( DepfileTest , Depfile_constraints) {
 
 
 TEST_F( DepfileTest , Depfile_scripts) {
-    SetUp("Depfile");
+    SetUp(td_file("Depfile"));
     std::vector<Script> correct_answer;
     script_specs s;
 

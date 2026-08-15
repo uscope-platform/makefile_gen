@@ -23,6 +23,8 @@
 #include "analysis/HDL_ast_builder_v2.hpp"
 #include "analysis/control_bus_analysis.hpp"
 
+#include "test_paths.hpp"
+
 TEST( bus_analysis, simple_bus_analysis) {
 
 
@@ -41,7 +43,7 @@ TEST( bus_analysis, simple_bus_analysis) {
             "Components/system/axi_lite/skid_buffer/rtl"
     };
 
-    auto prefix = "check_files/test_data/";
+    auto prefix = td_file("check_files/test_data/");
     for(auto &p:paths){
         for(auto &f:std::filesystem::directory_iterator(prefix + p)){
             if(f.path().extension() == ".v" || f.path().extension() == ".sv"|| f.path().extension() == ".svh"){

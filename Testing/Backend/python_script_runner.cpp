@@ -18,6 +18,8 @@
 
 #include "Backend/python_script_runner.hpp"
 
+#include "test_paths.hpp"
+
 TEST(python_script_runner, run_script){
     script_specs specs;
     specs.name = "python_test";
@@ -27,17 +29,17 @@ TEST(python_script_runner, run_script){
     specs.include_products = true;
 
     Script s(specs);
-    s.set_path("check_files/python_test.py");
+    s.set_path(td_file("check_files/python_test.py"));
     std::vector script_vect = {s};
 
     python_script_runner runner;
     runner.run_python_scripts(script_vect);
-    bool script_has_run = std::filesystem::exists("check_files/test_file.tcl");
+    bool script_has_run = std::filesystem::exists(td_path("check_files/test_file.tcl"));
     ASSERT_TRUE(script_has_run);
-    std::filesystem::remove("check_files/test_file.tcl");
+    std::filesystem::remove(td_path("check_files/test_file.tcl"));
     auto tcl_dep = runner.get_script_dependencies();
     std::vector<script_source> check_deps;
-    check_deps.push_back({"gen_script", "check_files/test_file.tcl", false, {}});
+    check_deps.push_back({"gen_script", td_file("check_files/test_file.tcl"), false, {}});
 
     ASSERT_EQ(tcl_dep, check_deps);
 }

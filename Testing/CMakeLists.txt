@@ -61,6 +61,16 @@ find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
 target_link_libraries(tests PRIVATE ${GTEST_LIBRARIES} ananke_lib gtest::gtest)
+target_include_directories(tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(tests PRIVATE TEST_DATA_DIR="${CMAKE_CURRENT_BINARY_DIR}")
+
+# Register with CTest so that `ctest --test-dir build` runs the suite from the
+# correct working directory regardless of where it is invoked.
+add_test(NAME ananke_tests COMMAND tests)
+set_tests_properties(ananke_tests PROPERTIES
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    TIMEOUT 600
+)
 set(CHECK_FILES_DIR ${CMAKE_CURRENT_BINARY_DIR}/check_files)
 file(MAKE_DIRECTORY ${CHECK_FILES_DIR})
 

@@ -25,6 +25,8 @@
 #include "Backend/uplatform/peripheral_definition_generator.hpp"
 #include "Backend/uplatform/application_definition_generator.hpp"
 
+#include "test_paths.hpp"
+
 TEST( app_def_generation , generate_app_def) {
 
     std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
@@ -38,7 +40,7 @@ TEST( app_def_generation , generate_app_def) {
             "Components/system/axi_lite/skid_buffer/rtl"
     };
 
-    auto prefix = "check_files/test_data/";
+    auto prefix = td_file("check_files/test_data/");
     for(auto &p:paths){
         for(auto &f:std::filesystem::directory_iterator(prefix + p)){
             if(f.path().extension() == ".v" || f.path().extension() == ".sv"){
