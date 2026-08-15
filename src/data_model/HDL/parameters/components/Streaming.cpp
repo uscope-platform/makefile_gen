@@ -41,6 +41,7 @@ void Streaming::propagate_function(const hdl_function_statement &def) {
 }
 
 static hdl_integer reverse_bits(hdl_integer value, int64_t width) {
+    if (width <= 0 || width > 1024) return value;
     hdl_integer result = 0;
     for (int64_t i = 0; i < width; i++) {
         hdl_integer bit = (value >> static_cast<int64_t>(i)) & hdl_integer(1);
@@ -74,8 +75,7 @@ std::optional<resolved_parameter> Streaming::evaluate(const std::map<qualified_i
     int64_t shift = total_width;
     for (size_t i = 0; i < values.size(); i++) {
         shift -= widths[i];
-        hdl_integer mask = (hdl_integer(1) << hdl_integer(widths[i])) - 1;
-        auto masked = values[i] & mask;
+        auto masked = values[i].truncate_to(widths[i]);
         P = P | (masked << hdl_integer(shift));
     }
 
@@ -98,8 +98,7 @@ std::optional<resolved_parameter> Streaming::evaluate(const std::map<qualified_i
         std::vector<int64_t> block_widths;
         for (int64_t off = 0; off < total_width; off += slice) {
             int64_t w = std::min<int64_t>(slice, total_width - off);
-            hdl_integer mask = (hdl_integer(1) << hdl_integer(w)) - 1;
-            blocks.push_back((P >> hdl_integer(off)) & mask);
+            blocks.push_back((P >> hdl_integer(off)).truncate_to(w));
             block_widths.push_back(w);
         }
         int64_t out_shift = 0;

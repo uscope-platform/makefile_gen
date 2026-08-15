@@ -230,6 +230,26 @@ TEST(hdl_integer, serialization_round_trip) {
     EXPECT_EQ(loaded.get_size(), 128u);
 }
 
+TEST(hdl_integer, serialization_round_trip_negative_wide) {
+    hdl_integer orig;
+    orig.set_value(-((int1024_t(1) << 100) + 0xCAFE));
+    orig.set_signed(true);
+
+    std::stringstream ss;
+    {
+        cereal::BinaryOutputArchive oa(ss);
+        oa(orig);
+    }
+    hdl_integer loaded;
+    {
+        cereal::BinaryInputArchive ia(ss);
+        ia(loaded);
+    }
+    EXPECT_EQ(orig, loaded);
+    EXPECT_TRUE(loaded.is_wide());
+    EXPECT_EQ(loaded.get_wide(), -((int1024_t(1) << 100) + 0xCAFE));
+}
+
 TEST(hdl_integer, wide_division_and_modulo) {
     hdl_integer a, b;
     a.set_value(int1024_t(1) << 100);

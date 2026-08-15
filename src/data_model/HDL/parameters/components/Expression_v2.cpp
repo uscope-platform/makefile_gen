@@ -372,8 +372,7 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(reso
             uint64_t operand_size = i_a.get_size();
             hdl_integer u_a = i_a;
             if(operand_size > 0) {
-                hdl_integer mask = (hdl_integer(1) << hdl_integer(operand_size)) - 1;
-                u_a = i_a & mask;
+                u_a = i_a.truncate_to(static_cast<int64_t>(operand_size));
             }
             int64_t shift = i_b.get_value();
             if(shift < 0 || shift >= 1024) return hdl_integer(0);

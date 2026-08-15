@@ -19,22 +19,11 @@
 #include "data_model/HDL/parameters/common/hdl_integer.hpp"
 
 hdl_integer type_cast_engine::to_unsigned(hdl_integer in, uint64_t container_size) {
-    hdl_integer mask = (hdl_integer(1) << hdl_integer(container_size)) - 1;
-    return in & mask;
+.    return in.truncate_to(static_cast<int64_t>(container_size));
 }
 
 hdl_integer type_cast_engine::to_signed(hdl_integer in, uint64_t container_size) {
-    if(container_size == 0) return 0;
-    if(container_size >= 1024) return in;
-
-    hdl_integer mask = (hdl_integer(1) << hdl_integer(container_size)) - 1;
-    hdl_integer v = in & mask;
-    // Sign-extend from bit (container_size - 1).
-    hdl_integer sign_bit = hdl_integer(1) << hdl_integer(container_size - 1);
-    if ((v & sign_bit) != 0) {
-        v = v | ~mask;
-    }
-    return v;
+    return in.sign_extend(static_cast<int64_t>(container_size));
 }
 
 hdl_integer type_cast_engine::to_int(hdl_integer in, uint64_t container_size) {

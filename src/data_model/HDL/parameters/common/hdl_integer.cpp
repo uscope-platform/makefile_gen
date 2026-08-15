@@ -166,6 +166,7 @@ hdl_integer hdl_integer::operator!() const {
 
 hdl_integer hdl_integer::operator<<(const hdl_integer &o) const {
     int64_t shift = o.get_value();
+    if (shift < 0 || shift >= 1024) return hdl_integer(0);
     hdl_integer res;
     if (is_wide() || shift >= 64) {
         res.set_value(to_wide() << static_cast<int>(shift));
@@ -177,6 +178,7 @@ hdl_integer hdl_integer::operator<<(const hdl_integer &o) const {
 
 hdl_integer hdl_integer::operator>>(const hdl_integer &o) const {
     int64_t shift = o.get_value();
+    if (shift < 0 || shift >= 1024) return hdl_integer(0);
     hdl_integer res;
     if (is_wide() || shift >= 64) {
         res.set_value(to_wide() >> static_cast<int>(shift));

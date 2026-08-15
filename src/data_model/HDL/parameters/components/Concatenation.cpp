@@ -94,8 +94,7 @@ std::optional<resolved_parameter> Concatenation::evaluate(const std::map<qualifi
             }
         }
         result = pack_values(values, sizes);
-        hdl_integer mask = (hdl_integer(1) << hdl_integer(container_size)) - 1;
-        result = result->get_integer() & mask;
+        result = result->get_integer().truncate_to(container_size);
     } else {
         if (components.empty())return std::nullopt;
 

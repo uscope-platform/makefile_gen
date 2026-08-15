@@ -65,16 +65,22 @@ namespace math {
         template <class Archive>
             void save(Archive& ar, const int1024_t& val) {
             std::stringstream ss;
-            ss << std::hex << val;
-            std::string s = ss.str();
-            ar(s); // Save it safely as a string
+            if (val < 0) {
+                ss << '-' << std::hex << (-val);
+            } else {
+                ss << std::hex << val;
+            }
+            ar(ss.str()); // Save it safely as a string
         }
 
         template <class Archive>
         void load(Archive& ar, int1024_t& val) {
             std::string s;
             ar(s); // Load the string representation
+            bool is_negative = s.rfind('-', 0) == 0;
+            if (is_negative) s = s.substr(1);
             val = int1024_t(("0x" + s).c_str());
+            if (is_negative) val = -val;
         }
     }
 }
@@ -106,6 +112,43 @@ public:
     void set_value(const uint64_t v);
     void set_value(const int1024_t v);
     void set_signed(const bool s) {signedness = s;}
+
+    // Produce an all-ones mask of `width` bits
+    static hdl_integer width_mask(int64_t width) {
+        if (width <= 0) return hdl_integer(0);
+        if (width >= 1024) {
+            hdl_integer m;
+            int1024_t all_ones = (int1024_t(1) << (1024 - 1)) | ((int1024_t(1) << (1024 - 1)) - 1);
+            m.set_value(all_ones);
+            return m;
+        }
+        return (hdl_integer(1) << hdl_integer(width)) - 1;
+    }
+
+    // Truncate the value to `width` bits, preserving signedness. Width <= 0
+    // yields 0; width >= 1024 leaves the value unchanged.
+    [[nodiscard]] hdl_integer truncate_to(int64_t width) const {
+        hdl_integer result;
+        int1024_t masked = to_wide() & width_mask(width).to_wide();
+        result.set_value(masked);
+        result.set_signed(signedness);
+        return result;
+    }
+
+    // Truncate to `width` bits and sign-extend from bit (width - 1).
+    [[nodiscard]] hdl_integer sign_extend(int64_t width) const {
+        if (width <= 0) return hdl_integer(0);
+        if (width >= 1024) return *this;
+        int1024_t mask = width_mask(width).to_wide();
+        int1024_t wide = to_wide() & mask;
+        if ((wide & (int1024_t(1) << (width - 1))) != 0)
+            wide |= ~mask;
+        hdl_integer result;
+        result.set_value(wide);
+        result.set_signed(signedness);
+        return result;
+    }
+
     [[nodiscard]] int64_t get_value() const {
         if (std::holds_alternative<int1024_t>(content))
             return static_cast<int64_t>(std::get<int1024_t>(content));

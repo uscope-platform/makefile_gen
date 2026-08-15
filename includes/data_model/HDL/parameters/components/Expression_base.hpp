@@ -68,8 +68,7 @@ public:
             if (size < 0) continue;
 
             // Build a size-bit all-ones mask as an hdl_integer: (1 << size) - 1.
-            hdl_integer mask = (hdl_integer(1) << hdl_integer(size)) - 1;
-            auto masked_component = components[i] & mask;
+            hdl_integer masked_component = components[i].truncate_to(size);
 
             packed_result = packed_result | (masked_component << hdl_integer(current_shift));
 

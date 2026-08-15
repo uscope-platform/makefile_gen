@@ -131,8 +131,7 @@ hdl_integer Replication::pack_repetition(hdl_integer value, int64_t width, int64
     hdl_integer packed_result = 0;
     if (width <= 0 || count <= 0) return packed_result;
 
-    hdl_integer mask = (hdl_integer(1) << hdl_integer(width)) - 1;
-    auto clean_value = value & mask;
+    hdl_integer clean_value = value.truncate_to(width);
 
     for (int64_t i = 0; i < count; i++) {
         int64_t shift_amount = i * width;
