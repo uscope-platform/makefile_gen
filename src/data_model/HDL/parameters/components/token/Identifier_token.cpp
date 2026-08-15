@@ -16,6 +16,8 @@
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
 #include "data_model/HDL/types/hdl_type.hpp"
 
+#include <spdlog/spdlog.h>
+
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/archives/binary.hpp>
 
@@ -51,6 +53,9 @@ std::optional<resolved_parameter> Identifier_token::evaluate(
     auto it = context.find(id);
     if (it != context.end()) {
         const auto &resolved = it->second;
+        if (resolved.is_undefined()) {
+            spdlog::warn("Parameter {} is undefined, using 0 as a default", id.print());
+        }
         if (array_index.empty()) return resolved;
 
         std::vector<int64_t> indices;

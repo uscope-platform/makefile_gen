@@ -197,6 +197,9 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
             res = std::nullopt;
         }
         if (res) {
+            if (res.value().is_undefined()) {
+                spdlog::warn("The parameter {} is undefined, using 0 as a default", next.value().get_name());
+            }
             ctx[next.value()] = res.value();
             solved_parameters[next.value()] = res.value();
 
@@ -538,7 +541,12 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::extract_str
     };
 
     if (res.is_integer()) {
-        uint64_t raw = res.get_integer().get_value();
+        auto make_hdl = [](const int1024_t &v) {
+            hdl_integer h;
+            h.set_value(v);
+            return h;
+        };
+        int1024_t raw = res.get_integer().to_wide();
         if (type->is<HDL_struct_type>()) {
             auto &st = type->as<HDL_struct_type>();
             auto type_info = st.evaluate_type(ctx);
@@ -546,9 +554,9 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::extract_str
                 uint64_t offset = 0;
                 for (int i = st.member.size() - 1; i >= 0; i--) {
                     uint64_t w = packed_width(type_info->struct_sizes[i].packed_sizes);
-                    uint64_t mask = (w >= 64) ? ~0ULL : (1ULL << w) - 1;
+                    int1024_t mask = (w >= 1024) ? int1024_t(-1) : (int1024_t(1) << w) - 1;
                     emit_field(st.member[i].name,
-                               static_cast<uint64_t>((raw >> offset) & mask),
+                               make_hdl((raw >> static_cast<size_t>(offset)) & mask),
                                st.member[i].type);
                     offset += w;
                 }
@@ -561,8 +569,8 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::extract_str
                     auto s = m.type->evaluate_type(ctx);
                     if (s) w = packed_width(*s);
                 }
-                uint64_t mask = (w >= 64) ? ~0ULL : (1ULL << w) - 1;
-                emit_field(m.name, static_cast<uint64_t>(raw & mask), m.type);
+                int1024_t mask = (w >= 1024) ? int1024_t(-1) : (int1024_t(1) << w) - 1;
+                emit_field(m.name, make_hdl(raw & mask), m.type);
             }
         }
     } else if (res.is_int_array()) {

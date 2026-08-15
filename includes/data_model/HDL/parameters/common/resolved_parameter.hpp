@@ -73,6 +73,8 @@ public:
         undefined = true;
     }
 
+    [[nodiscard]] bool is_undefined() const { return undefined; }
+
     bool operator==(const resolved_parameter&) const = default;
 
     friend std::ostream& operator<<(std::ostream& os, const resolved_parameter& rp) {
