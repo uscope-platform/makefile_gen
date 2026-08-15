@@ -102,7 +102,12 @@ void HDL_function_call::walk_body(
                     value_map[idx] = val.value().get_integer();
                     size_map[idx] = val.value().get_integer().get_size();
                 } else if (val.value().is_int_array()) {
-                    value_map[idx] = val.value().get_int_array().get_1d_slice({0, 0})[0];
+                    auto slice = val.value().get_int_array().get_1d_slice({0, 0});
+                    if (slice.empty()) {
+                        spdlog::warn("Empty array value in function body assignment, defaulting to 0");
+                        continue;
+                    }
+                    value_map[idx] = slice[0];
                     size_map[idx] = 0;
                 }
             } else if (rt && rt->is<HDL_struct_type>() && target.starts_with(fcn_name + ".")) {
@@ -120,7 +125,12 @@ void HDL_function_call::walk_body(
                             value_map[idx] = val.value().get_integer();
                             size_map[idx] = val.value().get_integer().get_size();
                         } else if (val.value().is_int_array()) {
-                            value_map[idx] = val.value().get_int_array().get_1d_slice({0, 0})[0];
+                            auto slice = val.value().get_int_array().get_1d_slice({0, 0});
+                            if (slice.empty()) {
+                                spdlog::warn("Empty array value in function body assignment, defaulting to 0");
+                                continue;
+                            }
+                            value_map[idx] = slice[0];
                             size_map[idx] = 0;
                         }
                         break;
@@ -167,7 +177,14 @@ std::expected<resolved_parameter, solver_errors> HDL_function_call::evaluate(con
 
     if (value_map.empty()) return std::unexpected{missing_value};
 
-    size_t max_idx = static_cast<size_t>(value_map.rbegin()->first) + 1;
+    constexpr int64_t MAX_FUNCTION_RETURN_INDEX = 1'000'000;
+    int64_t max_key = value_map.rbegin()->first;
+    if (max_key < 0) max_key = 0;
+    if (max_key >= MAX_FUNCTION_RETURN_INDEX) {
+        spdlog::warn("Function return index {} exceeds the maximum supported size of {}, clamping", value_map.rbegin()->first, MAX_FUNCTION_RETURN_INDEX);
+        max_key = MAX_FUNCTION_RETURN_INDEX - 1;
+    }
+    size_t max_idx = static_cast<size_t>(max_key + 1);
     std::vector<hdl_integer> values(max_idx);
     std::vector<int64_t> sizes(max_idx);
     for (auto &[idx, val] : value_map) {

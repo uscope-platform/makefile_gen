@@ -24,4 +24,15 @@ enum solver_errors {
     missing_arguments,
     unsupported
 };
+
+inline const char* solver_error_name(solver_errors e) {
+    switch (e) {
+        case missing_value: return "missing value";
+        case wrong_type: return "wrong type";
+        case empty_body: return "empty body";
+        case missing_arguments: return "missing arguments";
+        case unsupported: return "unsupported construct";
+    }
+    return "unknown error";
+}
 #endif //ANANKE_SOLVER_ERRORS_HPP

@@ -16,6 +16,9 @@
 
 #include "analysis/loop_solver.hpp"
 
+#include <spdlog/spdlog.h>
+
+static constexpr int64_t MAX_GENERATE_ITERATIONS = 1'000'000;
 
 std::vector<hdl_integer> loop_solver::solve_loop(const hdl_loop_statement &loop, const std::map<qualified_identifier, resolved_parameter> &context) {
     std::vector<hdl_integer> ret;
@@ -32,7 +35,12 @@ std::vector<hdl_integer> loop_solver::solve_loop(const hdl_loop_statement &loop,
     ctx[loop_var] = resolved_parameter(idx);
 
     auto cond = loop.get_end_condition()->evaluate(ctx);
+    int64_t iteration_count = 0;
     while (cond.has_value() && cond.value().is_integer() && cond.value().get_integer() != 0) {
+        if (iteration_count >= MAX_GENERATE_ITERATIONS) {
+            spdlog::warn("Loop variable {} exceeded the maximum number of iterations ({})", init->get_name(), MAX_GENERATE_ITERATIONS);
+            break;
+        }
         ret.push_back(idx);
 
         auto next = loop.get_iteration()->evaluate(ctx);
@@ -41,6 +49,7 @@ std::vector<hdl_integer> loop_solver::solve_loop(const hdl_loop_statement &loop,
 
         ctx[loop_var] = resolved_parameter(idx);
         cond = loop.get_end_condition()->evaluate(ctx);
+        iteration_count++;
     }
 
     return ret;

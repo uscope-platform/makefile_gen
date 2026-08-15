@@ -237,16 +237,16 @@ public:
 
 md_2d_array get_2d_slice(std::vector<int64_t> idx) {
         if(idx.empty() || idx[0] >= data.size()) {
-            std::cout << "Index out of range in get_2d_slice" << std::endl;
-            exit(1);
+            std::cerr << "Index out of range in get_2d_slice" << std::endl;
+            return {};
         }
         return data[idx[0]];
     }
 
     md_1d_array get_1d_slice(std::vector<int64_t> idx) const {
         if(idx.size() < 2 || idx[0] >= data.size() || idx[1] >= data[idx[0]].size()) {
-            std::cout << "Index out of range in get_1d_slice" << std::endl;
-            exit(1);
+            std::cerr << "Index out of range in get_1d_slice" << std::endl;
+            return {};
         }
         return data[idx[0]][idx[1]];
     }

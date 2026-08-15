@@ -159,6 +159,12 @@ std::expected<resolved_parameter, solver_errors> Concatenation::evaluate(const s
         if (!result.has_value()) return result;
         auto dims = unpacked_dimension;
         while (dims.size()<3) dims.insert(dims.begin(), 1);
+        bool zero_dim = false;
+        for (auto d : dims) if (d == 0) zero_dim = true;
+        if (zero_dim) {
+            spdlog::warn("Array default initialization with a zero dimension is not supported, defaulting to 0");
+            return std::unexpected{missing_value};
+        }
         if(result.value().is_int_array()) {
             auto val = result.value().get_int_array().get_scalar();
             if (!val) return std::unexpected{missing_arguments};

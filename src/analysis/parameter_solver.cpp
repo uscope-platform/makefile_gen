@@ -186,16 +186,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
         if (param->get_expression()) {
             annotate_identifier_types(param->get_expression(), type_map);
         }
-        std::expected<resolved_parameter, solver_errors>  res;
-        try {
-            res = param->evaluate(ctx);
-        } catch (const std::exception &e) {
-            spdlog::warn("Exception while evaluating parameter {}: {}", next.value().get_name(), e.what());
-            res = std::unexpected{missing_value};
-        } catch (...) {
-            spdlog::warn("Unknown exception while evaluating parameter {}", next.value().get_name());
-            res = std::unexpected{missing_value};
-        }
+        auto res = param->evaluate(ctx);
         if (res) {
             if (res.value().is_undefined()) {
                 spdlog::warn("The parameter {} is undefined, using 0 as a default", next.value().get_name());
@@ -203,18 +194,14 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
             ctx[next.value()] = res.value();
             solved_parameters[next.value()] = res.value();
 
-            try {
-                auto struct_fields = extract_struct_fields(param, res.value(), next.value(), ctx);
-                ctx.insert(struct_fields.begin(), struct_fields.end());
-                solved_parameters.insert(struct_fields.begin(), struct_fields.end());
-            } catch (const std::exception &e) {
-                spdlog::warn("Exception while extracting struct fields of parameter {}: {}", next.value().get_name(), e.what());
-            }
+            auto struct_fields = extract_struct_fields(param, res.value(), next.value(), ctx);
+            ctx.insert(struct_fields.begin(), struct_fields.end());
+            solved_parameters.insert(struct_fields.begin(), struct_fields.end());
             auto enum_values = extract_enum_values(param);
             ctx.insert(enum_values.begin(), enum_values.end());
             solved_parameters.insert(enum_values.begin(), enum_values.end());
         } else {
-            spdlog::warn("The parameter {} can't be solved, defaulting to 0",  next.value().get_name());
+            spdlog::warn("The parameter {} can't be solved ({}), defaulting to 0", next.value().get_name(), solver_error_name(res.error()));
             ctx[next.value()] = 0;
             solved_parameters[next.value()] = 0;
         }

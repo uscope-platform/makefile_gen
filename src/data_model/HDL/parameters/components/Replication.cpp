@@ -24,6 +24,8 @@
 CEREAL_REGISTER_TYPE(Replication)
 CEREAL_REGISTER_POLYMORPHIC_RELATION(Expression_base, Replication)
 
+static constexpr int64_t MAX_REPLICATION_SIZE = 1'000'000;
+
 
 Replication::Replication(const Replication &other) {
     repetition_size = other.repetition_size;
@@ -79,6 +81,10 @@ std::expected<resolved_parameter, solver_errors> Replication::evaluate(const std
     if (!raw_size.value().is_integer()) return std::unexpected{missing_value};
     auto size = raw_size.value().get_integer().get_value();
     if (size <= 0) return std::unexpected{missing_value};
+    if (size > MAX_REPLICATION_SIZE) {
+        spdlog::warn("Replication size {} exceeds the maximum supported size of {}, clamping", size, MAX_REPLICATION_SIZE);
+        size = MAX_REPLICATION_SIZE;
+    }
     mdarray<hdl_integer>::md_1d_array repeated_value;
     if (repeated_item->is<Expression_v2>()) {
         auto item = repeated_item->as<Expression_v2>().evaluate(context);
@@ -100,11 +106,14 @@ std::expected<resolved_parameter, solver_errors> Replication::evaluate(const std
         auto item = raw_item.value();
         if (item.is_integer())
             repeated_value = std::vector(size, item.get_integer());
-        else {
-            auto  item_vect = item.get_int_array().get_1d_slice({0,0});
+        else if (item.is_int_array()) {
+            auto item_vect = item.get_int_array().get_1d_slice({0,0});
             for (int i = 0; i< size; i++) {
                 repeated_value.insert(repeated_value.end(), item_vect.begin(), item_vect.end());
             }
+        } else {
+            spdlog::warn("Replication of an unsupported value type, defaulting to 0");
+            return std::unexpected{wrong_type};
         }
     } else if (!repeated_item->is<Expression_v2>() && !repeated_item->is<Concatenation>()){
         auto item = repeated_item->evaluate(context);
@@ -133,7 +142,7 @@ hdl_integer Replication::pack_repetition(hdl_integer value, int64_t width, int64
 
     hdl_integer clean_value = value.truncate_to(width);
 
-    for (int64_t i = 0; i < count; i++) {
+    for (int64_t i = 0; i < count && i < MAX_REPLICATION_SIZE; i++) {
         int64_t shift_amount = i * width;
         packed_result = packed_result | (clean_value << hdl_integer(shift_amount));
     }
