@@ -23,6 +23,25 @@
 CEREAL_REGISTER_TYPE(Expression_v2)
 CEREAL_REGISTER_POLYMORPHIC_RELATION(Expression_base, Expression_v2)
 
+namespace {
+    // Container width of an expression operand, derived from its resolved type.
+    // This is the deterministic width used for rotate/shift semantics (unsized
+    // integer literals model a 32-bit container).
+    uint64_t expr_width(const std::shared_ptr<Expression_base> &e,
+                        const std::map<qualified_identifier, resolved_parameter> &context) {
+        if (!e) return 0;
+        auto t = e->resolve_expression_type(context);
+        if (t && !t->is_real && !t->packed_sizes.empty()) {
+            uint64_t w = 1;
+            for (auto ps : t->packed_sizes) w *= ps;
+            if (w > 0) return w;
+        }
+        auto v = e->evaluate(context);
+        if (v && v->is_integer()) return v->get_integer().get_size();
+        return 64;
+    }
+}
+
 std::shared_ptr<Expression_base> Expression_v2::unwrap(Expression_v2 expr) {
     if (expr.lhs && !expr.rhs && expr.operation == none) {
         return expr.lhs;
@@ -237,7 +256,12 @@ std::expected<resolved_parameter, solver_errors> Expression_v2::evaluate(
                 operand_a = 0;
             }
         }
-        auto res = evaluate_binary_expression(operand_a, operand_b);
+        std::variant<hdl_integer, double> res;
+        if (operation == rotate_left || operation == rotate_right) {
+            res = evaluate_rotate(context, operand_a, operand_b);
+        } else {
+            res = evaluate_binary_expression(operand_a, operand_b);
+        }
         if (std::holds_alternative<double>(res)) ret_val = std::get<double>(res);
         else ret_val = std::get<hdl_integer>(res);
     }
@@ -277,6 +301,7 @@ std::expected<resolved_parameter, solver_errors> Expression_v2::evaluate(
             case abs_value:
             case logic_shift_left: case logic_shift_right:
             case arithmetic_shift_left: case arithmetic_shift_right:
+            case rotate_left: case rotate_right:
             case power:
                 width = w_a;
                 break;
@@ -293,6 +318,40 @@ std::expected<resolved_parameter, solver_errors> Expression_v2::evaluate(
         }
     }
     return  ret_val;
+}
+
+std::variant<hdl_integer, double> Expression_v2::evaluate_rotate(
+    const std::map<qualified_identifier, resolved_parameter> &context,
+    resolved_parameter op_a, resolved_parameter op_b) {
+    if (!op_a.is_integer() || !op_b.is_integer()) {
+        spdlog::warn("The rotate operator is only defined between integers");
+        return 0;
+    }
+
+    // Container width of the left operand, derived from its resolved type.
+    // Unsized integer literals model a 32-bit container, which makes the
+    // rotate deterministic (vs. the natural bit length of the value).
+    uint64_t width = expr_width(lhs, context);
+    if (width <= 0) width = 64;
+
+    auto i_a = op_a.get_integer();
+    auto i_b = op_b.get_integer();
+    int64_t amount = i_b.get_value() % static_cast<int64_t>(width);
+    if (amount < 0) amount += static_cast<int64_t>(width);
+    int1024_t mask = (int1024_t(1) << width) - 1;
+    int1024_t v = i_a.to_wide() & mask;
+    int1024_t res;
+    if (amount == 0) {
+        res = v;
+    } else if (operation == rotate_left) {
+        res = ((v << amount) | (v >> (width - amount))) & mask;
+    } else {
+        res = ((v >> amount) | (v << (width - amount))) & mask;
+    }
+    hdl_integer result;
+    result.set_value(res);
+    result.set_signed(i_a.get_signed());
+    return result;
 }
 
 std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(resolved_parameter op_a, resolved_parameter op_b) {
@@ -368,6 +427,21 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(reso
         if(int_exec) result_i =i_a % i_b;
         else spdlog::warn("The modulus operator is only defined between integers");
         result_d = 0;
+    }else if(operation == v_mod){
+        // VHDL `mod` is a floor-style modulo: the result takes the sign of the
+        // divisor. C++ `%` is truncated; adjust so the remainder matches the
+        // divisor's sign.
+        if(int_exec) {
+            auto rem = i_a % i_b;
+            auto rem_v = rem.get_value();
+            auto div_v = i_b.get_value();
+            if (rem_v != 0 && ((rem_v < 0) != (div_v < 0)))
+                rem_v += div_v;
+            result_i = hdl_integer(rem_v);
+        } else {
+            spdlog::warn("The mod operator is only defined between integers");
+            result_d = 0;
+        }
     }else if(operation == logic_shift_left){
         if(int_exec) result_i =i_a << i_b;
         else spdlog::warn("The shift operator is only defined between integers");
@@ -391,6 +465,11 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_binary_expression(reso
     } else if(operation == arithmetic_shift_right){
         if(int_exec) result_i =i_a >> i_b;
         else spdlog::warn("The shift operator is only defined between integers");
+        result_d = 0;
+    } else if(operation == rotate_left || operation == rotate_right){
+        // Rotate is handled in Expression_v2::evaluate where the operand
+        // expression (and thus its container width) is available.
+        spdlog::warn("Rotate operator evaluated without container width");
         result_d = 0;
     }else if(operation == greater){
         if(int_exec) result_i =i_a > i_b;

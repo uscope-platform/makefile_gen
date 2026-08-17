@@ -352,3 +352,49 @@ end top;
 
     ASSERT_EQ(*res, golden);
 }
+
+namespace {
+    int64_t eval_generic(const std::string &decl_body, const std::string &gname) {
+        std::string pattern = "entity top is\n    generic ( " + decl_body + " );\nend top;\n";
+        auto res = parse_first_entity(pattern);
+        auto param = res->get_parameters().get(gname);
+        if (!param) return -999999;
+        std::map<qualified_identifier, resolved_parameter> ctx;
+        auto val = param->evaluate(ctx);
+        if (!val.has_value() || !val->is_integer()) return -999999;
+        return val->get_integer().get_value();
+    }
+}
+
+TEST(vhdl_analyzer, literal_bit_string) {
+    EXPECT_EQ(eval_generic("V : integer := x\"FF\"", "v"), 255);
+    EXPECT_EQ(eval_generic("V : integer := b\"1010\"", "v"), 10);
+    EXPECT_EQ(eval_generic("V : integer := o\"17\"", "v"), 15);
+    EXPECT_EQ(eval_generic("V : integer := 8x\"1F\"", "v"), 31);
+}
+
+TEST(vhdl_analyzer, literal_signed_bit_string) {
+    // 8 bits of 0xFF interpreted as two's-complement signed -> -1.
+    EXPECT_EQ(eval_generic("V : integer := 8sx\"FF\"", "v"), -1);
+}
+
+TEST(vhdl_analyzer, literal_character) {
+    // Character literal 'a' maps to its ASCII value.
+    EXPECT_EQ(eval_generic("C : integer := 'a'", "c"), 97);
+}
+
+TEST(vhdl_analyzer, operator_mod_rem) {
+    // VHDL `mod` is floor modulo: 7 mod -3 = -2 (sign of divisor).
+    EXPECT_EQ(eval_generic("M : integer := 7 mod -3", "m"), -2);
+    // VHDL `rem` is truncated: 7 rem -3 = 1 (sign of dividend).
+    EXPECT_EQ(eval_generic("R : integer := 7 rem -3", "r"), 1);
+}
+
+TEST(vhdl_analyzer, operator_rotate) {
+    // Rotate operates on the default 32-bit container width, so small left
+    // rotates are just left shifts: 6 rol 1 = 12.
+    EXPECT_EQ(eval_generic("L : integer := 6 rol 1", "l"), 12);
+    // Rotating right by 31 on a 32-bit container equals rotating left by 1:
+    // 1 ror 31 = 2.
+    EXPECT_EQ(eval_generic("R : integer := 1 ror 31", "r"), 2);
+}

@@ -63,6 +63,7 @@ private:
     void finalize_generic(mgp_vh::vhdlParser::Identifier_listContext *ids);
     std::shared_ptr<hdl_type> make_generic_type(mgp_vh::vhdlParser::Subtype_indicationContext *type);
     std::shared_ptr<Expression_base> make_vhdl_value(const std::string &text);
+    std::shared_ptr<Expression_base> make_character_value(const std::string &text);
     static bool has_expr_operator(mgp_vh::vhdlParser::ExpressionContext *ctx);
     static bool simple_is_nonleaf(mgp_vh::vhdlParser::Simple_expressionContext *ctx);
 

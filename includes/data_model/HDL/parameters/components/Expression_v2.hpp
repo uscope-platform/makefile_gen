@@ -46,6 +46,9 @@ public:
         logic_shift_right,
         arithmetic_shift_left,
         arithmetic_shift_right,
+        rotate_left,
+        rotate_right,
+        v_mod,
         greater,
         greater_equal,
         less,
@@ -84,6 +87,9 @@ public:
         {logic_shift_right, ">>"},
         {arithmetic_shift_left, "<<<"},
         {arithmetic_shift_right, ">>>"},
+        {rotate_left, "rol"},
+        {rotate_right, "ror"},
+        {v_mod, "mod"},
         {greater, ">"},
         {greater_equal, ">="},
         {less, "<"},
@@ -109,6 +115,8 @@ public:
         {add, 7}, {subtract, 7},
         {logic_shift_left, 6}, {logic_shift_right, 6},
         {arithmetic_shift_left, 6}, {arithmetic_shift_right, 6},
+        {rotate_left, 6}, {rotate_right, 6},
+        {v_mod, 8},
         {greater, 5}, {greater_equal, 5}, {less, 5}, {less_equal, 5},
         {equal, 4}, {not_equal, 4}, {case_equal, 4}, {case_not_equal, 4},
         {wildcard_equal, 4}, {wildcard_not_equal, 4},
@@ -147,6 +155,9 @@ private:
 
     bool isEqual(const Expression_base& other) const override;
     std::variant<hdl_integer, double> evaluate_binary_expression(resolved_parameter op_a, resolved_parameter op_b);
+    std::variant<hdl_integer, double> evaluate_rotate(
+        const std::map<qualified_identifier, resolved_parameter> &context,
+        resolved_parameter op_a, resolved_parameter op_b);
     std::variant<hdl_integer, double> evaluate_unary_expression(resolved_parameter operand);
 
     std::shared_ptr<Expression_base> lhs;

@@ -26,6 +26,7 @@
 #include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
 #include "data_model/HDL/parameters/components/token/Real_token.hpp"
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
+#include "data_model/HDL/parameters/components/token/String_token.hpp"
 #include "data_model/HDL/types/HDL_simple_type.hpp"
 
 namespace {
@@ -202,6 +203,8 @@ void vhdl_visitor::exitExpression(mgp_vh::vhdlParser::ExpressionContext *ctx) {
         else if (ctx->shift_operator()->KW_SRL()) op = Expression_v2::logic_shift_right;
         else if (ctx->shift_operator()->KW_SLA()) op = Expression_v2::arithmetic_shift_left;
         else if (ctx->shift_operator()->KW_SRA()) op = Expression_v2::arithmetic_shift_right;
+        else if (ctx->shift_operator()->KW_ROL()) op = Expression_v2::rotate_left;
+        else if (ctx->shift_operator()->KW_ROR()) op = Expression_v2::rotate_right;
     } else if (ctx->relational_operator()) {
         if (ctx->relational_operator()->EQ()) op = Expression_v2::equal;
         else if (ctx->relational_operator()->NE()) op = Expression_v2::not_equal;
@@ -246,8 +249,8 @@ void vhdl_visitor::exitSimple_expression(mgp_vh::vhdlParser::Simple_expressionCo
         } else if (ctx->multiplying_operator()) {
             auto op = Expression_v2::multiply;
             if (ctx->multiplying_operator()->DIV()) op = Expression_v2::divide;
-            else if (ctx->multiplying_operator()->KW_MOD()) op = Expression_v2::modulo;
-            else if (ctx->multiplying_operator()->KW_REM()) op = Expression_v2::modulo; // rem ~ mod
+            else if (ctx->multiplying_operator()->KW_MOD()) op = Expression_v2::v_mod;   // floor mod
+            else if (ctx->multiplying_operator()->KW_REM()) op = Expression_v2::modulo;  // truncated rem
             params_factory.set_operation(op);
         } else if (ctx->adding_operator()) {
             if (ctx->adding_operator()->PLUS()) params_factory.set_operation(Expression_v2::add);
@@ -263,12 +266,28 @@ void vhdl_visitor::exitSimple_expression(mgp_vh::vhdlParser::Simple_expressionCo
 void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContext *ctx) {
     if (!in_generic_clause || in_subtype_indication || !params_factory.is_component_relevant()) return;
 
+    // A bare identifier: a reference to another generic/constant.
     if (ctx->name() && ctx->name()->name_literal() && ctx->name()->name_literal()->identifier()) {
-        // A bare name: a reference to another generic/constant.
         params_factory.add_component(std::make_shared<Identifier_token>(
             qualified_identifier(canon(ctx->name()->name_literal()->identifier()->getText()))));
         return;
     }
+
+    // A character literal ('a') or string literal ("...") also arrive through
+    // the `name` rule.
+    if (ctx->name() && ctx->name()->name_literal()) {
+        auto lit = ctx->name()->name_literal();
+        if (lit->CHARACTER_LITERAL()) {
+            params_factory.add_component(make_character_value(lit->CHARACTER_LITERAL()->getText()));
+            return;
+        }
+        if (lit->operator_symbol() && lit->operator_symbol()->STRING_LITERAL()) {
+            auto str = lit->operator_symbol()->STRING_LITERAL()->getText();
+            params_factory.add_component(std::make_shared<String_token>(str));
+            return;
+        }
+    }
+
     params_factory.add_component(make_vhdl_value(ctx->getText()));
 }
 
@@ -280,8 +299,80 @@ void vhdl_visitor::exitPrimary(mgp_vh::vhdlParser::PrimaryContext *ctx) {
     }
 }
 
+std::shared_ptr<Expression_base> vhdl_visitor::make_character_value(const std::string &text) {
+    // A VHDL character literal like 'a' is represented by its ASCII value.
+    // The text includes the surrounding apostrophes.
+    if (text.size() >= 3 && text.front() == '\'' && text.back() == '\'') {
+        char c = text[1];
+        return std::make_shared<Numeric_token>(std::to_string(static_cast<int>(static_cast<unsigned char>(c))));
+    }
+    spdlog::warn("Malformed VHDL character literal '{}' in generic default, ignored", text);
+    return nullptr;
+}
+
 std::shared_ptr<Expression_base> vhdl_visitor::make_vhdl_value(const std::string &text) {
     if (text.empty()) return nullptr;
+
+    // Bit-string literal, e.g. x"FF", b"1010", o"17", d"255",
+    // 8x"1F", ub"1101", sx"FF".
+    if (text.find('"') != std::string::npos) {
+        size_t quote_open = text.find('"');
+        std::string prefix = text.substr(0, quote_open);
+        size_t quote_close = text.rfind('"');
+        if (quote_close > quote_open) {
+            std::string digits = text.substr(quote_open + 1, quote_close - quote_open - 1);
+            // prefix = [width](u|s)?base
+            int64_t width = -1;
+            bool signed_number = false;
+            size_t i = 0;
+            // Optional integer width.
+            while (i < prefix.size() && std::isdigit(static_cast<unsigned char>(prefix[i]))) i++;
+            if (i > 0) {
+                std::from_chars(prefix.data(), prefix.data() + i, width, 10);
+            }
+            if (i < prefix.size() && (prefix[i] == 'u' || prefix[i] == 's')) {
+                signed_number = prefix[i] == 's';
+                i++;
+            }
+            if (i < prefix.size()) {
+                int base = 10;
+                char base_char = std::tolower(static_cast<unsigned char>(prefix[i]));
+                if (base_char == 'b') base = 2;
+                else if (base_char == 'o') base = 8;
+                else if (base_char == 'x') base = 16;
+                else if (base_char == 'd') base = 10;
+
+                int64_t value = 0;
+                bool valid = true;
+                for (char c : digits) {
+                    if (c == '_') continue;
+                    int d;
+                    if (c >= '0' && c <= '9') d = c - '0';
+                    else if (c >= 'a' && c <= 'f') d = c - 'a' + 10;
+                    else if (c >= 'A' && c <= 'F') d = c - 'A' + 10;
+                    else { valid = false; break; }
+                    if (d >= base) { valid = false; break; }
+                    value = value * base + d;
+                }
+                if (valid) {
+                    auto tok = std::make_shared<Numeric_token>(std::to_string(value));
+                    if (width > 0) {
+                        tok->set_binary_size(width);
+                        tok->set_sized_explicit(true);
+                        if (signed_number) {
+                            // Interpret as a two's-complement signed value of `width` bits.
+                            auto v = value;
+                            if (v & (int64_t(1) << (width - 1))) v -= (int64_t(1) << width);
+                            tok = std::make_shared<Numeric_token>(std::to_string(v));
+                        }
+                    }
+                    return tok;
+                }
+            }
+        }
+        spdlog::warn("Malformed VHDL bit-string literal '{}' in generic default, ignored", text);
+        return nullptr;
+    }
 
     // VHDL based literal, e.g. 16#FF# or 2#1010#.
     size_t hash_pos = text.find('#');
