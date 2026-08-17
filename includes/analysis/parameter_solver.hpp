@@ -40,6 +40,7 @@ struct work_order {
     std::string path;
     std::unordered_map<std::string, std::string> interfaces_map;
     std::vector<pending_parameter_override> pending_overrides;
+    std::vector<std::string> module_chain;
 };
 
 class parameter_solver {

@@ -558,4 +558,33 @@ TEST( hdl_ast_builder, primitive_classification) {
     pm.apply_passes(synth_ast);
 }
 
+TEST( hdl_ast_builder, recursion_limit_tunable) {
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+
+    std::string module_a = "module recursive_a ();\n    recursive_b b_inst ();\nendmodule\n";
+    std::string module_b = "module recursive_b ();\n    recursive_a a_inst ();\nendmodule\n";
+
+    sv_analyzer analyzer;
+    auto res_a = analyzer.analyze("", module_a).value();
+    d_store->store_file({"/tmp/recursive_a.sv", "file_hash", res_a});
+
+    auto res_b = analyzer.analyze("", module_b).value();
+    d_store->store_file({"/tmp/recursive_b.sv", "file_hash", res_b});
+
+    HDL_ast_builder_v2 strict_builder(s_store, d_store, Depfile(), 1);
+    auto strict_ast = strict_builder.build_ast(std::vector<std::string>({"recursive_a"}))[0];
+    EXPECT_EQ(strict_ast->dump_structure(), "TL:recursive_a\n    b_inst:recursive_b\n");
+
+    HDL_ast_builder_v2 relaxed_builder(s_store, d_store, Depfile(), 3);
+    auto relaxed_ast = relaxed_builder.build_ast(std::vector<std::string>({"recursive_a"}))[0];
+    EXPECT_EQ(relaxed_ast->dump_structure(), "TL:recursive_a\n"
+                                             "    b_inst:recursive_b\n"
+                                             "        a_inst:recursive_a\n"
+                                             "        b_inst:recursive_b\n"
+                                             "        a_inst:recursive_a\n"
+                                             "        b_inst:recursive_b\n");
+}
+
 

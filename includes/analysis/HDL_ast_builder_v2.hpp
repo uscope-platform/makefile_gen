@@ -34,7 +34,9 @@ class hdl_instance_statement;
 
 class HDL_ast_builder_v2 {
 public:
-    HDL_ast_builder_v2(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d, const Depfile& d_f);
+    HDL_ast_builder_v2(const std::shared_ptr<settings_store> &s, const std::shared_ptr<data_store> &d, const Depfile& d_f,
+                       int max_recursion_depth = 256);
+    void set_max_recursion_depth(int depth) { max_recursion_depth = depth; }
     std::vector<std::shared_ptr<hdl_ast_node>> build_ast(const std::vector<std::string>& modules);
 private:
     std::shared_ptr<hdl_ast_node> build_ast(const std::string& top_level_module);
@@ -47,7 +49,8 @@ private:
         const std::shared_ptr<hdl_ast_node> &parent,
         const std::map<qualified_identifier, resolved_parameter> &params,
         const std::string &path,
-        const std::unordered_map<std::string, std::string> &if_map
+        const std::unordered_map<std::string, std::string> &if_map,
+        const std::vector<std::string> &module_chain
     );
     std::expected<std::vector<work_order>, solver_errors> process_instance(
         const std::shared_ptr<hdl_instance_statement> &inst,
@@ -55,6 +58,7 @@ private:
         const std::map<qualified_identifier, resolved_parameter> &params,
         const std::string &path,
         const std::unordered_map<std::string, std::string> &if_map,
+        const std::vector<std::string> &module_chain,
         bool active = true
     );
     std::expected<std::vector<work_order>, solver_errors> process_loop(
@@ -62,14 +66,16 @@ private:
         const std::shared_ptr<hdl_ast_node> &parent,
         const std::map<qualified_identifier, resolved_parameter> &params,
         const std::string &path,
-        const std::unordered_map<std::string, std::string> &if_map
+        const std::unordered_map<std::string, std::string> &if_map,
+        const std::vector<std::string> &module_chain
     );
     std::expected<std::vector<work_order>, solver_errors> process_conditional(
         const hdl_conditional_statement &cond,
         const std::shared_ptr<hdl_ast_node> &parent,
         const std::map<qualified_identifier, resolved_parameter> &params,
         const std::string &path,
-        const std::unordered_map<std::string, std::string> &if_map
+        const std::unordered_map<std::string, std::string> &if_map,
+        const std::vector<std::string> &module_chain
     );
     void apply_parameter_overrides(
         const std::vector<std::shared_ptr<hdl_statement_base>> &statements,
@@ -80,6 +86,7 @@ private:
     std::shared_ptr<data_store> d_store;
     std::shared_ptr<settings_store> s_store;
     Depfile  dep_file;
+    int max_recursion_depth;
 };
 
 
