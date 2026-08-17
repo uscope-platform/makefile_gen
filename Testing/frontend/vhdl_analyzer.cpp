@@ -398,3 +398,11 @@ TEST(vhdl_analyzer, operator_rotate) {
     // 1 ror 31 = 2.
     EXPECT_EQ(eval_generic("R : integer := 1 ror 31", "r"), 2);
 }
+
+TEST(vhdl_analyzer, operator_condition_qq) {
+    // VHDL `??` condition operator normalizes a condition to 0/1.
+    // Note: `??` is a trigraph in C++, so the literal is split.
+    EXPECT_EQ(eval_generic("V : integer := ?" "?5", "v"), 1);
+    EXPECT_EQ(eval_generic("V : integer := ?" "?0", "v"), 0);
+    EXPECT_EQ(eval_generic("V : integer := ?" "?(1<2)", "v"), 1);
+}

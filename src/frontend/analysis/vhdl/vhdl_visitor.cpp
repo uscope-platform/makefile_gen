@@ -189,16 +189,19 @@ bool vhdl_visitor::simple_is_nonleaf(mgp_vh::vhdlParser::Simple_expressionContex
 }
 
 void vhdl_visitor::enterExpression(mgp_vh::vhdlParser::ExpressionContext *ctx) {
-    if (in_generic_clause && !in_subtype_indication && has_expr_operator(ctx))
+    if (in_generic_clause && !in_subtype_indication &&
+        (has_expr_operator(ctx) || ctx->COND_OP()))
         params_factory.start_expression_new(true);
 }
 
 void vhdl_visitor::exitExpression(mgp_vh::vhdlParser::ExpressionContext *ctx) {
     if (!in_generic_clause || in_subtype_indication) return;
-    if (!has_expr_operator(ctx)) return;
 
     auto op = Expression_v2::none;
-    if (ctx->shift_operator()) {
+    if (ctx->COND_OP()) {
+        // VHDL `??` condition operator: normalize a condition to 0/1.
+        op = Expression_v2::condition_op;
+    } else if (ctx->shift_operator()) {
         if (ctx->shift_operator()->KW_SLL()) op = Expression_v2::logic_shift_left;
         else if (ctx->shift_operator()->KW_SRL()) op = Expression_v2::logic_shift_right;
         else if (ctx->shift_operator()->KW_SLA()) op = Expression_v2::arithmetic_shift_left;
@@ -220,7 +223,8 @@ void vhdl_visitor::exitExpression(mgp_vh::vhdlParser::ExpressionContext *ctx) {
     }
     if (op != Expression_v2::none)
         params_factory.set_operation(op);
-    params_factory.stop_expression_new(true);
+    if (op != Expression_v2::none)
+        params_factory.stop_expression_new(true);
 }
 
 void vhdl_visitor::enterSimple_expression(mgp_vh::vhdlParser::Simple_expressionContext *ctx) {

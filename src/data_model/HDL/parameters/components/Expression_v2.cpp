@@ -238,7 +238,8 @@ std::expected<resolved_parameter, solver_errors> Expression_v2::evaluate(
     if (operation == logic_neg || operation == bitwise_neg ||
         operation == reduction_and || operation == reduction_nand ||
         operation == reduction_or || operation == reduction_nor ||
-        operation == reduction_xor || operation == reduction_xnor) {
+        operation == reduction_xor || operation == reduction_xnor ||
+        operation == abs_value || operation == condition_op) {
         resolved_parameter operand = 0;
         if (l_val.has_value()) operand = l_val.value();
         auto res = evaluate_unary_expression(operand);
@@ -291,6 +292,7 @@ std::expected<resolved_parameter, solver_errors> Expression_v2::evaluate(
             case reduction_and: case reduction_nand:
             case reduction_or: case reduction_nor:
             case reduction_xor: case reduction_xnor:
+            case condition_op:
             case greater: case greater_equal: case less: case less_equal:
             case equal: case not_equal: case case_equal: case case_not_equal:
             case wildcard_equal: case wildcard_not_equal:
@@ -531,6 +533,14 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_unary_expression(resol
             res.set_signed(operand.get_integer().get_signed());
             return res;
         }
+        spdlog::warn("Attempted evaluation of operand of unsupported type");
+        return 0;
+    }
+
+    if (operation == condition_op) {
+        // VHDL `??` condition operator: normalize a condition to 0/1.
+        if (operand.is_real()) return operand.get_real() != 0.0 ? hdl_integer(1) : hdl_integer(0);
+        if (operand.is_integer()) return operand.get_integer() != 0 ? hdl_integer(1) : hdl_integer(0);
         spdlog::warn("Attempted evaluation of operand of unsupported type");
         return 0;
     }

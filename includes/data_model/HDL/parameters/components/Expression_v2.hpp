@@ -65,7 +65,8 @@ public:
         bitwise_or,
         logical_and,
         logical_or,
-        abs_value
+        abs_value,
+        condition_op
     };
 
     inline static const std::map<expression_operator, std::string> op_to_str = {
@@ -106,7 +107,8 @@ public:
         {bitwise_or, "|"},
         {logical_and, "&&"},
         {logical_or, "||"},
-        {abs_value, "abs"}
+        {abs_value, "abs"},
+        {condition_op, "??"}
     };
 
     inline static const std::map<expression_operator, int> op_precedence = {
