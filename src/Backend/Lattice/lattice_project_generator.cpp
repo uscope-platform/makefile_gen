@@ -83,6 +83,16 @@ void lattice_project_generator::generate_project(std::ostream &output) {
     } else if(language == "sv"){
         output << R"(prj_set_impl_opt -impl "impl1" {VerilogStandard} {System Verilog})" <<std::endl;
     }
+
+    if (!data.commons_dir.empty()){
+        output << R"(prj_set_impl_opt -impl "impl1" {include path} {)";
+        for (int i = 0; i < data.commons_dir.size(); i++) {
+            output << base_dir + data.commons_dir[i];
+            if (i != data.commons_dir.size() - 1) output << ";";
+        }
+        output << R"(})" <<std::endl;
+    }
+
     output << R"(prj_save)" <<std::endl;
 
 }
