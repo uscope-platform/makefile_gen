@@ -32,6 +32,9 @@ public:
     explicit vhdl_analyzer(const std::string& file_path);
     void cleanup_content(const std::string& regex);
     hdl_file analyze();
+    // Analyze in-memory VHDL content. \p src_path is used for error
+    // reporting and mirrors the sv_analyzer string-based entry point.
+    hdl_file analyze_content(const std::string &content, const std::string &src_path);
 
 private:
     std::string path;

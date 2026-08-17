@@ -237,7 +237,7 @@ TEST( analysis_test , vhdl_module) {
     check_res.set_line_n(4);
     auto stmt = std::make_shared<hdl_instance_statement>();
     stmt->set_name("and_component");
-    stmt->set_type("ANDGATE");
+    stmt->set_type("andgate");
     stmt->set_dependency_class(module);
     check_res.add_statement(stmt);
     ASSERT_EQ(resource, check_res);
