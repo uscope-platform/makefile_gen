@@ -201,7 +201,7 @@ bool Repository_walker::file_is_verilog(const std::filesystem::path &file) {
 /// \return
 bool Repository_walker::file_is_vhdl(const std::filesystem::path &file) {
     std::string extension = file.extension();
-    return extension == ".vhd";
+    return extension == ".vhd" || extension == ".vhdl";
 }
 
 /// Check if the target file is a recognized script (TCL and python)

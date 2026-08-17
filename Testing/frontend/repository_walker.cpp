@@ -142,6 +142,7 @@ TEST_F(repository_walker , file_type_handling) {
     ASSERT_FALSE(Repository_walker::file_is_verilog("test.xx"));
     //VHDL
     ASSERT_TRUE(Repository_walker::file_is_vhdl("test.vhd"));
+    ASSERT_TRUE(Repository_walker::file_is_vhdl("test.vhdl"));
     ASSERT_FALSE(Repository_walker::file_is_vhdl("test.xx"));
     //SCRIPT
     ASSERT_TRUE(Repository_walker::file_is_script("test.tcl"));
