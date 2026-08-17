@@ -59,16 +59,28 @@ void new_app_generator::write_depfile() {
 }
 
 void new_app_generator::write_synth_hdl() {
-    std::string file_content = "`timescale 10ns / 1ns\n\nmodule " + name + " (\n);\n\nendmodule";
+    std::string ext = lang == "vhdl" ? "vhd" : "sv";
+    std::string file_content;
+    if (lang == "vhdl") {
+        file_content = "entity " + name + " is\nend " + name + ";\n\narchitecture rtl of " + name + " is\nbegin\nend rtl;";
+    } else {
+        file_content = "`timescale 10ns / 1ns\n\nmodule " + name + " (\n);\n\nendmodule";
+    }
 
-    std::ofstream stream(name+"/rtl/"+name+"."+lang);
+    std::ofstream stream(name+"/rtl/"+name+"."+ext);
     stream<<file_content;
 }
 
 void new_app_generator::write_sim_hdl() {
-    std::string file_content = "`timescale 10ns / 1ns\n\nmodule " + name + "_tb ();\n\n\nendmodule";
+    std::string ext = lang == "vhdl" ? "vhd" : "sv";
+    std::string file_content;
+    if (lang == "vhdl") {
+        file_content = "entity " + name + "_tb is\nend " + name + "_tb;\n\narchitecture rtl of " + name + "_tb is\nbegin\nend rtl;";
+    } else {
+        file_content = "`timescale 10ns / 1ns\n\nmodule " + name + "_tb ();\n\n\nendmodule";
+    }
 
-    std::ofstream stream(name+"/tb/"+name+"_tb."+lang);
+    std::ofstream stream(name+"/tb/"+name+"_tb."+ext);
     stream<<file_content;
 }
 
