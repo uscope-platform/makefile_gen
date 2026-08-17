@@ -615,8 +615,8 @@ void sv_visitor::exitPrimaryTfCall(sv2017::PrimaryTfCallContext *ctx) {
             modules_factory.add_statement(stmt);
         }
     }
+    in_type_argument = false;
     if(params_factory.is_component_relevant()) {
-        in_type_argument = false;
         params_factory.stop_function_call();
     }
 }
@@ -1683,6 +1683,9 @@ void sv_visitor::enterVariable_lvalue(sv2017::Variable_lvalueContext *ctx) {
         if(loops_factory.in_loop()) {
             loops_factory.start_assignment(var_name);
             if (loops_factory.in_body()) {
+                auto var_token = sv_parsing_helpers::make_value(var_name);
+                loops_factory.add_component(var_token);
+            } else if (loops_factory.in_initialization()) {
                 auto var_token = sv_parsing_helpers::make_value(var_name);
                 loops_factory.add_component(var_token);
             }

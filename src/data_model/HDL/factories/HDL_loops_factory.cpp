@@ -87,7 +87,17 @@ void HDL_loops_factory::set_phase(loop_phase_t p) {
         auto init = _statement.get_init();
         if (init) {
             auto copy = std::make_shared<HDL_parameter>(*init);
-            copy->set_raw_value(Expression_v2::unwrap(current_expression));
+            auto lhs = current_expression.get_lhs();
+            auto rhs = current_expression.get_rhs();
+            if (auto id = std::dynamic_pointer_cast<Identifier_token>(lhs)) {
+                if (rhs && id->get_value().get_name() == init->get_name()) {
+                    copy->set_raw_value(rhs);
+                } else {
+                    copy->set_raw_value(Expression_v2::unwrap(current_expression));
+                }
+            } else {
+                copy->set_raw_value(Expression_v2::unwrap(current_expression));
+            }
             _statement.set_init(copy);
         }
         current_expression = Expression_v2();
@@ -120,8 +130,9 @@ void HDL_loops_factory::advance_expression() {
                 if (tok.is_subscripted()) {
                     auto indices = tok.get_array_index();
                     if (indices.size() == 1) body_index = indices[0];
+                    else body_index = nullptr;
                 } else {
-                    body_index = raw;
+                    body_index = nullptr;
                 }
             } else if (raw && raw->is<Expression_v2>()) {
                 body_index = raw;

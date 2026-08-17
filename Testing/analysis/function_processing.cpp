@@ -21,6 +21,8 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/parameters/components/HDL_function_call.hpp"
 #include "data_model/HDL/statement/hdl_assignment_statement.hpp"
+#include "data_model/HDL/statement/hdl_loop_statement.hpp"
+#include "data_model/HDL/types/HDL_simple_type.hpp"
 #include "frontend/analysis/system_verilog/type_engine.hpp"
 
 
@@ -212,6 +214,83 @@ TEST(function_processing, parametric_loop_function) {
 
     EXPECT_EQ(check_f,result);
 }
+
+TEST(function_processing, loop_function_with_clog2_local) {
+    auto test_pattern = R"(
+        module test_mod #(
+            INPUT_WIDTH = 16
+        )();
+
+            function logic [$clog2(INPUT_WIDTH)-1:0] get_msb_index (input logic [31:0] value);
+                integer i;
+                logic [$clog2(INPUT_WIDTH)-1:0] msb = 0;
+                for (i = 0; i < INPUT_WIDTH; i++)
+                    msb = i;
+                get_msb_index = msb;
+            endfunction
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+
+    auto resource = analyzer.analyze("",test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
+
+    auto functions = resource.get_functions();
+
+    EXPECT_EQ(functions.size(), 1);
+    EXPECT_TRUE(functions.contains("get_msb_index"));
+    auto result = functions["get_msb_index"];
+
+    hdl_function_statement check_f;
+    check_f.set_name("get_msb_index");
+    check_f.add_argument("value");
+
+    auto var_i = std::make_shared<HDL_parameter>("i");
+    var_i->set_type(Type_engine::create_primitive_type("integer"));
+    check_f.add_local_variable(var_i);
+
+    auto var_msb = std::make_shared<HDL_parameter>("msb");
+    auto msb_type = std::make_shared<HDL_simple_type>();
+    msb_type->set_signed(false);
+    msb_type->set_type_name("logic");
+    dimension_t dim;
+    auto minus_one = std::make_shared<Expression_v2>();
+    minus_one->set_lhs(std::make_shared<Numeric_token>("1"));
+    minus_one->set_operation(Expression_v2::subtract);
+    dim.first_bound = minus_one;
+    dim.second_bound = std::make_shared<Numeric_token>("0");
+    dim.packed = false;
+    msb_type->set_unpacked_dimensions({dim});
+    var_msb->set_type(msb_type);
+    check_f.add_local_variable(var_msb);
+
+    auto loop_stmt = std::make_shared<hdl_loop_statement>();
+    auto lp = std::make_shared<HDL_parameter>();
+    lp->set_name("i"); lp->set_raw_value(std::make_shared<Numeric_token>("0"));
+    loop_stmt->set_init(lp);
+    Expression_v2 le;
+    le.set_lhs(std::make_shared<Identifier_token>(qualified_identifier("i")));
+    le.set_rhs(std::make_shared<Identifier_token>(qualified_identifier("INPUT_WIDTH")));
+    le.set_operation(Expression_v2::less);
+    loop_stmt->set_end_condition(std::make_shared<Expression_v2>(le));
+    le.set_lhs(std::make_shared<Identifier_token>(qualified_identifier("i")));
+    le.set_rhs(std::make_shared<Numeric_token>("1"));
+    le.set_operation(Expression_v2::add);
+    loop_stmt->set_iteration(std::make_shared<Expression_v2>(le));
+    auto body_stmt = std::make_shared<hdl_assignment_statement>();
+    body_stmt->set_target("msb");
+    body_stmt->set_value(std::make_shared<Identifier_token>(qualified_identifier("i")));
+    loop_stmt->add_body_stmt(body_stmt);
+    check_f.add_statement(loop_stmt);
+
+    auto ret_stmt = std::make_shared<hdl_assignment_statement>();
+    ret_stmt->set_target("get_msb_index");
+    ret_stmt->set_value(std::make_shared<Identifier_token>(qualified_identifier("msb")));
+    check_f.add_statement(ret_stmt);
+
+    EXPECT_EQ(check_f, result);
+}
+
 
 TEST(function_processing, complex_loop_function) {
     auto test_pattern = R"(

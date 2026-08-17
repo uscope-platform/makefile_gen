@@ -51,8 +51,6 @@ Immature areas
 ~~~~~~~~~~~~~~
 
 * **VHDL frontend** -- barely extracts anything (see :ref:`vhdl-frontend`).
-* **Lattice Radiant backend** -- broken in several concrete ways (see
-  :ref:`lattice-backend`).
 * **Procedural and net-level SystemVerilog** -- ``always``/``assign``/
   ``initial``/``case`` and module-level signal declarations are parsed by the
   grammar but silently discarded by the walker.
@@ -66,37 +64,6 @@ Cheap Wins
 Small, well-bounded fixes. Each item is hours to a few days of work and most
 are latent bugs or dead code.
 
-.. _lattice-backend:
-
-Lattice backend
-~~~~~~~~~~~~~~~
-
-The Lattice backend previously emitted an empty device (``-dev ""``) because
-:file:`src/ananke.cpp` never propagated ``target_part``/``board_part``, plus a
-stray dangling-quote line, a hardcoded ``-dir "./build_dir"``, an always-forced
-SystemVerilog language standard, and no toolchain-path verification. These are
-fixed:
-
-* :file:`src/ananke.cpp` now populates ``target_part`` (preferred) or
-  ``board_part`` as the device, along with ``commons_dir`` and ``repo_dir``,
-  and routes ``--synth_script`` and the default makefile flow.
-* The generator emits ``prj_create ... -dev "<device>" -dir "$build_dir"``,
-  and sets ``{VerilogStandard} {System Verilog}`` only for SystemVerilog
-  designs, a ``{VhdlStandard}`` option for VHDL designs, and nothing otherwise
-  (:file:`src/Backend/Lattice/lattice_project_generator.cpp`).
-* ``Radiant_manager`` warns and clears the tool path when the Radiant
-  installation is missing, and refuses to spawn on an empty path
-  (:file:`src/Backend/Lattice/Radiant_manager.cpp`).
-
-Remaining:
-
-* ``--sim_script`` is deliberately deferred for Lattice: the current
-  ``generate_sim_script`` emits raw ModelSim commands (``vlib``/``vlog``/
-  ``vsim``) that do not run under ``radiantc`` batch; a proper Radiant
-  simulation flow is needed.
-* Include directories still need to be set up manually in Radiant, as the
-  feature is not exposed through tcl scripting (documented in the README).
-
 Unimplemented design-synthesis flow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -107,19 +74,10 @@ flag is never referenced in :file:`src/ananke.cpp`. Most of the building blocks
 already exist: the Xilinx backend can emit a standalone synthesis script
 (:file:`src/Backend/Xilinx/xilinx_project_generator.cpp:208-295`), and the
 Lattice backend has ``generate_synth_script`` as well
-(:file:`src/Backend/Lattice/lattice_project_generator.cpp:50-58`), but neither
+(:file:`src/Backend/Lattice/lattice_project_generator.cpp:52-60`), but neither
 is reachable through the main flow. Implementing ``--S`` is wiring the flag to
 the existing synth-script generators and driving the corresponding
-``Toolchain_manager`` (see also :ref:`lattice-backend`).
-
-VHDL file-extension mismatch
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-``new_app_generator`` writes VHDL applications with a ``.vhdl`` extension
-(:file:`src/Backend/new_app_generator.cpp:58,66`) but the repository walker
-only recognizes ``.vhd`` (:file:`src/frontend/Repository_walker.cpp:188-191`),
-so generated VHDL apps are silently ignored. Moreover, ``--lang vhdl``
-currently emits SystemVerilog content anyway.
+``Toolchain_manager``.
 
 Unary and reduction operators are dropped
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -155,8 +113,6 @@ Documentation drift
   ``sym_modules`` typo, predates the ``board`` and ``bus`` sections, and still
   marks ``target_part`` as "reserved for future development" although the code
   consumes it.
-* The Lattice include-path limitation is documented in the README, but the
-  Lattice backend fixes above are not.
 
 Preprocessor hygiene
 ~~~~~~~~~~~~~~~~~~~~
@@ -311,9 +267,8 @@ Additional toolchain backends
 The ``project_generator_base`` / ``Toolchain_manager`` abstraction
 (:file:`includes/Backend/project_generator_base.hpp`,
 :file:`src/Backend/Toolchain_manager.cpp`) makes a Quartus or open
-Yosys/nextpnr backend tractable. The Lattice backend's project generation is
-now functional; the remaining gap is its deferred simulation flow (see
-:ref:`lattice-backend`).
+Yosys/nextpnr backend tractable. The Xilinx and Lattice backends both cover
+project generation; a new backend would follow the same abstraction.
 
 Generate-statement gaps
 ~~~~~~~~~~~~~~~~~~~~~~~
