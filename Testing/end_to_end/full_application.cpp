@@ -56,7 +56,7 @@ void e2e_setup_settings() {
     std::ofstream ofs(e2e_settings_file);
     ofs << "{\"profiles\":{\"test_profile\":{\"hdl_store\":\""
         << e2e_settings_path
-        << "\"}},\"amd_vivado_path\":\"/tmp/vivado\", \"default_profile\":\"test_profile\"}";
+        << "\"}},\"amd_vivado_path\":\"/tmp/vivado\",\"lattice_radiant_path\":\"/tmp/lscc\", \"default_profile\":\"test_profile\"}";
     ofs.flush();
     ofs.close();
     std::error_code ec;
@@ -370,7 +370,12 @@ TEST( end_to_end , vivado_project_generation) {
     std::stringstream ss;
     ss << ifs.rdbuf();
     std::string result = ss.str();
-    EXPECT_EQ(result, replace_base("set project_name PID\nset origin_dir \".\"\nset base_dir /tmp/ananke_test_cache\nset commons_dir [list \"/tmp/ananke_test_cache/public/Components/Common\" ]\nset synth_sources [list \"${base_dir}/PID/rtl/PID.sv\" \"${base_dir}/integrator/rtl/Integrator.v\" \"${base_dir}/simple_register_cu/rtl/axil_simple_register_cu.sv\" \"${base_dir}/skid_buffer/rtl/axil_skid_buffer.sv\" ]\nset sim_sources [list \"${base_dir}/Common/interfaces.sv\" \"${base_dir}/PID/tb/PID_tb.sv\" ]\nset constraints_sources [list ]\n# Create project\ncreate_project ${project_name} ./${project_name}\nset_property part xc7z020clg400-1 [current_project]\n# Set the directory path for the new project\nset proj_dir [get_property directory [current_project]]\nset obj [current_project]\nadd_files -norecurse $synth_sources\nset_property top PID [get_filesets sources_1]\nset_property include_dirs $commons_dir [get_filesets sources_1]\nset_property SOURCE_SET sources_1 [get_filesets sim_1]\nadd_files -fileset sim_1 -norecurse $sim_sources\nset_property top PID_tb [get_filesets sim_1]\nupdate_compile_order\n", "/tmp/ananke_test_cache", opts.cache_dir));
+    EXPECT_EQ(result, replace_base(
+        "set project_name PID\nset origin_dir \".\"\nset base_dir /tmp/ananke_test_cache\nset commons_dir [list \"/tmp/ananke_test_cache/public/Components/Common\" ]\nset synth_sources [list \"${base_dir}/PID/rtl/PID.sv\" \"${base_dir}/integrator/rtl/Integrator.v\" \"${base_dir}/simple_register_cu/rtl/axil_simple_register_cu.sv\" \"${base_dir}/skid_buffer/rtl/axil_skid_buffer.sv\" ]\nset sim_sources [list \"${base_dir}/Common/interfaces.sv\" \"${base_dir}/PID/tb/PID_tb.sv\" ]\nset constraints_sources [list ]\n# Create project\ncreate_project ${project_name} ./${project_name}\nset_property part xc7z020clg400-1 [current_project]\n# Set the directory path for the new project\nset proj_dir [get_property directory [current_project]]\nset obj [current_project]\nadd_files -norecurse $synth_sources\nset_property top PID [get_filesets sources_1]\nset_property include_dirs $commons_dir [get_filesets sources_1]\nset_property SOURCE_SET sources_1 [get_filesets sim_1]\nadd_files -fileset sim_1 -norecurse $sim_sources\nset_property top PID_tb [get_filesets sim_1]\nupdate_compile_order\n",
+        "/tmp/ananke_test_cache",
+        opts.cache_dir
+        )
+    );
 
     std::filesystem::current_path(wd);
     std::filesystem::remove_all("/tmp/vivado");
@@ -386,7 +391,7 @@ TEST( end_to_end , lattice_project_generation) {
     opts.makefile_only = true;
     opts.no_open = true;
 
-    opts.cache_dir = "/tmp/ananke_test_cache";
+    opts.cache_dir = e2e_settings_path;
     auto test_dir = opts.cache_dir + "/PID";
 
 
@@ -411,8 +416,11 @@ TEST( end_to_end , lattice_project_generation) {
     std::filesystem::current_path(test_dir);
 
     ananke uut(opts);
-    uut.load_data_cache();
-    uut.build_flow();
+    auto cache_rc = uut.load_data_cache();
+    ASSERT_FALSE(cache_rc.has_value());
+    auto build_rc = uut.build_flow();
+    ASSERT_FALSE(build_rc.has_value());
+
 
     EXPECT_TRUE(std::filesystem::exists(opts.cache_dir +"/PID/makefile.tcl"));
 
@@ -422,69 +430,10 @@ TEST( end_to_end , lattice_project_generation) {
     ss << ifs.rdbuf();
     std::string result = ss.str();
 
-    EXPECT_NE(result.find(R"(prj_create -name "PID" -impl "impl1" -dev "xc7z020clg400" -dir "$build_dir")"), std::string::npos);
-    EXPECT_NE(result.find(R"(prj_set_impl_opt -impl "impl1" {top} {PID})"), std::string::npos);
-    EXPECT_NE(result.find(R"(prj_set_impl_opt -impl "impl1" {VerilogStandard} {System Verilog})"), std::string::npos);
-    EXPECT_NE(result.find(R"(prj_add_source /tmp/ananke_test_cache/PID/rtl/PID.sv)"), std::string::npos);
-    EXPECT_EQ(result.find("-dir \"./build_dir\""), std::string::npos);
-    EXPECT_EQ(result.find("\nPID\""), std::string::npos);
+    std::string expected_res  = replace_base("set build_dir \"build\"\nif {![file exists $build_dir]} {\n    file mkdir $build_dir\n}\nprj_create -name \"PID\" -impl \"impl1\" -dev \"xc7z020clg400\" -dir \"$build_dir\"\nprj_add_source /tmp/ananke_test_cache/PID/rtl/PID.sv\nprj_add_source /tmp/ananke_test_cache/integrator/rtl/Integrator.v\nprj_add_source /tmp/ananke_test_cache/simple_register_cu/rtl/axil_simple_register_cu.sv\nprj_add_source /tmp/ananke_test_cache/skid_buffer/rtl/axil_skid_buffer.sv\nprj_set_impl_opt -impl \"impl1\" {top} {PID}\nprj_set_impl_opt -impl \"impl1\" {VerilogStandard} {System Verilog}\nprj_save\nprj_close\n",
+        "/tmp/ananke_test_cache", opts.cache_dir);
 
-    std::filesystem::current_path(wd);
-    std::filesystem::remove_all("/tmp/radiant");
-    e2e_clean_settings();
-}
-
-TEST( end_to_end , lattice_project_generation) {
-    e2e_setup_settings();
-    ananke::CLI_opt opts;
-    opts.no_cache = true;
-    opts.generate_lattice = true;
-    opts.keep_makefile = true;
-    opts.makefile_only = true;
-    opts.no_open = true;
-
-    opts.cache_dir = "/tmp/ananke_test_cache";
-    auto test_dir = opts.cache_dir + "/PID";
-
-
-    auto wd = std::filesystem::current_path();
-    const auto copyOptions = std::filesystem::copy_options::recursive |
-                             std::filesystem::copy_options::overwrite_existing;
-
-
-    std::filesystem::create_directory("/tmp/radiant");
-
-    auto components = wd / "check_files/test_data/Components";
-    std::filesystem::copy(components/"controls/PID", opts.cache_dir +"/PID", copyOptions);
-    std::filesystem::remove_all(opts.cache_dir +"/PID/makefile.tcl");
-    EXPECT_FALSE(std::filesystem::exists(opts.cache_dir +"/PID/makefile.tcl"));
-    std::filesystem::copy(components/"Common", opts.cache_dir +"/Common", copyOptions);
-    std::filesystem::copy(components/"system/axi_lite/simple_register_cu",  opts.cache_dir +"/simple_register_cu", copyOptions);
-    std::filesystem::copy(components/"system/axi_lite/skid_buffer", opts.cache_dir +"/skid_buffer", copyOptions);
-    std::filesystem::copy(components/"controls/integrator", opts.cache_dir +"/integrator", copyOptions);
-
-
-
-    std::filesystem::current_path(test_dir);
-
-    ananke uut(opts);
-    uut.load_data_cache();
-    uut.build_flow();
-
-    EXPECT_TRUE(std::filesystem::exists(opts.cache_dir +"/PID/makefile.tcl"));
-
-
-    auto ifs = std::ifstream(opts.cache_dir +"/PID/makefile.tcl");
-    std::stringstream ss;
-    ss << ifs.rdbuf();
-    std::string result = ss.str();
-
-    EXPECT_NE(result.find(R"(prj_create -name "PID" -impl "impl1" -dev "xc7z020clg400" -dir "$build_dir")"), std::string::npos);
-    EXPECT_NE(result.find(R"(prj_set_impl_opt -impl "impl1" {top} {PID})"), std::string::npos);
-    EXPECT_NE(result.find(R"(prj_set_impl_opt -impl "impl1" {VerilogStandard} {System Verilog})"), std::string::npos);
-    EXPECT_NE(result.find(R"(prj_add_source /tmp/ananke_test_cache/PID/rtl/PID.sv)"), std::string::npos);
-    EXPECT_EQ(result.find("-dir \"./build_dir\""), std::string::npos);
-    EXPECT_EQ(result.find("\nPID\""), std::string::npos);
+    EXPECT_EQ(result, expected_res);
 
     std::filesystem::current_path(wd);
     std::filesystem::remove_all("/tmp/radiant");
