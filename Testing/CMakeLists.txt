@@ -24,6 +24,7 @@ set(ANANKE_TESTS
         frontend/typedef_parsing.cpp
         frontend/source_mapping.cpp
         frontend/repository_walker.cpp
+        frontend/vhdl_analyzer.cpp
         data_model/Depfile_test.cpp
         data_model/Script_test.cpp
         data_model/Constraints_test.cpp
