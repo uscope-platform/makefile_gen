@@ -18,6 +18,15 @@
 
 #include <algorithm>
 #include <cctype>
+#include <charconv>
+#include <string>
+
+#include <spdlog/spdlog.h>
+
+#include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
+#include "data_model/HDL/parameters/components/token/Real_token.hpp"
+#include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
+#include "data_model/HDL/types/HDL_simple_type.hpp"
 
 namespace {
 
@@ -83,4 +92,235 @@ void vhdl_visitor::exitConcurrent_statement(mgp_vh::vhdlParser::Concurrent_state
 
 void vhdl_visitor::enterArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) {
     current_architecture = canon(ctx->name()->getText());
+}
+
+void vhdl_visitor::enterGeneric_clause(mgp_vh::vhdlParser::Generic_clauseContext *ctx) {
+    in_generic_clause = true;
+}
+
+void vhdl_visitor::exitGeneric_clause(mgp_vh::vhdlParser::Generic_clauseContext *ctx) {
+    in_generic_clause = false;
+}
+
+void vhdl_visitor::enterInterface_constant_declaration(
+        mgp_vh::vhdlParser::Interface_constant_declarationContext *ctx) {
+    if (in_generic_clause)
+        start_generic(ctx->identifier_list(), ctx->subtype_indication());
+}
+
+void vhdl_visitor::exitInterface_constant_declaration(
+        mgp_vh::vhdlParser::Interface_constant_declarationContext *ctx) {
+    if (in_generic_clause)
+        finalize_generic(ctx->identifier_list());
+}
+
+void vhdl_visitor::enterInterface_signal_declaration(
+        mgp_vh::vhdlParser::Interface_signal_declarationContext *ctx) {
+    // A generic declared without the `constant` keyword (the common form,
+    // e.g. `N : integer := 8`) is parsed as an interface signal declaration.
+    // Only treat it as a generic when inside a generic clause.
+    if (in_generic_clause)
+        start_generic(ctx->identifier_list(), ctx->subtype_indication());
+}
+
+void vhdl_visitor::exitInterface_signal_declaration(
+        mgp_vh::vhdlParser::Interface_signal_declarationContext *ctx) {
+    if (in_generic_clause)
+        finalize_generic(ctx->identifier_list());
+}
+
+void vhdl_visitor::enterSubtype_indication(mgp_vh::vhdlParser::Subtype_indicationContext *ctx) {
+    if (in_generic_clause) in_subtype_indication = true;
+}
+
+void vhdl_visitor::exitSubtype_indication(mgp_vh::vhdlParser::Subtype_indicationContext *ctx) {
+    if (in_generic_clause) in_subtype_indication = false;
+}
+
+void vhdl_visitor::start_generic(mgp_vh::vhdlParser::Identifier_listContext *ids,
+                                 mgp_vh::vhdlParser::Subtype_indicationContext *type) {
+    if (!ids || ids->identifier().empty()) return;
+    params_factory.set_type(make_generic_type(type));
+    params_factory.start_param_assignment();
+    params_factory.new_parameter(canon(ids->identifier(0)->getText()));
+}
+
+void vhdl_visitor::finalize_generic(mgp_vh::vhdlParser::Identifier_listContext *ids) {
+    if (!ids || ids->identifier().empty()) return;
+    params_factory.stop_param_assignment();
+
+    // The default expression (built by the listener callbacks) belongs to the
+    // first name; the remaining names in the list share the same type/default,
+    // so clone it.
+    auto base = params_factory.get_parameter();
+    modules_factory.add_parameter(base);
+    for (size_t i = 1; i < ids->identifier().size(); i++) {
+        auto clone = std::make_shared<HDL_parameter>(*base);
+        clone->set_name(canon(ids->identifier(i)->getText()));
+        modules_factory.add_parameter(clone);
+    }
+}
+
+std::shared_ptr<hdl_type> vhdl_visitor::make_generic_type(
+        mgp_vh::vhdlParser::Subtype_indicationContext *type) {
+    auto t = std::make_shared<HDL_simple_type>();
+    if (type && type->type_mark() && type->type_mark()->name() &&
+        type->type_mark()->name()->name_literal() &&
+        type->type_mark()->name()->name_literal()->identifier()) {
+        std::string type_name = canon(type->type_mark()->name()->name_literal()->identifier()->getText());
+        t->set_type_name(type_name);
+        // integer/natural/positive are signed integer-like scalars.
+        if (type_name == "integer" || type_name == "natural" || type_name == "positive")
+            t->set_signed(true);
+        if (type_name == "real")
+            t->set_real(true);
+    }
+    return t;
+}
+
+bool vhdl_visitor::has_expr_operator(mgp_vh::vhdlParser::ExpressionContext *ctx) {
+    return ctx && (ctx->shift_operator() || ctx->relational_operator() || ctx->logical_operator());
+}
+
+bool vhdl_visitor::simple_is_nonleaf(mgp_vh::vhdlParser::Simple_expressionContext *ctx) {
+    return ctx && (ctx->DOUBLESTAR() || ctx->KW_ABS() || ctx->KW_NOT() || ctx->logical_operator()
+        || ctx->sign() || ctx->multiplying_operator() || ctx->adding_operator());
+}
+
+void vhdl_visitor::enterExpression(mgp_vh::vhdlParser::ExpressionContext *ctx) {
+    if (in_generic_clause && !in_subtype_indication && has_expr_operator(ctx))
+        params_factory.start_expression_new(true);
+}
+
+void vhdl_visitor::exitExpression(mgp_vh::vhdlParser::ExpressionContext *ctx) {
+    if (!in_generic_clause || in_subtype_indication) return;
+    if (!has_expr_operator(ctx)) return;
+
+    auto op = Expression_v2::none;
+    if (ctx->shift_operator()) {
+        if (ctx->shift_operator()->KW_SLL()) op = Expression_v2::logic_shift_left;
+        else if (ctx->shift_operator()->KW_SRL()) op = Expression_v2::logic_shift_right;
+        else if (ctx->shift_operator()->KW_SLA()) op = Expression_v2::arithmetic_shift_left;
+        else if (ctx->shift_operator()->KW_SRA()) op = Expression_v2::arithmetic_shift_right;
+    } else if (ctx->relational_operator()) {
+        if (ctx->relational_operator()->EQ()) op = Expression_v2::equal;
+        else if (ctx->relational_operator()->NE()) op = Expression_v2::not_equal;
+        else if (ctx->relational_operator()->LT()) op = Expression_v2::less;
+        else if (ctx->relational_operator()->CONASGN()) op = Expression_v2::less_equal; // VHDL <=
+        else if (ctx->relational_operator()->GT()) op = Expression_v2::greater;
+        else if (ctx->relational_operator()->GE()) op = Expression_v2::greater_equal;
+    } else if (ctx->logical_operator()) {
+        if (ctx->logical_operator()->KW_AND()) op = Expression_v2::bitwise_and;
+        else if (ctx->logical_operator()->KW_OR()) op = Expression_v2::bitwise_or;
+        else if (ctx->logical_operator()->KW_XOR()) op = Expression_v2::bitwise_xor;
+        else if (ctx->logical_operator()->KW_XNOR()) op = Expression_v2::bitwise_xnor;
+    }
+    if (op != Expression_v2::none)
+        params_factory.set_operation(op);
+    params_factory.stop_expression_new(true);
+}
+
+void vhdl_visitor::enterSimple_expression(mgp_vh::vhdlParser::Simple_expressionContext *ctx) {
+    if (in_generic_clause && !in_subtype_indication)
+        params_factory.start_expression_new(simple_is_nonleaf(ctx));
+}
+
+void vhdl_visitor::exitSimple_expression(mgp_vh::vhdlParser::Simple_expressionContext *ctx) {
+    if (!in_generic_clause || in_subtype_indication) return;
+
+    if (simple_is_nonleaf(ctx)) {
+        if (ctx->DOUBLESTAR()) {
+            params_factory.set_operation(Expression_v2::power);
+        } else if (ctx->KW_ABS()) {
+            params_factory.set_operation(Expression_v2::abs_value);
+        } else if (ctx->KW_NOT()) {
+            params_factory.set_operation(Expression_v2::bitwise_neg);
+        } else if (ctx->logical_operator()) {
+            // VHDL allows a logical operator as a unary reduction over a vector.
+            if (ctx->logical_operator()->KW_AND() || ctx->logical_operator()->KW_NAND())
+                params_factory.set_operation(Expression_v2::reduction_and);
+            else if (ctx->logical_operator()->KW_OR() || ctx->logical_operator()->KW_NOR())
+                params_factory.set_operation(Expression_v2::reduction_or);
+            else
+                params_factory.set_operation(Expression_v2::reduction_xor);
+        } else if (ctx->multiplying_operator()) {
+            auto op = Expression_v2::multiply;
+            if (ctx->multiplying_operator()->DIV()) op = Expression_v2::divide;
+            else if (ctx->multiplying_operator()->KW_MOD()) op = Expression_v2::modulo;
+            else if (ctx->multiplying_operator()->KW_REM()) op = Expression_v2::modulo; // rem ~ mod
+            params_factory.set_operation(op);
+        } else if (ctx->adding_operator()) {
+            if (ctx->adding_operator()->PLUS()) params_factory.set_operation(Expression_v2::add);
+            else if (ctx->adding_operator()->MINUS()) params_factory.set_operation(Expression_v2::subtract);
+            else spdlog::warn("VHDL concatenation (&) in generic default not supported, ignored");
+        } else if (ctx->sign() && ctx->sign()->MINUS()) {
+            params_factory.set_operation(Expression_v2::subtract);
+        }
+    }
+    params_factory.stop_expression_new(simple_is_nonleaf(ctx));
+}
+
+void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContext *ctx) {
+    if (!in_generic_clause || in_subtype_indication || !params_factory.is_component_relevant()) return;
+
+    if (ctx->name() && ctx->name()->name_literal() && ctx->name()->name_literal()->identifier()) {
+        // A bare name: a reference to another generic/constant.
+        params_factory.add_component(std::make_shared<Identifier_token>(
+            qualified_identifier(canon(ctx->name()->name_literal()->identifier()->getText()))));
+        return;
+    }
+    params_factory.add_component(make_vhdl_value(ctx->getText()));
+}
+
+void vhdl_visitor::exitPrimary(mgp_vh::vhdlParser::PrimaryContext *ctx) {
+    if (!in_generic_clause || in_subtype_indication || !params_factory.is_component_relevant()) return;
+    if (ctx->BIT_STRING_LITERAL()) {
+        // Treat a bit string literal as a sized numeric value (e.g. x"FF").
+        params_factory.add_component(make_vhdl_value(ctx->BIT_STRING_LITERAL()->getText()));
+    }
+}
+
+std::shared_ptr<Expression_base> vhdl_visitor::make_vhdl_value(const std::string &text) {
+    if (text.empty()) return nullptr;
+
+    // VHDL based literal, e.g. 16#FF# or 2#1010#.
+    size_t hash_pos = text.find('#');
+    if (hash_pos != std::string::npos && text.size() > hash_pos + 1 && text.back() == '#') {
+        std::string base_str = text.substr(0, hash_pos);
+        std::string digits = text.substr(hash_pos + 1, text.size() - hash_pos - 2);
+        int base = 10;
+        std::from_chars(base_str.data(), base_str.data() + base_str.size(), base, 10);
+        // Reject base > 16 or invalid digits.
+        if (base >= 2 && base <= 16 && !digits.empty()) {
+            int64_t value = 0;
+            for (char c : digits) {
+                if (c == '_') continue;
+                int d = 0;
+                if (c >= '0' && c <= '9') d = c - '0';
+                else if (c >= 'a' && c <= 'f') d = c - 'a' + 10;
+                else if (c >= 'A' && c <= 'F') d = c - 'A' + 10;
+                else { d = -1; break; }
+                if (d >= base) { d = -1; break; }
+                value = value * base + d;
+            }
+            auto tok = std::make_shared<Numeric_token>(std::to_string(value));
+            return tok;
+        }
+    }
+
+    // Real literal (contains '.', or exponent without a base prefix).
+    bool is_real = text.find('.') != std::string::npos;
+    if (!is_real) {
+        // exponent like 1e3 or 1E-3
+        size_t epos = text.find_first_of("eE");
+        is_real = epos != std::string::npos;
+    }
+    if (is_real) {
+        std::string cleaned = text;
+        cleaned.erase(std::remove(cleaned.begin(), cleaned.end(), '_'), cleaned.end());
+        return std::make_shared<Real_token>(cleaned);
+    }
+
+    // Plain integer (underscores are handled by Numeric_token).
+    return std::make_shared<Numeric_token>(text);
 }

@@ -274,6 +274,7 @@ std::expected<resolved_parameter, solver_errors> Expression_v2::evaluate(
                 width = 1;
                 break;
             case bitwise_neg:
+            case abs_value:
             case logic_shift_left: case logic_shift_right:
             case arithmetic_shift_left: case arithmetic_shift_right:
             case power:
@@ -438,6 +439,19 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_unary_expression(resol
     if (operation == logic_neg) {
         if (operand.is_real()) return operand.get_real() == 0.0 ? hdl_integer(1) : hdl_integer(0);
         if (operand.is_integer()) return operand.get_integer() == 0 ? hdl_integer(1) : hdl_integer(0);
+        spdlog::warn("Attempted evaluation of operand of unsupported type");
+        return 0;
+    }
+
+    if (operation == abs_value) {
+        if (operand.is_real()) return std::abs(operand.get_real());
+        if (operand.is_integer()) {
+            auto v = operand.get_integer().to_wide();
+            hdl_integer res;
+            res.set_value(v < 0 ? -v : v);
+            res.set_signed(operand.get_integer().get_signed());
+            return res;
+        }
         spdlog::warn("Attempted evaluation of operand of unsupported type");
         return 0;
     }

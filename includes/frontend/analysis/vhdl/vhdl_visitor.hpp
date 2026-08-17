@@ -24,6 +24,8 @@
 #include "data_model/HDL/statement/hdl_instance_statement.hpp"
 #include "data_model/HDL/factories/HDL_modules_factory.hpp"
 
+#include "data_model/HDL/factories/HDL_parameters_factory.hpp"
+
 #include "mgp_vh/vhdlParserBaseListener.h"
 #include "mgp_vh/vhdlParser.h"
 
@@ -37,14 +39,42 @@ public:
     void enterArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) override;
     void exitArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) override;
     void exitConcurrent_statement(mgp_vh::vhdlParser::Concurrent_statementContext *ctx) override;
+
+    void enterGeneric_clause(mgp_vh::vhdlParser::Generic_clauseContext *ctx) override;
+    void exitGeneric_clause(mgp_vh::vhdlParser::Generic_clauseContext *ctx) override;
+    void enterInterface_constant_declaration(mgp_vh::vhdlParser::Interface_constant_declarationContext *ctx) override;
+    void exitInterface_constant_declaration(mgp_vh::vhdlParser::Interface_constant_declarationContext *ctx) override;
+    void enterInterface_signal_declaration(mgp_vh::vhdlParser::Interface_signal_declarationContext *ctx) override;
+    void exitInterface_signal_declaration(mgp_vh::vhdlParser::Interface_signal_declarationContext *ctx) override;
+    void enterSubtype_indication(mgp_vh::vhdlParser::Subtype_indicationContext *ctx) override;
+    void exitSubtype_indication(mgp_vh::vhdlParser::Subtype_indicationContext *ctx) override;
+
+    void enterExpression(mgp_vh::vhdlParser::ExpressionContext *ctx) override;
+    void exitExpression(mgp_vh::vhdlParser::ExpressionContext *ctx) override;
+    void enterSimple_expression(mgp_vh::vhdlParser::Simple_expressionContext *ctx) override;
+    void exitSimple_expression(mgp_vh::vhdlParser::Simple_expressionContext *ctx) override;
+    void exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContext *ctx) override;
+    void exitPrimary(mgp_vh::vhdlParser::PrimaryContext *ctx) override;
+
     std::vector<std::shared_ptr<hdl_statement_base>> get_entities() {return entities;}
 private:
+    void start_generic(mgp_vh::vhdlParser::Identifier_listContext *ids,
+                       mgp_vh::vhdlParser::Subtype_indicationContext *type);
+    void finalize_generic(mgp_vh::vhdlParser::Identifier_listContext *ids);
+    std::shared_ptr<hdl_type> make_generic_type(mgp_vh::vhdlParser::Subtype_indicationContext *type);
+    std::shared_ptr<Expression_base> make_vhdl_value(const std::string &text);
+    static bool has_expr_operator(mgp_vh::vhdlParser::ExpressionContext *ctx);
+    static bool simple_is_nonleaf(mgp_vh::vhdlParser::Simple_expressionContext *ctx);
+
     std::string path;
     std::vector<std::shared_ptr<hdl_statement_base>>  entities;
     std::unordered_map<std::string, std::vector<std::shared_ptr<hdl_statement_base>>> statement_map;
     std::string current_architecture;
+    bool in_generic_clause = false;
+    bool in_subtype_indication = false;
 
     HDL_modules_factory modules_factory;
+    HDL_parameters_factory params_factory;
 };
 
 

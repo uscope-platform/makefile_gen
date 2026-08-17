@@ -17,6 +17,14 @@
 
 #include "frontend/analysis/vhdl/vhdl_analyzer.hpp"
 #include "data_model/HDL/statement/hdl_statements.hpp"
+#include "data_model/HDL/parameters/HDL_parameter.hpp"
+#include "data_model/HDL/types/HDL_simple_type.hpp"
+#include "data_model/HDL/parameters/components/Expression_v2.hpp"
+#include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
+#include "data_model/HDL/parameters/components/token/Real_token.hpp"
+#include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
+#include "data_model/HDL/parameters/common/resolved_parameter.hpp"
+#include "data_model/HDL/parameters/common/qualified_identifier.hpp"
 
 namespace {
 
@@ -34,6 +42,27 @@ namespace {
         inst->set_type(type);
         inst->set_dependency_class(module);
         return inst;
+    }
+
+    std::shared_ptr<HDL_parameter> make_integer_param(const std::string &name,
+                                                      const std::shared_ptr<Expression_base> &value) {
+        auto p = std::make_shared<HDL_parameter>(name);
+        auto t = std::make_shared<HDL_simple_type>();
+        t->set_type_name("integer");
+        t->set_signed(true);
+        p->set_type(t);
+        p->set_raw_value(value);
+        return p;
+    }
+
+    std::shared_ptr<Expression_v2> make_binary(Expression_v2::expression_operator op,
+                                               const std::shared_ptr<Expression_base> &lhs,
+                                               const std::shared_ptr<Expression_base> &rhs) {
+        auto e = std::make_shared<Expression_v2>();
+        e->set_lhs(lhs);
+        e->set_rhs(rhs);
+        e->set_operation(op);
+        return e;
     }
 
 }
@@ -163,6 +192,163 @@ end rtl;
     golden.set_type(module);
     golden.set_line_n(5);
     golden.add_statement(make_instance("and_component", "andgate"));
+
+    ASSERT_EQ(*res, golden);
+}
+
+TEST(vhdl_analyzer, generic_numeric_single) {
+    auto test_pattern = R"(
+entity top is
+    generic (
+        N : integer := 8
+    );
+end top;
+)";
+
+    auto res = parse_first_entity(test_pattern);
+
+    hdl_resource_statement golden;
+    golden.set_name("top");
+    golden.set_type(module);
+    golden.set_line_n(2);
+    golden.add_parameter(make_integer_param("n", std::make_shared<Numeric_token>("8")));
+
+    ASSERT_EQ(*res, golden);
+}
+
+TEST(vhdl_analyzer, generic_math_expression) {
+    auto test_pattern = R"(
+entity top is
+    generic (
+        WIDTH : integer := 2**N-1
+    );
+end top;
+)";
+
+    auto res = parse_first_entity(test_pattern);
+
+    // 2**N-1 parses as (2**N) - 1
+    auto pow = make_binary(Expression_v2::power,
+                           std::make_shared<Numeric_token>("2"),
+                           std::make_shared<Identifier_token>(qualified_identifier("n")));
+    auto expr = make_binary(Expression_v2::subtract, pow, std::make_shared<Numeric_token>("1"));
+
+    hdl_resource_statement golden;
+    golden.set_name("top");
+    golden.set_type(module);
+    golden.set_line_n(2);
+    golden.add_parameter(make_integer_param("width", expr));
+
+    ASSERT_EQ(*res, golden);
+}
+
+TEST(vhdl_analyzer, generic_multiple_and_multiply) {
+    auto test_pattern = R"(
+entity top is
+    generic (
+        A : integer := 4;
+        B : integer := A * 8
+    );
+end top;
+)";
+
+    auto res = parse_first_entity(test_pattern);
+
+    auto b_expr = make_binary(Expression_v2::multiply,
+                              std::make_shared<Identifier_token>(qualified_identifier("a")),
+                              std::make_shared<Numeric_token>("8"));
+
+    hdl_resource_statement golden;
+    golden.set_name("top");
+    golden.set_type(module);
+    golden.set_line_n(2);
+    golden.add_parameter(make_integer_param("a", std::make_shared<Numeric_token>("4")));
+    golden.add_parameter(make_integer_param("b", b_expr));
+
+    ASSERT_EQ(*res, golden);
+}
+
+TEST(vhdl_analyzer, generic_identifier_reference) {
+    auto test_pattern = R"(
+entity top is
+    generic (
+        WIDTH : integer := DATA_WIDTH
+    );
+end top;
+)";
+
+    auto res = parse_first_entity(test_pattern);
+
+    hdl_resource_statement golden;
+    golden.set_name("top");
+    golden.set_type(module);
+    golden.set_line_n(2);
+    golden.add_parameter(make_integer_param("width",
+        std::make_shared<Identifier_token>(qualified_identifier("data_width"))));
+
+    ASSERT_EQ(*res, golden);
+}
+
+TEST(vhdl_analyzer, generic_expression_evaluates) {
+    auto test_pattern = R"(
+entity top is
+    generic ( WIDTH : integer := 2**N-1 );
+end top;
+)";
+
+    auto res = parse_first_entity(test_pattern);
+    auto param = res->get_parameters().get("width");
+    ASSERT_NE(param, nullptr);
+
+    std::map<qualified_identifier, resolved_parameter> ctx;
+    ctx[qualified_identifier("n")] = resolved_parameter(8);
+
+    auto val = param->evaluate(ctx);
+    ASSERT_TRUE(val.has_value());
+    ASSERT_TRUE(val->is_integer());
+    EXPECT_EQ(val->get_integer().get_value(), 255);
+}
+
+TEST(vhdl_analyzer, generic_range_subtype_not_polluted) {
+    // The range constraint expressions in the subtype must not leak into the
+    // default-value expression.
+    auto test_pattern = R"(
+entity top is
+    generic (
+        N : integer range 0 to 7 := 4
+    );
+end top;
+)";
+
+    auto res = parse_first_entity(test_pattern);
+    auto param = res->get_parameters().get("n");
+    ASSERT_NE(param, nullptr);
+
+    std::map<qualified_identifier, resolved_parameter> ctx;
+    auto val = param->evaluate(ctx);
+    ASSERT_TRUE(val.has_value());
+    ASSERT_TRUE(val->is_integer());
+    EXPECT_EQ(val->get_integer().get_value(), 4);
+}
+
+TEST(vhdl_analyzer, generic_multiple_names_shared_default) {
+    auto test_pattern = R"(
+entity top is
+    generic (
+        A, B, C : integer := 8
+    );
+end top;
+)";
+
+    auto res = parse_first_entity(test_pattern);
+
+    hdl_resource_statement golden;
+    golden.set_name("top");
+    golden.set_type(module);
+    golden.set_line_n(2);
+    golden.add_parameter(make_integer_param("a", std::make_shared<Numeric_token>("8")));
+    golden.add_parameter(make_integer_param("b", std::make_shared<Numeric_token>("8")));
+    golden.add_parameter(make_integer_param("c", std::make_shared<Numeric_token>("8")));
 
     ASSERT_EQ(*res, golden);
 }
