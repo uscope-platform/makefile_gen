@@ -93,6 +93,30 @@ void lattice_project_generator::generate_project(std::ostream &output) {
         output << R"(})" <<std::endl;
     }
 
+    std::set<std::string> sourced_scripts;
+    for(const auto& scr:data.scripts){
+        if(scr.name.empty() || scr.path.empty()) {
+            continue;
+        }
+        if(scr.function_mode) {
+            if(!sourced_scripts.contains(scr.path)) {
+                output << "source " << scr.path << std::endl;
+            }
+            if(!scr.name.empty()) {
+                output << scr.name;
+                for(const auto &[var_name, val] : scr.variables) {
+                    output << " " << val ;
+                }
+                output << std::endl;
+            }
+        } else {
+            if(!sourced_scripts.contains(scr.path)) {
+                output << "source " << scr.path << std::endl;
+            }
+        }
+        sourced_scripts.insert(scr.path);
+    }
+
     output << R"(prj_save)" <<std::endl;
 
 }

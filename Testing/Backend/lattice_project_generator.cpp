@@ -124,3 +124,36 @@ TEST(lattice_project_gen, write_makefile_no_sources){
 
     lpg_clean_settings();
 }
+
+TEST(lattice_project_gen, write_makefile_with_scripts){
+    std::shared_ptr<settings_store> s_store = lpg_setup_settings();
+    lattice_project_generator gen(s_store);
+
+    script_source plain_script;
+    plain_script.name = "setup.tcl";
+    plain_script.path = "/test/scripts/setup.tcl";
+
+    script_source function_script;
+    function_script.name = "create_ip";
+    function_script.path = "/test/scripts/ip.tcl";
+    function_script.function_mode = true;
+    function_script.variables = {{"name", "my_ip"}};
+
+    project_data d;
+    d.name = "test_proj";
+    d.target_part = "LIFCL-40-9BG400CES";
+    d.synth_tl = "top_module";
+    d.synth_sources = {"/test/synth/source.sv"};
+    d.scripts = {plain_script, function_script};
+    gen.set_data(d);
+
+    std::ostringstream result_tcl;
+    gen.write_makefile(result_tcl);
+    auto output = result_tcl.str();
+
+    EXPECT_NE(output.find(R"(source /test/scripts/setup.tcl)"), std::string::npos);
+    EXPECT_NE(output.find(R"(source /test/scripts/ip.tcl)"), std::string::npos);
+    EXPECT_NE(output.find(R"(create_ip my_ip)"), std::string::npos);
+
+    lpg_clean_settings();
+}

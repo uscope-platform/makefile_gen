@@ -79,6 +79,9 @@ void xilinx_project_generator::write_makefile(std::ostream &output) {
         output << "set board_part " << data.board_part << std::endl;
         output << "# Create project\ncreate_project ${project_name} ./${project_name}\n";
         output << "set_property board_part $board_part [current_project]\n";
+    } else if(!data.target_part.empty()) {
+        output << "# Create project\ncreate_project ${project_name} ./${project_name}\n";
+        output << "set_property part " << data.target_part << " [current_project]\n";
     } else {
         output << "# Create project\ncreate_project ${project_name} ./${project_name}\n";
         output << "set_property part xc7z020clg400-1 [current_project]\n";
