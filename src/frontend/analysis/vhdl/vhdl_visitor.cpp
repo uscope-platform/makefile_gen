@@ -20,6 +20,7 @@
 #include <cctype>
 #include <charconv>
 #include <string>
+#include <map>
 
 #include <spdlog/spdlog.h>
 
@@ -268,8 +269,58 @@ void vhdl_visitor::exitSimple_expression(mgp_vh::vhdlParser::Simple_expressionCo
     params_factory.stop_expression_new(simple_is_nonleaf(ctx));
 }
 
+void vhdl_visitor::enterNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContext *ctx) {
+    if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
+    if (!ctx->name() || !is_function_call(ctx->name())) return;
+
+    // A VHDL function call such as `log2(N)`. Map the builtin onto the
+    // SystemVerilog `$`-task the parameter engine already evaluates.
+    auto call_name = extract_call_name(ctx->name());
+    auto sv_name = map_vhdl_builtin(call_name);
+    if (sv_name.has_value()) {
+        params_factory.start_function_call(sv_name.value());
+    } else {
+        spdlog::warn("Unsupported VHDL function '{}' in generic default, ignored", call_name);
+        // Still push a call so the argument expressions are consumed cleanly.
+        params_factory.start_function_call("$" + call_name);
+    }
+}
+
+void vhdl_visitor::enterActual_part(mgp_vh::vhdlParser::Actual_partContext *ctx) {
+    if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
+    // A nested function call parsed as `name ( actual_designator )` (e.g. the
+    // `log2(N)` inside `ceil(log2(N))`) arrives here rather than through the
+    // `name(association_list)` rule.
+    if (ctx->name() && ctx->LPAREN() && ctx->name()->name_literal() &&
+        ctx->name()->name_literal()->identifier()) {
+        auto call_name = canon(ctx->name()->name_literal()->identifier()->getText());
+        auto sv_name = map_vhdl_builtin(call_name);
+        if (sv_name.has_value()) {
+            params_factory.start_function_call(sv_name.value());
+        } else {
+            spdlog::warn("Unsupported VHDL function '{}' in generic default, ignored", call_name);
+            params_factory.start_function_call("$" + call_name);
+        }
+    }
+}
+
+void vhdl_visitor::exitActual_part(mgp_vh::vhdlParser::Actual_partContext *ctx) {
+    if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
+    if (ctx->name() && ctx->LPAREN() && ctx->name()->name_literal() &&
+        ctx->name()->name_literal()->identifier()) {
+        params_factory.stop_function_call();
+    }
+}
+
 void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContext *ctx) {
     if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
+
+    // A function call: finalize it (the argument expressions have been routed
+    // into the function factory by the intervening listener callbacks).
+    if (ctx->name() && is_function_call(ctx->name())) {
+        params_factory.stop_function_call();
+        return;
+    }
 
     // A bare identifier: a reference to another generic/constant.
     if (ctx->name() && ctx->name()->name_literal() && ctx->name()->name_literal()->identifier()) {
@@ -294,6 +345,57 @@ void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContex
     }
 
     params_factory.add_component(make_vhdl_value(ctx->getText()));
+}
+
+bool vhdl_visitor::is_function_call(mgp_vh::vhdlParser::NameContext *nm) {
+    return nm && nm->association_list() != nullptr;
+}
+
+std::string vhdl_visitor::extract_call_name(mgp_vh::vhdlParser::NameContext *nm) {
+    if (!nm) return "";
+    auto base = nm->name(); // the prefix (function) name
+    if (!base) return "";
+    if (base->name_literal() && base->name_literal()->identifier())
+        return canon(base->name_literal()->identifier()->getText());
+    if (base->suffix())
+        return canon(base->suffix()->getText()); // qualified: pkg.func
+    if (base->name())
+        return extract_call_name(base);
+    return "";
+}
+
+std::optional<std::string> vhdl_visitor::map_vhdl_builtin(const std::string &name) {
+    // VHDL builtin functions that map onto the SystemVerilog system-function
+    // set already evaluated by the parameter engine (numeric/simple only).
+    static const std::map<std::string, std::string> mapping = {
+        {"ceil", "$ceil"},
+        {"floor", "$floor"},
+        {"round", "$round"},
+        {"trunc", "$truncate"},
+        {"sqrt", "$sqrt"},
+        {"log", "$ln"},
+        {"log10", "$log10"},
+        {"log2", "$log2"},
+        {"exp", "$exp"},
+        {"pow", "$pow"},
+        {"minimum", "$min"},
+        {"maximum", "$max"},
+        {"sin", "$sin"},
+        {"cos", "$cos"},
+        {"tan", "$tan"},
+        {"asin", "$asin"},
+        {"acos", "$acos"},
+        {"atan", "$atan"},
+        {"atan2", "$atan2"},
+        {"sinh", "$sinh"},
+        {"cosh", "$cosh"},
+        {"tanh", "$tanh"},
+        {"hypot", "$hypot"},
+        {"countones", "$countones"}
+    };
+    auto it = mapping.find(name);
+    if (it == mapping.end()) return std::nullopt;
+    return it->second;
 }
 
 void vhdl_visitor::exitPrimary(mgp_vh::vhdlParser::PrimaryContext *ctx) {

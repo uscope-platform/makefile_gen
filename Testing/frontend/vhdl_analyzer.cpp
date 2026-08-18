@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 
+#include <cmath>
+
 #include "frontend/analysis/vhdl/vhdl_analyzer.hpp"
 #include "data_model/HDL/statement/hdl_statements.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
@@ -454,4 +456,57 @@ TEST(vhdl_analyzer, aggregate_not_confused_with_parenthesized_expr) {
     EXPECT_EQ(eval_generic("V : integer := ?" "?(1<2)", "v"), 1);
     // A plain parenthesized expression is just the expression value.
     EXPECT_EQ(eval_generic("V : integer := (3)", "v"), 3);
+}
+
+double eval_generic_double(const std::string &decl_body, const std::string &gname) {
+    std::string pattern = "entity top is\n    generic ( " + decl_body + " );\nend top;\n";
+    auto res = parse_first_entity(pattern);
+    auto param = res->get_parameters().get(gname);
+    if (!param) return -999999.0;
+    std::map<qualified_identifier, resolved_parameter> ctx;
+    auto val = param->evaluate(ctx);
+    if (!val.has_value()) return -999999.0;
+    if (val->is_real()) return val->get_real();
+    if (val->is_integer()) return static_cast<double>(val->get_integer().get_value());
+    return -999999.0;
+}
+
+TEST(vhdl_analyzer, builtin_function_integer) {
+    EXPECT_EQ(eval_generic("V : integer := ceil(3)", "v"), 3);
+    EXPECT_EQ(eval_generic("V : integer := floor(3)", "v"), 3);
+    EXPECT_EQ(eval_generic("V : integer := minimum(3, 7)", "v"), 3);
+    EXPECT_EQ(eval_generic("V : integer := maximum(3, 7)", "v"), 7);
+    EXPECT_EQ(eval_generic("V : integer := countones(7)", "v"), 3);
+}
+
+TEST(vhdl_analyzer, builtin_function_real) {
+    EXPECT_EQ(eval_generic_double("V : real := log2(8)", "v"), std::log2(8));
+    EXPECT_EQ(eval_generic_double("V : real := sqrt(16)", "v"), 4.0);
+    EXPECT_EQ(eval_generic_double("V : real := ceil(2.5)", "v"), 3.0);
+    EXPECT_EQ(eval_generic_double("V : real := floor(2.5)", "v"), 2.0);
+}
+
+TEST(vhdl_analyzer, builtin_function_nested) {
+    // ceil(log2(N)) evaluates with N from the context.
+    auto test_pattern = R"(
+entity top is
+    generic ( N : integer := 8;
+              W : real := ceil(log2(N)) );
+end top;
+)";
+    auto res = parse_first_entity(test_pattern);
+    auto param = res->get_parameters().get("w");
+    ASSERT_NE(param, nullptr);
+    std::map<qualified_identifier, resolved_parameter> ctx;
+    ctx[qualified_identifier("n")] = resolved_parameter(8);
+    auto val = param->evaluate(ctx);
+    ASSERT_TRUE(val.has_value());
+    ASSERT_TRUE(val->is_real());
+    EXPECT_EQ(val->get_real(), 3.0);
+}
+
+TEST(vhdl_analyzer, builtin_function_unknown_does_not_crash) {
+    auto res = parse_first_entity("entity top is\n    generic ( V : integer := foo(3) );\nend top;\n");
+    auto param = res->get_parameters().get("v");
+    ASSERT_NE(param, nullptr);
 }

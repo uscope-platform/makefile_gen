@@ -20,6 +20,7 @@
 #include <utility>
 #include <vector>
 #include <stack>
+#include <optional>
 
 #include "data_model/HDL/statement/hdl_instance_statement.hpp"
 #include "data_model/HDL/factories/HDL_modules_factory.hpp"
@@ -53,12 +54,15 @@ public:
     void exitExpression(mgp_vh::vhdlParser::ExpressionContext *ctx) override;
     void enterSimple_expression(mgp_vh::vhdlParser::Simple_expressionContext *ctx) override;
     void exitSimple_expression(mgp_vh::vhdlParser::Simple_expressionContext *ctx) override;
+    void enterNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContext *ctx) override;
     void exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContext *ctx) override;
     void exitPrimary(mgp_vh::vhdlParser::PrimaryContext *ctx) override;
     void enterAggregate(mgp_vh::vhdlParser::AggregateContext *ctx) override;
     void exitAggregate(mgp_vh::vhdlParser::AggregateContext *ctx) override;
     void enterChoices(mgp_vh::vhdlParser::ChoicesContext *ctx) override;
     void exitChoices(mgp_vh::vhdlParser::ChoicesContext *ctx) override;
+    void enterActual_part(mgp_vh::vhdlParser::Actual_partContext *ctx) override;
+    void exitActual_part(mgp_vh::vhdlParser::Actual_partContext *ctx) override;
 
     std::vector<std::shared_ptr<hdl_statement_base>> get_entities() {return entities;}
 private:
@@ -73,6 +77,9 @@ private:
     static bool simple_is_aggregate(mgp_vh::vhdlParser::Simple_expressionContext *ctx);
     static bool has_expr_operator(mgp_vh::vhdlParser::ExpressionContext *ctx);
     static bool simple_is_nonleaf(mgp_vh::vhdlParser::Simple_expressionContext *ctx);
+    static bool is_function_call(mgp_vh::vhdlParser::NameContext *nm);
+    static std::string extract_call_name(mgp_vh::vhdlParser::NameContext *nm);
+    static std::optional<std::string> map_vhdl_builtin(const std::string &name);
 
     std::string path;
     std::vector<std::shared_ptr<hdl_statement_base>>  entities;
