@@ -20,51 +20,69 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/types/HDL_simple_type.hpp"
 #include "data_model/HDL/parameters/components/Expression_v2.hpp"
+#include "data_model/HDL/parameters/components/Concatenation.hpp"
 #include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
 #include "data_model/HDL/parameters/components/token/Real_token.hpp"
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
 #include "data_model/HDL/parameters/common/resolved_parameter.hpp"
 #include "data_model/HDL/parameters/common/qualified_identifier.hpp"
 
-namespace {
+std::shared_ptr<hdl_resource_statement> parse_first_entity(const std::string &content) {
+    vhdl_analyzer analyzer("test.vhd");
+    auto result = analyzer.analyze_content(content, "test.vhd");
+    auto &first = result.get_content()[0];
+    EXPECT_TRUE(first->is<hdl_resource_statement>());
+    return std::make_shared<hdl_resource_statement>(first->as<hdl_resource_statement>());
+}
 
-    std::shared_ptr<hdl_resource_statement> parse_first_entity(const std::string &content) {
-        vhdl_analyzer analyzer("test.vhd");
-        auto result = analyzer.analyze_content(content, "test.vhd");
-        auto &first = result.get_content()[0];
-        EXPECT_TRUE(first->is<hdl_resource_statement>());
-        return std::make_shared<hdl_resource_statement>(first->as<hdl_resource_statement>());
-    }
+std::shared_ptr<hdl_instance_statement> make_instance(const std::string &name, const std::string &type) {
+    auto inst = std::make_shared<hdl_instance_statement>();
+    inst->set_name(name);
+    inst->set_type(type);
+    inst->set_dependency_class(module);
+    return inst;
+}
 
-    std::shared_ptr<hdl_instance_statement> make_instance(const std::string &name, const std::string &type) {
-        auto inst = std::make_shared<hdl_instance_statement>();
-        inst->set_name(name);
-        inst->set_type(type);
-        inst->set_dependency_class(module);
-        return inst;
-    }
+std::shared_ptr<HDL_parameter> make_integer_param(const std::string &name,
+                                                  const std::shared_ptr<Expression_base> &value) {
+    auto p = std::make_shared<HDL_parameter>(name);
+    auto t = std::make_shared<HDL_simple_type>();
+    t->set_type_name("integer");
+    t->set_signed(true);
+    p->set_type(t);
+    p->set_raw_value(value);
+    return p;
+}
 
-    std::shared_ptr<HDL_parameter> make_integer_param(const std::string &name,
-                                                      const std::shared_ptr<Expression_base> &value) {
-        auto p = std::make_shared<HDL_parameter>(name);
-        auto t = std::make_shared<HDL_simple_type>();
-        t->set_type_name("integer");
-        t->set_signed(true);
-        p->set_type(t);
-        p->set_raw_value(value);
-        return p;
-    }
+std::shared_ptr<Expression_v2> make_binary(Expression_v2::expression_operator op,
+                                           const std::shared_ptr<Expression_base> &lhs,
+                                           const std::shared_ptr<Expression_base> &rhs) {
+    auto e = std::make_shared<Expression_v2>();
+    e->set_lhs(lhs);
+    e->set_rhs(rhs);
+    e->set_operation(op);
+    return e;
+}
 
-    std::shared_ptr<Expression_v2> make_binary(Expression_v2::expression_operator op,
-                                               const std::shared_ptr<Expression_base> &lhs,
-                                               const std::shared_ptr<Expression_base> &rhs) {
-        auto e = std::make_shared<Expression_v2>();
-        e->set_lhs(lhs);
-        e->set_rhs(rhs);
-        e->set_operation(op);
-        return e;
-    }
+int64_t eval_generic(const std::string &decl_body, const std::string &gname) {
+    std::string pattern = "entity top is\n    generic ( " + decl_body + " );\nend top;\n";
+    auto res = parse_first_entity(pattern);
+    auto param = res->get_parameters().get(gname);
+    if (!param) return -999999;
+    std::map<qualified_identifier, resolved_parameter> ctx;
+    auto val = param->evaluate(ctx);
+    if (!val.has_value() || !val->is_integer()) return -999999;
+    return val->get_integer().get_value();
+}
 
+// Build a golden integer parameter whose default value is a concatenation
+// (VHDL aggregate) of the given numeric literals.
+std::shared_ptr<HDL_parameter> make_concat_param(const std::string &name,
+                                                 std::initializer_list<std::string> values) {
+    auto concat = std::make_shared<Concatenation>();
+    for (const auto &v : values)
+        concat->add_component(std::make_shared<Numeric_token>(v));
+    return make_integer_param(name, concat);
 }
 
 TEST(vhdl_analyzer, entity_name_extraction) {
@@ -353,19 +371,6 @@ end top;
     ASSERT_EQ(*res, golden);
 }
 
-namespace {
-    int64_t eval_generic(const std::string &decl_body, const std::string &gname) {
-        std::string pattern = "entity top is\n    generic ( " + decl_body + " );\nend top;\n";
-        auto res = parse_first_entity(pattern);
-        auto param = res->get_parameters().get(gname);
-        if (!param) return -999999;
-        std::map<qualified_identifier, resolved_parameter> ctx;
-        auto val = param->evaluate(ctx);
-        if (!val.has_value() || !val->is_integer()) return -999999;
-        return val->get_integer().get_value();
-    }
-}
-
 TEST(vhdl_analyzer, literal_bit_string) {
     EXPECT_EQ(eval_generic("V : integer := x\"FF\"", "v"), 255);
     EXPECT_EQ(eval_generic("V : integer := b\"1010\"", "v"), 10);
@@ -405,4 +410,48 @@ TEST(vhdl_analyzer, operator_condition_qq) {
     EXPECT_EQ(eval_generic("V : integer := ?" "?5", "v"), 1);
     EXPECT_EQ(eval_generic("V : integer := ?" "?0", "v"), 0);
     EXPECT_EQ(eval_generic("V : integer := ?" "?(1<2)", "v"), 1);
+}
+
+TEST(vhdl_analyzer, aggregate_positional) {
+    auto test_pattern = R"(
+entity top is
+    generic ( V : integer := (1, 2, 3) );
+end top;
+)";
+
+    auto res = parse_first_entity(test_pattern);
+
+    hdl_resource_statement golden;
+    golden.set_name("top");
+    golden.set_type(module);
+    golden.set_line_n(2);
+    golden.add_parameter(make_concat_param("v", {"1", "2", "3"}));
+
+    ASSERT_EQ(*res, golden);
+}
+
+TEST(vhdl_analyzer, aggregate_with_choices) {
+    auto test_pattern = R"(
+entity top is
+    generic ( V : integer := (0 => 7, 1 => 8) );
+end top;
+)";
+
+    auto res = parse_first_entity(test_pattern);
+
+    hdl_resource_statement golden;
+    golden.set_name("top");
+    golden.set_type(module);
+    golden.set_line_n(2);
+    golden.add_parameter(make_concat_param("v", {"7", "8"}));
+
+    ASSERT_EQ(*res, golden);
+}
+
+TEST(vhdl_analyzer, aggregate_not_confused_with_parenthesized_expr) {
+    // `(1<2)` is a parenthesized relational expression, not a single-element
+    // aggregate; `??` of it must normalize the boolean to 1.
+    EXPECT_EQ(eval_generic("V : integer := ?" "?(1<2)", "v"), 1);
+    // A plain parenthesized expression is just the expression value.
+    EXPECT_EQ(eval_generic("V : integer := (3)", "v"), 3);
 }

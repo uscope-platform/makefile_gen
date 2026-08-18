@@ -55,6 +55,10 @@ public:
     void exitSimple_expression(mgp_vh::vhdlParser::Simple_expressionContext *ctx) override;
     void exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContext *ctx) override;
     void exitPrimary(mgp_vh::vhdlParser::PrimaryContext *ctx) override;
+    void enterAggregate(mgp_vh::vhdlParser::AggregateContext *ctx) override;
+    void exitAggregate(mgp_vh::vhdlParser::AggregateContext *ctx) override;
+    void enterChoices(mgp_vh::vhdlParser::ChoicesContext *ctx) override;
+    void exitChoices(mgp_vh::vhdlParser::ChoicesContext *ctx) override;
 
     std::vector<std::shared_ptr<hdl_statement_base>> get_entities() {return entities;}
 private:
@@ -64,6 +68,9 @@ private:
     std::shared_ptr<hdl_type> make_generic_type(mgp_vh::vhdlParser::Subtype_indicationContext *type);
     std::shared_ptr<Expression_base> make_vhdl_value(const std::string &text);
     std::shared_ptr<Expression_base> make_character_value(const std::string &text);
+    bool is_in_generic_expression() const;
+    static bool is_aggregate(mgp_vh::vhdlParser::AggregateContext *ctx);
+    static bool simple_is_aggregate(mgp_vh::vhdlParser::Simple_expressionContext *ctx);
     static bool has_expr_operator(mgp_vh::vhdlParser::ExpressionContext *ctx);
     static bool simple_is_nonleaf(mgp_vh::vhdlParser::Simple_expressionContext *ctx);
 
@@ -73,6 +80,7 @@ private:
     std::string current_architecture;
     bool in_generic_clause = false;
     bool in_subtype_indication = false;
+    bool in_aggregate_choices = false;
 
     HDL_modules_factory modules_factory;
     HDL_parameters_factory params_factory;

@@ -189,13 +189,12 @@ bool vhdl_visitor::simple_is_nonleaf(mgp_vh::vhdlParser::Simple_expressionContex
 }
 
 void vhdl_visitor::enterExpression(mgp_vh::vhdlParser::ExpressionContext *ctx) {
-    if (in_generic_clause && !in_subtype_indication &&
-        (has_expr_operator(ctx) || ctx->COND_OP()))
+    if (is_in_generic_expression() && (has_expr_operator(ctx) || ctx->COND_OP()))
         params_factory.start_expression_new(true);
 }
 
 void vhdl_visitor::exitExpression(mgp_vh::vhdlParser::ExpressionContext *ctx) {
-    if (!in_generic_clause || in_subtype_indication) return;
+    if (!is_in_generic_expression()) return;
 
     auto op = Expression_v2::none;
     if (ctx->COND_OP()) {
@@ -228,12 +227,14 @@ void vhdl_visitor::exitExpression(mgp_vh::vhdlParser::ExpressionContext *ctx) {
 }
 
 void vhdl_visitor::enterSimple_expression(mgp_vh::vhdlParser::Simple_expressionContext *ctx) {
-    if (in_generic_clause && !in_subtype_indication)
+    // An unambiguous aggregate primary is handled by enter/exitAggregate; skip
+    // bracketing it here so the aggregate elements reach level 0 independently.
+    if (is_in_generic_expression() && !simple_is_aggregate(ctx))
         params_factory.start_expression_new(simple_is_nonleaf(ctx));
 }
 
 void vhdl_visitor::exitSimple_expression(mgp_vh::vhdlParser::Simple_expressionContext *ctx) {
-    if (!in_generic_clause || in_subtype_indication) return;
+    if (!is_in_generic_expression() || simple_is_aggregate(ctx)) return;
 
     if (simple_is_nonleaf(ctx)) {
         if (ctx->DOUBLESTAR()) {
@@ -268,7 +269,7 @@ void vhdl_visitor::exitSimple_expression(mgp_vh::vhdlParser::Simple_expressionCo
 }
 
 void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContext *ctx) {
-    if (!in_generic_clause || in_subtype_indication || !params_factory.is_component_relevant()) return;
+    if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
 
     // A bare identifier: a reference to another generic/constant.
     if (ctx->name() && ctx->name()->name_literal() && ctx->name()->name_literal()->identifier()) {
@@ -296,11 +297,61 @@ void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContex
 }
 
 void vhdl_visitor::exitPrimary(mgp_vh::vhdlParser::PrimaryContext *ctx) {
-    if (!in_generic_clause || in_subtype_indication || !params_factory.is_component_relevant()) return;
+    if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
     if (ctx->BIT_STRING_LITERAL()) {
         // Treat a bit string literal as a sized numeric value (e.g. x"FF").
         params_factory.add_component(make_vhdl_value(ctx->BIT_STRING_LITERAL()->getText()));
     }
+}
+
+void vhdl_visitor::enterAggregate(mgp_vh::vhdlParser::AggregateContext *ctx) {
+    // `(expr)` is ambiguous between a parenthesized expression and a
+    // single-element aggregate. Only treat it as an aggregate when it is
+    // unambiguous: multiple elements, or an element with `choices`/`others`.
+    if (is_in_generic_expression() && is_aggregate(ctx))
+        params_factory.start_initialization_list();
+}
+
+void vhdl_visitor::exitAggregate(mgp_vh::vhdlParser::AggregateContext *ctx) {
+    if (!is_in_generic_expression() || !is_aggregate(ctx)) return;
+
+    // An aggregate using `others` sets the default-initialization flag.
+    bool default_assignment = false;
+    for (auto *el : ctx->element_association()) {
+        if (el->choices()) {
+            for (auto *c : el->choices()->choice()) {
+                if (c->KW_OTHERS()) { default_assignment = true; break; }
+            }
+        }
+        if (default_assignment) break;
+    }
+    params_factory.stop_initialization_list(default_assignment);
+}
+
+void vhdl_visitor::enterChoices(mgp_vh::vhdlParser::ChoicesContext *ctx) {
+    in_aggregate_choices = true;
+}
+
+void vhdl_visitor::exitChoices(mgp_vh::vhdlParser::ChoicesContext *ctx) {
+    in_aggregate_choices = false;
+}
+
+bool vhdl_visitor::is_aggregate(mgp_vh::vhdlParser::AggregateContext *ctx) {
+    if (ctx->element_association().size() > 1) return true;
+    // Single element: unambiguous aggregate only if it has `choices`
+    // (e.g. `(0 => a)` or `(others => a)`).
+    if (!ctx->element_association().empty())
+        return ctx->element_association(0)->choices() != nullptr;
+    return false;
+}
+
+bool vhdl_visitor::simple_is_aggregate(mgp_vh::vhdlParser::Simple_expressionContext *ctx) {
+    return ctx && ctx->primary(0) && ctx->primary(0)->aggregate() &&
+           is_aggregate(ctx->primary(0)->aggregate());
+}
+
+bool vhdl_visitor::is_in_generic_expression() const {
+    return in_generic_clause && !in_subtype_indication && !in_aggregate_choices;
 }
 
 std::shared_ptr<Expression_base> vhdl_visitor::make_character_value(const std::string &text) {
