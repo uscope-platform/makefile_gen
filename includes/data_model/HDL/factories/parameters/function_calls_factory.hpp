@@ -18,6 +18,7 @@
 #define ANANKE_FUNCTION_CALLS_FACTORY_HPP
 
 #include "data_model/HDL/parameters/components/HDL_function_call.hpp"
+#include "data_model/HDL/parameters/components/HDL_builtin_function.hpp"
 #include "data_model/HDL/factories/parameters/factory_base.hpp"
 
 class function_calls_factory : public factory_base{
@@ -31,6 +32,8 @@ public:
 
 private:
     HDL_function_call new_call;
+    std::shared_ptr<HDL_builtin_function> new_builtin;
+    bool is_builtin = false;
 
     enum class build_phase {
         inactive,

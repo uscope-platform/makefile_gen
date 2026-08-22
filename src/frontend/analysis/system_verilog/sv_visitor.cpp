@@ -29,21 +29,14 @@
 #include "data_model/HDL/parameters/components/token/Type_ref.hpp"
 #include "data_model/HDL/parameters/components/Streaming.hpp"
 #include "data_model/HDL/parameters/components/token/String_token.hpp"
+#include "data_model/HDL/parameters/components/HDL_builtin_function.hpp"
 #include "data_model/HDL/types/HDL_external_type.hpp"
 
 
 bool sv_visitor::is_known_system_function(const std::string &name) const {
+    if (HDL_builtin_function::is_known(name)) return true;
+
     static const std::set<std::string> known = {
-        // Value-returning system functions evaluated by the parameter pipeline
-        "bits", "size", "left", "right", "high", "low", "dimensions", "unpacked_dimensions",
-        "typename", "signed", "unsigned",
-        "rtoi", "itor", "ceil", "floor", "ln", "log10", "log2", "sqrt", "pow",
-        "min", "max", "countones", "countbits",
-        "sin", "cos", "tan", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh",
-        "exp", "hypot", "atan", "atan2", "asin", "acos", "round", "truncate",
-        "onehot", "onehot0", "isunknown", "isunbounded", "clog2",
-        "realtobits", "bitstoreal", "shortrealtobits", "bitstoshortreal",
-        "len", "substr", "to_lower", "to_upper", "atoi", "compare", "sformatf",
         // Random / distribution functions (recognized, not constant-evaluable)
         "random", "urandom", "urandom_range", "srandom",
         "dist_uniform", "dist_normal", "dist_exponential", "dist_poisson",

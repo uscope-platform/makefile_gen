@@ -24,8 +24,8 @@
 
 #include "data_model/HDL/statement/hdl_instance_statement.hpp"
 #include "data_model/HDL/factories/HDL_modules_factory.hpp"
-
 #include "data_model/HDL/factories/HDL_parameters_factory.hpp"
+#include "data_model/HDL/parameters/components/HDL_builtin_function.hpp"
 
 #include "mgp_vh/vhdlParserBaseListener.h"
 #include "mgp_vh/vhdlParser.h"
@@ -79,7 +79,7 @@ private:
     static bool simple_is_nonleaf(mgp_vh::vhdlParser::Simple_expressionContext *ctx);
     static bool is_function_call(mgp_vh::vhdlParser::NameContext *nm);
     static std::string extract_call_name(mgp_vh::vhdlParser::NameContext *nm);
-    static std::optional<std::string> map_vhdl_builtin(const std::string &name);
+    static bool is_vhdl_builtin(const std::string &name);
 
     std::string path;
     std::vector<std::shared_ptr<hdl_statement_base>>  entities;

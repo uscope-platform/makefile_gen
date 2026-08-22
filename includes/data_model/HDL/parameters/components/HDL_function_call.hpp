@@ -42,7 +42,6 @@ public:
     void propagate_function(const hdl_function_statement &def) override;
     std::expected<resolved_parameter, solver_errors> evaluate(const std::map<qualified_identifier, resolved_parameter> &context) override;
 
-    std::expected<resolved_parameter, solver_errors> evaluate_system_task(const std::map<qualified_identifier, resolved_parameter> &context);
     std::optional<resolved_type> resolve_expression_type(
         const std::map<qualified_identifier, resolved_parameter> &context) const override;
     void apply_return_order_reversal(
@@ -74,13 +73,6 @@ private:
         std::map<int64_t, int64_t> &size_map,
         const std::shared_ptr<hdl_type> &rt
     );
-
-    std::expected<resolved_parameter, solver_errors> evaluate_type_query(
-        const std::map<qualified_identifier, resolved_parameter> &context, const std::string &task_name);
-    std::expected<resolved_parameter, solver_errors> evaluate_typename(
-        const std::map<qualified_identifier, resolved_parameter> &context);
-    std::expected<resolved_parameter, solver_errors> evaluate_signedness(
-        const std::map<qualified_identifier, resolved_parameter> &context, const std::string &task_name);
 
     std::string function_name;
     std::string package_prefix;

@@ -23,6 +23,7 @@
 #include "data_model/HDL/parameters/components/Ternary.hpp"
 #include "data_model/HDL/parameters/components/Cast.hpp"
 #include "data_model/HDL/parameters/components/HDL_function_call.hpp"
+#include "data_model/HDL/parameters/components/HDL_builtin_function.hpp"
 #include "data_model/HDL/parameters/components/Streaming.hpp"
 #include "data_model/HDL/parameters/components/token/Type_ref.hpp"
 #include "frontend/analysis/system_verilog/type_engine.hpp"
@@ -111,6 +112,10 @@ static void annotate_identifier_types(
             if (c.get_content()) stack.push_back(c.get_content());
         } else if (node->is<HDL_function_call>()) {
             for (auto &arg : node->as<HDL_function_call>().get_arguments()) {
+                if (arg) stack.push_back(arg);
+            }
+        } else if (node->is<HDL_builtin_function>()) {
+            for (auto &arg : node->as<HDL_builtin_function>().get_arguments()) {
                 if (arg) stack.push_back(arg);
             }
         } else if (node->is<Streaming>()) {

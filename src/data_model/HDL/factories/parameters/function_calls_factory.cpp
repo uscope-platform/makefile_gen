@@ -18,16 +18,23 @@
 void function_calls_factory::start_function(const std::string &name) {
     new_call = HDL_function_call();
     new_call.set_name(name);
+    is_builtin = HDL_builtin_function::parse(name).has_value();
+    if (is_builtin) {
+        new_builtin = std::make_shared<HDL_builtin_function>(HDL_builtin_function::parse(name).value());
+    }
     state = build_phase::arguments;
 }
 
 void function_calls_factory::set_package_prefix(const std::string &p) {
-    new_call.add_package_prefix(p);
+    // Package prefixes only apply to user-defined function calls.
+    if (!is_builtin) new_call.add_package_prefix(p);
 }
 
-
 void function_calls_factory::consume(const std::shared_ptr<Expression_base> &arg) {
-    new_call.add_argument(arg);
+    if (is_builtin)
+        new_builtin->add_argument(arg);
+    else
+        new_call.add_argument(arg);
 }
 
 bool function_calls_factory::active() const {
@@ -35,8 +42,13 @@ bool function_calls_factory::active() const {
 }
 
 std::shared_ptr<Expression_base> function_calls_factory::result() {
-    auto call = std::make_shared<HDL_function_call>(new_call);
-    new_call = HDL_function_call();
-    return call;
+    std::shared_ptr<Expression_base> ret;
+    if (is_builtin) {
+        ret = new_builtin;
+        new_builtin.reset();
+    } else {
+        ret = std::make_shared<HDL_function_call>(new_call);
+        new_call = HDL_function_call();
+    }
+    return ret;
 }
-

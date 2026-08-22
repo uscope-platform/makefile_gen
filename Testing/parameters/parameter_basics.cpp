@@ -25,6 +25,7 @@
 #include "data_model/HDL/parameters/components/Concatenation.hpp"
 #include "data_model/HDL/parameters/components/Cast.hpp"
 #include "data_model/HDL/parameters/components/HDL_function_call.hpp"
+#include "data_model/HDL/parameters/components/HDL_builtin_function.hpp"
 #include "data_model/HDL/parameters/components/Ternary.hpp"
 #include "data_model/HDL/parameters/components/token/Real_token.hpp"
 #include "data_model/HDL/parameters/components/token/Time_token.hpp"
@@ -1060,14 +1061,14 @@ TEST(parameter_extraction, simple_expressions) {
     p = std::make_shared<HDL_parameter>();
     p->set_name("complex_log_expr_p");
     p->set_type(Type_engine::create_primitive_type("implicit"));
-    HDL_function_call call("$clog2");
+    auto call = std::make_shared<HDL_builtin_function>(HDL_builtin_function::function::clog2);
     e = Expression_v2();
     e.set_lhs(std::make_shared<Identifier_token>(qualified_identifier("add_expr_p")));
     e.set_rhs(std::make_shared<Numeric_token>("2"));
     e.set_operation(Expression_v2::expression_operator::add);
-    call.add_argument(std::make_shared<Expression_v2>(e));
+    call->add_argument(std::make_shared<Expression_v2>(e));
 
-    p->set_raw_value(std::make_shared<HDL_function_call>(call));
+    p->set_raw_value(call);
 
     check_params.insert(p);
 
@@ -1075,9 +1076,9 @@ TEST(parameter_extraction, simple_expressions) {
     p = std::make_shared<HDL_parameter>();
     p->set_name("simple_log_expr_p");
     p->set_type(Type_engine::create_primitive_type("implicit"));
-    call = HDL_function_call("$clog2");
-    call.add_argument(std::make_shared<Identifier_token>(qualified_identifier("add_expr_p")));
-    p->set_raw_value(std::make_shared<HDL_function_call>(call));
+    call = std::make_shared<HDL_builtin_function>(HDL_builtin_function::function::clog2);
+    call->add_argument(std::make_shared<Identifier_token>(qualified_identifier("add_expr_p")));
+    p->set_raw_value(call);
 
     check_params.insert(p);
 
@@ -2058,9 +2059,9 @@ TEST(parameter_extraction, complex_ternary_conditional) {
     e.set_rhs(std::make_shared<Numeric_token>("1"));
     e.set_operation(Expression_v2::greater);
     t.set_condition(std::make_shared<Expression_v2>(e));
-    HDL_function_call c("$clog2");
-    c.add_argument(std::make_shared<Identifier_token>(qualified_identifier("NM")));
-    t.set_true_value(std::make_shared<HDL_function_call>(c));
+    auto c = std::make_shared<HDL_builtin_function>(HDL_builtin_function::function::clog2);
+    c->add_argument(std::make_shared<Identifier_token>(qualified_identifier("NM")));
+    t.set_true_value(c);
     t.set_false_value(std::make_shared<Numeric_token>("1"));
 
     p->set_raw_value(std::make_shared<Ternary>(t));
