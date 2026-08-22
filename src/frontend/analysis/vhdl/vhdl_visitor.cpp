@@ -303,6 +303,32 @@ void vhdl_visitor::exitActual_part(mgp_vh::vhdlParser::Actual_partContext *ctx) 
     }
 }
 
+void vhdl_visitor::enterQualified_expression(
+        mgp_vh::vhdlParser::Qualified_expressionContext *ctx) {
+    if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
+
+    // VHDL qualified expression / type conversion: `type'(expr)`. The content
+    // is parenthesized, so it is an expression-sized cast.
+    params_factory.start_cast(true);
+
+    if (ctx->type_mark() && ctx->type_mark()->name()) {
+        auto nm = ctx->type_mark()->name();
+        std::string type_name;
+        if (nm->name_literal() && nm->name_literal()->identifier())
+            type_name = canon(nm->name_literal()->identifier()->getText());
+        else if (nm->suffix())
+            type_name = canon(nm->suffix()->getText()); // pkg.type
+        if (!type_name.empty())
+            params_factory.set_cast_type(type_name);
+    }
+}
+
+void vhdl_visitor::exitQualified_expression(
+        mgp_vh::vhdlParser::Qualified_expressionContext *ctx) {
+    if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
+    params_factory.stop_cast();
+}
+
 void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContext *ctx) {
     if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
 

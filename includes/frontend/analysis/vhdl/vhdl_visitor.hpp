@@ -63,6 +63,8 @@ public:
     void exitChoices(mgp_vh::vhdlParser::ChoicesContext *ctx) override;
     void enterActual_part(mgp_vh::vhdlParser::Actual_partContext *ctx) override;
     void exitActual_part(mgp_vh::vhdlParser::Actual_partContext *ctx) override;
+    void enterQualified_expression(mgp_vh::vhdlParser::Qualified_expressionContext *ctx) override;
+    void exitQualified_expression(mgp_vh::vhdlParser::Qualified_expressionContext *ctx) override;
 
     std::vector<std::shared_ptr<hdl_statement_base>> get_entities() {return entities;}
 private:

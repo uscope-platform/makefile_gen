@@ -23,6 +23,7 @@
 #include "data_model/HDL/types/HDL_simple_type.hpp"
 #include "data_model/HDL/parameters/components/Expression_v2.hpp"
 #include "data_model/HDL/parameters/components/Concatenation.hpp"
+#include "data_model/HDL/parameters/components/Cast.hpp"
 #include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
 #include "data_model/HDL/parameters/components/token/Real_token.hpp"
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
@@ -509,4 +510,48 @@ TEST(vhdl_analyzer, builtin_function_unknown_does_not_crash) {
     auto res = parse_first_entity("entity top is\n    generic ( V : integer := foo(3) );\nend top;\n");
     auto param = res->get_parameters().get("v");
     ASSERT_NE(param, nullptr);
+}
+
+TEST(vhdl_analyzer, qualified_expression_cast) {
+    // `integer'(...)`/`natural'(...)` convert to an integer (real→int rounds).
+    EXPECT_EQ(eval_generic("V : integer := integer'(5)", "v"), 5);
+    EXPECT_EQ(eval_generic("V : integer := natural'(2)", "v"), 2);
+    // `real'(...)` converts to real.
+    EXPECT_EQ(eval_generic_double("V : real := real'(5)", "v"), 5.0);
+    EXPECT_EQ(eval_generic_double("V : real := real'(2.5)", "v"), 2.5);
+    // `boolean'(...)` normalizes to 0/1.
+    EXPECT_EQ(eval_generic("V : integer := boolean'(0)", "v"), 0);
+    EXPECT_EQ(eval_generic("V : integer := boolean'(3)", "v"), 1);
+}
+
+TEST(vhdl_analyzer, qualified_expression_cast_golden) {
+    auto test_pattern = R"(
+entity top is
+    generic ( V : integer := integer'(7) );
+end top;
+)";
+    auto res = parse_first_entity(test_pattern);
+
+    auto cast = std::make_shared<Cast>();
+    cast->set_type_cast();
+    cast->set_target_type("integer");
+    cast->set_content(std::make_shared<Numeric_token>("7"));
+
+    hdl_resource_statement golden;
+    golden.set_name("top");
+    golden.set_type(module);
+    golden.set_line_n(2);
+    golden.add_parameter(make_integer_param("v", cast));
+
+    ASSERT_EQ(*res, golden);
+}
+
+TEST(vhdl_analyzer, cast_transforms_value) {
+    // real -> integer rounds.
+    EXPECT_EQ(eval_generic("V : integer := integer'(2.9)", "v"), 3);
+    EXPECT_EQ(eval_generic("V : integer := integer'(2.2)", "v"), 2);
+    // integer -> real widens the representation.
+    EXPECT_EQ(eval_generic_double("V : real := real'(7)", "v"), 7.0);
+    // boolean'(non-zero) -> 1 collapses to a 1-bit truth value.
+    EXPECT_EQ(eval_generic("V : integer := boolean'(5)", "v"), 1);
 }

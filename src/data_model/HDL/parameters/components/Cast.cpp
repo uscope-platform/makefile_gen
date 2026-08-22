@@ -61,7 +61,8 @@ std::expected<resolved_parameter, solver_errors> Cast::evaluate(const std::map<q
             }
             return type_cast_engine::to_unsigned(content_val.value().get_integer(), container);
         }
-        if (target_type == "int"){
+        if (target_type == "int" || target_type == "integer" ||
+            target_type == "natural" || target_type == "positive") {
             if (content_val.value().is_real()) {
                 return type_cast_engine::to_int(content_val.value().get_real(), container);
             } else if (content_val.value().is_integer()) {
@@ -70,6 +71,27 @@ std::expected<resolved_parameter, solver_errors> Cast::evaluate(const std::map<q
             spdlog::warn("Casting of non scalar integer values is not supported");
             return std::unexpected{wrong_type};
         }
+        if (target_type == "real") {
+            if (content_val.value().is_real()) {
+                return content_val.value().get_real();
+            } else if (content_val.value().is_integer()) {
+                return content_val.value().get_integer().to_double();
+            }
+            spdlog::warn("Casting of non scalar numeric values is not supported");
+            return std::unexpected{wrong_type};
+        }
+        if (target_type == "boolean") {
+            if (content_val.value().is_integer()) {
+                return static_cast<hdl_integer>(content_val.value().get_integer() != 0);
+            }
+            if (content_val.value().is_real()) {
+                return static_cast<hdl_integer>(content_val.value().get_real() != 0.0);
+            }
+            spdlog::warn("Casting of non scalar numeric values is not supported");
+            return std::unexpected{wrong_type};
+        }
+        spdlog::warn("Cast to unsupported type '{}' not evaluated, defaulting to 0", target_type);
+        return 0;
     } else {
         auto content_val = content->evaluate(context);
         if (!content_val.has_value()) return std::unexpected{missing_value};
