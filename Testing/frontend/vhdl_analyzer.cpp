@@ -555,3 +555,82 @@ TEST(vhdl_analyzer, cast_transforms_value) {
     // boolean'(non-zero) -> 1 collapses to a 1-bit truth value.
     EXPECT_EQ(eval_generic("V : integer := boolean'(5)", "v"), 1);
 }
+
+namespace {
+    // Parse a generic default and return the resolved type of the parameter.
+    std::shared_ptr<hdl_type> generic_type(const std::string &decl_body, const std::string &gname) {
+        std::string pattern = "entity top is\n    generic ( " + decl_body + " );\nend top;\n";
+        auto res = parse_first_entity(pattern);
+        auto param = res->get_parameters().get(gname);
+        if (!param) return nullptr;
+        return param->get_type();
+    }
+
+    dimension_t make_packed_dim(const std::string &first, const std::string &second) {
+        dimension_t d;
+        d.first_bound = std::make_shared<Numeric_token>(first);
+        d.second_bound = std::make_shared<Numeric_token>(second);
+        d.packed = true;
+        return d;
+    }
+
+    // Golden HDL_simple_type check object.
+    HDL_simple_type make_simple_type(const std::string &name, bool is_signed, bool is_real,
+                                     std::vector<dimension_t> packed = {}) {
+        HDL_simple_type t;
+        t.set_type_name(name);
+        t.set_signed(is_signed);
+        t.set_real(is_real);
+        t.set_packed_dimensions(packed);
+        return t;
+    }
+}
+
+TEST(vhdl_analyzer, type_vector_range) {
+    ASSERT_EQ(generic_type("V : std_logic_vector(7 downto 0)", "v")->as<HDL_simple_type>(),
+        make_simple_type("std_logic_vector", false, false, {make_packed_dim("7", "0")}));
+    ASSERT_EQ(generic_type("W : std_logic_vector(31 downto 0)", "w")->as<HDL_simple_type>(),
+        make_simple_type("std_logic_vector", false, false, {make_packed_dim("31", "0")}));
+    ASSERT_EQ(generic_type("U : unsigned(3 downto 0)", "u")->as<HDL_simple_type>(),
+        make_simple_type("unsigned", false, false, {make_packed_dim("3", "0")}));
+    ASSERT_EQ(generic_type("S : signed(7 downto 0)", "s")->as<HDL_simple_type>(),
+        make_simple_type("signed", true, false, {make_packed_dim("7", "0")}));
+}
+
+TEST(vhdl_analyzer, type_ascending_range) {
+    // `0 to 7` ascending produces the same width as `7 downto 0`.
+    ASSERT_EQ(generic_type("V : std_logic_vector(0 to 7)", "v")->as<HDL_simple_type>(),
+        make_simple_type("std_logic_vector", false, false, {make_packed_dim("0", "7")}));
+}
+
+TEST(vhdl_analyzer, type_scalar_builtins) {
+    ASSERT_EQ(generic_type("N : integer", "n")->as<HDL_simple_type>(),
+        make_simple_type("integer", true, false));
+    ASSERT_EQ(generic_type("X : real", "x")->as<HDL_simple_type>(),
+        make_simple_type("real", false, true));
+    ASSERT_EQ(generic_type("B : std_logic", "b")->as<HDL_simple_type>(),
+        make_simple_type("std_logic", false, false));
+}
+
+TEST(vhdl_analyzer, type_compound_range_bound) {
+    // A symbolic/compound bound like (N-1) downto 0 builds an expression bound.
+    auto test_pattern = R"(
+entity top is
+    generic ( N : integer := 8;
+              V : std_logic_vector(N-1 downto 0) );
+end top;
+)";
+    auto res = parse_first_entity(test_pattern);
+    auto param = res->get_parameters().get("v");
+    ASSERT_NE(param, nullptr);
+
+    auto bound = make_binary(Expression_v2::subtract,
+                             std::make_shared<Identifier_token>(qualified_identifier("n")),
+                             std::make_shared<Numeric_token>("1"));
+    dimension_t dim;
+    dim.first_bound = bound;
+    dim.second_bound = std::make_shared<Numeric_token>("0");
+    dim.packed = true;
+    ASSERT_EQ(param->get_type()->as<HDL_simple_type>(),
+        make_simple_type("std_logic_vector", false, false, {dim}));
+}

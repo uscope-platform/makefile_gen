@@ -104,6 +104,7 @@ target_sources(ananke_lib
     frontend/analysis/vhdl/vhdl_analyzer.cpp
     frontend/analysis/system_verilog/documentation_analyzer.cpp
     frontend/analysis/vhdl/vhdl_visitor.cpp
+    frontend/analysis/vhdl/vhdl_type_engine.cpp
     frontend/analysis/system_verilog/preprocessor/sv_preprocessor.cpp
     frontend/analysis/system_verilog/preprocessor/source_mapper.cpp
     frontend/analysis/system_verilog/preprocessor/conditional_solver.cpp

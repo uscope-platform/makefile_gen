@@ -26,6 +26,7 @@
 #include "data_model/HDL/factories/HDL_modules_factory.hpp"
 #include "data_model/HDL/factories/HDL_parameters_factory.hpp"
 #include "data_model/HDL/parameters/components/HDL_builtin_function.hpp"
+#include "frontend/analysis/vhdl/vhdl_type_engine.hpp"
 
 #include "mgp_vh/vhdlParserBaseListener.h"
 #include "mgp_vh/vhdlParser.h"
@@ -65,6 +66,11 @@ public:
     void exitActual_part(mgp_vh::vhdlParser::Actual_partContext *ctx) override;
     void enterQualified_expression(mgp_vh::vhdlParser::Qualified_expressionContext *ctx) override;
     void exitQualified_expression(mgp_vh::vhdlParser::Qualified_expressionContext *ctx) override;
+    void exitType_mark(mgp_vh::vhdlParser::Type_markContext *ctx) override;
+    void enterIndex_constraint(mgp_vh::vhdlParser::Index_constraintContext *ctx) override;
+    void exitIndex_constraint(mgp_vh::vhdlParser::Index_constraintContext *ctx) override;
+    void enterExplicit_range(mgp_vh::vhdlParser::Explicit_rangeContext *ctx) override;
+    void exitExplicit_range(mgp_vh::vhdlParser::Explicit_rangeContext *ctx) override;
 
     std::vector<std::shared_ptr<hdl_statement_base>> get_entities() {return entities;}
 private:
@@ -74,11 +80,14 @@ private:
     std::shared_ptr<hdl_type> make_generic_type(mgp_vh::vhdlParser::Subtype_indicationContext *type);
     std::shared_ptr<Expression_base> make_vhdl_value(const std::string &text);
     std::shared_ptr<Expression_base> make_character_value(const std::string &text);
+    std::shared_ptr<Expression_base> make_numeric_value(mgp_vh::vhdlParser::Numeric_literalContext *ctx);
     bool is_in_generic_expression() const;
     static bool is_aggregate(mgp_vh::vhdlParser::AggregateContext *ctx);
     static bool simple_is_aggregate(mgp_vh::vhdlParser::Simple_expressionContext *ctx);
     static bool has_expr_operator(mgp_vh::vhdlParser::ExpressionContext *ctx);
     static bool simple_is_nonleaf(mgp_vh::vhdlParser::Simple_expressionContext *ctx);
+    static std::optional<Expression_v2::expression_operator> simple_expression_op(
+        mgp_vh::vhdlParser::Simple_expressionContext *ctx);
     static bool is_function_call(mgp_vh::vhdlParser::NameContext *nm);
     static std::string extract_call_name(mgp_vh::vhdlParser::NameContext *nm);
     static bool is_vhdl_builtin(const std::string &name);
@@ -90,9 +99,11 @@ private:
     bool in_generic_clause = false;
     bool in_subtype_indication = false;
     bool in_aggregate_choices = false;
+    std::shared_ptr<hdl_type> pending_resolved_type;
 
     HDL_modules_factory modules_factory;
     HDL_parameters_factory params_factory;
+    vhdl_type_engine type_engine;
 };
 
 

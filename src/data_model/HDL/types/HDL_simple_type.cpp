@@ -57,11 +57,21 @@ parameter_deps_t HDL_simple_type::get_dependencies() {
 std::optional<resolved_type> HDL_simple_type::evaluate_type(const std::map<qualified_identifier, resolved_parameter> &context) {
     resolved_type result;
     result.is_real = is_real;
+    auto span_size = [](const hdl_integer &f_b, const hdl_integer &s_b) -> hdl_integer {
+        // Width of a range = |first - second| + 1, computed without relying on
+        // std::abs(hdl_integer), which is not found by qualified lookup.
+        auto a = f_b.to_wide();
+        auto b = s_b.to_wide();
+        auto span = a > b ? (a - b) : (b - a);
+        hdl_integer diff;
+        diff.set_value(span + 1);
+        return diff;
+    };
     for (auto &dim: unpacked_dimensions) {
         auto f_b = dim.first_bound->evaluate(context);
         auto s_b = dim.second_bound->evaluate(context);
         if (!(f_b.has_value() && s_b.has_value()) || !f_b.value().is_integer() || !s_b.value().is_integer()) return std::nullopt;
-        auto diff = std::abs(f_b.value().get_integer() - s_b.value().get_integer())+1;
+        auto diff = span_size(f_b.value().get_integer(), s_b.value().get_integer());
         result.unpacked_sizes.push_back(diff.get_value());
         result.unpacked_ascending.push_back(f_b.value().get_integer() < s_b.value().get_integer());
         result.unpacked_left.push_back(f_b.value().get_integer().get_value());
@@ -71,7 +81,7 @@ std::optional<resolved_type> HDL_simple_type::evaluate_type(const std::map<quali
         auto f_b = dim.first_bound->evaluate(context);
         auto s_b = dim.second_bound->evaluate(context);
         if (!(f_b.has_value() && s_b.has_value()) || !f_b.value().is_integer() || !s_b.value().is_integer()) return std::nullopt;
-        auto diff = std::abs(f_b.value().get_integer() - s_b.value().get_integer())+1;
+        auto diff = span_size(f_b.value().get_integer(), s_b.value().get_integer());
         result.packed_sizes.push_back(diff.get_value());
         result.packed_ascending.push_back(f_b.value().get_integer() < s_b.value().get_integer());
         result.packed_left.push_back(f_b.value().get_integer().get_value());

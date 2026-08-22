@@ -132,16 +132,24 @@ void vhdl_visitor::exitInterface_signal_declaration(
 }
 
 void vhdl_visitor::enterSubtype_indication(mgp_vh::vhdlParser::Subtype_indicationContext *ctx) {
-    if (in_generic_clause) in_subtype_indication = true;
+    if (in_generic_clause) {
+        in_subtype_indication = true;
+        type_engine.start_type_resolution();
+    }
 }
 
 void vhdl_visitor::exitSubtype_indication(mgp_vh::vhdlParser::Subtype_indicationContext *ctx) {
-    if (in_generic_clause) in_subtype_indication = false;
+    if (in_generic_clause) {
+        in_subtype_indication = false;
+        pending_resolved_type = type_engine.finish_type_resolution();
+    }
 }
 
 void vhdl_visitor::start_generic(mgp_vh::vhdlParser::Identifier_listContext *ids,
                                  mgp_vh::vhdlParser::Subtype_indicationContext *type) {
     if (!ids || ids->identifier().empty()) return;
+    // The type is resolved by the type engine during the subtype walk; set a
+    // provisional type now and override it in finalize_generic.
     params_factory.set_type(make_generic_type(type));
     params_factory.start_param_assignment();
     params_factory.new_parameter(canon(ids->identifier(0)->getText()));
@@ -155,6 +163,9 @@ void vhdl_visitor::finalize_generic(mgp_vh::vhdlParser::Identifier_listContext *
     // first name; the remaining names in the list share the same type/default,
     // so clone it.
     auto base = params_factory.get_parameter();
+    if (pending_resolved_type)
+        base->set_type(pending_resolved_type);
+    pending_resolved_type = nullptr;
     modules_factory.add_parameter(base);
     for (size_t i = 1; i < ids->identifier().size(); i++) {
         auto clone = std::make_shared<HDL_parameter>(*base);
@@ -187,6 +198,37 @@ bool vhdl_visitor::has_expr_operator(mgp_vh::vhdlParser::ExpressionContext *ctx)
 bool vhdl_visitor::simple_is_nonleaf(mgp_vh::vhdlParser::Simple_expressionContext *ctx) {
     return ctx && (ctx->DOUBLESTAR() || ctx->KW_ABS() || ctx->KW_NOT() || ctx->logical_operator()
         || ctx->sign() || ctx->multiplying_operator() || ctx->adding_operator());
+}
+
+std::optional<Expression_v2::expression_operator> vhdl_visitor::simple_expression_op(
+        mgp_vh::vhdlParser::Simple_expressionContext *ctx) {
+    if (!ctx || !simple_is_nonleaf(ctx)) return std::nullopt;
+
+    if (ctx->DOUBLESTAR()) return Expression_v2::power;
+    if (ctx->KW_ABS()) return Expression_v2::abs_value;
+    if (ctx->KW_NOT()) return Expression_v2::bitwise_neg;
+    if (ctx->logical_operator()) {
+        // VHDL allows a logical operator as a unary reduction over a vector.
+        if (ctx->logical_operator()->KW_AND() || ctx->logical_operator()->KW_NAND())
+            return Expression_v2::reduction_and;
+        if (ctx->logical_operator()->KW_OR() || ctx->logical_operator()->KW_NOR())
+            return Expression_v2::reduction_or;
+        return Expression_v2::reduction_xor;
+    }
+    if (ctx->multiplying_operator()) {
+        if (ctx->multiplying_operator()->DIV()) return Expression_v2::divide;
+        if (ctx->multiplying_operator()->KW_MOD()) return Expression_v2::v_mod;   // floor mod
+        if (ctx->multiplying_operator()->KW_REM()) return Expression_v2::modulo;  // truncated rem
+        return Expression_v2::multiply;
+    }
+    if (ctx->adding_operator()) {
+        if (ctx->adding_operator()->PLUS()) return Expression_v2::add;
+        if (ctx->adding_operator()->MINUS()) return Expression_v2::subtract;
+        spdlog::warn("VHDL concatenation (&) in generic default not supported, ignored");
+        return std::nullopt;
+    }
+    if (ctx->sign() && ctx->sign()->MINUS()) return Expression_v2::subtract;
+    return std::nullopt;
 }
 
 void vhdl_visitor::enterExpression(mgp_vh::vhdlParser::ExpressionContext *ctx) {
@@ -228,6 +270,11 @@ void vhdl_visitor::exitExpression(mgp_vh::vhdlParser::ExpressionContext *ctx) {
 }
 
 void vhdl_visitor::enterSimple_expression(mgp_vh::vhdlParser::Simple_expressionContext *ctx) {
+    // Range bound inside a type constraint: route into the type engine.
+    if (type_engine.in_range()) {
+        type_engine.start_bound_expression(simple_is_nonleaf(ctx));
+        return;
+    }
     // An unambiguous aggregate primary is handled by enter/exitAggregate; skip
     // bracketing it here so the aggregate elements reach level 0 independently.
     if (is_in_generic_expression() && !simple_is_aggregate(ctx))
@@ -235,37 +282,17 @@ void vhdl_visitor::enterSimple_expression(mgp_vh::vhdlParser::Simple_expressionC
 }
 
 void vhdl_visitor::exitSimple_expression(mgp_vh::vhdlParser::Simple_expressionContext *ctx) {
+    // Range bound inside a type constraint: route into the type engine.
+    if (type_engine.in_range()) {
+        if (auto op = simple_expression_op(ctx); op.has_value())
+            type_engine.set_range_operation(op.value());
+        type_engine.stop_bound_expression(simple_is_nonleaf(ctx));
+        return;
+    }
     if (!is_in_generic_expression() || simple_is_aggregate(ctx)) return;
 
-    if (simple_is_nonleaf(ctx)) {
-        if (ctx->DOUBLESTAR()) {
-            params_factory.set_operation(Expression_v2::power);
-        } else if (ctx->KW_ABS()) {
-            params_factory.set_operation(Expression_v2::abs_value);
-        } else if (ctx->KW_NOT()) {
-            params_factory.set_operation(Expression_v2::bitwise_neg);
-        } else if (ctx->logical_operator()) {
-            // VHDL allows a logical operator as a unary reduction over a vector.
-            if (ctx->logical_operator()->KW_AND() || ctx->logical_operator()->KW_NAND())
-                params_factory.set_operation(Expression_v2::reduction_and);
-            else if (ctx->logical_operator()->KW_OR() || ctx->logical_operator()->KW_NOR())
-                params_factory.set_operation(Expression_v2::reduction_or);
-            else
-                params_factory.set_operation(Expression_v2::reduction_xor);
-        } else if (ctx->multiplying_operator()) {
-            auto op = Expression_v2::multiply;
-            if (ctx->multiplying_operator()->DIV()) op = Expression_v2::divide;
-            else if (ctx->multiplying_operator()->KW_MOD()) op = Expression_v2::v_mod;   // floor mod
-            else if (ctx->multiplying_operator()->KW_REM()) op = Expression_v2::modulo;  // truncated rem
-            params_factory.set_operation(op);
-        } else if (ctx->adding_operator()) {
-            if (ctx->adding_operator()->PLUS()) params_factory.set_operation(Expression_v2::add);
-            else if (ctx->adding_operator()->MINUS()) params_factory.set_operation(Expression_v2::subtract);
-            else spdlog::warn("VHDL concatenation (&) in generic default not supported, ignored");
-        } else if (ctx->sign() && ctx->sign()->MINUS()) {
-            params_factory.set_operation(Expression_v2::subtract);
-        }
-    }
+    if (auto op = simple_expression_op(ctx); op.has_value())
+        params_factory.set_operation(op.value());
     params_factory.stop_expression_new(simple_is_nonleaf(ctx));
 }
 
@@ -329,7 +356,47 @@ void vhdl_visitor::exitQualified_expression(
     params_factory.stop_cast();
 }
 
+void vhdl_visitor::exitType_mark(mgp_vh::vhdlParser::Type_markContext *ctx) {
+    if (!type_engine.active()) return;
+    // A type_mark is a `name`, which may include a slice/constraint suffix such
+    // as `std_logic_vector(7 downto 0)`; walk down to the leaf identifier.
+    auto nm = ctx->name();
+    while (nm) {
+        if (nm->name_literal() && nm->name_literal()->identifier()) {
+            type_engine.set_type_mark(canon(nm->name_literal()->identifier()->getText()));
+            return;
+        }
+        if (nm->suffix()) {
+            type_engine.set_type_mark(canon(nm->suffix()->getText())); // pkg.type
+            return;
+        }
+        nm = nm->name();
+    }
+}
+
+void vhdl_visitor::enterIndex_constraint(mgp_vh::vhdlParser::Index_constraintContext *ctx) {
+    type_engine.start_array_constraint();
+}
+
+void vhdl_visitor::exitIndex_constraint(mgp_vh::vhdlParser::Index_constraintContext *ctx) {
+    type_engine.stop_array_constraint();
+}
+
+void vhdl_visitor::enterExplicit_range(mgp_vh::vhdlParser::Explicit_rangeContext *ctx) {
+    type_engine.start_range();
+}
+
+void vhdl_visitor::exitExplicit_range(mgp_vh::vhdlParser::Explicit_rangeContext *ctx) {
+    bool descending = ctx->direction() && ctx->direction()->KW_DOWNTO() != nullptr;
+    type_engine.stop_range(descending);
+}
+
 void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContext *ctx) {
+    // Range bound inside a type constraint: route into the type engine.
+    if (type_engine.in_range()) {
+        type_engine.add_range_component(make_numeric_value(ctx));
+        return;
+    }
     if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
 
     // A function call: finalize it (the argument expressions have been routed
@@ -364,6 +431,24 @@ void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContex
     params_factory.add_component(make_vhdl_value(ctx->getText()));
 }
 
+std::shared_ptr<Expression_base> vhdl_visitor::make_numeric_value(
+        mgp_vh::vhdlParser::Numeric_literalContext *ctx) {
+    if (!ctx) return nullptr;
+    // A bare identifier: a reference to another generic/constant.
+    if (ctx->name() && ctx->name()->name_literal() && ctx->name()->name_literal()->identifier())
+        return std::make_shared<Identifier_token>(
+            qualified_identifier(canon(ctx->name()->name_literal()->identifier()->getText())));
+    // Character/string literals also arrive through the `name` rule.
+    if (ctx->name() && ctx->name()->name_literal()) {
+        auto lit = ctx->name()->name_literal();
+        if (lit->CHARACTER_LITERAL())
+            return make_character_value(lit->CHARACTER_LITERAL()->getText());
+        if (lit->operator_symbol() && lit->operator_symbol()->STRING_LITERAL())
+            return std::make_shared<String_token>(lit->operator_symbol()->STRING_LITERAL()->getText());
+    }
+    return make_vhdl_value(ctx->getText());
+}
+
 bool vhdl_visitor::is_function_call(mgp_vh::vhdlParser::NameContext *nm) {
     return nm && nm->association_list() != nullptr;
 }
@@ -386,9 +471,13 @@ bool vhdl_visitor::is_vhdl_builtin(const std::string &name) {
 }
 
 void vhdl_visitor::exitPrimary(mgp_vh::vhdlParser::PrimaryContext *ctx) {
-    if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
     if (ctx->BIT_STRING_LITERAL()) {
         // Treat a bit string literal as a sized numeric value (e.g. x"FF").
+        if (type_engine.in_range()) {
+            type_engine.add_range_component(make_vhdl_value(ctx->BIT_STRING_LITERAL()->getText()));
+            return;
+        }
+        if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
         params_factory.add_component(make_vhdl_value(ctx->BIT_STRING_LITERAL()->getText()));
     }
 }
