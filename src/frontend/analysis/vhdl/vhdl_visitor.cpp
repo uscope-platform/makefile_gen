@@ -122,6 +122,7 @@ void vhdl_visitor::exitPort_map_aspect(mgp_vh::vhdlParser::Port_map_aspectContex
 }
 
 void vhdl_visitor::enterAssociation_element(mgp_vh::vhdlParser::Association_elementContext *ctx) {
+    if (in_name_selector) return;   // association element inside an index (`sig(0)`)
     if (in_instance_generic_map) {
         if (!ctx->formal_part()) {
             spdlog::warn("VHDL positional generic map not supported, ignored");
@@ -148,6 +149,7 @@ void vhdl_visitor::enterAssociation_element(mgp_vh::vhdlParser::Association_elem
 }
 
 void vhdl_visitor::exitAssociation_element(mgp_vh::vhdlParser::Association_elementContext *ctx) {
+    if (in_name_selector) return;   // association element inside an index (`sig(0)`)
     if (instance_override_active) {
         params_factory.stop_param_override();
         auto param = params_factory.get_parameter();
@@ -160,6 +162,100 @@ void vhdl_visitor::exitAssociation_element(mgp_vh::vhdlParser::Association_eleme
         if (formal)
             deps_factory.add_port(canon(formal->getText()));
     }
+}
+
+void vhdl_visitor::enterAssociation_list(mgp_vh::vhdlParser::Association_listContext *ctx) {
+    // An indexed name in a port actual (`sig(0)`) uses the association_list rule;
+    // the enclosing map's list is entered before any port is started.
+    if (in_instance_port_map && deps_factory.is_in_port() && !in_name_selector) {
+        in_name_selector = true;
+        pending_index = true;
+        pending_index_parts.clear();
+    }
+}
+
+void vhdl_visitor::exitAssociation_list(mgp_vh::vhdlParser::Association_listContext *ctx) {
+    if (in_name_selector && !pending_slice) in_name_selector = false;
+}
+
+void vhdl_visitor::enterName_slice_part(mgp_vh::vhdlParser::Name_slice_partContext *ctx) {
+    if (!(in_instance_port_map && deps_factory.is_in_port())) return;
+    in_name_selector = true;
+    pending_slice = true;
+    pending_slice_first.reset();
+    pending_slice_second.reset();
+    pending_slice_dir.clear();
+}
+
+void vhdl_visitor::exitName_slice_part(mgp_vh::vhdlParser::Name_slice_partContext *ctx) {
+    if (in_name_selector) in_name_selector = false;
+}
+
+void vhdl_visitor::enterDirection(mgp_vh::vhdlParser::DirectionContext *ctx) {
+    if (in_name_selector && in_instance_port_map && deps_factory.is_in_port())
+        pending_slice_dir = ctx->KW_TO() ? "to" : "downto";
+}
+
+void vhdl_visitor::route_port_slice(const std::string &base, const std::string &first,
+                                    const std::string &dir, const std::string &second) {
+    if (!deps_factory.is_valid_dependency() || !deps_factory.is_in_port()) return;
+    deps_factory.start_scalar_net(base);
+    deps_factory.start_array_range();
+    deps_factory.start_expression(false);
+    deps_factory.add_connection_element(first);
+    deps_factory.stop_expression(false);
+    deps_factory.advance_array_range_phase(dir == "to" ? "+" : "-");
+    deps_factory.start_expression(false);
+    deps_factory.add_connection_element(second);
+    deps_factory.stop_expression(false);
+    deps_factory.stop_array_range();
+}
+
+void vhdl_visitor::route_port_index(const std::string &base, const std::vector<std::string> &idx) {
+    if (!deps_factory.is_valid_dependency() || !deps_factory.is_in_port()) return;
+    deps_factory.start_scalar_net(base);
+    deps_factory.start_bit_selection();
+    for (auto &i : idx) deps_factory.add_connection_element(i);
+    deps_factory.stop_bit_selection();
+}
+
+void vhdl_visitor::clear_pending_selector() {
+    pending_slice = false;
+    pending_index = false;
+    pending_slice_first.reset();
+    pending_slice_second.reset();
+    pending_slice_dir.clear();
+    pending_index_parts.clear();
+}
+
+void vhdl_visitor::route_port_actual(mgp_vh::vhdlParser::Numeric_literalContext *ctx) {
+    if (in_name_selector) {
+        // A bound/index inside a slice (`sig(7 downto 0)`) or index (`sig(0)`):
+        // capture it for the enclosing name rather than routing it as a net.
+        if (pending_slice) {
+            if (!pending_slice_first.has_value()) pending_slice_first = canon(ctx->getText());
+            else if (!pending_slice_second.has_value()) pending_slice_second = canon(ctx->getText());
+        } else if (pending_index) {
+            pending_index_parts.push_back(canon(ctx->getText()));
+        }
+        return;
+    }
+    // The base of an indexed/sliced name is the text up to the first `(` (the
+    // name_literal lives on the innermost `name` child, not the outer one).
+    auto full_text = ctx->getText();
+    auto paren = full_text.find('(');
+    std::string base = paren == std::string::npos ? full_text : full_text.substr(0, paren);
+    if (pending_slice && pending_slice_first.has_value() && pending_slice_second.has_value()) {
+        route_port_slice(canon(base), *pending_slice_first, pending_slice_dir, *pending_slice_second);
+        clear_pending_selector();
+        return;
+    }
+    if (pending_index) {
+        route_port_index(canon(base), pending_index_parts);
+        clear_pending_selector();
+        return;
+    }
+    route_port_connection(canon(ctx->getText()));
 }
 
 void vhdl_visitor::route_port_connection(const std::string &text) {
@@ -420,7 +516,15 @@ void vhdl_visitor::enterNumeric_literal(mgp_vh::vhdlParser::Numeric_literalConte
 }
 
 void vhdl_visitor::enterActual_part(mgp_vh::vhdlParser::Actual_partContext *ctx) {
-    if (in_instance_port_map) in_port_actual = true;
+    // `name ( actual_designator )` on the connection side is an indexed name
+    // (`sig(0)`); in a generic default it is a function call.
+    if (in_instance_port_map && deps_factory.is_in_port() && ctx->name() && ctx->LPAREN()) {
+        in_name_selector = true;
+        pending_index = true;
+        pending_index_base = canon(ctx->name()->getText());
+        pending_index_parts.clear();
+        return;
+    }
     if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
     // A nested function call parsed as `name ( actual_designator )` (e.g. the
     // `log2(N)` inside `ceil(log2(N))`) arrives here rather than through the
@@ -435,7 +539,12 @@ void vhdl_visitor::enterActual_part(mgp_vh::vhdlParser::Actual_partContext *ctx)
 }
 
 void vhdl_visitor::exitActual_part(mgp_vh::vhdlParser::Actual_partContext *ctx) {
-    if (in_instance_port_map) in_port_actual = false;
+    if (in_instance_port_map && deps_factory.is_in_port() && ctx->name() && ctx->LPAREN()) {
+        in_name_selector = false;
+        route_port_index(pending_index_base, pending_index_parts);
+        clear_pending_selector();
+        return;
+    }
     if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
     if (ctx->name() && ctx->LPAREN() && ctx->name()->name_literal() &&
         ctx->name()->name_literal()->identifier()) {
@@ -587,9 +696,8 @@ void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContex
         type_engine.add_range_component(make_numeric_value(ctx));
         return;
     }
-    // A port-map actual connection: route it into the dependency's net.
-    if (in_port_actual && deps_factory.is_in_port()) {
-        route_port_connection(ctx->getText());
+    if (in_instance_port_map && deps_factory.is_in_port()) {
+        route_port_actual(ctx);
         return;
     }
     if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
@@ -670,10 +778,6 @@ void vhdl_visitor::exitPrimary(mgp_vh::vhdlParser::PrimaryContext *ctx) {
         // Treat a bit string literal as a sized numeric value (e.g. x"FF").
         if (type_engine.in_range()) {
             type_engine.add_range_component(make_vhdl_value(ctx->BIT_STRING_LITERAL()->getText()));
-            return;
-        }
-        if (in_port_actual && deps_factory.is_in_port()) {
-            route_port_connection(ctx->BIT_STRING_LITERAL()->getText());
             return;
         }
         if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;

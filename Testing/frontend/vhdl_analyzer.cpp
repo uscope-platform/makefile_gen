@@ -1006,3 +1006,54 @@ end rtl;
 
     ASSERT_EQ(*res, expected);
 }
+
+TEST(vhdl_analyzer, instance_port_map_complex_actuals) {
+    auto test_pattern = R"(
+entity top is
+end top;
+architecture rtl of top is
+begin
+    u_sub : entity work.sub
+        port map (
+            DATA => data_bus(7 downto 0),
+            BIT  => flag(0),
+            MIX  => (a & b)
+        );
+end rtl;
+)";
+    auto res = parse_first_entity(test_pattern);
+
+    auto inst = make_instance("u_sub", "sub");
+    std::unordered_map<std::string, std::vector<HDL_net>> inst_ports;
+
+    HDL_net data_net("data_bus");
+    {
+        HDL_range range;
+        Expression_v2 accessor;
+        accessor.set_lhs(std::make_shared<Numeric_token>("7"));
+        range.accessor = accessor;
+        Expression_v2 bound;
+        bound.set_lhs(std::make_shared<Numeric_token>("0"));
+        range.range = bound;
+        range.type = HDL_range::decreasing_range;
+        data_net.set_range(range);
+    }
+    inst_ports["data"] = {data_net};
+
+    HDL_net flag_net("flag");
+    Expression_v2 index;
+    index.set_lhs(std::make_shared<Numeric_token>("0"));
+    flag_net.add_index_expression(index);
+    inst_ports["bit"] = {flag_net};
+
+    inst_ports["mix"] = {HDL_net("a"), HDL_net("b")};
+    inst->set_ports(inst_ports);
+
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_statement(inst);
+
+    ASSERT_EQ(*res, expected);
+}

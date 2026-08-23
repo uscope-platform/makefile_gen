@@ -89,6 +89,11 @@ public:
     void exitPort_map_aspect(mgp_vh::vhdlParser::Port_map_aspectContext *ctx) override;
     void enterAssociation_element(mgp_vh::vhdlParser::Association_elementContext *ctx) override;
     void exitAssociation_element(mgp_vh::vhdlParser::Association_elementContext *ctx) override;
+    void enterAssociation_list(mgp_vh::vhdlParser::Association_listContext *ctx) override;
+    void exitAssociation_list(mgp_vh::vhdlParser::Association_listContext *ctx) override;
+    void enterName_slice_part(mgp_vh::vhdlParser::Name_slice_partContext *ctx) override;
+    void exitName_slice_part(mgp_vh::vhdlParser::Name_slice_partContext *ctx) override;
+    void enterDirection(mgp_vh::vhdlParser::DirectionContext *ctx) override;
 
     std::vector<std::shared_ptr<hdl_statement_base>> get_entities() {return entities;}
 private:
@@ -98,6 +103,11 @@ private:
     void finalize_port(mgp_vh::vhdlParser::Interface_signal_declarationContext *ctx);
     static std::string instantiated_module_name(mgp_vh::vhdlParser::Component_instantiation_statementContext *ctx);
     void route_port_connection(const std::string &text);
+    void route_port_slice(const std::string &base, const std::string &first,
+                          const std::string &dir, const std::string &second);
+    void route_port_index(const std::string &base, const std::vector<std::string> &idx);
+    void route_port_actual(mgp_vh::vhdlParser::Numeric_literalContext *ctx);
+    void clear_pending_selector();
     std::shared_ptr<hdl_type> make_generic_type(mgp_vh::vhdlParser::Subtype_indicationContext *type);
     std::shared_ptr<Expression_base> make_vhdl_value(const std::string &text);
     std::shared_ptr<Expression_base> make_character_value(const std::string &text);
@@ -127,7 +137,14 @@ private:
     bool in_instance_generic_map = false;
     bool instance_override_active = false;
     bool in_instance_port_map = false;
-    bool in_port_actual = false;
+    bool in_name_selector = false;
+    bool pending_slice = false;
+    bool pending_index = false;
+    std::optional<std::string> pending_slice_first;
+    std::optional<std::string> pending_slice_second;
+    std::string pending_slice_dir;
+    std::string pending_index_base;
+    std::vector<std::string> pending_index_parts;
     vhdl_type_kind decl_context = vhdl_type_kind::none;
     std::string declared_type_name;
     std::string subtype_decl_name;
