@@ -235,6 +235,12 @@ TEST( analysis_test , vhdl_module) {
     check_res.set_name("half_adder");
     check_res.set_type(module);
     check_res.set_line_n(4);
+    std::unordered_map<std::string, HDL_port> ports;
+    ports["i_bit1"] = {input_port};
+    ports["i_bit2"] = {input_port};
+    ports["o_sum"] = {output_port};
+    ports["o_carry"] = {output_port};
+    check_res.set_ports(ports);
     auto stmt = std::make_shared<hdl_instance_statement>();
     stmt->set_name("and_component");
     stmt->set_type("andgate");

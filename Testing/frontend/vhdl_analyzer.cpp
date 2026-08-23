@@ -211,10 +211,17 @@ end rtl;
 
     auto res = parse_first_entity(test_pattern);
 
+    std::unordered_map<std::string, HDL_port> ports;
+    ports["i_bit1"] = {input_port};
+    ports["i_bit2"] = {input_port};
+    ports["o_sum"] = {output_port};
+    ports["o_carry"] = {output_port};
+
     hdl_resource_statement golden;
     golden.set_name("half_adder");
     golden.set_type(module);
     golden.set_line_n(5);
+    golden.set_ports(ports);
     golden.add_statement(make_instance("and_component", "andgate"));
 
     ASSERT_EQ(*res, golden);
@@ -746,4 +753,87 @@ end rtl;
     golden.set_packed_dimensions({{std::make_shared<Numeric_token>("0"), std::make_shared<Numeric_token>("3"), true}});
     ASSERT_EQ(t->as<HDL_simple_type>(), golden);
 
+}
+
+TEST(vhdl_analyzer, port_extraction_basic) {
+    auto test_pattern = R"(
+entity top is
+    port (
+        clk   : in std_logic;
+        rst   : in std_logic;
+        dout  : out std_logic_vector(7 downto 0);
+        din   : inout unsigned(3 downto 0)
+    );
+end top;
+)";
+    auto res = parse_first_entity(test_pattern);
+    auto ports = res->get_port_specs();
+
+    HDL_port in_port{input_port};
+    ASSERT_EQ(ports.at("clk"), in_port);
+    ASSERT_EQ(ports.at("rst"), in_port);
+
+    HDL_port out_port{output_port};
+    ASSERT_EQ(ports.at("dout"), out_port);
+
+    HDL_port io_port{inout_port};
+    ASSERT_EQ(ports.at("din"), io_port);
+}
+
+TEST(vhdl_analyzer, port_typed_name_list) {
+    // `a, b, c : in std_logic` shares one type across all names.
+    auto test_pattern = R"(
+entity top is
+    port (
+        a, b, c : in std_logic
+    );
+end top;
+)";
+    auto res = parse_first_entity(test_pattern);
+    auto ports = res->get_port_specs();
+    HDL_port expected{input_port};
+    ASSERT_EQ(ports.at("a"), expected);
+    ASSERT_EQ(ports.at("b"), expected);
+    ASSERT_EQ(ports.at("c"), expected);
+}
+
+TEST(vhdl_analyzer, port_modes) {
+    auto test_pattern = R"(
+entity top is
+    port (
+        i  : in std_logic;
+        o  : out std_logic;
+        io : inout std_logic;
+        b  : buffer std_logic
+    );
+end top;
+)";
+    auto res = parse_first_entity(test_pattern);
+    auto ports = res->get_port_specs();
+    ASSERT_EQ(ports.at("i").direction, input_port);
+    ASSERT_EQ(ports.at("o").direction, output_port);
+    ASSERT_EQ(ports.at("io").direction, inout_port);
+    // buffer is treated as output.
+    ASSERT_EQ(ports.at("b").direction, output_port);
+}
+
+TEST(vhdl_analyzer, generic_default_boolean_string) {
+    auto test_pattern = R"(
+entity top is
+    generic (
+        WIDTH : integer := 8;
+        FLAG  : boolean := true;
+        NAME  : string := "blinky"
+    );
+    port (
+        dout : out std_logic_vector(WIDTH - 1 downto 0)
+    );
+end top;
+)";
+    auto res = parse_first_entity(test_pattern);
+    ASSERT_EQ(res->get_parameters().size(), 3u);
+    auto flag = res->get_parameters().get("flag");
+    ASSERT_TRUE(flag->get_expression() != nullptr);
+    auto name = res->get_parameters().get("name");
+    ASSERT_TRUE(name->get_expression() != nullptr);
 }

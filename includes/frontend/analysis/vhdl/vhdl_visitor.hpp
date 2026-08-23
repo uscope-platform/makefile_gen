@@ -44,6 +44,8 @@ public:
 
     void enterGeneric_clause(mgp_vh::vhdlParser::Generic_clauseContext *ctx) override;
     void exitGeneric_clause(mgp_vh::vhdlParser::Generic_clauseContext *ctx) override;
+    void enterPort_clause(mgp_vh::vhdlParser::Port_clauseContext *ctx) override;
+    void exitPort_clause(mgp_vh::vhdlParser::Port_clauseContext *ctx) override;
     void enterInterface_constant_declaration(mgp_vh::vhdlParser::Interface_constant_declarationContext *ctx) override;
     void exitInterface_constant_declaration(mgp_vh::vhdlParser::Interface_constant_declarationContext *ctx) override;
     void enterInterface_signal_declaration(mgp_vh::vhdlParser::Interface_signal_declarationContext *ctx) override;
@@ -85,6 +87,7 @@ private:
     void start_generic(mgp_vh::vhdlParser::Identifier_listContext *ids,
                        mgp_vh::vhdlParser::Subtype_indicationContext *type);
     void finalize_generic(mgp_vh::vhdlParser::Identifier_listContext *ids);
+    void finalize_port(mgp_vh::vhdlParser::Interface_signal_declarationContext *ctx);
     std::shared_ptr<hdl_type> make_generic_type(mgp_vh::vhdlParser::Subtype_indicationContext *type);
     std::shared_ptr<Expression_base> make_vhdl_value(const std::string &text);
     std::shared_ptr<Expression_base> make_character_value(const std::string &text);
@@ -105,6 +108,7 @@ private:
     std::unordered_map<std::string, std::vector<std::shared_ptr<hdl_statement_base>>> statement_map;
     std::string current_architecture;
     bool in_generic_clause = false;
+    bool in_port_clause = false;
     bool in_subtype_indication = false;
     bool in_aggregate_choices = false;
     bool in_type_declaration = false;

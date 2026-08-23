@@ -125,6 +125,12 @@ TEST_F(repository_walker , directory_analysis) {
     vh_res.set_name("half_adder");
     vh_res.set_type(module);
     vh_res.set_line_n(4);
+    std::unordered_map<std::string, HDL_port> vh_ports;
+    vh_ports["i_bit1"] = {input_port};
+    vh_ports["i_bit2"] = {input_port};
+    vh_ports["o_sum"] = {output_port};
+    vh_ports["o_carry"] = {output_port};
+    vh_res.set_ports(vh_ports);
 
     res = d_store->get_file<hdl_file>(file_name)->get_content()[0]->as<hdl_resource_statement>();
     ASSERT_EQ(res, vh_res);

@@ -122,8 +122,8 @@ void vhdl_visitor::exitInterface_constant_declaration(
 void vhdl_visitor::enterInterface_signal_declaration(
         mgp_vh::vhdlParser::Interface_signal_declarationContext *ctx) {
     // A generic declared without the `constant` keyword (the common form,
-    // e.g. `N : integer := 8`) is parsed as an interface signal declaration.
-    // Only treat it as a generic when inside a generic clause.
+    // e.g. `N : integer := 8`) is parsed as an interface signal declaration;
+    // ports use the same rule. Distinguish by the enclosing clause.
     if (in_generic_clause)
         start_generic(ctx->identifier_list(), ctx->subtype_indication());
 }
@@ -132,6 +132,33 @@ void vhdl_visitor::exitInterface_signal_declaration(
         mgp_vh::vhdlParser::Interface_signal_declarationContext *ctx) {
     if (in_generic_clause)
         finalize_generic(ctx->identifier_list());
+    else if (in_port_clause)
+        finalize_port(ctx);
+}
+
+void vhdl_visitor::enterPort_clause(mgp_vh::vhdlParser::Port_clauseContext *ctx) {
+    in_port_clause = true;
+}
+
+void vhdl_visitor::exitPort_clause(mgp_vh::vhdlParser::Port_clauseContext *ctx) {
+    in_port_clause = false;
+}
+
+void vhdl_visitor::finalize_port(mgp_vh::vhdlParser::Interface_signal_declarationContext *ctx) {
+    if (!ctx->identifier_list()) return;
+    auto dir = raw_port;
+    if (ctx->signal_mode()) {
+        if (ctx->signal_mode()->KW_IN()) dir = input_port;
+        else if (ctx->signal_mode()->KW_OUT()) dir = output_port;
+        else if (ctx->signal_mode()->KW_INOUT()) dir = inout_port;
+        else if (ctx->signal_mode()->KW_BUFFER()) dir = output_port;   // treated as output
+        else if (ctx->signal_mode()->KW_LINKAGE()) dir = raw_port;
+    }
+    for (auto *id : ctx->identifier_list()->identifier()) {
+        HDL_port port;
+        port.direction = dir;
+        modules_factory.add_port(canon(id->getText()), port);
+    }
 }
 
 void vhdl_visitor::enterSubtype_indication(mgp_vh::vhdlParser::Subtype_indicationContext *ctx) {
