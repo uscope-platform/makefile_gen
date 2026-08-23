@@ -21,6 +21,9 @@
 #include "data_model/HDL/statement/hdl_statements.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/types/HDL_simple_type.hpp"
+#include "data_model/HDL/types/HDL_struct_type.hpp"
+#include "data_model/HDL/types/HDL_enum_type.hpp"
+#include "data_model/HDL/types/HDL_external_type.hpp"
 #include "data_model/HDL/parameters/components/Expression_v2.hpp"
 #include "data_model/HDL/parameters/components/Concatenation.hpp"
 #include "data_model/HDL/parameters/components/Cast.hpp"
@@ -565,51 +568,53 @@ namespace {
         if (!param) return nullptr;
         return param->get_type();
     }
-
-    dimension_t make_packed_dim(const std::string &first, const std::string &second) {
-        dimension_t d;
-        d.first_bound = std::make_shared<Numeric_token>(first);
-        d.second_bound = std::make_shared<Numeric_token>(second);
-        d.packed = true;
-        return d;
-    }
-
-    // Golden HDL_simple_type check object.
-    HDL_simple_type make_simple_type(const std::string &name, bool is_signed, bool is_real,
-                                     std::vector<dimension_t> packed = {}) {
-        HDL_simple_type t;
-        t.set_type_name(name);
-        t.set_signed(is_signed);
-        t.set_real(is_real);
-        t.set_packed_dimensions(packed);
-        return t;
-    }
 }
 
 TEST(vhdl_analyzer, type_vector_range) {
-    ASSERT_EQ(generic_type("V : std_logic_vector(7 downto 0)", "v")->as<HDL_simple_type>(),
-        make_simple_type("std_logic_vector", false, false, {make_packed_dim("7", "0")}));
-    ASSERT_EQ(generic_type("W : std_logic_vector(31 downto 0)", "w")->as<HDL_simple_type>(),
-        make_simple_type("std_logic_vector", false, false, {make_packed_dim("31", "0")}));
-    ASSERT_EQ(generic_type("U : unsigned(3 downto 0)", "u")->as<HDL_simple_type>(),
-        make_simple_type("unsigned", false, false, {make_packed_dim("3", "0")}));
-    ASSERT_EQ(generic_type("S : signed(7 downto 0)", "s")->as<HDL_simple_type>(),
-        make_simple_type("signed", true, false, {make_packed_dim("7", "0")}));
+    HDL_simple_type golden;
+    golden.set_type_name("std_logic_vector");
+    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("7"), std::make_shared<Numeric_token>("0"), true}});
+    ASSERT_EQ(generic_type("V : std_logic_vector(7 downto 0)", "v")->as<HDL_simple_type>(), golden);
+
+    golden = HDL_simple_type();
+    golden.set_type_name("std_logic_vector");
+    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("31"), std::make_shared<Numeric_token>("0"), true}});
+    ASSERT_EQ(generic_type("W : std_logic_vector(31 downto 0)", "w")->as<HDL_simple_type>(), golden);
+
+    golden = HDL_simple_type();
+    golden.set_type_name("unsigned");
+    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("3"), std::make_shared<Numeric_token>("0"), true}});
+    ASSERT_EQ(generic_type("U : unsigned(3 downto 0)", "u")->as<HDL_simple_type>(), golden);
+
+    golden = HDL_simple_type();
+    golden.set_type_name("signed");
+    golden.set_signed(true);
+    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("7"), std::make_shared<Numeric_token>("0"), true}});
+    ASSERT_EQ(generic_type("S : signed(7 downto 0)", "s")->as<HDL_simple_type>(), golden);
 }
 
 TEST(vhdl_analyzer, type_ascending_range) {
     // `0 to 7` ascending produces the same width as `7 downto 0`.
-    ASSERT_EQ(generic_type("V : std_logic_vector(0 to 7)", "v")->as<HDL_simple_type>(),
-        make_simple_type("std_logic_vector", false, false, {make_packed_dim("0", "7")}));
+    HDL_simple_type golden;
+    golden.set_type_name("std_logic_vector");
+    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("0"), std::make_shared<Numeric_token>("7"), true}});
+    ASSERT_EQ(generic_type("V : std_logic_vector(0 to 7)", "v")->as<HDL_simple_type>(), golden);
 }
 
 TEST(vhdl_analyzer, type_scalar_builtins) {
-    ASSERT_EQ(generic_type("N : integer", "n")->as<HDL_simple_type>(),
-        make_simple_type("integer", true, false));
-    ASSERT_EQ(generic_type("X : real", "x")->as<HDL_simple_type>(),
-        make_simple_type("real", false, true));
-    ASSERT_EQ(generic_type("B : std_logic", "b")->as<HDL_simple_type>(),
-        make_simple_type("std_logic", false, false));
+    HDL_simple_type golden;
+    golden.set_type_name("integer");
+    golden.set_signed(true);
+    ASSERT_EQ(generic_type("N : integer", "n")->as<HDL_simple_type>(), golden);
+
+    golden = HDL_simple_type();
+    golden.set_type_name("real");
+    golden.set_real(true);
+    ASSERT_EQ(generic_type("X : real", "x")->as<HDL_simple_type>(), golden);
+
+    golden = HDL_simple_type();
+    golden.set_type_name("std_logic");
+    ASSERT_EQ(generic_type("B : std_logic", "b")->as<HDL_simple_type>(), golden);
 }
 
 TEST(vhdl_analyzer, type_compound_range_bound) {
@@ -627,10 +632,118 @@ end top;
     auto bound = make_binary(Expression_v2::subtract,
                              std::make_shared<Identifier_token>(qualified_identifier("n")),
                              std::make_shared<Numeric_token>("1"));
-    dimension_t dim;
-    dim.first_bound = bound;
-    dim.second_bound = std::make_shared<Numeric_token>("0");
-    dim.packed = true;
-    ASSERT_EQ(param->get_type()->as<HDL_simple_type>(),
-        make_simple_type("std_logic_vector", false, false, {dim}));
+    HDL_simple_type golden;
+    golden.set_type_name("std_logic_vector");
+    golden.set_packed_dimensions({{bound, std::make_shared<Numeric_token>("0"), true}});
+    ASSERT_EQ(param->get_type()->as<HDL_simple_type>(), golden);
+}
+
+namespace {
+    // Parse a whole design and look up a typedef declared on the entity resource.
+    std::shared_ptr<hdl_type> declared_typedef(const std::string &content, const std::string &tname) {
+        auto res = parse_first_entity(content);
+        auto typedefs = res->get_typedefs();
+        auto it = typedefs.find(tname);
+        if (it == typedefs.end()) return nullptr;
+        return it->second;
+    }
+}
+
+TEST(vhdl_analyzer, local_subtype_declaration) {
+    auto content = R"(
+entity top is
+end top;
+
+architecture rtl of top is
+    subtype small_int is integer range 0 to 7;
+begin
+end rtl;
+)";
+    auto t = declared_typedef(content, "small_int");
+    ASSERT_NE(t, nullptr);
+    HDL_simple_type golden;
+    golden.set_type_name("integer");
+    golden.set_signed(true);
+    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("0"), std::make_shared<Numeric_token>("7"), true}});
+    ASSERT_EQ(t->as<HDL_simple_type>(), golden);
+}
+
+TEST(vhdl_analyzer, local_enum_type) {
+    auto content = R"(
+entity top is
+end top;
+
+architecture rtl of top is
+    type state is (idle, run, done);
+begin
+end rtl;
+)";
+    auto t = declared_typedef(content, "state");
+    ASSERT_NE(t, nullptr);
+    ASSERT_TRUE(t->is<HDL_enum_type>());
+    HDL_enum_type golden;
+    golden.members = {{"idle", 0}, {"run", 1}, {"done", 2}};
+    ASSERT_EQ(t->as<HDL_enum_type>(), golden);
+}
+
+TEST(vhdl_analyzer, local_array_type) {
+    auto content = R"(
+entity top is
+end top;
+
+architecture rtl of top is
+    type byte_arr is array(0 to 7) of std_logic;
+begin
+end rtl;
+)";
+    auto t = declared_typedef(content, "byte_arr");
+    ASSERT_NE(t, nullptr);
+    HDL_simple_type golden;
+    golden.set_type_name("byte_arr");
+    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("0"), std::make_shared<Numeric_token>("7"), true}});
+    ASSERT_EQ(t->as<HDL_simple_type>(), golden);
+}
+
+TEST(vhdl_analyzer, local_record_type) {
+    auto content = R"(
+entity top is
+end top;
+
+architecture rtl of top is
+    type pixel is record
+        r, g, b : std_logic_vector(7 downto 0);
+    end record;
+begin
+end rtl;
+)";
+    auto t = declared_typedef(content, "pixel");
+    ASSERT_NE(t, nullptr);
+    ASSERT_TRUE(t->is<HDL_struct_type>());
+    auto field_t = std::make_shared<HDL_simple_type>();
+    field_t->set_type_name("std_logic_vector");
+    field_t->set_packed_dimensions({{std::make_shared<Numeric_token>("7"), std::make_shared<Numeric_token>("0"), true}});
+    HDL_struct_type golden;
+    golden.member = {{"r", field_t}, {"g", field_t}, {"b", field_t}};
+    ASSERT_EQ(t->as<HDL_struct_type>(), golden);
+}
+
+TEST(vhdl_analyzer, local_array_of_subtype) {
+    auto content = R"(
+entity top is
+end top;
+
+architecture rtl of top is
+    subtype bit_t is std_logic;
+    type arr is array(0 to 3) of bit_t;
+begin
+end rtl;
+)";
+    auto t = declared_typedef(content, "arr");
+    ASSERT_NE(t, nullptr);
+    ASSERT_TRUE(t->is<HDL_simple_type>());
+    HDL_simple_type golden;
+    golden.set_type_name("arr");
+    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("0"), std::make_shared<Numeric_token>("3"), true}});
+    ASSERT_EQ(t->as<HDL_simple_type>(), golden);
+
 }

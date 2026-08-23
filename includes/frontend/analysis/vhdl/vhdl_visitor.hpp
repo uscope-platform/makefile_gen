@@ -71,6 +71,14 @@ public:
     void exitIndex_constraint(mgp_vh::vhdlParser::Index_constraintContext *ctx) override;
     void enterExplicit_range(mgp_vh::vhdlParser::Explicit_rangeContext *ctx) override;
     void exitExplicit_range(mgp_vh::vhdlParser::Explicit_rangeContext *ctx) override;
+    void enterType_declaration(mgp_vh::vhdlParser::Type_declarationContext *ctx) override;
+    void exitType_declaration(mgp_vh::vhdlParser::Type_declarationContext *ctx) override;
+    void enterType_definition(mgp_vh::vhdlParser::Type_definitionContext *ctx) override;
+    void enterEnumeration_literal(mgp_vh::vhdlParser::Enumeration_literalContext *ctx) override;
+    void enterElement_declaration(mgp_vh::vhdlParser::Element_declarationContext *ctx) override;
+    void exitElement_declaration(mgp_vh::vhdlParser::Element_declarationContext *ctx) override;
+    void enterSubtype_declaration(mgp_vh::vhdlParser::Subtype_declarationContext *ctx) override;
+    void exitSubtype_declaration(mgp_vh::vhdlParser::Subtype_declarationContext *ctx) override;
 
     std::vector<std::shared_ptr<hdl_statement_base>> get_entities() {return entities;}
 private:
@@ -99,6 +107,12 @@ private:
     bool in_generic_clause = false;
     bool in_subtype_indication = false;
     bool in_aggregate_choices = false;
+    bool in_type_declaration = false;
+    bool in_subtype_declaration = false;
+    bool in_record_element = false;
+    vhdl_type_kind decl_context = vhdl_type_kind::none;
+    std::string declared_type_name;
+    std::string subtype_decl_name;
     std::shared_ptr<hdl_type> pending_resolved_type;
 
     HDL_modules_factory modules_factory;

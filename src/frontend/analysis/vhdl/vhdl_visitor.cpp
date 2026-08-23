@@ -61,11 +61,14 @@ void vhdl_visitor::enterEntity_declaration(mgp_vh::vhdlParser::Entity_declaratio
 
 void vhdl_visitor::exitArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) {
     std::string name = canon(ctx->name()->getText());
+    auto current_typedefs = modules_factory.get_module()->get_typedefs();
     for(auto &item:entities){
         if(item->is<hdl_resource_statement>() && item->as<hdl_resource_statement>().getName() == name){
             for (auto &stmt : statement_map[item->as<hdl_resource_statement>().getName()]) {
                 item->as<hdl_resource_statement>().add_statement(stmt);
             }
+            for (const auto &[tname, ttype] : current_typedefs)
+                item->as<hdl_resource_statement>().add_typedef(tname, ttype);
         }
     }
 }
@@ -132,16 +135,24 @@ void vhdl_visitor::exitInterface_signal_declaration(
 }
 
 void vhdl_visitor::enterSubtype_indication(mgp_vh::vhdlParser::Subtype_indicationContext *ctx) {
-    if (in_generic_clause) {
+    if (in_generic_clause || in_type_declaration || in_subtype_declaration) {
         in_subtype_indication = true;
         type_engine.start_type_resolution();
     }
 }
 
 void vhdl_visitor::exitSubtype_indication(mgp_vh::vhdlParser::Subtype_indicationContext *ctx) {
-    if (in_generic_clause) {
-        in_subtype_indication = false;
-        pending_resolved_type = type_engine.finish_type_resolution();
+    if (!(in_generic_clause || in_type_declaration || in_subtype_declaration)) return;
+    in_subtype_indication = false;
+    auto result = type_engine.finish_type_resolution();
+    if (in_type_declaration) {
+        if (in_record_element) {
+            pending_resolved_type = result;
+        } else if (decl_context == vhdl_type_kind::array) {
+            type_engine.set_array_element_type(result);
+        }
+    } else {
+        pending_resolved_type = result;
     }
 }
 
@@ -389,6 +400,83 @@ void vhdl_visitor::enterExplicit_range(mgp_vh::vhdlParser::Explicit_rangeContext
 void vhdl_visitor::exitExplicit_range(mgp_vh::vhdlParser::Explicit_rangeContext *ctx) {
     bool descending = ctx->direction() && ctx->direction()->KW_DOWNTO() != nullptr;
     type_engine.stop_range(descending);
+}
+
+void vhdl_visitor::enterType_declaration(mgp_vh::vhdlParser::Type_declarationContext *ctx) {
+    in_type_declaration = true;
+    decl_context = vhdl_type_kind::none;
+    declared_type_name.clear();
+    if (ctx->full_type_declaration() && ctx->full_type_declaration()->identifier()) {
+        declared_type_name = canon(ctx->full_type_declaration()->identifier()->getText());
+        type_engine.start_type_declaration(declared_type_name);
+    }
+}
+
+void vhdl_visitor::exitType_declaration(mgp_vh::vhdlParser::Type_declarationContext *ctx) {
+    if (!in_type_declaration) return;
+    auto t = type_engine.finish_type_declaration();
+    if (t && !declared_type_name.empty())
+        modules_factory.add_typedef(declared_type_name, t);
+    in_type_declaration = false;
+    decl_context = vhdl_type_kind::none;
+    declared_type_name.clear();
+}
+
+void vhdl_visitor::enterType_definition(mgp_vh::vhdlParser::Type_definitionContext *ctx) {
+    if (!in_type_declaration) return;
+    vhdl_type_kind kind = vhdl_type_kind::none;
+    if (ctx->scalar_type_definition() && ctx->scalar_type_definition()->enumeration_type_definition())
+        kind = vhdl_type_kind::enumeration;
+    else if (ctx->scalar_type_definition())
+        kind = vhdl_type_kind::scalar;
+    else if (ctx->composite_type_definition() && ctx->composite_type_definition()->array_type_definition())
+        kind = vhdl_type_kind::array;
+    else if (ctx->composite_type_definition() && ctx->composite_type_definition()->record_type_definition())
+        kind = vhdl_type_kind::record;
+    decl_context = kind;
+    type_engine.set_declaration_kind(kind);
+}
+
+void vhdl_visitor::enterEnumeration_literal(mgp_vh::vhdlParser::Enumeration_literalContext *ctx) {
+    if (!in_type_declaration || decl_context != vhdl_type_kind::enumeration) return;
+    if (ctx->identifier())
+        type_engine.add_enum_literal(canon(ctx->identifier()->getText()));
+    else if (ctx->CHARACTER_LITERAL())
+        type_engine.add_enum_literal(ctx->CHARACTER_LITERAL()->getText());
+}
+
+void vhdl_visitor::enterElement_declaration(mgp_vh::vhdlParser::Element_declarationContext *ctx) {
+    if (!in_type_declaration || decl_context != vhdl_type_kind::record) return;
+    in_record_element = true;
+    std::vector<std::string> names;
+    if (ctx->identifier_list()) {
+        for (auto *id : ctx->identifier_list()->identifier())
+            names.push_back(canon(id->getText()));
+    }
+    type_engine.begin_record_element(names);
+}
+
+void vhdl_visitor::exitElement_declaration(mgp_vh::vhdlParser::Element_declarationContext *ctx) {
+    if (!in_type_declaration || decl_context != vhdl_type_kind::record || !in_record_element) return;
+    in_record_element = false;
+    type_engine.end_record_element(pending_resolved_type);
+    pending_resolved_type = nullptr;
+}
+
+void vhdl_visitor::enterSubtype_declaration(mgp_vh::vhdlParser::Subtype_declarationContext *ctx) {
+    in_subtype_declaration = true;
+    subtype_decl_name = canon(ctx->identifier()->getText());
+}
+
+void vhdl_visitor::exitSubtype_declaration(mgp_vh::vhdlParser::Subtype_declarationContext *ctx) {
+    if (!in_subtype_declaration) return;
+    if (pending_resolved_type) {
+        type_engine.register_type(subtype_decl_name, pending_resolved_type);
+        modules_factory.add_typedef(subtype_decl_name, pending_resolved_type);
+    }
+    pending_resolved_type = nullptr;
+    in_subtype_declaration = false;
+    subtype_decl_name.clear();
 }
 
 void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContext *ctx) {
