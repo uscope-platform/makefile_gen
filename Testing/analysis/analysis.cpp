@@ -245,6 +245,11 @@ TEST( analysis_test , vhdl_module) {
     stmt->set_name("and_component");
     stmt->set_type("andgate");
     stmt->set_dependency_class(module);
+    std::unordered_map<std::string, std::vector<HDL_net>> inst_ports;
+    inst_ports["i1"] = {HDL_net("i_bit1")};
+    inst_ports["i2"] = {HDL_net("i_bit2")};
+    inst_ports["o"] = {HDL_net("o_carry")};
+    stmt->set_ports(inst_ports);
     check_res.add_statement(stmt);
     ASSERT_EQ(resource, check_res);
 }

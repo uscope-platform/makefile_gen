@@ -155,7 +155,12 @@ end rtl;
     expected.set_name("top");
     expected.set_type(module);
     expected.set_line_n(2);
-    expected.add_statement(make_instance("and1", "andgate"));
+    auto inst = make_instance("and1", "andgate");
+    std::unordered_map<std::string, std::vector<HDL_net>> inst_ports;
+    inst_ports["i1"] = {HDL_net("a")};
+    inst_ports["o"] = {HDL_net("b")};
+    inst->set_ports(inst_ports);
+    expected.add_statement(inst);
 
     ASSERT_EQ(*res, expected);
 }
@@ -187,7 +192,12 @@ END RTL;
     expected.set_name("half_adder");
     expected.set_type(module);
     expected.set_line_n(2);
-    expected.add_statement(make_instance("and1", "andgate"));
+    auto inst = make_instance("and1", "andgate");
+    std::unordered_map<std::string, std::vector<HDL_net>> inst_ports;
+    inst_ports["i1"] = {HDL_net("a")};
+    inst_ports["o"] = {HDL_net("b")};
+    inst->set_ports(inst_ports);
+    expected.add_statement(inst);
 
     ASSERT_EQ(*res, expected);
 }
@@ -243,7 +253,14 @@ end rtl;
     expected.set_type(module);
     expected.set_line_n(5);
     expected.set_ports(ports);
-    expected.add_statement(make_instance("and_component", "andgate"));
+
+    auto inst = make_instance("and_component", "andgate");
+    std::unordered_map<std::string, std::vector<HDL_net>> inst_ports;
+    inst_ports["i1"] = {HDL_net("i_bit1")};
+    inst_ports["i2"] = {HDL_net("i_bit2")};
+    inst_ports["o"] = {HDL_net("o_carry")};
+    inst->set_ports(inst_ports);
+    expected.add_statement(inst);
 
     ASSERT_EQ(*res, expected);
 }
@@ -956,4 +973,36 @@ end rtl;
     check.add_statement(inst);
 
     ASSERT_EQ(*res, check);
+}
+
+TEST(vhdl_analyzer, instance_port_map) {
+    auto test_pattern = R"(
+entity top is
+end top;
+architecture rtl of top is
+begin
+    u_sub : entity work.sub
+        port map (
+            CLK  => clk,
+            RST  => open,
+            DATA => data_in,
+            MODE => 3
+        );
+end rtl;
+)";
+    auto res = parse_first_entity(test_pattern);
+
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    auto inst = make_instance("u_sub", "sub");
+    std::unordered_map<std::string, std::vector<HDL_net>> inst_ports;
+    inst_ports["clk"] = {HDL_net("clk")};
+    inst_ports["data"] = {HDL_net("data_in")};
+    inst_ports["mode"] = {HDL_net("3")};
+    inst->set_ports(inst_ports);
+    expected.add_statement(inst);
+
+    ASSERT_EQ(*res, expected);
 }

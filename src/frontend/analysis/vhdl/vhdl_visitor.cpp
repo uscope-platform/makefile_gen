@@ -113,29 +113,59 @@ void vhdl_visitor::exitGeneric_map_aspect(mgp_vh::vhdlParser::Generic_map_aspect
     in_instance_generic_map = false;
 }
 
+void vhdl_visitor::enterPort_map_aspect(mgp_vh::vhdlParser::Port_map_aspectContext *ctx) {
+    in_instance_port_map = true;
+}
+
+void vhdl_visitor::exitPort_map_aspect(mgp_vh::vhdlParser::Port_map_aspectContext *ctx) {
+    in_instance_port_map = false;
+}
+
 void vhdl_visitor::enterAssociation_element(mgp_vh::vhdlParser::Association_elementContext *ctx) {
-    if (!in_instance_generic_map) return;
-    if (!ctx->formal_part()) {
-        spdlog::warn("VHDL positional generic map not supported, ignored");
-        return;
+    if (in_instance_generic_map) {
+        if (!ctx->formal_part()) {
+            spdlog::warn("VHDL positional generic map not supported, ignored");
+            return;
+        }
+        auto actual = ctx->actual_part();
+        bool is_open = actual && actual->actual_designator() && actual->actual_designator()->KW_OPEN();
+        if (is_open) return;
+        auto formal = ctx->formal_part()->name(0);
+        if (!formal) return;
+        params_factory.start_instance_parameter_assignment(canon(formal->getText()));
+        params_factory.start_param_override();
+        instance_override_active = true;
+    } else if (in_instance_port_map) {
+        if (!ctx->formal_part()) {
+            spdlog::warn("VHDL positional port map not supported, ignored");
+            return;
+        }
+        auto actual = ctx->actual_part();
+        bool is_open = actual && actual->actual_designator() && actual->actual_designator()->KW_OPEN();
+        if (is_open) return;
+        deps_factory.start_port();
     }
-    auto actual = ctx->actual_part();
-    bool is_open = actual && actual->actual_designator() && actual->actual_designator()->KW_OPEN();
-    if (is_open) return;
-    auto formal = ctx->formal_part()->name(0);
-    if (!formal) return;
-    params_factory.start_instance_parameter_assignment(canon(formal->getText()));
-    params_factory.start_param_override();
-    instance_override_active = true;
 }
 
 void vhdl_visitor::exitAssociation_element(mgp_vh::vhdlParser::Association_elementContext *ctx) {
-    if (!instance_override_active) return;
-    params_factory.stop_param_override();
-    auto param = params_factory.get_parameter();
-    if (deps_factory.is_valid_dependency())
-        deps_factory.add_parameter(param);
-    instance_override_active = false;
+    if (instance_override_active) {
+        params_factory.stop_param_override();
+        auto param = params_factory.get_parameter();
+        if (deps_factory.is_valid_dependency())
+            deps_factory.add_parameter(param);
+        instance_override_active = false;
+    } else if (deps_factory.is_in_port()) {
+        deps_factory.stop_port();
+        auto formal = ctx->formal_part() ? ctx->formal_part()->name(0) : nullptr;
+        if (formal)
+            deps_factory.add_port(canon(formal->getText()));
+    }
+}
+
+void vhdl_visitor::route_port_connection(const std::string &text) {
+    if (!deps_factory.is_valid_dependency() || !deps_factory.is_in_port()) return;
+    deps_factory.add_connection_element(canon(text));
+    deps_factory.start_scalar_net(canon(text));
 }
 
 void vhdl_visitor::enterArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) {
@@ -390,6 +420,7 @@ void vhdl_visitor::enterNumeric_literal(mgp_vh::vhdlParser::Numeric_literalConte
 }
 
 void vhdl_visitor::enterActual_part(mgp_vh::vhdlParser::Actual_partContext *ctx) {
+    if (in_instance_port_map) in_port_actual = true;
     if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
     // A nested function call parsed as `name ( actual_designator )` (e.g. the
     // `log2(N)` inside `ceil(log2(N))`) arrives here rather than through the
@@ -404,6 +435,7 @@ void vhdl_visitor::enterActual_part(mgp_vh::vhdlParser::Actual_partContext *ctx)
 }
 
 void vhdl_visitor::exitActual_part(mgp_vh::vhdlParser::Actual_partContext *ctx) {
+    if (in_instance_port_map) in_port_actual = false;
     if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
     if (ctx->name() && ctx->LPAREN() && ctx->name()->name_literal() &&
         ctx->name()->name_literal()->identifier()) {
@@ -555,6 +587,11 @@ void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContex
         type_engine.add_range_component(make_numeric_value(ctx));
         return;
     }
+    // A port-map actual connection: route it into the dependency's net.
+    if (in_port_actual && deps_factory.is_in_port()) {
+        route_port_connection(ctx->getText());
+        return;
+    }
     if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
 
     // A function call: finalize it (the argument expressions have been routed
@@ -633,6 +670,10 @@ void vhdl_visitor::exitPrimary(mgp_vh::vhdlParser::PrimaryContext *ctx) {
         // Treat a bit string literal as a sized numeric value (e.g. x"FF").
         if (type_engine.in_range()) {
             type_engine.add_range_component(make_vhdl_value(ctx->BIT_STRING_LITERAL()->getText()));
+            return;
+        }
+        if (in_port_actual && deps_factory.is_in_port()) {
+            route_port_connection(ctx->BIT_STRING_LITERAL()->getText());
             return;
         }
         if (!is_in_generic_expression() || !params_factory.is_component_relevant()) return;
