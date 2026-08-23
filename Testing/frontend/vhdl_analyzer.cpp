@@ -60,7 +60,7 @@ std::shared_ptr<HDL_parameter> make_integer_param(const std::string &name,
     return p;
 }
 
-// Golden parameter for an instance generic-map override: carries the actual
+// Expected parameter for an instance generic-map override: carries the actual
 // expression value but no formal type (the type is resolved downstream).
 std::shared_ptr<HDL_parameter> make_override_param(const std::string &name,
                                                    const std::shared_ptr<Expression_base> &value) {
@@ -69,7 +69,7 @@ std::shared_ptr<HDL_parameter> make_override_param(const std::string &name,
     return p;
 }
 
-// Golden parameter with the given scalar type name and default value.
+// Expected parameter with the given scalar type name and default value.
 std::shared_ptr<HDL_parameter> make_typed_param(const std::string &name,
                                                 const std::string &type_name,
                                                 const std::shared_ptr<Expression_base> &value) {
@@ -102,7 +102,7 @@ int64_t eval_generic(const std::string &decl_body, const std::string &gname) {
     return val->get_integer().get_value();
 }
 
-// Build a golden integer parameter whose default value is a concatenation
+// Build an expected integer parameter whose default value is a concatenation
 // (VHDL aggregate) of the given numeric literals.
 std::shared_ptr<HDL_parameter> make_concat_param(const std::string &name,
                                                  std::initializer_list<std::string> values) {
@@ -120,12 +120,12 @@ end test_mod;
 
     auto res = parse_first_entity(test_pattern);
 
-    hdl_resource_statement golden;
-    golden.set_name("test_mod");
-    golden.set_type(module);
-    golden.set_line_n(2);
+    hdl_resource_statement expected;
+    expected.set_name("test_mod");
+    expected.set_type(module);
+    expected.set_line_n(2);
 
-    ASSERT_EQ(*res, golden);
+    ASSERT_EQ(*res, expected);
 }
 
 TEST(vhdl_analyzer, architecture_statement_binding) {
@@ -151,13 +151,13 @@ end rtl;
 
     auto res = parse_first_entity(test_pattern);
 
-    hdl_resource_statement golden;
-    golden.set_name("top");
-    golden.set_type(module);
-    golden.set_line_n(2);
-    golden.add_statement(make_instance("and1", "andgate"));
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_statement(make_instance("and1", "andgate"));
 
-    ASSERT_EQ(*res, golden);
+    ASSERT_EQ(*res, expected);
 }
 
 TEST(vhdl_analyzer, case_insensitive_entity_and_architecture_binding) {
@@ -183,13 +183,13 @@ END RTL;
 
     auto res = parse_first_entity(test_pattern);
 
-    hdl_resource_statement golden;
-    golden.set_name("half_adder");
-    golden.set_type(module);
-    golden.set_line_n(2);
-    golden.add_statement(make_instance("and1", "andgate"));
+    hdl_resource_statement expected;
+    expected.set_name("half_adder");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_statement(make_instance("and1", "andgate"));
 
-    ASSERT_EQ(*res, golden);
+    ASSERT_EQ(*res, expected);
 }
 
 TEST(vhdl_analyzer, fixture_regression) {
@@ -238,14 +238,14 @@ end rtl;
     ports["o_sum"] = {output_port};
     ports["o_carry"] = {output_port};
 
-    hdl_resource_statement golden;
-    golden.set_name("half_adder");
-    golden.set_type(module);
-    golden.set_line_n(5);
-    golden.set_ports(ports);
-    golden.add_statement(make_instance("and_component", "andgate"));
+    hdl_resource_statement expected;
+    expected.set_name("half_adder");
+    expected.set_type(module);
+    expected.set_line_n(5);
+    expected.set_ports(ports);
+    expected.add_statement(make_instance("and_component", "andgate"));
 
-    ASSERT_EQ(*res, golden);
+    ASSERT_EQ(*res, expected);
 }
 
 TEST(vhdl_analyzer, generic_numeric_single) {
@@ -259,13 +259,13 @@ end top;
 
     auto res = parse_first_entity(test_pattern);
 
-    hdl_resource_statement golden;
-    golden.set_name("top");
-    golden.set_type(module);
-    golden.set_line_n(2);
-    golden.add_parameter(make_integer_param("n", std::make_shared<Numeric_token>("8")));
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_parameter(make_integer_param("n", std::make_shared<Numeric_token>("8")));
 
-    ASSERT_EQ(*res, golden);
+    ASSERT_EQ(*res, expected);
 }
 
 TEST(vhdl_analyzer, generic_math_expression) {
@@ -285,13 +285,13 @@ end top;
                            std::make_shared<Identifier_token>(qualified_identifier("n")));
     auto expr = make_binary(Expression_v2::subtract, pow, std::make_shared<Numeric_token>("1"));
 
-    hdl_resource_statement golden;
-    golden.set_name("top");
-    golden.set_type(module);
-    golden.set_line_n(2);
-    golden.add_parameter(make_integer_param("width", expr));
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_parameter(make_integer_param("width", expr));
 
-    ASSERT_EQ(*res, golden);
+    ASSERT_EQ(*res, expected);
 }
 
 TEST(vhdl_analyzer, generic_multiple_and_multiply) {
@@ -310,14 +310,14 @@ end top;
                               std::make_shared<Identifier_token>(qualified_identifier("a")),
                               std::make_shared<Numeric_token>("8"));
 
-    hdl_resource_statement golden;
-    golden.set_name("top");
-    golden.set_type(module);
-    golden.set_line_n(2);
-    golden.add_parameter(make_integer_param("a", std::make_shared<Numeric_token>("4")));
-    golden.add_parameter(make_integer_param("b", b_expr));
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_parameter(make_integer_param("a", std::make_shared<Numeric_token>("4")));
+    expected.add_parameter(make_integer_param("b", b_expr));
 
-    ASSERT_EQ(*res, golden);
+    ASSERT_EQ(*res, expected);
 }
 
 TEST(vhdl_analyzer, generic_identifier_reference) {
@@ -331,14 +331,14 @@ end top;
 
     auto res = parse_first_entity(test_pattern);
 
-    hdl_resource_statement golden;
-    golden.set_name("top");
-    golden.set_type(module);
-    golden.set_line_n(2);
-    golden.add_parameter(make_integer_param("width",
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_parameter(make_integer_param("width",
         std::make_shared<Identifier_token>(qualified_identifier("data_width"))));
 
-    ASSERT_EQ(*res, golden);
+    ASSERT_EQ(*res, expected);
 }
 
 TEST(vhdl_analyzer, generic_expression_evaluates) {
@@ -394,15 +394,15 @@ end top;
 
     auto res = parse_first_entity(test_pattern);
 
-    hdl_resource_statement golden;
-    golden.set_name("top");
-    golden.set_type(module);
-    golden.set_line_n(2);
-    golden.add_parameter(make_integer_param("a", std::make_shared<Numeric_token>("8")));
-    golden.add_parameter(make_integer_param("b", std::make_shared<Numeric_token>("8")));
-    golden.add_parameter(make_integer_param("c", std::make_shared<Numeric_token>("8")));
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_parameter(make_integer_param("a", std::make_shared<Numeric_token>("8")));
+    expected.add_parameter(make_integer_param("b", std::make_shared<Numeric_token>("8")));
+    expected.add_parameter(make_integer_param("c", std::make_shared<Numeric_token>("8")));
 
-    ASSERT_EQ(*res, golden);
+    ASSERT_EQ(*res, expected);
 }
 
 TEST(vhdl_analyzer, literal_bit_string) {
@@ -455,13 +455,13 @@ end top;
 
     auto res = parse_first_entity(test_pattern);
 
-    hdl_resource_statement golden;
-    golden.set_name("top");
-    golden.set_type(module);
-    golden.set_line_n(2);
-    golden.add_parameter(make_concat_param("v", {"1", "2", "3"}));
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_parameter(make_concat_param("v", {"1", "2", "3"}));
 
-    ASSERT_EQ(*res, golden);
+    ASSERT_EQ(*res, expected);
 }
 
 TEST(vhdl_analyzer, aggregate_with_choices) {
@@ -473,13 +473,13 @@ end top;
 
     auto res = parse_first_entity(test_pattern);
 
-    hdl_resource_statement golden;
-    golden.set_name("top");
-    golden.set_type(module);
-    golden.set_line_n(2);
-    golden.add_parameter(make_concat_param("v", {"7", "8"}));
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_parameter(make_concat_param("v", {"7", "8"}));
 
-    ASSERT_EQ(*res, golden);
+    ASSERT_EQ(*res, expected);
 }
 
 TEST(vhdl_analyzer, aggregate_not_confused_with_parenthesized_expr) {
@@ -555,7 +555,7 @@ TEST(vhdl_analyzer, qualified_expression_cast) {
     EXPECT_EQ(eval_generic("V : integer := boolean'(3)", "v"), 1);
 }
 
-TEST(vhdl_analyzer, qualified_expression_cast_golden) {
+TEST(vhdl_analyzer, qualified_expression_cast_expected) {
     auto test_pattern = R"(
 entity top is
     generic ( V : integer := integer'(7) );
@@ -568,13 +568,13 @@ end top;
     cast->set_target_type("integer");
     cast->set_content(std::make_shared<Numeric_token>("7"));
 
-    hdl_resource_statement golden;
-    golden.set_name("top");
-    golden.set_type(module);
-    golden.set_line_n(2);
-    golden.add_parameter(make_integer_param("v", cast));
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_parameter(make_integer_param("v", cast));
 
-    ASSERT_EQ(*res, golden);
+    ASSERT_EQ(*res, expected);
 }
 
 TEST(vhdl_analyzer, cast_transforms_value) {
@@ -599,50 +599,50 @@ namespace {
 }
 
 TEST(vhdl_analyzer, type_vector_range) {
-    HDL_simple_type golden;
-    golden.set_type_name("std_logic_vector");
-    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("7"), std::make_shared<Numeric_token>("0"), true}});
-    ASSERT_EQ(generic_type("V : std_logic_vector(7 downto 0)", "v")->as<HDL_simple_type>(), golden);
+    HDL_simple_type expected;
+    expected.set_type_name("std_logic_vector");
+    expected.set_packed_dimensions({{std::make_shared<Numeric_token>("7"), std::make_shared<Numeric_token>("0"), true}});
+    ASSERT_EQ(generic_type("V : std_logic_vector(7 downto 0)", "v")->as<HDL_simple_type>(), expected);
 
-    golden = HDL_simple_type();
-    golden.set_type_name("std_logic_vector");
-    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("31"), std::make_shared<Numeric_token>("0"), true}});
-    ASSERT_EQ(generic_type("W : std_logic_vector(31 downto 0)", "w")->as<HDL_simple_type>(), golden);
+    expected = HDL_simple_type();
+    expected.set_type_name("std_logic_vector");
+    expected.set_packed_dimensions({{std::make_shared<Numeric_token>("31"), std::make_shared<Numeric_token>("0"), true}});
+    ASSERT_EQ(generic_type("W : std_logic_vector(31 downto 0)", "w")->as<HDL_simple_type>(), expected);
 
-    golden = HDL_simple_type();
-    golden.set_type_name("unsigned");
-    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("3"), std::make_shared<Numeric_token>("0"), true}});
-    ASSERT_EQ(generic_type("U : unsigned(3 downto 0)", "u")->as<HDL_simple_type>(), golden);
+    expected = HDL_simple_type();
+    expected.set_type_name("unsigned");
+    expected.set_packed_dimensions({{std::make_shared<Numeric_token>("3"), std::make_shared<Numeric_token>("0"), true}});
+    ASSERT_EQ(generic_type("U : unsigned(3 downto 0)", "u")->as<HDL_simple_type>(), expected);
 
-    golden = HDL_simple_type();
-    golden.set_type_name("signed");
-    golden.set_signed(true);
-    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("7"), std::make_shared<Numeric_token>("0"), true}});
-    ASSERT_EQ(generic_type("S : signed(7 downto 0)", "s")->as<HDL_simple_type>(), golden);
+    expected = HDL_simple_type();
+    expected.set_type_name("signed");
+    expected.set_signed(true);
+    expected.set_packed_dimensions({{std::make_shared<Numeric_token>("7"), std::make_shared<Numeric_token>("0"), true}});
+    ASSERT_EQ(generic_type("S : signed(7 downto 0)", "s")->as<HDL_simple_type>(), expected);
 }
 
 TEST(vhdl_analyzer, type_ascending_range) {
     // `0 to 7` ascending produces the same width as `7 downto 0`.
-    HDL_simple_type golden;
-    golden.set_type_name("std_logic_vector");
-    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("0"), std::make_shared<Numeric_token>("7"), true}});
-    ASSERT_EQ(generic_type("V : std_logic_vector(0 to 7)", "v")->as<HDL_simple_type>(), golden);
+    HDL_simple_type expected;
+    expected.set_type_name("std_logic_vector");
+    expected.set_packed_dimensions({{std::make_shared<Numeric_token>("0"), std::make_shared<Numeric_token>("7"), true}});
+    ASSERT_EQ(generic_type("V : std_logic_vector(0 to 7)", "v")->as<HDL_simple_type>(), expected);
 }
 
 TEST(vhdl_analyzer, type_scalar_builtins) {
-    HDL_simple_type golden;
-    golden.set_type_name("integer");
-    golden.set_signed(true);
-    ASSERT_EQ(generic_type("N : integer", "n")->as<HDL_simple_type>(), golden);
+    HDL_simple_type expected;
+    expected.set_type_name("integer");
+    expected.set_signed(true);
+    ASSERT_EQ(generic_type("N : integer", "n")->as<HDL_simple_type>(), expected);
 
-    golden = HDL_simple_type();
-    golden.set_type_name("real");
-    golden.set_real(true);
-    ASSERT_EQ(generic_type("X : real", "x")->as<HDL_simple_type>(), golden);
+    expected = HDL_simple_type();
+    expected.set_type_name("real");
+    expected.set_real(true);
+    ASSERT_EQ(generic_type("X : real", "x")->as<HDL_simple_type>(), expected);
 
-    golden = HDL_simple_type();
-    golden.set_type_name("std_logic");
-    ASSERT_EQ(generic_type("B : std_logic", "b")->as<HDL_simple_type>(), golden);
+    expected = HDL_simple_type();
+    expected.set_type_name("std_logic");
+    ASSERT_EQ(generic_type("B : std_logic", "b")->as<HDL_simple_type>(), expected);
 }
 
 TEST(vhdl_analyzer, type_compound_range_bound) {
@@ -660,10 +660,10 @@ end top;
     auto bound = make_binary(Expression_v2::subtract,
                              std::make_shared<Identifier_token>(qualified_identifier("n")),
                              std::make_shared<Numeric_token>("1"));
-    HDL_simple_type golden;
-    golden.set_type_name("std_logic_vector");
-    golden.set_packed_dimensions({{bound, std::make_shared<Numeric_token>("0"), true}});
-    ASSERT_EQ(param->get_type()->as<HDL_simple_type>(), golden);
+    HDL_simple_type expected;
+    expected.set_type_name("std_logic_vector");
+    expected.set_packed_dimensions({{bound, std::make_shared<Numeric_token>("0"), true}});
+    ASSERT_EQ(param->get_type()->as<HDL_simple_type>(), expected);
 }
 
 namespace {
@@ -689,11 +689,11 @@ end rtl;
 )";
     auto t = declared_typedef(content, "small_int");
     ASSERT_NE(t, nullptr);
-    HDL_simple_type golden;
-    golden.set_type_name("integer");
-    golden.set_signed(true);
-    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("0"), std::make_shared<Numeric_token>("7"), true}});
-    ASSERT_EQ(t->as<HDL_simple_type>(), golden);
+    HDL_simple_type expected;
+    expected.set_type_name("integer");
+    expected.set_signed(true);
+    expected.set_packed_dimensions({{std::make_shared<Numeric_token>("0"), std::make_shared<Numeric_token>("7"), true}});
+    ASSERT_EQ(t->as<HDL_simple_type>(), expected);
 }
 
 TEST(vhdl_analyzer, local_enum_type) {
@@ -709,9 +709,9 @@ end rtl;
     auto t = declared_typedef(content, "state");
     ASSERT_NE(t, nullptr);
     ASSERT_TRUE(t->is<HDL_enum_type>());
-    HDL_enum_type golden;
-    golden.members = {{"idle", 0}, {"run", 1}, {"done", 2}};
-    ASSERT_EQ(t->as<HDL_enum_type>(), golden);
+    HDL_enum_type expected;
+    expected.members = {{"idle", 0}, {"run", 1}, {"done", 2}};
+    ASSERT_EQ(t->as<HDL_enum_type>(), expected);
 }
 
 TEST(vhdl_analyzer, local_array_type) {
@@ -726,10 +726,10 @@ end rtl;
 )";
     auto t = declared_typedef(content, "byte_arr");
     ASSERT_NE(t, nullptr);
-    HDL_simple_type golden;
-    golden.set_type_name("byte_arr");
-    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("0"), std::make_shared<Numeric_token>("7"), true}});
-    ASSERT_EQ(t->as<HDL_simple_type>(), golden);
+    HDL_simple_type expected;
+    expected.set_type_name("byte_arr");
+    expected.set_packed_dimensions({{std::make_shared<Numeric_token>("0"), std::make_shared<Numeric_token>("7"), true}});
+    ASSERT_EQ(t->as<HDL_simple_type>(), expected);
 }
 
 TEST(vhdl_analyzer, local_record_type) {
@@ -750,9 +750,9 @@ end rtl;
     auto field_t = std::make_shared<HDL_simple_type>();
     field_t->set_type_name("std_logic_vector");
     field_t->set_packed_dimensions({{std::make_shared<Numeric_token>("7"), std::make_shared<Numeric_token>("0"), true}});
-    HDL_struct_type golden;
-    golden.member = {{"r", field_t}, {"g", field_t}, {"b", field_t}};
-    ASSERT_EQ(t->as<HDL_struct_type>(), golden);
+    HDL_struct_type expected;
+    expected.member = {{"r", field_t}, {"g", field_t}, {"b", field_t}};
+    ASSERT_EQ(t->as<HDL_struct_type>(), expected);
 }
 
 TEST(vhdl_analyzer, local_array_of_subtype) {
@@ -762,18 +762,25 @@ end top;
 
 architecture rtl of top is
     subtype bit_t is std_logic;
+    subtype byte_t is integer range 0 to 255;
     type arr is array(0 to 3) of bit_t;
+    type arr2 is array(0 to 3) of byte_t;
 begin
 end rtl;
 )";
     auto t = declared_typedef(content, "arr");
     ASSERT_NE(t, nullptr);
     ASSERT_TRUE(t->is<HDL_simple_type>());
-    HDL_simple_type golden;
-    golden.set_type_name("arr");
-    golden.set_packed_dimensions({{std::make_shared<Numeric_token>("0"), std::make_shared<Numeric_token>("3"), true}});
-    ASSERT_EQ(t->as<HDL_simple_type>(), golden);
+    HDL_simple_type expected;
+    expected.set_type_name("arr");
+    expected.set_packed_dimensions({{std::make_shared<Numeric_token>("0"), std::make_shared<Numeric_token>("3"), true}});
+    ASSERT_EQ(t->as<HDL_simple_type>(), expected);
 
+    // An array of a non-bit-like element type is not representable yet: it
+    // degrades to an external (unknown) type reference.
+    auto t2 = declared_typedef(content, "arr2");
+    ASSERT_NE(t2, nullptr);
+    ASSERT_EQ(t2->as<HDL_external_type>(), HDL_external_type(qualified_identifier("arr2")));
 }
 
 TEST(vhdl_analyzer, port_extraction_basic) {
@@ -788,21 +795,24 @@ entity top is
 end top;
 )";
     auto res = parse_first_entity(test_pattern);
-    auto ports = res->get_port_specs();
 
-    HDL_port in_port{input_port};
-    ASSERT_EQ(ports.at("clk"), in_port);
-    ASSERT_EQ(ports.at("rst"), in_port);
+    std::unordered_map<std::string, HDL_port> ports;
+    ports["clk"] = {input_port};
+    ports["rst"] = {input_port};
+    ports["dout"] = {output_port};
+    ports["din"] = {inout_port};
 
-    HDL_port out_port{output_port};
-    ASSERT_EQ(ports.at("dout"), out_port);
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.set_ports(ports);
 
-    HDL_port io_port{inout_port};
-    ASSERT_EQ(ports.at("din"), io_port);
+    ASSERT_EQ(*res, expected);
 }
 
 TEST(vhdl_analyzer, port_typed_name_list) {
-    // `a, b, c : in std_logic` shares one type across all names.
+    // `a, b, c : in std_logic` shares one direction across all names.
     auto test_pattern = R"(
 entity top is
     port (
@@ -811,11 +821,19 @@ entity top is
 end top;
 )";
     auto res = parse_first_entity(test_pattern);
-    auto ports = res->get_port_specs();
-    HDL_port expected{input_port};
-    ASSERT_EQ(ports.at("a"), expected);
-    ASSERT_EQ(ports.at("b"), expected);
-    ASSERT_EQ(ports.at("c"), expected);
+
+    std::unordered_map<std::string, HDL_port> ports;
+    ports["a"] = {input_port};
+    ports["b"] = {input_port};
+    ports["c"] = {input_port};
+
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.set_ports(ports);
+
+    ASSERT_EQ(*res, expected);
 }
 
 TEST(vhdl_analyzer, port_modes) {
@@ -830,12 +848,20 @@ entity top is
 end top;
 )";
     auto res = parse_first_entity(test_pattern);
-    auto ports = res->get_port_specs();
-    ASSERT_EQ(ports.at("i").direction, input_port);
-    ASSERT_EQ(ports.at("o").direction, output_port);
-    ASSERT_EQ(ports.at("io").direction, inout_port);
-    // buffer is treated as output.
-    ASSERT_EQ(ports.at("b").direction, output_port);
+
+    std::unordered_map<std::string, HDL_port> ports;
+    ports["i"] = {input_port};
+    ports["o"] = {output_port};
+    ports["io"] = {inout_port};
+    ports["b"] = {output_port};   // buffer is treated as output
+
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.set_ports(ports);
+
+    ASSERT_EQ(*res, expected);
 }
 
 TEST(vhdl_analyzer, generic_default_boolean_string) {
