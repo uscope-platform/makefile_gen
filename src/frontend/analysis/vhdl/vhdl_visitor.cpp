@@ -89,8 +89,12 @@ void vhdl_visitor::enterConcurrent_statement(mgp_vh::vhdlParser::Concurrent_stat
 }
 
 void vhdl_visitor::exitConcurrent_statement(mgp_vh::vhdlParser::Concurrent_statementContext *ctx) {
-    if (deps_factory.is_valid_dependency())
-        statement_map[current_architecture].push_back(deps_factory.get_dependency());
+    if (deps_factory.is_valid_dependency()) {
+        if (loops_factory.in_loop())
+            loops_factory.add_statement(deps_factory.get_dependency());
+        else
+            statement_map[current_architecture].push_back(deps_factory.get_dependency());
+    }
 }
 
 std::string vhdl_visitor::instantiated_module_name(
@@ -194,6 +198,61 @@ void vhdl_visitor::exitName_slice_part(mgp_vh::vhdlParser::Name_slice_partContex
 void vhdl_visitor::enterDirection(mgp_vh::vhdlParser::DirectionContext *ctx) {
     if (in_name_selector && in_instance_port_map && deps_factory.is_in_port())
         pending_slice_dir = ctx->KW_TO() ? "to" : "downto";
+    if (in_loop_range) {
+        // The `to`/`downto` splits the loop range: the first bound is the loop
+        // init, the second becomes the end bound.
+        generate_loop_dir = ctx->KW_TO() ? "to" : "downto";
+        auto init_param = params_factory.get_parameter();
+        params_factory.stop_param_assignment();
+        loops_factory.set_loop_init(*init_param);
+        params_factory.start_param_assignment();
+        params_factory.new_parameter("genvar_end_bound");
+    }
+}
+
+void vhdl_visitor::enterFor_generate_statement(mgp_vh::vhdlParser::For_generate_statementContext *ctx) {
+    loops_factory.new_loop();
+    in_generate_loop = true;
+}
+
+void vhdl_visitor::exitFor_generate_statement(mgp_vh::vhdlParser::For_generate_statementContext *ctx) {
+    if (!in_generate_loop) return;
+    statement_map[current_architecture].push_back(loops_factory.get_loop_statement());
+    in_generate_loop = false;
+}
+
+void vhdl_visitor::enterParameter_specification(mgp_vh::vhdlParser::Parameter_specificationContext *ctx) {
+    if (!in_generate_loop) return;
+    generate_loop_var = canon(ctx->identifier()->getText());
+    in_loop_range = true;
+    loops_factory.set_phase(HDL_loops_factory::init);
+    params_factory.start_param_assignment();
+    params_factory.new_parameter(generate_loop_var);
+}
+
+void vhdl_visitor::exitParameter_specification(mgp_vh::vhdlParser::Parameter_specificationContext *ctx) {
+    if (!in_generate_loop) return;
+    auto end_param = params_factory.get_parameter();
+    params_factory.stop_param_assignment();
+    in_loop_range = false;
+
+    // VHDL `for i in A to B generate` maps onto the shared loop model as:
+    // init = A, end condition = `i <= B` (to) / `i >= B` (downto), iteration = `i +/- 1`.
+    auto loop_var = std::make_shared<Identifier_token>(qualified_identifier(generate_loop_var));
+    auto end_cond = std::make_shared<Expression_v2>();
+    end_cond->set_lhs(loop_var);
+    if (end_param->get_expression()) end_cond->set_rhs(end_param->get_expression());
+    end_cond->set_operation(generate_loop_dir == "to" ? Expression_v2::less_equal : Expression_v2::greater_equal);
+
+    auto iter = std::make_shared<Expression_v2>();
+    iter->set_lhs(loop_var);
+    iter->set_rhs(std::make_shared<Numeric_token>("1"));
+    iter->set_operation(generate_loop_dir == "to" ? Expression_v2::add : Expression_v2::subtract);
+
+    loops_factory.add_expression(*end_cond);
+    loops_factory.set_phase(HDL_loops_factory::step);
+    loops_factory.add_expression(*iter);
+    loops_factory.set_phase(HDL_loops_factory::body);
 }
 
 void vhdl_visitor::route_port_slice(const std::string &base, const std::string &first,
@@ -832,7 +891,7 @@ bool vhdl_visitor::simple_is_aggregate(mgp_vh::vhdlParser::Simple_expressionCont
 }
 
 bool vhdl_visitor::is_in_generic_expression() const {
-    return (in_generic_clause || in_instance_generic_map) && !in_subtype_indication && !in_aggregate_choices;
+    return (in_generic_clause || in_instance_generic_map || in_loop_range) && !in_subtype_indication && !in_aggregate_choices;
 }
 
 std::shared_ptr<Expression_base> vhdl_visitor::make_character_value(const std::string &text) {

@@ -18,6 +18,7 @@
 #include <cmath>
 
 #include "frontend/analysis/vhdl/vhdl_analyzer.hpp"
+#include "analysis/loop_solver.hpp"
 #include "data_model/HDL/statement/hdl_statements.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/types/HDL_simple_type.hpp"
@@ -1054,6 +1055,53 @@ end rtl;
     expected.set_type(module);
     expected.set_line_n(2);
     expected.add_statement(inst);
+
+    ASSERT_EQ(*res, expected);
+}
+
+TEST(vhdl_analyzer, for_generate_loop) {
+    auto test_pattern = R"(
+entity top is
+end top;
+architecture rtl of top is
+begin
+    gen : for i in 0 to 3 generate
+        u_sub : entity work.sub
+            port map ( CLK => clk );
+    end generate;
+end rtl;
+)";
+    auto res = parse_first_entity(test_pattern);
+
+    auto init = std::make_shared<HDL_parameter>("i");
+    init->set_raw_value(std::make_shared<Numeric_token>("0"));
+
+    auto end_cond = std::make_shared<Expression_v2>();
+    end_cond->set_lhs(std::make_shared<Identifier_token>(qualified_identifier("i")));
+    end_cond->set_rhs(std::make_shared<Numeric_token>("3"));
+    end_cond->set_operation(Expression_v2::less_equal);
+
+    auto iter = std::make_shared<Expression_v2>();
+    iter->set_lhs(std::make_shared<Identifier_token>(qualified_identifier("i")));
+    iter->set_rhs(std::make_shared<Numeric_token>("1"));
+    iter->set_operation(Expression_v2::add);
+
+    auto inst = make_instance("u_sub", "sub");
+    std::unordered_map<std::string, std::vector<HDL_net>> inst_ports;
+    inst_ports["clk"] = {HDL_net("clk")};
+    inst->set_ports(inst_ports);
+
+    auto loop = std::make_shared<hdl_loop_statement>();
+    loop->set_init(init);
+    loop->set_end_condition(end_cond);
+    loop->set_iteration(iter);
+    loop->add_body_stmt(inst);
+
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_statement(loop);
 
     ASSERT_EQ(*res, expected);
 }
