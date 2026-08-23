@@ -60,6 +60,27 @@ std::shared_ptr<HDL_parameter> make_integer_param(const std::string &name,
     return p;
 }
 
+// Golden parameter for an instance generic-map override: carries the actual
+// expression value but no formal type (the type is resolved downstream).
+std::shared_ptr<HDL_parameter> make_override_param(const std::string &name,
+                                                   const std::shared_ptr<Expression_base> &value) {
+    auto p = std::make_shared<HDL_parameter>(name);
+    p->set_raw_value(value);
+    return p;
+}
+
+// Golden parameter with the given scalar type name and default value.
+std::shared_ptr<HDL_parameter> make_typed_param(const std::string &name,
+                                                const std::string &type_name,
+                                                const std::shared_ptr<Expression_base> &value) {
+    auto p = std::make_shared<HDL_parameter>(name);
+    auto t = std::make_shared<HDL_simple_type>();
+    t->set_type_name(type_name);
+    p->set_type(t);
+    p->set_raw_value(value);
+    return p;
+}
+
 std::shared_ptr<Expression_v2> make_binary(Expression_v2::expression_operator op,
                                            const std::shared_ptr<Expression_base> &lhs,
                                            const std::shared_ptr<Expression_base> &rhs) {
@@ -831,9 +852,82 @@ entity top is
 end top;
 )";
     auto res = parse_first_entity(test_pattern);
-    ASSERT_EQ(res->get_parameters().size(), 3u);
-    auto flag = res->get_parameters().get("flag");
-    ASSERT_TRUE(flag->get_expression() != nullptr);
-    auto name = res->get_parameters().get("name");
-    ASSERT_TRUE(name->get_expression() != nullptr);
+
+    hdl_resource_statement check_res;
+    check_res.set_name("top");
+    check_res.set_type(module);
+    check_res.set_line_n(2);
+    check_res.add_parameter(make_integer_param("width", std::make_shared<Numeric_token>("8")));
+    check_res.add_parameter(make_typed_param("flag", "boolean",
+                                          std::make_shared<Identifier_token>(qualified_identifier("true"))));
+    // `string` is not a modeled builtin in the type engine: the value is a
+    // String_token but the declared type degrades to an external reference.
+    auto name = std::make_shared<HDL_parameter>("name");
+    name->set_type(std::make_shared<HDL_external_type>(qualified_identifier("string")));
+    name->set_raw_value(std::make_shared<String_token>("\"blinky\""));
+    check_res.add_parameter(name);
+    std::unordered_map<std::string, HDL_port> ports;
+    ports["dout"] = {output_port};
+    check_res.set_ports(ports);
+
+    ASSERT_EQ(*res, check_res);
+}
+
+TEST(vhdl_analyzer, instance_generic_map) {
+    auto test_pattern = R"(
+entity top is
+end top;
+architecture rtl of top is
+begin
+    u_sub : entity work.sub
+        generic map (
+            WIDTH => 16,
+            MODE  => 2
+        );
+end rtl;
+)";
+    auto res = parse_first_entity(test_pattern);
+
+    auto inst = make_instance("u_sub", "sub");
+    inst->add_parameter(make_override_param("width", std::make_shared<Numeric_token>("16")));
+    inst->add_parameter(make_override_param("mode", std::make_shared<Numeric_token>("2")));
+
+    hdl_resource_statement check;
+    check.set_name("top");
+    check.set_type(module);
+    check.set_line_n(2);
+    check.add_statement(inst);
+
+    ASSERT_EQ(*res, check);
+}
+
+TEST(vhdl_analyzer, instance_generic_map_expr) {
+    auto test_pattern = R"(
+entity top is
+end top;
+architecture rtl of top is
+begin
+    u_sub : entity work.sub
+        generic map (
+            WIDTH => 2**4-1
+        );
+end rtl;
+)";
+    auto res = parse_first_entity(test_pattern);
+
+    auto pow = make_binary(Expression_v2::power,
+                           std::make_shared<Numeric_token>("2"),
+                           std::make_shared<Numeric_token>("4"));
+    auto expr = make_binary(Expression_v2::subtract, pow, std::make_shared<Numeric_token>("1"));
+
+    auto inst = make_instance("u_sub", "sub");
+    inst->add_parameter(make_override_param("width", expr));
+
+    hdl_resource_statement check;
+    check.set_name("top");
+    check.set_type(module);
+    check.set_line_n(2);
+    check.add_statement(inst);
+
+    ASSERT_EQ(*res, check);
 }

@@ -24,6 +24,7 @@
 
 #include "data_model/HDL/statement/hdl_instance_statement.hpp"
 #include "data_model/HDL/factories/HDL_modules_factory.hpp"
+#include "data_model/HDL/factories/HDL_instances_factory.hpp"
 #include "data_model/HDL/factories/HDL_parameters_factory.hpp"
 #include "data_model/HDL/parameters/components/HDL_builtin_function.hpp"
 #include "frontend/analysis/vhdl/vhdl_type_engine.hpp"
@@ -81,6 +82,11 @@ public:
     void exitElement_declaration(mgp_vh::vhdlParser::Element_declarationContext *ctx) override;
     void enterSubtype_declaration(mgp_vh::vhdlParser::Subtype_declarationContext *ctx) override;
     void exitSubtype_declaration(mgp_vh::vhdlParser::Subtype_declarationContext *ctx) override;
+    void enterConcurrent_statement(mgp_vh::vhdlParser::Concurrent_statementContext *ctx) override;
+    void enterGeneric_map_aspect(mgp_vh::vhdlParser::Generic_map_aspectContext *ctx) override;
+    void exitGeneric_map_aspect(mgp_vh::vhdlParser::Generic_map_aspectContext *ctx) override;
+    void enterAssociation_element(mgp_vh::vhdlParser::Association_elementContext *ctx) override;
+    void exitAssociation_element(mgp_vh::vhdlParser::Association_elementContext *ctx) override;
 
     std::vector<std::shared_ptr<hdl_statement_base>> get_entities() {return entities;}
 private:
@@ -88,6 +94,7 @@ private:
                        mgp_vh::vhdlParser::Subtype_indicationContext *type);
     void finalize_generic(mgp_vh::vhdlParser::Identifier_listContext *ids);
     void finalize_port(mgp_vh::vhdlParser::Interface_signal_declarationContext *ctx);
+    static std::string instantiated_module_name(mgp_vh::vhdlParser::Component_instantiation_statementContext *ctx);
     std::shared_ptr<hdl_type> make_generic_type(mgp_vh::vhdlParser::Subtype_indicationContext *type);
     std::shared_ptr<Expression_base> make_vhdl_value(const std::string &text);
     std::shared_ptr<Expression_base> make_character_value(const std::string &text);
@@ -114,6 +121,8 @@ private:
     bool in_type_declaration = false;
     bool in_subtype_declaration = false;
     bool in_record_element = false;
+    bool in_instance_generic_map = false;
+    bool instance_override_active = false;
     vhdl_type_kind decl_context = vhdl_type_kind::none;
     std::string declared_type_name;
     std::string subtype_decl_name;
@@ -121,6 +130,7 @@ private:
 
     HDL_modules_factory modules_factory;
     HDL_parameters_factory params_factory;
+    HDL_instances_factory deps_factory;
     vhdl_type_engine type_engine;
 };
 

@@ -78,21 +78,64 @@ void vhdl_visitor::exitEntity_declaration(mgp_vh::vhdlParser::Entity_declaration
     entities.push_back(modules_factory.get_module());
 }
 
-void vhdl_visitor::exitConcurrent_statement(mgp_vh::vhdlParser::Concurrent_statementContext *ctx) {
-    if(ctx->component_instantiation_statement()!= nullptr){
-        auto instantiation = ctx->component_instantiation_statement();
-        std::string module_name;
-        if(instantiation->instantiated_unit()->name()->suffix() != nullptr){
-            module_name = canon(instantiation->instantiated_unit()->name()->suffix()->getText());
-        } else{
-            module_name = canon(instantiation->instantiated_unit()->name()->name_literal()->identifier()->getText());
-        }
-        auto stmt = std::make_shared<hdl_instance_statement>();
-        stmt->set_name(canon(ctx->label()->getText()));
-        stmt->set_type(module_name);
-        stmt->set_dependency_class(module);
-        statement_map[current_architecture].push_back(stmt);
+void vhdl_visitor::enterConcurrent_statement(mgp_vh::vhdlParser::Concurrent_statementContext *ctx) {
+    // Start the instance dependency before its generic/port maps are walked, so
+    // the maps can attach to a live dependency (mirrors sv_visitor).
+    if (ctx->component_instantiation_statement() && ctx->label()) {
+        auto module_name = instantiated_module_name(ctx->component_instantiation_statement());
+        if (!module_name.empty())
+            deps_factory.new_dependency(canon(ctx->label()->getText()), module_name, module);
     }
+}
+
+void vhdl_visitor::exitConcurrent_statement(mgp_vh::vhdlParser::Concurrent_statementContext *ctx) {
+    if (deps_factory.is_valid_dependency())
+        statement_map[current_architecture].push_back(deps_factory.get_dependency());
+}
+
+std::string vhdl_visitor::instantiated_module_name(
+        mgp_vh::vhdlParser::Component_instantiation_statementContext *ctx) {
+    auto unit = ctx->instantiated_unit();
+    if (!unit || !unit->name()) return "";
+    std::string module_name;
+    if (unit->name()->suffix())
+        module_name = unit->name()->suffix()->getText();
+    else if (unit->name()->name_literal() && unit->name()->name_literal()->identifier())
+        module_name = unit->name()->name_literal()->identifier()->getText();
+    return canon(module_name);
+}
+
+void vhdl_visitor::enterGeneric_map_aspect(mgp_vh::vhdlParser::Generic_map_aspectContext *ctx) {
+    in_instance_generic_map = true;
+}
+
+void vhdl_visitor::exitGeneric_map_aspect(mgp_vh::vhdlParser::Generic_map_aspectContext *ctx) {
+    in_instance_generic_map = false;
+}
+
+void vhdl_visitor::enterAssociation_element(mgp_vh::vhdlParser::Association_elementContext *ctx) {
+    if (!in_instance_generic_map) return;
+    if (!ctx->formal_part()) {
+        spdlog::warn("VHDL positional generic map not supported, ignored");
+        return;
+    }
+    auto actual = ctx->actual_part();
+    bool is_open = actual && actual->actual_designator() && actual->actual_designator()->KW_OPEN();
+    if (is_open) return;
+    auto formal = ctx->formal_part()->name(0);
+    if (!formal) return;
+    params_factory.start_instance_parameter_assignment(canon(formal->getText()));
+    params_factory.start_param_override();
+    instance_override_active = true;
+}
+
+void vhdl_visitor::exitAssociation_element(mgp_vh::vhdlParser::Association_elementContext *ctx) {
+    if (!instance_override_active) return;
+    params_factory.stop_param_override();
+    auto param = params_factory.get_parameter();
+    if (deps_factory.is_valid_dependency())
+        deps_factory.add_parameter(param);
+    instance_override_active = false;
 }
 
 void vhdl_visitor::enterArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) {
@@ -644,7 +687,7 @@ bool vhdl_visitor::simple_is_aggregate(mgp_vh::vhdlParser::Simple_expressionCont
 }
 
 bool vhdl_visitor::is_in_generic_expression() const {
-    return in_generic_clause && !in_subtype_indication && !in_aggregate_choices;
+    return (in_generic_clause || in_instance_generic_map) && !in_subtype_indication && !in_aggregate_choices;
 }
 
 std::shared_ptr<Expression_base> vhdl_visitor::make_character_value(const std::string &text) {
