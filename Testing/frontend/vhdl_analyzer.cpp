@@ -1332,3 +1332,54 @@ end rtl;
 
     ASSERT_EQ(*res, expected);
 }
+
+TEST(vhdl_analyzer, case_generate_range_choice) {
+    auto test_pattern = R"(
+entity top is
+end top;
+architecture rtl of top is
+begin
+    gen : case MODE generate
+        when 1 to 3 =>
+            u_a : entity work.a port map ( CLK => clk );
+        when others =>
+            u_b : entity work.b port map ( CLK => clk );
+    end generate;
+end rtl;
+)";
+    auto res = parse_first_entity(test_pattern);
+
+    std::unordered_map<std::string, std::vector<HDL_net>> clk_ports;
+    clk_ports["clk"] = {HDL_net("clk")};
+    auto u_a = make_instance("u_a", "a");
+    u_a->set_ports(clk_ports);
+    auto u_b = make_instance("u_b", "b");
+    u_b->set_ports(clk_ports);
+
+    auto mode = std::make_shared<Identifier_token>(qualified_identifier("mode"));
+    auto lo = std::make_shared<Expression_v2>();
+    lo->set_lhs(mode);
+    lo->set_rhs(std::make_shared<Numeric_token>("1"));
+    lo->set_operation(Expression_v2::greater_equal);
+    auto hi = std::make_shared<Expression_v2>();
+    hi->set_lhs(mode);
+    hi->set_rhs(std::make_shared<Numeric_token>("3"));
+    hi->set_operation(Expression_v2::less_equal);
+    auto cond = std::make_shared<Expression_v2>();
+    cond->set_lhs(lo);
+    cond->set_rhs(hi);
+    cond->set_operation(Expression_v2::logical_and);
+
+    auto conditional = std::make_shared<hdl_conditional_statement>();
+    conditional->add_branch(cond);
+    conditional->add_to_branch(u_a);
+    conditional->add_to_else(u_b);
+
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_statement(conditional);
+
+    ASSERT_EQ(*res, expected);
+}

@@ -211,6 +211,14 @@ void vhdl_visitor::enterDirection(mgp_vh::vhdlParser::DirectionContext *ctx) {
         params_factory.start_param_assignment();
         params_factory.new_parameter("genvar_end_bound");
     }
+    if (in_case_range_choice) {
+        // The direction splits a case range choice into its two bounds.
+        auto first = params_factory.get_parameter();
+        params_factory.stop_param_assignment();
+        if (first->get_expression()) case_choice_exprs.push_back(first->get_expression());
+        params_factory.start_param_assignment();
+        params_factory.new_parameter("gen_case_choice");
+    }
 }
 
 void vhdl_visitor::enterFor_generate_statement(mgp_vh::vhdlParser::For_generate_statementContext *ctx) {
@@ -332,6 +340,8 @@ void vhdl_visitor::enterCase_generate_alternative(mgp_vh::vhdlParser::Case_gener
     }
     case_alternatives_seen++;
     in_case_else_alternative = false;
+    in_case_range_choice = false;
+    case_choice_is_range = false;
     case_choice_exprs.clear();
     bool has_others = false;
     if (ctx->choices()) {
@@ -358,6 +368,10 @@ void vhdl_visitor::exitCase_generate_alternative(mgp_vh::vhdlParser::Case_genera
 
 void vhdl_visitor::enterChoice(mgp_vh::vhdlParser::ChoiceContext *ctx) {
     if (in_case_choices && !ctx->KW_OTHERS()) {
+        if (ctx->discrete_range()) {
+            in_case_range_choice = true;
+            case_choice_is_range = true;
+        }
         params_factory.start_param_assignment();
         params_factory.new_parameter("gen_case_choice");
     }
@@ -365,6 +379,15 @@ void vhdl_visitor::enterChoice(mgp_vh::vhdlParser::ChoiceContext *ctx) {
 
 void vhdl_visitor::exitChoice(mgp_vh::vhdlParser::ChoiceContext *ctx) {
     if (!in_case_choices || ctx->KW_OTHERS()) return;
+    if (in_case_range_choice) {
+        // A range choice (`1 to 3`) routes its two bounds through the same
+        // param; the direction splits them.
+        auto second = params_factory.get_parameter();
+        params_factory.stop_param_assignment();
+        if (second->get_expression()) case_choice_exprs.push_back(second->get_expression());
+        in_case_range_choice = false;
+        return;
+    }
     auto c = params_factory.get_parameter();
     params_factory.stop_param_assignment();
     if (c->get_expression()) case_choice_exprs.push_back(c->get_expression());
@@ -374,6 +397,22 @@ std::shared_ptr<Expression_base> vhdl_visitor::build_case_condition(
         const std::shared_ptr<Expression_base> &selector,
         const std::vector<std::shared_ptr<Expression_base>> &choices) {
     if (!selector || choices.empty()) return nullptr;
+    if (case_choice_is_range && choices.size() >= 2) {
+        // `when A to B` → SEL in [A, B] → (SEL >= A) AND (SEL <= B).
+        auto lo = std::make_shared<Expression_v2>();
+        lo->set_lhs(selector);
+        lo->set_rhs(choices[0]);
+        lo->set_operation(Expression_v2::greater_equal);
+        auto hi = std::make_shared<Expression_v2>();
+        hi->set_lhs(selector);
+        hi->set_rhs(choices[1]);
+        hi->set_operation(Expression_v2::less_equal);
+        auto range_cond = std::make_shared<Expression_v2>();
+        range_cond->set_lhs(lo);
+        range_cond->set_rhs(hi);
+        range_cond->set_operation(Expression_v2::logical_and);
+        return range_cond;
+    }
     std::shared_ptr<Expression_base> cond;
     for (auto &ch : choices) {
         auto eq = std::make_shared<Expression_v2>();

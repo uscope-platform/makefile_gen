@@ -170,6 +170,8 @@ private:
     bool in_case_selector = false;
     bool in_case_choices = false;
     bool in_case_else_alternative = false;
+    bool in_case_range_choice = false;
+    bool case_choice_is_range = false;
     int case_alternatives_seen = 0;
     std::shared_ptr<Expression_base> case_selector_expr;
     std::vector<std::shared_ptr<Expression_base>> case_choice_exprs;
