@@ -33,6 +33,8 @@
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
 #include "data_model/HDL/parameters/common/resolved_parameter.hpp"
 #include "data_model/HDL/parameters/common/qualified_identifier.hpp"
+#include "data_model/documentation/module_documentation.hpp"
+#include "data_model/documentation/register_documentation.hpp"
 
 std::shared_ptr<hdl_resource_statement> parse_first_entity(const std::string &content) {
     vhdl_analyzer analyzer("test.vhd");
@@ -1469,4 +1471,31 @@ end rtl;
     expected.add_statement(u_sub);
 
     ASSERT_EQ(*res, expected);
+}
+
+TEST(vhdl_analyzer, documentation_comments) {
+    auto test_pattern = R"(
+-- {
+--     "name": "Decoder",
+--     "type": "peripheral",
+--     "registers":[
+--         {
+--             "name": "simple_register_r",
+--             "offset": "0x0",
+--             "description": "Single word read only register",
+--             "direction": "R"
+--         }
+--     ]
+-- }
+entity Decoder is
+end Decoder;
+)";
+    auto res = parse_first_entity(test_pattern);
+
+    module_documentation expected_doc;
+    expected_doc.set_name("Decoder");
+    register_documentation reg("simple_register_r", 0, "Single word read only register", true, false);
+    expected_doc.add_register(reg);
+
+    ASSERT_EQ(res->get_documentation(), expected_doc);
 }

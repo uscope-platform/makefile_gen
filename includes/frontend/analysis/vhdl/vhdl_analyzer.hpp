@@ -37,6 +37,7 @@ public:
     hdl_file analyze_content(const std::string &content, const std::string &src_path);
 
 private:
+    void attach_documentation(hdl_file &result);
     std::string path;
     std::string processed_content;
     vhdl_visitor vhdl_modules_explorer;
