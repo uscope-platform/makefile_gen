@@ -1105,3 +1105,126 @@ end rtl;
 
     ASSERT_EQ(*res, expected);
 }
+
+TEST(vhdl_analyzer, if_generate_elsif_else) {
+    auto test_pattern = R"(
+entity top is
+end top;
+architecture rtl of top is
+begin
+    gen : if CONDITION generate
+        u_a : entity work.a port map ( CLK => clk );
+    elsif OTHER generate
+        u_b : entity work.b port map ( CLK => clk );
+    else generate
+        u_c : entity work.c port map ( CLK => clk );
+    end generate;
+end rtl;
+)";
+    auto res = parse_first_entity(test_pattern);
+
+    auto u_a = make_instance("u_a", "a");
+    std::unordered_map<std::string, std::vector<HDL_net>> clk_ports;
+    clk_ports["clk"] = {HDL_net("clk")};
+    u_a->set_ports(clk_ports);
+    auto u_b = make_instance("u_b", "b");
+    u_b->set_ports(clk_ports);
+    auto u_c = make_instance("u_c", "c");
+    u_c->set_ports(clk_ports);
+
+    auto conditional = std::make_shared<hdl_conditional_statement>();
+    conditional->add_branch(std::make_shared<Identifier_token>(qualified_identifier("condition")));
+    conditional->add_to_branch(u_a);
+    conditional->add_branch(std::make_shared<Identifier_token>(qualified_identifier("other")));
+    conditional->add_to_branch(u_b);
+    conditional->add_to_else(u_c);
+
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_statement(conditional);
+
+    ASSERT_EQ(*res, expected);
+}
+
+TEST(vhdl_analyzer, if_generate_plain) {
+    auto test_pattern = R"(
+entity top is
+end top;
+architecture rtl of top is
+begin
+    gen : if ENABLE generate
+        u_a : entity work.a port map ( CLK => clk );
+    end generate;
+end rtl;
+)";
+    auto res = parse_first_entity(test_pattern);
+
+    auto u_a = make_instance("u_a", "a");
+    std::unordered_map<std::string, std::vector<HDL_net>> clk_ports;
+    clk_ports["clk"] = {HDL_net("clk")};
+    u_a->set_ports(clk_ports);
+
+    auto conditional = std::make_shared<hdl_conditional_statement>();
+    conditional->add_branch(std::make_shared<Identifier_token>(qualified_identifier("enable")));
+    conditional->add_to_branch(u_a);
+
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_statement(conditional);
+
+    ASSERT_EQ(*res, expected);
+}
+
+TEST(vhdl_analyzer, if_inside_for_generate) {
+    auto test_pattern = R"(
+entity top is
+end top;
+architecture rtl of top is
+begin
+    gen : for i in 0 to 1 generate
+        gen2 : if ENABLE generate
+            u_a : entity work.a port map ( CLK => clk );
+        end generate;
+    end generate;
+end rtl;
+)";
+    auto res = parse_first_entity(test_pattern);
+
+    auto u_a = make_instance("u_a", "a");
+    std::unordered_map<std::string, std::vector<HDL_net>> clk_ports;
+    clk_ports["clk"] = {HDL_net("clk")};
+    u_a->set_ports(clk_ports);
+
+    auto conditional = std::make_shared<hdl_conditional_statement>();
+    conditional->add_branch(std::make_shared<Identifier_token>(qualified_identifier("enable")));
+    conditional->add_to_branch(u_a);
+
+    auto init = std::make_shared<HDL_parameter>("i");
+    init->set_raw_value(std::make_shared<Numeric_token>("0"));
+    auto end_cond = std::make_shared<Expression_v2>();
+    end_cond->set_lhs(std::make_shared<Identifier_token>(qualified_identifier("i")));
+    end_cond->set_rhs(std::make_shared<Numeric_token>("1"));
+    end_cond->set_operation(Expression_v2::less_equal);
+    auto iter = std::make_shared<Expression_v2>();
+    iter->set_lhs(std::make_shared<Identifier_token>(qualified_identifier("i")));
+    iter->set_rhs(std::make_shared<Numeric_token>("1"));
+    iter->set_operation(Expression_v2::add);
+
+    auto loop = std::make_shared<hdl_loop_statement>();
+    loop->set_init(init);
+    loop->set_end_condition(end_cond);
+    loop->set_iteration(iter);
+    loop->add_body_stmt(conditional);
+
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_statement(loop);
+
+    ASSERT_EQ(*res, expected);
+}

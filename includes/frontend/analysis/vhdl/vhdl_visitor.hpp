@@ -27,6 +27,7 @@
 #include "data_model/HDL/factories/HDL_instances_factory.hpp"
 #include "data_model/HDL/factories/HDL_parameters_factory.hpp"
 #include "data_model/HDL/factories/HDL_loops_factory.hpp"
+#include "data_model/HDL/factories/HDL_conditionals_factory.hpp"
 #include "data_model/HDL/parameters/components/HDL_builtin_function.hpp"
 #include "frontend/analysis/vhdl/vhdl_type_engine.hpp"
 
@@ -99,6 +100,12 @@ public:
     void exitFor_generate_statement(mgp_vh::vhdlParser::For_generate_statementContext *ctx) override;
     void enterParameter_specification(mgp_vh::vhdlParser::Parameter_specificationContext *ctx) override;
     void exitParameter_specification(mgp_vh::vhdlParser::Parameter_specificationContext *ctx) override;
+    void enterIf_generate_statement(mgp_vh::vhdlParser::If_generate_statementContext *ctx) override;
+    void exitIf_generate_statement(mgp_vh::vhdlParser::If_generate_statementContext *ctx) override;
+    void enterCondition(mgp_vh::vhdlParser::ConditionContext *ctx) override;
+    void exitCondition(mgp_vh::vhdlParser::ConditionContext *ctx) override;
+    void enterGenerate_statement_body(mgp_vh::vhdlParser::Generate_statement_bodyContext *ctx) override;
+    void exitGenerate_statement_body(mgp_vh::vhdlParser::Generate_statement_bodyContext *ctx) override;
 
     std::vector<std::shared_ptr<hdl_statement_base>> get_entities() {return entities;}
 private:
@@ -147,6 +154,8 @@ private:
     bool pending_index = false;
     bool in_generate_loop = false;
     bool in_loop_range = false;
+    bool in_generate_condition = false;
+    std::vector<std::string> generate_stack;
     std::string generate_loop_var;
     std::string generate_loop_dir;
     std::optional<std::string> pending_slice_first;
@@ -163,6 +172,7 @@ private:
     HDL_parameters_factory params_factory;
     HDL_instances_factory deps_factory;
     HDL_loops_factory loops_factory;
+    HDL_conditionals_factory conditionals_factory;
     vhdl_type_engine type_engine;
 };
 

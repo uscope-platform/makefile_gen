@@ -90,10 +90,13 @@ void vhdl_visitor::enterConcurrent_statement(mgp_vh::vhdlParser::Concurrent_stat
 
 void vhdl_visitor::exitConcurrent_statement(mgp_vh::vhdlParser::Concurrent_statementContext *ctx) {
     if (deps_factory.is_valid_dependency()) {
-        if (loops_factory.in_loop())
-            loops_factory.add_statement(deps_factory.get_dependency());
+        auto dep = deps_factory.get_dependency();
+        if (!generate_stack.empty() && generate_stack.back() == "if")
+            conditionals_factory.add_statement(dep);
+        else if (!generate_stack.empty() && generate_stack.back() == "for")
+            loops_factory.add_statement(dep);
         else
-            statement_map[current_architecture].push_back(deps_factory.get_dependency());
+            statement_map[current_architecture].push_back(dep);
     }
 }
 
@@ -212,13 +215,71 @@ void vhdl_visitor::enterDirection(mgp_vh::vhdlParser::DirectionContext *ctx) {
 
 void vhdl_visitor::enterFor_generate_statement(mgp_vh::vhdlParser::For_generate_statementContext *ctx) {
     loops_factory.new_loop();
+    generate_stack.emplace_back("for");
     in_generate_loop = true;
 }
 
 void vhdl_visitor::exitFor_generate_statement(mgp_vh::vhdlParser::For_generate_statementContext *ctx) {
     if (!in_generate_loop) return;
-    statement_map[current_architecture].push_back(loops_factory.get_loop_statement());
     in_generate_loop = false;
+    auto loop = loops_factory.get_loop_statement();
+    generate_stack.pop_back();
+    if (!generate_stack.empty() && generate_stack.back() == "if")
+        conditionals_factory.add_statement(loop);
+    else
+        statement_map[current_architecture].push_back(loop);
+}
+
+void vhdl_visitor::enterIf_generate_statement(mgp_vh::vhdlParser::If_generate_statementContext *ctx) {
+    if (!conditionals_factory.is_active())
+        conditionals_factory.new_conditional();
+    else
+        conditionals_factory.push_nested();
+    generate_stack.emplace_back("if");
+}
+
+void vhdl_visitor::exitIf_generate_statement(mgp_vh::vhdlParser::If_generate_statementContext *ctx) {
+    if (generate_stack.empty() || generate_stack.back() != "if") return;
+    auto stmt = conditionals_factory.get_conditional();
+    if (stmt.is_empty()) {
+        generate_stack.pop_back();
+        return;
+    }
+    auto ptr = std::make_shared<hdl_conditional_statement>(stmt);
+    generate_stack.pop_back();
+    if (!generate_stack.empty() && generate_stack.back() == "for")
+        loops_factory.add_statement(ptr);
+    else
+        statement_map[current_architecture].push_back(ptr);
+}
+
+void vhdl_visitor::enterCondition(mgp_vh::vhdlParser::ConditionContext *ctx) {
+    if (generate_stack.empty() || generate_stack.back() != "if") return;
+    // The first condition sets the initial branch; elsif conditions add branches.
+    if (conditionals_factory.has_condition())
+        conditionals_factory.add_branch();
+    in_generate_condition = true;
+    params_factory.start_param_assignment();
+    params_factory.new_parameter("gen_if_cond");
+}
+
+void vhdl_visitor::exitCondition(mgp_vh::vhdlParser::ConditionContext *ctx) {
+    if (!in_generate_condition) return;
+    auto param = params_factory.get_parameter();
+    params_factory.stop_param_assignment();
+    in_generate_condition = false;
+    conditionals_factory.set_condition(param->get_expression());
+}
+
+void vhdl_visitor::enterGenerate_statement_body(mgp_vh::vhdlParser::Generate_statement_bodyContext *ctx) {
+    // Only an if-generate's own bodies drive the conditional branch tracking.
+    if (!generate_stack.empty() && generate_stack.back() == "if")
+        conditionals_factory.enter_body_item();
+}
+
+void vhdl_visitor::exitGenerate_statement_body(mgp_vh::vhdlParser::Generate_statement_bodyContext *ctx) {
+    if (!generate_stack.empty() && generate_stack.back() == "if")
+        conditionals_factory.exit_body_item();
 }
 
 void vhdl_visitor::enterParameter_specification(mgp_vh::vhdlParser::Parameter_specificationContext *ctx) {
@@ -891,7 +952,7 @@ bool vhdl_visitor::simple_is_aggregate(mgp_vh::vhdlParser::Simple_expressionCont
 }
 
 bool vhdl_visitor::is_in_generic_expression() const {
-    return (in_generic_clause || in_instance_generic_map || in_loop_range) && !in_subtype_indication && !in_aggregate_choices;
+    return (in_generic_clause || in_instance_generic_map || in_loop_range || in_generate_condition) && !in_subtype_indication && !in_aggregate_choices;
 }
 
 std::shared_ptr<Expression_base> vhdl_visitor::make_character_value(const std::string &text) {
