@@ -91,7 +91,7 @@ void vhdl_visitor::enterConcurrent_statement(mgp_vh::vhdlParser::Concurrent_stat
 void vhdl_visitor::exitConcurrent_statement(mgp_vh::vhdlParser::Concurrent_statementContext *ctx) {
     if (deps_factory.is_valid_dependency()) {
         auto dep = deps_factory.get_dependency();
-        if (!generate_stack.empty() && generate_stack.back() == "if")
+        if (!generate_stack.empty() && (generate_stack.back() == "if" || generate_stack.back() == "case"))
             conditionals_factory.add_statement(dep);
         else if (!generate_stack.empty() && generate_stack.back() == "for")
             loops_factory.add_statement(dep);
@@ -280,6 +280,117 @@ void vhdl_visitor::enterGenerate_statement_body(mgp_vh::vhdlParser::Generate_sta
 void vhdl_visitor::exitGenerate_statement_body(mgp_vh::vhdlParser::Generate_statement_bodyContext *ctx) {
     if (!generate_stack.empty() && generate_stack.back() == "if")
         conditionals_factory.exit_body_item();
+}
+
+void vhdl_visitor::enterGenerate_statement_body_with_begin_end(mgp_vh::vhdlParser::Generate_statement_body_with_begin_endContext *ctx) {
+    if (!generate_stack.empty() && generate_stack.back() == "case")
+        conditionals_factory.enter_body_item();
+}
+
+void vhdl_visitor::exitGenerate_statement_body_with_begin_end(mgp_vh::vhdlParser::Generate_statement_body_with_begin_endContext *ctx) {
+    if (!generate_stack.empty() && generate_stack.back() == "case")
+        conditionals_factory.exit_body_item();
+}
+
+void vhdl_visitor::enterCase_generate_statement(mgp_vh::vhdlParser::Case_generate_statementContext *ctx) {
+    if (!conditionals_factory.is_active())
+        conditionals_factory.new_conditional();
+    else
+        conditionals_factory.push_nested();
+    generate_stack.push_back("case");
+    in_generate_case = true;
+    in_case_selector = true;
+    case_alternatives_seen = 0;
+    params_factory.start_param_assignment();
+    params_factory.new_parameter("gen_case_sel");
+}
+
+void vhdl_visitor::exitCase_generate_statement(mgp_vh::vhdlParser::Case_generate_statementContext *ctx) {
+    if (generate_stack.empty() || generate_stack.back() != "case") return;
+    in_generate_case = false;
+    auto stmt = conditionals_factory.get_conditional();
+    if (stmt.is_empty()) {
+        generate_stack.pop_back();
+        return;
+    }
+    auto ptr = std::make_shared<hdl_conditional_statement>(stmt);
+    generate_stack.pop_back();
+    if (!generate_stack.empty() && generate_stack.back() == "for")
+        loops_factory.add_statement(ptr);
+    else
+        statement_map[current_architecture].push_back(ptr);
+}
+
+void vhdl_visitor::enterCase_generate_alternative(mgp_vh::vhdlParser::Case_generate_alternativeContext *ctx) {
+    if (!in_generate_case) return;
+    if (case_alternatives_seen == 0 && in_case_selector) {
+        // The case selector is the expression routed before the first alternative.
+        auto sel = params_factory.get_parameter();
+        params_factory.stop_param_assignment();
+        in_case_selector = false;
+        case_selector_expr = sel->get_expression();
+    }
+    case_alternatives_seen++;
+    in_case_else_alternative = false;
+    case_choice_exprs.clear();
+    bool has_others = false;
+    if (ctx->choices()) {
+        for (auto *ch : ctx->choices()->choice()) {
+            if (ch->KW_OTHERS()) { has_others = true; break; }
+        }
+    }
+    if (has_others) {
+        in_case_else_alternative = true;
+        return;
+    }
+    conditionals_factory.add_branch();
+    in_case_choices = true;
+}
+
+void vhdl_visitor::exitCase_generate_alternative(mgp_vh::vhdlParser::Case_generate_alternativeContext *ctx) {
+    if (!in_generate_case) return;
+    if (in_case_choices) {
+        in_case_choices = false;
+        conditionals_factory.set_condition(build_case_condition(case_selector_expr, case_choice_exprs));
+    }
+    in_case_else_alternative = false;
+}
+
+void vhdl_visitor::enterChoice(mgp_vh::vhdlParser::ChoiceContext *ctx) {
+    if (in_case_choices && !ctx->KW_OTHERS()) {
+        params_factory.start_param_assignment();
+        params_factory.new_parameter("gen_case_choice");
+    }
+}
+
+void vhdl_visitor::exitChoice(mgp_vh::vhdlParser::ChoiceContext *ctx) {
+    if (!in_case_choices || ctx->KW_OTHERS()) return;
+    auto c = params_factory.get_parameter();
+    params_factory.stop_param_assignment();
+    if (c->get_expression()) case_choice_exprs.push_back(c->get_expression());
+}
+
+std::shared_ptr<Expression_base> vhdl_visitor::build_case_condition(
+        const std::shared_ptr<Expression_base> &selector,
+        const std::vector<std::shared_ptr<Expression_base>> &choices) {
+    if (!selector || choices.empty()) return nullptr;
+    std::shared_ptr<Expression_base> cond;
+    for (auto &ch : choices) {
+        auto eq = std::make_shared<Expression_v2>();
+        eq->set_lhs(selector);
+        eq->set_rhs(ch);
+        eq->set_operation(Expression_v2::equal);
+        if (!cond) {
+            cond = eq;
+        } else {
+            auto or_expr = std::make_shared<Expression_v2>();
+            or_expr->set_lhs(cond);
+            or_expr->set_rhs(eq);
+            or_expr->set_operation(Expression_v2::logical_or);
+            cond = or_expr;
+        }
+    }
+    return cond;
 }
 
 void vhdl_visitor::enterParameter_specification(mgp_vh::vhdlParser::Parameter_specificationContext *ctx) {
@@ -930,11 +1041,14 @@ void vhdl_visitor::exitAggregate(mgp_vh::vhdlParser::AggregateContext *ctx) {
 }
 
 void vhdl_visitor::enterChoices(mgp_vh::vhdlParser::ChoicesContext *ctx) {
-    in_aggregate_choices = true;
+    // Aggregate choices suppress expression routing; case-generate choices route.
+    if (!in_case_choices)
+        in_aggregate_choices = true;
 }
 
 void vhdl_visitor::exitChoices(mgp_vh::vhdlParser::ChoicesContext *ctx) {
-    in_aggregate_choices = false;
+    if (!in_case_choices)
+        in_aggregate_choices = false;
 }
 
 bool vhdl_visitor::is_aggregate(mgp_vh::vhdlParser::AggregateContext *ctx) {
@@ -952,7 +1066,8 @@ bool vhdl_visitor::simple_is_aggregate(mgp_vh::vhdlParser::Simple_expressionCont
 }
 
 bool vhdl_visitor::is_in_generic_expression() const {
-    return (in_generic_clause || in_instance_generic_map || in_loop_range || in_generate_condition) && !in_subtype_indication && !in_aggregate_choices;
+    return (in_generic_clause || in_instance_generic_map || in_loop_range || in_generate_condition
+            || in_case_selector || in_case_choices) && !in_subtype_indication && !in_aggregate_choices;
 }
 
 std::shared_ptr<Expression_base> vhdl_visitor::make_character_value(const std::string &text) {

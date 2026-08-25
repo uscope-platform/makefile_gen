@@ -1228,3 +1228,107 @@ end rtl;
 
     ASSERT_EQ(*res, expected);
 }
+
+TEST(vhdl_analyzer, case_generate) {
+    auto test_pattern = R"(
+entity top is
+end top;
+architecture rtl of top is
+begin
+    gen : case MODE generate
+        when 0 =>
+            u_a : entity work.a port map ( CLK => clk );
+        when 1 =>
+            u_b : entity work.b port map ( CLK => clk );
+        when others =>
+            u_c : entity work.c port map ( CLK => clk );
+    end generate;
+end rtl;
+)";
+    auto res = parse_first_entity(test_pattern);
+
+    std::unordered_map<std::string, std::vector<HDL_net>> clk_ports;
+    clk_ports["clk"] = {HDL_net("clk")};
+    auto u_a = make_instance("u_a", "a");
+    u_a->set_ports(clk_ports);
+    auto u_b = make_instance("u_b", "b");
+    u_b->set_ports(clk_ports);
+    auto u_c = make_instance("u_c", "c");
+    u_c->set_ports(clk_ports);
+
+    auto mode = std::make_shared<Identifier_token>(qualified_identifier("mode"));
+    auto cond0 = std::make_shared<Expression_v2>();
+    cond0->set_lhs(mode);
+    cond0->set_rhs(std::make_shared<Numeric_token>("0"));
+    cond0->set_operation(Expression_v2::equal);
+    auto cond1 = std::make_shared<Expression_v2>();
+    cond1->set_lhs(mode);
+    cond1->set_rhs(std::make_shared<Numeric_token>("1"));
+    cond1->set_operation(Expression_v2::equal);
+
+    auto conditional = std::make_shared<hdl_conditional_statement>();
+    conditional->add_branch(cond0);
+    conditional->add_to_branch(u_a);
+    conditional->add_branch(cond1);
+    conditional->add_to_branch(u_b);
+    conditional->add_to_else(u_c);
+
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_statement(conditional);
+
+    ASSERT_EQ(*res, expected);
+}
+
+TEST(vhdl_analyzer, case_generate_multi_choice) {
+    auto test_pattern = R"(
+entity top is
+end top;
+architecture rtl of top is
+begin
+    gen : case MODE generate
+        when 1 | 3 =>
+            u_a : entity work.a port map ( CLK => clk );
+        when others =>
+            u_b : entity work.b port map ( CLK => clk );
+    end generate;
+end rtl;
+)";
+    auto res = parse_first_entity(test_pattern);
+
+    std::unordered_map<std::string, std::vector<HDL_net>> clk_ports;
+    clk_ports["clk"] = {HDL_net("clk")};
+    auto u_a = make_instance("u_a", "a");
+    u_a->set_ports(clk_ports);
+    auto u_b = make_instance("u_b", "b");
+    u_b->set_ports(clk_ports);
+
+    auto mode = std::make_shared<Identifier_token>(qualified_identifier("mode"));
+    auto eq1 = std::make_shared<Expression_v2>();
+    eq1->set_lhs(mode);
+    eq1->set_rhs(std::make_shared<Numeric_token>("1"));
+    eq1->set_operation(Expression_v2::equal);
+    auto eq3 = std::make_shared<Expression_v2>();
+    eq3->set_lhs(mode);
+    eq3->set_rhs(std::make_shared<Numeric_token>("3"));
+    eq3->set_operation(Expression_v2::equal);
+    auto cond = std::make_shared<Expression_v2>();
+    cond->set_lhs(eq1);
+    cond->set_rhs(eq3);
+    cond->set_operation(Expression_v2::logical_or);
+
+    auto conditional = std::make_shared<hdl_conditional_statement>();
+    conditional->add_branch(cond);
+    conditional->add_to_branch(u_a);
+    conditional->add_to_else(u_b);
+
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_statement(conditional);
+
+    ASSERT_EQ(*res, expected);
+}

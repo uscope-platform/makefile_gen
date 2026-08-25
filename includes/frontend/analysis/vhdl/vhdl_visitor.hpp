@@ -106,6 +106,14 @@ public:
     void exitCondition(mgp_vh::vhdlParser::ConditionContext *ctx) override;
     void enterGenerate_statement_body(mgp_vh::vhdlParser::Generate_statement_bodyContext *ctx) override;
     void exitGenerate_statement_body(mgp_vh::vhdlParser::Generate_statement_bodyContext *ctx) override;
+    void enterCase_generate_statement(mgp_vh::vhdlParser::Case_generate_statementContext *ctx) override;
+    void exitCase_generate_statement(mgp_vh::vhdlParser::Case_generate_statementContext *ctx) override;
+    void enterCase_generate_alternative(mgp_vh::vhdlParser::Case_generate_alternativeContext *ctx) override;
+    void exitCase_generate_alternative(mgp_vh::vhdlParser::Case_generate_alternativeContext *ctx) override;
+    void enterChoice(mgp_vh::vhdlParser::ChoiceContext *ctx) override;
+    void exitChoice(mgp_vh::vhdlParser::ChoiceContext *ctx) override;
+    void enterGenerate_statement_body_with_begin_end(mgp_vh::vhdlParser::Generate_statement_body_with_begin_endContext *ctx) override;
+    void exitGenerate_statement_body_with_begin_end(mgp_vh::vhdlParser::Generate_statement_body_with_begin_endContext *ctx) override;
 
     std::vector<std::shared_ptr<hdl_statement_base>> get_entities() {return entities;}
 private:
@@ -120,6 +128,9 @@ private:
     void route_port_index(const std::string &base, const std::vector<std::string> &idx);
     void route_port_actual(mgp_vh::vhdlParser::Numeric_literalContext *ctx);
     void clear_pending_selector();
+    std::shared_ptr<Expression_base> build_case_condition(
+        const std::shared_ptr<Expression_base> &selector,
+        const std::vector<std::shared_ptr<Expression_base>> &choices);
     std::shared_ptr<hdl_type> make_generic_type(mgp_vh::vhdlParser::Subtype_indicationContext *type);
     std::shared_ptr<Expression_base> make_vhdl_value(const std::string &text);
     std::shared_ptr<Expression_base> make_character_value(const std::string &text);
@@ -155,6 +166,13 @@ private:
     bool in_generate_loop = false;
     bool in_loop_range = false;
     bool in_generate_condition = false;
+    bool in_generate_case = false;
+    bool in_case_selector = false;
+    bool in_case_choices = false;
+    bool in_case_else_alternative = false;
+    int case_alternatives_seen = 0;
+    std::shared_ptr<Expression_base> case_selector_expr;
+    std::vector<std::shared_ptr<Expression_base>> case_choice_exprs;
     std::vector<std::string> generate_stack;
     std::string generate_loop_var;
     std::string generate_loop_dir;
