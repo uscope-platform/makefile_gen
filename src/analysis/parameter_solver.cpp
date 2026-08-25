@@ -359,6 +359,15 @@ void parameter_solver::propagate_imports(std::shared_ptr<hdl_resource_statement>
             if (it != imported_types.end())
                 param->set_type(it->second);
         }
+        // A declared type name that wasn't resolvable at parse time keeps its
+        // name on the (dimensionless) placeholder type; swap in the imported
+        // typedef so the real width/orientation is used.
+        if (param->get_type() && param->get_type()->is<HDL_simple_type>()) {
+            auto &simple = param->get_type()->as<HDL_simple_type>();
+            auto it = imported_types.find(simple.get_type_name());
+            if (it != imported_types.end())
+                param->set_type(it->second);
+        }
     }
 }
 

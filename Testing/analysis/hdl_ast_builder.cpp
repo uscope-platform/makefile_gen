@@ -753,4 +753,14 @@ endmodule)";
     auto param = ast[0]->get_parameters().get("DATA");
     ASSERT_TRUE(param->get_value().has_value());
     ASSERT_EQ(param->get_value()->get_integer().get_value(), 255);
+
+    // The imported package typedef actually resolved onto the parameter.
+    auto type = param->get_type();
+    ASSERT_NE(type, nullptr);
+    ASSERT_TRUE(type->is<HDL_simple_type>());
+    auto &simple = type->as<HDL_simple_type>();
+    auto packed = simple.get_packed_dimensions();
+    ASSERT_EQ(packed.size(), 1u);
+    ASSERT_EQ(packed[0].first_bound->print(), "7");
+    ASSERT_EQ(packed[0].second_bound->print(), "0");
 }
