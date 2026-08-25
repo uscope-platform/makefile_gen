@@ -21,6 +21,7 @@
 #include <vector>
 #include <stack>
 #include <optional>
+#include <unordered_map>
 
 #include "data_model/HDL/statement/hdl_instance_statement.hpp"
 #include "data_model/HDL/factories/HDL_modules_factory.hpp"
@@ -115,7 +116,10 @@ public:
     void enterGenerate_statement_body_with_begin_end(mgp_vh::vhdlParser::Generate_statement_body_with_begin_endContext *ctx) override;
     void exitGenerate_statement_body_with_begin_end(mgp_vh::vhdlParser::Generate_statement_body_with_begin_endContext *ctx) override;
 
-    std::vector<std::shared_ptr<hdl_statement_base>> get_entities() {return entities;}
+    std::vector<std::shared_ptr<hdl_statement_base>> get_entities() {
+        resolve_positional_maps();
+        return entities;
+    }
 private:
     void start_generic(mgp_vh::vhdlParser::Identifier_listContext *ids,
                        mgp_vh::vhdlParser::Subtype_indicationContext *type);
@@ -128,6 +132,9 @@ private:
     void route_port_index(const std::string &base, const std::vector<std::string> &idx);
     void route_port_actual(mgp_vh::vhdlParser::Numeric_literalContext *ctx);
     void clear_pending_selector();
+    void resolve_positional_maps();
+    void resolve_positional_in_statement(const std::shared_ptr<hdl_statement_base> &stmt);
+    void resolve_positional_instance(const std::shared_ptr<hdl_instance_statement> &inst);
     std::shared_ptr<Expression_base> build_case_condition(
         const std::shared_ptr<Expression_base> &selector,
         const std::vector<std::shared_ptr<Expression_base>> &choices);
@@ -172,6 +179,13 @@ private:
     bool in_case_else_alternative = false;
     bool in_case_range_choice = false;
     bool case_choice_is_range = false;
+    bool in_entity_declaration = false;
+    int positional_gen_index = 0;
+    int positional_port_index = 0;
+    std::string positional_port_placeholder;
+    std::string current_entity_name;
+    std::unordered_map<std::string, std::vector<std::string>> entity_port_order;
+    std::unordered_map<std::string, std::vector<std::string>> entity_generic_order;
     int case_alternatives_seen = 0;
     std::shared_ptr<Expression_base> case_selector_expr;
     std::vector<std::shared_ptr<Expression_base>> case_choice_exprs;

@@ -42,6 +42,16 @@ std::shared_ptr<hdl_resource_statement> parse_first_entity(const std::string &co
     return std::make_shared<hdl_resource_statement>(first->as<hdl_resource_statement>());
 }
 
+std::shared_ptr<hdl_resource_statement> parse_entity(const std::string &content, const std::string &name) {
+    vhdl_analyzer analyzer("test.vhd");
+    auto result = analyzer.analyze_content(content, "test.vhd");
+    for (auto &c : result.get_content()) {
+        if (c->is<hdl_resource_statement>() && c->as<hdl_resource_statement>().getName() == name)
+            return std::make_shared<hdl_resource_statement>(c->as<hdl_resource_statement>());
+    }
+    return nullptr;
+}
+
 std::shared_ptr<hdl_instance_statement> make_instance(const std::string &name, const std::string &type) {
     auto inst = std::make_shared<hdl_instance_statement>();
     inst->set_name(name);
@@ -1380,6 +1390,83 @@ end rtl;
     expected.set_type(module);
     expected.set_line_n(2);
     expected.add_statement(conditional);
+
+    ASSERT_EQ(*res, expected);
+}
+
+TEST(vhdl_analyzer, positional_port_map) {
+    auto test_pattern = R"(
+entity sub is
+    port (
+        clk  : in std_logic;
+        rst  : in std_logic;
+        dout : out std_logic_vector(7 downto 0)
+    );
+end sub;
+
+entity top is
+end top;
+architecture rtl of top is
+begin
+    u_sub : entity work.sub
+        port map (clk2, rst2, data_out2);
+end rtl;
+)";
+    auto res = parse_entity(test_pattern, "top");
+
+    auto u_sub = make_instance("u_sub", "sub");
+    std::unordered_map<std::string, std::vector<HDL_net>> inst_ports;
+    inst_ports["clk"] = {HDL_net("clk2")};
+    inst_ports["rst"] = {HDL_net("rst2")};
+    inst_ports["dout"] = {HDL_net("data_out2")};
+    u_sub->set_ports(inst_ports);
+
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(10);
+    expected.add_statement(u_sub);
+
+    ASSERT_EQ(*res, expected);
+}
+
+TEST(vhdl_analyzer, positional_generic_and_port_map) {
+    auto test_pattern = R"(
+entity sub is
+    generic (
+        WIDTH : integer := 8;
+        DEPTH : integer := 4
+    );
+    port (
+        clk : in std_logic;
+        rst : in std_logic
+    );
+end sub;
+
+entity top is
+end top;
+architecture rtl of top is
+begin
+    u_sub : entity work.sub
+        generic map (16, 2)
+        port map (clk2, rst2);
+end rtl;
+)";
+    auto res = parse_entity(test_pattern, "top");
+
+    auto u_sub = make_instance("u_sub", "sub");
+    u_sub->add_parameter(make_override_param("width", std::make_shared<Numeric_token>("16")));
+    u_sub->add_parameter(make_override_param("depth", std::make_shared<Numeric_token>("2")));
+    std::unordered_map<std::string, std::vector<HDL_net>> inst_ports;
+    inst_ports["clk"] = {HDL_net("clk2")};
+    inst_ports["rst"] = {HDL_net("rst2")};
+    u_sub->set_ports(inst_ports);
+
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(13);
+    expected.add_statement(u_sub);
 
     ASSERT_EQ(*res, expected);
 }

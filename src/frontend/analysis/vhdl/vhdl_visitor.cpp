@@ -57,6 +57,8 @@ void vhdl_visitor::enterEntity_declaration(mgp_vh::vhdlParser::Entity_declaratio
     std::string module_name = canon(ctx->identifier()[0]->getText());
     size_t line_number = ctx->getStart()->getLine();
     modules_factory.new_module(module_name,module, line_number);
+    current_entity_name = module_name;
+    in_entity_declaration = true;
 }
 
 void vhdl_visitor::exitArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) {
@@ -76,6 +78,7 @@ void vhdl_visitor::exitArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyCo
 
 void vhdl_visitor::exitEntity_declaration(mgp_vh::vhdlParser::Entity_declarationContext *ctx) {
     entities.push_back(modules_factory.get_module());
+    in_entity_declaration = false;
 }
 
 void vhdl_visitor::enterConcurrent_statement(mgp_vh::vhdlParser::Concurrent_statementContext *ctx) {
@@ -114,6 +117,7 @@ std::string vhdl_visitor::instantiated_module_name(
 
 void vhdl_visitor::enterGeneric_map_aspect(mgp_vh::vhdlParser::Generic_map_aspectContext *ctx) {
     in_instance_generic_map = true;
+    positional_gen_index = 0;
 }
 
 void vhdl_visitor::exitGeneric_map_aspect(mgp_vh::vhdlParser::Generic_map_aspectContext *ctx) {
@@ -122,6 +126,8 @@ void vhdl_visitor::exitGeneric_map_aspect(mgp_vh::vhdlParser::Generic_map_aspect
 
 void vhdl_visitor::enterPort_map_aspect(mgp_vh::vhdlParser::Port_map_aspectContext *ctx) {
     in_instance_port_map = true;
+    positional_port_index = 0;
+    positional_port_placeholder.clear();
 }
 
 void vhdl_visitor::exitPort_map_aspect(mgp_vh::vhdlParser::Port_map_aspectContext *ctx) {
@@ -131,26 +137,33 @@ void vhdl_visitor::exitPort_map_aspect(mgp_vh::vhdlParser::Port_map_aspectContex
 void vhdl_visitor::enterAssociation_element(mgp_vh::vhdlParser::Association_elementContext *ctx) {
     if (in_name_selector) return;   // association element inside an index (`sig(0)`)
     if (in_instance_generic_map) {
-        if (!ctx->formal_part()) {
-            spdlog::warn("VHDL positional generic map not supported, ignored");
-            return;
-        }
         auto actual = ctx->actual_part();
         bool is_open = actual && actual->actual_designator() && actual->actual_designator()->KW_OPEN();
-        if (is_open) return;
+        if (is_open) { positional_gen_index++; return; }
+        if (!ctx->formal_part()) {
+            // Positional: record with a placeholder name, resolved post-parse
+            // against the target entity's generic order.
+            params_factory.start_instance_parameter_assignment("@gen" + std::to_string(positional_gen_index++));
+            params_factory.start_param_override();
+            instance_override_active = true;
+            return;
+        }
         auto formal = ctx->formal_part()->name(0);
         if (!formal) return;
         params_factory.start_instance_parameter_assignment(canon(formal->getText()));
         params_factory.start_param_override();
         instance_override_active = true;
     } else if (in_instance_port_map) {
-        if (!ctx->formal_part()) {
-            spdlog::warn("VHDL positional port map not supported, ignored");
-            return;
-        }
         auto actual = ctx->actual_part();
         bool is_open = actual && actual->actual_designator() && actual->actual_designator()->KW_OPEN();
-        if (is_open) return;
+        if (is_open) { positional_port_index++; return; }
+        if (!ctx->formal_part()) {
+            // Positional: record with a placeholder name, resolved post-parse
+            // against the target entity's port order.
+            positional_port_placeholder = "@port" + std::to_string(positional_port_index++);
+            deps_factory.start_port();
+            return;
+        }
         deps_factory.start_port();
     }
 }
@@ -160,6 +173,9 @@ void vhdl_visitor::exitAssociation_element(mgp_vh::vhdlParser::Association_eleme
     if (instance_override_active) {
         params_factory.stop_param_override();
         auto param = params_factory.get_parameter();
+        // The override carries only the actual value; the formal type is resolved
+        // downstream. Drop the factory's stale current_type so it doesn't leak in.
+        if (param) param->set_type(std::make_shared<HDL_simple_type>());
         if (deps_factory.is_valid_dependency())
             deps_factory.add_parameter(param);
         instance_override_active = false;
@@ -168,6 +184,10 @@ void vhdl_visitor::exitAssociation_element(mgp_vh::vhdlParser::Association_eleme
         auto formal = ctx->formal_part() ? ctx->formal_part()->name(0) : nullptr;
         if (formal)
             deps_factory.add_port(canon(formal->getText()));
+        else if (!positional_port_placeholder.empty()) {
+            deps_factory.add_port(positional_port_placeholder);
+            positional_port_placeholder.clear();
+        }
     }
 }
 
@@ -596,7 +616,10 @@ void vhdl_visitor::finalize_port(mgp_vh::vhdlParser::Interface_signal_declaratio
     for (auto *id : ctx->identifier_list()->identifier()) {
         HDL_port port;
         port.direction = dir;
-        modules_factory.add_port(canon(id->getText()), port);
+        auto name = canon(id->getText());
+        modules_factory.add_port(name, port);
+        if (in_entity_declaration)
+            entity_port_order[current_entity_name].push_back(name);
     }
 }
 
@@ -648,6 +671,10 @@ void vhdl_visitor::finalize_generic(mgp_vh::vhdlParser::Identifier_listContext *
         auto clone = std::make_shared<HDL_parameter>(*base);
         clone->set_name(canon(ids->identifier(i)->getText()));
         modules_factory.add_parameter(clone);
+    }
+    if (in_entity_declaration) {
+        for (auto *id : ids->identifier())
+            entity_generic_order[current_entity_name].push_back(canon(id->getText()));
     }
 }
 
@@ -1224,4 +1251,71 @@ std::shared_ptr<Expression_base> vhdl_visitor::make_vhdl_value(const std::string
 
     // Plain integer (underscores are handled by Numeric_token).
     return std::make_shared<Numeric_token>(text);
+}
+
+void vhdl_visitor::resolve_positional_maps() {
+    for (auto &e : entities) {
+        if (!e->is<hdl_resource_statement>()) continue;
+        for (auto &stmt : e->as<hdl_resource_statement>().get_statements())
+            resolve_positional_in_statement(stmt);
+    }
+}
+
+void vhdl_visitor::resolve_positional_in_statement(const std::shared_ptr<hdl_statement_base> &stmt) {
+    if (auto inst = std::dynamic_pointer_cast<hdl_instance_statement>(stmt)) {
+        resolve_positional_instance(inst);
+    } else if (auto loop = std::dynamic_pointer_cast<hdl_loop_statement>(stmt)) {
+        for (auto &s : loop->get_body()) resolve_positional_in_statement(s);
+    } else if (auto cond = std::dynamic_pointer_cast<hdl_conditional_statement>(stmt)) {
+        for (auto &b : cond->get_branches())
+            for (auto &s : b.body) resolve_positional_in_statement(s);
+        for (auto &s : cond->get_else_body()) resolve_positional_in_statement(s);
+    }
+}
+
+void vhdl_visitor::resolve_positional_instance(const std::shared_ptr<hdl_instance_statement> &inst) {
+    auto type = inst->get_type();
+
+    auto pit = entity_port_order.find(type);
+    if (pit != entity_port_order.end()) {
+        auto old_ports = inst->get_ports();
+        std::unordered_map<std::string, std::vector<HDL_net>> new_ports;
+        bool changed = false;
+        for (auto &[k, v] : old_ports) {
+            if (k.rfind("@port", 0) == 0) {
+                int idx = std::stoi(k.substr(5));
+                if (idx < static_cast<int>(pit->second.size())) {
+                    new_ports[pit->second[idx]] = v;
+                    changed = true;
+                } else {
+                    spdlog::warn("VHDL positional port map index {} out of range for '{}', dropped", idx, type);
+                }
+            } else {
+                new_ports[k] = v;
+            }
+        }
+        if (changed) inst->set_ports(new_ports);
+    }
+
+    auto git = entity_generic_order.find(type);
+    if (git != entity_generic_order.end()) {
+        Parameters_map new_params = inst->get_parameters();
+        std::vector<std::pair<std::string, int>> placeholders;
+        for (auto &[k, v] : new_params)
+            if (k.rfind("@gen", 0) == 0) placeholders.push_back({k, std::stoi(k.substr(4))});
+        bool changed = false;
+        for (auto &[k, idx] : placeholders) {
+            auto param = new_params.const_get(k);
+            new_params.erase(k);
+            if (idx < static_cast<int>(git->second.size())) {
+                auto renamed = std::make_shared<HDL_parameter>(*param);
+                renamed->set_name(git->second[idx]);
+                new_params.insert(renamed);
+                changed = true;
+            } else {
+                spdlog::warn("VHDL positional generic map index {} out of range for '{}', dropped", idx, type);
+            }
+        }
+        if (changed) inst->set_parameters(new_params);
+    }
 }
