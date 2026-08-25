@@ -123,6 +123,7 @@ public:
 
     std::vector<std::shared_ptr<hdl_statement_base>> get_entities() {
         resolve_positional_maps();
+        attach_default_architectures();
         return entities;
     }
     std::vector<std::shared_ptr<hdl_import_stmt>> get_imports() {return file_imports;}
@@ -132,6 +133,7 @@ private:
     void finalize_generic(mgp_vh::vhdlParser::Identifier_listContext *ids);
     void finalize_port(mgp_vh::vhdlParser::Interface_signal_declarationContext *ctx);
     static std::string instantiated_module_name(mgp_vh::vhdlParser::Component_instantiation_statementContext *ctx);
+    static std::string instantiated_module_arch(mgp_vh::vhdlParser::Component_instantiation_statementContext *ctx);
     void route_port_connection(const std::string &text);
     void route_port_slice(const std::string &base, const std::string &first,
                           const std::string &dir, const std::string &second);
@@ -139,6 +141,7 @@ private:
     void route_port_actual(mgp_vh::vhdlParser::Numeric_literalContext *ctx);
     void clear_pending_selector();
     void resolve_positional_maps();
+    void attach_default_architectures();
     void resolve_positional_in_statement(const std::shared_ptr<hdl_statement_base> &stmt);
     void resolve_positional_instance(const std::shared_ptr<hdl_instance_statement> &inst);
     std::shared_ptr<Expression_base> build_case_condition(
@@ -162,6 +165,7 @@ private:
     std::string path;
     std::vector<std::shared_ptr<hdl_statement_base>>  entities;
     std::unordered_map<std::string, std::vector<std::shared_ptr<hdl_statement_base>>> statement_map;
+    std::map<std::string, std::string> last_arch_of;
     std::string current_architecture;
     bool in_generic_clause = false;
     bool in_port_clause = false;

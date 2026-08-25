@@ -21,6 +21,7 @@
 hdl_ast_node::hdl_ast_node(const hdl_instance_statement &stmt) {
     name = stmt.get_name();
     type = stmt.get_type();
+    architecture = stmt.get_architecture();
     dep_class = stmt.get_dependency_class();
     wildcard_assignment = stmt.get_wildcard();
     groups = stmt.get_channel_groups();
@@ -37,6 +38,7 @@ hdl_ast_node::hdl_ast_node(const hdl_instance_statement &stmt) {
 hdl_ast_node::hdl_ast_node(const hdl_ast_node &c) {
     name = c.name;
     type = c.type;
+    architecture = c.architecture;
     dep_class = c.dep_class;
     parameters = c.parameters;
     ports_map = c.ports_map;
@@ -79,6 +81,7 @@ bool operator==(const hdl_ast_node &lhs, const hdl_ast_node &rhs) {
 
     ret &= lhs.name == rhs.name;
     ret &= lhs.type == rhs.type;
+    ret &= lhs.architecture == rhs.architecture;
     ret &= lhs.dep_class == rhs.dep_class;
     ret &= lhs.ports_map == rhs.ports_map;
     ret &= lhs.parameters == rhs.parameters;

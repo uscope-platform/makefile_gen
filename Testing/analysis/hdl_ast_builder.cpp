@@ -764,3 +764,61 @@ endmodule)";
     ASSERT_EQ(packed[0].first_bound->print(), "7");
     ASSERT_EQ(packed[0].second_bound->print(), "0");
 }
+
+TEST(hdl_ast_builder, vhdl_multiple_architectures) {
+    // Two instances of the same entity select different architectures.
+    auto test_pattern = R"(
+entity a is
+    port ( clk : in std_logic );
+end a;
+entity b is
+    port ( clk : in std_logic );
+end b;
+
+entity foo is
+    port ( clk : in std_logic );
+end foo;
+architecture rtl of foo is
+begin
+    u_a : entity work.a port map ( CLK => clk );
+end rtl;
+architecture behavioral of foo is
+begin
+    u_b : entity work.b port map ( CLK => clk );
+end behavioral;
+
+entity top is
+end top;
+architecture rtl of top is
+begin
+    u1 : entity work.foo(rtl) port map ( CLK => clk );
+    u2 : entity work.foo(behavioral) port map ( CLK => clk );
+end rtl;
+)";
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+    vhdl_analyzer analyzer("test/multi_arch.vhd");
+    d_store->store_file({"test/multi_arch.vhd", "hash", analyzer.analyze_content(test_pattern, "test/multi_arch.vhd")});
+
+    HDL_ast_builder_v2 b(s_store, d_store, Depfile());
+    auto ast = b.build_ast(std::vector<std::string>({"top"}));
+    ASSERT_EQ(ast.size(), 1u);
+    auto children = ast[0]->get_dependencies();
+    ASSERT_EQ(children.size(), 2u);
+
+    // u1 selects the rtl architecture → its implementation contains u_a.
+    auto u1 = children[0];
+    ASSERT_EQ(u1->get_name(), "u1");
+    ASSERT_EQ(u1->get_architecture(), "rtl");
+    auto u1_deps = u1->get_dependencies();
+    ASSERT_EQ(u1_deps.size(), 1u);
+    ASSERT_EQ(u1_deps[0]->get_name(), "u_a");
+
+    // u2 selects the behavioral architecture → its implementation contains u_b.
+    auto u2 = children[1];
+    ASSERT_EQ(u2->get_name(), "u2");
+    ASSERT_EQ(u2->get_architecture(), "behavioral");
+    auto u2_deps = u2->get_dependencies();
+    ASSERT_EQ(u2_deps.size(), 1u);
+    ASSERT_EQ(u2_deps[0]->get_name(), "u_b");
+}

@@ -82,6 +82,12 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
             if(working_instance->get_dependency_class() == module || working_instance->get_dependency_class() == interface ) {
                 std::string res_path;
                 auto res_opt = d_store->get_HDL_resource(type, res_path);
+                // An instance selecting a specific architecture (`entity foo(rtl)`)
+                // elaborates that architecture's implementation resource.
+                if (res_opt.has_value() && !working_instance->get_architecture().empty()) {
+                    auto arch_res = d_store->get_HDL_resource(type, working_instance->get_architecture());
+                    if (arch_res.has_value()) res_opt = arch_res;
+                }
 
                 if (!res_opt.has_value()) {
                     spdlog::error("Definition of module {} while AST building", type);

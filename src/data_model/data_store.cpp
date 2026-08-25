@@ -40,7 +40,21 @@ std::optional<std::shared_ptr<hdl_resource_statement>> data_store::get_HDL_resou
         if (!std::holds_alternative<hdl_file>(file.content)) continue;
         for (auto &res:std::get<hdl_file>(file.content).get_content()) {
             if (!res->is<hdl_resource_statement>()) continue;
-            if (res->as<hdl_resource_statement>().getName() == name) return std::static_pointer_cast<hdl_resource_statement>(res);
+            auto &r = res->as<hdl_resource_statement>();
+            if (r.getName() == name && r.get_architecture().empty()) return std::static_pointer_cast<hdl_resource_statement>(res);
+        }
+    }
+    return std::nullopt;
+}
+
+std::optional<std::shared_ptr<hdl_resource_statement>> data_store::get_HDL_resource(const std::string &name,
+    const std::string &arch) {
+    for (auto &file: cache | std::views::values) {
+        if (!std::holds_alternative<hdl_file>(file.content)) continue;
+        for (auto &res:std::get<hdl_file>(file.content).get_content()) {
+            if (!res->is<hdl_resource_statement>()) continue;
+            auto &r = res->as<hdl_resource_statement>();
+            if (r.getName() == name && r.get_architecture() == arch) return std::static_pointer_cast<hdl_resource_statement>(res);
         }
     }
     return std::nullopt;
@@ -52,7 +66,8 @@ std::optional<std::shared_ptr<hdl_resource_statement>> data_store::get_HDL_resou
         if (!std::holds_alternative<hdl_file>(file.content)) continue;
         for (auto &res:std::get<hdl_file>(file.content).get_content()) {
             if (!res->is<hdl_resource_statement>()) continue;
-            if (res->as<hdl_resource_statement>().getName() == name) {
+            auto &r = res->as<hdl_resource_statement>();
+            if (r.getName() == name && r.get_architecture().empty()) {
                 path = file.path;
                 return std::static_pointer_cast<hdl_resource_statement>(res);
             }

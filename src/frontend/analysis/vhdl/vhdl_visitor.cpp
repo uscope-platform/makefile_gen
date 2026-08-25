@@ -75,17 +75,25 @@ void vhdl_visitor::enterEntity_declaration(mgp_vh::vhdlParser::Entity_declaratio
 }
 
 void vhdl_visitor::exitArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) {
-    std::string name = canon(ctx->name()->getText());
-    auto current_typedefs = modules_factory.get_module()->get_typedefs();
-    for(auto &item:entities){
-        if(item->is<hdl_resource_statement>() && item->as<hdl_resource_statement>().getName() == name){
-            for (auto &stmt : statement_map[item->as<hdl_resource_statement>().getName()]) {
-                item->as<hdl_resource_statement>().add_statement(stmt);
-            }
-            for (const auto &[tname, ttype] : current_typedefs)
-                item->as<hdl_resource_statement>().add_typedef(tname, ttype);
+    std::string entity_name = canon(ctx->name()->getText());
+    std::string arch_name = canon(ctx->identifier(0)->getText());
+
+    auto arch_res = modules_factory.get_module();
+    arch_res->set_architecture(arch_name);
+    for (auto &stmt : statement_map[entity_name + "::" + arch_name])
+        arch_res->add_statement(stmt);
+
+    // Copy the entity's interface into the architecture resource (self-contained).
+    for (auto &item : entities) {
+        if (item->is<hdl_resource_statement>() && item->as<hdl_resource_statement>().getName() == entity_name) {
+            auto &entity = item->as<hdl_resource_statement>();
+            arch_res->set_ports(entity.get_port_specs());
+            arch_res->set_parameters(entity.get_parameters());
+            break;
         }
     }
+    last_arch_of[entity_name] = arch_name;
+    entities.push_back(arch_res);
 }
 
 
@@ -107,6 +115,8 @@ void vhdl_visitor::enterConcurrent_statement(mgp_vh::vhdlParser::Concurrent_stat
 void vhdl_visitor::exitConcurrent_statement(mgp_vh::vhdlParser::Concurrent_statementContext *ctx) {
     if (deps_factory.is_valid_dependency()) {
         auto dep = deps_factory.get_dependency();
+        if (ctx->component_instantiation_statement())
+            dep->set_architecture(instantiated_module_arch(ctx->component_instantiation_statement()));
         if (!generate_stack.empty() && (generate_stack.back() == "if" || generate_stack.back() == "case"))
             conditionals_factory.add_statement(dep);
         else if (!generate_stack.empty() && generate_stack.back() == "for")
@@ -120,12 +130,34 @@ std::string vhdl_visitor::instantiated_module_name(
         mgp_vh::vhdlParser::Component_instantiation_statementContext *ctx) {
     auto unit = ctx->instantiated_unit();
     if (!unit || !unit->name()) return "";
+    // The grammar absorbs an architecture selector into the name
+    // (`entity work.foo(rtl)` parses `work.foo(rtl)` as one name), so strip a
+    // trailing `(…)` before resolving the module name.
+    std::string text = unit->name()->getText();
+    auto paren = text.rfind('(');
+    if (paren != std::string::npos && text.back() == ')')
+        text = text.substr(0, paren);
     std::string module_name;
-    if (unit->name()->suffix())
-        module_name = unit->name()->suffix()->getText();
-    else if (unit->name()->name_literal() && unit->name()->name_literal()->identifier())
-        module_name = unit->name()->name_literal()->identifier()->getText();
+    auto dot = text.rfind('.');
+    module_name = dot == std::string::npos ? text : text.substr(dot + 1);
     return canon(module_name);
+}
+
+std::string vhdl_visitor::instantiated_module_arch(
+        mgp_vh::vhdlParser::Component_instantiation_statementContext *ctx) {
+    auto unit = ctx->instantiated_unit();
+    if (!unit) return "";
+    // `entity work.foo(rtl)` — the grammar usually folds `(rtl)` into the name,
+    // so extract the trailing selector from the name text.
+    if (unit->name()) {
+        auto text = unit->name()->getText();
+        auto paren = text.rfind('(');
+        if (paren != std::string::npos && text.back() == ')')
+            return canon(text.substr(paren + 1, text.size() - paren - 2));
+    }
+    if (unit->identifier())
+        return canon(unit->identifier()->getText());
+    return "";
 }
 
 void vhdl_visitor::enterGeneric_map_aspect(mgp_vh::vhdlParser::Generic_map_aspectContext *ctx) {
@@ -568,7 +600,15 @@ void vhdl_visitor::route_port_connection(const std::string &text) {
 }
 
 void vhdl_visitor::enterArchitecture_body(mgp_vh::vhdlParser::Architecture_bodyContext *ctx) {
-    current_architecture = canon(ctx->name()->getText());
+    // Real architecture name (`architecture rtl of foo` → identifier(0) = rtl,
+    // name = foo). Each architecture becomes its own implementation resource;
+    // statements are bucketed per (entity, arch) so same-named architectures of
+    // different entities don't collide.
+    std::string entity_name = canon(ctx->name()->getText());
+    std::string arch_name = canon(ctx->identifier(0)->getText());
+    current_architecture = entity_name + "::" + arch_name;
+    size_t line_number = ctx->getStart()->getLine();
+    modules_factory.new_module(entity_name, module, line_number);
 }
 
 void vhdl_visitor::enterGeneric_clause(mgp_vh::vhdlParser::Generic_clauseContext *ctx) {
@@ -1339,6 +1379,26 @@ std::shared_ptr<Expression_base> vhdl_visitor::make_vhdl_value(const std::string
 
     // Plain integer (underscores are handled by Numeric_token).
     return std::make_shared<Numeric_token>(text);
+}
+
+void vhdl_visitor::attach_default_architectures() {
+    // The entity resource (architecture "") is the default implementation: it
+    // carries the last-declared architecture's statements and typedefs.
+    for (auto &item : entities) {
+        if (!item->is<hdl_resource_statement>()) continue;
+        auto &res = item->as<hdl_resource_statement>();
+        if (!res.get_architecture().empty()) continue;
+        auto it = last_arch_of.find(res.getName());
+        if (it == last_arch_of.end()) continue;
+        for (auto &a : entities) {
+            if (!a->is<hdl_resource_statement>()) continue;
+            auto &arch = a->as<hdl_resource_statement>();
+            if (arch.getName() != res.getName() || arch.get_architecture() != it->second) continue;
+            for (auto &stmt : arch.get_statements()) res.add_statement(stmt);
+            for (auto &[tname, ttype] : arch.get_typedefs()) res.add_typedef(tname, ttype);
+            break;
+        }
+    }
 }
 
 void vhdl_visitor::resolve_positional_maps() {

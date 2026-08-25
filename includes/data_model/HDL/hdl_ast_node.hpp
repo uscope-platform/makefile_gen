@@ -64,6 +64,8 @@ public:
     void set_name(const std::string &n) { name = n; }
     std::string get_type() const { return type; }
     void set_type(const std::string &t) { type = t; }
+    std::string get_architecture() const { return architecture; }
+    void set_architecture(const std::string &a) { architecture = a; }
     dependency_class get_dependency_class() const { return dep_class; }
     void set_dependency_class(dependency_class dc) { dep_class = dc; }
 
@@ -139,8 +141,9 @@ public:
 private:
     static std::string dump_structure(const std::shared_ptr<hdl_ast_node>&ast, const std::string &prefix);
 
-    std::string name;
+std::string name;
     std::string type;
+    std::string architecture;
     bool active = true;
     dependency_class dep_class = module;
     Parameters_map parameters;

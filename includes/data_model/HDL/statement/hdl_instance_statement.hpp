@@ -43,6 +43,9 @@ public:
     void set_type(const std::string& t) { type = t; }
     std::string get_type() const { return type; }
 
+    void set_architecture(const std::string &a) { architecture = a; }
+    std::string get_architecture() const { return architecture; }
+
     void set_dependency_class(dependency_class dc) { dep_class = dc; }
     dependency_class get_dependency_class() const { return dep_class; }
 
@@ -68,12 +71,13 @@ public:
 
     template<class Archive>
     void serialize( Archive & ar ) {
-        ar(name, type, dep_class, parameters,ports_map, wildcard_assignment, groups, array_quantifier);
+        ar(name, type, architecture, dep_class, parameters,ports_map, wildcard_assignment, groups, array_quantifier);
     }
 
 private:
     std::string name;
     std::string type;
+    std::string architecture;
     dependency_class dep_class = module;
     Parameters_map parameters;
     std::unordered_map<std::string, std::vector<HDL_net>> ports_map;

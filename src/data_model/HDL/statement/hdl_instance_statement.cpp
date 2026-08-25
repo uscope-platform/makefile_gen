@@ -50,6 +50,7 @@ bool hdl_instance_statement::equals(const hdl_statement_base& other) const {
     const auto& rhs = static_cast<const hdl_instance_statement&>(other);
     bool ret = name == rhs.name;
     ret &= type == rhs.type;
+    ret &= architecture == rhs.architecture;
     ret &= dep_class == rhs.dep_class;
     ret &= parameters == rhs.parameters;
     ret &= ports_map == rhs.ports_map;

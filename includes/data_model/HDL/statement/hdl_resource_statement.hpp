@@ -53,6 +53,9 @@ public:
     const std::vector<std::shared_ptr<hdl_statement_base>>& get_statements() const { return statements; }
 
     void set_name(const std::string &n) { name = n; }
+
+    void set_architecture(const std::string &a) { architecture = a; }
+    std::string get_architecture() const { return architecture; }
     const std::string &getName() const { return name; }
 
 
@@ -94,11 +97,12 @@ public:
     template<class Archive>
     void serialize(Archive & ar) {
         ar(name, hdl_dependency_type, parameters_spec, port_specs, doc, processor_docs,
-            line_n, typedefs, statements);
+            line_n, typedefs, statements, architecture);
     }
 
 private:
     std::string name;
+    std::string architecture;
     unsigned int line_n = 0;
     dependency_class hdl_dependency_type = module;
     std::unordered_map<std::string, HDL_port> port_specs;
