@@ -89,6 +89,7 @@ public:
     void exitPackage_declaration(mgp_vh::vhdlParser::Package_declarationContext *ctx) override;
     void enterConstant_declaration(mgp_vh::vhdlParser::Constant_declarationContext *ctx) override;
     void exitConstant_declaration(mgp_vh::vhdlParser::Constant_declarationContext *ctx) override;
+    void enterUse_clause(mgp_vh::vhdlParser::Use_clauseContext *ctx) override;
     void enterConcurrent_statement(mgp_vh::vhdlParser::Concurrent_statementContext *ctx) override;
     void enterGeneric_map_aspect(mgp_vh::vhdlParser::Generic_map_aspectContext *ctx) override;
     void exitGeneric_map_aspect(mgp_vh::vhdlParser::Generic_map_aspectContext *ctx) override;

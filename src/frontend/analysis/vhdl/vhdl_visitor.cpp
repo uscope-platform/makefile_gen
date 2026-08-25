@@ -1026,6 +1026,40 @@ void vhdl_visitor::exitConstant_declaration(mgp_vh::vhdlParser::Constant_declara
     in_constant_declaration = false;
 }
 
+void vhdl_visitor::enterUse_clause(mgp_vh::vhdlParser::Use_clauseContext *ctx) {
+    for (auto *sn : ctx->selected_name()) {
+        // `use work.pkg.all` / `use work.pkg.item` / `use pkg` — split the dotted
+        // name into [library, package, (all|item)].
+        std::vector<std::string> segments;
+        segments.push_back(canon(sn->identifier()->getText()));
+        for (auto *suf : sn->suffix()) {
+            if (suf->KW_ALL()) segments.push_back("all");
+            else if (suf->name_literal() && suf->name_literal()->identifier())
+                segments.push_back(canon(suf->name_literal()->identifier()->getText()));
+            else
+                segments.push_back(canon(suf->getText()));
+        }
+        auto stmt = std::make_shared<hdl_import_stmt>();
+        size_t n = segments.size();
+        if (n >= 2 && segments.back() == "all") {
+            stmt->set_wildcard(true);
+            stmt->set_package(segments[n - 2]);
+            if (n >= 3) stmt->set_library(segments[n - 3]);
+        } else if (n >= 3) {
+            stmt->set_item(segments.back());
+            stmt->set_package(segments[n - 2]);
+            stmt->set_library(segments[n - 3]);
+        } else {
+            stmt->set_package(segments.back());
+            if (n == 2) stmt->set_library(segments[0]);
+        }
+        if (!current_architecture.empty())
+            statement_map[current_architecture].push_back(stmt);
+        else
+            modules_factory.add_statement(stmt);
+    }
+}
+
 void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContext *ctx) {
     // Range bound inside a type constraint: route into the type engine.
     if (type_engine.in_range()) {

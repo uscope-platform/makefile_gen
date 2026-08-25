@@ -19,6 +19,7 @@
 #include "mgp_sv/sv2017BaseListener.h"
 #include "mgp_sv/sv2017.h"
 
+#include "data_model/HDL/statement/hdl_import_stmt.hpp"
 #include "data_model/HDL/factories/HDL_parameters_factory.hpp"
 #include "data_model/HDL/factories/HDL_modules_factory.hpp"
 #include "frontend/analysis/system_verilog/type_engine.hpp"
@@ -68,6 +69,7 @@ public:
     void enterList_of_arguments(sv2017::List_of_argumentsContext *ctx) override;
     void enterPackage_declaration(sv2017::Package_declarationContext *ctx) override;
     void exitPackage_declaration(sv2017::Package_declarationContext *ctx) override;
+    void enterPackage_import_declaration(sv2017::Package_import_declarationContext *ctx) override;
     void exitPackage_or_class_scoped_path(sv2017::Package_or_class_scoped_pathContext *ctx) override;
     void enterParameter_declaration(sv2017::Parameter_declarationContext *ctx) override;
     void exitParameter_declaration(sv2017::Parameter_declarationContext *ctx) override;

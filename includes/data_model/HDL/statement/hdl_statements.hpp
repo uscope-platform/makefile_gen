@@ -17,6 +17,7 @@
 #define ANANKE_HDL_STATEMENTS_HPP
 
 #include "data_model/HDL/statement/hdl_instance_statement.hpp"
+#include "data_model/HDL/statement/hdl_import_stmt.hpp"
 #include "data_model/HDL/statement/hdl_loop_statement.hpp"
 #include "data_model/HDL/statement/hdl_assignment_statement.hpp"
 #include "data_model/HDL/statement/hdl_function_statement.hpp"

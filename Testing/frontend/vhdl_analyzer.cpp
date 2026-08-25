@@ -1570,3 +1570,35 @@ end top;
     ASSERT_NE(it, pkg_params.end());
     ASSERT_EQ(it->second.get_integer().get_value(), 8);
 }
+
+TEST(vhdl_analyzer, use_clause_import_stmt) {
+    auto test_pattern = R"(
+entity top is
+end top;
+architecture rtl of top is
+    use work.params_pkg.all;
+    use work.params_pkg.CONST;
+begin
+end rtl;
+)";
+    auto res = parse_first_entity(test_pattern);
+
+    auto wild = std::make_shared<hdl_import_stmt>();
+    wild->set_library("work");
+    wild->set_package("params_pkg");
+    wild->set_wildcard(true);
+
+    auto item = std::make_shared<hdl_import_stmt>();
+    item->set_library("work");
+    item->set_package("params_pkg");
+    item->set_item("const");
+
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_statement(wild);
+    expected.add_statement(item);
+
+    ASSERT_EQ(*res, expected);
+}

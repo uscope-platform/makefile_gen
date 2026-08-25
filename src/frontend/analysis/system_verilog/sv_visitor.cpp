@@ -631,6 +631,21 @@ void sv_visitor::exitPackage_declaration(sv2017::Package_declarationContext *ctx
     entities.push_back(package);
 }
 
+void sv_visitor::enterPackage_import_declaration(sv2017::Package_import_declarationContext *ctx) {
+    for (auto *item : ctx->package_import_item()) {
+        auto stmt = std::make_shared<hdl_import_stmt>();
+        if (!item->identifier().empty())
+            stmt->set_package(item->identifier(0)->getText());
+        if (item->MUL()) {
+            stmt->set_wildcard(true);
+        } else if (item->identifier().size() > 1) {
+            stmt->set_item(item->identifier(1)->getText());
+        }
+        if (modules_factory.is_current_valid())
+            modules_factory.add_statement(stmt);
+    }
+}
+
 void sv_visitor::exitPackage_or_class_scoped_path(sv2017::Package_or_class_scoped_pathContext *ctx) {
     if (type_engine.active() && ctx->DOUBLE_COLON().empty()) {
         type_engine.set_type(ctx->getText());
