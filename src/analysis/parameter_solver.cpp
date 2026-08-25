@@ -286,7 +286,9 @@ resolved_parameter parameter_solver::resolve_instance_dependency(
 
 std::map<qualified_identifier, resolved_parameter> parameter_solver::override_parameters(
     work_order &work, const std::shared_ptr<data_store> &d_store,
-    const std::map<qualified_identifier, resolved_parameter> &imported) {
+    const std::map<qualified_identifier, resolved_parameter> &imported,
+    const std::map<std::string, hdl_function_statement> &imported_functions,
+    const std::map<std::string, std::shared_ptr<hdl_type>> &imported_types) {
     auto node_spec = d_store->get_HDL_resource(work.node->get_type());
     if (!node_spec.has_value()) {
         spdlog::critical("Definition for module {} not found while solving parameters of instance {}",
@@ -304,6 +306,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
 
     propagate_functions(node_spec.value(), d_store);
     propagate_types(node_spec.value(), d_store);
+    propagate_imports(node_spec.value(), imported_functions, imported_types);
 
     auto solved_parameters = retrieve_package_parameters(combined_params, d_store);
     // Imported (`use pkg.all` / `import pkg::*`) constants enter scope unqualified.
@@ -337,8 +340,29 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::retrieve_pa
     return package_parameters;
 }
 
-void parameter_solver::propagate_types(std::shared_ptr<hdl_resource_statement> &resource, const std::shared_ptr<data_store> &d_store) {
+void parameter_solver::propagate_imports(std::shared_ptr<hdl_resource_statement> &resource,
+        const std::map<std::string, hdl_function_statement> &imported_functions,
+        const std::map<std::string, std::shared_ptr<hdl_type>> &imported_types) {
+    // Resolve unqualified (imported) package references: after `import pkg::*`,
+    // a module param may call a package function or use a package type by its
+    // bare name. Mirror propagate_functions/propagate_types for the no-prefix case.
+    for (auto &[_, param] : resource->get_parameters()) {
+        for (auto &fcn : param->get_dependencies().functions) {
+            if (!fcn.get_package_prefix().empty()) continue;
+            auto it = imported_functions.find(fcn.get_name());
+            if (it != imported_functions.end())
+                param->propagate_function(it->second);
+        }
+        for (auto &type : param->get_dependencies().types) {
+            if (!type.get_package_prefix().empty()) continue;
+            auto it = imported_types.find(type.get_name());
+            if (it != imported_types.end())
+                param->set_type(it->second);
+        }
+    }
+}
 
+void parameter_solver::propagate_types(std::shared_ptr<hdl_resource_statement> &resource, const std::shared_ptr<data_store> &d_store) {
     for (auto &[_, param] : resource->get_parameters()) {
 
         auto deps = param->get_dependencies();

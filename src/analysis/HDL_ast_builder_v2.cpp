@@ -95,6 +95,8 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                 // solving context (unqualified), so `N := WIDTH` after `use pkg.all`
                 // resolves. Imported constants are never attached to the node.
                 std::map<qualified_identifier, resolved_parameter> imported_params;
+                std::map<std::string, hdl_function_statement> imported_functions;
+                std::map<std::string, std::shared_ptr<hdl_type>> imported_types;
                 if (auto file = d_store->get_file<hdl_file>(res_path)) {
                     for (auto &stmt : file.value().get_content()) {
                         auto imp = std::dynamic_pointer_cast<hdl_import_stmt>(stmt);
@@ -107,11 +109,17 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                             if (imp->is_wildcard() || id.get_name() == imp->get_item())
                                 imported_params[qualified_identifier(id.get_name())] = val;
                         }
+                        for (auto &[name, fn] : pkg.value()->get_functions())
+                            if (imp->is_wildcard() || imp->get_item() == name)
+                                imported_functions[name] = fn;
+                        for (auto &[name, t] : pkg.value()->get_typedefs())
+                            if (imp->is_wildcard() || imp->get_item() == name)
+                                imported_types[name] = t;
                     }
                 }
 
                 spdlog::trace("Processing dependency {} in module {}",working_instance->get_name(), type);
-                auto current_param_values = parameter_solver::override_parameters(wo, d_store, imported_params);
+                auto current_param_values = parameter_solver::override_parameters(wo, d_store, imported_params, imported_functions, imported_types);
 
                 std::vector<work_order> child_wo;
                 auto child_path = wo.path + "." + working_instance->get_name();

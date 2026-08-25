@@ -692,3 +692,65 @@ end rtl;)";
     ASSERT_TRUE(param->get_value().has_value());
     ASSERT_EQ(param->get_value()->get_integer().get_value(), 8);
 }
+
+TEST(hdl_ast_builder, sv_imported_function) {
+    // `import test_pkg::*` pulls a package function into scope (unqualified call).
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+
+    {
+        auto pkg_content = R"(package test_pkg;
+    function int calc(int x);
+        calc = x * 2;
+    endfunction
+endpackage)";
+        sv_analyzer pkg_analyzer;
+        d_store->store_file({"test/test_pkg.sv", "hash_pkg", pkg_analyzer.analyze("", pkg_content).value()});
+    }
+    {
+        auto top_content = R"(import test_pkg::*;
+
+module top
+    #(parameter int RESULT = calc(21))();
+endmodule)";
+        sv_analyzer top_analyzer;
+        d_store->store_file({"test/top.sv", "hash_top", top_analyzer.analyze("", top_content).value()});
+    }
+
+    HDL_ast_builder_v2 b(s_store, d_store, Depfile());
+    auto ast = b.build_ast(std::vector<std::string>({"top"}));
+    ASSERT_EQ(ast.size(), 1u);
+    auto param = ast[0]->get_parameters().get("RESULT");
+    ASSERT_TRUE(param->get_value().has_value());
+    ASSERT_EQ(param->get_value()->get_integer().get_value(), 42);
+}
+
+TEST(hdl_ast_builder, sv_imported_type) {
+    // `import test_pkg::*` pulls a package typedef into scope (unqualified type).
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+
+    {
+        auto pkg_content = R"(package test_pkg;
+    typedef logic [7:0] byte_t;
+endpackage)";
+        sv_analyzer pkg_analyzer;
+        d_store->store_file({"test/test_pkg.sv", "hash_pkg", pkg_analyzer.analyze("", pkg_content).value()});
+    }
+    {
+        auto top_content = R"(import test_pkg::*;
+
+module top
+    #(parameter byte_t DATA = 8'hFF)();
+endmodule)";
+        sv_analyzer top_analyzer;
+        d_store->store_file({"test/top.sv", "hash_top", top_analyzer.analyze("", top_content).value()});
+    }
+
+    HDL_ast_builder_v2 b(s_store, d_store, Depfile());
+    auto ast = b.build_ast(std::vector<std::string>({"top"}));
+    ASSERT_EQ(ast.size(), 1u);
+    auto param = ast[0]->get_parameters().get("DATA");
+    ASSERT_TRUE(param->get_value().has_value());
+    ASSERT_EQ(param->get_value()->get_integer().get_value(), 255);
+}

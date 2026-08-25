@@ -56,9 +56,14 @@ public:
         );
 
     static std::map<qualified_identifier, resolved_parameter> override_parameters(work_order &work, const std::shared_ptr<data_store> &d_store,
-        const std::map<qualified_identifier, resolved_parameter> &imported = {});
+        const std::map<qualified_identifier, resolved_parameter> &imported = {},
+        const std::map<std::string, hdl_function_statement> &imported_functions = {},
+        const std::map<std::string, std::shared_ptr<hdl_type>> &imported_types = {});
     static void propagate_functions(std::shared_ptr<hdl_resource_statement> &resource, const std::shared_ptr<data_store> &d_store);
     static void propagate_types(std::shared_ptr<hdl_resource_statement> &resource, const std::shared_ptr<data_store> &d_store);
+    static void propagate_imports(std::shared_ptr<hdl_resource_statement> &resource,
+        const std::map<std::string, hdl_function_statement> &imported_functions,
+        const std::map<std::string, std::shared_ptr<hdl_type>> &imported_types);
     static std::map<qualified_identifier, resolved_parameter> retrieve_package_parameters(const Parameters_map &node_parameters, const std::shared_ptr<data_store> &d_store);
 
     static std::map<qualified_identifier, resolved_parameter> solve_complex_overrides(
