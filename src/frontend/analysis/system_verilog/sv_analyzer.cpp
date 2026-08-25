@@ -118,7 +118,10 @@ hdl_file sv_analyzer::process_hdl(const std::string &path, const std::string &pr
         last_error = "Unsupported construct while parsing " + path;
         return result;
     }
-    result.set_content(sv_modules_explorer.get_entities());
+    auto content = sv_modules_explorer.get_entities();
+    auto imports = sv_modules_explorer.get_imports();
+    content.insert(content.end(), imports.begin(), imports.end());
+    result.set_content(content);
     return result;
 }
 

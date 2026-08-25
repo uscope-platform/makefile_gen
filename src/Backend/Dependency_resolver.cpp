@@ -78,7 +78,9 @@ void Dependency_resolver_v2::solve_dep(std::shared_ptr<hdl_ast_node> &i) {
     }
 
     for(auto &item:i->get_package_dependencies()){
-        packages.insert(item);
+        std::string pkg_path;
+        if (d_store->get_HDL_resource(item, pkg_path).has_value())
+            packages.insert(pkg_path);
     }
 
     for(auto &item:i->get_data_dependencies()){

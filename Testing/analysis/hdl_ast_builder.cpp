@@ -20,6 +20,7 @@
 
 #include "data_model/mm_file.hpp"
 #include "frontend/analysis/system_verilog/sv_analyzer.hpp"
+#include "frontend/analysis/vhdl/vhdl_analyzer.hpp"
 #include "analysis/HDL_ast_builder_v2.hpp"
 #include "analysis/passes/pass_manager.hpp"
 #include "Backend/Dependency_resolver.hpp"
@@ -588,3 +589,106 @@ TEST( hdl_ast_builder, recursion_limit_tunable) {
 }
 
 
+
+TEST(hdl_ast_builder, vhdl_imported_constant_in_generic) {
+    // The package lives in its own file; the entity imports it from another.
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+
+    {
+        auto pkg_content = R"(package params_pkg is
+    constant WIDTH : integer := 8;
+end params_pkg;)";
+        vhdl_analyzer pkg_analyzer("test/params_pkg.vhd");
+        d_store->store_file({"test/params_pkg.vhd", "hash_pkg", pkg_analyzer.analyze_content(pkg_content, "test/params_pkg.vhd")});
+    }
+    {
+        auto top_content = R"(library work;
+use work.params_pkg.all;
+
+entity top is
+    generic (
+        N : integer := WIDTH
+    );
+end top;
+architecture rtl of top is
+begin
+end rtl;)";
+        vhdl_analyzer top_analyzer("test/top.vhd");
+        d_store->store_file({"test/top.vhd", "hash_top", top_analyzer.analyze_content(top_content, "test/top.vhd")});
+    }
+
+    HDL_ast_builder_v2 b(s_store, d_store, Depfile());
+    auto ast = b.build_ast(std::vector<std::string>({"top"}));
+    ASSERT_EQ(ast.size(), 1u);
+    auto param = ast[0]->get_parameters().get("n");
+    ASSERT_TRUE(param->get_value().has_value());
+    ASSERT_EQ(param->get_value()->get_integer().get_value(), 8);
+}
+
+TEST(hdl_ast_builder, sv_imported_constant_in_param) {
+    // The package lives in its own file; the module imports it from another.
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+
+    {
+        auto pkg_content = R"(package test_pkg;
+    parameter int WIDTH = 8;
+endpackage)";
+        sv_analyzer pkg_analyzer;
+        d_store->store_file({"test/test_pkg.sv", "hash_pkg", pkg_analyzer.analyze("", pkg_content).value()});
+    }
+    {
+        auto top_content = R"(import test_pkg::*;
+
+module top
+    #(parameter int N = WIDTH)();
+endmodule)";
+        sv_analyzer top_analyzer;
+        d_store->store_file({"test/top.sv", "hash_top", top_analyzer.analyze("", top_content).value()});
+    }
+
+    HDL_ast_builder_v2 b(s_store, d_store, Depfile());
+    auto ast = b.build_ast(std::vector<std::string>({"top"}));
+    ASSERT_EQ(ast.size(), 1u);
+    auto param = ast[0]->get_parameters().get("N");
+    ASSERT_TRUE(param->get_value().has_value());
+    ASSERT_EQ(param->get_value()->get_integer().get_value(), 8);
+}
+
+TEST(hdl_ast_builder, vhdl_imported_specific_item) {
+    // `use work.params_pkg.WIDTH` pulls only that constant, across files.
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+
+    {
+        auto pkg_content = R"(package params_pkg is
+    constant WIDTH : integer := 8;
+    constant DEPTH : integer := 4;
+end params_pkg;)";
+        vhdl_analyzer pkg_analyzer("test/params_pkg.vhd");
+        d_store->store_file({"test/params_pkg.vhd", "hash_pkg", pkg_analyzer.analyze_content(pkg_content, "test/params_pkg.vhd")});
+    }
+    {
+        auto top_content = R"(library work;
+use work.params_pkg.WIDTH;
+
+entity top is
+    generic (
+        N : integer := WIDTH
+    );
+end top;
+architecture rtl of top is
+begin
+end rtl;)";
+        vhdl_analyzer top_analyzer("test/top.vhd");
+        d_store->store_file({"test/top.vhd", "hash_top", top_analyzer.analyze_content(top_content, "test/top.vhd")});
+    }
+
+    HDL_ast_builder_v2 b(s_store, d_store, Depfile());
+    auto ast = b.build_ast(std::vector<std::string>({"top"}));
+    ASSERT_EQ(ast.size(), 1u);
+    auto param = ast[0]->get_parameters().get("n");
+    ASSERT_TRUE(param->get_value().has_value());
+    ASSERT_EQ(param->get_value()->get_integer().get_value(), 8);
+}

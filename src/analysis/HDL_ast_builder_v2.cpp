@@ -21,6 +21,7 @@
 #include "analysis/loop_solver.hpp"
 #include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
 #include "data_model/HDL/statement/hdl_statements.hpp"
+#include "data_model/hdl_file.hpp"
 
 namespace {
     std::string format_module_chain(const std::vector<std::string> &chain) {
@@ -89,8 +90,28 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                 auto res = res_opt.value();
                 crash_ctx.set(type, res_path);
 
+                // Resolve file-level `use`/`import` statements: record the package
+                // dependency and pull the imported package's constants into the
+                // solving context (unqualified), so `N := WIDTH` after `use pkg.all`
+                // resolves. Imported constants are never attached to the node.
+                std::map<qualified_identifier, resolved_parameter> imported_params;
+                if (auto file = d_store->get_file<hdl_file>(res_path)) {
+                    for (auto &stmt : file.value().get_content()) {
+                        auto imp = std::dynamic_pointer_cast<hdl_import_stmt>(stmt);
+                        if (!imp) continue;
+                        working_instance->add_package_dependency(imp->get_package());
+                        auto pkg = d_store->get_HDL_resource(imp->get_package());
+                        if (!pkg.has_value()) continue;
+                        auto pkg_solved = parameter_solver::process_parameters(pkg.value()->get_parameters(), {});
+                        for (auto &[id, val] : pkg_solved) {
+                            if (imp->is_wildcard() || id.get_name() == imp->get_item())
+                                imported_params[qualified_identifier(id.get_name())] = val;
+                        }
+                    }
+                }
+
                 spdlog::trace("Processing dependency {} in module {}",working_instance->get_name(), type);
-                auto current_param_values = parameter_solver::override_parameters(wo, d_store);
+                auto current_param_values = parameter_solver::override_parameters(wo, d_store, imported_params);
 
                 std::vector<work_order> child_wo;
                 auto child_path = wo.path + "." + working_instance->get_name();

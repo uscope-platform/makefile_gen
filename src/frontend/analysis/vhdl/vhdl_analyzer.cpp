@@ -90,7 +90,10 @@ hdl_file vhdl_analyzer::analyze() {
     antlr4::tree::ParseTree *Tree = parser.design_file();
     antlr4::tree::ParseTreeWalker::DEFAULT.walk(&vhdl_modules_explorer, Tree);
     hdl_file result;
-    result.set_content(vhdl_modules_explorer.get_entities());
+    auto content = vhdl_modules_explorer.get_entities();
+    auto imports = vhdl_modules_explorer.get_imports();
+    content.insert(content.end(), imports.begin(), imports.end());
+    result.set_content(content);
 
     attach_documentation(result);
 

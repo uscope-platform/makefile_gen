@@ -369,25 +369,28 @@ TEST(typedef_parsing, anonymous_simple_struct) {
 }
 TEST(typedef_parsing, package_import_stmt) {
     auto test_pattern = R"(
+        import test_pkg::*;
+        import other_pkg::CONST;
+
         module test_mod
-            import test_pkg::*;
-            import other_pkg::CONST;
             #()();
         endmodule
     )";
 
     sv_analyzer analyzer;
-    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
-    auto statements = resource.get_statements();
-    ASSERT_EQ(statements.size(), 2u);
+    auto file = analyzer.analyze("", test_pattern).value();
+    std::vector<std::shared_ptr<hdl_import_stmt>> imports;
+    for (auto &c : file.get_content())
+        if (c->is<hdl_import_stmt>()) imports.push_back(std::dynamic_pointer_cast<hdl_import_stmt>(c));
+    ASSERT_EQ(imports.size(), 2u);
 
     hdl_import_stmt expected_wild;
     expected_wild.set_package("test_pkg");
     expected_wild.set_wildcard(true);
-    ASSERT_EQ(*statements[0], expected_wild);
+    ASSERT_EQ(*imports[0], expected_wild);
 
     hdl_import_stmt expected_item;
     expected_item.set_package("other_pkg");
     expected_item.set_item("CONST");
-    ASSERT_EQ(*statements[1], expected_item);
+    ASSERT_EQ(*imports[1], expected_item);
 }

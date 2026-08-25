@@ -155,6 +155,7 @@ public:
     void exitReplication(sv2017::ReplicationContext *ctx) override;
 
     std::vector<std::shared_ptr<hdl_statement_base>> get_entities();
+    std::vector<std::shared_ptr<hdl_import_stmt>> get_imports() {return file_imports;}
 
     void exitData_type_or_implicit(sv2017::Data_type_or_implicitContext *ctx) override;
 
@@ -254,6 +255,7 @@ private:
     Type_engine type_engine;
     HDL_functions_factory f_factory;
     HDL_modules_factory modules_factory;
+    std::vector<std::shared_ptr<hdl_import_stmt>> file_imports;
     HDL_interfaces_factory interfaces_factory;
     HDL_instances_factory deps_factory;
     HDL_parameters_factory params_factory;

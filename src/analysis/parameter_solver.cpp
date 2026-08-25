@@ -284,7 +284,9 @@ resolved_parameter parameter_solver::resolve_instance_dependency(
     return value;
 }
 
-std::map<qualified_identifier, resolved_parameter> parameter_solver::override_parameters(work_order &work, const std::shared_ptr<data_store> &d_store) {
+std::map<qualified_identifier, resolved_parameter> parameter_solver::override_parameters(
+    work_order &work, const std::shared_ptr<data_store> &d_store,
+    const std::map<qualified_identifier, resolved_parameter> &imported) {
     auto node_spec = d_store->get_HDL_resource(work.node->get_type());
     if (!node_spec.has_value()) {
         spdlog::critical("Definition for module {} not found while solving parameters of instance {}",
@@ -304,6 +306,8 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
     propagate_types(node_spec.value(), d_store);
 
     auto solved_parameters = retrieve_package_parameters(combined_params, d_store);
+    // Imported (`use pkg.all` / `import pkg::*`) constants enter scope unqualified.
+    solved_parameters.insert(imported.begin(), imported.end());
     auto solution = solve_complex_overrides(work, d_store, solved_parameters);
     solved_parameters.insert(solution.begin(), solution.end());
 

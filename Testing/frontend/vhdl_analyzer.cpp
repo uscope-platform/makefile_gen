@@ -1573,32 +1573,33 @@ end top;
 
 TEST(vhdl_analyzer, use_clause_import_stmt) {
     auto test_pattern = R"(
+library work;
+use work.params_pkg.all;
+use work.params_pkg.CONST;
+
 entity top is
 end top;
 architecture rtl of top is
-    use work.params_pkg.all;
-    use work.params_pkg.CONST;
 begin
 end rtl;
 )";
-    auto res = parse_first_entity(test_pattern);
+    vhdl_analyzer analyzer("test.vhd");
+    auto file = analyzer.analyze_content(test_pattern, "test.vhd");
+
+    std::vector<std::shared_ptr<hdl_import_stmt>> imports;
+    for (auto &c : file.get_content())
+        if (c->is<hdl_import_stmt>()) imports.push_back(std::dynamic_pointer_cast<hdl_import_stmt>(c));
+    ASSERT_EQ(imports.size(), 2u);
 
     auto wild = std::make_shared<hdl_import_stmt>();
     wild->set_library("work");
     wild->set_package("params_pkg");
     wild->set_wildcard(true);
+    ASSERT_EQ(*imports[0], *wild);
 
     auto item = std::make_shared<hdl_import_stmt>();
     item->set_library("work");
     item->set_package("params_pkg");
     item->set_item("const");
-
-    hdl_resource_statement expected;
-    expected.set_name("top");
-    expected.set_type(module);
-    expected.set_line_n(2);
-    expected.add_statement(wild);
-    expected.add_statement(item);
-
-    ASSERT_EQ(*res, expected);
+    ASSERT_EQ(*imports[1], *item);
 }

@@ -125,6 +125,7 @@ public:
         resolve_positional_maps();
         return entities;
     }
+    std::vector<std::shared_ptr<hdl_import_stmt>> get_imports() {return file_imports;}
 private:
     void start_generic(mgp_vh::vhdlParser::Identifier_listContext *ids,
                        mgp_vh::vhdlParser::Subtype_indicationContext *type);
@@ -187,6 +188,7 @@ private:
     bool in_entity_declaration = false;
     bool in_package_declaration = false;
     bool in_constant_declaration = false;
+    std::vector<std::shared_ptr<hdl_import_stmt>> file_imports;
     int positional_gen_index = 0;
     int positional_port_index = 0;
     std::string positional_port_placeholder;

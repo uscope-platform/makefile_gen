@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "analysis/HDL_ast_builder_v2.hpp"
+#include "frontend/analysis/vhdl/vhdl_analyzer.hpp"
 #include "Backend/Dependency_resolver.hpp"
 #include "data_model/HDL/statement/hdl_instance_statement.hpp"
 
@@ -95,4 +96,42 @@ TEST_F(dep_resolver , dependency_resolver) {
     ASSERT_EQ(res.get_dependencies(), check);
     ASSERT_EQ(res.get_data(), check_mem);
     ASSERT_EQ(res.get_packages(), check_pkg);
+}
+
+TEST(dep_resolver_import, imported_package_trace) {
+    // The package is in its own file; the entity imports it from another.
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+
+    {
+        auto pkg_content = R"(package params_pkg is
+    constant WIDTH : integer := 8;
+end params_pkg;)";
+        vhdl_analyzer pkg_analyzer("test/params_pkg.vhd");
+        d_store->store_file({"test/params_pkg.vhd", "hash_pkg", pkg_analyzer.analyze_content(pkg_content, "test/params_pkg.vhd")});
+    }
+    {
+        auto top_content = R"(library work;
+use work.params_pkg.all;
+
+entity top is
+end top;
+architecture rtl of top is
+begin
+end rtl;)";
+        vhdl_analyzer top_analyzer("test/top.vhd");
+        d_store->store_file({"test/top.vhd", "hash_top", top_analyzer.analyze_content(top_content, "test/top.vhd")});
+    }
+
+    HDL_ast_builder_v2 b(s_store, d_store, Depfile());
+    auto ast = b.build_ast(std::vector<std::string>({"top"}));
+    ASSERT_EQ(ast.size(), 1u);
+    // The node traces the imported package dependency.
+    auto pkg_deps = ast[0]->get_package_dependencies();
+    ASSERT_TRUE(std::find(pkg_deps.begin(), pkg_deps.end(), "params_pkg") != pkg_deps.end());
+
+    // The resolver turns the dependency into the *package's* file path.
+    Dependency_resolver_v2 r(ast, d_store);
+    auto packages = r.get_packages();
+    ASSERT_TRUE(packages.contains("test/params_pkg.vhd"));
 }

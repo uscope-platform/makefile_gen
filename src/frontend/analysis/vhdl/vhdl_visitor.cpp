@@ -1027,9 +1027,10 @@ void vhdl_visitor::exitConstant_declaration(mgp_vh::vhdlParser::Constant_declara
 }
 
 void vhdl_visitor::enterUse_clause(mgp_vh::vhdlParser::Use_clauseContext *ctx) {
+    // `use work.pkg.all` / `use work.pkg.item` / `use pkg` — imports are
+    // file-level statements, collected on the hdl_file.
     for (auto *sn : ctx->selected_name()) {
-        // `use work.pkg.all` / `use work.pkg.item` / `use pkg` — split the dotted
-        // name into [library, package, (all|item)].
+        // Split the dotted name into [library, package, (all|item)].
         std::vector<std::string> segments;
         segments.push_back(canon(sn->identifier()->getText()));
         for (auto *suf : sn->suffix()) {
@@ -1053,10 +1054,7 @@ void vhdl_visitor::enterUse_clause(mgp_vh::vhdlParser::Use_clauseContext *ctx) {
             stmt->set_package(segments.back());
             if (n == 2) stmt->set_library(segments[0]);
         }
-        if (!current_architecture.empty())
-            statement_map[current_architecture].push_back(stmt);
-        else
-            modules_factory.add_statement(stmt);
+        file_imports.push_back(stmt);
     }
 }
 

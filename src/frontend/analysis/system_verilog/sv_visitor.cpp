@@ -632,6 +632,7 @@ void sv_visitor::exitPackage_declaration(sv2017::Package_declarationContext *ctx
 }
 
 void sv_visitor::enterPackage_import_declaration(sv2017::Package_import_declarationContext *ctx) {
+    // `import pkg::*` / `import pkg::item` — file-level statements on the hdl_file.
     for (auto *item : ctx->package_import_item()) {
         auto stmt = std::make_shared<hdl_import_stmt>();
         if (!item->identifier().empty())
@@ -641,8 +642,7 @@ void sv_visitor::enterPackage_import_declaration(sv2017::Package_import_declarat
         } else if (item->identifier().size() > 1) {
             stmt->set_item(item->identifier(1)->getText());
         }
-        if (modules_factory.is_current_valid())
-            modules_factory.add_statement(stmt);
+        file_imports.push_back(stmt);
     }
 }
 
