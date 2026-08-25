@@ -85,6 +85,10 @@ public:
     void exitElement_declaration(mgp_vh::vhdlParser::Element_declarationContext *ctx) override;
     void enterSubtype_declaration(mgp_vh::vhdlParser::Subtype_declarationContext *ctx) override;
     void exitSubtype_declaration(mgp_vh::vhdlParser::Subtype_declarationContext *ctx) override;
+    void enterPackage_declaration(mgp_vh::vhdlParser::Package_declarationContext *ctx) override;
+    void exitPackage_declaration(mgp_vh::vhdlParser::Package_declarationContext *ctx) override;
+    void enterConstant_declaration(mgp_vh::vhdlParser::Constant_declarationContext *ctx) override;
+    void exitConstant_declaration(mgp_vh::vhdlParser::Constant_declarationContext *ctx) override;
     void enterConcurrent_statement(mgp_vh::vhdlParser::Concurrent_statementContext *ctx) override;
     void enterGeneric_map_aspect(mgp_vh::vhdlParser::Generic_map_aspectContext *ctx) override;
     void exitGeneric_map_aspect(mgp_vh::vhdlParser::Generic_map_aspectContext *ctx) override;
@@ -180,6 +184,8 @@ private:
     bool in_case_range_choice = false;
     bool case_choice_is_range = false;
     bool in_entity_declaration = false;
+    bool in_package_declaration = false;
+    bool in_constant_declaration = false;
     int positional_gen_index = 0;
     int positional_port_index = 0;
     std::string positional_port_placeholder;

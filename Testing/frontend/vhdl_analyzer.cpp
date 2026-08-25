@@ -19,6 +19,8 @@
 
 #include "frontend/analysis/vhdl/vhdl_analyzer.hpp"
 #include "analysis/loop_solver.hpp"
+#include "analysis/parameter_solver.hpp"
+#include "data_model/data_store.hpp"
 #include "data_model/HDL/statement/hdl_statements.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/types/HDL_simple_type.hpp"
@@ -1498,4 +1500,73 @@ end Decoder;
     expected_doc.add_register(reg);
 
     ASSERT_EQ(res->get_documentation(), expected_doc);
+}
+
+TEST(vhdl_analyzer, package_declaration) {
+    auto test_pattern = R"(
+package params_pkg is
+    constant WIDTH : integer := 8;
+    constant DEPTH : integer := 4;
+end params_pkg;
+)";
+    auto res = parse_entity(test_pattern, "params_pkg");
+
+    hdl_resource_statement expected;
+    expected.set_name("params_pkg");
+    expected.set_type(package);
+    expected.set_line_n(2);
+    expected.add_parameter(make_integer_param("width", std::make_shared<Numeric_token>("8")));
+    expected.add_parameter(make_integer_param("depth", std::make_shared<Numeric_token>("4")));
+
+    ASSERT_EQ(*res, expected);
+}
+
+TEST(vhdl_analyzer, package_constant_in_generic) {
+    // A selected name `pkg.CONST` in a generic default becomes a
+    // package-qualified reference (the suffix is no longer dropped).
+    auto test_pattern = R"(
+entity top is
+    generic (
+        N : integer := params_pkg.WIDTH
+    );
+end top;
+)";
+    auto res = parse_first_entity(test_pattern);
+
+    hdl_resource_statement expected;
+    expected.set_name("top");
+    expected.set_type(module);
+    expected.set_line_n(2);
+    expected.add_parameter(make_integer_param(
+        "n", std::make_shared<Identifier_token>(qualified_identifier("params_pkg", "width"))));
+
+    ASSERT_EQ(*res, expected);
+}
+
+TEST(vhdl_analyzer, package_constant_resolution) {
+    // End-to-end: `params_pkg.WIDTH` in a generic default resolves through
+    // `parameter_solver::retrieve_package_parameters` once the package resource
+    // is in the store.
+    auto test_pattern = R"(
+package params_pkg is
+    constant WIDTH : integer := 8;
+end params_pkg;
+
+entity top is
+    generic (
+        N : integer := params_pkg.WIDTH
+    );
+end top;
+)";
+    vhdl_analyzer analyzer("test.vhd");
+    auto file = analyzer.analyze_content(test_pattern, "test.vhd");
+    auto d_store = std::make_shared<data_store>(true, "/tmp/vhdl_pkg_store");
+    d_store->store_file({"/dev/zero", "file_hash", file});
+
+    auto resources = file.get_content();
+    auto &top = resources[1]->as<hdl_resource_statement>();
+    auto pkg_params = parameter_solver::retrieve_package_parameters(top.get_parameters(), d_store);
+    auto it = pkg_params.find(qualified_identifier("params_pkg", "width"));
+    ASSERT_NE(it, pkg_params.end());
+    ASSERT_EQ(it->second.get_integer().get_value(), 8);
 }

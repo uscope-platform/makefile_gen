@@ -46,6 +46,19 @@ namespace {
         return ret;
     }
 
+    // Leftmost identifier of a (possibly selected) name: for `pkg.CONST` the
+    // recursive `name` rule nests the base, so walk down to the innermost
+    // `name_literal`.
+    std::string selected_name_base(mgp_vh::vhdlParser::NameContext *nm) {
+        while (nm) {
+            if (nm->name_literal() && nm->name_literal()->identifier())
+                return nm->name_literal()->identifier()->getText();
+            if (!nm->name()) break;
+            nm = nm->name();
+        }
+        return "";
+    }
+
 }
 
 vhdl_visitor::vhdl_visitor(std::string p) {
@@ -624,14 +637,14 @@ void vhdl_visitor::finalize_port(mgp_vh::vhdlParser::Interface_signal_declaratio
 }
 
 void vhdl_visitor::enterSubtype_indication(mgp_vh::vhdlParser::Subtype_indicationContext *ctx) {
-    if (in_generic_clause || in_type_declaration || in_subtype_declaration) {
+    if (in_generic_clause || in_type_declaration || in_subtype_declaration || in_constant_declaration) {
         in_subtype_indication = true;
         type_engine.start_type_resolution();
     }
 }
 
 void vhdl_visitor::exitSubtype_indication(mgp_vh::vhdlParser::Subtype_indicationContext *ctx) {
-    if (!(in_generic_clause || in_type_declaration || in_subtype_declaration)) return;
+    if (!(in_generic_clause || in_type_declaration || in_subtype_declaration || in_constant_declaration)) return;
     in_subtype_indication = false;
     auto result = type_engine.finish_type_resolution();
     if (in_type_declaration) {
@@ -987,6 +1000,32 @@ void vhdl_visitor::exitSubtype_declaration(mgp_vh::vhdlParser::Subtype_declarati
     subtype_decl_name.clear();
 }
 
+void vhdl_visitor::enterPackage_declaration(mgp_vh::vhdlParser::Package_declarationContext *ctx) {
+    std::string package_name = canon(ctx->identifier()[0]->getText());
+    size_t line_number = ctx->getStart()->getLine();
+    modules_factory.new_module(package_name, package, line_number);
+    in_package_declaration = true;
+}
+
+void vhdl_visitor::exitPackage_declaration(mgp_vh::vhdlParser::Package_declarationContext *ctx) {
+    if (!in_package_declaration) return;
+    entities.push_back(modules_factory.get_module());
+    in_package_declaration = false;
+}
+
+void vhdl_visitor::enterConstant_declaration(mgp_vh::vhdlParser::Constant_declarationContext *ctx) {
+    if (!in_package_declaration) return;
+    in_constant_declaration = true;
+    // Same shape as a generic: identifier_list : type := default.
+    start_generic(ctx->identifier_list(), ctx->subtype_indication());
+}
+
+void vhdl_visitor::exitConstant_declaration(mgp_vh::vhdlParser::Constant_declarationContext *ctx) {
+    if (!in_constant_declaration) return;
+    finalize_generic(ctx->identifier_list());
+    in_constant_declaration = false;
+}
+
 void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContext *ctx) {
     // Range bound inside a type constraint: route into the type engine.
     if (type_engine.in_range()) {
@@ -1006,11 +1045,20 @@ void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContex
         return;
     }
 
-    // A bare identifier: a reference to another generic/constant.
-    if (ctx->name() && ctx->name()->name_literal() && ctx->name()->name_literal()->identifier()) {
-        params_factory.add_component(std::make_shared<Identifier_token>(
-            qualified_identifier(canon(ctx->name()->name_literal()->identifier()->getText()))));
-        return;
+    // A bare identifier: a reference to another generic/constant (possibly a
+    // package-qualified selected name like `pkg.CONST`).
+    if (ctx->name()) {
+        std::string base = selected_name_base(ctx->name());
+        if (!base.empty()) {
+            auto suffix = ctx->name()->suffix();
+            if (suffix && suffix->name_literal() && suffix->name_literal()->identifier()) {
+                params_factory.add_component(std::make_shared<Identifier_token>(
+                    qualified_identifier(canon(base), canon(suffix->name_literal()->identifier()->getText()))));
+            } else {
+                params_factory.add_component(std::make_shared<Identifier_token>(qualified_identifier(canon(base))));
+            }
+            return;
+        }
     }
 
     // A character literal ('a') or string literal ("...") also arrive through
@@ -1034,10 +1082,18 @@ void vhdl_visitor::exitNumeric_literal(mgp_vh::vhdlParser::Numeric_literalContex
 std::shared_ptr<Expression_base> vhdl_visitor::make_numeric_value(
         mgp_vh::vhdlParser::Numeric_literalContext *ctx) {
     if (!ctx) return nullptr;
-    // A bare identifier: a reference to another generic/constant.
-    if (ctx->name() && ctx->name()->name_literal() && ctx->name()->name_literal()->identifier())
-        return std::make_shared<Identifier_token>(
-            qualified_identifier(canon(ctx->name()->name_literal()->identifier()->getText())));
+    // A bare identifier: a reference to another generic/constant (possibly a
+    // package-qualified selected name like `pkg.CONST`).
+    if (ctx->name()) {
+        std::string base = selected_name_base(ctx->name());
+        if (!base.empty()) {
+            auto suffix = ctx->name()->suffix();
+            if (suffix && suffix->name_literal() && suffix->name_literal()->identifier())
+                return std::make_shared<Identifier_token>(
+                    qualified_identifier(canon(base), canon(suffix->name_literal()->identifier()->getText())));
+            return std::make_shared<Identifier_token>(qualified_identifier(canon(base)));
+        }
+    }
     // Character/string literals also arrive through the `name` rule.
     if (ctx->name() && ctx->name()->name_literal()) {
         auto lit = ctx->name()->name_literal();
@@ -1133,7 +1189,7 @@ bool vhdl_visitor::simple_is_aggregate(mgp_vh::vhdlParser::Simple_expressionCont
 
 bool vhdl_visitor::is_in_generic_expression() const {
     return (in_generic_clause || in_instance_generic_map || in_loop_range || in_generate_condition
-            || in_case_selector || in_case_choices) && !in_subtype_indication && !in_aggregate_choices;
+            || in_case_selector || in_case_choices || in_constant_declaration) && !in_subtype_indication && !in_aggregate_choices;
 }
 
 std::shared_ptr<Expression_base> vhdl_visitor::make_character_value(const std::string &text) {
