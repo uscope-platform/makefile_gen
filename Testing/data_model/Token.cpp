@@ -20,9 +20,13 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
 #include "data_model/HDL/parameters/components/token/Real_token.hpp"
+#include "data_model/HDL/parameters/components/token/String_token.hpp"
 #include "data_model/HDL/parameters/common/hdl_integer.hpp"
+#include "data_model/HDL/parameters/common/resolved_parameter.hpp"
 #include <sstream>
 #include <cereal/archives/binary.hpp>
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/types/memory.hpp>
 
 
 
@@ -228,6 +232,61 @@ TEST(hdl_integer, serialization_round_trip) {
     EXPECT_EQ(loaded.to_wide(), (int1024_t(1) << 100) + 0xCAFE);
     EXPECT_EQ(loaded.get_signed(), true);
     EXPECT_EQ(loaded.get_size(), 128u);
+}
+
+TEST(resolved_parameter, serialization_preserves_undefined_flag) {
+    resolved_parameter defined_val = resolved_parameter("SOME_STRING");
+    EXPECT_FALSE(defined_val.is_undefined());
+
+    std::stringstream ss;
+    {
+        cereal::BinaryOutputArchive oa(ss);
+        oa(defined_val);
+    }
+    resolved_parameter loaded;
+    {
+        cereal::BinaryInputArchive ia(ss);
+        ia(loaded);
+    }
+    EXPECT_EQ(loaded, defined_val);
+    EXPECT_FALSE(loaded.is_undefined());
+    EXPECT_TRUE(loaded.is_string());
+    EXPECT_EQ(loaded.get_string(), "SOME_STRING");
+
+    resolved_parameter undefined_val;
+    undefined_val.set_undefined();
+    std::stringstream ss2;
+    {
+        cereal::BinaryOutputArchive oa(ss2);
+        oa(undefined_val);
+    }
+    resolved_parameter loaded_undef;
+    {
+        cereal::BinaryInputArchive ia(ss2);
+        ia(loaded_undef);
+    }
+    EXPECT_TRUE(loaded_undef.is_undefined());
+}
+
+TEST(resolved_parameter, serialization_preserves_undefined_flag_for_tokens) {
+    String_token orig("\"FALSE\"");
+    auto raw = std::static_pointer_cast<Expression_base>(std::make_shared<String_token>(orig));
+
+    std::stringstream ss;
+    {
+        cereal::BinaryOutputArchive oa(ss);
+        oa(raw);
+    }
+    std::shared_ptr<Expression_base> loaded;
+    {
+        cereal::BinaryInputArchive ia(ss);
+        ia(loaded);
+    }
+    ASSERT_TRUE(loaded->is<String_token>());
+    auto val = loaded->evaluate({});
+    ASSERT_TRUE(val.has_value());
+    EXPECT_FALSE(val.value().is_undefined());
+    EXPECT_TRUE(val.value().is_string());
 }
 
 TEST(hdl_integer, serialization_round_trip_negative_wide) {
