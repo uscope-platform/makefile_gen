@@ -30,6 +30,7 @@
 #include "Constraints.hpp"
 #include "DataFile.hpp"
 #include "hdl_file.hpp"
+#include "cache_schema_hash.hpp"
 
 
 class data_store {
@@ -74,6 +75,7 @@ public:
     static void clear_cache(const std::string &cache_dir_path) {
         std::filesystem::remove_all( cache_dir_path + "/unified_cache");
     }
+    static std::string get_cache_schema_hash() { return ANANKE_CACHE_SCHEMA_HASH; }
     ~data_store();
 private:
     void clean_up_caches();

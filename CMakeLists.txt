@@ -68,6 +68,33 @@ endif()
 
 
 
+# ---------------------------------------------------------------------------
+# Persistent cache schema fingerprint.
+# The on-disk cache (data_store::unified_cache) embeds the parsed HDL data
+# model; whenever any source that defines that model changes, the archive
+# format may change. We derive the cache version from a hash of those sources
+# so the cache invalidates automatically (no manual version bumps) and only
+# when serialization-relevant code changes.
+# ---------------------------------------------------------------------------
+file(GLOB_RECURSE CACHE_SCHEMA_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_SOURCE_DIR}/includes/data_model/*"
+    "${CMAKE_SOURCE_DIR}/src/data_model/*"
+)
+
+set(CACHE_SCHEMA_HASH_HEADER "${CMAKE_BINARY_DIR}/generated/cache_schema_hash.hpp")
+add_custom_command(
+    OUTPUT ${CACHE_SCHEMA_HASH_HEADER}
+    COMMAND ${CMAKE_COMMAND}
+        "-DSCHEMA_ROOT=${CMAKE_SOURCE_DIR}"
+        "-DOUTPUT=${CACHE_SCHEMA_HASH_HEADER}"
+        -P "${CMAKE_SOURCE_DIR}/cmake/hash_cache_schema.cmake"
+    DEPENDS ${CACHE_SCHEMA_SOURCES}
+    COMMENT "Generating cache schema fingerprint"
+)
+add_custom_target(cache_schema_hash DEPENDS ${CACHE_SCHEMA_HASH_HEADER})
+
+include_directories(${CMAKE_BINARY_DIR}/generated)
+
 add_subdirectory(includes)
 add_subdirectory(src)
 add_subdirectory(Testing)

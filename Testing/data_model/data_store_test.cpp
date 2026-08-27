@@ -257,6 +257,54 @@ TEST( data_store_test , corrupted_cache_recovery ) {
     std::filesystem::remove_all("/tmp/ananke_ds_corrupt");
 }
 
+TEST( data_store_test , persistent_cache_schema_round_trip ) {
+    auto dir = "/tmp/ananke_ds_schema";
+    std::filesystem::create_directories(dir);
+    std::string stored_path = dir + std::string("/schema_test.sv");
+    {
+        std::ofstream ofs(stored_path);
+        ofs << "// test";
+    }
+
+    {
+        data_store store(false, dir);
+        auto test_res = std::make_shared<hdl_resource_statement>();
+        test_res->set_name("schema_test");
+        test_res->set_type(interface);
+        hdl_file f;
+        f.set_content({test_res});
+        store.store_file({stored_path, "test_hash", f});
+    } // destructor persists the cache stamped with the current schema hash
+
+    {
+        data_store store(false, dir);
+        EXPECT_TRUE(store.contains(stored_path));
+        auto res = store.get_HDL_resource("schema_test");
+        ASSERT_TRUE(res.has_value());
+        EXPECT_EQ(res.value()->getName(), "schema_test");
+    }
+
+    std::filesystem::remove_all(dir);
+}
+
+TEST( data_store_test , persistent_cache_schema_mismatch_discarded ) {
+    auto dir = "/tmp/ananke_ds_schema_mismatch";
+    std::filesystem::create_directories(dir);
+
+    // Cache written with a stale schema fingerprint must be discarded on load.
+    std::unordered_map<std::string, data_store::cached_item> bogus_cache;
+    {
+        std::ofstream ofs(dir + std::string("/unified_cache"), std::ios::binary);
+        cereal::BinaryOutputArchive oa(ofs);
+        oa(std::string("stale_schema_fingerprint"), bogus_cache);
+    }
+
+    data_store store(false, dir);
+    EXPECT_FALSE(store.contains("anything"));
+
+    std::filesystem::remove_all(dir);
+}
+
 TEST( data_store_test , store_cache_never_throws ) {
     // Point store_path at an existing regular file so directory creation fails;
     // the constructor and the destructor's store_cache must not throw.

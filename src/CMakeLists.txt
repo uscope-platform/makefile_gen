@@ -2,6 +2,8 @@
 
 add_library(ananke_lib STATIC)
 
+add_dependencies(ananke_lib cache_schema_hash)
+
 target_sources(ananke_lib
     PRIVATE
     ananke.cpp

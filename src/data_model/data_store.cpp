@@ -143,6 +143,13 @@ void data_store::load_cache() {
             return;
         }
         cereal::BinaryInputArchive archive_in(is);
+        std::string schema_hash;
+        archive_in(schema_hash);
+        if (schema_hash != get_cache_schema_hash()) {
+            spdlog::warn("Cache schema changed, discarding stale cache {}", unified_cache);
+            cache.clear();
+            return;
+        }
         archive_in(cache);
     } catch (const std::exception &e) {
         spdlog::warn("Could not load cache file {} ({}), starting with an empty cache", unified_cache, e.what());
@@ -161,7 +168,7 @@ void data_store::store_cache() {
             return;
         }
         cereal::BinaryOutputArchive archive_out(os);
-        archive_out(cache);
+        archive_out(get_cache_schema_hash(), cache);
     } catch (const std::exception &e) {
         spdlog::error("Could not save cache file {}: {}", unified_cache, e.what());
     }
