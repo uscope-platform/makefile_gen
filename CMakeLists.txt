@@ -1,10 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
-project(ananke)
+project(ananke VERSION 1.0.0 LANGUAGES CXX)
 
 enable_testing()
 
 set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(OPENSSL_USE_STATIC_LIBS TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -17,23 +16,17 @@ find_package(CLI11 REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(valijson REQUIRED)
-find_package(cereal)
+find_package(cereal REQUIRED)
 find_package(GTest REQUIRED)
 find_package(ctre REQUIRED)
-find_package(tomlplusplus REQUIRED)
 
 include_directories(includes)
 
-include_directories(${inja_INCLUDE_DIRS})
-
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_definitions(-DTEMPLATES_FOLDER="${CMAKE_SOURCE_DIR}/templates")
     add_definitions(-DSPECS_FOLDER="${CMAKE_SOURCE_DIR}/bus_specs")
 elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    add_definitions(-DTEMPLATES_FOLDER="${CMAKE_SOURCE_DIR}/templates")
     add_definitions(-DSPECS_FOLDER="${CMAKE_SOURCE_DIR}/bus_specs")
 else()
-    add_definitions(-DTEMPLATES_FOLDER="/usr/local/etc/ananke/templates")
     add_definitions(-DSPECS_FOLDER="/usr/local/etc/ananke/specs")
 endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
@@ -99,20 +92,6 @@ add_subdirectory(includes)
 add_subdirectory(src)
 add_subdirectory(Testing)
 add_subdirectory(grammars)
-
-ExternalProject_Add(antlr_runtime
-        GIT_REPOSITORY https://github.com/antlr/antlr4.git
-        GIT_TAG ${ANTLR_VERSION}
-        CONFIGURE_COMMAND ${CMAKE_COMMAND}
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
-        -DBUILD_TESTING=OFF
-        -DANTLR_BUILD_CPP_TESTS=OFF
-        ${CMAKE_BINARY_DIR}/antlr_runtime-prefix/src/antlr_runtime/runtime/Cpp
-        INSTALL_COMMAND DESTDIR=${CMAKE_BINARY_DIR}/antlr_runtime/dist make install
-)
-
-add_custom_target(parsers)
-add_dependencies(parsers vh_parser_gen sv_parser_gen)
 
 
 
