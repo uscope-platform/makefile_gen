@@ -4,6 +4,9 @@ add_library(ananke_lib STATIC)
 
 add_dependencies(ananke_lib cache_schema_hash)
 
+target_include_directories(ananke_lib PUBLIC ${CMAKE_SOURCE_DIR}/includes)
+target_compile_definitions(ananke_lib PRIVATE SPECS_FOLDER="${SPECS_FOLDER}")
+
 target_sources(ananke_lib
     PRIVATE
     ananke.cpp

@@ -1,13 +1,13 @@
 
-set(CHECK_FILES_DIR ${CMAKE_CURRENT_BINARY_DIR}/check_files/test_data)
-file(MAKE_DIRECTORY ${CHECK_FILES_DIR})
+set(TESTDATA_DIR ${CMAKE_CURRENT_BINARY_DIR}/check_files/test_data)
+file(MAKE_DIRECTORY ${TESTDATA_DIR})
 
 include(FetchContent)
 FetchContent_Populate(
         test_data
         GIT_REPOSITORY https://github.com/uscope-platform/uscope_hdl.git
         GIT_TAG        cdb0a6fb17eb1d7b97b70a44404f2d32d8afb8c4
-        SOURCE_DIR ${CHECK_FILES_DIR}
+        SOURCE_DIR ${TESTDATA_DIR}
 )
 
 set(ANANKE_TESTS
@@ -57,12 +57,7 @@ set(ANANKE_TESTS
 
 add_executable(tests ${ANANKE_TESTS})
 
-
-# Locate GTest
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
-
-target_link_libraries(tests PRIVATE ${GTEST_LIBRARIES} ananke_lib gtest::gtest)
+target_link_libraries(tests PRIVATE ananke_lib gtest::gtest)
 target_include_directories(tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(tests PRIVATE TEST_DATA_DIR="${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -86,10 +81,10 @@ configure_file(check_files/test_sv_parameter_extraction.sv ${CHECK_FILES_DIR} CO
 configure_file(check_files/top_tb_sv.sv ${CHECK_FILES_DIR} COPYONLY)
 configure_file(check_files/python_test.py ${CHECK_FILES_DIR} COPYONLY)
 
-set(CHECK_FILES_DIR ${CMAKE_CURRENT_BINARY_DIR}/check_files/documentation_analyzer)
-file(MAKE_DIRECTORY ${CHECK_FILES_DIR})
-configure_file(check_files/documentation_analyzer/test_bus_hierarchy.sv ${CHECK_FILES_DIR} COPYONLY)
-configure_file(check_files/documentation_analyzer/test_module_hierarchy.sv ${CHECK_FILES_DIR} COPYONLY)
+set(DOC_ANALYZER_DIR ${CMAKE_CURRENT_BINARY_DIR}/check_files/documentation_analyzer)
+file(MAKE_DIRECTORY ${DOC_ANALYZER_DIR})
+configure_file(check_files/documentation_analyzer/test_bus_hierarchy.sv ${DOC_ANALYZER_DIR} COPYONLY)
+configure_file(check_files/documentation_analyzer/test_module_hierarchy.sv ${DOC_ANALYZER_DIR} COPYONLY)
 
 
 set(REPO_WALKER_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR}/repository_walker)
