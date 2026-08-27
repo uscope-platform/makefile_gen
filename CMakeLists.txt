@@ -30,6 +30,8 @@ option(ENABLE_PROFILING "Enable profiling" OFF)
 option(ENABLE_COVERAGE "Enable code coverage" OFF)
 option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
 option(ENABLE_TSAN "Enable ThreadSanitizer" OFF)
+option(ENABLE_PEDANTIC "Enable -Wall -Wextra compiler warnings" OFF)
+option(ENABLE_PARANOID "Enable -Werror, treating warnings as errors (implies ENABLE_PEDANTIC)" OFF)
 
 if(ENABLE_PROFILING)
     message(STATUS "Enabling Profiling support")
@@ -53,6 +55,18 @@ elseif(ENABLE_TSAN)
     # TSan requires at least -O1 optimization to be effective
     add_compile_options(-fsanitize=thread -g -O1 -fno-omit-frame-pointer)
     add_link_options(-fsanitize=thread)
+endif()
+
+if(ENABLE_PARANOID)
+    set(ENABLE_PEDANTIC ON)
+endif()
+if(ENABLE_PEDANTIC)
+    message(STATUS "Enabling pedantic compiler warnings (-Wall -Wextra)")
+    add_compile_options(-Wall -Wextra)
+endif()
+if(ENABLE_PARANOID)
+    message(STATUS "Enabling paranoid mode (warnings as errors)")
+    add_compile_options(-Werror)
 endif()
 
 
