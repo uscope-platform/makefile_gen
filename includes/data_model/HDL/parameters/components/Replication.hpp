@@ -68,6 +68,10 @@ public:
     bool isEqual(const Expression_base &other) const override{
 
         const auto& rhs = static_cast<const Replication&>(other);
+        if (repetition_size == nullptr && rhs.repetition_size == nullptr && repeated_item == nullptr && rhs.repeated_item == nullptr)
+            return true;
+        if (repetition_size == nullptr || rhs.repetition_size == nullptr) return false;
+        if (repeated_item == nullptr || rhs.repeated_item == nullptr) return false;
         bool res = true;
         res &= *repetition_size == *rhs.repetition_size;
         res &= *repeated_item == *rhs.repeated_item;

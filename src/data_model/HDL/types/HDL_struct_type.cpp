@@ -30,6 +30,7 @@ std::optional<resolved_type> HDL_struct_type::evaluate_type(
         uint64_t member_width = 1;
         if (m.type->is<HDL_struct_type>()) {
             auto s = m.type->as<HDL_struct_type>().evaluate_type(context);
+            if (!s) return std::nullopt;
             smrt.packed_sizes = s->packed_sizes;
             smrt.unpacked_sizes = s->unpacked_sizes;
             smrt.members = s->struct_sizes;
@@ -37,6 +38,7 @@ std::optional<resolved_type> HDL_struct_type::evaluate_type(
                 member_width *= ps;
         } else {
             auto s = m.type->as<HDL_simple_type>().evaluate_type(context);
+            if (!s) return std::nullopt;
             smrt.packed_sizes = s->packed_sizes;
             smrt.unpacked_sizes = s->unpacked_sizes;
             for (auto &ps : s->packed_sizes)

@@ -37,8 +37,7 @@ void replication_factory::consume(const std::shared_ptr<Expression_base> &expr) 
     if (state == build_phase::size) {
         state = build_phase::item;
         new_replication.set_size(expr);
-    }
-    if (state== build_phase::item) {
+    } else if (state == build_phase::item) {
         new_replication.set_item(expr);
     }
 }

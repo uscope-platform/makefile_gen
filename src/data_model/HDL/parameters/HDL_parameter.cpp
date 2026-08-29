@@ -64,6 +64,7 @@ bool operator<(const HDL_parameter &lhs, const HDL_parameter &rhs) {
 std::expected<resolved_parameter, solver_errors>  HDL_parameter::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
     if (is_type_param) return resolved_parameter(0);
     if (!type) return std::unexpected{wrong_type};
+    if (!raw_value) return std::unexpected{missing_value};
     std::optional<resolved_type> container_size;
     if (type->is<HDL_external_type>()) {
     } else {

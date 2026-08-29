@@ -57,24 +57,25 @@ void Replication::set_size(const std::shared_ptr<Expression_base> &size) { repet
 
 parameter_deps_t Replication::get_dependencies()const {
     parameter_deps_t result;
-    result.merge(repetition_size->get_dependencies());
-    result.merge(repeated_item->get_dependencies());
+    if (repetition_size) result.merge(repetition_size->get_dependencies());
+    if (repeated_item) result.merge(repeated_item->get_dependencies());
     return result;
 }
 
 
 void Replication::propagate_expression(const qualified_identifier &constant_id,
     const std::shared_ptr<Expression_base> &value) {
-    repetition_size->propagate_expression(constant_id, value);
-    repeated_item->propagate_expression(constant_id, value);
+    if (repetition_size) repetition_size->propagate_expression(constant_id, value);
+    if (repeated_item) repeated_item->propagate_expression(constant_id, value);
 }
 
 void Replication::propagate_function(const hdl_function_statement &def) {
-    repetition_size->propagate_function(def);
-    repeated_item->propagate_function(def);
+    if (repetition_size) repetition_size->propagate_function(def);
+    if (repeated_item) repeated_item->propagate_function(def);
 }
 
 std::expected<resolved_parameter, solver_errors> Replication::evaluate(const std::map<qualified_identifier, resolved_parameter> &context) {
+    if (!repetition_size || !repeated_item) return std::unexpected{missing_value};
     mdarray<hdl_integer> result;
     auto raw_size = repetition_size->evaluate(context);
     if (!raw_size.has_value()) return std::unexpected{missing_value};
@@ -152,8 +153,10 @@ hdl_integer Replication::pack_repetition(hdl_integer value, int64_t width, int64
 
 std::string Replication::print() const {
     std::ostringstream oss;
-    oss << "{" << repetition_size->print()<<"{";
-    oss << repeated_item->print();
+    oss << "{";
+    if (repetition_size) oss << repetition_size->print();
+    oss << "{";
+    if (repeated_item) oss << repeated_item->print();
     oss << "}}";
     return oss.str();
 }

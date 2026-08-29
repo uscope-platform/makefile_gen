@@ -17,6 +17,10 @@
 
 #include <gtest/gtest.h>
 
+#include <fstream>
+#include <sstream>
+
+#include "test_paths.hpp"
 #include "frontend/analysis/system_verilog/sv_analyzer.hpp"
 #include "analysis/HDL_ast_builder_v2.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
@@ -26,6 +30,10 @@
 #include "data_model/HDL/types/HDL_external_type.hpp"
 #include "data_model/HDL/types/HDL_struct_type.hpp"
 #include "data_model/HDL/statement/hdl_statements.hpp"
+#include "data_model/settings_store.hpp"
+#include "data_model/data_store.hpp"
+#include "frontend/Repository_walker.hpp"
+#include "data_model/Depfile/Depfile.hpp"
 
 
 TEST(parameter_processing, override_after_fatal) {
@@ -176,6 +184,56 @@ TEST(parameter_processing, package_parameters_in_array_init) {
 }
 
 
+TEST(parameter_processing, cva6_ast_build_repro) {
+    const std::string repo = "/var/folders/49/qk_dm63x0h73mpw9_l_7x7ch0000gn/T/opencode/cva6-repro";
+    if (!std::filesystem::exists(repo + "/core/cva6.sv")) GTEST_SKIP();
+
+    std::string settings_path = "/tmp/ananke_cva6_repro_settings";
+    std::filesystem::create_directories(settings_path);
+    std::ofstream ofs(settings_path + "/settings");
+    ofs << "{\"profiles\": {\"repro\": {\"hdl_store\":\"" << repo << "\",\"include_auto_discovery\":true}}}";
+    ofs.close();
+
+    auto s_store = std::make_shared<settings_store>(false, settings_path, "repro");
+    auto d_store = std::make_shared<data_store>(true, settings_path + "/cache");
+    Repository_walker walker(s_store, d_store, false);
+
+    Depfile dep;
+    dep.general.synth_tl = "cva6";
+    HDL_ast_builder_v2 b(s_store, d_store, dep);
+    auto ast = b.build_ast(std::vector<std::string>{"cva6"});
+    ASSERT_TRUE(ast[0] != nullptr);
+
+    std::filesystem::remove_all(settings_path);
+}
+
+
+TEST(parameter_processing, struct_member_unresolvable_range_no_crash) {
+    // A struct whose member range references an undefined identifier must make
+    // evaluate_type return nullopt (handled as "missing value") instead of
+    // dereferencing a disengaged optional and crashing.
+    auto test_pattern = R"(
+
+        package test_pkg;
+            typedef struct packed {
+                logic [EXT_PARAM-1:0] field;
+                logic [63:0] DmBaseAddress;
+            } cva6_cfg_t;
+
+            localparam cva6_cfg_t Cfg = '0;
+        endpackage
+    )";
+
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", test_pattern).value().get_content();
+    auto& pkg = resources[0]->as<hdl_resource_statement>();
+
+    auto solved = parameter_solver::process_parameters(pkg.get_parameters(), {});
+
+    ASSERT_TRUE(solved.contains(qualified_identifier("Cfg")));
+}
+
+
 TEST(parameter_processing, package_parameters_use) {
     auto test_pattern = R"(
 
@@ -207,6 +265,31 @@ TEST(parameter_processing, package_parameters_use) {
 
     ASSERT_TRUE(solved.contains(qualified_identifier("package_param")));
     ASSERT_EQ(67, solved.at(qualified_identifier("package_param")).get_integer());
+}
+
+
+TEST(parameter_processing, ariane_pkg_struct_and_unresolvable_localparam) {
+    // Reproduces the ariane_pkg layout that crashes the solver on ZERO_TVAL in
+    // the cva6 flow: a struct localparam with a struct literal that cannot be
+    // solved, followed by an unresolvable external reference, then a bit param.
+    std::ifstream input(td_file("check_files/ariane_pkg.sv"));
+    ASSERT_TRUE(input.good());
+    std::stringstream buffer;
+    buffer << input.rdbuf();
+
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", buffer.str());
+    ASSERT_TRUE(resources.has_value());
+    bool found = false;
+    for (auto &res : resources.value().get_content()) {
+        if (!res->is<hdl_resource_statement>()) continue;
+        auto &r = res->as<hdl_resource_statement>();
+        if (r.get_type() != dependency_class::package) continue;
+        auto solved = parameter_solver::process_parameters(r.get_parameters(), {});
+        found = true;
+        ASSERT_TRUE(solved.contains(qualified_identifier("ZERO_TVAL")));
+    }
+    ASSERT_TRUE(found);
 }
 
 
