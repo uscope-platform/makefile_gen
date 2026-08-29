@@ -68,3 +68,23 @@ TEST(settings_store, include_auto_discovery_persisted) {
 
     std::filesystem::remove_all(store_settings_path);
 }
+
+TEST(settings_store, defines_loaded_and_persisted) {
+    std::filesystem::create_directories(store_settings_path);
+    std::ofstream ofs(store_settings_file);
+    ofs << "{\"profiles\": {\"test_profile\": {\"hdl_store\":\"/tmp/repo\","
+           "\"defines\":[\"KINTEX7\",\"BOARD_ID=42\"]}}}";
+    ofs.flush();
+    ofs.close();
+
+    {
+        settings_store s(false, store_settings_path, "test_profile");
+        EXPECT_EQ(s.get_defines(), (std::set<std::string>{"KINTEX7", "BOARD_ID=42"}));
+        s.flush();
+    }
+
+    settings_store s2(false, store_settings_path, "test_profile");
+    EXPECT_EQ(s2.get_defines(), (std::set<std::string>{"KINTEX7", "BOARD_ID=42"}));
+
+    std::filesystem::remove_all(store_settings_path);
+}

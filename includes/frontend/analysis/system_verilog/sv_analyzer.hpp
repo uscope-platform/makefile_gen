@@ -42,6 +42,7 @@ public:
     std::optional<hdl_file> analyze(const std::string &path, const std::string_view &file_content);
     void set_include_directories(const std::set<std::string> &i_d){include_directories = i_d;}
     void set_repository_index(const std::shared_ptr<repository_index> &idx){repository_index = idx;}
+    void set_defines(const std::set<std::string> &d){defines = d;}
     std::set<include_dependency> get_includes() {return includes;}
     [[nodiscard]] bool has_error() const {return last_error.has_value();}
     [[nodiscard]] const std::string& get_error() const {return last_error.value();}
@@ -49,6 +50,7 @@ private:
 
     hdl_file process_hdl(const std::string &path, const std::string &preprocessed_content);
     std::set<std::string> include_directories;
+    std::set<std::string> defines;
     std::shared_ptr<repository_index> repository_index;
     std::set<include_dependency> includes;
     std::optional<std::string> last_error;

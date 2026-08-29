@@ -165,6 +165,31 @@ TEST(preprocessor, undef) {
     EXPECT_TRUE(preproc.has_error());
 }
 
+TEST(preprocessor, global_defines) {
+    auto test_pattern = R"(
+        module test_module ();
+            `ifdef KINTEX7
+            parameter BOARD = `BOARD_ID;
+            `else
+            parameter BOARD = 0;
+            `endif
+        endmodule
+    )";
+
+    sv_preprocessor preproc;
+    preproc.set_path("/tmp/file.sv");
+    preproc.set_defines({"KINTEX7", "BOARD_ID=42"});
+
+    auto result = preproc.preprocess(test_pattern);
+    auto check_string = R"(
+        module test_module ();
+            parameter BOARD = 42;
+        endmodule
+    )";
+    EXPECT_EQ(result, check_string);
+    EXPECT_FALSE(preproc.has_error());
+}
+
 
 TEST(preprocessor, line_comment_elimination) {
     auto test_pattern = R"(

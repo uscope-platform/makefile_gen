@@ -83,6 +83,7 @@ std::expected<std::unordered_map<std::string, std::string>, int> ananke::directe
                 }
                 auto includes = s_store->get_default_includes();;
                 analyzer.set_include_directories(includes);
+                analyzer.set_defines(s_store->get_defines());
                 auto analysis_result = analyzer.analyze(target, f_opt->view());
                 if (!analysis_result.has_value()) {
                     std::cout << "Error parsing target: " << target << ": " << analyzer.get_error() << std::endl;

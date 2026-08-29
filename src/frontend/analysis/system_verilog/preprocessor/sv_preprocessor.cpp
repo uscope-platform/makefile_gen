@@ -30,6 +30,7 @@ namespace preprocessor {
     std::string sv_preprocessor::preprocess(const std::string_view &file_content, unsigned int initial_output_line) {
         macro_processor macro_engine(definitions , line_number, path, error);
 
+        install_global_defines();
         auto flat_source= flatten_source(file_content);
         std::istringstream iss(flat_source);
         std::ostringstream out;
@@ -134,6 +135,20 @@ namespace preprocessor {
         return retval;
     }
 
+
+    void sv_preprocessor::install_global_defines() {
+        for (const auto &d: global_defines) {
+            auto eq = d.find('=');
+            if (eq == std::string::npos) {
+                definitions[d] = "1";
+            } else {
+                auto name = d.substr(0, eq);
+                auto value = d.substr(eq + 1);
+                value.erase(0, value.find_first_not_of("\t "));
+                definitions[name] = value;
+            }
+        }
+    }
 
     std::optional<include_dependency> sv_preprocessor::parse_include_path(const std::string_view &line) {
         auto start_identifier = line.find_first_of("\"<");

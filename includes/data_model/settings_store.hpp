@@ -31,6 +31,7 @@ struct settings_profile {
     std::filesystem::path hdl_store;
     std::set<std::string> includes;
     std::set<std::string> excludes;
+    std::set<std::string> defines;
     bool include_auto_discovery = true;
 };
 
@@ -42,6 +43,7 @@ public:
     std::filesystem::path get_tool_path(const std::string &tool);
     std::set<std::string> get_default_includes();
     std::set<std::string> get_excluded_paths();
+    std::set<std::string> get_defines();
     bool get_include_auto_discovery();
     void flush();
     ~settings_store();

@@ -49,7 +49,7 @@ struct file_analysis_context {
     std::vector<include_dependency> includes;
 };
 
-static file_analysis_context<hdl_file> analyze_verilog(const std::filesystem::path &file, std::set<std::string> i_d, const std::string &old_hash, const std::shared_ptr<repository_index> &idx);
+static file_analysis_context<hdl_file> analyze_verilog(const std::filesystem::path &file, std::set<std::string> i_d, std::set<std::string> defines, const std::string &old_hash, const std::shared_ptr<repository_index> &idx);
 static file_analysis_context<hdl_file> analyze_vhdl(const std::filesystem::path &file, std::set<std::string> i_d, const std::string &old_hash);
 static file_analysis_context<Script>  analyze_script(const std::filesystem::path &file, std::set<std::string> i_d, const std::string &old_hash);
 static file_analysis_context<DataFile>  analyze_data(const std::filesystem::path &file, std::set<std::string> i_d, const std::string &old_hash);
@@ -109,6 +109,7 @@ private:
     thread_pool pool;
     int working_threads = 0;
     std::set<std::string> default_includes;
+    std::set<std::string> default_defines;
 };
 
 

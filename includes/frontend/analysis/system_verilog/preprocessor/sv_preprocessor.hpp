@@ -44,6 +44,7 @@ namespace preprocessor {
         void set_include_directories(const std::set<std::string> &i_d){include_directories = i_d;}
         void set_repository_index(const std::shared_ptr<repository_index> &idx){repository_index = idx;}
         void set_path(const std::string &s){path = s;}
+        void set_defines(const std::set<std::string> &d) {global_defines = d;}
         std::vector<std::string> get_documentation_comments() {return documentation_comments;}
         std::set<include_dependency> get_includes() {return includes;}
         source_map_t get_source_map() const {return  source_map.get_map();}
@@ -58,9 +59,11 @@ namespace preprocessor {
         std::optional<include_dependency> resolve_include(const std::string &name, bool quoted);
         std::string get_define_replacement(const std::string_view &v);
         void parse_definition(const std::string_view &sv, int prefix_length);
+        void install_global_defines();
         static std::string_view parse_one_arg_directive(const std::string_view &sv, int prefix_length);
         uint64_t line_number = 1;
         definitions_map definitions;
+        std::set<std::string> global_defines;
         std::vector<std::string> documentation_comments;
         std::string path;
         std::optional<std::string> error;

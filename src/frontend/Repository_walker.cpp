@@ -35,6 +35,7 @@ void Repository_walker::construct_walker(std::shared_ptr<settings_store> s, std:
     excluded_directories = std::move(ex);
     target_repository = s_store->get_hdl_store();
     default_includes = s_store->get_default_includes();
+    default_defines = s_store->get_defines();
     if (s_store->get_include_auto_discovery()) {
         repository_index_p = std::make_shared<repository_index>();
     }
@@ -217,7 +218,7 @@ void Repository_walker::analyze_file(std::filesystem::path &file) {
     spdlog::trace("Analizing file: {}", file.string());
     if(file_is_verilog(file)){
         auto old_hash = d_store->get_hash(file);
-        hdl_futures.push_back(pool.submit(analyze_verilog, file, default_includes, old_hash, repository_index_p));
+        hdl_futures.push_back(pool.submit(analyze_verilog, file, default_includes, default_defines, old_hash, repository_index_p));
         working_threads++;
     } else if(file_is_script(file)){
         std::set<std::string> includes;
@@ -284,7 +285,8 @@ bool Repository_walker::file_is_data(const std::filesystem::path &file) {
 /// \param file Target file
 file_analysis_context<hdl_file> analyze_verilog(
     const std::filesystem::path &file,
-    std::set<std::string> i_d, const std::string &old_hash,
+    std::set<std::string> i_d, std::set<std::string> defines,
+    const std::string &old_hash,
     const std::shared_ptr<repository_index> &idx
 ) {
     spdlog::trace("PARSING: {}", file.c_str());
@@ -306,6 +308,7 @@ file_analysis_context<hdl_file> analyze_verilog(
         }
         sv_analyzer file_processor;
         file_processor.set_include_directories(i_d);
+        file_processor.set_defines(defines);
         file_processor.set_repository_index(idx);
         auto analysis = file_processor.analyze(file, f_opt->view());
         if (!analysis.has_value()) {

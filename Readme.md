@@ -16,6 +16,27 @@ Several mechanisms are available to exclude sub-directories from the analysis:
 - **IDE projects**: Directories containing an IDE project file (like .xpr for Xilinx Vivado) will be ignored
 - **.git**: git source control hidden directories will be ignored
 
+## Preprocessor defines
+
+Designs frequently gate code on macros supplied by the build system (`+define+`,
+Vivado `` `ifdef `` switches, etc.). These can be injected globally for every
+analyzed file via the `defines` key of the profile in the settings file
+(`<cache_dir>/settings`):
+
+```json
+{
+    "profiles": {
+        "my_profile": {
+            "defines": ["KINTEX7", "BOARD_ID=42"]
+        }
+    }
+}
+```
+
+A bare name defines the macro to the value `1`; `NAME=value` defines it to the
+given value. This makes `` `ifdef NAME `` branches and `` `NAME `` substitutions
+resolve as they would in the real build.
+
 ## Toolchain support
 
 The following toolchains are supported:
