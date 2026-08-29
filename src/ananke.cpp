@@ -180,11 +180,34 @@ std::optional<int> ananke::build_flow() {
 
         LOG_TIMEPOINT("Solved sim dependencies");
 
-        // BUS MAPPING
+        // Collect the include directories that were auto-discovered (only) by
+        // files in the project's dependency closure. The discovered header
+        // paths are cached per file; their parent directories are derived here
+        // so the generated project carries exactly the include paths it needs.
+        std::set<std::string> discovered_dirs;
+        auto collect_discovered = [&](const std::set<std::string> &sources) {
+            for (auto &src: sources) {
+                if (auto inc = d_store->get_discovered_includes(src); inc.has_value()) {
+                    for (auto &path: inc.value()) {
+                        discovered_dirs.insert(std::filesystem::path(path).parent_path().string());
+                    }
+                }
+            }
+        };
+        collect_discovered(synth_sources);
+        collect_discovered(synth_packages);
+        collect_discovered(sim_sources);
+        collect_discovered(sim_packages);
+
+        std::vector<std::string> commons_dir = dep.general.include_paths;
+        for (auto &dir: discovered_dirs) {
+            commons_dir.push_back("/" + std::filesystem::relative(dir, s_store->get_hdl_store()).string());
+        }
+
+        LOG_TIMEPOINT("control bus analysis");
 
         control_bus_analysis bus_analyzer(dep);
         bus_analyzer.analyze_bus(synth_ast);
-        LOG_TIMEPOINT("control bus analysis");
 
         proxy_bus_analysis proxy_analyzer(s_store, d_store, dep);
         proxy_analyzer.analyze(synth_ast);
@@ -208,7 +231,7 @@ std::optional<int> ananke::build_flow() {
             data.constraints_sources = constr_deps;
             data.tb_tl = dep.general.sim_tl;
             data.synth_tl = dep.general.synth_tl;
-            data.commons_dir = dep.general.include_paths;
+            data.commons_dir = commons_dir;
             data.repo_dir = std::filesystem::current_path();
             if (dep.general.board) {
                 data.board_part = dep.general.board.value();
@@ -259,7 +282,7 @@ std::optional<int> ananke::build_flow() {
             data.constraints_sources = constr_deps;
             data.tb_tl = dep.general.sim_tl;
             data.synth_tl = dep.general.synth_tl;
-            data.commons_dir = dep.general.include_paths;
+            data.commons_dir = commons_dir;
             data.repo_dir = std::filesystem::current_path();
             if (dep.general.target_part) {
                 data.target_part = dep.general.target_part.value();

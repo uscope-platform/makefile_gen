@@ -44,6 +44,7 @@ namespace preprocessor {
         void set_repository_index(const std::shared_ptr<repository_index> &idx){repository_index = idx;}
         void set_path(const std::string &s){path = s;}
         std::vector<std::string> get_documentation_comments() {return documentation_comments;}
+        std::set<std::string> get_discovered_includes() {return discovered_includes;}
         source_map_t get_source_map() const {return  source_map.get_map();}
         [[nodiscard]] bool has_error() const {return error.has_value();}
         [[nodiscard]] const std::string& get_error() const {return error.value();}
@@ -66,6 +67,7 @@ namespace preprocessor {
         conditional_solver c_solver;
         std::set<std::string> include_directories;
         std::shared_ptr<repository_index> repository_index;
+        std::set<std::string> discovered_includes;
         source_mapper source_map;
         unsigned int output_line_n = 0;
         bool disable_preprocessor = false;

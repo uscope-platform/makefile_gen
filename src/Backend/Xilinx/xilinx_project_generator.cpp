@@ -179,10 +179,10 @@ void xilinx_project_generator::generate_sim_script(std::ostream &output) {
 
     output << "    xvlog -sv \"${FILES[@]}\" ";
     for (const auto& d: data.commons_dir) {
-        output<< "-i " << base_dir + d;
+        output<< "-i " << base_dir + d << " ";
     }
     // add includes for xilinx interface definitions
-    output << " -i " << vivado_dir + "/data/rsb/busdef"<< std::endl;
+    output << "-i " << vivado_dir + "/data/rsb/busdef"<< std::endl;
 
     output << check_result("XVLOG FAILED");
 

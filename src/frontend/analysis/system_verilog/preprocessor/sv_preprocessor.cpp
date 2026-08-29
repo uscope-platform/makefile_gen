@@ -177,7 +177,10 @@ namespace preprocessor {
     std::optional<std::string> sv_preprocessor::resolve_include(const std::string &name, bool quoted) {
         if (!repository_index) return std::nullopt;
         auto candidates = repository_index->lookup(name);
-        if (candidates.size() == 1) return candidates[0].string();
+        if (candidates.size() == 1) {
+            discovered_includes.insert(candidates[0].string());
+            return candidates[0].string();
+        }
         if (candidates.size() > 1) {
             std::string candidate_dirs;
             for (auto &c: candidates) {
@@ -443,6 +446,7 @@ namespace preprocessor {
             }
 
             definitions = nested_preproc.definitions;
+            discovered_includes.insert(nested_preproc.discovered_includes.begin(), nested_preproc.discovered_includes.end());
         }
         if (output_line.contains("/*")) {
             std::string stripped;

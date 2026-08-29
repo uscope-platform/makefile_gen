@@ -43,6 +43,7 @@ struct file_analysis_context {
     std::string path;
     std::string hash;
     std::optional<T> resource;
+    std::vector<std::string> discovered_includes;
 };
 
 static file_analysis_context<hdl_file> analyze_verilog(const std::filesystem::path &file, std::set<std::string> i_d, const std::string &old_hash, const std::shared_ptr<repository_index> &idx);

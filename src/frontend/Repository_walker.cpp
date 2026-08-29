@@ -91,8 +91,8 @@ void Repository_walker::collect_analysis_results() {
     auto store = [this](auto &futures) {
         for(auto &f : futures) {
             try {
-                auto [path, file_hash, resource] = f.get();
-                if (resource) d_store->store_file({path, file_hash, resource.value()});
+                auto [path, file_hash, resource, discovered_includes] = f.get();
+                if (resource) d_store->store_file({path, file_hash, resource.value(), discovered_includes});
             } catch (const std::exception &e) {
                 spdlog::error("Error analyzing a file: {}", e.what());
             } catch (...) {
@@ -269,7 +269,8 @@ file_analysis_context<hdl_file> analyze_verilog(
             spdlog::error("Error analyzing {}: {}", file.string(), file_processor.get_error());
             return {};
         }
-        return {file.string(), hash, analysis.value()};
+        auto discovered = file_processor.get_discovered_includes();
+        return {file.string(), hash, analysis.value(), {discovered.begin(), discovered.end()}};
     } catch (const std::exception &err) {
         spdlog::error("Error analyzing {}: {}", file.string(), err.what());
         return {};

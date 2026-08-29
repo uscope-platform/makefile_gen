@@ -46,7 +46,7 @@ std::string replace_base(std::string text, const std::string &from, const std::s
 std::string e2e_settings_path = unique_temp_dir("cache");
 std::string e2e_settings_file = e2e_settings_path + "/settings";
 
-void e2e_setup_settings() {
+void e2e_setup_settings(bool include_auto_discovery = true) {
     std::filesystem::create_directories(e2e_settings_path);
     // Resolve any symlinks in the temp path (e.g. /tmp -> /private/tmp,
     // /var -> /private/var) so that paths recorded by the repository walker,
@@ -56,7 +56,8 @@ void e2e_setup_settings() {
     std::ofstream ofs(e2e_settings_file);
     ofs << "{\"profiles\":{\"test_profile\":{\"hdl_store\":\""
         << e2e_settings_path
-        << "\"}},\"amd_vivado_path\":\"/tmp/vivado\",\"lattice_radiant_path\":\"/tmp/lscc\", \"default_profile\":\"test_profile\"}";
+        << "\",\"include_auto_discovery\":" << (include_auto_discovery ? "true" : "false")
+        << "}},\"amd_vivado_path\":\"/tmp/vivado\",\"lattice_radiant_path\":\"/tmp/lscc\", \"default_profile\":\"test_profile\"}";
     ofs.flush();
     ofs.close();
     std::error_code ec;
@@ -256,7 +257,7 @@ TEST( end_to_end , sim_script_generation) {
     ss << ifs.rdbuf();
     std::string result = ss.str();
 
-    std::string expected = replace_base("FILES=( \n    /tmp/ananke_test_cache/PID/rtl/PID.sv\n    /tmp/ananke_test_cache/integrator/rtl/Integrator.v\n    /tmp/ananke_test_cache/simple_register_cu/rtl/axil_simple_register_cu.sv\n    /tmp/ananke_test_cache/skid_buffer/rtl/axil_skid_buffer.sv\n    /tmp/vivado/data/verilog/src/glbl.v\n    /tmp/ananke_test_cache/Common/interfaces.sv\n    /tmp/ananke_test_cache/PID/tb/PID_tb.sv\n)\n\nmkdir -p /tmp/ananke_test_cache/PID/sim\ncp sim.tcl /tmp/ananke_test_cache/PID/sim/sim.tcl\n\n\n(\n    cd /tmp/ananke_test_cache/PID/sim|| exit\n\n    echo -e \"\\n\\033[1;33m>>> PHASE 1: XVLOG (Analysis) <<<\\033[0m\"\n    xvlog -sv \"${FILES[@]}\" -i /tmp/ananke_test_cache/public/Components/Common -i /tmp/vivado/data/rsb/busdef\n    if [ $? -ne 0 ]; then\n        echo -e \"\\033[1;31m!!! XVLOG FAILED !!!\\033[0m\"\n        exit 1\n    fi\n\n    echo -e \"\\n\\033[1;33m>>> PHASE 2: XELAB (Elaboration) <<<\\033[0m\"\n    xelab -debug typical --relax -top PID_tb -top glbl -L xil_defaultlib -L unisims_ver -L unimacro_ver -L xpm  -snapshot sim_snapshot  -timescale 10ns/1ps\n    if [ $? -ne 0 ]; then\n        echo -e \"\\033[1;31m!!! XELAB FAILED !!!\\033[0m\"\n        exit 1\n    fi\n\n    echo -e \"\\n\\033[1;33m>>> PHASE 3: XSIM (Simulation) <<<\\033[0m\"\n    xsim sim_snapshot -tclbatch sim.tcl\n    if [ $? -ne 0 ]; then\n        echo -e \"\\033[1;31m!!! XSIM FAILED !!!\\033[0m\"\n        exit 1\n    fi\n\n)\nif [ -f /tmp/ananke_test_cache/PID/sim/dump.vcd  ]; then\n    vcd2fst /tmp/ananke_test_cache/PID/sim/dump.vcd dump.fst\n    rm /tmp/ananke_test_cache/PID/sim/dump.vcd\nfi\nrm -r /tmp/ananke_test_cache/PID/sim\n",
+    std::string expected = replace_base("FILES=( \n    /tmp/ananke_test_cache/PID/rtl/PID.sv\n    /tmp/ananke_test_cache/integrator/rtl/Integrator.v\n    /tmp/ananke_test_cache/simple_register_cu/rtl/axil_simple_register_cu.sv\n    /tmp/ananke_test_cache/skid_buffer/rtl/axil_skid_buffer.sv\n    /tmp/vivado/data/verilog/src/glbl.v\n    /tmp/ananke_test_cache/Common/interfaces.sv\n    /tmp/ananke_test_cache/PID/tb/PID_tb.sv\n)\n\nmkdir -p /tmp/ananke_test_cache/PID/sim\ncp sim.tcl /tmp/ananke_test_cache/PID/sim/sim.tcl\n\n\n(\n    cd /tmp/ananke_test_cache/PID/sim|| exit\n\n    echo -e \"\\n\\033[1;33m>>> PHASE 1: XVLOG (Analysis) <<<\\033[0m\"\n    xvlog -sv \"${FILES[@]}\" -i /tmp/ananke_test_cache/public/Components/Common -i /tmp/ananke_test_cache/Common -i /tmp/vivado/data/rsb/busdef\n    if [ $? -ne 0 ]; then\n        echo -e \"\\033[1;31m!!! XVLOG FAILED !!!\\033[0m\"\n        exit 1\n    fi\n\n    echo -e \"\\n\\033[1;33m>>> PHASE 2: XELAB (Elaboration) <<<\\033[0m\"\n    xelab -debug typical --relax -top PID_tb -top glbl -L xil_defaultlib -L unisims_ver -L unimacro_ver -L xpm  -snapshot sim_snapshot  -timescale 10ns/1ps\n    if [ $? -ne 0 ]; then\n        echo -e \"\\033[1;31m!!! XELAB FAILED !!!\\033[0m\"\n        exit 1\n    fi\n\n    echo -e \"\\n\\033[1;33m>>> PHASE 3: XSIM (Simulation) <<<\\033[0m\"\n    xsim sim_snapshot -tclbatch sim.tcl\n    if [ $? -ne 0 ]; then\n        echo -e \"\\033[1;31m!!! XSIM FAILED !!!\\033[0m\"\n        exit 1\n    fi\n\n)\nif [ -f /tmp/ananke_test_cache/PID/sim/dump.vcd  ]; then\n    vcd2fst /tmp/ananke_test_cache/PID/sim/dump.vcd dump.fst\n    rm /tmp/ananke_test_cache/PID/sim/dump.vcd\nfi\nrm -r /tmp/ananke_test_cache/PID/sim\n",
         "/tmp/ananke_test_cache", opts.cache_dir);
     EXPECT_EQ(result, expected);
 
@@ -314,7 +315,7 @@ TEST( end_to_end , synth_script_generation) {
     std::stringstream ss;
     ss << ifs.rdbuf();
     std::string result = ss.str();
-    EXPECT_EQ(result, replace_base("set outputDir ./project_output\nfile mkdir $outputDir\ncd $outputDir\nset data_files_set {\n}\nset sources_set {\n\t/tmp/ananke_test_cache/PID/rtl/PID.sv\n\t/tmp/ananke_test_cache/integrator/rtl/Integrator.v\n\t/tmp/ananke_test_cache/simple_register_cu/rtl/axil_simple_register_cu.sv\n\t/tmp/ananke_test_cache/skid_buffer/rtl/axil_skid_buffer.sv\n}\nset inc_dirs {\n\t/tmp/ananke_test_cache/public/Components/Common\n}\nset constr_dirs {\n}\nforeach f $data_files_set {\n    file copy -force $f .\n}\nset_part xc7z020clg400\ngenerate_target all [get_files ps.bd]\nexport_ip_user_files -of_objects [get_files ps.bd] -no_script -force\nread_verilog $sources_set\nif {[llength $constr_dirs] > 0} { read_xdc $constr_dirs }\nsynth_design -top PID -part xc7z020clg400 -include_dirs $inc_dirs\nwrite_checkpoint -force $outputDir/post_synth.dcp\nopt_design\nplace_design\nwrite_checkpoint  -force $outputDir/post_place.dcp\nroute_design\nwrite_checkpoint  -force $outputDir/post_route.dcp\nwrite_bitstream -force $outputDir/top_module.bit\n", "/tmp/ananke_test_cache", opts.cache_dir));
+    EXPECT_EQ(result, replace_base("set outputDir ./project_output\nfile mkdir $outputDir\ncd $outputDir\nset data_files_set {\n}\nset sources_set {\n\t/tmp/ananke_test_cache/PID/rtl/PID.sv\n\t/tmp/ananke_test_cache/integrator/rtl/Integrator.v\n\t/tmp/ananke_test_cache/simple_register_cu/rtl/axil_simple_register_cu.sv\n\t/tmp/ananke_test_cache/skid_buffer/rtl/axil_skid_buffer.sv\n}\nset inc_dirs {\n\t/tmp/ananke_test_cache/public/Components/Common\n\t/tmp/ananke_test_cache/Common\n}\nset constr_dirs {\n}\nforeach f $data_files_set {\n    file copy -force $f .\n}\nset_part xc7z020clg400\ngenerate_target all [get_files ps.bd]\nexport_ip_user_files -of_objects [get_files ps.bd] -no_script -force\nread_verilog $sources_set\nif {[llength $constr_dirs] > 0} { read_xdc $constr_dirs }\nsynth_design -top PID -part xc7z020clg400 -include_dirs $inc_dirs\nwrite_checkpoint -force $outputDir/post_synth.dcp\nopt_design\nplace_design\nwrite_checkpoint  -force $outputDir/post_place.dcp\nroute_design\nwrite_checkpoint  -force $outputDir/post_route.dcp\nwrite_bitstream -force $outputDir/top_module.bit\n", "/tmp/ananke_test_cache", opts.cache_dir));
 
     std::filesystem::current_path(wd);
 
@@ -371,7 +372,7 @@ TEST( end_to_end , vivado_project_generation) {
     ss << ifs.rdbuf();
     std::string result = ss.str();
     EXPECT_EQ(result, replace_base(
-        "set project_name PID\nset origin_dir \".\"\nset base_dir /tmp/ananke_test_cache\nset commons_dir [list \"/tmp/ananke_test_cache/public/Components/Common\" ]\nset synth_sources [list \"${base_dir}/PID/rtl/PID.sv\" \"${base_dir}/integrator/rtl/Integrator.v\" \"${base_dir}/simple_register_cu/rtl/axil_simple_register_cu.sv\" \"${base_dir}/skid_buffer/rtl/axil_skid_buffer.sv\" ]\nset sim_sources [list \"${base_dir}/Common/interfaces.sv\" \"${base_dir}/PID/tb/PID_tb.sv\" ]\nset constraints_sources [list ]\n# Create project\ncreate_project ${project_name} ./${project_name}\nset_property part xc7z020clg400 [current_project]\n# Set the directory path for the new project\nset proj_dir [get_property directory [current_project]]\nset obj [current_project]\nadd_files -norecurse $synth_sources\nset_property top PID [get_filesets sources_1]\nset_property include_dirs $commons_dir [get_filesets sources_1]\nset_property SOURCE_SET sources_1 [get_filesets sim_1]\nadd_files -fileset sim_1 -norecurse $sim_sources\nset_property top PID_tb [get_filesets sim_1]\nupdate_compile_order\n",
+        "set project_name PID\nset origin_dir \".\"\nset base_dir /tmp/ananke_test_cache\nset commons_dir [list \"/tmp/ananke_test_cache/public/Components/Common\" \"/tmp/ananke_test_cache/Common\" ]\nset synth_sources [list \"${base_dir}/PID/rtl/PID.sv\" \"${base_dir}/integrator/rtl/Integrator.v\" \"${base_dir}/simple_register_cu/rtl/axil_simple_register_cu.sv\" \"${base_dir}/skid_buffer/rtl/axil_skid_buffer.sv\" ]\nset sim_sources [list \"${base_dir}/Common/interfaces.sv\" \"${base_dir}/PID/tb/PID_tb.sv\" ]\nset constraints_sources [list ]\n# Create project\ncreate_project ${project_name} ./${project_name}\nset_property part xc7z020clg400 [current_project]\n# Set the directory path for the new project\nset proj_dir [get_property directory [current_project]]\nset obj [current_project]\nadd_files -norecurse $synth_sources\nset_property top PID [get_filesets sources_1]\nset_property include_dirs $commons_dir [get_filesets sources_1]\nset_property SOURCE_SET sources_1 [get_filesets sim_1]\nadd_files -fileset sim_1 -norecurse $sim_sources\nset_property top PID_tb [get_filesets sim_1]\nupdate_compile_order\n",
         "/tmp/ananke_test_cache",
         opts.cache_dir
         )
@@ -430,12 +431,236 @@ TEST( end_to_end , lattice_project_generation) {
     ss << ifs.rdbuf();
     std::string result = ss.str();
 
-    std::string expected_res  = replace_base("set build_dir \"build\"\nif {![file exists $build_dir]} {\n    file mkdir $build_dir\n}\nprj_create -name \"PID\" -impl \"impl1\" -dev \"xc7z020clg400\" -dir \"$build_dir\"\nprj_add_source /tmp/ananke_test_cache/PID/rtl/PID.sv\nprj_add_source /tmp/ananke_test_cache/integrator/rtl/Integrator.v\nprj_add_source /tmp/ananke_test_cache/simple_register_cu/rtl/axil_simple_register_cu.sv\nprj_add_source /tmp/ananke_test_cache/skid_buffer/rtl/axil_skid_buffer.sv\nprj_set_impl_opt -impl \"impl1\" {top} {PID}\nprj_set_impl_opt -impl \"impl1\" {VerilogStandard} {System Verilog}\nprj_set_impl_opt -impl \"impl1\" {include path} {/tmp/ananke_test_cache/public/Components/Common}\nprj_save\nprj_close\n",
+    std::string expected_res  = replace_base("set build_dir \"build\"\nif {![file exists $build_dir]} {\n    file mkdir $build_dir\n}\nprj_create -name \"PID\" -impl \"impl1\" -dev \"xc7z020clg400\" -dir \"$build_dir\"\nprj_add_source /tmp/ananke_test_cache/PID/rtl/PID.sv\nprj_add_source /tmp/ananke_test_cache/integrator/rtl/Integrator.v\nprj_add_source /tmp/ananke_test_cache/simple_register_cu/rtl/axil_simple_register_cu.sv\nprj_add_source /tmp/ananke_test_cache/skid_buffer/rtl/axil_skid_buffer.sv\nprj_set_impl_opt -impl \"impl1\" {top} {PID}\nprj_set_impl_opt -impl \"impl1\" {VerilogStandard} {System Verilog}\nprj_set_impl_opt -impl \"impl1\" {include path} {/tmp/ananke_test_cache/public/Components/Common;/tmp/ananke_test_cache/Common}\nprj_save\nprj_close\n",
         "/tmp/ananke_test_cache", opts.cache_dir);
 
     EXPECT_EQ(result, expected_res);
 
     std::filesystem::current_path(wd);
     std::filesystem::remove_all("/tmp/radiant");
+    e2e_clean_settings();
+}
+
+std::string setup_auto_discovery_repo() {
+    std::filesystem::create_directories(e2e_settings_path + "/rtl");
+    std::filesystem::create_directories(e2e_settings_path + "/Common");
+
+    std::ofstream ofs(e2e_settings_path + "/rtl/top.sv");
+    ofs << "`include \"defs.svh\"\n"
+           "module top #(\n"
+           "    parameter W = `BUS_WIDTH\n"
+           ")(\n"
+           "    input logic clock,\n"
+           "    input logic reset,\n"
+           "    output logic [`BUS_WIDTH-1:0] data\n"
+           ");\n"
+           "endmodule\n";
+    ofs.close();
+
+    ofs = std::ofstream(e2e_settings_path + "/Common/defs.svh");
+    ofs << "`define BUS_WIDTH 8\n";
+    ofs.close();
+
+    ofs = std::ofstream(e2e_settings_path + "/Depfile");
+    ofs << "{\"general\":{\"project_name\":\"auto_disc\",\"target_part\":\"xc7z020clg400\","
+           "\"synth_tl\":\"top\",\"sim_tl\":\"top\",\"include_paths\":[]},\"scripts\":[]}";
+    ofs.close();
+
+    return e2e_settings_path;
+}
+
+TEST( end_to_end , include_auto_discovery) {
+    e2e_setup_settings();
+    auto repo = setup_auto_discovery_repo();
+
+    ananke::CLI_opt opts;
+    opts.no_cache = true;
+    opts.generate_xilinx = true;
+    opts.generate_synth_script = true;
+    opts.cache_dir = e2e_settings_path;
+
+    auto wd = std::filesystem::current_path();
+    std::filesystem::current_path(repo);
+
+    ananke uut(opts);
+    auto cache_rc = uut.load_data_cache();
+    ASSERT_FALSE(cache_rc.has_value());
+    auto build_rc = uut.build_flow();
+    ASSERT_FALSE(build_rc.has_value());
+
+    std::ifstream ifs("synth.tcl");
+    std::stringstream ss;
+    ss << ifs.rdbuf();
+    std::string result = ss.str();
+
+    // The unique header must have been auto-discovered: the top module parses
+    // (its BUS_WIDTH macro resolves) and its directory is emitted as an include
+    // path for the toolchain.
+    std::string expected = replace_base(
+        "set outputDir ./project_output\n"
+        "file mkdir $outputDir\n"
+        "cd $outputDir\n"
+        "set data_files_set {\n"
+        "}\n"
+        "set sources_set {\n"
+        "\t/tmp/ananke_test_cache/rtl/top.sv\n"
+        "}\n"
+        "set inc_dirs {\n"
+        "\t/tmp/ananke_test_cache/Common\n"
+        "}\n"
+        "set constr_dirs {\n"
+        "}\n"
+        "foreach f $data_files_set {\n"
+        "    file copy -force $f .\n"
+        "}\n"
+        "set_part xc7z020clg400\n"
+        "generate_target all [get_files ps.bd]\n"
+        "export_ip_user_files -of_objects [get_files ps.bd] -no_script -force\n"
+        "read_verilog $sources_set\n"
+        "if {[llength $constr_dirs] > 0} { read_xdc $constr_dirs }\n"
+        "synth_design -top top -part xc7z020clg400 -include_dirs $inc_dirs\n"
+        "write_checkpoint -force $outputDir/post_synth.dcp\n"
+        "opt_design\n"
+        "place_design\n"
+        "write_checkpoint  -force $outputDir/post_place.dcp\n"
+        "route_design\n"
+        "write_checkpoint  -force $outputDir/post_route.dcp\n"
+        "write_bitstream -force $outputDir/top_module.bit\n",
+        "/tmp/ananke_test_cache", repo);
+    EXPECT_EQ(result, expected);
+
+    std::filesystem::current_path(wd);
+    e2e_clean_settings();
+}
+
+TEST( end_to_end , include_auto_discovery_disabled) {
+    e2e_setup_settings(false);
+    auto repo = setup_auto_discovery_repo();
+
+    ananke::CLI_opt opts;
+    opts.no_cache = true;
+    opts.generate_xilinx = true;
+    opts.generate_synth_script = true;
+    opts.cache_dir = e2e_settings_path;
+
+    auto wd = std::filesystem::current_path();
+    std::filesystem::current_path(repo);
+
+    ananke uut(opts);
+    auto cache_rc = uut.load_data_cache();
+    ASSERT_FALSE(cache_rc.has_value());
+    auto build_rc = uut.build_flow();
+    ASSERT_FALSE(build_rc.has_value());
+
+    std::ifstream ifs("synth.tcl");
+    std::stringstream ss;
+    ss << ifs.rdbuf();
+    std::string result = ss.str();
+
+    // With the toggle off the walker never builds the index, the include stays
+    // unresolved, the macro is undefined and the top module is not analyzed:
+    // the synthesis sources and include dirs are empty.
+    std::string expected = replace_base(
+        "set outputDir ./project_output\n"
+        "file mkdir $outputDir\n"
+        "cd $outputDir\n"
+        "set data_files_set {\n"
+        "}\n"
+        "set sources_set {\n"
+        "}\n"
+        "set inc_dirs {\n"
+        "}\n"
+        "set constr_dirs {\n"
+        "}\n"
+        "foreach f $data_files_set {\n"
+        "    file copy -force $f .\n"
+        "}\n"
+        "set_part xc7z020clg400\n"
+        "generate_target all [get_files ps.bd]\n"
+        "export_ip_user_files -of_objects [get_files ps.bd] -no_script -force\n"
+        "read_verilog $sources_set\n"
+        "if {[llength $constr_dirs] > 0} { read_xdc $constr_dirs }\n"
+        "synth_design -top top -part xc7z020clg400 -include_dirs $inc_dirs\n"
+        "write_checkpoint -force $outputDir/post_synth.dcp\n"
+        "opt_design\n"
+        "place_design\n"
+        "write_checkpoint  -force $outputDir/post_place.dcp\n"
+        "route_design\n"
+        "write_checkpoint  -force $outputDir/post_route.dcp\n"
+        "write_bitstream -force $outputDir/top_module.bit\n",
+        "/tmp/ananke_test_cache", repo);
+    EXPECT_EQ(result, expected);
+
+    std::filesystem::current_path(wd);
+    e2e_clean_settings();
+}
+
+// The discovered headers are cached per file, so a fully-cached second run
+// (no re-parse) must still emit the discovered include directory.
+TEST( end_to_end , include_auto_discovery_cached) {
+    e2e_setup_settings();
+    auto repo = setup_auto_discovery_repo();
+
+    ananke::CLI_opt opts;
+    opts.generate_xilinx = true;
+    opts.generate_synth_script = true;
+    opts.cache_dir = e2e_settings_path;
+
+    auto wd = std::filesystem::current_path();
+    std::filesystem::current_path(repo);
+
+    // First run: parse everything, persist the discovered headers in the cache.
+    {
+        ananke uut(opts);
+        ASSERT_FALSE(uut.load_data_cache().has_value());
+        ASSERT_FALSE(uut.build_flow().has_value());
+    }
+
+    std::string expected = replace_base(
+        "set outputDir ./project_output\n"
+        "file mkdir $outputDir\n"
+        "cd $outputDir\n"
+        "set data_files_set {\n"
+        "}\n"
+        "set sources_set {\n"
+        "\t/tmp/ananke_test_cache/rtl/top.sv\n"
+        "}\n"
+        "set inc_dirs {\n"
+        "\t/tmp/ananke_test_cache/Common\n"
+        "}\n"
+        "set constr_dirs {\n"
+        "}\n"
+        "foreach f $data_files_set {\n"
+        "    file copy -force $f .\n"
+        "}\n"
+        "set_part xc7z020clg400\n"
+        "generate_target all [get_files ps.bd]\n"
+        "export_ip_user_files -of_objects [get_files ps.bd] -no_script -force\n"
+        "read_verilog $sources_set\n"
+        "if {[llength $constr_dirs] > 0} { read_xdc $constr_dirs }\n"
+        "synth_design -top top -part xc7z020clg400 -include_dirs $inc_dirs\n"
+        "write_checkpoint -force $outputDir/post_synth.dcp\n"
+        "opt_design\n"
+        "place_design\n"
+        "write_checkpoint  -force $outputDir/post_place.dcp\n"
+        "route_design\n"
+        "write_checkpoint  -force $outputDir/post_route.dcp\n"
+        "write_bitstream -force $outputDir/top_module.bit\n",
+        "/tmp/ananke_test_cache", repo);
+
+    // Second run: nothing changed, everything is a cache hit (no re-parse).
+    ananke uut(opts);
+    ASSERT_FALSE(uut.load_data_cache().has_value());
+    ASSERT_FALSE(uut.build_flow().has_value());
+
+    std::ifstream ifs("synth.tcl");
+    std::stringstream ss;
+    ss << ifs.rdbuf();
+    std::string result = ss.str();
+    // The discovered include directory survives the cache round-trip without
+    // re-parsing the sources.
+    EXPECT_EQ(result, expected);
+
+    std::filesystem::current_path(wd);
     e2e_clean_settings();
 }

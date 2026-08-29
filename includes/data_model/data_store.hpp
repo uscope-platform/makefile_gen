@@ -48,8 +48,9 @@ public:
         std::string path;
         std::string hash;
         source_content content;
+        std::vector<std::string> discovered_includes;
         template<class Archive> void serialize(Archive & ar) {
-            ar(path, hash, content);  // cereal supports variant natively
+            ar(path, hash, content, discovered_includes);  // cereal supports variant natively
         }
     };
 
@@ -68,6 +69,7 @@ public:
     std::optional<DataFile> get_data_file(const std::string& name);
     std::optional<Constraints> get_constraint(const std::string& name);
     std::optional<hdl_function_statement> get_standalone_function(const std::string &name, const std::string &source_path);
+    std::optional<std::vector<std::string>> get_discovered_includes(const std::string &name) const;
     // OLD IF
 
     void remove_stale_info(const std::filesystem::path& p);

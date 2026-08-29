@@ -77,7 +77,7 @@ std::optional<std::shared_ptr<hdl_resource_statement>> data_store::get_HDL_resou
 }
 
 void data_store::store_file(const cached_item &file) {
-    cache.insert({file.path, file});
+    cache.insert_or_assign(file.path, file);
 }
 
 void data_store::evict_file(const std::string &file) {
@@ -132,6 +132,11 @@ std::optional<hdl_function_statement> data_store::get_standalone_function(const 
         if (f && f->get_name() == name) return *f;
     }
     return std::nullopt;
+}
+
+std::optional<std::vector<std::string>> data_store::get_discovered_includes(const std::string &name) const {
+    if (!cache.contains(name)) return std::nullopt;
+    return cache.at(name).discovered_includes;
 }
 
 

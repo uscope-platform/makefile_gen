@@ -20,6 +20,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <set>
 #include <nlohmann/json.hpp>
 
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
@@ -40,6 +41,7 @@ public:
     std::optional<hdl_file> analyze(const std::string &path, const std::string_view &file_content);
     void set_include_directories(const std::set<std::string> &i_d){include_directories = i_d;}
     void set_repository_index(const std::shared_ptr<repository_index> &idx){repository_index = idx;}
+    std::set<std::string> get_discovered_includes() {return discovered_includes;}
     [[nodiscard]] bool has_error() const {return last_error.has_value();}
     [[nodiscard]] const std::string& get_error() const {return last_error.value();}
 private:
@@ -47,6 +49,7 @@ private:
     hdl_file process_hdl(const std::string &path, const std::string &preprocessed_content);
     std::set<std::string> include_directories;
     std::shared_ptr<repository_index> repository_index;
+    std::set<std::string> discovered_includes;
     std::optional<std::string> last_error;
 };
 
