@@ -12,7 +12,7 @@ Any subsequent run will be nearly instant as only the modified files will be sca
 
 Several mechanisms are available to exclude sub-directories from the analysis:
 
-- **.mkinclude**: Directories containing a .mkinclude file (it only needs to exist) will be skipped
+- **.mkignore**: Directories containing a .mkignore file (it only needs to exist) will be skipped
 - **IDE projects**: Directories containing an IDE project file (like .xpr for Xilinx Vivado) will be ignored
 - **.git**: git source control hidden directories will be ignored
 

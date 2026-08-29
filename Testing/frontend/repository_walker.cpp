@@ -138,6 +138,21 @@ TEST_F(repository_walker , directory_analysis) {
 }
 
 
+TEST_F(repository_walker , mkignore_exclusion) {
+
+    Repository_walker walker(s_store,d_store, false,{td_file("repository_walker/ignored_dir"),td_file("repository_walker/ignored_dir_2") });
+
+    // The directory is skipped by the presence of a .mkignore marker, not by an
+    // explicit exclusion, so its file must not end up in the data store.
+    auto file_name = td_file("repository_walker/ignored_dir_3/test_sv_module2.sv");
+    ASSERT_FALSE(d_store->get_file<hdl_file>(file_name).has_value());
+
+    // A file outside the marker directory is still analyzed.
+    file_name = td_file("repository_walker/test_sv_module.sv");
+    ASSERT_TRUE(d_store->get_file<hdl_file>(file_name).has_value());
+}
+
+
 TEST_F(repository_walker , file_type_handling) {
 
     //VERILOG

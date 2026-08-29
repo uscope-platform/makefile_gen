@@ -100,4 +100,7 @@ configure_file(check_files/repository_walker/ignored_dir/test_sv_module2.sv ${RE
 file(MAKE_DIRECTORY ${REPO_WALKER_TEST_DIR}/ignored_dir_2)
 configure_file(check_files/repository_walker/ignored_dir_2/test_sv_module2.sv ${REPO_WALKER_TEST_DIR}/ignored_dir_2 COPYONLY)
 configure_file(check_files/repository_walker/ignored_dir_2/example_proj.xpr ${REPO_WALKER_TEST_DIR}/ignored_dir_2 COPYONLY)
+file(MAKE_DIRECTORY ${REPO_WALKER_TEST_DIR}/ignored_dir_3)
+configure_file(check_files/repository_walker/ignored_dir_3/.mkignore ${REPO_WALKER_TEST_DIR}/ignored_dir_3 COPYONLY)
+configure_file(check_files/repository_walker/ignored_dir_3/test_sv_module2.sv ${REPO_WALKER_TEST_DIR}/ignored_dir_3 COPYONLY)
 

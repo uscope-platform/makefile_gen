@@ -182,6 +182,7 @@ bool Repository_walker::contains_excluding_file(const std::filesystem::path &dir
                 bool is_excluded = excluding_extensions.find(p.path().extension()) != excluding_extensions.end();
                 if(p.path().filename() == ignore_file_name){
                     this->read_ignore_file(p.path());
+                    return true;
                 }
                 if(is_excluded) return true;
             }
