@@ -25,6 +25,7 @@
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 
 #include "frontend/analysis/system_verilog/preprocessor/sv_preprocessor.hpp"
+#include "frontend/repository_index.hpp"
 #include "documentation_analyzer.hpp"
 
 #include "mgp_sv/sv2017Lexer.h"
@@ -38,12 +39,14 @@ public:
     std::pair<std::string, std::vector<std::string>> preprocess(const std::string &path, const std::string_view &file_content);
     std::optional<hdl_file> analyze(const std::string &path, const std::string_view &file_content);
     void set_include_directories(const std::set<std::string> &i_d){include_directories = i_d;}
+    void set_repository_index(const std::shared_ptr<repository_index> &idx){repository_index = idx;}
     [[nodiscard]] bool has_error() const {return last_error.has_value();}
     [[nodiscard]] const std::string& get_error() const {return last_error.value();}
 private:
 
     hdl_file process_hdl(const std::string &path, const std::string &preprocessed_content);
     std::set<std::string> include_directories;
+    std::shared_ptr<repository_index> repository_index;
     std::optional<std::string> last_error;
 };
 

@@ -155,6 +155,8 @@ namespace preprocessor {
                 }
             }
             if (full_path.empty()) {
+                auto discovered = resolve_include(std::string(name), true);
+                if (discovered.has_value()) return discovered.value();
                 spdlog::warn("include file not found: {}", std::string(name));
                 return {};
             }
@@ -165,9 +167,29 @@ namespace preprocessor {
                 auto full_path = dir/ filename;
                 if (std::filesystem::exists(full_path)) return full_path;
             }
+            auto discovered = resolve_include(filename, false);
+            if (discovered.has_value()) return discovered.value();
             report_error(fmt::format("included file not found: {}", filename));
             return std::nullopt;
         }
+    }
+
+    std::optional<std::string> sv_preprocessor::resolve_include(const std::string &name, bool quoted) {
+        if (!repository_index) return std::nullopt;
+        auto candidates = repository_index->lookup(name);
+        if (candidates.size() == 1) return candidates[0].string();
+        if (candidates.size() > 1) {
+            std::string candidate_dirs;
+            for (auto &c: candidates) {
+                candidate_dirs += "\n    " + c.parent_path().string();
+            }
+            if (quoted) {
+                spdlog::warn("include file {} is ambiguous, candidates found in:{}", name, candidate_dirs);
+            } else {
+                report_error(fmt::format("included file {} is ambiguous, candidates found in:{}", name, candidate_dirs));
+            }
+        }
+        return std::nullopt;
     }
 
     std::string sv_preprocessor::get_define_replacement(const std::string_view &identifier) {
@@ -409,6 +431,7 @@ namespace preprocessor {
             sv_preprocessor nested_preproc;
             nested_preproc.definitions = definitions;
             nested_preproc.include_directories = include_directories;
+            nested_preproc.repository_index = repository_index;
             nested_preproc.path = path;
 
             // Evaluate the conditional branches cleanly using the existing rules

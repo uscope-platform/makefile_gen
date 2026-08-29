@@ -35,6 +35,8 @@ void Repository_walker::construct_walker(std::shared_ptr<settings_store> s, std:
     excluded_directories = std::move(ex);
     target_repository = s_store->get_hdl_store();
     default_includes = s_store->get_default_includes();
+    repository_index_p = std::make_shared<repository_index>();
+    scan_repository();
     analyze_dir();
 }
 
@@ -43,11 +45,22 @@ void Repository_walker::construct_walker(std::shared_ptr<settings_store> s, std:
 
 /// This method analyses the Repository_walker target directory, mapping out useful things (like module dependencies, script location, etc.)
 ///
-/// The implementation of this function iterates over the target directory recursively, calling the analyze_file method
-/// on each file, to speed up the process directories can be skipped either based on their name (.git for example) or
-/// on their content (exclude directories containing a .xpr file as they are vivado projecta and contain only auto-generated
-/// stuff.
+/// The repository must have been scanned first (see scan_repository); the analysis
+/// phase iterates the resulting file list instead of walking the directory tree.
 void Repository_walker::analyze_dir() {
+    for (auto &file: scanned_files) {
+        if(working_threads == 2*max_threads){
+           this->collect_analysis_results();
+        }
+        analyze_file(file);
+    }
+    this->collect_analysis_results();
+}
+
+/// Scan the repository once, building the repository index (basename -> paths) and the list of
+/// files to be analyzed. The same exclusion rules used by the analysis phase are applied, so
+/// the scan and the parse operate on the exact same file set.
+void Repository_walker::scan_repository() {
     std::error_code ec;
     const std::filesystem::recursive_directory_iterator end;
     auto p_iter = std::filesystem::recursive_directory_iterator(target_repository, ec);
@@ -55,24 +68,20 @@ void Repository_walker::analyze_dir() {
 
         auto path = p_iter->path();
         if(std::filesystem::is_directory(path, ec)){
-            if(is_excluded_directory(path)){
+            if(is_excluded_directory(path) || contains_excluding_file(path)){
                 p_iter.disable_recursion_pending();
-            } else{
-                if(contains_excluding_file(path)){
-                    p_iter.disable_recursion_pending();
-                }
             }
         } else{
-            if(working_threads == 2*max_threads){
-               this->collect_analysis_results();
+            if(file_is_verilog(path)){
+                repository_index_p->add_file(path);
+                scanned_files.push_back(path);
+            } else if(file_is_vhdl(path) || file_is_script(path) || file_is_constraint(path) || file_is_data(path)){
+                scanned_files.push_back(path);
             }
-            analyze_file(path);
         }
         p_iter.increment(ec);
     }
     if (ec) spdlog::warn("Error walking repository {}: {}", target_repository, ec.message());
-
-    this->collect_analysis_results();
 }
 
 void Repository_walker::collect_analysis_results() {
@@ -163,7 +172,7 @@ void Repository_walker::analyze_file(std::filesystem::path &file) {
     spdlog::trace("Analizing file: {}", file.string());
     if(file_is_verilog(file)){
         auto old_hash = d_store->get_hash(file);
-        hdl_futures.push_back(pool.submit(analyze_verilog, file, default_includes, old_hash));
+        hdl_futures.push_back(pool.submit(analyze_verilog, file, default_includes, old_hash, repository_index_p));
         working_threads++;
     } else if(file_is_script(file)){
         std::set<std::string> includes;
@@ -230,7 +239,8 @@ bool Repository_walker::file_is_data(const std::filesystem::path &file) {
 /// \param file Target file
 file_analysis_context<hdl_file> analyze_verilog(
     const std::filesystem::path &file,
-    std::set<std::string> i_d, const std::string &old_hash
+    std::set<std::string> i_d, const std::string &old_hash,
+    const std::shared_ptr<repository_index> &idx
 ) {
     spdlog::trace("PARSING: {}", file.c_str());
     try {
@@ -251,6 +261,7 @@ file_analysis_context<hdl_file> analyze_verilog(
         }
         sv_analyzer file_processor;
         file_processor.set_include_directories(i_d);
+        file_processor.set_repository_index(idx);
         auto analysis = file_processor.analyze(file, f_opt->view());
         if (!analysis.has_value()) {
             spdlog::error("Error analyzing {}: {}", file.string(), file_processor.get_error());

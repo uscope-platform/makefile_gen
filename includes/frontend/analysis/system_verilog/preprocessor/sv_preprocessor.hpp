@@ -30,6 +30,7 @@
 #include "frontend/analysis/system_verilog/preprocessor/conditional_solver.hpp"
 #include "frontend/analysis/system_verilog/preprocessor/source_mapper.hpp"
 #include "frontend/analysis/system_verilog/preprocessor/macro_processor.hpp"
+#include "frontend/repository_index.hpp"
 #include "data_model/mm_file.hpp"
 
 namespace preprocessor {
@@ -40,6 +41,7 @@ namespace preprocessor {
         std::string preprocess(const std::string_view &file_content, unsigned int initial_output_line);
         std::string flatten_source(const std::string_view &file_content);
         void set_include_directories(const std::set<std::string> &i_d){include_directories = i_d;}
+        void set_repository_index(const std::shared_ptr<repository_index> &idx){repository_index = idx;}
         void set_path(const std::string &s){path = s;}
         std::vector<std::string> get_documentation_comments() {return documentation_comments;}
         source_map_t get_source_map() const {return  source_map.get_map();}
@@ -51,6 +53,7 @@ namespace preprocessor {
         std::string gather_multi_line_macro(const std::string &first_line, std::istringstream &iss);
         typedef std::unordered_map<std::string, std::variant<std::string, function_macro>> definitions_map;
         std::optional<std::string> parse_include_path(const std::string_view &v);
+        std::optional<std::string> resolve_include(const std::string &name, bool quoted);
         std::string get_define_replacement(const std::string_view &v);
         void parse_definition(const std::string_view &sv, int prefix_length);
         static std::string_view parse_one_arg_directive(const std::string_view &sv, int prefix_length);
@@ -62,6 +65,7 @@ namespace preprocessor {
         std::set<std::string> active_includes;
         conditional_solver c_solver;
         std::set<std::string> include_directories;
+        std::shared_ptr<repository_index> repository_index;
         source_mapper source_map;
         unsigned int output_line_n = 0;
         bool disable_preprocessor = false;

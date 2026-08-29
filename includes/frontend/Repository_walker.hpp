@@ -35,6 +35,7 @@
 #include "data_model/DataFile.hpp"
 #include "analysis/system_verilog/sv_analyzer.hpp"
 #include "analysis/vhdl/vhdl_analyzer.hpp"
+#include "frontend/repository_index.hpp"
 #include "third_party/thread_pool.hpp"
 
 template<typename  T>
@@ -44,7 +45,7 @@ struct file_analysis_context {
     std::optional<T> resource;
 };
 
-static file_analysis_context<hdl_file> analyze_verilog(const std::filesystem::path &file, std::set<std::string> i_d, const std::string &old_hash);
+static file_analysis_context<hdl_file> analyze_verilog(const std::filesystem::path &file, std::set<std::string> i_d, const std::string &old_hash, const std::shared_ptr<repository_index> &idx);
 static file_analysis_context<hdl_file> analyze_vhdl(const std::filesystem::path &file, std::set<std::string> i_d, const std::string &old_hash);
 static file_analysis_context<Script>  analyze_script(const std::filesystem::path &file, std::set<std::string> i_d, const std::string &old_hash);
 static file_analysis_context<DataFile>  analyze_data(const std::filesystem::path &file, std::set<std::string> i_d, const std::string &old_hash);
@@ -61,7 +62,9 @@ class Repository_walker {
 public:
     Repository_walker(const std::shared_ptr<settings_store>& s, const std::shared_ptr<data_store>& d, bool ephimeral);
     Repository_walker(const std::shared_ptr<settings_store>& s, const std::shared_ptr<data_store>& d, bool ephimeral, std::set<std::string> ex);
+    void scan_repository();
     void analyze_dir();
+    std::shared_ptr<repository_index> get_repository_index() { return repository_index_p; }
 private:
     void construct_walker(std::shared_ptr<settings_store> s, std::shared_ptr<data_store> d, std::set<std::string> ex);
     bool is_excluded_directory(const std::filesystem::path& dir);
@@ -88,6 +91,8 @@ private:
     std::string target_repository;
     std::shared_ptr<settings_store> s_store;
     std::shared_ptr<data_store> d_store;
+    std::shared_ptr<repository_index> repository_index_p;
+    std::vector<std::filesystem::path> scanned_files;
 
     std::vector<std::future<file_analysis_context<hdl_file>>> hdl_futures;
     std::vector<std::future<file_analysis_context<Script>>> scripts_futures;
