@@ -187,9 +187,11 @@ std::optional<int> ananke::build_flow() {
         std::set<std::string> discovered_dirs;
         auto collect_discovered = [&](const std::set<std::string> &sources) {
             for (auto &src: sources) {
-                if (auto inc = d_store->get_discovered_includes(src); inc.has_value()) {
-                    for (auto &path: inc.value()) {
-                        discovered_dirs.insert(std::filesystem::path(path).parent_path().string());
+                if (auto inc = d_store->get_includes(src); inc.has_value()) {
+                    for (auto &dep: inc.value()) {
+                        if (dep.resolution == include_resolution::auto_discovered) {
+                            discovered_dirs.insert(std::filesystem::path(dep.path).parent_path().string());
+                        }
                     }
                 }
             }

@@ -69,12 +69,13 @@ namespace preprocessor {
 
                 auto included_file = parse_include_path(trimmed_line);
                 if (included_file.has_value()) {
-                    if (included_file.value() == path || active_includes.contains(included_file.value())) {
-                        report_error(fmt::format("Recursive include detected for file {} in file {}", included_file.value(), path));
+                    includes.insert(included_file.value());
+                    if (included_file.value().path == path || active_includes.contains(included_file.value().path)) {
+                        report_error(fmt::format("Recursive include detected for file {} in file {}", included_file.value().path, path));
                     } else {
                         auto saved_path = path;
                         auto saved_line = line_number;
-                        path = included_file.value();
+                        path = included_file.value().path;
                         active_includes.insert(path);
                         source_map.close_range(output_line_n);
 
@@ -134,16 +135,15 @@ namespace preprocessor {
     }
 
 
-    std::optional<std::string> sv_preprocessor::parse_include_path(const std::string_view &line) {
+    std::optional<include_dependency> sv_preprocessor::parse_include_path(const std::string_view &line) {
         auto start_identifier = line.find_first_of("\"<");
-        std::string file_path;
         if (start_identifier == std::string_view::npos) {
             report_error(fmt::format("Malformed include [{}] at line {} in file: {}", line,line_number, path));
             return std::nullopt;
         }else if (line[start_identifier] == '\"') {
             auto end_identifier = line.substr(start_identifier+1).find_first_of('"');
             auto name = line.substr(start_identifier+1, end_identifier);
-            if (name.starts_with('/')) return std::string(name);
+            if (name.starts_with('/')) return include_dependency{std::string(name), include_resolution::regular};
             std::string full_path;
             auto rel_path = std::string(std::filesystem::path(path).parent_path()/name);
             if (std::filesystem::exists(rel_path)) {
@@ -160,12 +160,12 @@ namespace preprocessor {
                 spdlog::warn("include file not found: {}", std::string(name));
                 return {};
             }
-            return full_path;
+            return include_dependency{full_path, include_resolution::regular};
         } else {
             auto filename = std::string(line.substr(start_identifier+1, line.find_first_of('>')- start_identifier-1));
             for (std::filesystem::path dir: include_directories) {
                 auto full_path = dir/ filename;
-                if (std::filesystem::exists(full_path)) return full_path;
+                if (std::filesystem::exists(full_path)) return include_dependency{full_path.string(), include_resolution::regular};
             }
             auto discovered = resolve_include(filename, false);
             if (discovered.has_value()) return discovered.value();
@@ -174,12 +174,11 @@ namespace preprocessor {
         }
     }
 
-    std::optional<std::string> sv_preprocessor::resolve_include(const std::string &name, bool quoted) {
+    std::optional<include_dependency> sv_preprocessor::resolve_include(const std::string &name, bool quoted) {
         if (!repository_index) return std::nullopt;
         auto candidates = repository_index->lookup(name);
         if (candidates.size() == 1) {
-            discovered_includes.insert(candidates[0].string());
-            return candidates[0].string();
+            return include_dependency{candidates[0].string(), include_resolution::auto_discovered};
         }
         if (candidates.size() > 1) {
             std::string candidate_dirs;
@@ -446,7 +445,7 @@ namespace preprocessor {
             }
 
             definitions = nested_preproc.definitions;
-            discovered_includes.insert(nested_preproc.discovered_includes.begin(), nested_preproc.discovered_includes.end());
+            includes.insert(nested_preproc.includes.begin(), nested_preproc.includes.end());
         }
         if (output_line.contains("/*")) {
             std::string stripped;

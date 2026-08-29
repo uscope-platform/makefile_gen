@@ -469,6 +469,38 @@ std::string setup_auto_discovery_repo() {
     return e2e_settings_path;
 }
 
+// Expected synth.tcl for the auto-discovery repository: `discovered` toggles
+// whether the top source and its discovered include directory are present.
+std::string auto_disc_synth_script(const std::string &base, bool discovered) {
+    std::string sources = discovered ? "\t" + base + "/rtl/top.sv\n" : "";
+    std::string inc_dirs = discovered ? "\t" + base + "/Common\n" : "";
+    return "set outputDir ./project_output\n"
+           "file mkdir $outputDir\n"
+           "cd $outputDir\n"
+           "set data_files_set {\n"
+           "}\n"
+           "set sources_set {\n" + sources + "}\n"
+           "set inc_dirs {\n" + inc_dirs + "}\n"
+           "set constr_dirs {\n"
+           "}\n"
+           "foreach f $data_files_set {\n"
+           "    file copy -force $f .\n"
+           "}\n"
+           "set_part xc7z020clg400\n"
+           "generate_target all [get_files ps.bd]\n"
+           "export_ip_user_files -of_objects [get_files ps.bd] -no_script -force\n"
+           "read_verilog $sources_set\n"
+           "if {[llength $constr_dirs] > 0} { read_xdc $constr_dirs }\n"
+           "synth_design -top top -part xc7z020clg400 -include_dirs $inc_dirs\n"
+           "write_checkpoint -force $outputDir/post_synth.dcp\n"
+           "opt_design\n"
+           "place_design\n"
+           "write_checkpoint  -force $outputDir/post_place.dcp\n"
+           "route_design\n"
+           "write_checkpoint  -force $outputDir/post_route.dcp\n"
+           "write_bitstream -force $outputDir/top_module.bit\n";
+}
+
 TEST( end_to_end , include_auto_discovery) {
     e2e_setup_settings();
     auto repo = setup_auto_discovery_repo();
@@ -496,38 +528,7 @@ TEST( end_to_end , include_auto_discovery) {
     // The unique header must have been auto-discovered: the top module parses
     // (its BUS_WIDTH macro resolves) and its directory is emitted as an include
     // path for the toolchain.
-    std::string expected = replace_base(
-        "set outputDir ./project_output\n"
-        "file mkdir $outputDir\n"
-        "cd $outputDir\n"
-        "set data_files_set {\n"
-        "}\n"
-        "set sources_set {\n"
-        "\t/tmp/ananke_test_cache/rtl/top.sv\n"
-        "}\n"
-        "set inc_dirs {\n"
-        "\t/tmp/ananke_test_cache/Common\n"
-        "}\n"
-        "set constr_dirs {\n"
-        "}\n"
-        "foreach f $data_files_set {\n"
-        "    file copy -force $f .\n"
-        "}\n"
-        "set_part xc7z020clg400\n"
-        "generate_target all [get_files ps.bd]\n"
-        "export_ip_user_files -of_objects [get_files ps.bd] -no_script -force\n"
-        "read_verilog $sources_set\n"
-        "if {[llength $constr_dirs] > 0} { read_xdc $constr_dirs }\n"
-        "synth_design -top top -part xc7z020clg400 -include_dirs $inc_dirs\n"
-        "write_checkpoint -force $outputDir/post_synth.dcp\n"
-        "opt_design\n"
-        "place_design\n"
-        "write_checkpoint  -force $outputDir/post_place.dcp\n"
-        "route_design\n"
-        "write_checkpoint  -force $outputDir/post_route.dcp\n"
-        "write_bitstream -force $outputDir/top_module.bit\n",
-        "/tmp/ananke_test_cache", repo);
-    EXPECT_EQ(result, expected);
+    EXPECT_EQ(result, auto_disc_synth_script(repo, true));
 
     std::filesystem::current_path(wd);
     e2e_clean_settings();
@@ -560,36 +561,7 @@ TEST( end_to_end , include_auto_discovery_disabled) {
     // With the toggle off the walker never builds the index, the include stays
     // unresolved, the macro is undefined and the top module is not analyzed:
     // the synthesis sources and include dirs are empty.
-    std::string expected = replace_base(
-        "set outputDir ./project_output\n"
-        "file mkdir $outputDir\n"
-        "cd $outputDir\n"
-        "set data_files_set {\n"
-        "}\n"
-        "set sources_set {\n"
-        "}\n"
-        "set inc_dirs {\n"
-        "}\n"
-        "set constr_dirs {\n"
-        "}\n"
-        "foreach f $data_files_set {\n"
-        "    file copy -force $f .\n"
-        "}\n"
-        "set_part xc7z020clg400\n"
-        "generate_target all [get_files ps.bd]\n"
-        "export_ip_user_files -of_objects [get_files ps.bd] -no_script -force\n"
-        "read_verilog $sources_set\n"
-        "if {[llength $constr_dirs] > 0} { read_xdc $constr_dirs }\n"
-        "synth_design -top top -part xc7z020clg400 -include_dirs $inc_dirs\n"
-        "write_checkpoint -force $outputDir/post_synth.dcp\n"
-        "opt_design\n"
-        "place_design\n"
-        "write_checkpoint  -force $outputDir/post_place.dcp\n"
-        "route_design\n"
-        "write_checkpoint  -force $outputDir/post_route.dcp\n"
-        "write_bitstream -force $outputDir/top_module.bit\n",
-        "/tmp/ananke_test_cache", repo);
-    EXPECT_EQ(result, expected);
+    EXPECT_EQ(result, auto_disc_synth_script(repo, false));
 
     std::filesystem::current_path(wd);
     e2e_clean_settings();
@@ -616,37 +588,7 @@ TEST( end_to_end , include_auto_discovery_cached) {
         ASSERT_FALSE(uut.build_flow().has_value());
     }
 
-    std::string expected = replace_base(
-        "set outputDir ./project_output\n"
-        "file mkdir $outputDir\n"
-        "cd $outputDir\n"
-        "set data_files_set {\n"
-        "}\n"
-        "set sources_set {\n"
-        "\t/tmp/ananke_test_cache/rtl/top.sv\n"
-        "}\n"
-        "set inc_dirs {\n"
-        "\t/tmp/ananke_test_cache/Common\n"
-        "}\n"
-        "set constr_dirs {\n"
-        "}\n"
-        "foreach f $data_files_set {\n"
-        "    file copy -force $f .\n"
-        "}\n"
-        "set_part xc7z020clg400\n"
-        "generate_target all [get_files ps.bd]\n"
-        "export_ip_user_files -of_objects [get_files ps.bd] -no_script -force\n"
-        "read_verilog $sources_set\n"
-        "if {[llength $constr_dirs] > 0} { read_xdc $constr_dirs }\n"
-        "synth_design -top top -part xc7z020clg400 -include_dirs $inc_dirs\n"
-        "write_checkpoint -force $outputDir/post_synth.dcp\n"
-        "opt_design\n"
-        "place_design\n"
-        "write_checkpoint  -force $outputDir/post_place.dcp\n"
-        "route_design\n"
-        "write_checkpoint  -force $outputDir/post_route.dcp\n"
-        "write_bitstream -force $outputDir/top_module.bit\n",
-        "/tmp/ananke_test_cache", repo);
+    std::string expected = auto_disc_synth_script(repo, true);
 
     // Second run: nothing changed, everything is a cache hit (no re-parse).
     ananke uut(opts);
@@ -660,6 +602,54 @@ TEST( end_to_end , include_auto_discovery_cached) {
     // The discovered include directory survives the cache round-trip without
     // re-parsing the sources.
     EXPECT_EQ(result, expected);
+
+    std::filesystem::current_path(wd);
+    e2e_clean_settings();
+}
+
+// A cache-hit file whose (transitive) include file changed must be evicted and
+// re-parsed, even though its own content hash is unchanged.
+TEST( end_to_end , include_auto_discovery_invalidation) {
+    e2e_setup_settings();
+    auto repo = setup_auto_discovery_repo();
+
+    ananke::CLI_opt opts;
+    opts.generate_xilinx = true;
+    opts.generate_synth_script = true;
+    opts.cache_dir = e2e_settings_path;
+
+    auto wd = std::filesystem::current_path();
+    std::filesystem::current_path(repo);
+
+    // First run: parse and cache the top module and its header.
+    {
+        ananke uut(opts);
+        ASSERT_FALSE(uut.load_data_cache().has_value());
+        ASSERT_FALSE(uut.build_flow().has_value());
+    }
+    {
+        std::ifstream ifs("synth.tcl");
+        std::stringstream ss;
+        ss << ifs.rdbuf();
+        EXPECT_EQ(ss.str(), auto_disc_synth_script(repo, true));
+    }
+
+    // Break the header: BUS_WIDTH becomes undefined, so the top module can no
+    // longer parse. The top module's own hash is unchanged.
+    std::ofstream ofs(e2e_settings_path + "/Common/defs.svh");
+    ofs << "`undef BUS_WIDTH\n";
+    ofs.close();
+
+    // Second run: the top module is a cache hit, but its include changed, so it
+    // must be invalidated and re-parsed -- and now fail to analyze.
+    ananke uut(opts);
+    ASSERT_FALSE(uut.load_data_cache().has_value());
+    ASSERT_FALSE(uut.build_flow().has_value());
+
+    std::ifstream ifs("synth.tcl");
+    std::stringstream ss;
+    ss << ifs.rdbuf();
+    EXPECT_EQ(ss.str(), auto_disc_synth_script(repo, false));
 
     std::filesystem::current_path(wd);
     e2e_clean_settings();

@@ -21,6 +21,8 @@
 #include <iostream>
 #include <filesystem>
 #include <set>
+#include <vector>
+#include <unordered_map>
 #include <future>
 #include <utility>
 #include <gtest/gtest.h>
@@ -33,6 +35,7 @@
 #include "data_model/Constraints.hpp"
 #include "data_model/data_store.hpp"
 #include "data_model/DataFile.hpp"
+#include "data_model/include_dependency.hpp"
 #include "analysis/system_verilog/sv_analyzer.hpp"
 #include "analysis/vhdl/vhdl_analyzer.hpp"
 #include "frontend/repository_index.hpp"
@@ -43,7 +46,7 @@ struct file_analysis_context {
     std::string path;
     std::string hash;
     std::optional<T> resource;
-    std::vector<std::string> discovered_includes;
+    std::vector<include_dependency> includes;
 };
 
 static file_analysis_context<hdl_file> analyze_verilog(const std::filesystem::path &file, std::set<std::string> i_d, const std::string &old_hash, const std::shared_ptr<repository_index> &idx);
@@ -73,6 +76,7 @@ private:
     void read_ignore_file(const std::filesystem::path& file);
     void analyze_file(std::filesystem::path& dir);
     void collect_analysis_results();
+    void invalidate_stale_includes();
 
     // File type discrimination methods
     // TODO: use these to make file associations dynamic a la vscode
@@ -94,6 +98,8 @@ private:
     std::shared_ptr<data_store> d_store;
     std::shared_ptr<repository_index> repository_index_p;
     std::vector<std::filesystem::path> scanned_files;
+    std::unordered_map<std::string, std::string> file_hashes;
+    std::unordered_map<std::string, std::string> previous_hashes;
 
     std::vector<std::future<file_analysis_context<hdl_file>>> hdl_futures;
     std::vector<std::future<file_analysis_context<Script>>> scripts_futures;

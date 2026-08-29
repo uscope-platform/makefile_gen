@@ -50,6 +50,13 @@ void Repository_walker::construct_walker(std::shared_ptr<settings_store> s, std:
 /// The repository must have been scanned first (see scan_repository); the analysis
 /// phase iterates the resulting file list instead of walking the directory tree.
 void Repository_walker::analyze_dir() {
+    // Snapshot the cached hashes before any file is re-parsed, so include-change
+    // detection compares against the state the cache was in at the start of this
+    // run (the main pass updates cache entries as it goes).
+    for (auto &file: scanned_files) {
+        previous_hashes[file.string()] = d_store->get_hash(file.string());
+    }
+
     for (auto &file: scanned_files) {
         if(working_threads == 2*max_threads){
            this->collect_analysis_results();
@@ -57,6 +64,9 @@ void Repository_walker::analyze_dir() {
         analyze_file(file);
     }
     this->collect_analysis_results();
+
+    // Re-parse cache-hit files whose (transitive) includes changed.
+    invalidate_stale_includes();
 }
 
 /// Scan the repository once, building the repository index (basename -> paths) and the list of
@@ -91,8 +101,9 @@ void Repository_walker::collect_analysis_results() {
     auto store = [this](auto &futures) {
         for(auto &f : futures) {
             try {
-                auto [path, file_hash, resource, discovered_includes] = f.get();
-                if (resource) d_store->store_file({path, file_hash, resource.value(), discovered_includes});
+                auto [path, file_hash, resource, includes] = f.get();
+                if (!path.empty()) file_hashes[path] = file_hash;
+                if (resource) d_store->store_file({path, file_hash, resource.value(), includes});
             } catch (const std::exception &e) {
                 spdlog::error("Error analyzing a file: {}", e.what());
             } catch (...) {
@@ -107,6 +118,37 @@ void Repository_walker::collect_analysis_results() {
     store(data_futures);
 
     working_threads =0;
+}
+
+/// After the main analysis pass, evict and re-parse any file that was served
+/// from the cache (own hash unchanged) but whose transitive include files have
+/// changed since it was cached. The include sets are transitive, so a single
+/// hash comparison per include is sufficient.
+void Repository_walker::invalidate_stale_includes() {
+    std::vector<std::filesystem::path> stale;
+    for (auto &file: scanned_files) {
+        if (!file_is_verilog(file)) continue;
+        auto path = file.string();
+        // Own hash changed: the file was already re-parsed in the main pass.
+        if (file_hashes[path] != previous_hashes[path]) continue;
+        auto includes = d_store->get_includes(path);
+        if (!includes.has_value()) continue;
+        for (auto &inc: includes.value()) {
+            auto current = file_hashes.find(inc.path);
+            if (current == file_hashes.end()) continue;  // external/unscanned include: cannot track
+            if (current->second != previous_hashes[inc.path]) {
+                stale.push_back(file);
+                break;
+            }
+        }
+    }
+
+    for (auto &file: stale) {
+        spdlog::trace("Invalidating {}: an included file changed", file.string());
+        d_store->evict_file(file.string());
+        analyze_file(file);
+    }
+    if (!stale.empty()) this->collect_analysis_results();
 }
 
 
@@ -269,8 +311,8 @@ file_analysis_context<hdl_file> analyze_verilog(
             spdlog::error("Error analyzing {}: {}", file.string(), file_processor.get_error());
             return {};
         }
-        auto discovered = file_processor.get_discovered_includes();
-        return {file.string(), hash, analysis.value(), {discovered.begin(), discovered.end()}};
+        auto includes = file_processor.get_includes();
+        return {file.string(), hash, analysis.value(), {includes.begin(), includes.end()}};
     } catch (const std::exception &err) {
         spdlog::error("Error analyzing {}: {}", file.string(), err.what());
         return {};

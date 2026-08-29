@@ -134,9 +134,9 @@ std::optional<hdl_function_statement> data_store::get_standalone_function(const 
     return std::nullopt;
 }
 
-std::optional<std::vector<std::string>> data_store::get_discovered_includes(const std::string &name) const {
+std::optional<std::vector<include_dependency>> data_store::get_includes(const std::string &name) const {
     if (!cache.contains(name)) return std::nullopt;
-    return cache.at(name).discovered_includes;
+    return cache.at(name).includes;
 }
 
 
