@@ -16,6 +16,12 @@
 #include <gtest/gtest.h>
 
 #include "data_model/data_store.hpp"
+#include "data_model/HDL/types/HDL_external_type.hpp"
+#include "data_model/HDL/types/HDL_simple_type.hpp"
+#include "data_model/HDL/types/HDL_struct_type.hpp"
+#include "data_model/HDL/types/HDL_union_type.hpp"
+#include "data_model/HDL/types/HDL_enum_type.hpp"
+#include "data_model/HDL/parameters/components/token/Type_ref.hpp"
 
 
 TEST( data_store_test , evict_constr) {
@@ -244,6 +250,50 @@ TEST( data_store_test , resource_clean_up) {
 
 }
 
+
+TEST( data_store_test , polymorphic_types_round_trip ) {
+    // Every polymorphic subtype of hdl_type and Expression_base must be
+    // registered with cereal (CEREAL_REGISTER_TYPE + the polymorphic relation,
+    // with the binary archive header included in the same TU), otherwise saving
+    // the cache throws "unregistered polymorphic type". Round-trip each through
+    // the same BinaryOutputArchive/InputArchive pair the cache uses.
+    auto round_trip_hdl_type = [](std::shared_ptr<hdl_type> out) {
+        std::stringstream ss;
+        {
+            cereal::BinaryOutputArchive archive_out(ss);
+            archive_out(out);
+        }
+        std::stringstream is(ss.str());
+        std::shared_ptr<hdl_type> in;
+        {
+            cereal::BinaryInputArchive archive_in(is);
+            archive_in(in);
+        }
+        return in;
+    };
+
+    EXPECT_TRUE(round_trip_hdl_type(std::make_shared<HDL_simple_type>())->is<HDL_simple_type>());
+    EXPECT_TRUE(round_trip_hdl_type(std::make_shared<HDL_struct_type>())->is<HDL_struct_type>());
+    EXPECT_TRUE(round_trip_hdl_type(std::make_shared<HDL_union_type>())->is<HDL_union_type>());
+    EXPECT_TRUE(round_trip_hdl_type(std::make_shared<HDL_enum_type>())->is<HDL_enum_type>());
+    EXPECT_TRUE(round_trip_hdl_type(std::make_shared<HDL_external_type>(qualified_identifier("foo")))->is<HDL_external_type>());
+
+    // Type_ref is a polymorphic Expression_base subclass.
+    std::shared_ptr<Expression_base> tr_out = std::make_shared<Type_ref>(qualified_identifier("foo"));
+    std::stringstream ss;
+    {
+        cereal::BinaryOutputArchive archive_out(ss);
+        archive_out(tr_out);
+    }
+    std::stringstream is(ss.str());
+    std::shared_ptr<Expression_base> tr_in;
+    {
+        cereal::BinaryInputArchive archive_in(is);
+        archive_in(tr_in);
+    }
+    ASSERT_TRUE(tr_in != nullptr);
+    EXPECT_TRUE(tr_in->is<Type_ref>());
+}
 
 TEST( data_store_test , corrupted_cache_recovery ) {
     std::filesystem::create_directories("/tmp/ananke_ds_corrupt");

@@ -26,6 +26,8 @@ public:
        value = id;
    }
 
+   HDL_external_type() = default;
+
     parameter_deps_t get_dependencies() override;
     [[nodiscard]] bool is_scalar()const override;
     std::optional<resolved_type> evaluate_type(const std::map<qualified_identifier, resolved_parameter> &context) override;
@@ -34,6 +36,11 @@ public:
    bool operator==(const HDL_external_type & hdl_external) const;
 
     [[nodiscard]] bool is_equal(const hdl_type &other) const override;
+
+    template<class Archive>
+    void serialize(Archive & ar) {
+        ar(value);
+    }
 
 private:
     qualified_identifier value;

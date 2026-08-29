@@ -16,6 +16,12 @@
 
 #include "data_model/HDL/types/HDL_external_type.hpp"
 
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/archives/binary.hpp>
+
+CEREAL_REGISTER_TYPE(HDL_external_type)
+CEREAL_REGISTER_POLYMORPHIC_RELATION(hdl_type, HDL_external_type)
+
 parameter_deps_t HDL_external_type::get_dependencies() {
     parameter_deps_t deps;
     deps.types.insert(value);

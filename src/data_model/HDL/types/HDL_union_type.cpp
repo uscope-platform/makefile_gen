@@ -16,6 +16,8 @@
 #include "data_model/HDL/types/HDL_union_type.hpp"
 
 #include <cereal/types/polymorphic.hpp>
+#include <cereal/archives/binary.hpp>
 
 CEREAL_REGISTER_TYPE(HDL_union_type)
 CEREAL_REGISTER_POLYMORPHIC_RELATION(hdl_type, HDL_union_type)
+CEREAL_REGISTER_DYNAMIC_INIT(HDL_union_type)

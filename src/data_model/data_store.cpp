@@ -16,6 +16,14 @@
 #include "data_model/data_store.hpp"
 #include <spdlog/spdlog.h>
 
+#include <cereal/types/polymorphic.hpp>
+
+// These types are defined entirely in their headers, so their registration
+// translation units contain no referenced symbols and would be dropped by the
+// linker. Force the registration to be pulled in from the cache serializer.
+CEREAL_FORCE_DYNAMIC_INIT(HDL_union_type)
+CEREAL_FORCE_DYNAMIC_INIT(Type_ref)
+
 
 
 data_store::data_store(bool e, std::string cache_dir_path) {

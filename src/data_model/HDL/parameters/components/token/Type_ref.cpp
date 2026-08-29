@@ -16,6 +16,8 @@
 #include "data_model/HDL/parameters/components/token/Type_ref.hpp"
 
 #include <cereal/types/polymorphic.hpp>
+#include <cereal/archives/binary.hpp>
 
 CEREAL_REGISTER_TYPE(Type_ref)
 CEREAL_REGISTER_POLYMORPHIC_RELATION(Expression_base, Type_ref)
+CEREAL_REGISTER_DYNAMIC_INIT(Type_ref)
