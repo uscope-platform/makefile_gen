@@ -17,4 +17,54 @@
 
 #include "data_model/settings_store.hpp"
 
-// TODO: TEST SETTINGS STORE??
+namespace {
+std::string store_settings_path = "/tmp/ananke_settings_test";
+auto store_settings_file = store_settings_path + "/settings";
+}
+
+TEST(settings_store, include_auto_discovery_default_on) {
+    std::filesystem::create_directories(store_settings_path);
+    std::ofstream ofs(store_settings_file);
+    ofs << "{\"profiles\": {\"test_profile\": {\"hdl_store\":\"/tmp/repo\"}}}";
+    ofs.flush();
+    ofs.close();
+
+    settings_store s(false, store_settings_path, "test_profile");
+    EXPECT_TRUE(s.get_include_auto_discovery());
+
+    std::filesystem::remove_all(store_settings_path);
+}
+
+TEST(settings_store, include_auto_discovery_explicit_off) {
+    std::filesystem::create_directories(store_settings_path);
+    std::ofstream ofs(store_settings_file);
+    ofs << "{\"profiles\": {\"test_profile\": {\"hdl_store\":\"/tmp/repo\","
+           "\"include_auto_discovery\":false}}}";
+    ofs.flush();
+    ofs.close();
+
+    settings_store s(false, store_settings_path, "test_profile");
+    EXPECT_FALSE(s.get_include_auto_discovery());
+
+    std::filesystem::remove_all(store_settings_path);
+}
+
+TEST(settings_store, include_auto_discovery_persisted) {
+    std::filesystem::create_directories(store_settings_path);
+    std::ofstream ofs(store_settings_file);
+    ofs << "{\"profiles\": {\"test_profile\": {\"hdl_store\":\"/tmp/repo\","
+           "\"include_auto_discovery\":false}}}";
+    ofs.flush();
+    ofs.close();
+
+    {
+        settings_store s(false, store_settings_path, "test_profile");
+        EXPECT_FALSE(s.get_include_auto_discovery());
+        s.flush();
+    }
+
+    settings_store s2(false, store_settings_path, "test_profile");
+    EXPECT_FALSE(s2.get_include_auto_discovery());
+
+    std::filesystem::remove_all(store_settings_path);
+}

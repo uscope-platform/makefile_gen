@@ -80,6 +80,10 @@ std::set<std::string> settings_store::get_excluded_paths() {
     return  raw_includes;
 }
 
+bool settings_store::get_include_auto_discovery() {
+    return profiles[selected_profile].include_auto_discovery;
+}
+
 settings_store::~settings_store() {
     if(!ephemeral){
         flush();
@@ -104,6 +108,8 @@ void settings_store::load_settings(const std::string  &settings_file) {
                 profiles[key].includes = value["default_includes"];
             if (value.contains("excluded_paths"))
                 profiles[key].excludes = value["excluded_paths"];
+            if (value.contains("include_auto_discovery"))
+                profiles[key].include_auto_discovery = value["include_auto_discovery"];
         }
     }
     if (settings.contains("amd_vivado_path"))
@@ -126,6 +132,7 @@ void settings_store::flush() {
         for (const auto& [key, profile] : profiles) {
             settings["profiles"][key]["hdl_store"] = profile.hdl_store.string();
             settings["profiles"][key]["default_includes"] = profile.includes;
+            settings["profiles"][key]["include_auto_discovery"] = profile.include_auto_discovery;
         }
         for (auto &[tool_name, path]: tool_paths) {
             settings[tool_name + "_path"] = path;

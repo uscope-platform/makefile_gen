@@ -35,7 +35,9 @@ void Repository_walker::construct_walker(std::shared_ptr<settings_store> s, std:
     excluded_directories = std::move(ex);
     target_repository = s_store->get_hdl_store();
     default_includes = s_store->get_default_includes();
-    repository_index_p = std::make_shared<repository_index>();
+    if (s_store->get_include_auto_discovery()) {
+        repository_index_p = std::make_shared<repository_index>();
+    }
     scan_repository();
     analyze_dir();
 }
@@ -73,7 +75,7 @@ void Repository_walker::scan_repository() {
             }
         } else{
             if(file_is_verilog(path)){
-                repository_index_p->add_file(path);
+                if (repository_index_p) repository_index_p->add_file(path);
                 scanned_files.push_back(path);
             } else if(file_is_vhdl(path) || file_is_script(path) || file_is_constraint(path) || file_is_data(path)){
                 scanned_files.push_back(path);
