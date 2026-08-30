@@ -822,3 +822,116 @@ end rtl;
     ASSERT_EQ(u2_deps.size(), 1u);
     ASSERT_EQ(u2_deps[0]->get_name(), "u_b");
 }
+
+
+TEST(hdl_ast_builder, recursive_module_half_width_terminates) {
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+
+    auto source = R"(
+module popcount #(
+    parameter int unsigned INPUT_WIDTH = 256,
+    localparam int unsigned PopcountWidth = $clog2(INPUT_WIDTH)+1
+) (
+    input logic [INPUT_WIDTH-1:0] data_i,
+    output logic [PopcountWidth-1:0] popcount_o
+);
+    localparam int unsigned PaddedWidth = 1 << $clog2(INPUT_WIDTH);
+    if (INPUT_WIDTH == 1) begin : single_node
+    end else if (INPUT_WIDTH == 2) begin : leaf_node
+    end else begin : non_leaf_node
+        popcount #(.INPUT_WIDTH(PaddedWidth / 2))
+            left_child(.data_i(data_i[INPUT_WIDTH-1:INPUT_WIDTH/2]), .popcount_o(popcount_o));
+        popcount #(.INPUT_WIDTH(PaddedWidth / 2))
+            right_child(.data_i(data_i[INPUT_WIDTH/2-1:0]), .popcount_o(popcount_o));
+    end
+endmodule
+
+module top #(parameter int unsigned INPUT_WIDTH = 8) ();
+    popcount #(.INPUT_WIDTH(INPUT_WIDTH)) i_popcount();
+endmodule
+)";
+
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", source);
+    ASSERT_TRUE(resources.has_value());
+    d_store->store_file({"/tmp/popcount.sv", "h", resources.value()});
+
+    HDL_ast_builder_v2 b(s_store, d_store, Depfile());
+    auto ast = b.build_ast(std::vector<std::string>{"top"})[0];
+
+    // Count every popcount node in the tree. The active chain halves the width
+    // 8 -> 4 -> 2 and stops at the leaf; the inactive recursive children of the
+    // leaf are terminals. Without the termination guard this runs away to 256.
+    std::vector<std::shared_ptr<hdl_ast_node>> stack;
+    stack.push_back(ast);
+    int popcounts = 0;
+    while (!stack.empty()) {
+        auto node = stack.back();
+        stack.pop_back();
+        if (!node) continue;
+        if (node->get_type() == "popcount") popcounts++;
+        auto deps = node->get_dependencies();
+        stack.insert(stack.end(), deps.begin(), deps.end());
+    }
+    // 15 popcounts: 7 in the active chain (1@8, 2@4, 4@2) plus 8 inactive
+    // terminal children of the width-2 leaves (their non-selected recursive
+    // branch). None of the terminals is elaborated, so the build terminates.
+    ASSERT_EQ(popcounts, 15);
+}
+
+TEST(hdl_ast_builder, recursive_module_struct_field_override_terminates) {
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    std::shared_ptr<settings_store> s_store = std::make_shared<settings_store>(true, "/tmp/test_data_store", "test_profile");
+
+    auto source = R"(
+package cfg_pkg;
+    typedef struct packed {
+        int unsigned INSTR_PER_FETCH;
+    } cva6_cfg_t;
+endpackage
+
+module popcount #(
+    parameter int unsigned INPUT_WIDTH = 256,
+    localparam int unsigned PaddedWidth = 1 << $clog2(INPUT_WIDTH)
+) ();
+    if (INPUT_WIDTH == 1) begin : single_node
+    end else if (INPUT_WIDTH == 2) begin : leaf_node
+    end else begin : non_leaf_node
+        popcount #(.INPUT_WIDTH(PaddedWidth / 2)) left_child();
+        popcount #(.INPUT_WIDTH(PaddedWidth / 2)) right_child();
+    end
+endmodule
+
+module instr_queue #(parameter cfg_pkg::cva6_cfg_t CVA6Cfg) ();
+    popcount #(.INPUT_WIDTH(CVA6Cfg.INSTR_PER_FETCH)) i_popcount();
+endmodule
+
+module top #(parameter cfg_pkg::cva6_cfg_t CVA6Cfg = '{INSTR_PER_FETCH: 4}) ();
+    instr_queue #(.CVA6Cfg(CVA6Cfg)) i_instr();
+endmodule
+)";
+
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", source);
+    ASSERT_TRUE(resources.has_value());
+    d_store->store_file({"/tmp/rec.sv", "h", resources.value()});
+
+    HDL_ast_builder_v2 b(s_store, d_store, Depfile());
+    auto ast = b.build_ast(std::vector<std::string>{"top"})[0];
+
+    std::vector<std::shared_ptr<hdl_ast_node>> stack;
+    stack.push_back(ast);
+    int popcounts = 0;
+    while (!stack.empty()) {
+        auto node = stack.back();
+        stack.pop_back();
+        if (!node) continue;
+        if (node->get_type() == "popcount") popcounts++;
+        auto deps = node->get_dependencies();
+        stack.insert(stack.end(), deps.begin(), deps.end());
+    }
+    // popcount(4) -> {popcount(2), popcount(2)}; the non-selected recursive
+    // branches of the width-2 leaves add 4 inactive terminal popcounts.
+    ASSERT_EQ(popcounts, 7);
+}

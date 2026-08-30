@@ -46,36 +46,20 @@ private:
 
     std::expected<std::vector<work_order>, solver_errors> process_statement(
         const std::shared_ptr<hdl_statement_base> &stmt,
-        const std::shared_ptr<hdl_ast_node> &parent,
-        const std::map<qualified_identifier, resolved_parameter> &params,
-        const std::string &path,
-        const std::unordered_map<std::string, std::string> &if_map,
-        const std::vector<std::string> &module_chain
+        work_order &wo
     );
     std::expected<std::vector<work_order>, solver_errors> process_instance(
         const std::shared_ptr<hdl_instance_statement> &inst,
-        const std::shared_ptr<hdl_ast_node> &parent,
-        const std::map<qualified_identifier, resolved_parameter> &params,
-        const std::string &path,
-        const std::unordered_map<std::string, std::string> &if_map,
-        const std::vector<std::string> &module_chain,
+        work_order &wo,
         bool active = true
     );
     std::expected<std::vector<work_order>, solver_errors> process_loop(
         const hdl_loop_statement &loop,
-        const std::shared_ptr<hdl_ast_node> &parent,
-        const std::map<qualified_identifier, resolved_parameter> &params,
-        const std::string &path,
-        const std::unordered_map<std::string, std::string> &if_map,
-        const std::vector<std::string> &module_chain
+        work_order &wo
     );
     std::expected<std::vector<work_order>, solver_errors> process_conditional(
         const hdl_conditional_statement &cond,
-        const std::shared_ptr<hdl_ast_node> &parent,
-        const std::map<qualified_identifier, resolved_parameter> &params,
-        const std::string &path,
-        const std::unordered_map<std::string, std::string> &if_map,
-        const std::vector<std::string> &module_chain
+        work_order &wo
     );
     void apply_parameter_overrides(
         const std::vector<std::shared_ptr<hdl_statement_base>> &statements,

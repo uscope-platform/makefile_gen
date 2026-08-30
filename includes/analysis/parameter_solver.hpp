@@ -41,6 +41,9 @@ struct work_order {
     std::unordered_map<std::string, std::string> interfaces_map;
     std::vector<pending_parameter_override> pending_overrides;
     std::vector<std::string> module_chain;
+    // Parallel to module_chain: the resolved parameter set of each module in
+    // the chain (the final entry is filled once that module is elaborated).
+    std::vector<std::map<qualified_identifier, resolved_parameter>> param_chain;
 };
 
 class parameter_solver {

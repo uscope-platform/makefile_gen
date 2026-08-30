@@ -63,7 +63,7 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
         top->set_dependency_class(module);
 
         std::stack< work_order> working_stack;
-        working_stack.push({top, {}, "TL", {}, {}, {top_level_module}});
+        working_stack.push({top, {}, "TL", {}, {}, {top_level_module}, {{}}});
 
 
 
@@ -126,19 +126,18 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
 
                 spdlog::trace("Processing dependency {} in module {}",working_instance->get_name(), type);
                 auto current_param_values = parameter_solver::override_parameters(wo, d_store, imported_params, imported_functions, imported_types);
+                if (!wo.param_chain.empty()) wo.param_chain.back() = current_param_values;
 
                 std::vector<work_order> child_wo;
-                auto child_path = wo.path + "." + working_instance->get_name();
-
-                std::unordered_map<std::string, std::string> interfaces_map;
+                wo.interfaces_map.clear();
                 for (auto &[port_name, port_net] :wo.node->get_ports()) {
                     auto port_spec = res->get_port_specs()[port_name];
                     if (port_spec.direction == interface_port) {
-                        interfaces_map[port_name] = port_spec.if_info.type;
+                        wo.interfaces_map[port_name] = port_spec.if_info.type;
                     }
                 }
                 for (auto &stmt : res->get_statements()) {
-                    auto processed = process_statement(stmt, working_instance, current_param_values, child_path, interfaces_map, wo.module_chain);
+                    auto processed = process_statement(stmt, wo);
                     if (!processed) {
                         if (processed.error() == recursive_module) {
                             spdlog::error("Skipping cyclic module hierarchy rooted at {}::{}", working_instance->get_type(), working_instance->get_name());
@@ -177,37 +176,32 @@ std::expected<void, solver_errors> HDL_ast_builder_v2::process_quantifier(const 
 
 std::expected<std::vector<work_order>, solver_errors> HDL_ast_builder_v2::process_statement(
     const std::shared_ptr<hdl_statement_base> &stmt,
-    const std::shared_ptr<hdl_ast_node> &parent,
-    const std::map<qualified_identifier, resolved_parameter> &params,
-    const std::string &path,
-    const std::unordered_map<std::string, std::string> &if_map,
-    const std::vector<std::string> &module_chain
+    work_order &wo
 ) {
     if (auto inst = std::dynamic_pointer_cast<hdl_instance_statement>(stmt))
-        return process_instance(inst, parent, params, path, if_map, module_chain);
+        return process_instance(inst, wo);
     if (auto loop = std::dynamic_pointer_cast<hdl_loop_statement>(stmt))
-        return process_loop(*loop, parent, params, path, if_map, module_chain);
+        return process_loop(*loop, wo);
     if (auto cond = std::dynamic_pointer_cast<hdl_conditional_statement>(stmt))
-        return process_conditional(*cond, parent, params, path, if_map, module_chain);
+        return process_conditional(*cond, wo);
     return {};
 }
 
 std::expected<std::vector<work_order>, solver_errors> HDL_ast_builder_v2::process_instance(
     const std::shared_ptr<hdl_instance_statement> &inst,
-    const std::shared_ptr<hdl_ast_node> &parent,
-    const std::map<qualified_identifier, resolved_parameter> &params,
-    const std::string &path,
-    const std::unordered_map<std::string, std::string> &if_map,
-    const std::vector<std::string> &module_chain,
+    work_order &wo,
     bool active
 ) {
     std::vector<work_order> orders;
     auto dc = inst->get_dependency_class();
     if (dc != module && dc != interface) return orders;
     auto child = std::make_shared<hdl_ast_node>(*inst);
-    child->set_parent(parent);
+    child->set_parent(wo.node);
     child->set_active(active);
     auto type = inst->get_type();
+    auto &module_chain = wo.module_chain;
+    auto &param_chain = wo.param_chain;
+    const auto &params = param_chain.back();
     auto recursion_depth = std::count(module_chain.begin(), module_chain.end(), type);
     if (recursion_depth >= max_recursion_depth) {
         spdlog::error("Recursive module hierarchy detected at depth {} (limit {}): {} -> {}",
@@ -218,44 +212,62 @@ std::expected<std::vector<work_order>, solver_errors> HDL_ast_builder_v2::proces
     if (auto err = process_quantifier(child->get_array_quantifier(), params); !err) return std::unexpected{err.error()};
     auto child_chain = module_chain;
     child_chain.push_back(type);
-    parent->add_child(child);
-    orders.push_back({child, params, path, if_map, {}, child_chain});
+    auto child_param_chain = param_chain;
+    child_param_chain.push_back({});
+    wo.node->add_child(child);
+    bool recurses = std::count(module_chain.begin(), module_chain.end(), type) > 0;
+    // A recursive instantiation whose resolved parameters repeat an ancestor of
+    // the same type makes no progress and would never terminate (e.g. a module
+    // recursing on an unresolved parameter that stays 0). Keep it as a terminal.
+    // Parameterless recursion is left to the depth guard: an empty parameter set
+    // cannot show whether the recursion is progressing.
+    if (recurses && !params.empty()) {
+        for (size_t i = 0; i + 1 < module_chain.size(); ++i) {
+            if (module_chain[i] == type && i < param_chain.size() && param_chain[i] == params)
+                return orders;
+        }
+    }
+    // Instances from non-selected generate branches are normally elaborated too
+    // (so their internals are available for analysis). The one exception is a
+    // recursive instantiation through such an inactive branch: that would never
+    // terminate (the generate chain only terminates on the selected leaf), so
+    // it is kept as a terminal node instead.
+    if (!active && recurses) return orders;
+    orders.push_back({child, params, wo.path + "." + wo.node->get_name(), wo.interfaces_map, {}, child_chain, child_param_chain});
     return orders;
 }
 
 std::expected<std::vector<work_order>, solver_errors> HDL_ast_builder_v2::process_loop(
     const hdl_loop_statement &loop,
-    const std::shared_ptr<hdl_ast_node> &parent,
-    const std::map<qualified_identifier, resolved_parameter> &params,
-    const std::string &path,
-    const std::unordered_map<std::string, std::string> &if_map,
-    const std::vector<std::string> &module_chain
+    work_order &wo
 ) {
     if (!loop.get_init() || loop.get_init()->get_name().empty())
         return {};
 
     std::vector<work_order> orders;
-    auto indices = loop_solver::solve_loop(loop, params);
+    auto indices = loop_solver::solve_loop(loop, wo.param_chain.back());
     auto loop_var_name = loop.get_init()->get_name();
     for (auto &body_stmt : loop.get_body()) {
         for (auto &idx : indices) {
-            auto parent_params = params;
-            parent_params[qualified_identifier(loop_var_name)] = resolved_parameter(idx);
+            // Per-iteration elaboration context: same frame as wo, with the
+            // loop variable bound to the current index.
+            work_order iter_wo = wo;
+            iter_wo.param_chain.back()[qualified_identifier(loop_var_name)] = resolved_parameter(idx);
 
             if (auto body_inst = std::dynamic_pointer_cast<hdl_instance_statement>(body_stmt)) {
                 auto child = std::make_shared<hdl_ast_node>(*body_inst);
-                child->set_parent(parent);
+                child->set_parent(wo.node);
                 auto inst_type = body_inst->get_type();
                 auto dc = body_inst->get_dependency_class();
                 if ((dc == module || dc == interface) &&
-                    std::count(module_chain.begin(), module_chain.end(), inst_type) >= max_recursion_depth) {
+                    std::count(wo.module_chain.begin(), wo.module_chain.end(), inst_type) >= max_recursion_depth) {
                     spdlog::error("Recursive module hierarchy detected at depth {} (limit {}): {} -> {}",
-                                  std::count(module_chain.begin(), module_chain.end(), inst_type) + 1,
-                                  max_recursion_depth, format_module_chain(module_chain), inst_type);
+                                  std::count(wo.module_chain.begin(), wo.module_chain.end(), inst_type) + 1,
+                                  max_recursion_depth, format_module_chain(wo.module_chain), inst_type);
                     return std::unexpected{recursive_module};
                 }
                 if (dep_file.is_module_excluded(inst_type) || d_store->is_primitive(inst_type)) child->set_dependency_class(primitive);
-                if (auto err = process_quantifier(child->get_array_quantifier(), params); !err) return std::unexpected{err.error()};
+                if (auto err = process_quantifier(child->get_array_quantifier(), iter_wo.param_chain.back()); !err) return std::unexpected{err.error()};
 
                 std::unordered_map<std::string, std::vector<HDL_net>> new_ports;
                 for (auto &[port_name, nets] : child->get_ports()) {
@@ -275,14 +287,17 @@ std::expected<std::vector<work_order>, solver_errors> HDL_ast_builder_v2::proces
                 }
                 child->set_ports(new_ports);
 
-                auto child_chain = module_chain;
+                auto child_chain = iter_wo.module_chain;
                 child_chain.push_back(inst_type);
-                parent->add_child(child);
-                orders.push_back({child, parent_params, path, if_map, {}, child_chain});
+                auto child_param_chain = iter_wo.param_chain;
+                child_param_chain.push_back({});
+                wo.node->add_child(child);
+                orders.push_back({child, iter_wo.param_chain.back(), iter_wo.path + "." + wo.node->get_name(),
+                                  iter_wo.interfaces_map, {}, child_chain, child_param_chain});
             } else {
-                auto wo = process_statement(body_stmt, parent, parent_params, path, if_map, module_chain);
-                if (!wo) return std::unexpected{wo.error()};
-                orders.insert(orders.end(), wo.value().begin(), wo.value().end());
+                auto w = process_statement(body_stmt, iter_wo);
+                if (!w) return std::unexpected{w.error()};
+                orders.insert(orders.end(), w.value().begin(), w.value().end());
             }
         }
     }
@@ -291,38 +306,34 @@ std::expected<std::vector<work_order>, solver_errors> HDL_ast_builder_v2::proces
 
 std::expected<std::vector<work_order>, solver_errors> HDL_ast_builder_v2::process_conditional(
     const hdl_conditional_statement &cond,
-    const std::shared_ptr<hdl_ast_node> &parent,
-    const std::map<qualified_identifier, resolved_parameter> &params,
-    const std::string &path,
-    const std::unordered_map<std::string, std::string> &if_map,
-    const std::vector<std::string> &module_chain
+    work_order &wo
 ) {
     std::vector<work_order> orders;
     bool any_matched = false;
     for (auto &branch : cond.get_branches()) {
-        bool selected = evaluate_condition(branch.condition, params);
+        bool selected = evaluate_condition(branch.condition, wo.param_chain.back());
         any_matched = any_matched || selected;
         for (auto &body_stmt : branch.body) {
             if (auto inst = std::dynamic_pointer_cast<hdl_instance_statement>(body_stmt)) {
-                auto wo = process_instance(inst, parent, params, path, if_map, module_chain, selected);
-                if (!wo)return std::unexpected{wo.error()};
-                orders.insert(orders.end(), wo.value().begin(), wo.value().end());
+                auto w = process_instance(inst, wo, selected);
+                if (!w)return std::unexpected{w.error()};
+                orders.insert(orders.end(), w.value().begin(), w.value().end());
             } else {
-                auto wo = process_statement(body_stmt, parent, params, path, if_map, module_chain);
-                if (!wo) return std::unexpected{wo.error()};
-                orders.insert(orders.end(), wo.value().begin(), wo.value().end());
+                auto w = process_statement(body_stmt, wo);
+                if (!w) return std::unexpected{w.error()};
+                orders.insert(orders.end(), w.value().begin(), w.value().end());
             }
         }
     }
     for (auto &body_stmt : cond.get_else_body()) {
         if (auto inst = std::dynamic_pointer_cast<hdl_instance_statement>(body_stmt)) {
-            auto wo = process_instance(inst, parent, params, path, if_map, module_chain, !any_matched);
-            if (!wo) return std::unexpected{wo.error()};
-            orders.insert(orders.end(), wo.value().begin(), wo.value().end());
+            auto w = process_instance(inst, wo, !any_matched);
+            if (!w) return std::unexpected{w.error()};
+            orders.insert(orders.end(), w.value().begin(), w.value().end());
         } else {
-            auto wo = process_statement(body_stmt, parent, params, path, if_map, module_chain);
-            if (!wo) return std::unexpected{wo.error()};
-            orders.insert(orders.end(), wo.value().begin(), wo.value().end());
+            auto w = process_statement(body_stmt, wo);
+            if (!w) return std::unexpected{w.error()};
+            orders.insert(orders.end(), w.value().begin(), w.value().end());
         }
     }
     return orders;
