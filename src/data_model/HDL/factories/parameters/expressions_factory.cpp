@@ -17,13 +17,16 @@
 #include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
 
 void expressions_factory::push_level() {
-    levels_stack.push(expression_level);
+    context_stack.push({expression_level, factory_active, current_v2});
     expression_level = 0;
 }
 
 void expressions_factory::pop_level() {
-    expression_level = levels_stack.top();
-    levels_stack.pop();
+    auto ctx = context_stack.top();
+    context_stack.pop();
+    expression_level = ctx.level;
+    factory_active = ctx.active;
+    current_v2 = ctx.current;
 }
 
 void expressions_factory::start_expression(bool new_expr) {

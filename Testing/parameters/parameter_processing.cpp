@@ -2488,3 +2488,21 @@ TEST(parameter_processing, circular_three_way_cycle) {
     ASSERT_TRUE(params.contains("D"));
     EXPECT_EQ(params.get("D")->get_numeric_value(), 77);
 }
+
+TEST(parameter_processing, shift_of_clog2_roundtrip) {
+    auto test_pattern = R"(
+        package pkg;
+            localparam int A = 1 << $clog2(8);
+            localparam int B = $clog2(8);
+            localparam int C = 1 << 3;
+        endpackage
+    )";
+
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", test_pattern).value().get_content();
+    auto& pkg = resources[0]->as<hdl_resource_statement>();
+    auto solved = parameter_solver::process_parameters(pkg.get_parameters(), {});
+    ASSERT_EQ(8, solved.at(qualified_identifier("A")).get_integer());
+    ASSERT_EQ(3, solved.at(qualified_identifier("B")).get_integer());
+    ASSERT_EQ(8, solved.at(qualified_identifier("C")).get_integer());
+}

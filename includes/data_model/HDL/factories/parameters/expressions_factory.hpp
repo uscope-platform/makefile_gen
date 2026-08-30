@@ -48,6 +48,15 @@ public:
     bool active() const;
 
 private:
+    // State saved when entering a nested expression context (concatenation,
+    // function call, ...): the enclosing partial expression plus its level and
+    // activation, restored on pop.
+    struct expression_context {
+        int level;
+        bool active;
+        Expression_v2 current;
+    };
+
     bool factory_active = false;
     bool paused = false;
     bool skip_nesting = false;
@@ -55,7 +64,7 @@ private:
     bool operation_set = false;
     Expression_v2 current_v2 ={};
     std::stack<Expression_v2> nested_expressions;
-    std::stack<int> levels_stack;
+    std::stack<expression_context> context_stack;
     bool bit_select_active = false;
     Expression_v2 bit_select_v2 = {};
 
