@@ -101,7 +101,7 @@ void HDL_functions_factory::start_replication() {
     auto repl = std::make_unique<replication_factory>();
     repl->start_replication(true);
     consumer_stack.push(std::move(repl));
-    expr_factory_.decrease_level();
+    expr_factory_.push_level();
 }
 
 void HDL_functions_factory::stop_replication() {
@@ -113,7 +113,7 @@ void HDL_functions_factory::stop_replication() {
         } else {
             assignment_value = result;
         }
-        expr_factory_.increase_level();
+        expr_factory_.pop_level();
     }
 }
 

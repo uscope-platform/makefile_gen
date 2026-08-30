@@ -57,8 +57,8 @@ void Replication::set_size(const std::shared_ptr<Expression_base> &size) { repet
 
 parameter_deps_t Replication::get_dependencies()const {
     parameter_deps_t result;
-    if (repetition_size) result.merge(repetition_size->get_dependencies());
-    if (repeated_item) result.merge(repeated_item->get_dependencies());
+    result.merge(repetition_size->get_dependencies());
+    result.merge(repeated_item->get_dependencies());
     return result;
 }
 

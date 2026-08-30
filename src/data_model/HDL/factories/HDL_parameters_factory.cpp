@@ -115,7 +115,7 @@ void HDL_parameters_factory::stop_replication() {
             current_resource.set_type(current_type);
             current_resource.set_raw_value(result);
         }
-        expr_factory.increase_level();
+        expr_factory.pop_level();
     }
 }
 
@@ -244,7 +244,7 @@ void HDL_parameters_factory::start_replication() {
         auto repl = std::make_unique<replication_factory>();
         repl->start_replication(true);
         consumer_stack.push(std::move(repl));
-        expr_factory.decrease_level();
+        expr_factory.push_level();
     }
 }
 
@@ -288,11 +288,13 @@ void HDL_parameters_factory::stop_param_override() {
 void HDL_parameters_factory::start_cast(bool expression_size) {
     bool in_ctx = ctx != param_context::idle || top_as<concatenation_factory>();
     if (in_ctx) {
-        if (top_as<concatenation_factory>() || expression_size) {
+        bool open_expression = top_as<concatenation_factory>() || expression_size;
+        if (open_expression) {
             expr_factory.start_expression(false);
         } else {
             expr_factory.decrease_level();
         }
+        cast_started_expression.push_back(open_expression);
         auto cast = std::make_unique<cast_factory>();
         cast->start(expression_size);
         consumer_stack.push(std::move(cast));
@@ -321,12 +323,16 @@ void HDL_parameters_factory::stop_cast() {
         }
 
         auto cast_value = consumer_stack.top()->result();
-        bool is_expr_size = top_as<cast_factory>()->is_expression_size();
         consumer_stack.pop();
-        if (is_expr_size) {
-            expr_factory.stop_expression(false);
-        } else {
-            expr_factory.increase_level();
+
+        if (!cast_started_expression.empty()) {
+            bool open_expression = cast_started_expression.back();
+            cast_started_expression.pop_back();
+            if (open_expression) {
+                expr_factory.stop_expression(false);
+            } else {
+                expr_factory.increase_level();
+            }
         }
 
         if (!consumer_stack.empty()) {

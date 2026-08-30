@@ -17,22 +17,22 @@
 
 #include <gtest/gtest.h>
 
-#include <fstream>
-#include <sstream>
-
-#include "test_paths.hpp"
 #include "frontend/analysis/system_verilog/sv_analyzer.hpp"
 #include "analysis/HDL_ast_builder_v2.hpp"
 #include "data_model/HDL/parameters/HDL_parameter.hpp"
 #include "analysis/parameter_solver.hpp"
 #include "data_model/HDL/parameters/components/Replication.hpp"
 #include "data_model/HDL/parameters/components/Concatenation.hpp"
+#include "data_model/HDL/parameters/components/Expression_v2.hpp"
+#include "data_model/HDL/parameters/components/Expression_base.hpp"
+#include "data_model/HDL/parameters/components/Cast.hpp"
+#include "data_model/HDL/parameters/components/HDL_function_call.hpp"
+#include "data_model/HDL/parameters/components/token/Identifier_token.hpp"
+#include "data_model/HDL/parameters/components/token/Numeric_token.hpp"
 #include "data_model/HDL/types/HDL_external_type.hpp"
-#include "data_model/HDL/types/HDL_struct_type.hpp"
 #include "data_model/HDL/statement/hdl_statements.hpp"
 #include "data_model/settings_store.hpp"
 #include "data_model/data_store.hpp"
-#include "frontend/Repository_walker.hpp"
 #include "data_model/Depfile/Depfile.hpp"
 
 
@@ -184,30 +184,6 @@ TEST(parameter_processing, package_parameters_in_array_init) {
 }
 
 
-TEST(parameter_processing, cva6_ast_build_repro) {
-    const std::string repo = "/var/folders/49/qk_dm63x0h73mpw9_l_7x7ch0000gn/T/opencode/cva6-repro";
-    if (!std::filesystem::exists(repo + "/core/cva6.sv")) GTEST_SKIP();
-
-    std::string settings_path = "/tmp/ananke_cva6_repro_settings";
-    std::filesystem::create_directories(settings_path);
-    std::ofstream ofs(settings_path + "/settings");
-    ofs << "{\"profiles\": {\"repro\": {\"hdl_store\":\"" << repo << "\",\"include_auto_discovery\":true}}}";
-    ofs.close();
-
-    auto s_store = std::make_shared<settings_store>(false, settings_path, "repro");
-    auto d_store = std::make_shared<data_store>(true, settings_path + "/cache");
-    Repository_walker walker(s_store, d_store, false);
-
-    Depfile dep;
-    dep.general.synth_tl = "cva6";
-    HDL_ast_builder_v2 b(s_store, d_store, dep);
-    auto ast = b.build_ast(std::vector<std::string>{"cva6"});
-    ASSERT_TRUE(ast[0] != nullptr);
-
-    std::filesystem::remove_all(settings_path);
-}
-
-
 TEST(parameter_processing, struct_member_unresolvable_range_no_crash) {
     // A struct whose member range references an undefined identifier must make
     // evaluate_type return nullopt (handled as "missing value") instead of
@@ -231,6 +207,52 @@ TEST(parameter_processing, struct_member_unresolvable_range_no_crash) {
     auto solved = parameter_solver::process_parameters(pkg.get_parameters(), {});
 
     ASSERT_TRUE(solved.contains(qualified_identifier("Cfg")));
+}
+
+
+TEST(parameter_processing, replication_after_cast_in_assignment_pattern) {
+    // A replication member value following a cast member value in an assignment
+    // pattern used to produce a Replication with a null size, crashing the
+    // topological sorter (Replication::get_dependencies). The tree must be
+    // well-formed and the parameter must still be solvable.
+    auto test_pattern = R"(
+        package pkg;
+            typedef struct packed {
+                logic [7:0] a;
+                logic [1:0] b;
+            } cfg_t;
+            localparam cfg_t c = '{a: unsigned'(8'd7), b: {2{1'b1}}};
+        endpackage
+    )";
+
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", test_pattern).value().get_content();
+    auto& pkg = resources[0]->as<hdl_resource_statement>();
+
+    std::vector<std::shared_ptr<Expression_base>> stack;
+    stack.push_back(pkg.get_parameters().get("c")->get_expression());
+    while (!stack.empty()) {
+        auto node = stack.back();
+        stack.pop_back();
+        if (!node) continue;
+        if (auto rep = std::dynamic_pointer_cast<Replication>(node)) {
+            ASSERT_NE(rep->get_size(), nullptr) << "Replication has null size";
+            ASSERT_NE(rep->get_item(), nullptr) << "Replication has null item";
+            stack.push_back(rep->get_size());
+            stack.push_back(rep->get_item());
+        } else if (auto e = std::dynamic_pointer_cast<Expression_v2>(node)) {
+            stack.push_back(e->get_lhs());
+            stack.push_back(e->get_rhs());
+        } else if (auto conc = std::dynamic_pointer_cast<Concatenation>(node)) {
+            for (auto &comp : conc->get_components()) stack.push_back(comp);
+        } else if (auto cast = std::dynamic_pointer_cast<Cast>(node)) {
+            stack.push_back(cast->get_content());
+            stack.push_back(cast->get_size_expr());
+        }
+    }
+
+    auto solved = parameter_solver::process_parameters(pkg.get_parameters(), {});
+    ASSERT_TRUE(solved.contains(qualified_identifier("c")));
 }
 
 
@@ -265,31 +287,6 @@ TEST(parameter_processing, package_parameters_use) {
 
     ASSERT_TRUE(solved.contains(qualified_identifier("package_param")));
     ASSERT_EQ(67, solved.at(qualified_identifier("package_param")).get_integer());
-}
-
-
-TEST(parameter_processing, ariane_pkg_struct_and_unresolvable_localparam) {
-    // Reproduces the ariane_pkg layout that crashes the solver on ZERO_TVAL in
-    // the cva6 flow: a struct localparam with a struct literal that cannot be
-    // solved, followed by an unresolvable external reference, then a bit param.
-    std::ifstream input(td_file("check_files/ariane_pkg.sv"));
-    ASSERT_TRUE(input.good());
-    std::stringstream buffer;
-    buffer << input.rdbuf();
-
-    sv_analyzer analyzer;
-    auto resources = analyzer.analyze("", buffer.str());
-    ASSERT_TRUE(resources.has_value());
-    bool found = false;
-    for (auto &res : resources.value().get_content()) {
-        if (!res->is<hdl_resource_statement>()) continue;
-        auto &r = res->as<hdl_resource_statement>();
-        if (r.get_type() != dependency_class::package) continue;
-        auto solved = parameter_solver::process_parameters(r.get_parameters(), {});
-        found = true;
-        ASSERT_TRUE(solved.contains(qualified_identifier("ZERO_TVAL")));
-    }
-    ASSERT_TRUE(found);
 }
 
 

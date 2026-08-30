@@ -122,6 +122,10 @@ private:
 
     bool in_bit_selection = false;
 
+    // For each active cast, records whether start_cast opened an expression
+    // level (concatenation/size context) so stop_cast can balance it exactly.
+    std::vector<bool> cast_started_expression;
+
     std::shared_ptr<hdl_type> current_type = std::make_shared<HDL_simple_type>();
 
     Streaming::stream_direction pending_stream_direction = Streaming::left;
