@@ -126,6 +126,85 @@ TEST(parameter_extraction, size_cast) {
     ASSERT_EQ(3, defaults.at(qualified_identifier("TEST_PARAM")).get_integer());
 }
 
+
+TEST(parameter_extraction, unsized_zero) {
+    auto test_pattern = R"(
+        module test_mod #(
+            )();
+            parameter integer TEST_PARAM = '0;
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_name("TEST_PARAM");
+    p->set_raw_value(std::make_shared<Numeric_token>("'0"));
+    p->set_type(Type_engine::create_primitive_type("integer"));
+    check_params.insert(p);
+
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& [name, item]:check_params){
+        ASSERT_TRUE(parameters.contains(name));
+        ASSERT_EQ(*item, *parameters.get(name));
+    }
+
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+
+    ASSERT_EQ(0, defaults.at(qualified_identifier("TEST_PARAM")).get_integer());
+}
+
+
+
+
+TEST(parameter_extraction, unsized_one) {
+    auto test_pattern = R"(
+        module test_mod #(
+            )();
+            parameter reg [7:0] TEST_PARAM = '1;
+        endmodule
+    )";
+
+    sv_analyzer analyzer;
+
+    auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
+    auto parameters = resource.get_parameters();
+
+    Parameters_map check_params;
+
+    auto p = std::make_shared<HDL_parameter>();
+    p->set_name("TEST_PARAM");
+    p->set_raw_value(std::make_shared<Numeric_token>("'1"));
+    dimension_t d;
+    d.first_bound = std::make_shared<Numeric_token>("7");
+    d.second_bound = std::make_shared<Numeric_token>("0");
+    d.packed = true;
+    auto param_type = HDL_simple_type();
+    param_type.add_dimension(d);
+    p->set_type(std::make_shared<HDL_simple_type>(param_type));
+    check_params.insert(p);
+
+
+    ASSERT_EQ(check_params.size(), parameters.size());
+
+    for(const auto& [name, item]:check_params){
+        ASSERT_TRUE(parameters.contains(name));
+        ASSERT_EQ(*item, *parameters.get(name));
+    }
+
+    auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
+
+    ASSERT_EQ(255, defaults.at(qualified_identifier("TEST_PARAM")).get_integer());
+}
+
+
 TEST(parameter_extraction, paretesized_cast) {
     auto test_pattern = R"(
         module test_mod #(
@@ -474,6 +553,8 @@ TEST(parameter_extraction,time_literal) {
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("TEST_PARAM")).get_real(), 1e-8);
     EXPECT_DOUBLE_EQ(defaults.at(qualified_identifier("TEST_PARAM_2")).get_real(), 1.5e-6);
 }
+
+
 
 TEST(parameter_extraction, cast_in_concat) {
     auto test_pattern = R"(

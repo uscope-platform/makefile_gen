@@ -75,6 +75,10 @@ namespace {
         return !s.empty() && s.find_first_not_of("0123456789") == std::string_view::npos;
     }
 
+    bool is_unbased_unsized_literal(const std::string_view &s) {
+        return s== "'0" || s== "'1";
+    }
+
     // ^\d*'(s)?(h|d|o|b)([0-9a-fA-F]+)  (prefix match, matching ctre::search semantics)
     bool is_sized_literal(const std::string_view &s) {
         size_t int_end = s.find_first_not_of("0123456789");
@@ -132,6 +136,9 @@ namespace sv_parsing_helpers {
         }
         if (is_real_literal(s)) {
             return std::make_shared<Real_token>(s);
+        }
+        if (is_unbased_unsized_literal(s)) {
+            return std::make_shared<Numeric_token>(s);
         }
         if (is_unsigned_integer(s) || is_sized_literal(s)) {
             return std::make_shared<Numeric_token>(s);

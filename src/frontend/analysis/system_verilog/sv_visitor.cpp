@@ -531,7 +531,8 @@ void sv_visitor::enterCast_separator(sv2017::Cast_separatorContext *ctx) {
 }
 
 void sv_visitor::enterPrimaryCast2(sv2017::PrimaryCast2Context *ctx) {
-    auto expression_size = ctx->primary()->getText().starts_with("(");
+    auto primary_text = ctx->primary()->getText();
+    auto expression_size = primary_text.starts_with("(") || primary_text.contains("::");
     if (f_factory.is_active()) {
         f_factory.start_cast(expression_size);
     } else {

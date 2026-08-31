@@ -69,6 +69,14 @@ bool operator==(const Numeric_token &lhs, const Numeric_token &rhs) {
     return ret_val;
 }
 
+void Numeric_token::set_container_sizes(const resolved_type &s,
+                                        const std::map<qualified_identifier, resolved_parameter> &context) {
+    // If the token was unconstrained/unsized, snap its binary_size to the target signal width
+    if (!sized_explicit && !s.packed_sizes.empty()) {
+        binary_size = s.packed_sizes.front();
+    }
+}
+
 std::optional<resolved_type> Numeric_token::resolve_expression_type(
     const std::map<qualified_identifier, resolved_parameter> &context) const {
     resolved_type result;
@@ -91,10 +99,6 @@ std::optional<resolved_type> Numeric_token::resolve_expression_type(
     return result;
 }
 
-void Numeric_token::set_container_sizes(const resolved_type &s,
-    const std::map<qualified_identifier, resolved_parameter> &context) {
-}
-
 Numeric_token::numeric_parse_result Numeric_token::process_number(const std::string_view &s) {
     numeric_parse_result result;
     result.binary_size = 0;
@@ -106,6 +110,21 @@ Numeric_token::numeric_parse_result Numeric_token::process_number(const std::str
 
     auto qualifiers = parse_qualifiers(body, signed_number);
     result.sized_explicit = qualifiers.sized_explicit;
+
+    // Direct interception for unbased unsized literals ('0, '1, 'x, 'z)
+    if (!qualifiers.sized_explicit && !qualifiers.based && body.starts_with('\'')) {
+        hdl_integer val;
+        if (qualifiers.digits == "1") {
+            int1024_t all_ones = -1;
+            val.set_value(all_ones);
+        } else {
+            val.set_value(0);
+        }
+        val.set_signed(signed_number);
+        result.value = val;
+        result.binary_size = -1;
+        return result;
+    }
 
     auto digits = purge_underscores(qualifiers.digits);
 
@@ -142,10 +161,14 @@ Numeric_token::literal_qualifiers Numeric_token::parse_qualifiers(const std::str
 
     std::string_view raw_value;
     if (body.contains('\'')) {
-        raw_value = body.substr(body.find_first_of('\'') + 1);
-        auto size_str = body.substr(0, body.find_first_of('\''));
-        auto [ptr, ec] = std::from_chars(size_str.data(), size_str.data() + size_str.size(), qualifiers.explicit_size, 10);
-        if (ec == std::errc() && ptr != size_str.data()) qualifiers.sized_explicit = true;
+        auto quote_pos = body.find_first_of('\'');
+        raw_value = body.substr(quote_pos + 1);
+        auto size_str = body.substr(0, quote_pos);
+
+        if (!size_str.empty()) {
+            auto [ptr, ec] = std::from_chars(size_str.data(), size_str.data() + size_str.size(), qualifiers.explicit_size, 10);
+            if (ec == std::errc() && ptr != size_str.data()) qualifiers.sized_explicit = true;
+        }
     } else {
         raw_value = body;
     }
@@ -156,7 +179,17 @@ Numeric_token::literal_qualifiers Numeric_token::parse_qualifiers(const std::str
     }
 
     qualifiers.based = raw_value.starts_with("d") || raw_value.starts_with("b")
-        || raw_value.starts_with("o") || raw_value.starts_with("h");
+                       || raw_value.starts_with("o") || raw_value.starts_with("h");
+
+    // Strictly check for unbased unsized literals: no size prefix, starts with single quote, and is 0/1/x/z
+    if (!qualifiers.sized_explicit && !qualifiers.based && body.starts_with('\'')) {
+        if (raw_value == "1" || raw_value == "0" || raw_value == "x" || raw_value == "z" || raw_value == "X" || raw_value == "Z") {
+            qualifiers.base = 2;
+            qualifiers.digits = raw_value;
+            return qualifiers;
+        }
+    }
+
     qualifiers.base = detect_base(raw_value);
     qualifiers.digits = raw_value;
     return qualifiers;
@@ -189,8 +222,8 @@ std::string Numeric_token::purge_underscores(const std::string_view &digits) {
     return purged_value;
 }
 
-std::pair<resolved_parameter, int64_t> Numeric_token::parse_integer_digits(const std::string &digits, int base,
-    bool is_signed, int64_t explicit_size) {
+std::pair<resolved_parameter, int64_t> Numeric_token::parse_integer_digits(const std::string &digits, int base, bool is_signed, int64_t explicit_size) {
+    // Standard integer parsing path (used by 'hfffffffa, 1, 2, etc.)
     if (is_signed) {
         int64_t value;
         auto [ptr, ec] = std::from_chars(digits.data(), digits.data() + digits.size(), value, base);
@@ -214,14 +247,14 @@ std::pair<resolved_parameter, int64_t> Numeric_token::parse_integer_digits(const
 }
 
 std::pair<resolved_parameter, int64_t> Numeric_token::finalize_integer(hdl_integer int_val, int64_t explicit_size,
-    bool is_signed) {
+                                                                       bool is_signed) {
     int_val.set_signed(is_signed);
     if (explicit_size < 0) explicit_size = int_val.get_size();
     return {int_val, explicit_size};
 }
 
 std::pair<resolved_parameter, int64_t> Numeric_token::process_wide_integer(const std::string_view &raw_string, uint8_t base,
-    bool signed_number, int64_t explicit_size) {
+                                                                           bool signed_number, int64_t explicit_size) {
     hdl_integer res;
 
     std::string prefixed_string;

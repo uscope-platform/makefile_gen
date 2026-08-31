@@ -164,7 +164,6 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
     while (auto next = s.get_next()) {
         auto param = map_in.const_get(next.value().get_name());
         crash_ctx.parameter = next.value().get_name();
-
         if (param->is_type_param) {
             std::shared_ptr<hdl_type> resolved_type;
             if (param->get_expression() && param->get_expression()->is<Type_ref>()) {
@@ -472,8 +471,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::solve_compl
                     if (it != parent_type_ctx.end()) {
                         param->set_type(it->second);
                         continue;
-}
-
+                    }
                 }
                 param->set_type(spec_param->get_type());
             } else {
