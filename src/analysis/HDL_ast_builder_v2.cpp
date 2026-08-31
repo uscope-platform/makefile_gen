@@ -110,7 +110,9 @@ std::shared_ptr<hdl_ast_node> HDL_ast_builder_v2::build_ast(const std::string &t
                         working_instance->add_package_dependency(imp->get_package());
                         auto pkg = d_store->get_HDL_resource(imp->get_package());
                         if (!pkg.has_value()) continue;
-                        auto pkg_solved = parameter_solver::process_parameters(pkg.value()->get_parameters(), {});
+                        auto pkg_params = pkg.value()->get_parameters();
+                        auto pkg_deps = parameter_solver::retrieve_package_parameters(pkg_params, d_store);
+                        auto pkg_solved = parameter_solver::process_parameters(pkg_params, pkg_deps);
                         for (auto &[id, val] : pkg_solved) {
                             if (imp->is_wildcard() || id.get_name() == imp->get_item())
                                 imported_params[qualified_identifier(id.get_name())] = val;

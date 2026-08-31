@@ -164,6 +164,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
     while (auto next = s.get_next()) {
         auto param = map_in.const_get(next.value().get_name());
         crash_ctx.parameter = next.value().get_name();
+        auto stop = crash_ctx.parameter  == "RVFI";
         if (param->is_type_param) {
             std::shared_ptr<hdl_type> resolved_type;
             if (param->get_expression() && param->get_expression()->is<Type_ref>()) {
@@ -317,20 +318,24 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
 
     return solved_parameters;
 }
-
 std::map<qualified_identifier, resolved_parameter> parameter_solver::retrieve_package_parameters(const Parameters_map &node_parameters, const std::shared_ptr<data_store> &d_store) {
     std::map<qualified_identifier, resolved_parameter> package_parameters;
     for (auto &[p_name, param]: node_parameters) {
         for (const auto& dep: param->get_dependencies().data) {
             if (!dep.get_package_prefix().empty() && !package_parameters.contains(dep)) {
-                auto package = d_store->get_HDL_resource(dep.get_package_prefix().back());
+                auto pkg_name = dep.get_package_prefix().back();
+                auto package = d_store->get_HDL_resource(pkg_name);
                 if (!package.has_value()) {
-                    spdlog::critical("Definition for package {} not found while searching for {}",dep.get_package_prefix().back(), dep.print());
+                    spdlog::critical("Definition for package {} not found while searching for {}", pkg_name, dep.print());
                     return {};
                 }
-                auto pkg_solved = process_parameters(package.value()->get_parameters(), {});
+
+                // FIX: Retrieve sub-package dependencies first, then process parameters with context
+                auto sub_pkg_deps = retrieve_package_parameters(package.value()->get_parameters(), d_store);
+                auto pkg_solved = process_parameters(package.value()->get_parameters(), sub_pkg_deps);
+
                 for (auto &[pkg_id, pkg_val]: pkg_solved) {
-                    qualified_identifier qid{dep.get_package_prefix().back(), "", pkg_id.get_name()};
+                    qualified_identifier qid{pkg_name, "", pkg_id.get_name()};
                     package_parameters[qid] = pkg_val;
                 }
             }
