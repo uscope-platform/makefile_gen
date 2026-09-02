@@ -628,3 +628,29 @@ endmodule
 }
 
 
+
+TEST(parameter_processing, int_to_struct_cast) {
+    auto test_pattern = R"(
+    package pkg;
+        typedef struct packed {
+            int unsigned a;
+            bit          b;
+        } my_struct_t;
+
+        localparam my_struct_t TEST_ZERO = my_struct_t'(0);
+        localparam my_struct_t TEST_VAL  = my_struct_t'(5);
+    endpackage
+)";
+
+    sv_analyzer analyzer;
+    auto resources = analyzer.analyze("", test_pattern).value().get_content();
+    auto& pkg = resources[0]->as<hdl_resource_statement>();
+    auto solved = parameter_solver::process_parameters(pkg.get_parameters(), {});
+
+    ASSERT_EQ(0, solved.at(qualified_identifier("TEST_ZERO")).get_integer());
+    ASSERT_EQ(5, solved.at(qualified_identifier("TEST_VAL")).get_integer());
+}
+
+
+
+

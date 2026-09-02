@@ -90,6 +90,24 @@ std::expected<resolved_parameter, solver_errors> Cast::evaluate(const std::map<q
             spdlog::warn("Casting of non scalar numeric values is not supported");
             return std::unexpected{wrong_type};
         }
+
+        // --- NEW: User-Defined / Complex Packed Types (Structs, Enums, Unions) ---
+        if (content_val.value().is_integer()) {
+            auto raw_val = content_val.value().get_integer();
+
+            // Coerce the integer literal (0) into a wide bitvector matching `container` width
+            hdl_integer result;
+            if (raw_val.get_value() == 0) {
+                // Zero-fill the entire packed width of cva6_cfg_t
+                result.set_value(0);
+            } else {
+                // Mask/extend the value to fit container width
+                int1024_t mask = (int1024_t(1) << container) - 1;
+                result.set_value(raw_val.to_wide() & mask);
+            }
+            result.set_size(container);
+            return result;
+        }
         spdlog::warn("Cast to unsupported type '{}' not evaluated, defaulting to 0", target_type);
         return 0;
     } else {

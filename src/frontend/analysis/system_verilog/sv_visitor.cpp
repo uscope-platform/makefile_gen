@@ -532,11 +532,23 @@ void sv_visitor::enterCast_separator(sv2017::Cast_separatorContext *ctx) {
 
 void sv_visitor::enterPrimaryCast2(sv2017::PrimaryCast2Context *ctx) {
     auto primary_text = ctx->primary()->getText();
-    auto expression_size = primary_text.starts_with("(") || primary_text.contains("::");
-    if (f_factory.is_active()) {
-        f_factory.start_cast(expression_size);
+
+    // Check if the identifier is a known type/struct/typedef
+    if (type_engine.has_type(primary_text)) {
+        if (f_factory.is_active()) {
+            f_factory.start_cast(false);
+            f_factory.set_cast_type(primary_text);
+        } else {
+            params_factory.start_cast(false);
+            params_factory.set_cast_type(primary_text);
+        }
     } else {
-        params_factory.start_cast(expression_size);
+        auto expression_size = primary_text.starts_with("(") || primary_text.contains("::");
+        if (f_factory.is_active()) {
+            f_factory.start_cast(expression_size);
+        } else {
+            params_factory.start_cast(expression_size);
+        }
     }
 }
 
