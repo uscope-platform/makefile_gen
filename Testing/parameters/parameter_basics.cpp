@@ -2326,7 +2326,7 @@ TEST(parameter_extraction, wide_integer_bitwise_and) {
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
     auto and_val = defaults.at(qualified_identifier("AND_RES")).get_integer().to_wide();
-    auto expected = int1024_t("0xAAAAAAAAAAAAAAAA0000000000000005");
+    auto expected = wide_integer("0xAAAAAAAAAAAAAAAA0000000000000005");
     EXPECT_EQ(and_val, expected);
 }
 
@@ -2342,7 +2342,7 @@ TEST(parameter_extraction, wide_integer_shift_left) {
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
 
     auto shifted_val = defaults.at(qualified_identifier("SHIFTED")).get_integer().to_wide();
-    EXPECT_EQ(shifted_val, int1024_t("0x00000000000000010000000000000000"));
+    EXPECT_EQ(shifted_val, wide_integer("0x00000000000000010000000000000000"));
 }
 
 TEST(parameter_extraction, wide_integer_mixed_arithmetic) {
@@ -2485,7 +2485,7 @@ TEST(parameter_extraction, wide_packed_concatenation) {
     auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     auto c = defaults.at(qualified_identifier("C")).get_integer();
-    EXPECT_EQ(c.to_wide(), int1024_t("0xCAFEBABECAFEBABEDEADBEEFDEADBEEF"));
+    EXPECT_EQ(c.to_wide(), wide_integer("0xCAFEBABECAFEBABEDEADBEEFDEADBEEF"));
 }
 
 TEST(parameter_extraction, wide_streaming_byte_reversal) {
@@ -2499,7 +2499,7 @@ TEST(parameter_extraction, wide_streaming_byte_reversal) {
     auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     auto x = defaults.at(qualified_identifier("X")).get_integer();
-    EXPECT_EQ(x.to_wide(), int1024_t("0xEFCDAB8967452301EFCDAB8967452301"));
+    EXPECT_EQ(x.to_wide(), wide_integer("0xEFCDAB8967452301EFCDAB8967452301"));
 }
 
 TEST(parameter_extraction, wide_replication) {
@@ -2513,7 +2513,7 @@ TEST(parameter_extraction, wide_replication) {
     auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     auto r = defaults.at(qualified_identifier("R")).get_integer();
-    EXPECT_EQ(r.to_wide(), int1024_t("0xDEADBEEFCAFEBABEDEADBEEFCAFEBABE"));
+    EXPECT_EQ(r.to_wide(), wide_integer("0xDEADBEEFCAFEBABEDEADBEEFCAFEBABE"));
 }
 
 TEST(parameter_extraction, wide_bit_select) {
@@ -2531,7 +2531,7 @@ TEST(parameter_extraction, wide_bit_select) {
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     auto w = defaults.at(qualified_identifier("W")).get_integer();
     ASSERT_TRUE(w.is_wide());
-    EXPECT_EQ(w.to_wide(), int1024_t(1) << 65);
+    EXPECT_EQ(w.to_wide(), wide_integer(1) << 65);
     EXPECT_EQ(defaults.at(qualified_identifier("B65")).get_integer().get_value(), 1);
     EXPECT_EQ(defaults.at(qualified_identifier("B64")).get_integer().get_value(), 0);
     EXPECT_EQ(defaults.at(qualified_identifier("B63")).get_integer().get_value(), 0);
@@ -2548,7 +2548,7 @@ TEST(parameter_extraction, wide_logic_shift_right) {
     auto resource = analyzer.analyze("", test_pattern).value().get_content()[0]->as<hdl_resource_statement>();
     auto defaults = parameter_solver::process_parameters(resource.get_parameters(), {});
     auto x = defaults.at(qualified_identifier("X")).get_integer();
-    EXPECT_EQ(x.to_wide(), int1024_t(0x1000000000000000));
+    EXPECT_EQ(x.to_wide(), wide_integer(0x1000000000000000));
 }
 
 

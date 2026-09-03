@@ -601,12 +601,12 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::extract_str
     };
 
     if (res.is_integer()) {
-        auto make_hdl = [](const int1024_t &v) {
+        auto make_hdl = [](const wide_integer &v) {
             hdl_integer h;
             h.set_value(v);
             return h;
         };
-        int1024_t raw = res.get_integer().to_wide();
+        wide_integer raw = res.get_integer().to_wide();
         if (type->is<HDL_struct_type>()) {
             auto &st = type->as<HDL_struct_type>();
             auto type_info = st.evaluate_type(ctx);
@@ -614,7 +614,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::extract_str
                 uint64_t offset = 0;
                 for (int i = st.member.size() - 1; i >= 0; i--) {
                     uint64_t w = packed_width(type_info->struct_sizes[i].packed_sizes);
-                    int1024_t mask = (w >= 1024) ? int1024_t(-1) : (int1024_t(1) << w) - 1;
+                    wide_integer mask = (w >= 1024) ? wide_integer(-1) : (wide_integer(1) << w) - 1;
                     emit_field(st.member[i].name,
                                make_hdl((raw >> static_cast<size_t>(offset)) & mask),
                                st.member[i].type);
@@ -629,7 +629,7 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::extract_str
                     auto s = m.type->evaluate_type(ctx);
                     if (s) w = packed_width(*s);
                 }
-                int1024_t mask = (w >= 1024) ? int1024_t(-1) : (int1024_t(1) << w) - 1;
+                wide_integer mask = (w >= 1024) ? wide_integer(-1) : (wide_integer(1) << w) - 1;
                 emit_field(m.name, make_hdl(raw & mask), m.type);
             }
         }

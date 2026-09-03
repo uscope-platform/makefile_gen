@@ -17,7 +17,6 @@
 #ifndef ANANKE_HDL_INTEGER_HPP
 #define ANANKE_HDL_INTEGER_HPP
 
-#include <cstdio> //Needed to avoid a boost bug
 #include <cstdint>
 #include <cmath>
 #include <string>
@@ -31,7 +30,7 @@
 #include "third_party/boost/multiprecision/cpp_int.hpp"
 
 
-using int1024_t = math::wide_integer::int1024_t;
+using wide_integer = math::wide_integer::int1024_t;
 
 namespace math {
     namespace wide_integer {
@@ -103,18 +102,18 @@ public:
         content = val;
     }
 
-    [[nodiscard]] int1024_t to_wide() const {
-        if (std::holds_alternative<int1024_t>(content))
-            return std::get<int1024_t>(content);
+    [[nodiscard]] wide_integer to_wide() const {
+        if (std::holds_alternative<wide_integer>(content))
+            return std::get<wide_integer>(content);
         // Zero-extend the narrow value: treat its int64 bit pattern as unsigned,
         // so a negative narrow value does not sign-extend into the high bits.
-        return int1024_t(static_cast<uint64_t>(std::get<int64_t>(content)));
+        return wide_integer(static_cast<uint64_t>(std::get<int64_t>(content)));
     }
-    [[nodiscard]] bool is_wide() const { return std::holds_alternative<int1024_t>(content); }
+    [[nodiscard]] bool is_wide() const { return std::holds_alternative<wide_integer>(content); }
 
     void set_size(const int64_t s);
     void set_value(const uint64_t v);
-    void set_value(const int1024_t v);
+    void set_value(const wide_integer v);
     void set_signed(const bool s) {signedness = s;}
 
     // Produce an all-ones mask of `width` bits
@@ -122,7 +121,7 @@ public:
         if (width <= 0) return hdl_integer(0);
         if (width >= 1024) {
             hdl_integer m;
-            int1024_t all_ones = (int1024_t(1) << (1024 - 1)) | ((int1024_t(1) << (1024 - 1)) - 1);
+            wide_integer all_ones = (wide_integer(1) << (1024 - 1)) | ((wide_integer(1) << (1024 - 1)) - 1);
             m.set_value(all_ones);
             return m;
         }
@@ -133,7 +132,7 @@ public:
     // yields 0; width >= 1024 leaves the value unchanged.
     [[nodiscard]] hdl_integer truncate_to(int64_t width) const {
         hdl_integer result;
-        int1024_t masked = to_wide() & width_mask(width).to_wide();
+        wide_integer masked = to_wide() & width_mask(width).to_wide();
         result.set_value(masked);
         result.set_signed(signedness);
         return result;
@@ -143,9 +142,9 @@ public:
     [[nodiscard]] hdl_integer sign_extend(int64_t width) const {
         if (width <= 0) return hdl_integer(0);
         if (width >= 1024) return *this;
-        int1024_t mask = width_mask(width).to_wide();
-        int1024_t wide = to_wide() & mask;
-        if ((wide & (int1024_t(1) << (width - 1))) != 0)
+        wide_integer mask = width_mask(width).to_wide();
+        wide_integer wide = to_wide() & mask;
+        if ((wide & (wide_integer(1) << (width - 1))) != 0)
             wide |= ~mask;
         hdl_integer result;
         result.set_value(wide);
@@ -154,23 +153,23 @@ public:
     }
 
     [[nodiscard]] int64_t get_value() const {
-        if (std::holds_alternative<int1024_t>(content))
-            return static_cast<int64_t>(std::get<int1024_t>(content));
+        if (std::holds_alternative<wide_integer>(content))
+            return static_cast<int64_t>(std::get<wide_integer>(content));
         return std::get<int64_t>(content);
     }
 
     // The value as a double, preserving the sign of narrow negatives (unlike
     // to_wide(), which zero-extends them) and the full width of wide values.
     [[nodiscard]] double to_double() const {
-        if (std::holds_alternative<int1024_t>(content))
-            return static_cast<double>(std::get<int1024_t>(content));
+        if (std::holds_alternative<wide_integer>(content))
+            return static_cast<double>(std::get<wide_integer>(content));
         return static_cast<double>(std::get<int64_t>(content));
     }
 
     // The value's full bit pattern as a bitset (width encapsulated here).
     [[nodiscard]] std::bitset<1024> to_bitset() const {
         std::bitset<1024> result;
-        int1024_t w = to_wide();
+        wide_integer w = to_wide();
         for (size_t i = 0; i < 1024; i++)
             if (((w >> i) & 1) != 0) result.set(i);
         return result;
@@ -215,41 +214,41 @@ public:
     }
 
     std::string to_string() const {
-        if (std::holds_alternative<int1024_t>(content)) {
+        if (std::holds_alternative<wide_integer>(content)) {
             std::stringstream ss;
-            ss << std::get<int1024_t>(content);
+            ss << std::get<wide_integer>(content);
             return ss.str();
         }
         return std::to_string(std::get<int64_t>(content));
     }
 
     // The value interpreted as a signed number (sign-extends narrow values).
-    static int1024_t signed_value(const hdl_integer &v) {
-        if (std::holds_alternative<int1024_t>(v.content)) return std::get<int1024_t>(v.content);
-        return int1024_t(std::get<int64_t>(v.content));
+    static wide_integer signed_value(const hdl_integer &v) {
+        if (std::holds_alternative<wide_integer>(v.content)) return std::get<wide_integer>(v.content);
+        return wide_integer(std::get<int64_t>(v.content));
     }
 
     // Extend to a common comparison width: sign-extend when signed, zero-extend otherwise.
-    static int1024_t extend_to_width(const hdl_integer &v, int64_t width) {
-        int1024_t mask = (width >= 1024) ? int1024_t(-1) : (int1024_t(1) << width) - 1;
-        int1024_t m = v.to_wide() & mask;
+    static wide_integer extend_to_width(const hdl_integer &v, int64_t width) {
+        wide_integer mask = (width >= 1024) ? wide_integer(-1) : (wide_integer(1) << width) - 1;
+        wide_integer m = v.to_wide() & mask;
         if (v.get_signed() && width > 0 && width < 1024) {
-            int1024_t sign_bit = int1024_t(1) << (width - 1);
+            wide_integer sign_bit = wide_integer(1) << (width - 1);
             if ((m & sign_bit) != 0) m |= ~mask;
         }
         return m;
     }
 
     // Interpret a possibly sign-extended pattern as an unsigned width-bit value.
-    static int1024_t as_unsigned_bits(const int1024_t &v, int64_t width) {
+    static wide_integer as_unsigned_bits(const wide_integer &v, int64_t width) {
         if (width >= 1024 || v >= 0) return v;
-        return v + (int1024_t(1) << width);
+        return v + (wide_integer(1) << width);
     }
 
     // Minimum bit width that can hold a signed value (magnitude bits + sign bit).
     static int64_t signed_fit_width(const hdl_integer &v) {
         if (!v.get_signed()) return 0;
-        int1024_t mag = signed_value(v);
+        wide_integer mag = signed_value(v);
         if (mag < 0) mag = -mag;
         int64_t bits = 0;
         while (mag != 0) { mag >>= 1; bits++; }
@@ -301,7 +300,7 @@ public:
 
     friend void from_json(const nlohmann::json& j, hdl_integer& val) {
         if (j.at("wide").get<bool>()) {
-            val.content = j.at("wide_value").get<int1024_t>();
+            val.content = j.at("wide_value").get<wide_integer>();
         } else {
             val.content = j.at("value").get<int64_t>();
         }
@@ -311,7 +310,7 @@ public:
 
 private:
 
-    std::variant<int64_t, int1024_t> content;
+    std::variant<int64_t, wide_integer> content;
     uint64_t size = 0;
     bool signedness = false;
 };

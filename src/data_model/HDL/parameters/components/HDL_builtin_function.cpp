@@ -147,7 +147,7 @@ std::string unquote(const std::string &s) {
     return s;
 }
 
-std::string to_binary_string(int1024_t v, int width) {
+std::string to_binary_string(wide_integer v, int width) {
     if (v == 0) return width > 0 ? std::string(width, '0') : "0";
     std::string s;
     while (v != 0) {
@@ -407,7 +407,7 @@ std::expected<resolved_parameter, solver_errors> HDL_builtin_function::evaluate(
     }
     if (function_kind == function::countones) {
         if (resolved_arguments[0].is_integer()) {
-            int1024_t val = resolved_arguments[0].get_integer().to_wide();
+            wide_integer val = resolved_arguments[0].get_integer().to_wide();
             int64_t count = 0;
             while (val != 0) { count++; val &= (val - 1); }
             return static_cast<hdl_integer>(count);
@@ -490,7 +490,7 @@ std::expected<resolved_parameter, solver_errors> HDL_builtin_function::evaluate(
     }
     if (function_kind == function::onehot) {
         if (resolved_arguments[0].is_integer()) {
-            int1024_t v = resolved_arguments[0].get_integer().to_wide();
+            wide_integer v = resolved_arguments[0].get_integer().to_wide();
             return static_cast<hdl_integer>(v != 0 && (v & (v - 1)) == 0);
         }
         spdlog::warn("Encountered an invalid argument for a $onehot call");
@@ -498,7 +498,7 @@ std::expected<resolved_parameter, solver_errors> HDL_builtin_function::evaluate(
     }
     if (function_kind == function::onehot0) {
         if (resolved_arguments[0].is_integer()) {
-            int1024_t v = resolved_arguments[0].get_integer().to_wide();
+            wide_integer v = resolved_arguments[0].get_integer().to_wide();
             return static_cast<hdl_integer>((v & (v - 1)) == 0);
         }
         spdlog::warn("Encountered an invalid argument for a $onehot0 call");
@@ -578,7 +578,7 @@ std::expected<resolved_parameter, solver_errors> HDL_builtin_function::evaluate(
             spdlog::warn("Encountered an invalid argument for a $countbits call");
             return 0;
         }
-        int1024_t ctrl = resolved_arguments[1].get_integer().to_wide();
+        wide_integer ctrl = resolved_arguments[1].get_integer().to_wide();
         int ctrl_width = 1;
         auto ctrl_type = arguments[1]->resolve_expression_type(context);
         if (ctrl_type) ctrl_width = std::max(1, static_cast<int>(packed_width(*ctrl_type)));
@@ -587,7 +587,7 @@ std::expected<resolved_parameter, solver_errors> HDL_builtin_function::evaluate(
         for (int i = 0; i < ctrl_width; i++) {
             if ((ctrl >> i) & 1) count_ones = true; else count_zeros = true;
         }
-        int1024_t value = resolved_arguments[0].get_integer().to_wide();
+        wide_integer value = resolved_arguments[0].get_integer().to_wide();
         int expr_width = 64;
         auto expr_type = arguments[0]->resolve_expression_type(context);
         if (expr_type) expr_width = static_cast<int>(packed_width(*expr_type));

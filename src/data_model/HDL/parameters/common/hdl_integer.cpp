@@ -24,8 +24,8 @@ void hdl_integer::set_value(const uint64_t v) {
     content = static_cast<int64_t>(v);
 }
 
-void hdl_integer::set_value(const int1024_t v) {
-    if (v >= int1024_t(INT64_MIN) && v <= int1024_t(INT64_MAX)) {
+void hdl_integer::set_value(const wide_integer v) {
+    if (v >= wide_integer(INT64_MIN) && v <= wide_integer(INT64_MAX)) {
         content = static_cast<int64_t>(v);
     } else {
         content = v;
@@ -34,9 +34,9 @@ void hdl_integer::set_value(const int1024_t v) {
 
 uint64_t hdl_integer::get_size() const {
     if (size > 0) return size;
-    int1024_t tmp;
+    wide_integer tmp;
     if (is_wide()) {
-        tmp = std::get<int1024_t>(content);
+        tmp = std::get<wide_integer>(content);
     } else {
         tmp = get_value();
     }
@@ -151,7 +151,7 @@ hdl_integer hdl_integer::operator^(const hdl_integer &o) const {
 hdl_integer hdl_integer::operator~() const {
     hdl_integer res;
     if (is_wide()) {
-        res.set_value(-std::get<int1024_t>(content) - 1);
+        res.set_value(-std::get<wide_integer>(content) - 1);
     } else {
         res.set_value(static_cast<uint64_t>(~get_value()));
     }

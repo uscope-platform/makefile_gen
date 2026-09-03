@@ -102,7 +102,7 @@ std::expected<resolved_parameter, solver_errors> Cast::evaluate(const std::map<q
                 result.set_value(0);
             } else {
                 // Mask/extend the value to fit container width
-                int1024_t mask = (int1024_t(1) << container) - 1;
+                wide_integer mask = (wide_integer(1) << container) - 1;
                 result.set_value(raw_val.to_wide() & mask);
             }
             result.set_size(container);
@@ -131,7 +131,7 @@ std::expected<resolved_parameter, solver_errors> Cast::evaluate(const std::map<q
             spdlog::warn("Cast size {} exceeds supported width, truncating to 1024 bits", cast_size);
             cast_size = 1024;
         }
-        int1024_t mask = (int1024_t(1) << cast_size) - 1;
+        wide_integer mask = (wide_integer(1) << cast_size) - 1;
         hdl_integer result;
         result.set_value(raw_value.to_wide() & mask);
         result.set_size(cast_size);

@@ -340,9 +340,9 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_rotate(
     auto i_b = op_b.get_integer();
     int64_t amount = i_b.get_value() % static_cast<int64_t>(width);
     if (amount < 0) amount += static_cast<int64_t>(width);
-    int1024_t mask = (int1024_t(1) << width) - 1;
-    int1024_t v = i_a.to_wide() & mask;
-    int1024_t res;
+    wide_integer mask = (wide_integer(1) << width) - 1;
+    wide_integer v = i_a.to_wide() & mask;
+    wide_integer res;
     if (amount == 0) {
         res = v;
     } else if (operation == rotate_left) {
@@ -554,7 +554,7 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_unary_expression(resol
 
     if (operation == bitwise_neg) {
         auto width = int_op.get_size();
-        int1024_t negated = -int_op.to_wide() - 1;
+        wide_integer negated = -int_op.to_wide() - 1;
         hdl_integer res;
         res.set_value(negated);
         res = res.truncate_to(static_cast<int64_t>(width));
@@ -562,7 +562,7 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_unary_expression(resol
     }
 
     if (operation == reduction_and) {
-        int1024_t v = int_op.to_wide();
+        wide_integer v = int_op.to_wide();
         while (v != 0) {
             if ((v & 1) == 0) return static_cast<hdl_integer>(0);
             v >>= 1;
@@ -571,7 +571,7 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_unary_expression(resol
         return static_cast<hdl_integer>(int_op.to_wide() != 0);
     }
     if (operation == reduction_nand) {
-        int1024_t v = int_op.to_wide();
+        wide_integer v = int_op.to_wide();
         while (v != 0) {
             if ((v & 1) == 0) return static_cast<hdl_integer>(1);
             v >>= 1;
@@ -587,7 +587,7 @@ std::variant<hdl_integer, double> Expression_v2::evaluate_unary_expression(resol
 
     // Reduction XOR / XNOR: parity of the set bits, across the full wide value.
     if (operation == reduction_xor || operation == reduction_xnor) {
-        int1024_t v = int_op.to_wide();
+        wide_integer v = int_op.to_wide();
         bool parity = false;
         while (v != 0) {
             parity = !parity;

@@ -115,7 +115,7 @@ Numeric_token::numeric_parse_result Numeric_token::process_number(const std::str
     if (!qualifiers.sized_explicit && !qualifiers.based && body.starts_with('\'')) {
         hdl_integer val;
         if (qualifiers.digits == "1") {
-            int1024_t all_ones = -1;
+            wide_integer all_ones = -1;
             val.set_value(all_ones);
         } else {
             val.set_value(0);
@@ -133,7 +133,7 @@ Numeric_token::numeric_parse_result Numeric_token::process_number(const std::str
         binary_size = 32;
     if (negative_number) {
         auto int_val = value.get_integer();
-        int1024_t negated = -int_val.to_wide();
+        wide_integer negated = -int_val.to_wide();
         hdl_integer neg_val;
         neg_val.set_value(negated);
         neg_val.set_signed(int_val.get_signed());
@@ -265,7 +265,7 @@ std::pair<resolved_parameter, int64_t> Numeric_token::process_wide_integer(const
         case 2: prefixed_string = "0b" + std::string(raw_string); break;
 
     }
-    int1024_t wide_num(prefixed_string.c_str());
+    wide_integer wide_num(prefixed_string.c_str());
 
     res.set_value(wide_num);
     res.set_signed(signed_number);
