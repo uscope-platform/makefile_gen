@@ -17,6 +17,7 @@
 #ifndef ANANKE_HDL_INTEGER_HPP
 #define ANANKE_HDL_INTEGER_HPP
 
+#include <cstdio> //Needed to avoid a boost bug
 #include <cstdint>
 #include <cmath>
 #include <string>
@@ -27,8 +28,10 @@
 #include <cereal/types/string.hpp>
 
 #include "third_party/uintwide_t.h"
+#include "third_party/boost/multiprecision/cpp_int.hpp"
 
-using int1024_t = ::math::wide_integer::int1024_t;
+
+using int1024_t = math::wide_integer::int1024_t;
 
 namespace math {
     namespace wide_integer {

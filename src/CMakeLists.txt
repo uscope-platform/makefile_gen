@@ -4,8 +4,13 @@ add_library(ananke_lib STATIC)
 
 add_dependencies(ananke_lib cache_schema_hash)
 
-target_include_directories(ananke_lib PUBLIC ${CMAKE_SOURCE_DIR}/includes)
+target_include_directories(ananke_lib PUBLIC
+        ${CMAKE_SOURCE_DIR}/includes
+        ${CMAKE_SOURCE_DIR}/includes/third_party
+)
 target_compile_definitions(ananke_lib PRIVATE SPECS_FOLDER="${SPECS_FOLDER}")
+
+target_compile_definitions(ananke_lib PUBLIC BOOST_MP_STANDALONE)
 
 target_sources(ananke_lib
     PRIVATE
