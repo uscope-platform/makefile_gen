@@ -629,7 +629,7 @@ endmodule
 
 
 
-TEST(parameter_processing, int_to_struct_cast) {
+TEST(parameter_extraction, int_to_struct_cast) {
     auto test_pattern = R"(
     package pkg;
         typedef struct packed {
@@ -652,5 +652,50 @@ TEST(parameter_processing, int_to_struct_cast) {
 }
 
 
+TEST(parameter_extraction, cross_package_enum_init) {
+    auto test_pattern = R"(
 
+        package type_pkg;
+            /// Cache type parameter
+            typedef enum logic [2:0] {
+                WB = 0,
+                WT = 1,
+                HPDCACHE_WT = 2,
+                HPDCACHE_WB = 3,
+                HPDCACHE_WT_WB = 4
+              } cache_type_t;
+
+        endpackage
+
+    package pkg;
+
+
+        /// Cache type parameter
+        typedef enum logic [2:0] {
+            WB = 0,
+            WT = 1,
+            HPDCACHE_WT = 2,
+            HPDCACHE_WB = 3,
+            HPDCACHE_WT_WB = 4
+          } cache_type_t;
+
+        localparam type_pkg::cache_type_t CVA6ConfigDcacheType = type_pkg::WT;
+
+    endpackage
+)";
+
+    sv_analyzer analyzer;
+
+    std::shared_ptr<data_store> d_store = std::make_shared<data_store>(true, "/tmp/test_data_store");
+    auto file = analyzer.analyze("", test_pattern).value();
+    auto resources = file.get_content();
+    d_store->store_file({"/dev/zero", "file_hash", file});
+    std::shared_ptr<hdl_resource_statement> p_pkg = std::static_pointer_cast<hdl_resource_statement>(resources[1]);
+
+    parameter_solver::propagate_types(p_pkg, d_store);
+    auto pkg_context = parameter_solver::retrieve_package_parameters(p_pkg->get_parameters(), d_store);
+    auto solved = parameter_solver::process_parameters(p_pkg->get_parameters(), pkg_context);
+
+    ASSERT_EQ(1, solved.at(qualified_identifier("CVA6ConfigDcacheType")).get_integer().get_value());
+}
 

@@ -164,7 +164,6 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::process_par
     while (auto next = s.get_next()) {
         auto param = map_in.const_get(next.value().get_name());
         crash_ctx.parameter = next.value().get_name();
-        auto stop = crash_ctx.parameter  == "RVFI";
         if (param->is_type_param) {
             std::shared_ptr<hdl_type> resolved_type;
             if (param->get_expression() && param->get_expression()->is<Type_ref>()) {
@@ -318,23 +317,40 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::override_pa
 
     return solved_parameters;
 }
-std::map<qualified_identifier, resolved_parameter> parameter_solver::retrieve_package_parameters(const Parameters_map &node_parameters, const std::shared_ptr<data_store> &d_store) {
+std::map<qualified_identifier, resolved_parameter> parameter_solver::retrieve_package_parameters(
+    const Parameters_map &node_parameters,
+    const std::shared_ptr<data_store> &d_store
+) {
     std::map<qualified_identifier, resolved_parameter> package_parameters;
-    for (auto &[p_name, param]: node_parameters) {
-        for (const auto& dep: param->get_dependencies().data) {
-            if (!dep.get_package_prefix().empty() && !package_parameters.contains(dep)) {
+
+    for (auto &[p_name, param] : node_parameters) {
+        for (const auto& dep : param->get_dependencies().data) {
+            if (!dep.get_package_prefix().empty()) {
                 auto pkg_name = dep.get_package_prefix().back();
                 auto package = d_store->get_HDL_resource(pkg_name);
-                if (!package.has_value()) {
-                    spdlog::critical("Definition for package {} not found while searching for {}", pkg_name, dep.print());
-                    return {};
-                }
+                if (!package.has_value()) continue;
 
-                // FIX: Retrieve sub-package dependencies first, then process parameters with context
+                // 1. FIRST: Scan sub-package dependencies recursively
                 auto sub_pkg_deps = retrieve_package_parameters(package.value()->get_parameters(), d_store);
-                auto pkg_solved = process_parameters(package.value()->get_parameters(), sub_pkg_deps);
+                package_parameters.insert(sub_pkg_deps.begin(), sub_pkg_deps.end());
 
-                for (auto &[pkg_id, pkg_val]: pkg_solved) {
+                // 2. SECOND: Extract typedef enums from THIS package into the context BEFORE processing its parameters
+                for (const auto &[_, hdl_t] : package.value()->get_typedefs()) {
+                    if (hdl_t && hdl_t->is<HDL_enum_type>()) {
+                        auto &et = hdl_t->as<HDL_enum_type>();
+                        for (const auto &m : et.members) {
+                            if (m.value.has_value()) {
+                                qualified_identifier qid{pkg_name, "", m.name};
+                                package_parameters[qid] = static_cast<hdl_integer>(m.value.value());
+                            }
+                        }
+                    }
+                }
+                propagate_types(package.value(), d_store);
+                // 3. THIRD: Now solve the package parameters with ALL enums and sub-package deps present in package_parameters!
+                auto pkg_solved = process_parameters(package.value()->get_parameters(), package_parameters);
+
+                for (auto &[pkg_id, pkg_val] : pkg_solved) {
                     qualified_identifier qid{pkg_name, "", pkg_id.get_name()};
                     package_parameters[qid] = pkg_val;
                 }
@@ -343,7 +359,6 @@ std::map<qualified_identifier, resolved_parameter> parameter_solver::retrieve_pa
     }
     return package_parameters;
 }
-
 void parameter_solver::propagate_imports(std::shared_ptr<hdl_resource_statement> &resource,
         const std::map<std::string, hdl_function_statement> &imported_functions,
         const std::map<std::string, std::shared_ptr<hdl_type>> &imported_types) {
@@ -377,6 +392,19 @@ void parameter_solver::propagate_imports(std::shared_ptr<hdl_resource_statement>
 
 void parameter_solver::propagate_types(std::shared_ptr<hdl_resource_statement> &resource, const std::shared_ptr<data_store> &d_store) {
     for (auto &[_, param] : resource->get_parameters()) {
+        // If the parameter type itself is directly an external type
+        if (param->get_type()->is<HDL_external_type>()) {
+            auto &ext = param->get_type()->as<HDL_external_type>();
+            auto pkg_name = ext.get_value().get_package_prefix()[0];
+            auto type_name = ext.get_value().get_name();
+            auto res = d_store->get_HDL_resource(pkg_name);
+            if (res.has_value()) {
+                auto type_def = res.value()->get_typedefs()[type_name];
+                if (type_def) {
+                    param->set_type(type_def);
+                }
+            }
+        }
 
         auto deps = param->get_dependencies();
         for (const auto& type:deps.types) {

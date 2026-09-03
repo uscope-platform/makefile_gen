@@ -23,7 +23,8 @@ enum solver_errors {
     empty_body,
     missing_arguments,
     unsupported,
-    recursive_module
+    recursive_module,
+    unresolved_external_type
 };
 
 inline const char* solver_error_name(solver_errors e) {
@@ -34,6 +35,7 @@ inline const char* solver_error_name(solver_errors e) {
         case missing_arguments: return "missing arguments";
         case unsupported: return "unsupported construct";
         case recursive_module: return "recursive module hierarchy";
+        case unresolved_external_type: return "unresolved external type";
     }
     return "unknown error";
 }

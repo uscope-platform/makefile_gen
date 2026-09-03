@@ -67,6 +67,7 @@ std::expected<resolved_parameter, solver_errors>  HDL_parameter::evaluate(const 
     if (!raw_value) return std::unexpected{missing_value};
     std::optional<resolved_type> container_size;
     if (type->is<HDL_external_type>()) {
+        return std::unexpected{unresolved_external_type};
     } else {
         container_size = type->evaluate_type(context);
     }

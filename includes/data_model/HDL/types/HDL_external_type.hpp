@@ -32,8 +32,8 @@ public:
     [[nodiscard]] bool is_scalar()const override;
     std::optional<resolved_type> evaluate_type(const std::map<qualified_identifier, resolved_parameter> &context) override;
     [[nodiscard]] std::string to_print() const override;
-
-   bool operator==(const HDL_external_type & hdl_external) const;
+    qualified_identifier get_value() {return value;}
+    bool operator==(const HDL_external_type & hdl_external) const;
 
     [[nodiscard]] bool is_equal(const hdl_type &other) const override;
 
